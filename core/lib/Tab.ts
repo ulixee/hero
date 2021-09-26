@@ -208,7 +208,7 @@ export default class Tab
 
     for (const frame of this.frameEnvironmentsById.values()) {
       const top = frame.navigations.top;
-      if (!top || top.resourceId.isResolved) continue;
+      if (!top || top.resourceIdResolvable.isResolved) continue;
 
       if (
         (top.finalUrl && finalUrl === top.finalUrl) ||
@@ -949,7 +949,7 @@ export default class Tab
     if (
       !!event.resource.browserServedFromCache &&
       event.resource.url?.href === frame.navigations?.top?.requestedUrl &&
-      frame.navigations?.top?.resourceId?.isResolved === false
+      frame.navigations?.top?.resourceIdResolvable?.isResolved === false
     ) {
       frame.navigations.onHttpResponded(
         event.resource.browserRequestId,

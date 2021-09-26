@@ -76,6 +76,16 @@ describe('basic Dom Replay tests', () => {
      div2.innerHTML = "<p>This is para 1</p><br/><p>This is para 2</p>";
      document.body.insertBefore(div2, document.querySelector('script'))
    }
+   if (clicks === 7){
+     document.body.appendChild(document.createElement('div'));
+   }
+   if (clicks === 8){
+     const div = document.createElement('div');
+     div.id = 'after-script'
+     div.innerHTML = "<p>This is para 1</p><br/><p>This is para 2</p>";
+     const last = document.body.children.item(document.body.children.length-1);
+     document.body.insertBefore(div, last);
+   }
    return false;
  }
 </script>
@@ -83,6 +93,8 @@ describe('basic Dom Replay tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    tab.session.options.showBrowserInteractions = true;
+    await InjectedScripts.installInteractionScript(tab.puppetPage);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
     const session = tab.session;
@@ -103,22 +115,21 @@ describe('basic Dom Replay tests', () => {
     }
     await Promise.all([
       mirrorPage.navigate(`${koaServer.baseUrl}/empty`),
-      mirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+      mirrorPage.mainFrame.waitForLoad(),
     ]);
-    const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
+    const sourceHtml = await tab.puppetPage.mainFrame.evaluate<string>(getContentScript, false);
 
     const mainPageChanges = await tab.getMainFrameDomChanges();
     await InjectedScripts.restoreDom(mirrorPage, mainPageChanges);
 
-    const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
-    if (mirrorHtml !== sourceHtml) {
-      // eslint-disable-next-line no-console
-      console.log('Mirror Page mismatch', mainPageChanges);
-    }
-    expect(mirrorHtml).toBe(sourceHtml);
+    const mirrorHtml = await mirrorPage.mainFrame.evaluate<string>(getContentScript, false);
+    const replayNode = '<hero-replay style="z-index: 2147483647;"></hero-replay>';
+    // source should have a replay node that should not be rebuilt in mirror
+    expect(mirrorHtml).not.toBe(sourceHtml);
+    expect(mirrorHtml).toBe(sourceHtml.replace(replayNode, ''));
 
     let lastCommandId = tab.lastCommandId;
-    for (let i = 1; i <= 6; i += 1) {
+    for (let i = 1; i <= 8; i += 1) {
       await tab.interact([
         {
           command: InteractionCommand.click,
@@ -131,12 +142,15 @@ describe('basic Dom Replay tests', () => {
       const pageChangesByFrame = await tab.getMainFrameDomChanges(lastCommandId);
       lastCommandId = tab.lastCommandId;
       await InjectedScripts.restoreDom(mirrorPage, pageChangesByFrame);
-      // replay happens on animation tick now
-      await new Promise(setImmediate);
 
-      const sourceHtmlNext = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
-      const mirrorHtmlNext = await mirrorPage.mainFrame.evaluate(getContentScript, false);
-      expect(mirrorHtmlNext).toBe(sourceHtmlNext);
+      const sourceHtmlNext = await tab.puppetPage.mainFrame.evaluate<string>(
+        getContentScript,
+        false,
+      );
+      const mirrorHtmlNext = await mirrorPage.mainFrame.evaluate<string>(getContentScript, false);
+      // mirror page should not know about the hero-replay nodes
+      expect(mirrorHtmlNext).not.toBe(sourceHtmlNext);
+      expect(mirrorHtmlNext).toBe(sourceHtmlNext.replace(replayNode, ''));
     }
   }, 45e3);
 

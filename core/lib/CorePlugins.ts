@@ -53,8 +53,8 @@ export default class CorePlugins implements ICorePlugins {
   public readonly browserEngine: IBrowserEngine;
   public readonly browserEmulator: IBrowserEmulator;
   public readonly humanEmulator: IHumanEmulator;
+  public readonly instances: ICorePlugin[] = [];
 
-  private readonly instances: ICorePlugin[] = [];
   private readonly instanceById: { [id: string]: ICorePlugin } = {};
   private readonly createOptions: ICorePluginCreateOptions;
   private readonly logger: IBoundLog;
@@ -115,11 +115,11 @@ export default class CorePlugins implements ICorePlugins {
     Object.values(Core.pluginMap.corePluginsById).forEach(x => this.use(x));
 
     if (Core.allowDynamicPluginLoading) {
-      if (dependencyMap) {
-        this.loadDependencies(dependencyMap);
-      }
       if (corePluginPaths) {
         this.loadCorePluginPaths(corePluginPaths);
+      }
+      if (dependencyMap) {
+        this.loadDependencies(dependencyMap);
       }
     }
   }

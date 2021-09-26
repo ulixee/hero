@@ -1,34 +1,15 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { IScrollRecord } from '../models/ScrollEventsTable';
-import { IMouseEventRecord } from '../models/MouseEventsTable';
-import ICommandWithResult from '../interfaces/ICommandWithResult';
+import Log from '@ulixee/commons/lib/Logger';
 import { IPaintEvent, ITabDetails, ITick } from '../apis/Session.ticks';
 import InjectedScripts from './InjectedScripts';
-import SessionReplay from './SessionReplay';
+
+const { log } = Log(module);
 
 export default class SessionReplayTab {
   public get ticks(): ITick[] {
     return this.tabDetails.ticks;
   }
-
-  public get tabId(): number {
-    return this.tabDetails.tab.id;
-  }
-
-  public get detachedFromTabId(): number {
-    return this.tabDetails.tab.detachedFromTabId;
-  }
-
-  public get firstDocumentUrl(): string {
-    return this.tabDetails.tab.startUrl;
-  }
-
-  public get tabCreatedTime(): number {
-    return this.tabDetails.tab.createdTime;
-  }
-
-  public mainFrameId: number;
 
   public get currentTick(): ITick {
     return this.ticks[this.currentTickIndex];
@@ -38,33 +19,53 @@ export default class SessionReplayTab {
     return this.ticks[this.currentTickIndex + 1];
   }
 
-  public readonly commandsById = new Map<number, ICommandWithResult>();
+  public get previousTick(): ITick {
+    return this.ticks[this.currentTickIndex - 1];
+  }
 
-  public currentUrl: string;
-  public currentPlaybarOffsetPct = 0;
+  public get isOpen(): boolean {
+    return !!this.page && !!this.pageId;
+  }
+
+  public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
+
+  private pageId: string;
+  private page: Promise<IPuppetPage>;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
-  private page: IPuppetPage;
-  private domNodePathByFrameId = new Map<number, string>();
+  private readonly mainFrameId: number;
+  private readonly domNodePathByFrameId: { [frameId: number]: string } = {};
 
   constructor(
     private readonly tabDetails: ITabDetails,
-    private readonly sessionReplay: SessionReplay,
+    private readonly pageCreator: () => Promise<IPuppetPage>,
+    private readonly sessionId: string,
+    private readonly debugLogging: boolean = false,
   ) {
-    for (const command of tabDetails.commands) {
-      this.commandsById.set(command.id, command);
-    }
     for (const frame of this.tabDetails.tab.frames) {
       if (frame.isMainFrame) this.mainFrameId = frame.id;
-      this.domNodePathByFrameId.set(frame.id, frame.domNodePath);
+      this.domNodePathByFrameId[frame.id] = frame.domNodePath;
     }
   }
 
-  public async openTab(): Promise<void> {
-    this.page = await this.sessionReplay.createNewPage();
-    await this.goto(this.tabDetails.tab.startUrl);
+  public async open(): Promise<void> {
+    if (this.page) {
+      await this.page;
+      return;
+    }
+    this.page = this.pageCreator();
+    const page = await this.page;
+    page.on('close', () => {
+      this.page = null;
+      this.pageId = null;
+      this.paintEventsLoadedIdx = -1;
+      this.isPlaying = false;
+      this.currentTickIndex = -1;
+      this.currentTimelineOffsetPct = 0;
+    });
+    this.pageId = page.id;
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -96,87 +97,95 @@ export default class SessionReplayTab {
     this.isPlaying = false;
   }
 
-  public goBack(): Promise<void> {
-    const prevTickIdx =
-      this.currentTickIndex > 0 ? this.currentTickIndex - 1 : this.currentTickIndex;
-    return this.loadTick(prevTickIdx);
-  }
-
-  public goForward(): Promise<void> {
-    const result = this.loadTick(this.currentTickIndex + 1);
-    if (this.currentTickIndex === this.ticks.length - 1) {
-      this.currentPlaybarOffsetPct = 100;
-    }
-    return result;
-  }
-
   public async close(): Promise<void> {
-    await this.page.close();
-  }
-
-  public getTickState(): {
-    currentPlaybarOffsetPct: number;
-    currentTickIndex: number;
-    ticks: number[];
-  } {
-    return {
-      currentPlaybarOffsetPct: this.currentPlaybarOffsetPct,
-      currentTickIndex: this.currentTickIndex,
-      ticks: this.ticks.filter(x => x.isMajor).map(x => x.playbarOffsetPercent),
-    };
-  }
-
-  public async setPlaybarOffset(playbarOffset: number, isReset = false): Promise<void> {
-    const ticks = this.ticks;
-    if (isReset) {
-      this.currentPlaybarOffsetPct = 0;
-      this.currentTickIndex = -1;
-      this.paintEventsLoadedIdx = -1;
+    const pagePromise = this.page;
+    this.page = null;
+    if (pagePromise) {
+      const page = await pagePromise;
+      // go ahead and say this is closed
+      page.emit('close');
+      await page?.close();
     }
-    if (!ticks.length || this.currentPlaybarOffsetPct === playbarOffset) return;
+  }
+
+  public async setTimelineOffset(timelineOffset: number): Promise<void> {
+    const ticks = this.ticks;
+    if (!ticks.length || this.currentTimelineOffsetPct === timelineOffset) return;
 
     let newTickIdx = this.currentTickIndex;
     // if going forward, load next ticks
-    if (playbarOffset > this.currentPlaybarOffsetPct) {
+    if (timelineOffset > this.currentTimelineOffsetPct) {
       for (let i = this.currentTickIndex; i < ticks.length; i += 1) {
         if (i < 0) continue;
-        if (ticks[i].playbarOffsetPercent > playbarOffset) break;
+        if (ticks[i].timelineOffsetPercent > timelineOffset) break;
         newTickIdx = i;
       }
     } else {
       for (let i = this.currentTickIndex - 1; i >= 0; i -= 1) {
-        if (ticks[i].playbarOffsetPercent < playbarOffset) break;
+        if (ticks[i].timelineOffsetPercent < timelineOffset) break;
         newTickIdx = i;
       }
     }
 
-    await this.loadTick(newTickIdx, playbarOffset);
+    await this.loadTick(newTickIdx, timelineOffset);
   }
 
-  public async loadTick(newTickIdx: number, specificPlaybarOffset?: number): Promise<void> {
-    if (newTickIdx === this.currentTickIndex) {
+  public async loadEndState(): Promise<void> {
+    await this.loadTick(this.ticks.length - 1);
+  }
+
+  public async loadTick(
+    newTickOrIdx: number | ITick,
+    specificTimelineOffset?: number,
+  ): Promise<void> {
+    if (newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick) {
       return;
     }
-    const newTick = this.ticks[newTickIdx];
 
-    // need to wait for load
-    if (!newTick) {
-      return;
+    let newTick = newTickOrIdx as ITick;
+    let newTickIdx = newTickOrIdx as number;
+    if (typeof newTickOrIdx === 'number') {
+      newTick = this.ticks[newTickOrIdx];
+    } else {
+      newTickIdx = this.ticks.indexOf(newTickOrIdx);
     }
 
-    const playbarOffset = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
     this.currentTickIndex = newTickIdx;
-    this.currentPlaybarOffsetPct = playbarOffset;
+    this.currentTimelineOffsetPct = specificTimelineOffset ?? newTick.timelineOffsetPercent;
 
-    const paintEvents = this.getPaintEventsForNewTick(newTick);
+    const newPaintIndex = newTick.paintEventIndex;
+    if (newPaintIndex === -1 && newTick.documentUrl) {
+      this.paintEventsLoadedIdx = newPaintIndex;
+      await this.goto(newTick.documentUrl);
+    } else if (newPaintIndex !== this.paintEventsLoadedIdx) {
+      const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
+
+      let startIndex = newTick.documentLoadPaintIndex;
+      // is document loaded and moving forward? yes - no need to reload old ticks
+      if (!isBackwards && this.paintEventsLoadedIdx > newTick.documentLoadPaintIndex) {
+        startIndex = this.paintEventsLoadedIdx + 1;
+      }
+
+      this.paintEventsLoadedIdx = newPaintIndex;
+      await this.loadPaintEvents([startIndex, newPaintIndex]);
+    }
+
     const mouseEvent = this.tabDetails.mouse[newTick.mouseEventIndex];
     const scrollEvent = this.tabDetails.scroll[newTick.scrollEventIndex];
     const nodesToHighlight = newTick.highlightNodeIds;
 
-    this.currentUrl = newTick.documentUrl;
-    this.paintEventsLoadedIdx = newTick.paintEventIndex;
+    if (nodesToHighlight || mouseEvent || scrollEvent) {
+      await InjectedScripts.replayInteractions(
+        await this.page,
+        this.applyFrameNodePath(nodesToHighlight),
+        this.applyFrameNodePath(mouseEvent),
+        this.applyFrameNodePath(scrollEvent),
+      );
+    }
+  }
 
-    await this.loadDomState(paintEvents, nodesToHighlight, mouseEvent, scrollEvent);
+  public async showStatusText(text: string): Promise<void> {
+    await InjectedScripts.showStatusText(await this.page, text);
   }
 
   public loadDetachedState(
@@ -201,98 +210,57 @@ export default class SessionReplayTab {
     this.ticks.unshift(tick);
   }
 
-  private getPaintEventsForNewTick(newTick: ITick): IPaintEvent['changeEvents'] {
-    if (
-      newTick.paintEventIndex === this.paintEventsLoadedIdx ||
-      newTick.paintEventIndex === undefined
-    ) {
-      return;
+  private async loadPaintEvents(paintIndexRange: [number, number]): Promise<void> {
+    const page = await this.page;
+    const startIndex = paintIndexRange[0];
+    let loadUrl: string = null;
+    const { action, frameId, textContent } =
+      this.tabDetails.paintEvents[startIndex].changeEvents[0] ?? {};
+
+    if (action === DomActionType.newDocument && frameId === this.mainFrameId) {
+      loadUrl = textContent;
     }
 
-    const isBackwards = newTick.paintEventIndex < this.paintEventsLoadedIdx;
-
-    let startIndex = this.paintEventsLoadedIdx + 1;
-    if (isBackwards) {
-      startIndex = newTick.documentLoadPaintIndex;
+    if (loadUrl && loadUrl !== page.mainFrame.url) {
+      await this.goto(loadUrl);
     }
-
-    const changeEvents: IPaintEvent['changeEvents'] = [];
-    if ((newTick.paintEventIndex === -1 && isBackwards) || newTick.eventType === 'init') {
-      startIndex = -1;
-      changeEvents.push({
-        action: DomActionType.newDocument,
-        textContent: this.firstDocumentUrl,
-        commandId: newTick.commandId,
-      } as any);
-    } else {
-      for (let i = startIndex; i <= newTick.paintEventIndex; i += 1) {
-        const paints = this.tabDetails.paintEvents[i];
-        const first = paints.changeEvents[0];
-        // find last newDocument change
-        if (first.frameId === this.mainFrameId && first.action === DomActionType.newDocument) {
-          changeEvents.length = 0;
-        }
-        changeEvents.push(...paints.changeEvents);
+    if (startIndex >= 0) {
+      if (this.debugLogging) {
+        log.info('Replay.loadPaintEvents', {
+          sessionId: this.sessionId,
+          paintIndexRange,
+        });
       }
-    }
-
-    if (this.sessionReplay.debugLogging) {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Paint load. Current Idx=%s, Loading [%s->%s] (paints: %s, back? %s)',
-        this.paintEventsLoadedIdx,
-        startIndex,
-        newTick.paintEventIndex,
-        changeEvents.length,
-        isBackwards,
-      );
-    }
-    return changeEvents;
-  }
-
-  private async loadDomState(
-    domChanges: IPaintEvent['changeEvents'],
-    highlightedNodes?: { frameId: number; nodeIds: number[] },
-    mouse?: IMouseEventRecord,
-    scroll?: IScrollRecord,
-  ): Promise<void> {
-    if (domChanges?.length) {
-      const { action, frameId } = domChanges[0];
-      const hasNewUrlToLoad = action === DomActionType.newDocument && frameId === this.mainFrameId;
-      if (hasNewUrlToLoad) {
-        const nav = domChanges.shift();
-        await this.goto(nav.textContent);
-      }
-      await InjectedScripts.restoreDom(
-        this.page,
-        domChanges.map(this.applyFrameNodePath.bind(this)),
-      );
-    }
-
-    if (highlightedNodes || mouse || scroll) {
-      await InjectedScripts.replayInteractions(
-        this.page,
-        this.applyFrameNodePath(highlightedNodes),
-        this.applyFrameNodePath(mouse),
-        this.applyFrameNodePath(scroll),
-      );
+      await InjectedScripts.setPaintIndexRange(page, startIndex, paintIndexRange[1], !!loadUrl);
     }
   }
 
   private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
     if (!item) return undefined;
     const result = item as T & { frameIdPath: string };
-    result.frameIdPath = this.domNodePathByFrameId.get(item.frameId);
+    result.frameIdPath = this.domNodePathByFrameId[item.frameId];
     return result;
   }
 
   private async goto(url: string): Promise<void> {
-    const page = this.page;
+    if (this.debugLogging) {
+      log.info('Replay.goto', {
+        sessionId: this.sessionId,
+        url,
+      });
+    }
+
+    const page = await this.page;
     const loader = await page.navigate(url);
 
     await Promise.all([
       page.mainFrame.waitForLoader(loader.loaderId),
       page.mainFrame.waitForLoad('DOMContentLoaded'),
     ]);
+    await InjectedScripts.injectPaintEvents(
+      page,
+      this.tabDetails.paintEvents,
+      this.domNodePathByFrameId,
+    );
   }
 }

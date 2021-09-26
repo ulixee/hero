@@ -325,7 +325,10 @@ async function getRefreshedFrameEnvironments(tab: Tab): Promise<FrameEnvironment
 }
 
 export function getCoreTab(tab: Tab): Promise<CoreTab> {
-  return getState(tab).coreTab;
+  return getState(tab).coreTab.then(x => {
+    if (x instanceof Error) throw x;
+    return x;
+  });
 }
 
 // CREATE

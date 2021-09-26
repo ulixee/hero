@@ -10,10 +10,10 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   sessionName?: string;
   sessionKeepAlive?: boolean;
   sessionResume?: {
-    startLocation: 'currentLocation' | 'pageStart' | 'sessionStart';
     sessionId: string;
+    startLocation: 'currentLocation' | 'pageStart' | 'sessionStart';
+    startNavigationId?: number;
   };
-
   browserEmulatorId?: string;
   userAgent?: string;
   scriptInstanceMeta?: IScriptInstanceMeta;

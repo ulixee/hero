@@ -1,6 +1,6 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import { IDomChangeRecord } from '../models/DomChangesTable';
-import sessionCommandsApi from './Session.commands';
+import { loadCommandTimeline } from './Session.commands';
 import sessionDomChangesApi from './Session.domChanges';
 import sessionInteractionsApi, { ISessionInteractionsResult } from './Session.interactions';
 import SessionDb from '../dbs/SessionDb';
@@ -11,15 +11,18 @@ import ICommandWithResult from '../interfaces/ICommandWithResult';
 import ICoreApi from '../interfaces/ICoreApi';
 import sessionTabsApi, { ISessionTab } from './Session.tabs';
 import { ISessionRecord } from '../models/SessionTable';
+import CommandFormatter from '../lib/CommandFormatter';
+import CommandTimeline from '../lib/CommandTimeline';
 
 export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
   const session = sessionDb.session.get();
-  const { commands } = sessionCommandsApi(args);
+  const timeline = loadCommandTimeline(args);
+  const commands = timeline.commands.map(CommandFormatter.parseResult);
   const { domChangesByTabId } = sessionDomChangesApi(args);
   const interactions = sessionInteractionsApi(args);
   const { tabs } = sessionTabsApi(args);
-  const state = createSessionState(session, tabs);
+  const state = createSessionState(session, tabs, timeline);
 
   createCommandTicks(state, commands);
   createInteractionTicks(state, interactions);
@@ -49,15 +52,19 @@ export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksR
 
 /////// HELPER FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////////
 
-function createSessionState(session: ISessionRecord, tabs: ISessionTab[]): ISessionState {
+function createSessionState(
+  session: ISessionRecord,
+  tabs: ISessionTab[],
+  timeline: CommandTimeline,
+): ISessionState {
   const state: ISessionState = {
     tabsById: {},
+    timeline,
   };
 
   for (const tab of tabs) {
     state.tabsById[tab.id] = {
       tab,
-      lastActivityTimestamp: tab.createdTime,
       ticks: [],
       documents: [],
       mouse: [],
@@ -72,17 +79,18 @@ function createSessionState(session: ISessionRecord, tabs: ISessionTab[]): ISess
 
 function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]): void {
   for (let i = 0; i < commands.length; i += 1) {
-    const { startDate: timestamp, label, id: commandId, endDate } = commands[i];
-    const tabId = commands[i].tabId ?? Number(Object.keys(state.tabsById)[0]);
+    const command = commands[i];
+    const tabId = command.tabId ?? Number(Object.keys(state.tabsById)[0]);
 
-    addTick(state, 'command', i, { timestamp, commandId, label, tabId });
+    addTick(state, 'command', i, {
+      timestamp: command.startTime,
+      commandId: command.id,
+      label: command.label,
+      tabId,
+    });
 
     const tabDetails = state.tabsById[tabId];
-    tabDetails.commands.push(commands[i]);
-
-    if (endDate && endDate > tabDetails.lastActivityTimestamp) {
-      tabDetails.lastActivityTimestamp = endDate;
-    }
+    tabDetails.commands.push(command);
   }
 }
 
@@ -182,7 +190,7 @@ function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithRes
       commandId: -1,
       timestamp: tabDetails.tab.createdTime + 1,
       isMajor: false,
-      playbarOffsetPercent: 1,
+      timelineOffsetPercent: 1,
       isNewDocumentTick: true,
       paintEventIndex: 0,
       documentUrl: url,
@@ -228,24 +236,7 @@ function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithRes
 
 function sortTicks(state: ISessionState): void {
   for (const tabDetails of Object.values(state.tabsById)) {
-    const { ticks, focus, mouse, commands, tab } = tabDetails;
-    ticks.sort((a, b) => {
-      if (a.timestamp === b.timestamp) {
-        if (a.eventType === b.eventType) return a.eventTypeIndex - b.eventTypeIndex;
-        return a.eventType.localeCompare(b.eventType);
-      }
-      return a.timestamp - b.timestamp;
-    });
-    ticks.unshift({
-      playbarOffsetPercent: 0,
-      isMajor: true,
-      eventType: 'init',
-      timestamp: tab.createdTime,
-      eventTypeIndex: -1,
-      commandId: -1,
-      label: 'Session Created',
-    } as any);
-
+    const { focus, mouse, commands, tab } = tabDetails;
     const startUrl = tab.startUrl;
 
     let lastEvents: Pick<
@@ -268,11 +259,19 @@ function sortTicks(state: ISessionState): void {
       }
     }
 
-    const startTime = tabDetails.tab.createdTime;
-    const tabActiveMillis = tabDetails.lastActivityTimestamp - startTime;
+    tabDetails.ticks = tabDetails.ticks.filter(tick => {
+      tick.timelineOffsetPercent ??= state.timeline.getTimelineOffsetForTimestamp(tick.timestamp);
+      return tick.timelineOffsetPercent <= 100 && tick.timelineOffsetPercent >= 0;
+    });
+    tabDetails.ticks.sort((a, b) => {
+      if (a.timelineOffsetPercent === b.timelineOffsetPercent) {
+        if (a.eventType === b.eventType) return a.eventTypeIndex - b.eventTypeIndex;
+        return a.eventType.localeCompare(b.eventType);
+      }
+      return a.timelineOffsetPercent - b.timelineOffsetPercent;
+    });
 
-    for (const tick of ticks) {
-      tick.playbarOffsetPercent = round((100 * (tick.timestamp - startTime)) / tabActiveMillis);
+    for (const tick of tabDetails.ticks) {
       // if new doc, reset the markers
       if (tick.isNewDocumentTick) {
         lastEvents = {
@@ -356,15 +355,8 @@ function addTick(
   } as ITick;
 
   const tabDetails = tabId ? state.tabsById[tabId] : Object.values(state.tabsById)[0];
-  if (timestamp > tabDetails.lastActivityTimestamp) {
-    tabDetails.lastActivityTimestamp = timestamp;
-  }
   tabDetails.ticks.push(newTick);
   return newTick;
-}
-
-function round(num: number): number {
-  return Math.floor(1000 * num) / 1000;
 }
 
 export interface ISessionTicksApi extends ICoreApi {
@@ -385,7 +377,6 @@ export interface ISessionTicksResult {
 
 export interface ITabDetails {
   tab: ISessionTab;
-  lastActivityTimestamp: number;
   ticks: ITick[];
   mouse?: IMouseEventRecord[];
   focus?: IFocusRecord[];
@@ -413,7 +404,7 @@ export interface ITick {
   eventTypeIndex: number;
   commandId: number;
   timestamp: number;
-  playbarOffsetPercent: number;
+  timelineOffsetPercent: number;
   isMajor: boolean;
   label?: string;
   isNewDocumentTick: boolean;
@@ -434,4 +425,5 @@ export interface IDetachedTabState {
 
 interface ISessionState {
   tabsById: { [tabId: number]: ITabDetails };
+  timeline: CommandTimeline;
 }

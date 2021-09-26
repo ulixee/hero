@@ -96,7 +96,7 @@ export default class FrameNavigationsObserver {
   public async waitForNavigationResourceId(): Promise<number> {
     const top = this.navigations.top;
 
-    this.resourceIdResolvable = top?.resourceId;
+    this.resourceIdResolvable = top?.resourceIdResolvable;
     const resourceId = await this.resourceIdResolvable?.promise;
     if (top?.navigationError) {
       throw top.navigationError;

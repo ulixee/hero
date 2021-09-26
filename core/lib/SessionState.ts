@@ -43,7 +43,9 @@ export default class SessionState {
 
   public viewport: IViewport;
   public readonly db: SessionDb;
+  public navigationIdCounter = 0;
 
+  public allNavigations: INavigation[] = [];
   public nextCommandMeta: { commandId: number; startDate: Date; sendDate: Date };
 
   private readonly sessionName: string;
@@ -474,6 +476,7 @@ export default class SessionState {
 
   public recordNavigation(navigation: INavigation): void {
     this.db.frameNavigations.insert(navigation);
+    this.allNavigations.push(navigation);
     if (
       navigation.statusChanges.has(LoadStatus.AllContentLoaded) ||
       navigation.statusChanges.has(ContentPaint)

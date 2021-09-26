@@ -142,7 +142,13 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     if (event.waitingForDebugger && targetInfo.type === 'service_worker') {
       const devtoolsSession = this.connection.getSession(sessionId);
       if (!devtoolsSession) return;
-      devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
+
+      const promise = devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
+      if (targetInfo.url.startsWith('chrome-extension://')) {
+        promise
+          .then(() => this.devtoolsSession.send('Target.detachFromTarget', { sessionId }))
+          .catch(() => null);
+      }
     }
 
     if (

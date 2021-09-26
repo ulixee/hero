@@ -87,8 +87,8 @@ describe('basic Apis tests', () => {
       args: { sessionId },
     });
     expect(result.tabDetails).toHaveLength(1);
-    expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(2);
-    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(6); // 1 for init
+    expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(5);
+    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(5);
     expect(result.tabDetails[0].ticks.filter(x => x.isNewDocumentTick)).toHaveLength(1);
     // only should be returned if asked for
     expect(result.tabDetails[0].mouse).not.toBeTruthy();

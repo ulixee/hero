@@ -18,10 +18,19 @@ inspect.defaultOptions.depth = null;
     scriptEntrypoint = Path.resolve(process.cwd(), scriptEntrypoint);
   }
   const connectionToCoreApi = new DirectConnectionToCoreApi();
-  const sessionReplay = new SessionReplay(connectionToCoreApi);
-  await sessionReplay.load({
-    scriptEntrypoint,
+
+  const { session } = await connectionToCoreApi.run({
+    api: 'Session.find',
+    args: {
+      scriptEntrypoint,
+    },
   });
+
+  const context = await SessionReplay.recreateBrowserContextForSession(session.id, true);
+
+  const sessionReplay = new SessionReplay(session.id, connectionToCoreApi);
+  const startTab = await sessionReplay.open(context);
+
   readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -35,15 +44,12 @@ inspect.defaultOptions.depth = null;
     readline.cursorTo(process.stdout, 0, 0);
     readline.clearScreenDown(process.stdout);
 
-    const currentLabel =
-      sessionReplay.startTab.currentTick?.label ??
-      sessionReplay.startTab.currentTick?.eventType ??
-      'Start';
+    const currentLabel = startTab.currentTick?.label ?? startTab.currentTick?.eventType ?? 'Start';
 
-    const input = `${sessionReplay.startTab.currentTickIndex} / ${sessionReplay.startTab.ticks.length}: ${currentLabel}`;
+    const input = `${startTab.currentTickIndex} / ${startTab.ticks.length}: ${currentLabel}`;
 
     const prompt = `Interactive commands: P=${
-      sessionReplay.startTab.isPlaying ? 'pause' : 'play'
+      startTab.isPlaying ? 'pause' : 'play'
     }, LeftArrow=Back, RightArrow=Forward, C=Close\n\n${input}`;
 
     process.stdout.write(prompt);
@@ -51,7 +57,7 @@ inspect.defaultOptions.depth = null;
 
   async function close() {
     await sessionReplay.connection.disconnect();
-    await sessionReplay.close();
+    await sessionReplay.close(true);
     await Core.shutdown();
   }
 
@@ -64,19 +70,21 @@ inspect.defaultOptions.depth = null;
     }
 
     if (key.name === 'p') {
-      if (sessionReplay.startTab.isPlaying) {
-        sessionReplay.startTab.pause();
+      if (startTab.isPlaying) {
+        startTab.pause();
       } else {
-        await sessionReplay.startTab.play(() => render());
+        await startTab.play(() => render());
       }
     }
     if (key.name === 'right') {
-      sessionReplay.startTab.pause();
-      await sessionReplay.startTab.goForward();
+      startTab.pause();
+      const nextTick = startTab.nextTick;
+      if (nextTick) await startTab.loadTick(nextTick);
     }
     if (key.name === 'left') {
-      sessionReplay.startTab.pause();
-      await sessionReplay.startTab.goBack();
+      startTab.pause();
+      const prevTick = startTab.previousTick;
+      if (prevTick) await startTab.loadTick(prevTick);
     }
     render();
   });

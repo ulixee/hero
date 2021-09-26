@@ -52,7 +52,7 @@ class NodeTracker {
   public static restore(id: number, node: Node): void {
     node[this.nodeIdSymbol] = id;
     this.watchedNodesById.set(id, node);
-    if (id > this.nextId) this.nextId = id;
+    if (id > this.nextId) this.nextId = id + 1;
   }
 }
 

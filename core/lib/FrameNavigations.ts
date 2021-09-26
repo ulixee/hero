@@ -42,7 +42,11 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
-  constructor(readonly frameId: number, readonly sessionState: SessionState) {
+  constructor(
+    readonly tabId: number,
+    readonly frameId: number,
+    readonly sessionState: SessionState,
+  ) {
     super();
     this.setEventsToLog(['navigation-requested', 'status-change']);
     this.logger = log.createChild(module, {
@@ -105,6 +109,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     browserRequestId?: string,
   ): INavigation {
     const nextTop = <INavigation>{
+      id: (this.sessionState.navigationIdCounter += 1),
+      tabId: this.tabId,
       requestedUrl: url,
       finalUrl: null,
       frameId: this.frameId,
@@ -113,9 +119,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       navigationReason: reason,
       initiatedTime: Date.now(),
       statusChanges: new Map(),
-      resourceId: createPromise(),
+      resourceIdResolvable: createPromise(),
       browserRequestId,
     };
+    nextTop.resourceIdResolvable.promise.then(x => (nextTop.resourceId = x)).catch(() => null);
     if (loaderId) this.loaderIds.add(loaderId);
 
     this.checkStoredNavigationReason(nextTop, url);
@@ -132,11 +139,11 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
             nextTop.statusChanges.set(state, Date.now());
           }
         }
-        nextTop.resourceId.resolve(currentTop.resourceId.promise);
+        nextTop.resourceIdResolvable.resolve(currentTop.resourceIdResolvable.promise);
       } else {
         nextTop.statusChanges.set(LoadStatus.AllContentLoaded, nextTop.initiatedTime);
         nextTop.statusChanges.set(ContentPaint, nextTop.initiatedTime);
-        nextTop.resourceId.resolve(-1);
+        nextTop.resourceIdResolvable.resolve(-1);
       }
       shouldPublishLocationChange = true;
       nextTop.finalUrl = url;
@@ -217,13 +224,13 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       currentUrl: this.currentUrl,
     });
     const top = this.top;
-    if (!top || top.resourceId.isResolved) return;
+    if (!top || top.resourceIdResolvable.isResolved) return;
 
     // since we don't know if there are listeners yet, we need to just set the error on the return value
     // otherwise, get unhandledrejections
     if (error) top.navigationError = error;
 
-    top.resourceId.resolve(resourceId);
+    top.resourceIdResolvable.resolve(resourceId);
   }
 
   public onLoadStatusChanged(

@@ -1,5 +1,5 @@
 // NOTE: do not use node dependencies
-// eslint-disable-next-line max-classes-per-file
+
 import { IDomChangeEvent, INodeData } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
 import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
@@ -11,6 +11,7 @@ declare global {
     extractDomChanges(): PageRecorderResultSet;
     flushPageRecorder(): PageRecorderResultSet;
     listenForInteractionEvents(): void;
+    doNotTrackElement(element: Element): void;
   }
 }
 declare const runtimeFunction: string;
@@ -70,19 +71,20 @@ function idx() {
 let isStarted = false;
 
 class PageEventsRecorder {
-  private domChanges: IDomChangeEvent[] = [];
+  private readonly domChanges: IDomChangeEvent[] = [];
 
-  private mouseEvents: IMouseEvent[] = [];
-  private focusEvents: IFocusEvent[] = [];
-  private scrollEvents: IScrollEvent[] = [];
-  private loadEvents: ILoadEvent[] = [];
+  private readonly mouseEvents: IMouseEvent[] = [];
+  private readonly focusEvents: IFocusEvent[] = [];
+  private readonly scrollEvents: IScrollEvent[] = [];
+  private readonly loadEvents: ILoadEvent[] = [];
+  private readonly doNotTrackElementsById = new Map<number, Element>();
   private location = window.self.location.href;
   private uploadOnDelay: number;
 
   private isListeningForInteractionEvents = false;
 
-  private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
-  private stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
+  private readonly propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
+  private readonly stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
   private readonly observer: MutationObserver;
 
@@ -91,50 +93,44 @@ class PageEventsRecorder {
   }
 
   public start() {
-    if (isStarted || window.self.location.href === 'about:blank') {
+    if (isStarted || this.location === 'about:blank') {
       return;
     }
     isStarted = true;
 
-    const stamp = Date.now();
     // preload with a document
-    this.domChanges.push([
-      DomActionType.newDocument,
-      {
-        id: -1,
-        textContent: window.self.location.href,
-      },
-      stamp,
-      idx(),
-    ]);
+    const newDocument = {
+      id: -1,
+      textContent: this.location,
+    };
+    const stamp = Date.now();
+    this.pushChange(DomActionType.newDocument, newDocument, stamp);
+
     if (document) {
-      this.domChanges.push([DomActionType.added, this.serializeNode(document), stamp, idx()]);
+      this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
     }
 
     if (document && document.doctype) {
-      this.domChanges.push([
-        DomActionType.added,
-        this.serializeNode(document.doctype),
-        stamp,
-        idx(),
-      ]);
+      this.pushChange(DomActionType.added, this.serializeNode(document.doctype), stamp);
     }
-    const children = this.serializeChildren(document, new Map<Node, INodeData>());
+
+    this.serializeChildren(document, stamp, new Map<Node, INodeData>());
     this.observer.observe(document, {
       attributes: true,
       childList: true,
       subtree: true,
       characterData: true,
     });
-    for (const childData of children) {
-      this.domChanges.push([DomActionType.added, childData, stamp, idx()]);
-    }
     this.uploadChanges();
   }
 
+  public doNotTrackElement(element: Element): void {
+    const nodeId = NodeTracker.track(element);
+    this.doNotTrackElementsById.set(nodeId, element);
+  }
+
   public extractChanges(): PageRecorderResultSet {
-    const changes = this.convertMutationsToChanges(this.observer.takeRecords());
-    this.domChanges.push(...changes);
+    this.convertMutationsToChanges(this.observer.takeRecords());
     return this.pageResultset;
   }
 
@@ -151,7 +147,7 @@ class PageEventsRecorder {
     const time = Date.now();
     const event = [eventType as any, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
-    this.getPropertyChanges(time, this.domChanges);
+    this.getPropertyChanges(time);
   }
 
   public trackMouse(eventType: MouseEventType, mouseEvent: MouseEvent) {
@@ -196,7 +192,7 @@ class PageEventsRecorder {
   }
 
   public checkForAllPropertyChanges() {
-    this.getPropertyChanges(Date.now(), this.domChanges);
+    this.getPropertyChanges(Date.now());
   }
 
   public get pageResultset(): PageRecorderResultSet {
@@ -280,32 +276,26 @@ class PageEventsRecorder {
     });
   }
 
-  private getLocationChange(changeUnixTime: number, changes: IDomChangeEvent[]) {
-    const timestamp = changeUnixTime || Date.now();
+  private getLocationChange(changeUnixTime: number) {
     const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
-      changes.push([
-        DomActionType.location,
-        { id: -1, textContent: currentLocation },
-        timestamp,
-        idx(),
-      ]);
+      const timestamp = changeUnixTime || Date.now();
+      this.pushChange(DomActionType.location, { id: -1, textContent: currentLocation }, timestamp);
     }
   }
 
-  private getPropertyChanges(changeUnixTime: number, changes: IDomChangeEvent[]) {
+  private getPropertyChanges(changeUnixTime: number) {
     for (const [input, propertyMap] of this.propertyTrackingElements) {
       for (const [propertyName, value] of propertyMap) {
         const newPropValue = input[propertyName];
         if (newPropValue !== value) {
           const nodeId = NodeTracker.getNodeId(input);
-          changes.push([
+          this.pushChange(
             DomActionType.property,
             { id: nodeId, properties: { [propertyName]: newPropValue } },
             changeUnixTime,
-            idx(),
-          ]);
+          );
           propertyMap.set(propertyName, newPropValue);
         }
       }
@@ -330,7 +320,7 @@ class PageEventsRecorder {
     }
   }
 
-  private checkForStylesheetChanges(changeUnixTime: number, changes: IDomChangeEvent[]) {
+  private checkForStylesheetChanges(changeUnixTime: number) {
     const timestamp = changeUnixTime || Date.now();
     for (const [style, current] of this.stylesheets) {
       if (!style.sheet || !style.isConnected) continue;
@@ -338,20 +328,18 @@ class PageEventsRecorder {
       const newPropValue = [...sheet.cssRules].map(x => x.cssText);
       if (newPropValue.toString() !== current.toString()) {
         const nodeId = NodeTracker.getNodeId(style);
-        changes.push([
+        this.pushChange(
           DomActionType.property,
           { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
           timestamp,
-          idx(),
-        ]);
+        );
         this.stylesheets.set(style, newPropValue);
       }
     }
   }
 
   private onMutation(mutations: MutationRecord[]) {
-    const changes = this.convertMutationsToChanges(mutations);
-    this.domChanges.push(...changes);
+    this.convertMutationsToChanges(mutations);
     // debounce uploads
     if (document.readyState === 'complete') {
       clearTimeout(this.uploadOnDelay);
@@ -359,12 +347,11 @@ class PageEventsRecorder {
     }
   }
 
-  private convertMutationsToChanges(mutations: MutationRecord[]) {
-    const changes: IDomChangeEvent[] = [];
+  private convertMutationsToChanges(mutations: MutationRecord[]): void {
     const stamp = Date.now();
 
-    this.getLocationChange(stamp, changes);
-    this.getPropertyChanges(stamp, changes);
+    this.getLocationChange(stamp);
+    this.getPropertyChanges(stamp);
 
     const addedNodeMap = new Map<Node, INodeData>();
     const removedNodes = new Set<Node>();
@@ -372,7 +359,7 @@ class PageEventsRecorder {
     for (const mutation of mutations) {
       const { type, target } = mutation;
       if (!NodeTracker.has(target)) {
-        this.serializeHierarchy(target, changes, stamp, addedNodeMap);
+        this.serializeNodeToRoot(target, stamp, addedNodeMap);
       }
 
       if (type === MutationRecordType.childList) {
@@ -382,11 +369,12 @@ class PageEventsRecorder {
           removedNodes.add(node);
           if (!NodeTracker.has(node)) continue;
           const serial = this.serializeNode(node);
+          if (!serial) continue;
           serial.parentNodeId = NodeTracker.getNodeId(target);
           serial.previousSiblingId = NodeTracker.getNodeId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([DomActionType.removed, serial, stamp, idx()]);
+          this.pushChange(DomActionType.removed, serial, stamp);
           isFirstRemoved = false;
         }
 
@@ -396,6 +384,7 @@ class PageEventsRecorder {
         for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
           const node = mutation.addedNodes[i];
           const serial = this.serializeNode(node);
+          if (!serial) continue;
           serial.parentNodeId = NodeTracker.getNodeId(target);
           serial.previousSiblingId = NodeTracker.getNodeId(
             isFirstAdded ? mutation.previousSibling : node.previousSibling,
@@ -412,98 +401,94 @@ class PageEventsRecorder {
             }
           }
           addedNodeMap.set(node, serial);
-          changes.push([DomActionType.added, serial, stamp, idx()]);
+          this.pushChange(DomActionType.added, serial, stamp);
         }
       }
 
       if (type === MutationRecordType.attributes) {
         // don't store
         if (!NodeTracker.has(target)) {
-          this.serializeHierarchy(target, changes, stamp, addedNodeMap);
+          this.serializeNodeToRoot(target, stamp, addedNodeMap);
         }
-        const serial = addedNodeMap.get(target) || this.serializeNode(target);
-        if (!serial.attributes) serial.attributes = {};
+        let serial = addedNodeMap.get(target) || this.serializeNode(target);
+        if (!serial) continue;
+
+        let shouldPushChange = !addedNodeMap.has(target);
+
+        // sometimes we get 1 change per attribute - put them all in one change
+        const previous = this.domChanges[this.domChanges.length - 1];
+        if (previous && previous[1].id === serial.id) {
+          serial = previous[1];
+          shouldPushChange = false;
+        }
+
+        serial.attributes ??= {};
         serial.attributes[mutation.attributeName] = (target as Element).getAttributeNS(
           mutation.attributeNamespace,
           mutation.attributeName,
         );
         if (mutation.attributeNamespace && mutation.attributeNamespace !== '') {
-          if (!serial.attributeNamespaces) serial.attributeNamespaces = {};
+          serial.attributeNamespaces ??= {};
           serial.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
         }
 
-        // flatten changes
-        if (!addedNodeMap.has(target)) {
-          changes.push([DomActionType.attribute, serial, stamp, idx()]);
+        if (shouldPushChange) {
+          this.pushChange(DomActionType.attribute, serial, stamp);
         }
       }
 
       if (type === MutationRecordType.characterData) {
-        const textChange = this.serializeNode(target);
-        textChange.textContent = target.textContent;
-        changes.push([DomActionType.text, textChange, stamp, idx()]);
+        const serial = this.serializeNode(target);
+        if (!serial) continue;
+        serial.textContent = target.textContent;
+        this.pushChange(DomActionType.text, serial, stamp);
       }
     }
 
     for (const [node] of addedNodeMap) {
       // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
       // individually so we need to extract child nodes into flat hierarchy
-      const children = this.serializeChildren(node, addedNodeMap);
-      for (const childData of children) {
-        changes.push([DomActionType.added, childData, stamp, idx()]);
-      }
+      this.serializeChildren(node, stamp, addedNodeMap);
     }
 
-    this.checkForStylesheetChanges(stamp, changes);
-
-    return changes;
+    this.checkForStylesheetChanges(stamp);
   }
 
-  private serializeHierarchy(
-    node: Node,
-    changes: IDomChangeEvent[],
-    changeTime: number,
-    addedNodeMap: Map<Node, INodeData>,
-  ) {
+  private serializeNodeToRoot(node: Node, changeTime: number, addedNodeMap: Map<Node, INodeData>) {
     if (NodeTracker.has(node)) return this.serializeNode(node);
 
     const serial = this.serializeNode(node);
+    if (!serial) return;
+
     serial.parentNodeId = NodeTracker.getNodeId(node.parentNode);
     if (!serial.parentNodeId && node.parentNode) {
-      const parentSerial = this.serializeHierarchy(
-        node.parentNode,
-        changes,
-        changeTime,
-        addedNodeMap,
-      );
-
-      serial.parentNodeId = parentSerial.id;
+      const parentSerial = this.serializeNodeToRoot(node.parentNode, changeTime, addedNodeMap);
+      serial.parentNodeId = parentSerial?.id;
     }
     serial.previousSiblingId = NodeTracker.getNodeId(node.previousSibling);
     if (!serial.previousSiblingId && node.previousSibling) {
-      const previous = this.serializeHierarchy(
-        node.previousSibling,
-        changes,
-        changeTime,
-        addedNodeMap,
-      );
-      serial.previousSiblingId = previous.id;
+      const previous = this.serializeNodeToRoot(node.previousSibling, changeTime, addedNodeMap);
+      serial.previousSiblingId = previous?.id;
     }
-    changes.push([DomActionType.added, serial, changeTime, idx()]);
+    this.pushChange(DomActionType.added, serial, changeTime);
     addedNodeMap.set(node, serial);
     return serial;
   }
 
-  private serializeChildren(node: Node, addedNodes: Map<Node, INodeData>) {
-    const serialized: INodeData[] = [];
-
+  private serializeChildren(
+    node: Node,
+    changeTime: number,
+    addedNodes: Map<Node, INodeData>,
+  ): void {
     for (const child of node.childNodes) {
       if (!NodeTracker.has(child)) {
         const serial = this.serializeNode(child);
+        if (!serial) continue;
         serial.parentNodeId = NodeTracker.getNodeId(child.parentElement ?? child.getRootNode());
         serial.previousSiblingId = NodeTracker.getNodeId(child.previousSibling);
         addedNodes.set(child, serial);
-        serialized.push(serial, ...this.serializeChildren(child, addedNodes));
+        this.pushChange(DomActionType.added, serial, changeTime);
+        this.serializeChildren(child, changeTime, addedNodes);
       }
     }
 
@@ -514,8 +499,10 @@ class PageEventsRecorder {
       const shadowRoot = element.shadowRoot;
       if (shadowRoot && !NodeTracker.has(shadowRoot)) {
         const serial = this.serializeNode(shadowRoot);
+        if (!serial) continue;
         serial.parentNodeId = NodeTracker.getNodeId(element);
-        serialized.push(serial, ...this.serializeChildren(shadowRoot, addedNodes));
+        this.pushChange(DomActionType.added, serial, changeTime);
+        this.serializeChildren(shadowRoot, changeTime, addedNodes);
         this.observer.observe(shadowRoot, {
           attributes: true,
           childList: true,
@@ -524,8 +511,6 @@ class PageEventsRecorder {
         });
       }
     }
-
-    return serialized;
   }
 
   private serializeNode(node: Node): INodeData {
@@ -593,6 +578,26 @@ class PageEventsRecorder {
 
     return data;
   }
+
+  private pushChange(action: DomActionType, serial: INodeData, timestamp: number): void {
+    if (action === DomActionType.added) {
+      // don't include this if it's hero id
+      if (this.doNotTrackElementsById.has(serial.id)) {
+        return;
+      }
+      if (this.doNotTrackElementsById.has(serial.previousSiblingId)) {
+        // get previous node that's tracked
+        let previousNode: ChildNode = this.doNotTrackElementsById.get(serial.previousSiblingId);
+        let nodeId = serial.previousSiblingId;
+        do {
+          previousNode = previousNode.previousSibling;
+          nodeId = NodeTracker.getNodeId(previousNode);
+        } while (previousNode && this.doNotTrackElementsById.has(nodeId));
+        serial.previousSiblingId = nodeId;
+      }
+    }
+    this.domChanges.push([action, serial, timestamp, idx()]);
+  }
 }
 
 const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
@@ -602,6 +607,7 @@ const recorder = new PageEventsRecorder();
 window.extractDomChanges = () => recorder.extractChanges();
 window.flushPageRecorder = () => recorder.flushAndReturnLists();
 window.listenForInteractionEvents = () => recorder.listenToInteractionEvents();
+window.doNotTrackElement = element => recorder.doNotTrackElement(element);
 
 const interval = setInterval(() => {
   if (!lastUploadDate || Date.now() - lastUploadDate.getTime() > 1e3) {

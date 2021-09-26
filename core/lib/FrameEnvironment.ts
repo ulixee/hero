@@ -128,7 +128,7 @@ export default class FrameEnvironment
     this.jsPath = new JsPath(this, tab.isDetached);
     this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
-    this.navigations = new FrameNavigations(this.id, tab.sessionState);
+    this.navigations = new FrameNavigations(this.tab.id, this.id, tab.sessionState);
     this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.interactor = new Interactor(this);
 

@@ -138,7 +138,10 @@ export default class SessionDb {
       try {
         this.batchInsert.immediate();
       } catch (error) {
-        if (String(error).match(/attempt to write a readonly database/)) {
+        if (
+          String(error).match(/attempt to write a readonly database/) ||
+          String(error).match(/database is locked/)
+        ) {
           clearInterval(this.saveInterval);
         }
         throw error;
