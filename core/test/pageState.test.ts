@@ -109,7 +109,7 @@ test('can continue to get events as dom changes', async () => {
   );
   await hasDiv.promise;
   stop();
-  expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(4);
+  expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(2);
   const lastCall = callbackFn.mock.calls.slice(-1).shift()[0];
   expect(lastCall.url).toBe(`${koaServer.baseUrl}/pageState2`);
   expect(lastCall.paintStable).toBe(true);

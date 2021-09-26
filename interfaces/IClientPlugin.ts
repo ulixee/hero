@@ -1,4 +1,4 @@
-import type { Tab } from '@ulixee/hero';
+import type { Tab, FrameEnvironment } from '@ulixee/hero';
 import type Hero from '@ulixee/hero/lib/Hero';
 import { PluginTypes } from './IPluginTypes';
 
@@ -7,6 +7,11 @@ export default interface IClientPlugin {
 
   onHero?(hero: Hero, sendToCore: ISendToCoreFn): void;
   onTab?(hero: Hero, tab: Tab, sendToCore: ISendToCoreFn): void;
+  onFrameEnvironment?(
+    hero: Hero,
+    frameEnvironment: FrameEnvironment,
+    sendToCore: ISendToCoreFn,
+  ): void;
 }
 
 export interface IClientPluginClass {

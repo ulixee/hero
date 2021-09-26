@@ -83,3 +83,11 @@ This method is called every time a new Tab is initialized.
 - tab `Tab`
 - sendToCore: `(toPluginId: string, ...args: any[]) => Promise<any>`
 #### **Returns** `void`
+
+### onFrameEnvironment<em>(hero, frameEnvironment, sendToCore)</em> *optional*
+This method is called every time a new FrameEnvironment is initialized.
+#### **Arguments**:
+- hero `Hero`
+- tab `FrameEnvironment`
+- sendToCore: `(toPluginId: string, ...args: any[]) => Promise<any>`
+#### **Returns** `void`

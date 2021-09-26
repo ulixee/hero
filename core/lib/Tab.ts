@@ -589,9 +589,10 @@ export default class Tab
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
-  public async runPluginCommand(toPluginId, args: any[]): Promise<any> {
+  public async runPluginCommand(toPluginId: string, args: any[]): Promise<any> {
     const commandMeta = {
       puppetPage: this.puppetPage,
+      puppetFrame: this.mainFrameEnvironment?.puppetFrame,
     };
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }

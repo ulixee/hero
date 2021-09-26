@@ -247,7 +247,7 @@ export default class CorePlugins implements ICorePlugins {
 
   public async onPluginCommand(
     toPluginId: string,
-    commandMeta: Pick<IOnClientCommandMeta, 'puppetPage'>,
+    commandMeta: Pick<IOnClientCommandMeta, 'puppetPage' | 'puppetFrame'>,
     args: any[],
   ): Promise<any> {
     const plugin = this.instanceById[toPluginId];
@@ -255,6 +255,7 @@ export default class CorePlugins implements ICorePlugins {
       return await plugin.onClientCommand(
         {
           puppetPage: commandMeta.puppetPage,
+          puppetFrame: commandMeta.puppetFrame,
           sessionSummary: this.getSessionSummary(),
         },
         ...args,
@@ -281,7 +282,14 @@ export default class CorePlugins implements ICorePlugins {
         // eslint-disable-next-line global-require,import/no-dynamic-require
         const CorePlugin = await import(corePluginId);
         if (!CorePlugin) return;
-        CorePlugins.corePluginClassesById[corePluginId] = CorePlugin.default || CorePlugin;
+        let CoreModule = CorePlugin.default || CorePlugin;
+        if (Object.keys(CoreModule).length === 1) {
+          CoreModule = CoreModule[Object.keys(CoreModule).pop()];
+        }
+        if (!CoreModule.id) {
+          throw new Error('Your CorePlugin needs to have a static id property');
+        }
+        CorePlugins.corePluginClassesById[corePluginId] = CoreModule;
       } catch (error) {
         return;
       }
@@ -290,22 +298,22 @@ export default class CorePlugins implements ICorePlugins {
   }
 
   private loadDependencies(dependencyMap: IDependencyMap): void {
-    Object.entries(dependencyMap).forEach(([clientPluginId, corePluginIds]) => {
-      corePluginIds.forEach(corePluginId => {
-        if (this.instanceById[corePluginId]) return;
-        if (Core.pluginMap.corePluginsById[corePluginId]) return;
+    for (const [clientPluginId, corePluginIds] of Object.entries(dependencyMap)) {
+      for (const corePluginId of corePluginIds) {
+        if (this.instanceById[corePluginId]) continue;
+        if (Core.pluginMap.corePluginsById[corePluginId]) continue;
         this.logger.info(`Dynamically requiring ${corePluginId} requested by ${clientPluginId}`);
         const Plugin = requirePlugins<ICorePluginClass>(corePluginId, PluginTypes.CorePlugin)[0];
         if (!Plugin) throw new Error(`Could not find ${corePluginId}`);
 
         this.use(Plugin);
-      });
-    });
+      }
+    }
   }
 
   private loadCorePluginPaths(corePluginPaths: string[]): void {
     for (const corePluginPath of corePluginPaths) {
-      if (Core.pluginMap.corePluginsById[corePluginPath]) return;
+      if (Core.pluginMap.corePluginsById[corePluginPath]) continue;
       const Plugins = requirePlugins<ICorePluginClass>(corePluginPath, PluginTypes.CorePlugin);
       Plugins.forEach(Plugin => this.use(Plugin));
     }
