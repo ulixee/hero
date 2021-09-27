@@ -88,6 +88,33 @@ function saveDoc(doc: IDoc, filePath: string) {
     markup.push({ table: linksTable });
   }
 
+  if (doc.name === 'XPathResult') {
+    for (const p of doc.properties) {
+      if (p.name === 'singleNodeValue') {
+        const example =
+          '\n\n ```js' +
+          '\n  await result.singleNodeResult === null; // null if not present' +
+          '\n  await result.singleNodeResult.textContent; // gets text' +
+          '\n ```';
+        p.overview += `\n\n\nNOTE: The returned SuperNode will behave like all AwaitedDom SuperNodes: nothing will be retrieved until you await the node or child property.
+${example}
+`;
+      }
+    }
+    for (const m of doc.methods) {
+      if (m.name === 'iterateNext') {
+        const example =
+          '\n\n ```js' +
+          '\n  await result.iterateNext() === null; // null if not present' +
+          '\n  await result.iterateNext().textContent; // gets text' +
+          '\n ```';
+        m.overview += `\n\n\nNOTE: The iterated SuperNodes will behave like all AwaitedDom SuperNodes: nothing will be retrieved until you await the node or child property.
+${example}
+`;
+      }
+    }
+  }
+
   const implementedProperties = doc.properties.filter(x => x.isImplemented);
   if (implementedProperties.length) {
     markup.push({ h2: 'Properties' });

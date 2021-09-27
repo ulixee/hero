@@ -154,6 +154,13 @@ describe('basic Document tests', () => {
     expect(element2Text).toBe('2');
   });
 
+  it("returns null for elements that don't exist", async () => {
+    const hero = await openBrowser(`/`);
+    const { document } = hero;
+    const element = await document.querySelector('#this-element-aint-there');
+    expect(element).toBe(null);
+  });
+
   it('can execute xpath', async () => {
     koaServer.get('/xpath', ctx => {
       ctx.body = `
@@ -212,11 +219,42 @@ describe('basic Document tests', () => {
     await expect(headings.singleNodeValue.textContent).resolves.toBe('Here I am');
   });
 
-  it("returns null for elements that don't exist", async () => {
+  it("returns null for xpath elements that don't exist", async () => {
     const hero = await openBrowser(`/`);
     const { document } = hero;
-    const element = await document.querySelector('#this-element-aint-there');
+    const element = await document.evaluate(
+      '//div[@id="this-element-aint-there"]',
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue;
     expect(element).toBe(null);
+  });
+
+  it('returns null while iterating nodes', async () => {
+    koaServer.get('/xpath-nodes', ctx => {
+      ctx.body = `
+        <body>
+          <div id="div1">Div 1</div>
+          <div id="div2">Div 2</div>
+          <div id="div3">Div 3</div>
+        </body>
+      `;
+    });
+    const hero = await openBrowser(`/xpath-nodes`);
+    const { document } = hero;
+    const iterator = await document.evaluate(
+      '//div',
+      document,
+      null,
+      XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+      null,
+    );
+    await expect(iterator.iterateNext()).resolves.toBeTruthy();
+    await expect(iterator.iterateNext()).resolves.toBeTruthy();
+    await expect(iterator.iterateNext()).resolves.toBeTruthy();
+    await expect(iterator.iterateNext()).resolves.toBe(null);
   });
 
   it('can determine if an element is visible', async () => {
