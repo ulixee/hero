@@ -3,24 +3,11 @@
   "compileOnSave": true,
   "compilerOptions": {
     "composite": true,
-    "target": "ES2019",
-    "module": "CommonJS",
-    "lib": ["ES2019", "DOM", "DOM.Iterable"],
-    "noImplicitAny": false,
-    "esModuleInterop": false,
-    "resolveJsonModule": true,
     "sourceMap": false,
-    "declaration": true,
-    "allowJs": true,
+    "inlineSourceMap": false,
+    "removeComments": true,
     "strictBindCallApply": false
   },
-  "references": [],
   "include": ["*.ts", "*.js", ".eslintrc.js"],
-  "exclude": [
-    "**/tsconfig*.json",
-    "**/node_modules",
-    "**/dist",
-    "**/build*",
-    "**/injected-scripts"
-  ]
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist", "**/build*", "**/injected-scripts"]
 }

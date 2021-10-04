@@ -463,7 +463,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     const hasRecords = results.some(x => x.length > 0);
     if (!hasRecords) return false;
     this.logger.stats('FrameEnvironment.onPageEvents', {
-      tabId: this.id,
+      tabId: this.tab.id,
+      frameId: this.id,
       dom: domChanges.length,
       mouse: mouseEvents.length,
       focusEvents: focusEvents.length,

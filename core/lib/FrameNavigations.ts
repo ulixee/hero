@@ -234,12 +234,25 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 
   public onLoadStatusChanged(
-    incomingStatus: LoadStatus.DomContentLoaded | LoadStatus.AllContentLoaded,
+    incomingStatus:
+      | LoadStatus.DomContentLoaded
+      | LoadStatus.AllContentLoaded
+      | LoadStatus.PaintingStable,
     url: string,
     loaderId: string,
     statusChangeDate?: Date,
   ): void {
     if (url === 'about:blank') return;
+    // if this is a painting stable, it probably won't come from a loader event for the page
+    if (!loaderId) {
+      for (let i = this.history.length - 1; i >= 0; i -= 1) {
+        const nav = this.history[i];
+        if (nav && nav.finalUrl === url && nav.statusChanges.has(LoadStatus.HttpResponded)) {
+          loaderId = nav.loaderId;
+          break;
+        }
+      }
+    }
     this.changeNavigationStatus(incomingStatus, loaderId, statusChangeDate?.getTime());
   }
 
@@ -343,7 +356,12 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   ): void {
     const navigation = this.findMatchingNavigation(loaderId);
     if (!navigation) return;
-    if (navigation.statusChanges.has(newStatus)) return;
+    if (navigation.statusChanges.has(newStatus)) {
+      if (statusChangeDate && statusChangeDate < navigation.statusChanges.get(newStatus)) {
+        navigation.statusChanges.set(newStatus, statusChangeDate);
+      }
+      return;
+    }
 
     this.recordStatusChange(navigation, newStatus, statusChangeDate);
     if (loaderId) this.loaderIds.add(loaderId);

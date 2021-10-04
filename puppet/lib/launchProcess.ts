@@ -109,7 +109,7 @@ export default function launchProcess(
     pipeWrite as NodeJS.WritableStream,
     pipeRead as NodeJS.ReadableStream,
   );
-  transport.onCloseFns.push(this.close);
+  transport.onCloseFns.push(close);
 
   return Promise.resolve(<ILaunchedProcess>{
     transport,

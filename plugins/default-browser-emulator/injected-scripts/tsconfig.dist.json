@@ -1,8 +1,12 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../../../tsconfig.dist.json",
   "compilerOptions": {
-    "outDir": "../../../../build-dist"
+    "composite": true,
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "removeComments": true,
+    "strictBindCallApply": false
   },
-  "include": ["./*.ts", "./*.js", ".eslintrc.js"],
-  "exclude": ["node_modules", "build-dist"]
+  "include": ["*.ts", ".eslintrc.js"],
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/build-dist"]
 }

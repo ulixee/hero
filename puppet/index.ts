@@ -10,6 +10,7 @@ import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
@@ -24,9 +25,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public readonly id: number;
   public readonly browserEngine: IBrowserEngine;
   public supportsBrowserContextProxy: boolean;
+  public isReady = new Resolvable<void | Error>();
+  public isStarted = false;
   private readonly launcher: IPuppetLauncher;
   private isShuttingDown: Promise<Error | void>;
-  private isStarted = false;
   private browser: IPuppetBrowser;
 
   constructor(browserEngine: IBrowserEngine, args: IPuppetLaunchArgs = {}) {
@@ -46,6 +48,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public async start(
     attachToDevtools?: (session: IDevtoolsSession) => Promise<any>,
   ): Promise<Puppet> {
+    if (this.isStarted) {
+      await this.isReady.promise;
+      return this;
+    }
     try {
       this.isStarted = true;
 
@@ -64,24 +70,28 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
 
       this.supportsBrowserContextProxy = this.browser.majorVersion >= 85;
 
+      this.isReady.resolve();
       return this;
     } catch (err) {
       const launchError = this.launcher.translateLaunchError(err);
-      throw new PuppetLaunchError(
+      const puppetLaunchError = new PuppetLaunchError(
         launchError.message,
         launchError.stack,
         launchError.isSandboxError,
       );
+      this.isReady.reject(puppetLaunchError);
+      throw puppetLaunchError;
     }
   }
 
-  public newContext(
+  public async newContext(
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
     isIncognito = true,
   ): Promise<IPuppetContext> {
-    if (!this.isStarted || !this.browser) {
+    await this.isReady.promise;
+    if (!this.browser) {
       throw new Error('This Puppet instance has not had start() called on it');
     }
     if (this.isShuttingDown) throw new Error('Shutting down');
@@ -95,6 +105,13 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
     const parentLogId = log.stats('Puppet.Closing');
 
     try {
+      // if we started to get ready, clear out now
+      this.isStarted = false;
+      if (this.isReady) {
+        await this.isReady;
+        this.isReady = null;
+      }
+
       this.isShuttingDown = this.browser?.close();
       await this.isShuttingDown;
     } catch (error) {
