@@ -29,7 +29,7 @@ export default class CommandRunner {
       );
     }
 
-    this.runFn = () => Promise.resolve(target[method](...args));
+    this.runFn = async () => await target[method](...args);
   }
 }
 

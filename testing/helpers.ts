@@ -17,7 +17,7 @@ import * as net from 'net';
 import * as tls from 'tls';
 import * as http2 from 'http2';
 import * as stream from 'stream';
-import Core from '@ulixee/hero-core';
+import Core, { Session, Tab } from '@ulixee/hero-core';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import MitmSocket from '@ulixee/hero-mitm-socket';
 import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
@@ -460,6 +460,16 @@ function bindSslListeners(server: tls.Server): void {
 
 export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOnFinal = false) {
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
+}
+
+export async function createSession(): Promise<{ session: Session; tab: Tab }> {
+  const connection = Core.addConnection();
+  Helpers.onClose(() => connection.disconnect());
+  const meta = await connection.createSession();
+  const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session);
+
+  return { tab, session: tab.session };
 }
 
 function extractPort(url: URL) {

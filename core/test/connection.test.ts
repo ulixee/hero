@@ -80,13 +80,13 @@ describe('basic connection tests', () => {
 
     logError.mockClear();
     validate.mockClear();
-    validate.mockImplementationOnce(async () => {
-      throw new DependenciesMissingError(
+    validate.mockRejectedValueOnce(
+      new DependenciesMissingError(
         `You can resolve this by running the apt dependency installer at:${ChromeApp.aptScriptPath}`,
         'Chrome',
         ['libnacl'],
-      );
-    });
+      ),
+    );
 
     logError.mockImplementationOnce(() => null /* no op*/);
 
@@ -95,14 +95,9 @@ describe('basic connection tests', () => {
     });
     Helpers.needsClosing.push(hero1);
 
-    try {
-      await hero1;
-    } catch (err) {
-      // eslint-disable-next-line jest/no-try-expect
-      expect(String(err)).toMatch(
-        'CoreServer needs further setup to launch the browserEmulator. See server logs',
-      );
-    }
+    await expect(hero1).rejects.toThrowError(
+      'CoreServer needs further setup to launch the browserEmulator. See server logs',
+    );
     expect(logError).toHaveBeenCalledTimes(1);
     const error = String((logError.mock.calls[0][1] as any).error);
     expect(error).toMatch('PuppetLaunchError');

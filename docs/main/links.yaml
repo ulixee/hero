@@ -28,7 +28,7 @@
     - ConnectionToCore
     - Remote
     - Session
-    - SessionReplay
+    - TimeTravel
 - title: Plugins
   items:
     - Client Plugins

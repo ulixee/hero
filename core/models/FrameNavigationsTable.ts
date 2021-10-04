@@ -60,6 +60,19 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       .get() as IFrameNavigationRecord;
   }
 
+  public getMostRecentTabNavigations(
+    tabId: number,
+    frameIds?: Set<number>,
+  ): IFrameNavigationRecord[] {
+    const navigations = this.db
+      .prepare(`select * from ${this.tableName} where tabId=? order by initiatedTime desc`)
+      .all(tabId) as IFrameNavigationRecord[];
+    if (frameIds) {
+      return navigations.filter(x => frameIds.has(x.frameId));
+    }
+    return navigations;
+  }
+
   public static toNavigation(
     record: IFrameNavigationRecord,
     recreateResolvable = false,

@@ -1,7 +1,7 @@
-import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { Helpers } from '@ulixee/hero-testing';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import Core, { Session } from '../index';
+import Core from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -12,11 +12,7 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('can wait for page state events', async () => {
-  const connection = Core.addConnection();
-  Helpers.onClose(() => connection.disconnect());
-  const meta = await connection.createSession();
-  const tab = Session.getTab(meta);
-  Helpers.needsClosing.push(tab.session);
+  const { tab } = await createSession();
   koaServer.get('/pageState1', ctx => {
     ctx.body = `
   <body>
@@ -66,11 +62,8 @@ test('can wait for page state events', async () => {
 });
 
 test('can continue to get events as dom changes', async () => {
-  const connection = Core.addConnection();
-  Helpers.onClose(() => connection.disconnect());
-  const meta = await connection.createSession();
-  const tab = Session.getTab(meta);
-  Helpers.needsClosing.push(tab.session);
+  const { tab } = await createSession();
+
   koaServer.get('/pageState2', ctx => {
     ctx.body = `
   <body>

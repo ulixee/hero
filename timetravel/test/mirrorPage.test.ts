@@ -1,23 +1,16 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import Puppet from '@ulixee/hero-puppet';
-import Log from '@ulixee/commons/lib/Logger';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import ConnectionToClient from '../connections/ConnectionToClient';
-import InjectedScripts from '../lib/InjectedScripts';
-import Core, { Session } from '../index';
+import Core, { Session, Tab } from '@ulixee/hero-core';
+import ConnectionToClient from '@ulixee/hero-core/connections/ConnectionToClient';
+import InjectedScripts from '@ulixee/hero-core/lib/InjectedScripts';
+import DomChangesTable from '@ulixee/hero-core/models/DomChangesTable';
+import { inspect } from 'util';
+import MirrorContext from '../lib/MirrorContext';
+import MirrorPage from '../lib/MirrorPage';
+import MirrorNetwork from '../lib/MirrorNetwork';
 
-const { log } = Log(module);
-
-const getContentScript = `(() => {
-  let retVal = '';
-  if (document.doctype)
-    retVal = new XMLSerializer().serializeToString(document.doctype);
-  if (document.documentElement)
-    retVal += document.documentElement.outerHTML;
-  return retVal;
-})()`;
-
+inspect.defaultOptions.depth = 5;
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
@@ -31,8 +24,8 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-describe('basic Dom Replay tests', () => {
-  it('basic replay test', async () => {
+describe('MirrorPage tests', () => {
+  it('can build from dom recordings', async () => {
     koaServer.get('/test1', ctx => {
       ctx.body = `<body>
 <div>
@@ -97,32 +90,14 @@ describe('basic Dom Replay tests', () => {
     await InjectedScripts.installInteractionScript(tab.puppetPage);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
-    const session = tab.session;
 
-    const mirrorChrome = new Puppet(session.browserEngine);
-    await mirrorChrome.start();
-    Helpers.onClose(() => mirrorChrome.close());
+    const mirrorPage = await createMirrorPage(tab);
 
-    const context = await mirrorChrome.newContext(session.plugins, log.createChild(module));
-    // context.on('devtools-message', console.log);
-    const mirrorPage = await context.newPage();
-    const debug = false;
-    if (debug) {
-      // eslint-disable-next-line no-console
-      mirrorPage.on('page-error', console.log);
-      // eslint-disable-next-line no-console
-      mirrorPage.on('console', console.log);
-    }
-    await Promise.all([
-      mirrorPage.navigate(`${koaServer.baseUrl}/empty`),
-      mirrorPage.mainFrame.waitForLoad(),
-    ]);
-    const sourceHtml = await tab.puppetPage.mainFrame.evaluate<string>(getContentScript, false);
+    const sourceHtml = await tab.puppetPage.mainFrame.html();
 
-    const mainPageChanges = await tab.getMainFrameDomChanges();
-    await InjectedScripts.restoreDom(mirrorPage, mainPageChanges);
+    await mirrorPage.load();
 
-    const mirrorHtml = await mirrorPage.mainFrame.evaluate<string>(getContentScript, false);
+    const mirrorHtml = await mirrorPage.page.mainFrame.html();
     const replayNode = '<hero-replay style="z-index: 2147483647;"></hero-replay>';
     // source should have a replay node that should not be rebuilt in mirror
     expect(mirrorHtml).not.toBe(sourceHtml);
@@ -139,15 +114,18 @@ describe('basic Dom Replay tests', () => {
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const pageChangesByFrame = await tab.getMainFrameDomChanges(lastCommandId);
+      const pageChangesByFrame = await tab.getDomChanges(tab.mainFrameId, lastCommandId);
       lastCommandId = tab.lastCommandId;
-      await InjectedScripts.restoreDom(mirrorPage, pageChangesByFrame);
-
-      const sourceHtmlNext = await tab.puppetPage.mainFrame.evaluate<string>(
-        getContentScript,
-        false,
+      const domRecordingUpdates = DomChangesTable.toDomRecording(
+        pageChangesByFrame,
+        new Set([tab.mainFrameId]),
+        tab.sessionState.db.frames.frameDomNodePathsById,
       );
-      const mirrorHtmlNext = await mirrorPage.mainFrame.evaluate<string>(getContentScript, false);
+      await mirrorPage.updateDomRecording(domRecordingUpdates);
+      await mirrorPage.load();
+
+      const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
+      const mirrorHtmlNext = await mirrorPage.page.mainFrame.html();
       // mirror page should not know about the hero-replay nodes
       expect(mirrorHtmlNext).not.toBe(sourceHtmlNext);
       expect(mirrorHtmlNext).toBe(sourceHtmlNext.replace(replayNode, ''));
@@ -190,30 +168,27 @@ describe('basic Dom Replay tests', () => {
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/tab1`);
     await tab.waitForLoad('DomContentLoaded');
-    const session = tab.session;
 
-    const mirrorChrome = new Puppet(session.browserEngine);
-    await mirrorChrome.start();
-    Helpers.onClose(() => mirrorChrome.close());
+    const mirrorPage = await createMirrorPage(tab);
 
-    const mirrorContext = await mirrorChrome.newContext(session.plugins, log.createChild(module));
-    const mirrorPage = await mirrorContext.newPage();
+    const sourceHtml = await tab.puppetPage.mainFrame.html();
 
-    await Promise.all([
-      mirrorPage.navigate(`${koaServer.baseUrl}/empty`),
-      mirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
-    ]);
-    const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
+    await mirrorPage.load();
 
     {
-      const changes = await tab.getMainFrameDomChanges();
+      const changes = await tab.getDomChanges();
       expect(changes).toHaveLength(21);
-      await InjectedScripts.restoreDom(mirrorPage, changes);
-      // replay happens on animation tick now
-      await new Promise(setImmediate);
+
+      const domRecordingUpdates = DomChangesTable.toDomRecording(
+        changes,
+        new Set([tab.mainFrameId]),
+        tab.sessionState.db.frames.frameDomNodePathsById,
+      );
+      await mirrorPage.updateDomRecording(domRecordingUpdates);
+      await mirrorPage.load();
     }
 
-    const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
+    const mirrorHtml = await mirrorPage.page.mainFrame.html();
     expect(mirrorHtml).toBe(sourceHtml);
 
     await tab.interact([
@@ -224,19 +199,30 @@ describe('basic Dom Replay tests', () => {
     ]);
     const newTab = await tab.waitForNewTab();
     await newTab.waitForLoad('PaintingStable');
-    const newTabHtml = await newTab.puppetPage.mainFrame.evaluate(getContentScript, false);
-    const pageChanges = await newTab.getMainFrameDomChanges();
+    const newTabHtml = await newTab.puppetPage.mainFrame.html();
+    const pageChanges = await newTab.getDomChanges();
     expect(pageChanges.length).toBeGreaterThan(10);
 
-    const newTabMirrorPage = await mirrorContext.newPage();
-    await Promise.all([
-      newTabMirrorPage.navigate(`${koaServer.baseUrl}/empty`),
-      newTabMirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
-    ]);
+    const newTabMirrorPage = await createMirrorPage(newTab);
+    await newTabMirrorPage.load();
 
-    await InjectedScripts.restoreDom(newTabMirrorPage, pageChanges);
-
-    const mirrorNewTabHtml = await newTabMirrorPage.mainFrame.evaluate(getContentScript, false);
+    const mirrorNewTabHtml = await newTabMirrorPage.page.mainFrame.html();
     expect(mirrorNewTabHtml).toBe(newTabHtml);
   }, 45e3);
 });
+
+async function createMirrorPage(tab: Tab, isDebug = false): Promise<MirrorPage> {
+  const mirrorContext = await MirrorContext.createFromSessionDb(tab.session.id, false);
+  Helpers.needsClosing.push(mirrorContext);
+  const mainPageChanges = await tab.getDomChanges();
+  const domRecording = DomChangesTable.toDomRecording(
+    mainPageChanges,
+    new Set([tab.mainFrameId]),
+    tab.sessionState.db.frames.frameDomNodePathsById,
+  );
+
+  const mirrorPage = new MirrorPage(new MirrorNetwork(), domRecording, false, isDebug);
+  await mirrorPage.open(mirrorContext, tab.sessionId);
+  Helpers.needsClosing.push(mirrorPage);
+  return mirrorPage;
+}

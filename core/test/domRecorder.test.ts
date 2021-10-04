@@ -46,7 +46,7 @@ function addMe() {
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    const changesAfterLoad = await tab.getDomChanges();
 
     const commandId = tab.lastCommandId;
     expect(changesAfterLoad).toHaveLength(12);
@@ -56,7 +56,7 @@ function addMe() {
 
     await tab.waitForElement(['document', ['querySelector', 'a#link2']]);
 
-    const changes = await tab.getMainFrameDomChanges(commandId);
+    const changes = await tab.getDomChanges(tab.mainFrameId, commandId);
     expect(changes).toHaveLength(2);
     expect(changes[0].action).toBe(DomActionType.added);
     expect(changes[0].tagName).toBe('A');
@@ -81,7 +81,7 @@ function removeMe() {
     await tab.goto(`${koaServer.baseUrl}/test2`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    const changesAfterLoad = await tab.getDomChanges();
     expect(changesAfterLoad).toHaveLength(12);
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test2`);
     const loadCommand = tab.lastCommandId;
@@ -91,7 +91,7 @@ function removeMe() {
 
     await tab.waitForMillis(100);
 
-    const changes = await tab.getMainFrameDomChanges(loadCommand);
+    const changes = await tab.getDomChanges(tab.mainFrameId, loadCommand);
     expect(changes).toHaveLength(2);
     expect(changes[0].action).toBe(DomActionType.removed);
 
@@ -127,7 +127,7 @@ function sort() {
     await tab.goto(`${koaServer.baseUrl}/test3`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    const changesAfterLoad = await tab.getDomChanges();
     expect(changesAfterLoad).toHaveLength(30);
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test3`);
     const loadCommand = tab.lastCommandId;
@@ -137,7 +137,7 @@ function sort() {
 
     await tab.waitForMillis(100);
 
-    const changes = await tab.getMainFrameDomChanges(loadCommand);
+    const changes = await tab.getDomChanges(tab.mainFrameId, loadCommand);
     // 1 remove and 1 add for each
     expect(changes).toHaveLength(9);
     expect(changes.filter(x => x.action === DomActionType.removed)).toHaveLength(4);
@@ -172,7 +172,7 @@ function sort() {
     await tab.goto(`${koaServer.baseUrl}/test4`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    const changesAfterLoad = await tab.getDomChanges();
     expect(changesAfterLoad).toHaveLength(15);
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test4`);
     const loadCommand = tab.lastCommandId;
@@ -182,7 +182,7 @@ function sort() {
 
     await tab.waitForMillis(100);
 
-    const changes = await tab.getMainFrameDomChanges(loadCommand);
+    const changes = await tab.getDomChanges(tab.mainFrameId, loadCommand);
     expect(changes).toHaveLength(2);
     expect(changes[0].action).toBe(DomActionType.attribute);
     expect(changes[0].attributes['new-attr']).toBe('1');
@@ -273,7 +273,7 @@ function clickIt() {
 
     await tab.waitForMillis(100);
 
-    const changes = await tab.getMainFrameDomChanges();
+    const changes = await tab.getDomChanges();
 
     const propChange = changes.find(
       x => x.action === DomActionType.property && !!x.properties['sheet.cssRules'],
@@ -322,7 +322,7 @@ customElements.define('image-list', class extends HTMLElement {
 
     await tab.waitForMillis(100);
 
-    const changes = await tab.getMainFrameDomChanges();
+    const changes = await tab.getDomChanges();
     expect(changes.find(x => x.action === DomActionType.added && x.nodeType === 40)).toBeTruthy();
 
     const shadowRoot = changes.find(x => x.action === DomActionType.added && x.nodeType === 40);
@@ -378,7 +378,7 @@ describe('basic Mouse Event tests', () => {
       { command: 'click', mousePosition: ['document', ['querySelector', 'BUTTON']] },
     ]);
 
-    await tab.getMainFrameDomChanges();
+    await tab.getDomChanges();
     const mouseMoves = state.db.mouseEvents.all();
 
     expect(mouseMoves.filter(x => x.event === MouseEventType.MOVE)).toHaveLength(1);
@@ -390,7 +390,7 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    const domChanges = await tab.getMainFrameDomChanges();
+    const domChanges = await tab.getDomChanges();
     const linkNode = domChanges.find(x => x.tagName === 'BUTTON');
 
     expect(mouseDownEvents[0].targetNodeId).toBe(linkNode.nodeId);
@@ -449,7 +449,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const changesAfterType = await tab.getMainFrameDomChanges();
+    const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
     expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(
@@ -511,7 +511,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const changesAfterType = await tab.getMainFrameDomChanges();
+    const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
     expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(
@@ -568,7 +568,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const changesAfterType = await tab.getMainFrameDomChanges();
+    const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
     expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(2);
@@ -623,7 +623,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const changesAfterType = await tab.getMainFrameDomChanges();
+    const changesAfterType = await tab.getDomChanges();
 
     // 2 changes per radio change
     expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(4);
@@ -687,7 +687,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const changesAfterType = await tab.getMainFrameDomChanges();
+    const changesAfterType = await tab.getDomChanges();
 
     const focusRecords = state.db.focusEvents.all();
 
@@ -755,8 +755,8 @@ function addMe2() {
       { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
     ]);
 
-    const tab1Changes = await tab.getMainFrameDomChanges();
-    const tab2Changes = await tab2.getMainFrameDomChanges();
+    const tab1Changes = await tab.getDomChanges();
+    const tab2Changes = await tab2.getDomChanges();
 
     const frame1DomRecords = tab1Changes.map(x => ({
       action: x.action,

@@ -54,7 +54,7 @@ export default class GlobalPool {
     await this.startMitm();
   }
 
-  public static createSession(options: ISessionCreateOptions): Promise<Session> {
+  public static async createSession(options: ISessionCreateOptions): Promise<Session> {
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
@@ -65,9 +65,9 @@ export default class GlobalPool {
     if (!this.hasAvailability) {
       const resolvablePromise = createPromise<Session>();
       this.waitingForAvailability.push({ options, promise: resolvablePromise });
-      return resolvablePromise.promise;
+      return await resolvablePromise.promise;
     }
-    return this.createSessionNow(options);
+    return await this.createSessionNow(options);
   }
 
   public static close(): Promise<void> {
@@ -229,9 +229,9 @@ export default class GlobalPool {
     }
     const { options, promise } = this.waitingForAvailability.shift();
 
-    // NOTE: we want this to blow up if an exception occurs inside the promise
-    // eslint-disable-next-line promise/catch-or-return
-    this.createSessionNow(options).then(session => promise.resolve(session));
+    this.createSessionNow(options)
+      .then(session => promise.resolve(session))
+      .catch(error => promise.reject(error));
 
     log.info('TransferredChromeToWaitingAcquirer');
     return true;

@@ -1,8 +1,8 @@
+import CommandTimeline from '@ulixee/hero-timetravel/lib/CommandTimeline';
 import SessionDb from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import ICoreApi from '../interfaces/ICoreApi';
-import CommandTimeline from '../lib/CommandTimeline';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import Session from '../lib/Session';
 

@@ -1,12 +1,11 @@
-import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
+import { IDomRecording } from '@ulixee/hero-core/models/DomChangesTable';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import Log from '@ulixee/commons/lib/Logger';
-import { IPaintEvent, ITabDetails, ITick } from '../apis/Session.ticks';
-import InjectedScripts from './InjectedScripts';
+import MirrorPage from '../lib/MirrorPage';
+import MirrorNetwork from '../lib/MirrorNetwork';
 
-const { log } = Log(module);
-
-export default class SessionReplayTab {
+export default class TabPlaybackController {
   public get ticks(): ITick[] {
     return this.tabDetails.ticks;
   }
@@ -24,48 +23,53 @@ export default class SessionReplayTab {
   }
 
   public get isOpen(): boolean {
-    return !!this.page && !!this.pageId;
+    return !!this.mirrorPage?.puppetPageId;
   }
 
   public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
+  public readonly mirrorPage: MirrorPage;
 
-  private pageId: string;
-  private page: Promise<IPuppetPage>;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
   private readonly mainFrameId: number;
-  private readonly domNodePathByFrameId: { [frameId: number]: string } = {};
 
   constructor(
     private readonly tabDetails: ITabDetails,
-    private readonly pageCreator: () => Promise<IPuppetPage>,
+    private readonly mirrorNetwork: MirrorNetwork,
     private readonly sessionId: string,
-    private readonly debugLogging: boolean = false,
+    debugLogging = false,
   ) {
+    const domNodePathByFrameId: { [frameId: number]: string } = {};
     for (const frame of this.tabDetails.tab.frames) {
       if (frame.isMainFrame) this.mainFrameId = frame.id;
-      this.domNodePathByFrameId[frame.id] = frame.domNodePath;
+      domNodePathByFrameId[frame.id] = frame.domNodePath;
     }
-  }
-
-  public async open(): Promise<void> {
-    if (this.page) {
-      await this.page;
-      return;
-    }
-    this.page = this.pageCreator();
-    const page = await this.page;
-    page.on('close', () => {
-      this.page = null;
-      this.pageId = null;
+    const domRecording = <IDomRecording>{
+      paintEvents: tabDetails.paintEvents,
+      documents: tabDetails.documents,
+      domNodePathByFrameId,
+      mainFrameIds: new Set([this.mainFrameId]),
+    };
+    this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
+    this.mirrorPage.on('close', () => {
       this.paintEventsLoadedIdx = -1;
       this.isPlaying = false;
       this.currentTickIndex = -1;
       this.currentTimelineOffsetPct = 0;
     });
-    this.pageId = page.id;
+  }
+
+  public isPage(id: string): boolean {
+    return this.mirrorPage?.puppetPageId === id;
+  }
+
+  public async open(
+    browserContext: IPuppetContext,
+    onPage?: (page: IPuppetPage) => Promise<void>,
+  ): Promise<void> {
+    await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -98,14 +102,9 @@ export default class SessionReplayTab {
   }
 
   public async close(): Promise<void> {
-    const pagePromise = this.page;
-    this.page = null;
-    if (pagePromise) {
-      const page = await pagePromise;
-      // go ahead and say this is closed
-      page.emit('close');
-      await page?.close();
-    }
+    // go ahead and say this is closed
+    this.mirrorPage.emit('close');
+    await this.mirrorPage.close();
   }
 
   public async setTimelineOffset(timelineOffset: number): Promise<void> {
@@ -141,6 +140,7 @@ export default class SessionReplayTab {
     if (newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick) {
       return;
     }
+    const mirrorPage = this.mirrorPage;
 
     let newTick = newTickOrIdx as ITick;
     let newTickIdx = newTickOrIdx as number;
@@ -156,7 +156,7 @@ export default class SessionReplayTab {
     const newPaintIndex = newTick.paintEventIndex;
     if (newPaintIndex === -1 && newTick.documentUrl) {
       this.paintEventsLoadedIdx = newPaintIndex;
-      await this.goto(newTick.documentUrl);
+      await mirrorPage.navigate(newTick.documentUrl);
     } else if (newPaintIndex !== this.paintEventsLoadedIdx) {
       const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
 
@@ -167,7 +167,7 @@ export default class SessionReplayTab {
       }
 
       this.paintEventsLoadedIdx = newPaintIndex;
-      await this.loadPaintEvents([startIndex, newPaintIndex]);
+      await mirrorPage.load([startIndex, newPaintIndex]);
     }
 
     const mouseEvent = this.tabDetails.mouse[newTick.mouseEventIndex];
@@ -175,92 +175,11 @@ export default class SessionReplayTab {
     const nodesToHighlight = newTick.highlightNodeIds;
 
     if (nodesToHighlight || mouseEvent || scrollEvent) {
-      await InjectedScripts.replayInteractions(
-        await this.page,
-        this.applyFrameNodePath(nodesToHighlight),
-        this.applyFrameNodePath(mouseEvent),
-        this.applyFrameNodePath(scrollEvent),
-      );
+      await mirrorPage.showInteractions(nodesToHighlight, mouseEvent, scrollEvent);
     }
   }
 
   public async showStatusText(text: string): Promise<void> {
-    await InjectedScripts.showStatusText(await this.page, text);
-  }
-
-  public loadDetachedState(
-    paintEvents: IPaintEvent[],
-    timestamp: number,
-    commandId: number,
-    startUrl: string,
-  ): void {
-    const flatEvent = <IPaintEvent>{ changeEvents: [], commandId, timestamp };
-    for (const paintEvent of paintEvents) {
-      flatEvent.changeEvents.push(...paintEvent.changeEvents);
-    }
-    this.tabDetails.paintEvents.push(flatEvent);
-    const tick = <ITick>{
-      eventTypeIndex: 0,
-      eventType: 'paint',
-      commandId,
-      timestamp,
-      isNewDocumentTick: true,
-      documentUrl: startUrl,
-    };
-    this.ticks.unshift(tick);
-  }
-
-  private async loadPaintEvents(paintIndexRange: [number, number]): Promise<void> {
-    const page = await this.page;
-    const startIndex = paintIndexRange[0];
-    let loadUrl: string = null;
-    const { action, frameId, textContent } =
-      this.tabDetails.paintEvents[startIndex].changeEvents[0] ?? {};
-
-    if (action === DomActionType.newDocument && frameId === this.mainFrameId) {
-      loadUrl = textContent;
-    }
-
-    if (loadUrl && loadUrl !== page.mainFrame.url) {
-      await this.goto(loadUrl);
-    }
-    if (startIndex >= 0) {
-      if (this.debugLogging) {
-        log.info('Replay.loadPaintEvents', {
-          sessionId: this.sessionId,
-          paintIndexRange,
-        });
-      }
-      await InjectedScripts.setPaintIndexRange(page, startIndex, paintIndexRange[1], !!loadUrl);
-    }
-  }
-
-  private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
-    if (!item) return undefined;
-    const result = item as T & { frameIdPath: string };
-    result.frameIdPath = this.domNodePathByFrameId[item.frameId];
-    return result;
-  }
-
-  private async goto(url: string): Promise<void> {
-    if (this.debugLogging) {
-      log.info('Replay.goto', {
-        sessionId: this.sessionId,
-        url,
-      });
-    }
-
-    const page = await this.page;
-    const loader = await page.navigate(url);
-
-    await Promise.all([
-      page.mainFrame.waitForLoader(loader.loaderId),
-      page.mainFrame.waitForLoad('DOMContentLoaded'),
-    ]);
-    await InjectedScripts.injectPaintEvents(
-      page,
-      this.tabDetails.paintEvents,
-      this.domNodePathByFrameId,
-    );
+    await this.mirrorPage.showStatusText(text);
   }
 }

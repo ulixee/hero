@@ -1,6 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 
 export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   public readonly startTime: number;
@@ -92,12 +93,4 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   private getCommand(run: number, commandId: number): T & ICommandTimelineOffset {
     return this.commandsFromAllRuns.find(x => x.run === run && x.id === commandId);
   }
-}
-
-export interface ICommandTimelineOffset {
-  startTime: number;
-  timelineOffsetStartMs: number;
-  timelineOffsetEndMs: number;
-  commandGapMs: number;
-  runtimeMs: number;
 }

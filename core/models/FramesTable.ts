@@ -2,7 +2,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class FramesTable extends SqliteTable<IFrameRecord> {
-  public frameDomNodePathsById = new Map<number, string>();
+  public frameDomNodePathsById: { [frameId: number]: string } = {};
 
   constructor(readonly db: SqliteDatabase) {
     super(
@@ -38,6 +38,19 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
     ]);
   }
 
+  public mainFrameIds(tabId?: number): Set<number> {
+    const all = super.all();
+    const mainFrameIds = new Set<number>();
+    for (const frame of all) {
+      if (!frame.parentId && frame.tabId === tabId) {
+        mainFrameIds.add(frame.id);
+      }
+
+      this.recordDomNodePath(frame);
+    }
+    return mainFrameIds;
+  }
+
   public all(): IFrameRecord[] {
     const all = super.all();
     for (const frame of all) {
@@ -48,11 +61,11 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
 
   private recordDomNodePath(frame: IFrameRecord): void {
     if (!frame.parentId) {
-      this.frameDomNodePathsById.set(frame.id, 'main');
+      this.frameDomNodePathsById[frame.id] = 'main';
     }
     if (frame.domNodeId) {
-      const parentPath = this.frameDomNodePathsById.get(frame.parentId);
-      this.frameDomNodePathsById.set(frame.id, `${parentPath ?? ''}_${frame.domNodeId}`);
+      const parentPath = this.frameDomNodePathsById[frame.parentId];
+      this.frameDomNodePathsById[frame.id] = `${parentPath ?? ''}_${frame.domNodeId}`;
     }
   }
 }

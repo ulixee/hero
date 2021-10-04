@@ -1,5 +1,10 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import { IDomChangeRecord } from '../models/DomChangesTable';
+import CommandTimeline from '@ulixee/hero-timetravel/lib/CommandTimeline';
+import DomChangesTable, {
+  IDocument,
+  IDomChangeRecord,
+  IPaintEvent,
+} from '../models/DomChangesTable';
 import { loadCommandTimeline } from './Session.commands';
 import sessionDomChangesApi from './Session.domChanges';
 import sessionInteractionsApi, { ISessionInteractionsResult } from './Session.interactions';
@@ -12,7 +17,6 @@ import ICoreApi from '../interfaces/ICoreApi';
 import sessionTabsApi, { ISessionTab } from './Session.tabs';
 import { ISessionRecord } from '../models/SessionTable';
 import CommandFormatter from '../lib/CommandFormatter';
-import CommandTimeline from '../lib/CommandTimeline';
 
 export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
@@ -120,34 +124,11 @@ function createPaintTicks(
     const { documents, tab } = details;
     const mainFrameIds = new Set(tab.frames.filter(x => x.isMainFrame).map(x => x.id));
 
-    const paintEvents: { [timestamp: number]: IPaintEvent } = {};
-    let i = 0;
-    for (const change of changes) {
-      const { timestamp, commandId, ...event } = change;
-      const { frameId } = change;
-      if (change.action === DomActionType.newDocument) {
-        const isMainframe = mainFrameIds.has(frameId);
-        const doctype =
-          // eslint-disable-next-line no-nested-ternary
-          changes[i + 1]?.nodeType === 10
-            ? changes[i + 1].textContent
-            : changes[i + 2]?.nodeType === 10
-            ? changes[i + 2].textContent
-            : null;
-
-        documents.push({ url: change.textContent, doctype, isMainframe, frameId });
-      }
-      paintEvents[timestamp] ??= {
-        timestamp,
-        commandId,
-        changeEvents: [],
-      };
-      paintEvents[timestamp].changeEvents.push(event as any);
-      i += 1;
-    }
+    const toPaint = DomChangesTable.toDomRecording(changes, mainFrameIds);
+    documents.push(...toPaint.documents);
 
     let idx = 0;
-    for (const event of Object.values(paintEvents)) {
+    for (const event of toPaint.paintEvents) {
       const tick = addTick(state, 'paint', idx, { tabId: Number(tabId), ...event });
       const { action, frameId, textContent } = event.changeEvents[0];
 
@@ -386,19 +367,6 @@ export interface ITabDetails {
   documents: IDocument[];
 }
 
-export interface IDocument {
-  isMainframe: boolean;
-  frameId: number;
-  url: string;
-  doctype: string;
-}
-
-export interface IPaintEvent {
-  timestamp: number;
-  commandId: number;
-  changeEvents: Omit<IDomChangeRecord, 'timestamp' | 'commandId'>[];
-}
-
 export interface ITick {
   eventType: 'command' | 'paint' | 'focus' | 'mouse' | 'scroll' | 'init';
   eventTypeIndex: number;
@@ -415,12 +383,6 @@ export interface ITick {
   scrollEventIndex?: number;
   focusEventIndex?: number;
   mouseEventIndex?: number;
-}
-
-export interface IDetachedTabState {
-  parentTabId: number;
-  url: string;
-  domChangeRange: { indexRange: [number, number]; timestampRange: [number, number] };
 }
 
 interface ISessionState {

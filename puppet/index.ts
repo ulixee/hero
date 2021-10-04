@@ -48,6 +48,11 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public async start(
     attachToDevtools?: (session: IDevtoolsSession) => Promise<any>,
   ): Promise<Puppet> {
+    const parentLogId = log.info('Puppet.Starting', {
+      sessionId: null,
+      name: this.browserEngine.name,
+      fullVersion: this.browserEngine.fullVersion,
+    });
     if (this.isStarted) {
       await this.isReady.promise;
       return this;
@@ -71,6 +76,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       this.supportsBrowserContextProxy = this.browser.majorVersion >= 85;
 
       this.isReady.resolve();
+      log.stats('Puppet.Started', {
+        sessionId: null,
+        parentLogId,
+      });
       return this;
     } catch (err) {
       const launchError = this.launcher.translateLaunchError(err);
@@ -80,7 +89,12 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
         launchError.isSandboxError,
       );
       this.isReady.reject(puppetLaunchError);
-      throw puppetLaunchError;
+      log.stats('Puppet.LaunchError', {
+        puppetLaunchError,
+        sessionId: null,
+        parentLogId,
+      });
+      await this.isReady.promise;
     }
   }
 
@@ -108,8 +122,9 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       // if we started to get ready, clear out now
       this.isStarted = false;
       if (this.isReady) {
-        await this.isReady;
+        const err = await this.isReady.catch(startError => startError);
         this.isReady = null;
+        if (err) return;
       }
 
       this.isShuttingDown = this.browser?.close();
