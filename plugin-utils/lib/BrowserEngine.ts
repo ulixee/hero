@@ -10,6 +10,7 @@ export default class BrowserEngine implements IBrowserEngine {
   public fullVersion: string;
   public executablePath: string;
   public executablePathEnvVar: string;
+  public userDataDir?: string;
 
   public readonly launchArguments: string[] = [];
 

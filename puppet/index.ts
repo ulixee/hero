@@ -11,7 +11,7 @@ import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import launchProcess from './lib/launchProcess';
+import BrowserProcess from './lib/BrowserProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
@@ -64,11 +64,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
         await this.browserEngine.verifyLaunchable();
       }
 
-      const launchedProcess = await launchProcess(
-        this.browserEngine.executablePath,
-        this.browserEngine.launchArguments,
-        this.browserDidClose.bind(this),
-      );
+      const launchedProcess = new BrowserProcess(this.browserEngine);
+      const hasError = await launchedProcess.hasLaunchError;
+      if (hasError) throw hasError;
+      launchedProcess.on('close', () => this.emit('close'));
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
       this.browser.onDevtoolsAttached = attachToDevtools;
@@ -135,9 +134,5 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       this.emit('close');
       log.stats('Puppet.Closed', { parentLogId, sessionId: null });
     }
-  }
-
-  private browserDidClose() {
-    this.emit('close');
   }
 }

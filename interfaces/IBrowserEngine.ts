@@ -7,6 +7,7 @@ export default interface IBrowserEngine {
   executablePathEnvVar: string;
   launchArguments: string[];
   isInstalled: boolean;
+  userDataDir?: string;
 
   isHeaded?: boolean;
   verifyLaunchable?(): Promise<any>;

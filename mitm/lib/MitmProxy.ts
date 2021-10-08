@@ -18,7 +18,7 @@ import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 import NetworkDb from './NetworkDb';
 
 const { log } = Log(module);
-const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
+const emptyResponse = `<html lang="en"><body></body></html>`;
 
 const defaultStorageDirectory =
   process.env.HERO_NETWORK_DIR ?? process.env.HERO_DATA_DIR ?? Path.join(Os.tmpdir(), '.ulixee');

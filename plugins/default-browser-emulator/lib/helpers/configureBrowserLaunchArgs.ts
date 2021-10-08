@@ -66,6 +66,7 @@ export function configureBrowserLaunchArgs(
       `${String(Date.now()).substr(0, 10)}-${(sessionDirCounter += 1)}`,
     );
     engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
+    engine.userDataDir = dataDir;
 
     if (!options.disableDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
   } else {
