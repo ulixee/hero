@@ -28,7 +28,7 @@ export interface INodeData {
   properties?: { [key: string]: string | boolean | number | string[] };
 }
 
-export interface IFrontendDomChangeEvent extends INodeData {
+export interface IFrontendDomChangeEvent extends Omit<INodeData, 'id'> {
   nodeId: number;
   eventIndex: number;
   action: DomActionType;

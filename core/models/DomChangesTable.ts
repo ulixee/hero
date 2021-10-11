@@ -3,9 +3,11 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
+  public lastNavigationIdByFrameId: { [frameId: number]: number } = {};
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
+      ['frameNavigationId', 'INTEGER'],
       ['eventIndex', 'INTEGER'],
       ['action', 'INTEGER'],
       ['nodeId', 'INTEGER'],
@@ -25,10 +27,24 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     this.defaultSortOrder = 'timestamp ASC,eventIndex ASC';
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, change: IDomChangeEvent): void {
+  public insert(
+    tabId: number,
+    frameId: number,
+    navigationId: number,
+    commandId: number,
+    change: IDomChangeEvent,
+  ): void {
     const [action, nodeData, timestamp, eventIndex] = change;
+    if (
+      !this.lastNavigationIdByFrameId[frameId] ||
+      this.lastNavigationIdByFrameId[frameId] < navigationId
+    ) {
+      this.lastNavigationIdByFrameId[frameId] = navigationId;
+    }
+
     const record = [
       frameId,
+      navigationId,
       eventIndex,
       action,
       nodeData.id,
@@ -108,7 +124,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
         documents.push({
           url: change.textContent,
           paintEventIndex: paintEventsByTimestamp[timestamp]
-            ? paintEvents.length - 1
+            ? paintEvents.indexOf(paintEventsByTimestamp[timestamp])
             : paintEvents.length,
           doctype,
           isMainframe,
@@ -170,6 +186,7 @@ export interface IDomChangeRecord {
   commandId: number;
   tabId: number;
   frameId: number;
+  frameNavigationId: number;
   nodeId: number;
   timestamp: number;
   eventIndex: number;
