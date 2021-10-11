@@ -21,8 +21,10 @@ class NodeTracker {
     if (!id) {
       // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
       if ('extractDomChanges' in window) {
-        // @ts-ignore
         window.extractDomChanges();
+      }
+      if (!this.has(node) && 'trackElement' in window) {
+        window.trackElement(node as any);
       }
       id = this.track(node);
     }

@@ -48,7 +48,7 @@ const showInteractionScript = `(function installInteractionsScript() {
     const exports = {}; // workaround for ts adding an exports variable
 
     window.selfFrameIdPath = '';
-    if (!'blockClickAndSubmit' in window) window.blockClickAndSubmit = false;
+    if (!('blockClickAndSubmit' in window)) window.blockClickAndSubmit = false;
 
     if (!('getNodeById' in window)) {
       window.getNodeById = function getNodeById(id) {

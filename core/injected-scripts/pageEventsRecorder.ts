@@ -10,7 +10,8 @@ declare global {
   interface Window {
     extractDomChanges(): PageRecorderResultSet;
     flushPageRecorder(): PageRecorderResultSet;
-    listenForInteractionEvents(): void;
+    listenToInteractionEvents(): void;
+    trackElement(element: Element): void;
     doNotTrackElement(element: Element): void;
   }
 }
@@ -44,16 +45,28 @@ const SHADOW_NODE_TYPE = 40;
 
 // callback binding
 const eventsCallback = window[runtimeFunction] as unknown as (data: string) => void;
-
-let lastUploadDate: Date;
+const hiddenTags = new Set<string>([
+  'STYLE',
+  'SCRIPT',
+  'FRAME',
+  'IFRAME',
+  'META',
+  'LINK',
+  'BODY',
+  'HEAD',
+  'TITLE',
+]);
+let lastUploadDate: number;
 
 function upload(records: PageRecorderResultSet) {
   try {
-    const total = records.reduce((tot, ent) => tot + ent.length, 0);
-    if (total > 0) {
-      eventsCallback(JSON.stringify(records));
+    if (!records.some(x => x.length)) {
+      return;
     }
-    lastUploadDate = new Date();
+
+    eventsCallback(JSON.stringify(records));
+
+    lastUploadDate = Date.now();
     return true;
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -72,17 +85,19 @@ let isStarted = false;
 
 class PageEventsRecorder {
   private readonly domChanges: IDomChangeEvent[] = [];
-
   private readonly mouseEvents: IMouseEvent[] = [];
   private readonly focusEvents: IFocusEvent[] = [];
   private readonly scrollEvents: IScrollEvent[] = [];
   private readonly loadEvents: ILoadEvent[] = [];
   private readonly doNotTrackElementsById = new Map<number, Element>();
+
+  private nodeIdToParentNodeId: { [nodeId: number]: number } = {};
   private location = window.self.location.href;
   private uploadOnDelay: number;
 
   private isListeningForInteractionEvents = false;
 
+  private readonly elementsToTrack = new WeakSet<Node>();
   private readonly propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
   private readonly stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
@@ -105,16 +120,9 @@ class PageEventsRecorder {
     };
     const stamp = Date.now();
     this.pushChange(DomActionType.newDocument, newDocument, stamp);
+    this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
+    this.serializeChildren(document, stamp, new Map());
 
-    if (document) {
-      this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
-    }
-
-    if (document && document.doctype) {
-      this.pushChange(DomActionType.added, this.serializeNode(document.doctype), stamp);
-    }
-
-    this.serializeChildren(document, stamp, new Map<Node, INodeData>());
     this.observer.observe(document, {
       attributes: true,
       childList: true,
@@ -122,6 +130,10 @@ class PageEventsRecorder {
       characterData: true,
     });
     this.uploadChanges();
+  }
+
+  public trackElement(element: Element): void {
+    this.elementsToTrack.add(element);
   }
 
   public doNotTrackElement(element: Element): void {
@@ -166,6 +178,8 @@ class PageEventsRecorder {
       Date.now(),
     ] as IMouseEvent;
 
+    this.mouseEvents.push(event);
+
     if ('replayInteractions' in window) {
       const [, pageX, pageY, offsetX, offsetY, buttons] = event;
       window.replayInteractions(undefined, {
@@ -178,7 +192,6 @@ class PageEventsRecorder {
         targetNodeId: nodeId,
       });
     }
-    this.mouseEvents.push(event);
   }
 
   public trackScroll(scrollX: number, scrollY: number) {
@@ -287,47 +300,59 @@ class PageEventsRecorder {
 
   private getPropertyChanges(changeUnixTime: number) {
     for (const [input, propertyMap] of this.propertyTrackingElements) {
+      let properties: INodeData['properties'];
       for (const [propertyName, value] of propertyMap) {
         const newPropValue = input[propertyName];
         if (newPropValue !== value) {
-          const nodeId = NodeTracker.getNodeId(input);
-          this.pushChange(
-            DomActionType.property,
-            { id: nodeId, properties: { [propertyName]: newPropValue } },
-            changeUnixTime,
-          );
+          if (!properties) properties = {};
+          properties[propertyName] = newPropValue;
           propertyMap.set(propertyName, newPropValue);
         }
+      }
+      if (properties) {
+        const nodeId = NodeTracker.getNodeId(input);
+        this.pushChange(DomActionType.property, { id: nodeId, properties }, changeUnixTime);
       }
     }
   }
 
-  private trackStylesheet(element: HTMLStyleElement) {
-    if (!element || this.stylesheets.has(element)) return;
-    if (!element.sheet) return;
+  private stylesheetRules(element: HTMLStyleElement): string[] {
+    const result = [];
+    // don't record the text content of scripts
+    if (!element || !element.sheet) return result;
+    if (!(element.sheet instanceof CSSStyleSheet)) return [];
 
-    const shouldStoreCurrentStyleState = !!element.textContent;
-    if (element.sheet instanceof CSSStyleSheet) {
-      try {
-        // if there's style text, record the current state
-        const startingStyle = shouldStoreCurrentStyleState
-          ? [...element.sheet.cssRules].map(x => x.cssText)
-          : [];
-        this.stylesheets.set(element, startingStyle);
-      } catch (err) {
-        // can't track cors stylesheet rules
+    try {
+      for (const rule of element.sheet.cssRules) {
+        result.push(rule.cssText);
       }
+      return result;
+    } catch (err) {
+      // can't track cors stylesheet rules
+      return null;
     }
+  }
+
+  private trackStylesheet(element: HTMLStyleElement): string[] | undefined {
+    if (!element || this.stylesheets.has(element)) return;
+    if (!element.sheet || !(element.sheet instanceof CSSStyleSheet)) return;
+
+    const storeStartingStyle = !!(element.textContent ?? '').trim();
+    let startingStyle = [];
+    if (storeStartingStyle) {
+      startingStyle = this.stylesheetRules(element);
+    }
+    if (startingStyle !== null) this.stylesheets.set(element, startingStyle);
+    return startingStyle;
   }
 
   private checkForStylesheetChanges(changeUnixTime: number) {
     const timestamp = changeUnixTime || Date.now();
     for (const [style, current] of this.stylesheets) {
+      const nodeId = NodeTracker.getNodeId(style);
       if (!style.sheet || !style.isConnected) continue;
-      const sheet = style.sheet as CSSStyleSheet;
-      const newPropValue = [...sheet.cssRules].map(x => x.cssText);
+      const newPropValue = this.stylesheetRules(style);
       if (newPropValue.toString() !== current.toString()) {
-        const nodeId = NodeTracker.getNodeId(style);
         this.pushChange(
           DomActionType.property,
           { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
@@ -358,8 +383,9 @@ class PageEventsRecorder {
 
     for (const mutation of mutations) {
       const { type, target } = mutation;
-      if (!NodeTracker.has(target)) {
+      if (!NodeTracker.has(target) || this.elementsToTrack.has(target)) {
         this.serializeNodeToRoot(target, stamp, addedNodeMap);
+        this.elementsToTrack.delete(target);
       }
 
       if (type === MutationRecordType.childList) {
@@ -455,7 +481,9 @@ class PageEventsRecorder {
   }
 
   private serializeNodeToRoot(node: Node, changeTime: number, addedNodeMap: Map<Node, INodeData>) {
-    if (NodeTracker.has(node)) return this.serializeNode(node);
+    if (NodeTracker.has(node) && !this.elementsToTrack.has(node)) {
+      return this.serializeNode(node);
+    }
 
     const serial = this.serializeNode(node);
     if (!serial) return;
@@ -480,11 +508,15 @@ class PageEventsRecorder {
     changeTime: number,
     addedNodes: Map<Node, INodeData>,
   ): void {
+    const parentId = NodeTracker.getNodeId(node);
     for (const child of node.childNodes) {
-      if (!NodeTracker.has(child)) {
+      const nodeId = NodeTracker.getNodeId(child);
+      const hasChangedParent = parentId !== this.nodeIdToParentNodeId[nodeId];
+
+      if (!NodeTracker.has(child) || hasChangedParent) {
         const serial = this.serializeNode(child);
         if (!serial) continue;
-        serial.parentNodeId = NodeTracker.getNodeId(child.parentElement ?? child.getRootNode());
+        serial.parentNodeId = parentId;
         serial.previousSiblingId = NodeTracker.getNodeId(child.previousSibling);
         addedNodes.set(child, serial);
         this.pushChange(DomActionType.added, serial, changeTime);
@@ -493,9 +525,6 @@ class PageEventsRecorder {
     }
 
     for (const element of [node, ...node.childNodes] as Element[]) {
-      if (element.tagName === 'STYLE') {
-        this.trackStylesheet(element as HTMLStyleElement);
-      }
       const shadowRoot = element.shadowRoot;
       if (shadowRoot && !NodeTracker.has(shadowRoot)) {
         const serial = this.serializeNode(shadowRoot);
@@ -519,7 +548,7 @@ class PageEventsRecorder {
     }
 
     const id = NodeTracker.getNodeId(node);
-    if (id !== undefined) {
+    if (id !== undefined && !this.elementsToTrack.has(node)) {
       return { id };
     }
 
@@ -562,17 +591,30 @@ class PageEventsRecorder {
           }
         }
 
-        let propertyChecks: [string, string | boolean][];
+        let propertyChecks: Map<string, string | boolean>;
         for (const prop of propertiesToCheck) {
           if (prop in element) {
-            if (!propertyChecks) propertyChecks = [];
-            propertyChecks.push([prop, element[prop]]);
+            // don't store LI value as a property
+            if (prop === 'value' && data.tagName === 'LI') continue;
+            if (!propertyChecks) {
+              propertyChecks = new Map();
+              data.properties = {};
+              this.propertyTrackingElements.set(node, propertyChecks);
+            }
+            propertyChecks.set(prop, element[prop]);
+            data.properties[prop] = element[prop];
           }
         }
-        if (propertyChecks) {
-          const propsMap = new Map<string, string | boolean>(propertyChecks);
-          this.propertyTrackingElements.set(node, propsMap);
+
+        if (data.tagName === 'STYLE') {
+          this.trackStylesheet(element as HTMLStyleElement);
+          data.textContent = element.textContent;
         }
+
+        if (!this.isListeningForInteractionEvents && !hiddenTags.has(data.tagName)) {
+          this.listenToInteractionEvents();
+        }
+
         break;
     }
 
@@ -581,10 +623,13 @@ class PageEventsRecorder {
 
   private pushChange(action: DomActionType, serial: INodeData, timestamp: number): void {
     if (action === DomActionType.added) {
+      this.nodeIdToParentNodeId[serial.id] = serial.parentNodeId;
+
       // don't include this if it's hero id
       if (this.doNotTrackElementsById.has(serial.id)) {
         return;
       }
+
       if (this.doNotTrackElementsById.has(serial.previousSiblingId)) {
         // get previous node that's tracked
         let previousNode: ChildNode = this.doNotTrackElementsById.get(serial.previousSiblingId);
@@ -601,16 +646,17 @@ class PageEventsRecorder {
 }
 
 const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
-const propertiesToCheck = ['value', 'selected', 'checked'];
+const propertiesToCheck = ['value', 'selected', 'selectedIndex', 'checked'];
 
 const recorder = new PageEventsRecorder();
 window.extractDomChanges = () => recorder.extractChanges();
+window.trackElement = element => recorder.trackElement(element);
 window.flushPageRecorder = () => recorder.flushAndReturnLists();
-window.listenForInteractionEvents = () => recorder.listenToInteractionEvents();
+window.listenToInteractionEvents = () => recorder.listenToInteractionEvents();
 window.doNotTrackElement = element => recorder.doNotTrackElement(element);
 
 const interval = setInterval(() => {
-  if (!lastUploadDate || Date.now() - lastUploadDate.getTime() > 1e3) {
+  if (!lastUploadDate || Date.now() - lastUploadDate > 1e3) {
     // if we haven't uploaded in 1 second, make sure nothing is pending
     requestAnimationFrame(() => recorder.uploadChanges());
   }
