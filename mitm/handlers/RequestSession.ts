@@ -47,6 +47,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     responseTime: Date;
   }[] = [];
 
+  public respondWithHttpErrorStacks = true;
   public readonly browserRequestMatcher: BrowserRequestMatcher;
 
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
