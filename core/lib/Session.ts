@@ -253,26 +253,16 @@ export default class Session
   }> {
     const sourceTab = this.getTab(sourceTabId);
 
-    const [detachedState, page] = await Promise.all([
-      sourceTab.createDetachedState(),
-      this.browserContext.newPage({
-        runPageScripts: false,
-      }),
-    ]);
-    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite, key);
-    await Promise.all([
-      page.setNetworkRequestInterceptor(detachedState.mockNetworkRequests.bind(detachedState)),
-      page.setJavaScriptEnabled(false),
-    ]);
-    const newTab = Tab.create(this, page, true, sourceTab);
+    const detachedState = await sourceTab.createDetachedState();
 
-    await detachedState.restoreDomIntoTab(newTab);
-    await newTab.isReady;
+    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite, key);
+
+    const newTab = await detachedState.openInNewTab(this.browserContext, this.viewport);
 
     this.sessionState.captureTab(
       newTab.id,
-      page.id,
-      page.devtoolsSession.id,
+      newTab.puppetPage.id,
+      newTab.puppetPage.devtoolsSession.id,
       sourceTab.id,
       detachedState.detachedAtCommandId,
     );
@@ -420,6 +410,9 @@ export default class Session
       result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
       result.didKeepAlive = true;
       this.emit('kept-alive', result);
+      for (const tab of this.tabsById.values()) {
+        await tab.flushDomChanges();
+      }
       return result;
     }
 

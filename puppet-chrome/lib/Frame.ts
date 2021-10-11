@@ -165,6 +165,21 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     }
   }
 
+  public html(): Promise<string> {
+    return this.evaluate(
+      `(() => {
+  let retVal = '';
+  if (document.doctype)
+    retVal = new XMLSerializer().serializeToString(document.doctype);
+  if (document.documentElement)
+    retVal += document.documentElement.outerHTML;
+  return retVal;
+})()`,
+      true,
+      { shouldAwaitExpression: false, retriesWaitingForLoad: 1 },
+    );
+  }
+
   public async setFileInputFiles(objectId: string, files: string[]): Promise<void> {
     await this.devtoolsSession.send('DOM.setFileInputFiles', {
       objectId,

@@ -65,13 +65,22 @@ export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implement
       throw new CanceledPromiseError(`${method} called after session closed (${this.sessionId})`);
     }
 
+    const id = this.connection.nextId;
     const message = {
       sessionId: this.sessionId || undefined,
       method,
       params,
+      id,
     };
     const timestamp = new Date();
-    const id = this.connection.sendMessage(message);
+    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>();
+    this.pendingMessages.set(id, { resolvable, method });
+
+    if (!this.connection.sendMessage(message)) {
+      resolvable.reject(new CanceledPromiseError('Connection failed to send message'));
+      this.pendingMessages.delete(id);
+    }
+
     this.messageEvents.emit(
       'send',
       {
@@ -81,9 +90,6 @@ export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implement
       },
       sendInitiator,
     );
-    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>();
-
-    this.pendingMessages.set(id, { resolvable, method });
     return await resolvable.promise;
   }
 

@@ -379,18 +379,6 @@ export default class SessionState {
     return resource;
   }
 
-  public getResourceLookupMap(tabId: number): { [method_url: string]: IResourceMeta[] } {
-    const result: { [method_url: string]: IResourceMeta[] } = {};
-    for (const resource of this.resourcesById.values()) {
-      if (resource.tabId === tabId) {
-        const key = `${resource.request.method}_${resource.request.url}`;
-        result[key] ??= [];
-        result[key].push(resource);
-      }
-    }
-    return result;
-  }
-
   public getResources(tabId: number): IResourceMeta[] {
     const resources: IResourceMeta[] = [];
     for (const resource of this.resourcesById.values()) {

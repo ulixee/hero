@@ -11,7 +11,7 @@ import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import launchProcess from './lib/launchProcess';
+import BrowserProcess from './lib/BrowserProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
@@ -48,6 +48,11 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public async start(
     attachToDevtools?: (session: IDevtoolsSession) => Promise<any>,
   ): Promise<Puppet> {
+    const parentLogId = log.info('Puppet.Starting', {
+      sessionId: null,
+      name: this.browserEngine.name,
+      fullVersion: this.browserEngine.fullVersion,
+    });
     if (this.isStarted) {
       await this.isReady.promise;
       return this;
@@ -59,11 +64,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
         await this.browserEngine.verifyLaunchable();
       }
 
-      const launchedProcess = await launchProcess(
-        this.browserEngine.executablePath,
-        this.browserEngine.launchArguments,
-        this.browserDidClose.bind(this),
-      );
+      const launchedProcess = new BrowserProcess(this.browserEngine);
+      const hasError = await launchedProcess.hasLaunchError;
+      if (hasError) throw hasError;
+      launchedProcess.on('close', () => this.emit('close'));
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
       this.browser.onDevtoolsAttached = attachToDevtools;
@@ -71,6 +75,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       this.supportsBrowserContextProxy = this.browser.majorVersion >= 85;
 
       this.isReady.resolve();
+      log.stats('Puppet.Started', {
+        sessionId: null,
+        parentLogId,
+      });
       return this;
     } catch (err) {
       const launchError = this.launcher.translateLaunchError(err);
@@ -80,7 +88,12 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
         launchError.isSandboxError,
       );
       this.isReady.reject(puppetLaunchError);
-      throw puppetLaunchError;
+      log.stats('Puppet.LaunchError', {
+        puppetLaunchError,
+        sessionId: null,
+        parentLogId,
+      });
+      await this.isReady.promise;
     }
   }
 
@@ -108,8 +121,9 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       // if we started to get ready, clear out now
       this.isStarted = false;
       if (this.isReady) {
-        await this.isReady;
+        const err = await this.isReady.catch(startError => startError);
         this.isReady = null;
+        if (err) return;
       }
 
       this.isShuttingDown = this.browser?.close();
@@ -120,9 +134,5 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       this.emit('close');
       log.stats('Puppet.Closed', { parentLogId, sessionId: null });
     }
-  }
-
-  private browserDidClose() {
-    this.emit('close');
   }
 }

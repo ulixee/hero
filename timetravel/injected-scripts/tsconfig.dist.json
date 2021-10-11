@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.dist.json",
+  "compilerOptions": {
+    "composite": true,
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "removeComments": true
+  },
+  "include": ["*.ts", ".eslintrc.js"],
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/build-dist"]
+}

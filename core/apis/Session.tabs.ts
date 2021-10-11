@@ -28,7 +28,7 @@ export default function sessionTabsApi(args: ISessionTabsArgs): ISessionTabsResu
         return {
           id: x.id,
           isMainFrame: !x.parentId,
-          domNodePath: sessionDb.frames.frameDomNodePathsById.get(x.id),
+          domNodePath: sessionDb.frames.frameDomNodePathsById[x.id],
         };
       }),
     });

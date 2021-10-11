@@ -33,10 +33,7 @@ import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import DomChangesTable, {
-  IDomChangeRecord,
-  IFrontendDomChangeEvent,
-} from '../models/DomChangesTable';
+import { IDomChangeRecord } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import CommandFormatter from './CommandFormatter';
 import CommandRunner, { ICommandableTarget } from './CommandRunner';
@@ -639,22 +636,24 @@ export default class Tab
     }
   }
 
-  public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {
-    const frameDomNodePaths = this.sessionState.db.frames.frameDomNodePathsById;
-
-    return (await this.getFrameDomChanges(this.mainFrameId, sinceCommandId)).map(x =>
-      DomChangesTable.toFrontendRecord(x, frameDomNodePaths),
-    );
+  public async flushDomChanges(): Promise<void> {
+    for (const frame of this.frameEnvironmentsById.values()) {
+      await frame.flushPageEventsRecorder();
+    }
+    this.sessionState.db.flush();
   }
 
-  public async getFrameDomChanges(
-    frameId: number,
-    sinceCommandId: number,
+  public async getDomChanges(
+    frameId?: number,
+    sinceCommandId?: number,
   ): Promise<IDomChangeRecord[]> {
     await this.mainFrameEnvironment.flushPageEventsRecorder();
     this.sessionState.db.flush();
 
-    return this.sessionState.db.domChanges.getFrameChanges(this.mainFrameId, sinceCommandId);
+    return this.sessionState.db.domChanges.getFrameChanges(
+      frameId ?? this.mainFrameId,
+      sinceCommandId,
+    );
   }
 
   public async createDetachedState(): Promise<DetachedTabState> {
@@ -662,11 +661,10 @@ export default class Tab
     await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     // find last page load
     const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
-    const domChanges = await this.getFrameDomChanges(
+    const domChanges = await this.getDomChanges(
       this.mainFrameId,
       lastLoadedNavigation.startCommandId - 1,
     );
-    const resources = this.sessionState.getResourceLookupMap(this.id);
     this.logger.info('DetachingTab', {
       url: lastLoadedNavigation.finalUrl,
       domChangeIndices:
@@ -674,9 +672,8 @@ export default class Tab
           ? [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex]
           : [],
       domChanges: domChanges.length,
-      resources: Object.keys(resources).length,
     });
-    return new DetachedTabState(this.session, lastLoadedNavigation, domChanges, resources);
+    return new DetachedTabState(this, lastLoadedNavigation, domChanges);
   }
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////

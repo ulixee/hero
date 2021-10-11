@@ -23,9 +23,18 @@ const { log } = Log(module);
 
 export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   public readonly rootSession: DevtoolsSession;
-  public isClosed = false;
+  public get isClosed(): boolean {
+    return this.#isClosed || this.transport.isClosed;
+  }
 
+  public get nextId(): number {
+    this.lastId += 1;
+    return this.lastId;
+  }
+
+  #isClosed = false;
   private lastId = 0;
+
   private sessionsById = new Map<string, DevtoolsSession>();
 
   constructor(readonly transport: IConnectionTransport) {
@@ -38,11 +47,8 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     this.sessionsById.set('', this.rootSession);
   }
 
-  public sendMessage(message: object): number {
-    this.lastId += 1;
-    const id = this.lastId;
-    this.transport.send(JSON.stringify({ ...message, id }));
-    return id;
+  public sendMessage(message: object & { id: number }): boolean {
+    return this.transport.send(JSON.stringify(message));
   }
 
   public getSession(sessionId: string): DevtoolsSession | undefined {
@@ -81,8 +87,8 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   }
 
   private onClosed(): void {
-    if (this.isClosed) return;
-    this.isClosed = true;
+    if (this.#isClosed) return;
+    this.#isClosed = true;
     for (const [id, session] of this.sessionsById) {
       session.onClosed();
       this.sessionsById.delete(id);

@@ -1,11 +1,16 @@
 import INavigation from '@ulixee/hero-interfaces/INavigation';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { IDomChangeRecord } from '../models/DomChangesTable';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
+import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import DomChangesTable, {
+  IDomChangeRecord,
+  IDomRecording,
+  IPaintEvent,
+} from '../models/DomChangesTable';
 import Session from './Session';
-import InjectedScripts from './InjectedScripts';
 import Tab from './Tab';
+import { ISessionResource } from '../apis/Session.resources';
 
 export default class DetachedTabState {
   public get url(): string {
@@ -15,159 +20,104 @@ export default class DetachedTabState {
   public detachedAtCommandId: number;
 
   public get domChangeRange(): { indexRange: [number, number]; timestampRange: [number, number] } {
-    if (!this.domChanges?.length) {
+    if (!this.paintEvents?.length) {
       return { indexRange: [-1, 1], timestampRange: [-1, 1] };
     }
-    const first = this.domChanges[0];
-    const last = this.domChanges[this.domChanges.length - 1];
+    const firstPaint = this.paintEvents[0];
+    const lastPaint = this.paintEvents[this.paintEvents.length - 1];
+
+    const firstChange = firstPaint.changeEvents[0];
+    const lastChange = lastPaint.changeEvents[lastPaint.changeEvents.length - 1];
     return {
-      indexRange: [first.eventIndex, last.eventIndex],
-      timestampRange: [first.timestamp, last.timestamp],
+      indexRange: [firstChange?.eventIndex, lastChange?.eventIndex],
+      timestampRange: [firstPaint.timestamp, lastPaint.timestamp],
     };
   }
 
+  public mirrorNetwork: MirrorNetwork;
+  public mirrorPage: MirrorPage;
+
+  public get paintEvents(): IPaintEvent[] {
+    return this.domRecording.paintEvents;
+  }
+
+  private readonly domRecording: IDomRecording;
   private readonly initialPageNavigation: INavigation;
-  private readonly domChanges: IDomChangeRecord[];
-  private readonly resourceLookup: { [method_url: string]: IResourceMeta[] };
   private session: Session;
-  private doctype = '';
 
   constructor(
-    session: Session,
+    readonly sourceTab: Tab,
     initialPageNavigation: INavigation,
-    domRecording: IDomChangeRecord[],
-    resourceLookup: { [method_url: string]: IResourceMeta[] },
+    domChangeRecords: IDomChangeRecord[],
   ) {
+    const session = sourceTab.session;
     this.detachedAtCommandId = session.sessionState.lastCommand.id;
     this.session = session;
     this.initialPageNavigation = initialPageNavigation;
-    this.domChanges = this.filterDomChanges(domRecording);
-    this.resourceLookup = resourceLookup;
+    this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTab);
+
+    const db = sourceTab.session.sessionState.db;
+
+    this.domRecording = DomChangesTable.toDomRecording(
+      domChangeRecords,
+      new Set([sourceTab.mainFrameId]),
+      db.frames.frameDomNodePathsById,
+      true,
+    );
+
+    this.mirrorPage = new MirrorPage(this.mirrorNetwork, this.domRecording, false);
   }
 
-  public async restoreDomIntoTab(tab: Tab): Promise<void> {
-    const page = tab.puppetPage;
-    const loader = await page.navigate(this.url);
-
-    tab.navigations.onNavigationRequested(
+  public async openInNewTab(context: IPuppetContext, viewport: IViewport): Promise<Tab> {
+    await this.mirrorPage.open(context, this.session.id, viewport);
+    const newTab = Tab.create(this.sourceTab.session, this.mirrorPage.page, true, this.sourceTab);
+    const navigation = newTab.navigations.onNavigationRequested(
       'goto',
       this.url,
       this.detachedAtCommandId,
-      loader.loaderId,
+      null,
     );
-    await Promise.all([
-      page.mainFrame.waitForLoader(loader.loaderId),
-      page.mainFrame.waitForLoad('DOMContentLoaded'),
-      InjectedScripts.installDetachedScripts(page, this.session.options.showBrowserInteractions),
-      page.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
-        height: this.session.options.viewport.height,
-        width: this.session.options.viewport.width,
-        deviceScaleFactor: this.session.options.viewport.deviceScaleFactor,
-        mobile: false,
-      }),
-    ]);
-    await InjectedScripts.restoreDom(page, this.domChanges);
+    this.mirrorPage.on('goto', ({ loaderId }) =>
+      newTab.navigations.assignLoaderId(navigation, loaderId),
+    );
+    await this.mirrorPage.load();
+    await newTab.isReady;
+    return newTab;
   }
-
-  public mockNetworkRequests: Parameters<IPuppetPage['setNetworkRequestInterceptor']>[0] =
-    async request => {
-      const { url, method } = request.request;
-      if (request.resourceType === 'Document' && url === this.url) {
-        return {
-          requestId: request.requestId,
-          responseCode: 200,
-          responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
-          body: Buffer.from(`${this.doctype}<html><head></head><body></body></html>`).toString(
-            'base64',
-          ),
-        };
-      }
-
-      const match = this.resourceLookup[`${method}_${url}`]?.shift();
-      if (!match) return null;
-
-      const { headers, isJavascript } = this.getMockHeaders(match);
-      if (isJavascript || request.resourceType === 'Script') {
-        return {
-          requestId: request.requestId,
-          responseCode: 200,
-          responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
-          body: '',
-        };
-      }
-
-      const body =
-        (await this.session.sessionState.getResourceData(match.id, true))?.toString('base64') ?? '';
-
-      return {
-        requestId: request.requestId,
-        body,
-        responseHeaders: headers,
-        responseCode: match.response.statusCode,
-      };
-    };
 
   public toJSON(): any {
     return {
       domChangeRange: this.domChangeRange,
       url: this.url,
       detachedAtCommandId: this.detachedAtCommandId,
-      resources: Object.values(this.resourceLookup).reduce((a, b) => (a += b.length), 0),
     };
   }
 
-  private getMockHeaders(resource: IResourceMeta): {
-    isJavascript: boolean;
-    headers: { name: string; value: string }[];
-  } {
-    const headers: { name: string; value: string }[] = [];
-    let isJavascript = false;
+  private static createMirrorNetwork(sourceTab: Tab): MirrorNetwork {
+    const db = sourceTab.sessionState.db;
+    const resources = sourceTab.sessionState.getResources(sourceTab.id).map(x => {
+      return <ISessionResource>{
+        url: x.request.url,
+        method: x.request.method,
+        id: x.id,
+        tabId: x.tabId,
+        statusCode: x.response?.statusCode,
+        type: x.type,
+        redirectedToUrl: x.isRedirect ? x.response.url : undefined,
+      };
+    });
 
-    for (const [key, header] of Object.entries(resource.response.headers)) {
-      const name = key.toLowerCase();
+    const mirrorNetwork = new MirrorNetwork({
+      headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],
+      useResourcesOnce: true,
+      ignoreJavascriptRequests: true,
+    });
 
-      // only take limited set of headers
-      if (
-        name === 'date' ||
-        name.startsWith('x-') ||
-        name === 'set-cookie' ||
-        name === 'alt-svc' ||
-        name === 'server'
-      ) {
-        continue;
-      }
+    mirrorNetwork.loadResources(
+      resources,
+      MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, db),
+    );
 
-      if (name === 'content-type' && header.includes('javascript')) {
-        isJavascript = true;
-        break;
-      }
-
-      if (Array.isArray(header)) {
-        for (const value of header) {
-          headers.push({ name, value });
-        }
-      } else {
-        headers.push({ name, value: header });
-      }
-    }
-    return { headers, isJavascript };
-  }
-
-  private filterDomChanges(allDomChanges: IDomChangeRecord[]): IDomChangeRecord[] {
-    // find last "newDocument" entry
-    const domChanges: IDomChangeRecord[] = [];
-    for (const entry of allDomChanges) {
-      // 10 is doctype
-      if (entry.action === DomActionType.added && entry.nodeType === 10) {
-        this.doctype = entry.textContent;
-      }
-      if (entry.action === DomActionType.newDocument && this.url === entry.textContent) {
-        // reset list
-        domChanges.length = 0;
-        continue;
-      }
-      domChanges.push(entry);
-    }
-    return domChanges;
+    return mirrorNetwork;
   }
 }

@@ -11,7 +11,8 @@
     "puppet",
     "puppet-chrome",
     "mitm",
-    "testing"
+    "testing",
+    "timetravel"
   ],
   "useWorkspaces": true
 }

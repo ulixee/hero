@@ -3,8 +3,8 @@ import { IInteractionGroup } from '@ulixee/hero-interfaces/IInteractions';
 import { getKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
-import { ICommandTimelineOffset } from './CommandTimeline';
 
 export default class CommandFormatter {
   public static toString(command: ICommandMeta): string {

@@ -7,8 +7,12 @@ declare global {
   interface Window {
     selfFrameIdPath: string;
     blockClickAndSubmit: boolean;
+    replayInteractions(...args: any[]);
+    debugLogs: any[];
+    debugToConsole: boolean;
     showCommandGrowl(id: number, name: string, fadeAfterMs?: number);
     toggleCommandActive(trackMouse: boolean, hideMouse: boolean, hideOverlays: boolean);
+    getNodeById(id: number): Node;
   }
 }
 

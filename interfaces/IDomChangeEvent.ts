@@ -27,3 +27,10 @@ export interface INodeData {
   attributeNamespaces?: { [key: string]: string };
   properties?: { [key: string]: string | boolean | number | string[] };
 }
+
+export interface IFrontendDomChangeEvent extends INodeData {
+  nodeId: number;
+  eventIndex: number;
+  action: DomActionType;
+  frameIdPath?: string;
+}

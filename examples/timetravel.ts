@@ -1,16 +1,17 @@
 import '@ulixee/commons/lib/SourceMapSupport';
-import SessionReplay from '@ulixee/hero-core/lib/SessionReplay';
+import TimetravelPlayer from '@ulixee/hero-timetravel/player/TimetravelPlayer';
 import { inspect } from 'util';
 import * as Path from 'path';
 import * as readline from 'readline';
 import Core from '@ulixee/hero-core';
 import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
+import MirrorContext from '@ulixee/hero-timetravel/lib/MirrorContext';
 
 inspect.defaultOptions.depth = null;
 
 (async () => {
   if (process.argv.length <= 2) {
-    console.log('Run this script with the path to the script you want to replay');
+    console.log('Run this script with the path to the script you want to load in Timetravel');
     process.exit(0);
   }
   let scriptEntrypoint = process.argv[2];
@@ -26,10 +27,10 @@ inspect.defaultOptions.depth = null;
     },
   });
 
-  const context = await SessionReplay.recreateBrowserContextForSession(session.id, true);
+  const context = await MirrorContext.createFromSessionDb(session.id, true);
 
-  const sessionReplay = new SessionReplay(session.id, connectionToCoreApi);
-  const startTab = await sessionReplay.open(context);
+  const player = new TimetravelPlayer(session.id, connectionToCoreApi);
+  const startTab = await player.open(context);
 
   readline.createInterface({
     input: process.stdin,
@@ -56,8 +57,8 @@ inspect.defaultOptions.depth = null;
   }
 
   async function close() {
-    await sessionReplay.connection.disconnect();
-    await sessionReplay.close(true);
+    await player.connection.disconnect();
+    await player.close(true);
     await Core.shutdown();
   }
 

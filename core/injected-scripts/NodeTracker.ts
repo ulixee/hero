@@ -3,7 +3,7 @@ function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
 
 @NodeTrackerStatics
 class NodeTracker {
-  public static nodeIdSymbol = Symbol.for('saNodeId');
+  public static nodeIdSymbol = Symbol.for('heroNodeId');
   private static nextId = 1;
   private static watchedNodesById = new Map<number, Node>();
 

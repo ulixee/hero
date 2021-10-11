@@ -3,7 +3,7 @@ import Hero from '@ulixee/hero-fullstack';
 // process.env.HERO_SHOW_BROWSER = 'true';
 
 async function run() {
-  const hero = new Hero({ userAgent: '~ chrome = 88' });
+  const hero = new Hero({ userAgent: '~ chrome = 89' });
   await hero.goto('https://news.ycombinator.com/');
   await hero.waitForPaintingStable();
 

@@ -4,6 +4,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import { ISessionResource } from '../apis/Session.resources';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -173,6 +174,34 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.browserBlockedReason,
       extras.browserCanceled ? 1 : 0,
     ]);
+  }
+
+  public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): ISessionResource[] {
+    const { hasResponse, isGetOrDocument } = filters;
+    const records = this.db
+      .prepare(
+        `select requestUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
+      )
+      .all();
+
+    return records
+      .filter(resource => {
+        if (hasResponse && !resource.responseHeaders) return false;
+        if (isGetOrDocument && resource.requestMethod !== 'GET') {
+          // if this is a POST of a document, allow it
+          if (resource.type !== 'Document' && resource.method === 'POST') return false;
+        }
+        return true;
+      })
+      .map(resource => ({
+        url: resource.requestUrl,
+        statusCode: resource.statusCode,
+        method: resource.requestMethod,
+        id: resource.id,
+        tabId: resource.tabId,
+        type: resource.type,
+        redirectedToUrl: resource.redirectedToUrl,
+      }));
   }
 
   public getResponse(

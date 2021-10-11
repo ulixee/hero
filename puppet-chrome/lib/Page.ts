@@ -295,20 +295,26 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   async close(timeoutMs = 5e3): Promise<void> {
-    if (this.devtoolsSession.isConnected() && !this.isClosed) {
-      // trigger beforeUnload
-      try {
-        await this.devtoolsSession.send('Page.close');
-      } catch (err) {
-        if (!err.message.includes('Target closed') && !(err instanceof CanceledPromiseError)) {
-          throw err;
+    const parentLogId = this.logger.stats('Page.Closing');
+    try {
+      if (this.devtoolsSession.isConnected() && !this.isClosed) {
+        const timeout = setTimeout(() => this.didClose(), timeoutMs);
+        // trigger beforeUnload
+        try {
+          await this.devtoolsSession.send('Page.close');
+        } catch (err) {
+          if (!err.message.includes('Target closed') && !(err instanceof CanceledPromiseError)) {
+            throw err;
+          }
         }
+        clearTimeout(timeout);
+      } else {
+        this.didClose();
       }
+      await this.closePromise.promise;
+    } finally {
+      this.logger.stats('Page.Closed', { parentLogId });
     }
-
-    const timeout = setTimeout(() => this.didClose(), timeoutMs);
-    await this.closePromise.promise;
-    clearTimeout(timeout);
   }
 
   onTargetKilled(errorCode: number): void {
@@ -330,7 +336,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         worker.close();
       }
     } catch (error) {
-      this.logger.error('Page.closeWorkersError', {
+      this.logger.error('Page.didClose().error', {
         error,
       });
     } finally {

@@ -2,13 +2,6 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
-export declare type IFrontendDomChangeEvent = Omit<
-  IDomChangeRecord,
-  'frameId' | 'tabId' | 'commandId' | 'timestamp'
-> & {
-  frameIdPath?: string;
-};
-
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
@@ -63,6 +56,12 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     return query.all(frameId, sinceCommandId ?? 0).map(DomChangesTable.inflateRecord);
   }
 
+  public getChangesSince(timestamp: number): IDomChangeRecord[] {
+    const query = this.db.prepare(`select * from ${this.tableName} where timestamp >= ?`);
+
+    return query.all(timestamp).map(DomChangesTable.inflateRecord);
+  }
+
   public static inflateRecord(record: IDomChangeRecord): IDomChangeRecord {
     for (const [key, value] of Object.entries(record)) {
       if (value === null) record[key] = undefined;
@@ -75,26 +74,96 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     return record;
   }
 
-  public static toFrontendRecord(
-    record: IDomChangeRecord,
-    frameIdToNodePath: Map<number, string>,
-  ): IFrontendDomChangeEvent {
-    return {
-      action: record.action,
-      eventIndex: record.eventIndex,
-      nodeId: record.nodeId,
-      parentNodeId: record.parentNodeId,
-      previousSiblingId: record.previousSiblingId,
-      properties: record.properties,
-      nodeType: record.nodeType,
-      tagName: record.tagName,
-      attributeNamespaces: record.attributeNamespaces,
-      attributes: record.attributes,
-      frameIdPath: frameIdToNodePath.get(record.frameId),
-      textContent: record.textContent,
-      namespaceUri: record.namespaceUri,
-    };
+  public static toDomRecording(
+    domChangeRecords: IDomChangeRecord[],
+    mainFrameIds: Set<number>,
+    domNodePathByFrameId?: Record<number, string>,
+    onlyLatestNavigation = false,
+  ): IDomRecording {
+    const paintEvents: IPaintEvent[] = [];
+    const documents: IDocument[] = [];
+    let paintEventsByTimestamp: { [timestamp: number]: IPaintEvent } = {};
+
+    for (let i = 0; i < domChangeRecords.length; i += 1) {
+      const change = domChangeRecords[i];
+      const { timestamp, commandId, ...event } = change;
+      const { frameId } = change;
+
+      if (change.action === DomActionType.newDocument) {
+        const isMainframe = mainFrameIds.has(frameId);
+        let doctype = null;
+        for (let x = 1; x <= 2; x += 1) {
+          const next = domChangeRecords[i + x];
+          if (next?.nodeType === 10) {
+            doctype = next.textContent;
+            break;
+          }
+        }
+
+        if (isMainframe && onlyLatestNavigation) {
+          documents.length = 0;
+          paintEvents.length = 0;
+          paintEventsByTimestamp = {};
+        }
+        documents.push({
+          url: change.textContent,
+          paintEventIndex: paintEventsByTimestamp[timestamp]
+            ? paintEvents.length - 1
+            : paintEvents.length,
+          doctype,
+          isMainframe,
+          frameId,
+        });
+      }
+
+      if (!paintEventsByTimestamp[timestamp]) {
+        paintEventsByTimestamp[timestamp] = {
+          timestamp,
+          commandId,
+          changeEvents: [],
+        };
+        paintEvents.push(paintEventsByTimestamp[timestamp]);
+      }
+
+      const changeEvents = paintEventsByTimestamp[timestamp].changeEvents;
+      changeEvents.push(event as any);
+      if (
+        changeEvents.length > 1 &&
+        event.eventIndex < changeEvents[changeEvents.length - 2].eventIndex
+      ) {
+        changeEvents.sort((a, b) => {
+          if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
+          return a.frameId - b.frameId;
+        });
+      }
+    }
+    paintEvents.sort((a, b) => {
+      return a.timestamp - b.timestamp;
+    });
+
+    return { documents, paintEvents, mainFrameIds, domNodePathByFrameId };
   }
+}
+
+export interface IPaintEvent {
+  timestamp: number;
+  commandId: number;
+  changeEvents: IDomChangeRecord[];
+}
+
+export interface IDomRecording {
+  paintEvents: IPaintEvent[];
+  domNodePathByFrameId: Record<number, string>;
+  mainFrameIds: Set<number>;
+  documents: IDocument[];
+}
+
+export interface IDocument {
+  isMainframe: boolean;
+  paintEventIndex: number;
+  frameId: number;
+  url: string;
+  doctype: string;
 }
 
 export interface IDomChangeRecord {

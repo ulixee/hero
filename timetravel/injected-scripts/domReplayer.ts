@@ -1,12 +1,11 @@
 // NOTE: do not use node dependencies
 
-import type { IFrontendDomChangeEvent } from '@ulixee/hero-core/models/DomChangesTable';
+import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 declare global {
   interface Window {
     loadPaintEvents(paintEvents: IFrontendDomChangeEvent[][]);
     setPaintIndexRange(startIndex: number, endIndex: number);
-    replayInteractions(...args: any[]);
     showReplayStatus(text: string);
     showReplayOverlay();
     hideReplayOverlay();
