@@ -174,6 +174,7 @@ export default class Session
       sessionOptions: providedOptions,
     });
     this.mitmRequestSession = new RequestSession(this.id, this.plugins, this.upstreamProxyUrl);
+    this.mitmRequestSession.respondWithHttpErrorStacks = options.showBrowserInteractions === true;
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
