@@ -8,6 +8,7 @@ export default interface INavigation {
   resourceId: number;
   resourceIdResolvable: IResolvablePromise<number>;
   browserRequestId: string;
+  doctype: string;
   loaderId: string;
   navigationError?: Error;
   startCommandId: number;

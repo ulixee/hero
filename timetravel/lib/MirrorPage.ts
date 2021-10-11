@@ -14,7 +14,6 @@ import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent
 import MirrorNetwork from './MirrorNetwork';
 
 const { log } = Log(module);
-const installedSymbol = Symbol('MirrorPageScripts.Installed');
 
 export default class MirrorPage extends TypedEventEmitter<{
   close: void;
@@ -72,7 +71,8 @@ export default class MirrorPage extends TypedEventEmitter<{
       if (onPage) promises.push(onPage(this.page));
       promises.push(
         this.page.setNetworkRequestInterceptor(this.network.mirrorNetworkRequests),
-        this.installDetachedScripts(this.showBrowserInteractions),
+        this.page.addNewDocumentScript(detachedInjectedScript, true),
+        this.showBrowserInteractions ? InjectedScripts.installInteractionScript(this.page) : null,
         this.page.setJavaScriptEnabled(false),
       );
       if (viewport) {
@@ -106,17 +106,30 @@ export default class MirrorPage extends TypedEventEmitter<{
     for (const paint of paintEvents) {
       paintByTimestamp[paint.timestamp] = paint;
     }
-    for (const paint of domRecording.paintEvents) {
-      if (!paintByTimestamp[paint.timestamp]) {
-        paintEvents.push(paint);
-        continue;
-      }
 
-      paintByTimestamp[paint.timestamp].changeEvents.push(...paint.changeEvents);
-      paintByTimestamp[paint.timestamp].changeEvents.sort((a, b) => {
-        if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
-        return a.frameId - b.frameId;
-      });
+    let iteratedPaintIndex = 0;
+    for (const paint of domRecording.paintEvents) {
+      const existing = paintByTimestamp[paint.timestamp];
+
+      let paintIndex: number;
+      if (!existing) {
+        paintEvents.push(paint);
+        paintIndex = paintEvents.length - 1;
+      } else {
+        paintIndex = paintEvents.indexOf(existing);
+        existing.changeEvents.push(...paint.changeEvents);
+        existing.changeEvents.sort((a, b) => {
+          if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
+          return a.frameId - b.frameId;
+        });
+      }
+      // update paint indices
+      for (const document of domRecording.documents) {
+        if (iteratedPaintIndex === document.paintEventIndex) {
+          document.paintEventIndex = paintIndex;
+        }
+      }
+      iteratedPaintIndex += 1;
     }
     await this.injectPaintEvents();
   }
@@ -221,20 +234,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     return result;
   }
 
-  private async installDetachedScripts(showInteractions = false): Promise<void> {
-    if (this.page[installedSymbol]) return;
-    this.page[installedSymbol] = true;
-
-    await Promise.all([
-      this.page.addNewDocumentScript(detachedInjectedScript, true),
-      showInteractions ? InjectedScripts.installInteractionScript(this.page) : null,
-      this.page.addNewDocumentScript(`window.blockClickAndSubmit = true;`, true),
-    ]);
-  }
-
   private async injectPaintEvents(): Promise<void> {
-    await this.installDetachedScripts();
-
     const columns = [
       'action',
       'nodeId',
@@ -297,18 +297,24 @@ export default class MirrorPage extends TypedEventEmitter<{
     }
 
     window.loadPaintEvents(paintEvents);
-})()
+})();
 //# sourceURL=${injectedSourceUrl}`,
     );
   }
 }
 
 const pageScripts = {
+  DomActions: fs.readFileSync(`${__dirname}/../injected-scripts/DomActions.js`, 'utf8'),
   domReplayer: fs.readFileSync(`${__dirname}/../injected-scripts/domReplayer.js`, 'utf8'),
+  domReplayerUI: fs.readFileSync(`${__dirname}/../injected-scripts/domReplayerUI.js`, 'utf8'),
 };
 
 const detachedInjectedScript = `(function installDetachedScripts() {
   ${CorePageInjectedScript};
 
+  ${pageScripts.DomActions};
   ${pageScripts.domReplayer};
+  ${pageScripts.domReplayerUI};
+
+  window.blockClickAndSubmit = true;
 })();`;

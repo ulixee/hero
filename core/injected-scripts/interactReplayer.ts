@@ -7,7 +7,11 @@ declare global {
   interface Window {
     selfFrameIdPath: string;
     blockClickAndSubmit: boolean;
-    replayInteractions(...args: any[]);
+    replayInteractions(
+      resultNodeIds?: IHighlightedNodes,
+      mouseEvent?: IFrontendMouseEvent,
+      scrollEvent?: IFrontendScrollEvent,
+    );
     debugLogs: any[];
     debugToConsole: boolean;
     showCommandGrowl(id: number, name: string, fadeAfterMs?: number);

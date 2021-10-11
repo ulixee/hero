@@ -18,7 +18,7 @@ import ResourceState from '@ulixee/hero-mitm/interfaces/ResourceState';
 import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
 import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
 import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
-import { IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
@@ -45,7 +45,8 @@ export default class SessionState {
   public readonly db: SessionDb;
   public navigationIdCounter = 0;
 
-  public allNavigations: INavigation[] = [];
+  public allNavigationsById: { [id: number]: INavigation } = {};
+  public navigationsByFrameId: { [frameId: number]: INavigation[] } = {};
   public nextCommandMeta: { commandId: number; startDate: Date; sendDate: Date };
 
   private readonly sessionName: string;
@@ -464,7 +465,11 @@ export default class SessionState {
 
   public recordNavigation(navigation: INavigation): void {
     this.db.frameNavigations.insert(navigation);
-    this.allNavigations.push(navigation);
+    if (!this.allNavigationsById[navigation.id]) {
+      this.navigationsByFrameId[navigation.frameId] ??= [];
+      this.navigationsByFrameId[navigation.frameId].push(navigation);
+      this.allNavigationsById[navigation.id] = navigation;
+    }
     if (
       navigation.statusChanges.has(LoadStatus.AllContentLoaded) ||
       navigation.statusChanges.has(ContentPaint)
@@ -545,9 +550,29 @@ export default class SessionState {
   ): void {
     let lastCommand = this.lastCommand;
     if (!lastCommand) return; // nothing to store yet
+    const frameNavigations = this.navigationsByFrameId[frameId] ?? [];
+    let navigationId = this.db.domChanges.lastNavigationIdByFrameId[frameId];
+
     for (const domChange of domChanges) {
       lastCommand = this.getCommandForTimestamp(lastCommand, domChange[2]);
-      this.db.domChanges.insert(tabId, frameId, lastCommand.id, domChange);
+      if (domChange[0] === DomActionType.newDocument || domChange[0] === DomActionType.location) {
+        for (let i = frameNavigations.length - 1; i >= 0; i -= 1) {
+          const nav = frameNavigations[i];
+          if (nav.finalUrl === domChange[1].textContent) {
+            navigationId = nav.id;
+            break;
+          }
+        }
+      }
+
+      // if this is a doctype, set into the navigation
+      if (navigationId && domChange[0] === DomActionType.added && domChange[1].nodeType === 10) {
+        const nav = this.allNavigationsById[navigationId];
+        nav.doctype = domChange[1].textContent;
+        this.recordNavigation(nav);
+      }
+
+      this.db.domChanges.insert(tabId, frameId, navigationId, lastCommand.id, domChange);
     }
 
     for (const mouseEvent of mouseEvents) {

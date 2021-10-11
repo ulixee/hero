@@ -372,7 +372,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     if (isDefault) {
       this.defaultContextId = executionContextId;
       this.defaultContextCreated?.resolve();
-    } else {
+    } else if (!this.isolatedContextId) {
+      // workaround for bug where relative frames duplicates our isolated world
       this.isolatedContextId = executionContextId;
     }
   }

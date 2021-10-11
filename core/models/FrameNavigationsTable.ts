@@ -17,6 +17,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
         ['startCommandId', 'INTEGER'],
         ['requestedUrl', 'TEXT'],
         ['finalUrl', 'TEXT'],
+        ['doctype', 'TEXT'],
         ['navigationReason', 'TEXT'],
         ['loaderId', 'TEXT'],
         ['initiatedTime', 'INTEGER'],
@@ -41,6 +42,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.startCommandId,
       navigation.requestedUrl,
       navigation.finalUrl,
+      navigation.doctype,
       navigation.navigationReason,
       navigation.loaderId,
       navigation.initiatedTime,
@@ -98,6 +100,7 @@ export interface IFrameNavigationRecord {
   id: number;
   frameId: number;
   tabId: number;
+  doctype: string;
   resourceId?: number;
   requestedUrl: string;
   finalUrl?: string;

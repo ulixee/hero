@@ -302,7 +302,7 @@ class ObjectAtPath {
     this.containerOffset = containerOffset;
 
     // @ts-ignore - start listening for events since we've just looked up something on this frame
-    if ('listenForInteractionEvents' in window) window.listenForInteractionEvents();
+    if ('listenToInteractionEvents' in window) window.listenToInteractionEvents();
 
     if (
       Array.isArray(jsPath[jsPath.length - 1]) &&

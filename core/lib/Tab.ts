@@ -381,7 +381,7 @@ export default class Tab
   }
 
   public async goto(url: string, timeoutMs = 30e3): Promise<IResourceMeta> {
-    const formattedUrl = Url.format(url);
+    const formattedUrl = Url.format(new Url.URL(url), { unicode: true });
 
     const navigation = this.navigations.onNavigationRequested(
       'goto',

@@ -33,54 +33,17 @@ describe('MirrorPage tests', () => {
     <ul>
         <li>1</li>
     </ul>
+    <input name="test"/>
     <a href="#" onclick="clicky()">Clickeroo</a>
+    <ul id="ul2"></ul>
 </div>
 <div id="div2"></div>
 <script>
- let clicks = 0;
- const child = document.createElement('li');
- const child2 = document.createElement('li');
- const child3 = document.createElement('li');
- const parent = document.querySelector('ul');
-
- function clicky(){
-   clicks += 1;
-
-   if (clicks === 1) {
-     child.textContent = 'Another one ' + parent.children.length;
-     parent.append(child, child2, child3);
-   }
-   if (clicks === 2) {
-     parent.removeChild(child2);
-   }
-   if (clicks === 3) {
-     parent.append(child);
-   }
-   if (clicks === 4) {
-     document.querySelector('#div2').setAttribute('data', "{ data: true }");
-     document.querySelector('#div2').setAttribute('trial', '1');
-   }
-   if (clicks === 5) {
-     child.textContent = 'Li 2';
-   }
-   if (clicks === 6){
-     // test inserting a bunch at once
-     const div2 = document.createElement('div');
-     div2.innerHTML = "<p>This is para 1</p><br/><p>This is para 2</p>";
-     document.body.insertBefore(div2, document.querySelector('script'))
-   }
-   if (clicks === 7){
-     document.body.appendChild(document.createElement('div'));
-   }
-   if (clicks === 8){
-     const div = document.createElement('div');
-     div.id = 'after-script'
-     div.innerHTML = "<p>This is para 1</p><br/><p>This is para 2</p>";
-     const last = document.body.children.item(document.body.children.length-1);
-     document.body.insertBefore(div, last);
-   }
-   return false;
- }
+  document.querySelector('input').value = '1';
+  var child = document.createElement('li');
+  var child2 = document.createElement('li');
+  var child3 = document.createElement('li');
+  var parent = document.querySelector('ul');
 </script>
 </body>`;
     });
@@ -104,16 +67,8 @@ describe('MirrorPage tests', () => {
     expect(mirrorHtml).toBe(sourceHtml.replace(replayNode, ''));
 
     let lastCommandId = tab.lastCommandId;
-    for (let i = 1; i <= 8; i += 1) {
-      await tab.interact([
-        {
-          command: InteractionCommand.click,
-          mousePosition: ['window', 'document', ['querySelector', 'a']],
-        },
-      ]);
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
+    async function compareTabsAfterEvaluate(evaluateScript: string) {
+      await tab.getJsValue(evaluateScript);
       const pageChangesByFrame = await tab.getDomChanges(tab.mainFrameId, lastCommandId);
       lastCommandId = tab.lastCommandId;
       const domRecordingUpdates = DomChangesTable.toDomRecording(
@@ -130,7 +85,49 @@ describe('MirrorPage tests', () => {
       expect(mirrorHtmlNext).not.toBe(sourceHtmlNext);
       expect(mirrorHtmlNext).toBe(sourceHtmlNext.replace(replayNode, ''));
     }
-  }, 45e3);
+
+    // 1. Append list
+    await compareTabsAfterEvaluate(`
+        child.textContent = 'Another one ' + parent.children.length;
+        parent.append(child, child2, child3);
+    `);
+    // remove child
+    await compareTabsAfterEvaluate(`parent.removeChild(child2);`);
+    // add new child
+    await compareTabsAfterEvaluate(`parent.append(child);`);
+    // set attributes
+    await compareTabsAfterEvaluate(`
+        document.querySelector('#div2').setAttribute('data', '{ data: true }');
+        document.querySelector('#div2').setAttribute('trial', '1');
+    `);
+    // text content
+    await compareTabsAfterEvaluate(`child.textContent = 'Li 2';`);
+    // test inserting a bunch at once
+    await compareTabsAfterEvaluate(`
+        const div2 = document.createElement('div');
+        div2.innerHTML = '<p>This is para 1</p><br/><p>This is para 2</p>';
+        document.body.insertBefore(div2, document.querySelector('script'));`);
+    // add element to end of page
+    await compareTabsAfterEvaluate(`document.body.appendChild(document.createElement('div'));`);
+    // ensure replay node doesn't get in the way
+    await compareTabsAfterEvaluate(`
+        const div = document.createElement('div');
+        div.id = 'after-script';
+        div.innerHTML = '<p>This is para 1</p><br/><p>This is para 2</p>';
+        const last = document.body.children.item(document.body.children.length - 1);
+        document.body.insertBefore(div, last);
+    `);
+    // remove all lis
+    await compareTabsAfterEvaluate(`
+      child.remove();
+      child3.remove();
+    `);
+    // try to reparent elements
+    await compareTabsAfterEvaluate(`
+      const ul2 = document.querySelector('#ul2');
+      ul2.append(child, child2, child3);
+    `);
+  });
 
   it('should support multiple tabs', async () => {
     koaServer.get('/tab1', ctx => {
