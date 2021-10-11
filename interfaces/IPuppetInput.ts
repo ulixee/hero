@@ -6,6 +6,7 @@ export interface IPuppetKeyboard {
   up(key: IKeyboardKey): Promise<void>;
   down(key: IKeyboardKey): Promise<void>;
   press(key: IKeyboardKey, keyupDelay?: number): Promise<void>;
+  insertText(text: string): Promise<void>;
   sendCharacter(char: string): Promise<void>;
 }
 
