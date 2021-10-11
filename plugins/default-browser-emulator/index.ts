@@ -52,6 +52,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public locale: string;
   public viewport: IViewport;
   public geolocation: IGeolocation;
+  public dnsOverTlsProvider: IDnsSettings['dnsOverTlsConnection'];
 
   protected readonly data: IBrowserData;
   private readonly domOverridesBuilder: DomOverridesBuilder;
@@ -82,10 +83,15 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     this.viewport = config.viewport;
     this.timezoneId = config.timezoneId;
     this.geolocation = config.geolocation;
+    this.dnsOverTlsProvider = config.dnsOverTlsProvider;
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
     configureSessionDns(this, settings);
+
+    if (this.dnsOverTlsProvider !== undefined) {
+      settings.dnsOverTlsConnection = this.dnsOverTlsProvider;
+    }
   }
 
   public onTcpConfiguration(settings: ITcpSettings): void {

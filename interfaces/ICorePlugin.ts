@@ -158,6 +158,7 @@ export interface IBrowserEmulatorConfig {
   geolocation?: IGeolocation;
   timezoneId?: string;
   locale?: string;
+  dnsOverTlsProvider?: IDnsSettings['dnsOverTlsConnection'];
 }
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
