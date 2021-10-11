@@ -283,9 +283,7 @@ describe('Keyboard', () => {
     expect(await page.evaluate(`${textArea}.value`)).toBe('👹 Tokyo street Japan 🇯🇵');
   });
 
-  // playwright test that we didn't copy the logic for - would need to add "mac editing shortcuts"
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('should handle selectAll', async () => {
+  it('should handle selectAll', async () => {
     await page.goto(`${server.baseUrl}/input/textarea.html`);
     await page.click('textarea');
     await page.type('some text');
