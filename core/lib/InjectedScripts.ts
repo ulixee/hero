@@ -74,9 +74,8 @@ export default class InjectedScripts {
     puppetPage[installedSymbol] = true;
 
     return Promise.all([
-      puppetPage.addPageCallback(pageEventsCallbackName),
+      puppetPage.addPageCallback(pageEventsCallbackName, null, true),
       puppetPage.addNewDocumentScript(injectedScript, true),
-      puppetPage.addNewDocumentScript(`delete window.${pageEventsCallbackName}`, false),
       showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
     ]);
   }

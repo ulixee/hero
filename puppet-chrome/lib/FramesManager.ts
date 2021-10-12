@@ -111,11 +111,16 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   public async addPageCallback(
     name: string,
     onCallback: (payload: any, frameId: string) => any,
+    isolateFromWebPageEnvironment?: boolean,
   ): Promise<IRegisteredEventListener> {
-    // add binding to every new context automatically
-    await this.devtoolsSession.send('Runtime.addBinding', {
+    const params: Protocol.Runtime.AddBindingRequest = {
       name,
-    });
+    };
+    if (isolateFromWebPageEnvironment) {
+      (params as any).executionContextName = ISOLATED_WORLD;
+    }
+    // add binding to every new context automatically
+    await this.devtoolsSession.send('Runtime.addBinding', params);
     return eventUtils.addEventListener(
       this.devtoolsSession,
       'Runtime.bindingCalled',

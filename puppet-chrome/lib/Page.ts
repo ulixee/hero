@@ -160,17 +160,22 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   addPageCallback(
     name: string,
-    onCallback: (payload: any, frameId: string) => any,
+    onCallback?: (payload: any, frameId: string) => any,
+    isolateFromWebPageEnvironment?: boolean,
   ): Promise<IRegisteredEventListener> {
-    return this.framesManager.addPageCallback(name, (payload, frameId) => {
-      if (onCallback) onCallback(payload, frameId);
+    return this.framesManager.addPageCallback(
+      name,
+      (payload, frameId) => {
+        if (onCallback) onCallback(payload, frameId);
 
-      this.emit('page-callback-triggered', {
-        name,
-        payload,
-        frameId,
-      });
-    });
+        this.emit('page-callback-triggered', {
+          name,
+          payload,
+          frameId,
+        });
+      },
+      isolateFromWebPageEnvironment,
+    );
   }
 
   async getIndexedDbDatabaseNames(): Promise<
