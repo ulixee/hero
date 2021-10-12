@@ -107,8 +107,15 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.setFileInputFiles', jsPath, files);
   }
 
-  public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {
-    await this.commandQueue.run('FrameEnvironment.waitForElement', jsPath, opts);
+  public async waitForElement(
+    jsPath: IJsPath,
+    opts: IWaitForElementOptions,
+  ): Promise<INodePointer> {
+    return await this.commandQueue.run<INodePointer>(
+      'FrameEnvironment.waitForElement',
+      jsPath,
+      opts,
+    );
   }
 
   public async waitForLoad(status: ILoadStatus, opts: IWaitForOptions): Promise<void> {

@@ -3,6 +3,8 @@ import { XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { FrameEnvironment, LocationStatus } from '@ulixee/hero';
 import Dialog from '@ulixee/hero/lib/Dialog';
+import HTMLIFrameElement from 'awaited-dom/impl/official-klasses/HTMLIFrameElement';
+import HTMLHeadingElement from 'awaited-dom/impl/official-klasses/HTMLHeadingElement';
 import Hero from '../index';
 
 let koaServer: ITestKoaServer;
@@ -215,7 +217,8 @@ describe('basic Document tests', () => {
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     );
-    await hero.waitForElement(headings.singleNodeValue, { waitForVisible: true });
+    const result = await hero.waitForElement(headings.singleNodeValue, { waitForVisible: true });
+    expect(result).toBeInstanceOf(HTMLHeadingElement);
     await expect(headings.singleNodeValue.textContent).resolves.toBe('Here I am');
   });
 
@@ -498,7 +501,9 @@ describe('basic Document tests', () => {
     const hero = await openBrowser(`/iframePage2`);
 
     const frameElement2 = hero.document.querySelector('#frame2');
-    await hero.waitForElement(frameElement2);
+    const result = await hero.waitForElement(frameElement2);
+    expect(result).toBeTruthy();
+    expect(result).toBeInstanceOf(HTMLIFrameElement);
     const frame2Env = await hero.activeTab.getFrameEnvironment(frameElement2);
 
     expect(frame2Env).toBeTruthy();

@@ -24,7 +24,7 @@ export default class FrameNavigationsObserver {
 
   private waitingForLoadTimeout: NodeJS.Timeout;
   private resourceIdResolvable: IResolvablePromise<number>;
-  private statusTriggerResolvable: IResolvablePromise<void>;
+  private statusTriggerResolvable: IResolvablePromise<INavigation>;
   private statusTrigger: LocationStatus;
   private statusTriggerStartCommandId: number;
   private logger: IBoundLog;
@@ -58,7 +58,10 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  public waitForLocation(status: ILocationTrigger, options: IWaitForOptions = {}): Promise<void> {
+  public waitForLocation(
+    status: ILocationTrigger,
+    options: IWaitForOptions = {},
+  ): Promise<INavigation> {
     assert(LocationTrigger[status], `Invalid location status: ${status}`);
 
     // determine if this location trigger has already been satisfied
@@ -66,14 +69,13 @@ export default class FrameNavigationsObserver {
       ? options.sinceCommandId
       : this.defaultWaitForLocationCommandId;
 
-    if (this.hasLocationTrigger(status, sinceCommandId)) {
-      return Promise.resolve();
-    }
+    const trigger = this.hasLocationTrigger(status, sinceCommandId);
+    if (trigger) return Promise.resolve(trigger);
     // otherwise set pending
     return this.createStatusTriggeredPromise(status, options.timeoutMs, sinceCommandId);
   }
 
-  public waitForLoad(status: ILoadStatus, options: IWaitForOptions = {}): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options: IWaitForOptions = {}): Promise<INavigation> {
     assert(LoadStatus[status], `Invalid load status: ${status}`);
 
     if (options.sinceCommandId) {
@@ -89,7 +91,7 @@ export default class FrameNavigationsObserver {
     return promise;
   }
 
-  public waitForReady(): Promise<void> {
+  public waitForReady(): Promise<INavigation> {
     return this.waitForLoad(LoadStatus.DomContentLoaded);
   }
 
@@ -120,8 +122,12 @@ export default class FrameNavigationsObserver {
       this.statusTrigger === LocationTrigger.change ||
       this.statusTrigger === LocationTrigger.reload
     ) {
-      if (this.hasLocationTrigger(this.statusTrigger, this.statusTriggerStartCommandId)) {
-        this.resolvePendingStatus(this.statusTrigger);
+      const resolver = this.hasLocationTrigger(
+        this.statusTrigger,
+        this.statusTriggerStartCommandId,
+      );
+      if (resolver) {
+        this.resolvePendingStatus(this.statusTrigger, resolver);
       }
       return;
     }
@@ -136,7 +142,8 @@ export default class FrameNavigationsObserver {
     }
 
     // otherwise just look for state changes > the trigger
-    for (const status of this.navigations.top.statusChanges.keys()) {
+    const top = this.navigations.top;
+    for (const status of top.statusChanges.keys()) {
       // don't resolve states for redirected
       if (status === LoadStatus.HttpRedirected) continue;
       let pipelineStatus: number = LoadStatusPipeline[status];
@@ -144,7 +151,7 @@ export default class FrameNavigationsObserver {
         pipelineStatus = LoadStatusPipeline.AllContentLoaded;
       }
       if (pipelineStatus >= loadTrigger) {
-        this.resolvePendingStatus(status);
+        this.resolvePendingStatus(status, top);
         return;
       }
     }
@@ -153,9 +160,10 @@ export default class FrameNavigationsObserver {
   private waitForPageLoaded(): void {
     clearTimeout(this.waitingForLoadTimeout);
 
+    const top = this.navigations.top;
     const { isStable, timeUntilReadyMs } = this.navigations.getPaintStableStatus();
 
-    if (isStable) this.resolvePendingStatus('PaintingStable + Load');
+    if (isStable) this.resolvePendingStatus('PaintingStable + Load', top);
 
     if (!isStable && timeUntilReadyMs) {
       const loadDate = this.navigations.top.statusChanges.get(LoadStatus.AllContentLoaded);
@@ -164,13 +172,17 @@ export default class FrameNavigationsObserver {
         () =>
           this.resolvePendingStatus(
             `TimeElapsed. Loaded="${loadDate}", ContentPaint="${contentPaintDate}"`,
+            this.navigations.top,
           ),
         timeUntilReadyMs,
       ).unref();
     }
   }
 
-  private resolvePendingStatus(resolvedWithStatus: LoadStatus | string): void {
+  private resolvePendingStatus(
+    resolvedWithStatus: LoadStatus | string,
+    navigation: INavigation,
+  ): void {
     if (this.statusTriggerResolvable && !this.statusTriggerResolvable?.isResolved) {
       this.logger.info(`Resolving pending "${this.statusTrigger}" with trigger`, {
         resolvedWithStatus,
@@ -178,14 +190,14 @@ export default class FrameNavigationsObserver {
         url: this.navigations.currentUrl,
       });
       clearTimeout(this.waitingForLoadTimeout);
-      this.statusTriggerResolvable.resolve();
+      this.statusTriggerResolvable.resolve(navigation);
       this.statusTriggerResolvable = null;
       this.statusTrigger = null;
       this.statusTriggerStartCommandId = null;
     }
   }
 
-  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number): boolean {
+  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number): INavigation {
     let previousLoadedNavigation: INavigation;
     for (const history of this.navigations.history) {
       const isMatch = history.startCommandId >= sinceCommandId;
@@ -223,7 +235,7 @@ export default class FrameNavigationsObserver {
             status: trigger,
             sinceCommandId,
           });
-          return true;
+          return history;
         }
       }
 
@@ -235,14 +247,14 @@ export default class FrameNavigationsObserver {
         previousLoadedNavigation = history;
       }
     }
-    return false;
+    return null;
   }
 
   private createStatusTriggeredPromise(
     status: LocationStatus,
     timeoutMs: number,
     sinceCommandId?: number,
-  ): Promise<void> {
+  ): Promise<INavigation> {
     if (this.statusTriggerResolvable) {
       if (status === this.statusTrigger && sinceCommandId === this.statusTriggerStartCommandId) {
         return this.statusTriggerResolvable.promise;
@@ -252,7 +264,7 @@ export default class FrameNavigationsObserver {
 
     this.statusTrigger = status;
     this.statusTriggerStartCommandId = sinceCommandId;
-    this.statusTriggerResolvable = createPromise<void>(timeoutMs ?? 60e3);
+    this.statusTriggerResolvable = createPromise<INavigation>(timeoutMs ?? 60e3);
     return this.statusTriggerResolvable.promise;
   }
 

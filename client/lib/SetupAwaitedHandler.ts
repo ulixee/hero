@@ -6,6 +6,7 @@ import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import NodeFactory from 'awaited-dom/base/NodeFactory';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
@@ -104,6 +105,24 @@ export async function getAwaitedState<TClass>(
 
 export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
   return `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
+}
+
+export function createInstanceWithNodePointer<TClass>(
+  stateHandler: IStateHandler<TClass>,
+  awaitedPath: AwaitedPath,
+  awaitedOptions: IAwaitedOptions,
+  nodePointer: INodePointer,
+): TClass {
+  const createNewInstance =
+    NodeFactory.instanceCreatorsByName[`create${nodePointer.type}`] ??
+    NodeFactory.instanceCreatorsByName.createSuperNode;
+  const newPath = awaitedPath.withNodeId(awaitedPath.parent, nodePointer.id);
+  const element = createNewInstance(newPath, awaitedOptions);
+  stateHandler.setState(element, {
+    nodePointer,
+  });
+  element.then = null;
+  return element;
 }
 
 const { getState: getAwaitedPathState } = StateMachine<any, { awaitedPath?: AwaitedPath }>();

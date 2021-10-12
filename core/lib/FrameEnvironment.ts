@@ -24,7 +24,7 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as Os from 'os';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
-import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
+import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
@@ -383,21 +383,27 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }
 
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
     return this.navigationsObserver.waitForLoad(status, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(
+    trigger: ILocationTrigger,
+    options?: IWaitForOptions,
+  ): Promise<INavigation> {
     return this.navigationsObserver.waitForLocation(trigger, options);
   }
 
   // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which
   // can break waitForLocation
-  public async waitForDom(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public async waitForDom(
+    jsPath: IJsPath,
+    options?: IWaitForElementOptions,
+  ): Promise<INodePointer> {
     const waitForVisible = options?.waitForVisible ?? false;
     const timeoutMs = options?.timeoutMs ?? 30e3;
     const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
@@ -423,7 +429,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
           const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
           let isValid = isNodeVisible.value?.isVisible;
           if (!waitForVisible) isValid = isNodeVisible.value?.nodeExists;
-          if (isValid) return true;
+          if (isValid) return isNodeVisible.nodePointer;
         } catch (err) {
           if (String(err).includes('not a valid selector')) throw err;
           // don't log during loop
@@ -434,7 +440,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     } finally {
       timer.clear();
     }
-    return false;
+    return null;
   }
 
   public moveMouseToStartLocation(): Promise<void> {

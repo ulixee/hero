@@ -27,11 +27,16 @@ import {
 } from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Hero, { IState as IHeroState } from './Hero';
-import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
+import {
+  createInstanceWithNodePointer,
+  delegate as AwaitedHandler,
+  getAwaitedPathAsMethodArg,
+} from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
@@ -40,7 +45,7 @@ const { getState, setState } = StateMachine<FrameEnvironment, IState>();
 const heroState = StateMachine<Hero, IHeroState>();
 const awaitedPathState = StateMachine<
   any,
-  { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
+  { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions; nodePointer?: INodePointer }
 >();
 
 export interface IState {
@@ -197,11 +202,18 @@ export default class FrameEnvironment {
   public async waitForElement(
     element: ISuperElement,
     options?: IWaitForElementOptions,
-  ): Promise<void> {
+  ): Promise<ISuperElement | null> {
     if (!element) throw new Error('Element being waited for is null');
-    const { awaitedPath } = awaitedPathState.getState(element);
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(element);
     const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForElement(awaitedPath.toJSON(), options);
+    const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), options);
+    if (!nodePointer) return null;
+    return createInstanceWithNodePointer(
+      awaitedPathState,
+      awaitedPath,
+      awaitedOptions,
+      nodePointer,
+    );
   }
 
   public async waitForLocation(

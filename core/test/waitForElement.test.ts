@@ -33,7 +33,9 @@ describe('basic waitForElement tests', () => {
     const { tab } = await createSession();
     await tab.goto(`${koaServer.baseUrl}/waitForElementTest1`);
 
-    await expect(tab.waitForElement(['document', ['querySelector', 'a']])).resolves.toBe(true);
+    await expect(tab.waitForElement(['document', ['querySelector', 'a']])).resolves.toMatchObject({
+      id: expect.any(Number),
+    });
   });
 
   it('times out waiting for an element', async () => {
@@ -67,7 +69,10 @@ describe('basic waitForElement tests', () => {
       tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
   });
 
   it('will yield an error for a bad querySelector', async () => {
@@ -108,7 +113,10 @@ describe('basic waitForElement tests', () => {
         waitForVisible: true,
         timeoutMs: 5e3,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLLIElement',
+    });
   });
 
   it('will find the correct center of an element', async () => {
@@ -127,19 +135,28 @@ describe('basic waitForElement tests', () => {
       tab.waitForElement(['document', ['querySelector', '#wrapper']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLDivElement',
+    });
 
     await expect(
       tab.waitForElement(['document', ['querySelector', '#elem1']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLDivElement',
+    });
 
     await expect(
       tab.waitForElement(['document', ['querySelector', '#elem2']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLDivElement',
+    });
   });
 
   it('will wait for an element above the fold to be on screen', async () => {
@@ -160,7 +177,10 @@ describe('basic waitForElement tests', () => {
       tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
   });
 
   it('will wait until an element off the bottom of the page', async () => {
@@ -183,7 +203,10 @@ describe('basic waitForElement tests', () => {
       tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(true);
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
   });
 });
 

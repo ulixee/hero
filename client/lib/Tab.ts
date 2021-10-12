@@ -245,7 +245,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForElement(
     element: ISuperElement,
     options?: IWaitForElementOptions,
-  ): Promise<void> {
+  ): Promise<ISuperElement | null> {
     return await this.mainFrameEnvironment.waitForElement(element, options);
   }
 

@@ -25,6 +25,8 @@ import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
+import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
+import INavigation from '@ulixee/hero-interfaces/INavigation';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -360,15 +362,18 @@ export default class Tab
     return this.mainFrameEnvironment.getUrl();
   }
 
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
     return this.mainFrameEnvironment.waitForElement(jsPath, options);
   }
 
-  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
     return this.mainFrameEnvironment.waitForLoad(status, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(
+    trigger: ILocationTrigger,
+    options?: IWaitForOptions,
+  ): Promise<INavigation> {
     return this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 
