@@ -41,6 +41,7 @@ export default class PageStateGenerator {
     this.sessionsById.set(sessionId, {
       tabId,
       sessionId,
+      needsResultsVerification: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
@@ -88,6 +89,7 @@ export default class PageStateGenerator {
       this.sessionsById.set(session.sessionId, {
         ...session,
         db,
+        needsResultsVerification: false,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
       });
     }
@@ -125,7 +127,9 @@ export default class PageStateGenerator {
 
   public async evaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      const { db, timeRange, tabId, sessionId } = session;
+      const { db, timeRange, tabId, sessionId, needsResultsVerification } = session;
+
+      if (!needsResultsVerification) continue;
 
       const [start, end] = timeRange;
       const timeoutMs = end - Date.now();
@@ -137,10 +141,12 @@ export default class PageStateGenerator {
       session.mainFrameIds = db.frames.mainFrameIds(tabId);
 
       const lastNavigation = this.findLastNavigation(session);
-      if (!lastNavigation) continue;
+      if (!lastNavigation) {
+        continue;
+      }
 
       // get all dom changes since the last navigation
-      const domChangeRecords = db.domChanges.getChangesSince(lastNavigation.initiatedTime);
+      const domChangeRecords = db.domChanges.getChangesSinceNavigation(lastNavigation.id);
       session.domRecording = DomChangesTable.toDomRecording(
         domChangeRecords,
         session.mainFrameIds,
@@ -164,7 +170,7 @@ export default class PageStateGenerator {
       }
     }
 
-    await this.refreshResults();
+    await this.checkResultsInPage();
 
     const states = [...this.statesByName.values()];
     // 1. Only keep assert results common to all sessions in a state
@@ -179,22 +185,25 @@ export default class PageStateGenerator {
     PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
   }
 
-  private async refreshResults(): Promise<void> {
+  private async checkResultsInPage(): Promise<void> {
     const context = await this.browserContext;
     if (context instanceof Error) throw context;
 
     for (const session of this.sessionsById.values()) {
-      const paintEvents = session.domRecording.paintEvents;
-      if (!session.mirrorPage) await this.createMirrorPage(context, session);
-      // needs to be inited before destructure
-      const { mirrorPage } = session;
+      if (!session.domRecording || !session.needsResultsVerification) continue;
+      const paintEvents = session.domRecording?.paintEvents;
       if (!paintEvents.length) {
         // no paint events for page!
         log.warn('No paint events for session!!', { sessionId: session.sessionId });
         continue;
       }
+
+      await this.createMirrorPageIfNeeded(context, session);
       // create at "loaded" state
+      const { mirrorPage } = session;
       await mirrorPage.load();
+      // only need to do this once?
+      session.needsResultsVerification = false;
 
       for (const [frameId, assertions] of this.sessionAssertions.iterateSessionAssertionsByFrameId(
         session.sessionId,
@@ -223,10 +232,11 @@ export default class PageStateGenerator {
     }
   }
 
-  private async createMirrorPage(
+  private async createMirrorPageIfNeeded(
     context: IPuppetContext,
     session: IPageStateSession,
   ): Promise<void> {
+    if (session.mirrorPage) return;
     const networkInterceptor = MirrorNetwork.createFromSessionDb(session.db, session.tabId, {
       hasResponse: true,
       isGetOrDocument: true,
@@ -377,6 +387,7 @@ interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;
+  needsResultsVerification: boolean;
   mainFrameIds: Set<number>;
   domRecording?: IDomRecording;
   mirrorPage?: MirrorPage;

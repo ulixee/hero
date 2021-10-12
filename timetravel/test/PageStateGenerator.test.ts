@@ -2,6 +2,8 @@ import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { Helpers } from '@ulixee/hero-testing';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import Core from '@ulixee/hero-core';
+import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import * as Fs from 'fs';
 import PageStateGenerator from '../lib/PageStateGenerator';
 
 let koaServer: ITestKoaServer;
@@ -292,7 +294,71 @@ describe('pageStateGenerator', () => {
     expect(states2['count(//H1[text()="Page 2"])'].result).toBe(1);
   }, 20e3);
 
-  test.todo('can add more sessions without re-running the old ones');
+  test('can export and re-import states', async () => {
+    let changeTitle = false;
+    koaServer.get('/restorePage1', ctx => {
+      ctx.body = `<body><h1>Title 1</h1></body>`;
+    });
+    koaServer.get('/restorePage2', ctx => {
+      if (changeTitle) {
+        ctx.body = `<body><h2>Title 3</h2></body>`;
+      } else {
+        ctx.body = `<body><h2>Title 2</h2></body>`;
+      }
+    });
 
-  test.todo('can save and reload results');
+    async function run(page: string, pageStateGenerator: PageStateGenerator) {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession();
+      const startTime = Date.now();
+      await tab.goto(`${koaServer.baseUrl}/${page}`);
+      await tab.waitForLoad('PaintingStable');
+      await tab.close();
+      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+
+      const state = page.endsWith('1') ? '1' : '2';
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    const psg1 = new PageStateGenerator('c');
+
+    await Promise.all([
+      run('restorePage1', psg1),
+      run('restorePage1', psg1),
+      run('restorePage2', psg1),
+      run('restorePage2', psg1),
+    ]);
+
+    await psg1.evaluate();
+
+    const state1 = psg1.export('1');
+    expect(state1).toBeTruthy();
+    expect(state1.assertions.length).toBeGreaterThanOrEqual(3);
+    expect(state1.sessions).toHaveLength(2);
+
+    const state2 = psg1.export('2');
+    expect(state2).toBeTruthy();
+    expect(state2.assertions.length).toBeGreaterThanOrEqual(3);
+    expect(state2.sessions).toHaveLength(2);
+
+    const psg2 = new PageStateGenerator('c');
+    psg2.import(state1);
+    psg2.import(state2);
+
+    changeTitle = true;
+    // add sessions to the second round
+    await Promise.all([run('restorePage1', psg2), run('restorePage2', psg2)]);
+    await psg2.evaluate();
+
+    const state1Round2 = psg2.export('1');
+    const state2Round2 = psg2.export('2');
+
+    expect(state1Round2.sessions).toHaveLength(3);
+    expect(state2Round2.sessions).toHaveLength(3);
+
+    expect(state1Round2.assertions).toEqual(state1.assertions);
+    // should take into account the new change
+    expect(state2Round2.assertions).not.toEqual(state2.assertions);
+    expect(state2Round2.assertions.filter(x => x.toString().includes('Title 2'))).toHaveLength(0);
+  });
 });
