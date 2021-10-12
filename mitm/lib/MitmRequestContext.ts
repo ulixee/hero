@@ -41,13 +41,8 @@ export default class MitmRequestContext {
     >,
     responseCache: HttpResponseCache,
   ): IMitmRequestContext {
-    const {
-      isSSL,
-      proxyToClientResponse,
-      clientToProxyRequest,
-      requestSession,
-      isUpgrade,
-    } = params;
+    const { isSSL, proxyToClientResponse, clientToProxyRequest, requestSession, isUpgrade } =
+      params;
 
     const protocol = isUpgrade ? 'ws' : 'http';
     const expectedProtocol = `${protocol}${isSSL ? 's' : ''}:`;
@@ -95,7 +90,7 @@ export default class MitmRequestContext {
       requestOriginalHeaders: parseRawHeaders(clientToProxyRequest.rawHeaders),
       clientToProxyRequest,
       proxyToClientResponse,
-      requestTime: new Date(),
+      requestTime: Date.now(),
       protocol: (clientToProxyRequest.socket as TLSSocket)?.alpnProtocol || 'http/1.1',
       documentUrl: clientToProxyRequest.headers.origin as string,
       originType: this.getOriginType(url, requestHeaders),
@@ -148,7 +143,7 @@ export default class MitmRequestContext {
       proxyToClientResponse: null,
       serverToProxyResponseStream: null,
       proxyToServerRequest: null,
-      requestTime: new Date(),
+      requestTime: Date.now(),
       didBlockResource: false,
       cacheHandler: null,
       stateChanges: state,
@@ -168,7 +163,7 @@ export default class MitmRequestContext {
       headers: ctx.requestHeaders,
       method: ctx.method,
       postData: ctx.requestPostData,
-      timestamp: ctx.requestTime.getTime(),
+      timestamp: ctx.requestTime,
     } as IResourceRequest;
 
     const response = {
@@ -177,7 +172,7 @@ export default class MitmRequestContext {
       statusMessage: ctx.statusMessage,
       headers: ctx.responseHeaders,
       trailers: ctx.responseTrailers,
-      timestamp: ctx.responseTime?.getTime(),
+      timestamp: ctx.responseTime,
       browserServedFromCache: ctx.browserServedFromCache,
       browserLoadFailure: ctx.browserLoadFailure,
       remoteAddress: ctx.remoteAddress,
@@ -200,7 +195,7 @@ export default class MitmRequestContext {
       protocol: ctx.protocol,
       serverAlpn: ctx.proxyToServerMitmSocket?.alpn,
       didBlockResource: ctx.didBlockResource,
-      executionMillis: (ctx.responseTime ?? new Date()).getTime() - ctx.requestTime.getTime(),
+      executionMillis: (ctx.responseTime ?? Date.now()) - ctx.requestTime,
       isHttp2Push: ctx.isHttp2Push,
       browserBlockedReason: ctx.browserBlockedReason,
       browserCanceled: ctx.browserCanceled,
@@ -245,7 +240,7 @@ export default class MitmRequestContext {
     ctx.statusMessage = response.statusMessage;
 
     ctx.responseUrl = response.url;
-    ctx.responseTime = new Date();
+    ctx.responseTime = Date.now();
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = parseRawHeaders(response.rawHeaders);
     ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, ctx.responseOriginalHeaders);
@@ -266,7 +261,7 @@ export default class MitmRequestContext {
     const headers = parseRawHeaders(rawHeaders);
     ctx.status = statusCode;
     ctx.originalStatus = statusCode;
-    ctx.responseTime = new Date();
+    ctx.responseTime = Date.now();
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = headers;
     ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, headers);

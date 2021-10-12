@@ -16,6 +16,7 @@ export interface IPuppetNetworkEvents {
     location?: string;
     url?: string;
     loaderId: string;
+    timestamp: number;
   };
   'websocket-frame': {
     browserRequestId: string;

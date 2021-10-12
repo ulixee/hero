@@ -8,7 +8,6 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
 import { ILoadStatus, LoadStatus } from '@ulixee/hero-interfaces/Location';
-import * as moment from 'moment';
 import SessionState from './SessionState';
 
 export interface IFrameNavigationEvents {
@@ -94,7 +93,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     // doesn't have any "contentful" items that are eligible (image, headers, divs, paragraphs that fill the page)
 
     // have contentPaintedDate date, but no load
-    const timeUntilReadyMs = moment().diff(contentPaintedDate ?? loadDate, 'milliseconds');
+    const timeUntilReadyMs = Date.now() - (contentPaintedDate ?? loadDate);
     return {
       isStable: timeUntilReadyMs >= 3e3,
       timeUntilReadyMs: Math.min(3e3, 3e3 - timeUntilReadyMs),
@@ -207,13 +206,18 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     this.changeNavigationStatus(LoadStatus.HttpRequested, loaderId);
   }
 
-  public onHttpResponded(browserRequestId: string, url: string, loaderId: string): void {
+  public onHttpResponded(
+    browserRequestId: string,
+    url: string,
+    loaderId: string,
+    responseTime: number,
+  ): void {
     if (url === 'about:blank') return;
 
     const navigation = this.findMatchingNavigation(loaderId);
     navigation.finalUrl = url;
 
-    this.recordStatusChange(navigation, LoadStatus.HttpResponded);
+    this.recordStatusChange(navigation, LoadStatus.HttpResponded, responseTime);
   }
 
   public onResourceLoaded(resourceId: number, statusCode: number, error?: Error): void {
@@ -240,20 +244,16 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       | LoadStatus.PaintingStable,
     url: string,
     loaderId: string,
-    statusChangeDate?: Date,
+    statusChangeDate?: number,
   ): void {
     if (url === 'about:blank') return;
-    // if this is a painting stable, it probably won't come from a loader event for the page
+    // if this is a painting stable, it won't come from a loader event for the page
     if (!loaderId) {
-      for (let i = this.history.length - 1; i >= 0; i -= 1) {
-        const nav = this.history[i];
-        if (nav && nav.finalUrl === url && nav.statusChanges.has(LoadStatus.HttpResponded)) {
-          loaderId = nav.loaderId;
-          break;
-        }
-      }
+      loaderId = this.findHistory(
+        nav => nav.finalUrl === url && nav.statusChanges.has(LoadStatus.HttpResponded),
+      )?.loaderId;
     }
-    this.changeNavigationStatus(incomingStatus, loaderId, statusChangeDate?.getTime());
+    this.changeNavigationStatus(incomingStatus, loaderId, statusChangeDate);
   }
 
   public updateNavigationReason(url: string, reason: NavigationReason): void {
@@ -284,18 +284,13 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 
   public getLastLoadedNavigation(): INavigation {
-    let navigation: INavigation;
-    for (let i = this.history.length - 1; i >= 0; i -= 1) {
-      navigation = this.history[i];
-      if (
-        navigation.statusChanges.has(LoadStatus.DomContentLoaded) &&
-        navigation.navigationReason !== 'inPage' &&
-        !!navigation.finalUrl
-      ) {
-        return navigation;
-      }
-    }
-    return this.top;
+    const lastDomLoadedNav = this.findHistory(
+      x =>
+        x.statusChanges.has(LoadStatus.DomContentLoaded) &&
+        x.navigationReason !== 'inPage' &&
+        !!x.finalUrl,
+    );
+    return lastDomLoadedNav ?? this.top;
   }
 
   private checkStoredNavigationReason(navigation: INavigation, url: string): void {
@@ -313,13 +308,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     const navigation = this.top;
     if (!navigation) return undefined;
     if (loaderId && navigation.loaderId && navigation.loaderId !== loaderId) {
-      // find the right loader id
-      for (let i = this.history.length - 1; i >= 0; i -= 1) {
-        const nav = this.history[i];
-        if (nav && nav.loaderId === loaderId) {
-          return nav;
-        }
-      }
+      // still return the navigation if we can't find the loader
+      return this.findHistory(x => x.loaderId === loaderId) ?? navigation;
     }
     return navigation;
   }
@@ -334,18 +324,23 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
 
     // find the right loader id
+    const navigation = this.findHistory(
+      x =>
+        x.loaderId === loaderId &&
+        !x.statusChanges.has(LoadStatus.HttpRedirected) &&
+        x.requestedUrl === requestedUrl,
+    );
+    if (navigation) {
+      navigation.finalUrl = finalUrl;
+      this.recordStatusChange(navigation, LoadStatus.HttpRedirected);
+      return navigation;
+    }
+  }
+
+  private findHistory(callback: (history: INavigation) => boolean): INavigation {
     for (let i = this.history.length - 1; i >= 0; i -= 1) {
       const navigation = this.history[i];
-      if (navigation && navigation.loaderId === loaderId) {
-        if (
-          !navigation.statusChanges.has(LoadStatus.HttpRedirected) &&
-          navigation.requestedUrl === requestedUrl
-        ) {
-          navigation.finalUrl = finalUrl;
-          this.recordStatusChange(navigation, LoadStatus.HttpRedirected);
-          return navigation;
-        }
-      }
+      if (callback(navigation)) return navigation;
     }
   }
 

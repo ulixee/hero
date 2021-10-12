@@ -80,7 +80,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   public emit<
-    K extends (keyof IPuppetNetworkEvents & string) | (keyof IPuppetNetworkEvents & symbol)
+    K extends (keyof IPuppetNetworkEvents & string) | (keyof IPuppetNetworkEvents & symbol),
   >(eventType: K, event?: IPuppetNetworkEvents[K]): boolean {
     if (this.parentManager) {
       this.parentManager.emit(eventType, event);
@@ -214,7 +214,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        requestTime: new Date(),
+        requestTime: Date.now(),
         protocol: null,
         hasUserGesture: false,
         documentUrl: networkRequest.request.headers.Referer,
@@ -269,7 +269,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        requestTime: new Date(networkRequest.wallTime * 1e3),
+        requestTime: networkRequest.wallTime * 1e3,
         protocol: null,
         browserRequestId: networkRequest.requestId,
         resourceType: getResourceTypeForChromeValue(
@@ -415,7 +415,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       resource.remoteAddress = `${response.remoteIPAddress}:${response.remotePort}`;
       resource.protocol = response.protocol;
       resource.responseUrl = response.url;
-      resource.responseTime = new Date();
+      resource.responseTime = response.responseTime;
       if (response.fromDiskCache) resource.browserServedFromCache = 'disk';
       if (response.fromServiceWorker) resource.browserServedFromCache = 'service-worker';
       if (response.fromPrefetchCache) resource.browserServedFromCache = 'prefetch';
@@ -440,6 +440,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         location: response.headers.location,
         url: response.url,
         loaderId: event.loaderId,
+        timestamp: response.responseTime,
       });
     }
   }

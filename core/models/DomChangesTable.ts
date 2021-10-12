@@ -72,10 +72,10 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     return query.all(frameId, sinceCommandId ?? 0).map(DomChangesTable.inflateRecord);
   }
 
-  public getChangesSince(timestamp: number): IDomChangeRecord[] {
-    const query = this.db.prepare(`select * from ${this.tableName} where timestamp >= ?`);
+  public getChangesSinceNavigation(navigationId: number): IDomChangeRecord[] {
+    const query = this.db.prepare(`select * from ${this.tableName} where frameNavigationId >= ?`);
 
-    return query.all(timestamp).map(DomChangesTable.inflateRecord);
+    return query.all(navigationId).map(DomChangesTable.inflateRecord);
   }
 
   public static inflateRecord(record: IDomChangeRecord): IDomChangeRecord {

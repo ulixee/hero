@@ -105,9 +105,7 @@ export default class BrowserRequestMatcher {
 
     if (resource && resource.browserRequestedPromise.isResolved && resource.browserRequestId) {
       // figure out how long ago this request was
-      const requestTimeDiff = Math.abs(
-        httpResourceLoad.requestTime.getTime() - resource.requestTime.getTime(),
-      );
+      const requestTimeDiff = Math.abs(httpResourceLoad.requestTime - resource.requestTime);
       if (requestTimeDiff > 5e3) resource = null;
     }
 
@@ -234,9 +232,12 @@ export default class BrowserRequestMatcher {
   }
 }
 
-function getHeaderDetails(
-  httpResourceLoad: IPuppetResourceRequest,
-): { origin: string; referer: string; secFetchDest: string; secFetchSite: string } {
+function getHeaderDetails(httpResourceLoad: IPuppetResourceRequest): {
+  origin: string;
+  referer: string;
+  secFetchDest: string;
+  secFetchSite: string;
+} {
   const origin = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'origin');
   const referer = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'referer');
   const secFetchDest = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'sec-fetch-dest');
@@ -251,7 +252,7 @@ interface IRequestedResource {
   secFetchSite: string;
   secFetchDest: string;
   referer: string;
-  requestTime: Date;
+  requestTime: number;
   browserRequestedPromise: IResolvablePromise<void>;
   tabId?: number;
   mitmResourceId?: number;

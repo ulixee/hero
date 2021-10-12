@@ -953,6 +953,7 @@ export default class Tab
         event.resource.browserRequestId,
         event.resource.responseUrl ?? event.resource.url?.href,
         event.loaderId,
+        event.resource.responseTime,
       );
     }
 
@@ -971,7 +972,7 @@ export default class Tab
         if (!request) continue;
         if (
           request.method === event.resource.method &&
-          Math.abs(request.timestamp - event.resource.requestTime.getTime()) < 500
+          Math.abs(request.timestamp - event.resource.requestTime) < 500
         ) {
           errorsMatchingUrl.splice(i, 1);
           this.sessionState.captureResourceRequestId(
@@ -1066,7 +1067,12 @@ export default class Tab
       return;
     }
 
-    frame.navigations.onHttpResponded(event.browserRequestId, event.url, event.loaderId);
+    frame.navigations.onHttpResponded(
+      event.browserRequestId,
+      event.url,
+      event.loaderId,
+      event.timestamp,
+    );
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
   }
 

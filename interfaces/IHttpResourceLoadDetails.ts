@@ -22,7 +22,7 @@ export default interface IHttpResourceLoadDetails {
   dnsResolvedIp?: string;
   url: URL;
   method: string;
-  requestTime: Date;
+  requestTime: number;
   requestOriginalHeaders: IResourceHeaders;
   requestHeaders: IResourceHeaders;
   requestTrailers?: IResourceHeaders;
@@ -33,7 +33,7 @@ export default interface IHttpResourceLoadDetails {
   responseUrl?: string;
   responseOriginalHeaders?: IResourceHeaders;
   responseHeaders?: IResourceHeaders;
-  responseTime?: Date;
+  responseTime?: number;
   responseTrailers?: IResourceHeaders;
   resourceType?: ResourceType;
   browserRequestId?: string;

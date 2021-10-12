@@ -475,7 +475,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     for (const [event, url, timestamp] of loadEvents) {
       const incomingStatus = pageStateToLoadStatus[event];
 
-      this.navigations.onLoadStatusChanged(incomingStatus, url, null, new Date(timestamp));
+      this.navigations.onLoadStatusChanged(incomingStatus, url, null, timestamp);
     }
 
     if (domChanges.length) {
