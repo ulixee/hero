@@ -19,7 +19,7 @@ export default class PageStateAssertions {
     if (frameAssertions) return frameAssertions[query];
   }
 
-  public recordAssertion(sessionId: string, frameId: number, assertion: IAssertionAndResult) {
+  public recordAssertion(sessionId: string, frameId: number, assertion: IAssertionAndResult): void {
     this.assertsBySessionId[sessionId] ??= {};
     this.assertsBySessionId[sessionId][frameId] ??= {};
     this.assertsBySessionId[sessionId][frameId][assertion.query] = assertion;

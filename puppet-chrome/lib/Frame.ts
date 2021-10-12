@@ -297,8 +297,9 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   public onStoppedLoading(): void {
     if (!this.lifecycleEvents.load) {
-      this.onLifecycleEvent('DOMContentLoaded');
-      this.onLifecycleEvent('load');
+      const time = Date.now();
+      this.onLifecycleEvent('DOMContentLoaded', time);
+      this.onLifecycleEvent('load', time);
     }
   }
 
@@ -312,7 +313,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     }
   }
 
-  public onLifecycleEvent(name: string, pageLoaderId?: string): void {
+  public onLifecycleEvent(name: string, timestamp?: number, pageLoaderId?: string): void {
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init') {
       if (!this.loaderIdResolvers.has(loaderId)) {
@@ -342,11 +343,11 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     const lifecycle = this.loaderLifecycles.get(loaderId);
 
     if (lifecycle) {
-      lifecycle[name] = new Date();
+      lifecycle[name] = timestamp ?? Date.now();
     }
 
     if (!this.isDefaultUrl) {
-      this.emit('frame-lifecycle', { frame: this, name, loaderId: pageLoaderId });
+      this.emit('frame-lifecycle', { frame: this, name, loaderId: pageLoaderId, timestamp });
     }
   }
 

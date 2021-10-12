@@ -173,7 +173,10 @@ export default class MirrorNetwork {
     return network;
   }
 
-  public static loadResourceFromDb(db: SessionDb, resourceId: number) {
+  public static loadResourceFromDb(
+    db: SessionDb,
+    resourceId: number,
+  ): { statusCode: number; headers: Record<string, string | string[]>; body: Buffer } {
     const resource = db.resources.getResponse(resourceId);
     const headers = JSON.parse(resource.responseHeaders ?? '{}');
     return {

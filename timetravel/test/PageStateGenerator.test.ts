@@ -2,8 +2,6 @@ import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { Helpers } from '@ulixee/hero-testing';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import Core from '@ulixee/hero-core';
-import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
-import * as Fs from 'fs';
 import PageStateGenerator from '../lib/PageStateGenerator';
 
 let koaServer: ITestKoaServer;

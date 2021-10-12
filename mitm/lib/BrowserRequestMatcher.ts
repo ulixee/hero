@@ -68,6 +68,7 @@ export default class BrowserRequestMatcher {
         mitmResource.browserRequestId = browserRequest.browserRequestId;
         mitmResource.hasUserGesture = browserRequest.hasUserGesture;
         mitmResource.documentUrl = browserRequest.documentUrl;
+        mitmResource.browserFrameId = browserRequest.frameId;
         return null;
       })
       // drown errors - we don't want to log cancels
@@ -79,6 +80,7 @@ export default class BrowserRequestMatcher {
   public onBrowserRequestedResourceExtraDetails(
     httpResourceLoad: IPuppetResourceRequest,
     tabId?: number,
+    frameId?: number,
   ): void {
     const match = this.requestedResources.find(
       x => x.browserRequestId === httpResourceLoad.browserRequestId,
@@ -91,13 +93,14 @@ export default class BrowserRequestMatcher {
       'hasMitmResourceId',
     );
     if (mitmResourceNeedsResolve && !mitmResourceNeedsResolve.browserRequestedPromise.isResolved) {
-      this.updatePendingResource(httpResourceLoad, mitmResourceNeedsResolve, tabId);
+      this.updatePendingResource(httpResourceLoad, mitmResourceNeedsResolve, tabId, frameId);
     }
   }
 
   public onBrowserRequestedResource(
     httpResourceLoad: IPuppetResourceRequest,
     tabId?: number,
+    frameId?: number,
   ): IRequestedResource {
     const { method } = httpResourceLoad;
 
@@ -121,7 +124,7 @@ export default class BrowserRequestMatcher {
       this.requestedResources.push(resource);
     }
 
-    this.updatePendingResource(httpResourceLoad, resource, tabId);
+    this.updatePendingResource(httpResourceLoad, resource, tabId, frameId);
 
     return resource;
   }
@@ -129,6 +132,7 @@ export default class BrowserRequestMatcher {
   public onBrowserRequestFailed(event: {
     resource: IPuppetResourceRequest;
     tabId: number;
+    frameId?: number;
     loadError: Error;
   }): number {
     this.requestIdToTabId.set(event.resource.browserRequestId, event.tabId);
@@ -139,6 +143,8 @@ export default class BrowserRequestMatcher {
       match.resourceType = event.resource.resourceType;
       match.browserRequestId = event.resource.browserRequestId;
       match.tabId = event.tabId;
+      match.frameId = event.frameId;
+      match.browserLoadedTime = event.resource.browserLoadedTime;
       match.browserRequestedPromise.resolve();
       const id = match.mitmResourceId;
       if (id) setTimeout(() => this.clearRequest(id), 500).unref();
@@ -161,11 +167,14 @@ export default class BrowserRequestMatcher {
     httpResourceLoad: IPuppetResourceRequest,
     pendingResource: IRequestedResource,
     tabId: number,
+    frameId: number,
   ): void {
     if (tabId) {
       pendingResource.tabId = tabId;
       this.requestIdToTabId.set(httpResourceLoad.browserRequestId, tabId);
     }
+    pendingResource.frameId ??= frameId;
+    pendingResource.browserLoadedTime ??= httpResourceLoad.browserLoadedTime;
     pendingResource.browserRequestId = httpResourceLoad.browserRequestId;
     pendingResource.documentUrl = httpResourceLoad.documentUrl;
     pendingResource.resourceType = httpResourceLoad.resourceType;
@@ -255,7 +264,9 @@ interface IRequestedResource {
   requestTime: number;
   browserRequestedPromise: IResolvablePromise<void>;
   tabId?: number;
+  frameId?: number;
   mitmResourceId?: number;
+  browserLoadedTime?: number;
   browserRequestId?: string;
   resourceType?: ResourceType;
   documentUrl?: string;

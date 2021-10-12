@@ -251,7 +251,9 @@ export default class SessionState {
       existingDbRecord.redirectedToUrl ??= resourceFailedEvent.redirectedToUrl;
       existingDbRecord.statusCode ??= convertedMeta.response.statusCode;
       existingDbRecord.statusMessage ??= convertedMeta.response.statusMessage;
-      existingDbRecord.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
+      existingDbRecord.browserLoadFailure = convertedMeta.response.browserLoadFailure;
+      existingDbRecord.browserLoadedTimestamp ??= convertedMeta.response.timestamp;
+      existingDbRecord.frameId ??= convertedMeta.frameId;
 
       if (!resource.response) {
         resource.response = convertedMeta.response ?? ({} as any);
@@ -296,6 +298,15 @@ export default class SessionState {
 
     if (!this.resourcesById.has(resource.id)) {
       this.resourcesById.set(resource.id, resource);
+    }
+    return resource;
+  }
+
+  public captureResourceBrowserLoadedTime(resourceId: number, loadedTime: number): IResourceMeta {
+    const resource = this.resourcesById.get(resourceId);
+    if (resource) {
+      resource.response.browserLoadedTime = loadedTime;
+      this.db.resources.updateReceivedTime(resourceId, loadedTime);
     }
     return resource;
   }
@@ -346,7 +357,7 @@ export default class SessionState {
     tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
   ): IResourceMeta {
-    const { request, response, resourceType, browserRequestId, redirectedToUrl } =
+    const { request, response, resourceType, browserRequestId, frameId, redirectedToUrl } =
       resourceEvent as IRequestSessionResponseEvent;
 
     if (browserRequestId) {
@@ -361,6 +372,7 @@ export default class SessionState {
     const resource = {
       id: resourceEvent.id,
       tabId,
+      frameId,
       url: request.url,
       receivedAtCommandId: this.lastCommand?.id,
       type: resourceType,
@@ -369,6 +381,7 @@ export default class SessionState {
         ...request,
         postData: request.postData?.toString(),
       },
+      response: {},
     } as IResourceMeta;
 
     if (response?.statusCode || response?.browserServedFromCache || response?.browserLoadFailure) {

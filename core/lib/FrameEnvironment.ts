@@ -613,7 +613,12 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
-      this.navigations.onLoadStatusChanged(status, event.frame.url, event.loaderId);
+      this.navigations.onLoadStatusChanged(
+        status,
+        event.frame.url,
+        event.loaderId,
+        event.timestamp,
+      );
     }
   }
 

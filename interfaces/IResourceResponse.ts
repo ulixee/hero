@@ -8,6 +8,7 @@ export default interface IResourceResponse {
   trailers?: IResourceHeaders;
   browserServedFromCache?: IHttpResourceLoadDetails['browserServedFromCache'];
   browserLoadFailure?: string;
+  browserLoadedTime?: number;
   remoteAddress: string;
   statusCode: number;
   statusMessage?: string;

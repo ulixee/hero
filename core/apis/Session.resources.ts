@@ -35,7 +35,9 @@ export interface ISessionResource {
   method: string;
   id: number;
   tabId: number;
+  frameId?: number;
   statusCode: number;
   type: ResourceType;
   redirectedToUrl?: string;
+  timestamp?: number;
 }

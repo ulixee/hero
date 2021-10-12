@@ -175,12 +175,14 @@ export default class MitmRequestContext {
       timestamp: ctx.responseTime,
       browserServedFromCache: ctx.browserServedFromCache,
       browserLoadFailure: ctx.browserLoadFailure,
+      browserLoadedTime: ctx.browserLoadedTime,
       remoteAddress: ctx.remoteAddress,
     } as IResourceResponse;
 
     return {
       id: ctx.id,
       browserRequestId: ctx.browserRequestId,
+      frameId: ctx.browserFrameId,
       request,
       response,
       redirectedToUrl: ctx.redirectedToUrl,

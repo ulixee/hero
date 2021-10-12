@@ -103,7 +103,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.logger,
       this.browserContext.proxy,
     );
-    this.framesManager = new FramesManager(devtoolsSession, this.logger);
+    this.framesManager = new FramesManager(devtoolsSession, this.networkManager, this.logger);
     this.opener = opener;
 
     this.setEventsToLog([

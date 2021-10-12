@@ -910,7 +910,11 @@ export default class Tab
     }
     resource.hasUserGesture ||= navigations.didGotoUrl(url);
 
-    session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(resource, this.id);
+    session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(
+      resource,
+      this.id,
+      this.translatePuppetFrameId(event.frameId),
+    );
 
     if (isDocumentNavigation && !event.resource.browserCanceled) {
       navigations.onHttpRequested(
@@ -927,22 +931,26 @@ export default class Tab
     this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
       event.resource,
       this.id,
+      this.translatePuppetFrameId(event.frameId),
     );
   }
 
   private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
+    const { resource, frameId, loaderId } = event;
+
+    let frame = this.frameEnvironmentsByPuppetId.get(frameId);
+    // if no frame id provided, use default
+    if (!frame && !frameId) frame = this.mainFrameEnvironment;
+
     this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
-      event.resource,
+      resource,
       this.id,
+      frame?.id,
     );
 
-    let frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
-    // if no frame id provided, use default
-    if (!frame && !event.frameId) frame = this.mainFrameEnvironment;
-
-    if (!frame && event.frameId) {
-      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
-      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
+    if (!frame && frameId) {
+      this.onFrameCreatedResourceEventsByFrameId[frameId] ??= [];
+      const events = this.onFrameCreatedResourceEventsByFrameId[frameId];
       if (!events.some(x => x.event === event)) {
         events.push({ event, type: 'resource-loaded' });
       }
@@ -950,25 +958,30 @@ export default class Tab
     }
 
     if (
-      !!event.resource.browserServedFromCache &&
-      event.resource.url?.href === frame.navigations?.top?.requestedUrl &&
+      !!resource.browserServedFromCache &&
+      resource.url?.href === frame.navigations?.top?.requestedUrl &&
       frame.navigations?.top?.resourceIdResolvable?.isResolved === false
     ) {
       frame.navigations.onHttpResponded(
-        event.resource.browserRequestId,
-        event.resource.responseUrl ?? event.resource.url?.href,
-        event.loaderId,
-        event.resource.responseTime,
+        resource.browserRequestId,
+        resource.responseUrl ?? resource.url?.href,
+        loaderId,
+        resource.browserLoadedTime,
       );
     }
 
     const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
-      event.resource.browserRequestId,
+      resource.browserRequestId,
     );
-
-    if (!resourcesWithBrowserRequestId?.length) {
+    if (resourcesWithBrowserRequestId?.length) {
+      const last = resourcesWithBrowserRequestId[resourcesWithBrowserRequestId.length - 1];
+      this.sessionState.captureResourceBrowserLoadedTime(
+        last.resourceId,
+        resource.browserLoadedTime,
+      );
+    } else {
       // first check if this is a mitm error
-      const errorsMatchingUrl = this.session.mitmErrorsByUrl.get(event.resource.url.href);
+      const errorsMatchingUrl = this.session.mitmErrorsByUrl.get(resource.url.href);
 
       // if this resource error-ed out,
       for (let i = 0; i < errorsMatchingUrl?.length ?? 0; i += 1) {
@@ -976,13 +989,13 @@ export default class Tab
         const request = error.event?.request?.request;
         if (!request) continue;
         if (
-          request.method === event.resource.method &&
-          Math.abs(request.timestamp - event.resource.requestTime) < 500
+          request.method === resource.method &&
+          Math.abs(request.timestamp - resource.requestTime) < 500
         ) {
           errorsMatchingUrl.splice(i, 1);
           this.sessionState.captureResourceRequestId(
             error.resourceId,
-            event.resource.browserRequestId,
+            resource.browserRequestId,
             this.id,
           );
           return;
@@ -991,6 +1004,10 @@ export default class Tab
 
       setImmediate(r => this.checkForResourceCapture(r), event);
     }
+  }
+
+  private translatePuppetFrameId(puppetFrameId: string): number {
+    return this.frameEnvironmentsByPuppetId.get(puppetFrameId)?.id ?? this.mainFrameId;
   }
 
   private async checkForResourceCapture(
@@ -1032,10 +1049,12 @@ export default class Tab
     }
 
     const browserRequestId = event.resource.browserRequestId;
+    const frame = this.frameEnvironmentsByPuppetId.get(event.resource.frameId);
 
     let resourceId = this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestFailed({
       resource,
       tabId: this.id,
+      frameId: frame?.id,
       loadError,
     });
 
@@ -1109,13 +1128,13 @@ export default class Tab
   private onPageError(event: IPuppetPageEvents['page-error']): void {
     const { error, frameId } = event;
     this.logger.info('Window.pageError', { error, frameId });
-    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
+    const translatedFrameId = this.translatePuppetFrameId(frameId);
     this.sessionState.captureError(this.id, translatedFrameId, `events.page-error`, error);
   }
 
   private onConsole(event: IPuppetPageEvents['console']): void {
     const { frameId, type, message, location } = event;
-    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
+    const translatedFrameId = this.translatePuppetFrameId(frameId);
     this.sessionState.captureLog(this.id, translatedFrameId, type, message, location);
   }
 

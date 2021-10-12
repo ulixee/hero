@@ -229,6 +229,7 @@ export interface IResourceStateChangeEvent {
 
 export interface IRequestSessionResponseEvent extends IRequestSessionRequestEvent {
   browserRequestId: string;
+  frameId: number;
   response: IResourceResponse;
   wasCached: boolean;
   dnsResolvedIp?: string;
