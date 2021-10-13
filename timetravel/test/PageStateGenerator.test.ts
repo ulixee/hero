@@ -292,6 +292,58 @@ describe('pageStateGenerator', () => {
     expect(states2['count(//H1[text()="Page 2"])'].result).toBe(1);
   }, 20e3);
 
+  test('can find resources', async () => {
+    koaServer.get('/pageStateResources', ctx => {
+      const xhrParam = ctx.query.state;
+
+      ctx.body = `
+<body>
+<h1>Resources Page</h1>
+<script>
+  fetch('/xhr?param=${xhrParam}')
+    .then(x => x.text())
+    .then(text => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      div.id="ready";
+      document.body.appendChild(div)
+    })
+</script>
+</body>`;
+    });
+
+    koaServer.get('/xhr', ctx => {
+      ctx.body = `ok ${ctx.query.param}`;
+    });
+
+    const pageStateGenerator = new PageStateGenerator('1');
+    async function run(state: string) {
+      // just give some time randomization
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession();
+      await tab.goto(`${koaServer.baseUrl}/pageStateResources?state=${state}`);
+      const startTime = Date.now();
+
+      await tab.waitForLoad(LoadStatus.PaintingStable);
+      await tab.waitForElement(['document', ['querySelector', '#ready']]);
+
+      await tab.close();
+      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    await Promise.all([run('1'), run('2'), run('1'), run('2')]);
+
+    await pageStateGenerator.evaluate();
+
+    const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
+    const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
+    expect(states1).not.toEqual(states2);
+
+    expect(Object.values(states1).filter(x => x.type === 'resource')).toHaveLength(1);
+    expect(Object.values(states2).filter(x => x.type === 'resource')).toHaveLength(1);
+  }, 20e3);
+
   test('can export and re-import states', async () => {
     let changeTitle = false;
     koaServer.get('/restorePage1', ctx => {

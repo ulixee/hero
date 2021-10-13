@@ -8,6 +8,7 @@ import DomChangesTable, {
   IDomRecording,
 } from '@ulixee/hero-core/models/DomChangesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
@@ -168,6 +169,9 @@ export default class PageStateGenerator {
 
         this.processDomChanges(domRebuilder, sessionId, paintEvent.changeEvents);
       }
+
+      const resources = db.resources.withResponseTimeInRange(tabId, start, end);
+      this.processResources(resources, sessionId);
     }
 
     await this.checkResultsInPage();
@@ -251,6 +255,21 @@ export default class PageStateGenerator {
         locale: sessionRecord.locale,
       });
     });
+  }
+
+  private processResources(resources: IResourceSummary[], sessionId: string): void {
+    for (const resource of resources) {
+      const { frameId } = resource;
+      if (!frameId) continue;
+
+      const args = { url: resource.url, status: resource.statusCode, method: resource.method };
+      this.sessionAssertions.recordAssertion(sessionId, frameId, {
+        type: 'resource',
+        query: JSON.stringify(args),
+        comparison: '!==',
+        result: null,
+      });
+    }
   }
 
   private processDomChanges(

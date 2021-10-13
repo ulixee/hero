@@ -3,6 +3,7 @@ import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import DomChangesTable, {
   IDomChangeRecord,
   IDomRecording,
@@ -10,7 +11,6 @@ import DomChangesTable, {
 } from '../models/DomChangesTable';
 import Session from './Session';
 import Tab from './Tab';
-import { ISessionResource } from '../apis/Session.resources';
 
 export default class DetachedTabState {
   public get url(): string {
@@ -96,7 +96,7 @@ export default class DetachedTabState {
   private static createMirrorNetwork(sourceTab: Tab): MirrorNetwork {
     const db = sourceTab.sessionState.db;
     const resources = sourceTab.sessionState.getResources(sourceTab.id).map(x => {
-      return <ISessionResource>{
+      return <IResourceSummary>{
         url: x.request.url,
         method: x.request.method,
         id: x.id,

@@ -381,7 +381,6 @@ export default class SessionState {
         ...request,
         postData: request.postData?.toString(),
       },
-      response: {},
     } as IResourceMeta;
 
     if (response?.statusCode || response?.browserServedFromCache || response?.browserLoadFailure) {

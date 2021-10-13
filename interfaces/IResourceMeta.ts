@@ -5,7 +5,7 @@ import ResourceType from './ResourceType';
 export default interface IResourceMeta {
   id: number;
   tabId: number;
-  frameId?: number;
+  frameId: number;
   url: string;
   request: IResourceRequest;
   response?: IResourceResponse;

@@ -4,7 +4,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import { ISessionResource } from '../apis/Session.resources';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -198,56 +198,39 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     tabId: number,
     startTime: number,
     endTime: number,
-  ): ISessionResource[] {
+  ): IResourceSummary[] {
     return this.db
       .prepare(
-        `select frameId, requestUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders, browserLoadedTime, responseTime
+        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl,
+        responseHeaders, browserLoadedTimestamp, responseTimestamp
         from ${this.tableName} where tabId = ? and (
-          (browserLoadedTime is null and responseTime >= ? and responseTime <= ?) or
-          (browserLoadedTime is not null and browserLoadedTime >= ? and browserLoadedTime <= ?)
+          (browserLoadedTimestamp is null and responseTimestamp >= ? and responseTimestamp <= ?) or
+          (browserLoadedTimestamp is not null and browserLoadedTimestamp >= ? and browserLoadedTimestamp <= ?)
         )`,
       )
       .all(tabId, startTime, endTime, startTime, endTime)
-      .map(x => ({
-        id: x.id,
-        frameId: x.frameId,
-        tabId: x.tabId,
-        url: x.requestUrl,
-        method: x.requestMethod,
-        type: x.type,
-        statusCode: x.statusCode,
-        redirectedToUrl: x.redirectedToUrl,
-        timestamp: x.browserLoadedTime ?? x.responseTime,
-        responseHeaders: x.responseHeaders ? JSON.parse(x.responseHeaders) : null,
-      }));
+      .map(ResourcesTable.toResourceSummary);
   }
 
-  public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): ISessionResource[] {
+  public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): IResourceSummary[] {
     const { hasResponse, isGetOrDocument } = filters;
     const records = this.db
       .prepare(
-        `select requestUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
+        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
       )
       .all();
 
     return records
       .filter(resource => {
-        if (hasResponse && !resource.responseHeaders) return false;
+        if ((hasResponse && !resource.responseHeaders) || resource.responseHeaders === '{}')
+          return false;
         if (isGetOrDocument && resource.requestMethod !== 'GET') {
           // if this is a POST of a document, allow it
           if (resource.type !== 'Document' && resource.method === 'POST') return false;
         }
         return true;
       })
-      .map(resource => ({
-        url: resource.requestUrl,
-        statusCode: resource.statusCode,
-        method: resource.requestMethod,
-        id: resource.id,
-        tabId: resource.tabId,
-        type: resource.type,
-        redirectedToUrl: resource.redirectedToUrl,
-      }));
+      .map(ResourcesTable.toResourceSummary);
   }
 
   public getResponse(
@@ -280,6 +263,21 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     const { responseData, responseEncoding } = record;
     if (!decompress) return responseData;
     return await decodeBuffer(responseData, responseEncoding);
+  }
+
+  public static toResourceSummary(record: IResourcesRecord): IResourceSummary {
+    return {
+      id: record.id,
+      frameId: record.frameId,
+      tabId: record.tabId,
+      url: record.responseUrl ?? record.requestUrl,
+      method: record.requestMethod,
+      type: record.type,
+      statusCode: record.statusCode,
+      redirectedToUrl: record.redirectedToUrl,
+      timestamp: record.browserLoadedTimestamp ?? record.responseTimestamp,
+      hasResponse: !!record.responseHeaders,
+    };
   }
 
   public static getErrorString(error: Error | string): string {

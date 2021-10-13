@@ -112,7 +112,7 @@ export interface IFrameAssertions {
 export interface IAssertionAndResult {
   type: 'xpath' | 'qs' | 'resource' | 'url';
   query: string;
-  comparison: '===' | '>=' | '>' | '<' | '<=' | 'contains';
+  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=' | 'contains';
   result: number | string | boolean;
 }
 
