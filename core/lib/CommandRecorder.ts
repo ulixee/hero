@@ -1,7 +1,5 @@
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import Session from './Session';
 import Tab from './Tab';
 import { ICommandableTarget } from './CommandRunner';
@@ -35,8 +33,8 @@ export default class CommandRecorder {
       throw new Error(`Unsupported function requested ${commandFn.name}`);
 
     const { session } = this;
-    const sessionState = session.sessionState;
-    const commandHistory = sessionState.commands;
+    const commands = session.commands;
+
     let tabId = this.tabId;
     const frameId = this.frameId;
 
@@ -48,47 +46,41 @@ export default class CommandRecorder {
     const frame =
       tab?.getFrameEnvironment(frameId) ?? this.session.getLastActiveTab()?.mainFrameEnvironment;
 
-    const commandMeta = {
-      id: commandHistory.length + 1,
+    const commandMeta = commands.create(
       tabId,
       frameId,
-      name: commandFn.name,
-      args: args.length ? TypeSerializer.stringify(args) : undefined,
-      run: session.resumeCounter,
-      startNavigationId: frame?.navigations?.top?.id,
-    } as ICommandMeta;
-
-    if (sessionState.nextCommandMeta) {
-      const { commandId, sendDate, startDate } = sessionState.nextCommandMeta;
-      sessionState.nextCommandMeta = null;
-      commandMeta.id = commandId;
-      commandMeta.clientSendDate = sendDate?.getTime();
-      commandMeta.clientStartDate = startDate?.getTime();
-    }
+      frame?.navigations?.top?.id,
+      commandFn.name,
+      args,
+    );
 
     if (commandMeta.run > 0) {
-      const reusableCommand = this.findReusableCommandFromRun(commandMeta, commandMeta.run - 1);
+      const sessionResumeLocation = session.options.sessionResume?.startLocation;
+      const reusableCommand = commands.findReusableCommandFromRun(
+        sessionResumeLocation,
+        commandMeta,
+        commandMeta.run - 1,
+      );
 
       let isReusable = !!reusableCommand;
       if (isReusable && 'canReuseCommand' in this.owner) {
         isReusable = await this.owner.canReuseCommand(commandMeta, reusableCommand);
       }
       if (isReusable) {
-        return this.reuseCommand(commandMeta, reusableCommand);
+        return commands.reuseCommand(commandMeta, reusableCommand);
       }
     }
 
     tab?.willRunCommand(commandMeta);
 
     if (frame) {
-      frame.navigationsObserver.willRunCommand(commandMeta, commandHistory);
+      frame.navigationsObserver.willRunCommand(commandMeta, commands.history);
     }
     const id = this.logger.info('Command.run', commandMeta);
 
     let result: T;
     try {
-      commandMeta.runStartDate = Date.now();
-      sessionState.recordCommandStart(commandMeta);
+      commands.onStart(commandMeta, Date.now());
 
       result = await commandFn.call(this.owner, ...args);
       return result;
@@ -96,77 +88,10 @@ export default class CommandRecorder {
       result = err;
       throw err;
     } finally {
-      commandMeta.endDate = Date.now();
-      commandMeta.result = result;
       const mainFrame = frame ?? (tab ?? this.session.getLastActiveTab())?.mainFrameEnvironment;
-      commandMeta.endNavigationId = mainFrame?.navigations?.top?.id;
-      // NOTE: second insert on purpose -- it will do an update
-      sessionState.recordCommandFinished(commandMeta);
+      commands.onFinished(commandMeta, result, mainFrame?.navigations?.top?.id);
       tab?.didRunCommand(commandMeta);
       this.logger.stats('Command.done', { result, parentLogId: id });
-    }
-  }
-
-  private reuseCommand<T>(commandMeta: ICommandMeta, reusableCommand: ICommandMeta): T {
-    commandMeta.result = reusableCommand.result;
-    commandMeta.runStartDate = reusableCommand.runStartDate;
-    commandMeta.endDate = reusableCommand.endDate;
-    commandMeta.reusedCommandFromRun = reusableCommand.reusedCommandFromRun ?? reusableCommand.run;
-    commandMeta.startNavigationId = reusableCommand.startNavigationId;
-    commandMeta.endNavigationId = reusableCommand.endNavigationId;
-    this.session.sessionState.recordCommandStart(commandMeta);
-    return reusableCommand.result;
-  }
-
-  private findReusableCommandFromRun(commandMeta: ICommandMeta, run: number): ICommandMeta {
-    const { session } = this;
-    const sessionState = session.sessionState;
-    const commandHistory = sessionState.commands;
-    const { tabId, frameId, id } = commandMeta;
-
-    const { sessionResume } = session.options;
-    if (!sessionResume) return;
-    // don't use any cached commands if sessionStart
-    if (sessionResume.startLocation === 'sessionStart') return;
-
-    const startAtPageStart = sessionResume.startLocation === 'pageStart';
-    const breakAtNavigationId =
-      sessionResume.startNavigationId ??
-      session.tabsById.get(tabId)?.getFrameEnvironment(frameId)?.navigations?.top?.id;
-
-    // make sure last command reused a command run
-    const lastCommand = sessionState.lastCommand;
-    if (
-      lastCommand &&
-      lastCommand.run === commandMeta.run &&
-      lastCommand.reusedCommandFromRun === undefined
-    ) {
-      return;
-    }
-
-    for (let i = commandHistory.length - 1; i >= 0; i -= 1) {
-      const previous = commandHistory[i];
-      if (previous.run < run) break;
-
-      if (
-        previous.run === run &&
-        previous.id === id &&
-        previous.tabId === commandMeta.tabId &&
-        previous.args === commandMeta.args &&
-        previous.name === commandMeta.name &&
-        !previous.resultType?.includes('Error')
-      ) {
-        // if page start, we should break if command ends in the navigation we want to restart is the same.
-        if (
-          startAtPageStart &&
-          breakAtNavigationId === previous.startNavigationId &&
-          commandMeta.name !== 'waitForLocation' // can't wait for location again here
-        ) {
-          break;
-        }
-
-        return previous;
-      }
     }
   }
 }

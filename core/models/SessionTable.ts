@@ -38,7 +38,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     browserVersion: string,
     userAgentString: string,
     humanEmulatorId: string,
-    startDate: Date,
+    startDate: number,
     scriptInstanceId: string,
     scriptEntrypoint: string,
     scriptStartDate: number,
@@ -54,7 +54,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       browserEmulatorId,
       browserVersion,
       humanEmulatorId,
-      startDate.getTime(),
+      startDate,
       null,
       scriptInstanceId,
       scriptEntrypoint,
@@ -69,8 +69,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     this.insertNow(record);
   }
 
-  public close(id: string, closeDate: Date): void {
-    const values = [closeDate.getTime(), id];
+  public close(id: string, closeDate: number): void {
+    const values = [closeDate, id];
     const fields = ['closeDate'];
     const sql = `UPDATE ${this.tableName} SET ${fields.map(n => `${n}=?`).join(', ')} WHERE id=?`;
     this.db.prepare(sql).run(...values);

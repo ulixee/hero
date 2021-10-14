@@ -17,7 +17,7 @@ export default function sessionCommandsApi(args: ISessionCommandsArgs): ISession
 }
 
 export function loadCommandTimeline(args: ISessionCommandsArgs): CommandTimeline {
-  Session.get(args.sessionId)?.sessionState?.db?.flush();
+  Session.get(args.sessionId)?.db?.flush();
   const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   // sort in case they got out of order (like saving in batch)

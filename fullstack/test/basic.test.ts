@@ -92,7 +92,6 @@ describe('basic Full Client tests', () => {
     Helpers.needsClosing.push(hero);
 
     const resource = await hero.goto(exampleUrl);
-
     const { request, response } = resource;
     expect(await request.headers).toMatchObject({
       Host: koaServer.baseHost,
@@ -106,7 +105,7 @@ describe('basic Full Client tests', () => {
     expect(await request.url).toBe(exampleUrl);
     expect(await request.timestamp).toBeTruthy();
     expect(await request.method).toBe('GET');
-    expect(await request.postData).toBe('');
+    expect(await request.postData).toEqual(Buffer.from(''));
 
     expect(await response.headers).toMatchObject({
       'Content-Type': 'text/html; charset=utf-8',

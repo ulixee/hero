@@ -1,5 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import { Session } from '../index';
 
 export default class SessionsTable extends SqliteTable<ISessionsRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -13,21 +14,17 @@ export default class SessionsTable extends SqliteTable<ISessionsRecord> {
     ]);
   }
 
-  public insert(
-    id: string,
-    name: string,
-    startDate: number,
-    scriptInstanceId: string,
-    scriptEntrypoint: string,
-    scriptStartDate: number,
-  ): void {
+  public insert(session: Session): void {
+    const { options, createdTime } = session;
+    const { scriptInstanceMeta } = options;
+
     const record = [
-      id,
-      name,
-      new Date(startDate).toISOString(),
-      scriptInstanceId,
-      scriptEntrypoint,
-      new Date(scriptStartDate).toISOString(),
+      session.id,
+      options.sessionName,
+      new Date(createdTime).toISOString(),
+      scriptInstanceMeta?.id,
+      scriptInstanceMeta?.entrypoint,
+      new Date(scriptInstanceMeta?.startDate).toISOString(),
     ];
     this.insertNow(record);
   }

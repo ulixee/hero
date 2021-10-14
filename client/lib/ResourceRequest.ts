@@ -37,7 +37,7 @@ export default class ResourceRequest {
     return getRequestProperty(this, 'method');
   }
 
-  public get postData(): Promise<any> {
+  public get postData(): Promise<Buffer> {
     return getRequestProperty(this, 'postData');
   }
 

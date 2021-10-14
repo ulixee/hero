@@ -119,6 +119,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       record.requestOriginalHeaders,
       record.responseOriginalHeaders,
       record.httpError,
+      record.browserLoadedTimestamp,
       record.browserServedFromCache,
       record.browserLoadFailure,
       record.browserBlockedReason,

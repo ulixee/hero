@@ -19,10 +19,16 @@ export default class PageStateAssertions {
     if (frameAssertions) return frameAssertions[query];
   }
 
-  public recordAssertion(sessionId: string, frameId: number, assertion: IAssertionAndResult): void {
+  public recordAssertion(
+    sessionId: string,
+    frameId: number,
+    assert: Omit<IAssertionAndResult, 'key'>,
+  ): void {
     this.assertsBySessionId[sessionId] ??= {};
     this.assertsBySessionId[sessionId][frameId] ??= {};
-    this.assertsBySessionId[sessionId][frameId][assertion.query] = assertion;
+    const assertion = assert as IAssertionAndResult;
+    assertion.key ??= PageStateAssertions.generateKey(assertion.command, assertion.args);
+    this.assertsBySessionId[sessionId][frameId][assertion.key] = assertion;
   }
 
   public getCommonSessionAssertions(
@@ -76,6 +82,10 @@ export default class PageStateAssertions {
     return state;
   }
 
+  public static generateKey(command: IAssertionAndResult['command'], args: any[]): string {
+    return [command, args ? JSON.stringify(args) : ''].join(':');
+  }
+
   public static removeAssertsSharedBetweenStates(states: IFrameAssertions[]): void {
     for (const state of states) {
       for (const [frameId, asserts] of Object.entries(state)) {
@@ -110,8 +120,9 @@ export interface IFrameAssertions {
 }
 
 export interface IAssertionAndResult {
-  type: 'xpath' | 'qs' | 'resource' | 'url';
-  query: string;
+  key: string;
+  command: 'Tab.findResource' | 'FrameEnvironment.execXPath' | 'FrameEnvironment.getUrl';
+  args: any[];
   comparison: '===' | '!==' | '>=' | '>' | '<' | '<=' | 'contains';
   result: number | string | boolean;
 }

@@ -73,6 +73,17 @@ export default class HeadersHandler {
     }
   }
 
+  public static isWorkerDest(
+    ctx: Pick<IHttpResourceLoadDetails, 'requestHeaders'>,
+    ...types: ('shared' | 'service' | 'worker')[]
+  ): boolean {
+    const fetchDest = HeadersHandler.getRequestHeader(ctx, 'sec-fetch-dest');
+    if (types.includes('shared') && fetchDest === 'sharedworker') return true;
+    if (types.includes('service') && fetchDest === 'serviceworker') return true;
+    if (types.includes('worker') && fetchDest === 'worker') return true;
+    return false;
+  }
+
   public static cleanResponseHeaders(
     ctx: IMitmRequestContext,
     originalRawHeaders: IResourceHeaders,
@@ -131,21 +142,6 @@ export default class HeadersHandler {
         else stream.sendTrailers(trailers ?? {});
       });
     }
-  }
-
-  public static prepareHttp2RequestHeadersForSave(
-    headers: IMitmRequestContext['requestHeaders'],
-  ): IMitmRequestContext['requestHeaders'] {
-    const order: string[] = [];
-    for (const key of Object.keys(headers)) {
-      if (key.startsWith(':')) order.unshift(key);
-      else order.push(key);
-    }
-    const newHeaders = {};
-    for (const key of order) {
-      newHeaders[key] = headers[key];
-    }
-    return newHeaders;
   }
 
   public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext): void {

@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import Log from '@ulixee/commons/lib/Logger';
+import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -23,7 +23,6 @@ import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import SessionState from './SessionState';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -33,6 +32,10 @@ import CorePlugins from './CorePlugins';
 import Core from '../index';
 import SessionDb from '../dbs/SessionDb';
 import { ICommandableTarget } from './CommandRunner';
+import Resources from './Resources';
+import Commands from './Commands';
+import WebsocketMessages from './WebsocketMessages';
+import SessionsDb from '../dbs/SessionsDb';
 
 const { log } = Log(module);
 
@@ -58,13 +61,16 @@ export default class Session
   public timezoneId: string;
   public locale: string;
   public geolocation: IGeolocation;
+  public readonly createdTime: number;
 
   public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
-  public sessionState: SessionState;
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
-  public resumeCounter = 0;
+  public resources: Resources;
+  public commands: Commands;
+  public websocketMessages: WebsocketMessages;
+  public readonly db: SessionDb;
 
   public tabsById = new Map<number, Tab>();
 
@@ -79,14 +85,6 @@ export default class Session
     };
   }
 
-  public mitmErrorsByUrl = new Map<
-    string,
-    {
-      resourceId: number;
-      event: IRequestSessionHttpErrorEvent;
-    }[]
-  >();
-
   protected readonly logger: IBoundLog;
 
   private hasLoadedUserProfile = false;
@@ -95,9 +93,7 @@ export default class Session
   private _isClosing = false;
   private isResettingState = false;
   private detachedTabsById = new Map<number, Tab>();
-
-  private tabIdCounter = 0;
-  private frameIdCounter = 0;
+  private readonly logSubscriptionId: number;
 
   constructor(readonly options: ISessionCreateOptions) {
     super();
@@ -113,10 +109,15 @@ export default class Session
       }
     }
     this.id = options.sessionId ?? uuidv1();
+    this.createdTime = Date.now();
     Session.byId[this.id] = this;
-    const providedOptions = { ...options };
-    this.logger = log.createChild(module, { sessionId: this.id });
+    this.db = new SessionDb(this.id);
 
+    this.logger = log.createChild(module, { sessionId: this.id });
+    loggerSessionIdNames.set(this.id, options.sessionName);
+    this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
+
+    const providedOptions = { ...options };
     const {
       browserEmulatorId,
       humanEmulatorId,
@@ -157,24 +158,15 @@ export default class Session
     this.locale = options.locale;
     this.viewport = options.viewport;
 
-    this.sessionState = new SessionState(
-      this.id,
-      options.sessionName,
-      options.scriptInstanceMeta,
-      this.viewport,
-    );
-    this.sessionState.recordSession({
-      browserEmulatorId: this.plugins.browserEmulator.id,
-      browserVersion: this.browserEngine.fullVersion,
-      humanEmulatorId: this.plugins.humanEmulator.id,
-      userAgentString: this.plugins.browserEmulator.userAgentString,
-      deviceProfile: this.plugins.browserEmulator.deviceProfile,
-      locale: options.locale,
-      timezoneId: options.timezoneId,
-      sessionOptions: providedOptions,
-    });
+    this.recordSession(providedOptions);
+
+    SessionsDb.find().recordSession(this);
+
     this.mitmRequestSession = new RequestSession(this.id, this.plugins, this.upstreamProxyUrl);
     this.mitmRequestSession.respondWithHttpErrorStacks = options.showBrowserInteractions === true;
+    this.resources = new Resources(this, this.mitmRequestSession.browserRequestMatcher);
+    this.websocketMessages = new WebsocketMessages(this.db);
+    this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
@@ -254,13 +246,11 @@ export default class Session
   }> {
     const sourceTab = this.getTab(sourceTabId);
 
-    const detachedState = await sourceTab.createDetachedState();
-
-    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite, key);
+    const detachedState = await sourceTab.createDetachedState(callsite, key);
 
     const newTab = await detachedState.openInNewTab(this.browserContext, this.viewport);
 
-    this.sessionState.captureTab(
+    this.recordTab(
       newTab.id,
       newTab.puppetPage.id,
       newTab.puppetPage.devtoolsSession.id,
@@ -270,16 +260,13 @@ export default class Session
     this.detachedTabsById.set(newTab.id, newTab);
     newTab.on('close', () => {
       if (newTab.mainFrameEnvironment.jsPath.hasNewExecJsPathHistory) {
-        this.sessionState.recordDetachedJsPathCalls(
-          newTab.mainFrameEnvironment.jsPath.execHistory,
-          callsite,
-          key,
-        );
+        detachedState.saveHistory(newTab.mainFrameEnvironment.jsPath.execHistory);
       }
 
       this.detachedTabsById.delete(newTab.id);
     });
 
+    const jsPathCalls = detachedState.getJsPathHistory();
     const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPathCalls);
     return { detachedTab: newTab, prefetchedJsPaths: prefetches };
   }
@@ -328,14 +315,6 @@ export default class Session
     requestSession.on('socket-connect', this.onSocketConnect.bind(this));
   }
 
-  public nextTabId(): number {
-    return (this.tabIdCounter += 1);
-  }
-
-  public nextFrameId(): number {
-    return (this.frameIdCounter += 1);
-  }
-
   public exportUserProfile(): Promise<IUserProfile> {
     return UserProfile.export(this);
   }
@@ -350,15 +329,15 @@ export default class Session
     }
 
     const tab = Tab.create(this, page);
-    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSession.id);
+    this.recordTab(tab.id, page.id, page.devtoolsSession.id);
     this.registerTab(tab, page);
     await tab.isReady;
     return tab;
   }
 
   public getLastActiveTab(): Tab {
-    for (let idx = this.sessionState.commands.length - 1; idx >= 0; idx -= 1) {
-      const command = this.sessionState.commands[idx];
+    for (let idx = this.commands.history.length - 1; idx >= 0; idx -= 1) {
+      const command = this.commands.history[idx];
       if (command.tabId) {
         const tab = this.tabsById.get(command.tabId);
         if (tab && !tab.isClosing) return tab;
@@ -453,7 +432,19 @@ export default class Session
     });
     this.emit('closed');
     // should go last so we can capture logs
-    this.sessionState.close();
+    this.db.session.close(this.id, Date.now());
+    LogEvents.unsubscribe(this.logSubscriptionId);
+    loggerSessionIdNames.delete(this.id);
+    this.db.flush();
+
+    // give the system a second to write to db before clearing
+    setImmediate(() => {
+      try {
+        this.db.close();
+      } catch (err) {
+        // drown
+      }
+    });
   }
 
   private async resume(options: ISessionCreateOptions): Promise<void> {
@@ -463,33 +454,28 @@ export default class Session
       // create a new tab
     }
     Object.assign(this.options, options);
-    this.resumeCounter += 1;
+    this.commands.resumeCounter += 1;
     this.emit('resumed');
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {
-    this.sessionState.captureDevtoolsMessage(event);
+    this.db.devtoolsMessages.insert(event);
   }
 
   private onMitmRequest(event: IRequestSessionRequestEvent): void {
     // don't know the tab id at this point
-    this.sessionState.captureResource(null, event, false);
+    this.resources.record(null, event, false);
   }
 
   private onMitmResponse(event: IRequestSessionResponseEvent): void {
-    const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
-      event.browserRequestId,
-    );
+    const tabId = this.resources.getBrowserRequestTabId(event.browserRequestId);
     let tab = this.tabsById.get(tabId);
     if (!tab && !tabId) {
       // if we can't place it, just use the first active tab
-      for (const next of this.tabsById.values()) {
-        tab = next;
-        if (!next.isClosing) break;
-      }
+      tab = [...this.tabsById.values()].find(x => !x.isClosing);
     }
 
-    const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
+    const resource = this.resources.record(tab?.id ?? tabId, event, true);
     if (!event.didBlockResource) {
       tab?.emit('resource', resource);
     }
@@ -497,20 +483,13 @@ export default class Session
   }
 
   private onMitmError(event: IRequestSessionHttpErrorEvent): void {
-    const { request } = event;
-    let tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
-      request.browserRequestId,
-    );
-    const url = request.request?.url;
-    const isDocument = request?.resourceType === 'Document';
+    const { browserRequestId, request, resourceType, response } = event.request;
+    let tabId = this.resources.getBrowserRequestTabId(browserRequestId);
+    const url = request?.url;
+    const isDocument = resourceType === 'Document';
     if (isDocument && !tabId) {
       for (const tab of this.tabsById.values()) {
-        const isMatch = tab.findFrameWithUnresolvedNavigation(
-          request.browserRequestId,
-          request.request?.method,
-          url,
-          request.response?.url,
-        );
+        const isMatch = tab.frameWithPendingNavigation(browserRequestId, url, response?.url);
         if (isMatch) {
           tabId = tab.id;
           break;
@@ -519,32 +498,24 @@ export default class Session
     }
 
     // record errors
-    const resource = this.sessionState.captureResourceError(tabId, request, event.error);
-    if (!request.browserRequestId && url) {
-      const existing = this.mitmErrorsByUrl.get(url) ?? [];
-      existing.push({
-        resourceId: resource.id,
-        event,
-      });
-      this.mitmErrorsByUrl.set(url, existing);
-    }
+    const resource = this.resources.onMitmRequestError(tabId, event, event.error);
 
     if (tabId && isDocument) {
       const tab = this.tabsById.get(tabId);
-      tab?.checkForResolvedNavigation(request.browserRequestId, resource, event.error);
+      tab?.checkForResolvedNavigation(browserRequestId, resource, event.error);
     }
   }
 
   private onResourceStates(event: IResourceStateChangeEvent): void {
-    this.sessionState.captureResourceState(event.context.id, event.context.stateChanges);
+    this.db.resourceStates.insert(event.context.id, event.context.stateChanges);
   }
 
   private onSocketClose(event: ISocketEvent): void {
-    this.sessionState.captureSocketEvent(event);
+    this.db.sockets.insert(event.socket);
   }
 
   private onSocketConnect(event: ISocketEvent): void {
-    this.sessionState.captureSocketEvent(event);
+    this.db.sockets.insert(event.socket);
   }
 
   private async onNewTab(
@@ -556,7 +527,7 @@ export default class Session
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoaderId,
     });
-    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSession.id, parentTab.id);
+    this.recordTab(tab.id, page.id, page.devtoolsSession.id, parentTab.id);
     this.registerTab(tab, page);
 
     await tab.isReady;
@@ -582,6 +553,53 @@ export default class Session
   private async newPage(): Promise<IPuppetPage> {
     if (this._isClosing) throw new Error('Cannot create tab, shutting down');
     return await this.browserContext.newPage();
+  }
+
+  private recordLog(entry: ILogEntry): void {
+    if (entry.sessionId === this.id || !entry.sessionId) {
+      if (entry.action === 'Window.runCommand') entry.data = { id: entry.data.id };
+      if (entry.action === 'Window.ranCommand') entry.data = null;
+      this.db.sessionLogs.insert(entry);
+    }
+  }
+
+  private recordTab(
+    tabId: number,
+    pageId: string,
+    devtoolsSessionId: string,
+    parentTabId?: number,
+    detachedAtCommandId?: number,
+  ): void {
+    this.db.tabs.insert(
+      tabId,
+      pageId,
+      devtoolsSessionId,
+      this.viewport,
+      parentTabId,
+      detachedAtCommandId,
+    );
+  }
+
+  private recordSession(providedOptions: ISessionCreateOptions): void {
+    const configuration = this.getHeroMeta();
+    const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
+    this.db.session.insert(
+      this.id,
+      configuration.sessionName,
+      configuration.browserEmulatorId,
+      this.browserEngine.fullVersion,
+      configuration.userAgentString,
+      configuration.humanEmulatorId,
+      this.createdTime,
+      scriptInstanceMeta?.id,
+      scriptInstanceMeta?.entrypoint,
+      scriptInstanceMeta?.startDate,
+      configuration.timezoneId,
+      this.plugins.browserEmulator.deviceProfile,
+      configuration.viewport,
+      configuration.locale,
+      optionsToStore,
+    );
   }
 
   public static restoreOptionsFromSessionRecord(

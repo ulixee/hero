@@ -4,6 +4,7 @@ import IResourceHeaders from './IResourceHeaders';
 import OriginType from './OriginType';
 
 export default interface IHttpResourceLoadDetails {
+  id: number;
   isSSL: boolean;
   isUpgrade: boolean;
   isServerHttp2: boolean;

@@ -4,6 +4,13 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 export default class FramesTable extends SqliteTable<IFrameRecord> {
   public frameDomNodePathsById: { [frameId: number]: string } = {};
 
+  public get nextId(): number {
+    this.#idCounter += 1;
+    return this.#idCounter;
+  }
+
+  #idCounter = 0;
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,

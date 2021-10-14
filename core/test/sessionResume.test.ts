@@ -65,10 +65,10 @@ describe('sessionResume tests when resume location is currentLocation', () => {
 
       sessionId = session.id;
       const keepAlives = i;
-      expect(session.sessionState.commands).toHaveLength(2 * (i + 1) + keepAlives);
+      expect(session.commands.history).toHaveLength(2 * (i + 1) + keepAlives);
       // should reuse the commands from the first 2
-      expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        session.sessionState.commands.length - 2 - keepAlives,
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
+        session.commands.history.length - 2 - keepAlives,
       );
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
       await session.close();
@@ -127,12 +127,10 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       ]);
       expect(playInteractionSpy).toHaveBeenCalledTimes(2);
 
-      expect(session.sessionState.commands).toHaveLength(4);
+      expect(session.commands.history).toHaveLength(4);
 
       // should reuse the commands from only the first one
-      expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        1,
-      );
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(1);
     }
   });
 
@@ -212,183 +210,10 @@ describe('sessionResume tests when resume location is currentLocation', () => {
 
       expect(playInteractionSpy).toHaveBeenCalledTimes(4 + 3);
 
-      expect(session.sessionState.commands).toHaveLength(10);
+      expect(session.commands.history).toHaveLength(10);
 
       // should reuse the commands from only the first one
-      expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        2,
-      );
-    }
-  });
-});
-
-describe('sessionResume tests when resume location is pageStart', () => {
-  test('should be able to start at the beginning of pages', async () => {
-    playInteractionSpy.mockClear();
-    koaServer.get(
-      '/sessionResumePageStart1',
-      ctx =>
-        (ctx.body = `<body><h1>Hover me</h1><a id="link" href="/sessionResumePageStart2">Go to page 2</a></body>`),
-    );
-    koaServer.get(
-      '/sessionResumePageStart2',
-      ctx =>
-        (ctx.body = `<body><h1>Hover me</h1><a id="link" href="/sessionResumePageStart3">Go to page 3</a></body>`),
-    );
-    koaServer.get(
-      '/sessionResumePageStart3',
-      ctx => (ctx.body = `<body><h1>You got to page 3</h1></body>`),
-    );
-    let sessionId: string;
-
-    {
-      const { session, tab } = await createSession({ sessionKeepAlive: true });
-      sessionId = session.id;
-
-      simulateScriptSendingCommandMeta(session, 1);
-      await tab.goto(`${koaServer.baseUrl}/sessionResumePageStart1`);
-
-      simulateScriptSendingCommandMeta(session, 2);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 3);
-      await tab.interact([
-        { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 4);
-      await tab.waitForLocation('change');
-
-      simulateScriptSendingCommandMeta(session, 5);
-      await tab.waitForLoad('PaintingStable');
-
-      simulateScriptSendingCommandMeta(session, 6);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      expect(tab.url).toBe(`${koaServer.baseUrl}/sessionResumePageStart2`);
-
-      expect(playInteractionSpy).toHaveBeenCalledTimes(3);
-    }
-    {
-      playInteractionSpy.mockClear();
-      const { session, tab } = await createSession({
-        sessionKeepAlive: true,
-        sessionResume: {
-          sessionId,
-          startLocation: 'pageStart',
-        },
-      });
-
-      simulateScriptSendingCommandMeta(session, 1);
-      await tab.goto(`${koaServer.baseUrl}/sessionResumePageStart1`);
-
-      simulateScriptSendingCommandMeta(session, 2);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 3);
-      await tab.interact([
-        { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 4);
-      await tab.waitForLocation('change');
-
-      simulateScriptSendingCommandMeta(session, 5);
-      await tab.waitForLoad('PaintingStable');
-
-      simulateScriptSendingCommandMeta(session, 6);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      expect(tab.url).toBe(`${koaServer.baseUrl}/sessionResumePageStart2`);
-
-      expect(playInteractionSpy).toHaveBeenCalledTimes(1);
-
-      expect(session.sessionState.commands).toHaveLength(12);
-
-      // should reuse the commands from only the first one
-      expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        4,
-      );
-
-      simulateScriptSendingCommandMeta(session, 7);
-      await tab.interact([
-        { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 8);
-      await tab.waitForLoad('PaintingStable');
-
-      // should reuse the commands from only the first one
-      expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        4,
-      );
-    }
-
-    // run 3
-    {
-      playInteractionSpy.mockClear();
-      const { session, tab } = await createSession({
-        sessionKeepAlive: true,
-        sessionResume: {
-          sessionId,
-          startLocation: 'pageStart',
-        },
-      });
-
-      simulateScriptSendingCommandMeta(session, 1);
-      await tab.goto(`${koaServer.baseUrl}/sessionResumePageStart1`);
-
-      simulateScriptSendingCommandMeta(session, 2);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 3);
-      await tab.interact([
-        { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 4);
-      await tab.waitForLocation('change');
-
-      simulateScriptSendingCommandMeta(session, 5);
-      await tab.waitForLoad('PaintingStable');
-
-      simulateScriptSendingCommandMeta(session, 6);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 7);
-      await tab.interact([
-        { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-      ]);
-
-      simulateScriptSendingCommandMeta(session, 8);
-      await tab.waitForLoad('PaintingStable');
-
-      simulateScriptSendingCommandMeta(session, 9);
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
-      ]);
-
-      expect(playInteractionSpy).toHaveBeenCalledTimes(1);
-
-      // should reuse the commands from only the first one
-      expect(
-        session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0 && x.run === 2),
-      ).toHaveLength(4);
-      expect(
-        session.sessionState.commands.filter(x => x.reusedCommandFromRun === 1 && x.run === 2),
-      ).toHaveLength(3);
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(2);
     }
   });
 });
@@ -447,9 +272,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
 
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
       expect(
-        session.sessionState.commands.filter(
-          x => x.reusedCommandFromRun === undefined && x.run === 1,
-        ),
+        session.commands.history.filter(x => x.reusedCommandFromRun === undefined && x.run === 1),
       ).toHaveLength(2);
       const newProfile = await session.exportUserProfile();
       expect(newProfile.userAgentString).toBe(profile.userAgentString);
@@ -532,9 +355,9 @@ describe('sessionResume tests when resume location is sessionStart', () => {
       ]);
 
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
-      expect(session.sessionState.commands).toHaveLength(2);
+      expect(session.commands.history).toHaveLength(2);
       expect(
-        session.sessionState.commands.filter(x => x.reusedCommandFromRun !== undefined),
+        session.commands.history.filter(x => x.reusedCommandFromRun !== undefined),
       ).toHaveLength(0);
 
       const meta = await session.getHeroMeta();
@@ -564,7 +387,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
 });
 
 function simulateScriptSendingCommandMeta(session: Session, id: number): void {
-  session.sessionState.nextCommandMeta = {
+  session.commands.nextCommandMeta = {
     commandId: id,
     startDate: new Date(),
     sendDate: new Date(),

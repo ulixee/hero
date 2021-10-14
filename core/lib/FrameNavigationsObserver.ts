@@ -83,7 +83,7 @@ export default class FrameNavigationsObserver {
     }
 
     const top = this.navigations.top;
-    if (this.navigations.hasLoadStatus(status)) return;
+    if (this.navigations.hasLoadStatus(status)) return Promise.resolve(top);
 
     const promise = this.createStatusTriggeredPromise(status, options.timeoutMs);
 
@@ -197,7 +197,10 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number): INavigation {
+  private hasLocationTrigger(
+    trigger: ILocationTrigger,
+    sinceCommandId: number,
+  ): INavigation | null {
     let previousLoadedNavigation: INavigation;
     for (const history of this.navigations.history) {
       const isMatch = history.startCommandId >= sinceCommandId;

@@ -8,7 +8,7 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
 import { ILoadStatus, LoadStatus } from '@ulixee/hero-interfaces/Location';
-import SessionState from './SessionState';
+import FrameNavigationsTable from '../models/FrameNavigationsTable';
 
 export interface IFrameNavigationEvents {
   'navigation-requested': INavigation;
@@ -39,19 +39,25 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   private loaderIds = new Set<string>();
 
+  private readonly historyById: Record<number, INavigation> = {};
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
   constructor(
     readonly tabId: number,
     readonly frameId: number,
-    readonly sessionState: SessionState,
+    readonly sessionId: string,
+    readonly model: FrameNavigationsTable,
   ) {
     super();
     this.setEventsToLog(['navigation-requested', 'status-change']);
     this.logger = log.createChild(module, {
-      sessionId: sessionState.sessionId,
+      sessionId: this.sessionId,
       frameId,
     });
+  }
+
+  public get(id: number): INavigation {
+    return this.historyById[id];
   }
 
   public didGotoUrl(url: string): boolean {
@@ -108,7 +114,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     browserRequestId?: string,
   ): INavigation {
     const nextTop = <INavigation>{
-      id: (this.sessionState.navigationIdCounter += 1),
+      id: (this.model.idCounter += 1),
       tabId: this.tabId,
       requestedUrl: url,
       finalUrl: null,
@@ -148,9 +154,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       nextTop.finalUrl = url;
     }
     this.history.push(nextTop);
+    this.historyById[nextTop.id] = nextTop;
 
     this.emit('navigation-requested', nextTop);
-    this.captureNavigationUpdate(nextTop);
+    this.model.insert(nextTop);
     if (shouldPublishLocationChange) {
       this.emit('status-change', {
         id: nextTop.id,
@@ -220,6 +227,24 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     this.recordStatusChange(navigation, LoadStatus.HttpResponded, responseTime);
   }
 
+  public doesMatchPending(
+    browserRequestId: string,
+    requestedUrl: string,
+    finalUrl: string,
+  ): boolean {
+    const top = this.top;
+    if (!top || top.resourceIdResolvable.isResolved) return false;
+
+    if (
+      (top.finalUrl && finalUrl === top.finalUrl) ||
+      requestedUrl === top.requestedUrl ||
+      browserRequestId === top.browserRequestId
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   public onResourceLoaded(resourceId: number, statusCode: number, error?: Error): void {
     this.logger.info('NavigationResource resolved', {
       resourceId,
@@ -264,7 +289,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       (top.navigationReason === null || top.navigationReason === 'newFrame')
     ) {
       top.navigationReason = reason;
-      this.captureNavigationUpdate(top);
+      this.model.insert(top);
     } else {
       this.nextNavigationReason = { url, reason };
     }
@@ -280,7 +305,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     ) {
       navigation.requestedUrl = url;
     }
-    this.captureNavigationUpdate(navigation);
+    this.model.insert(navigation);
   }
 
   public getLastLoadedNavigation(): INavigation {
@@ -291,6 +316,13 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
         !!x.finalUrl,
     );
     return lastDomLoadedNav ?? this.top;
+  }
+
+  public findHistory(callback: (history: INavigation) => boolean): INavigation {
+    for (let i = this.history.length - 1; i >= 0; i -= 1) {
+      const navigation = this.history[i];
+      if (callback(navigation)) return navigation;
+    }
   }
 
   private checkStoredNavigationReason(navigation: INavigation, url: string): void {
@@ -337,13 +369,6 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
   }
 
-  private findHistory(callback: (history: INavigation) => boolean): INavigation {
-    for (let i = this.history.length - 1; i >= 0; i -= 1) {
-      const navigation = this.history[i];
-      if (callback(navigation)) return navigation;
-    }
-  }
-
   private changeNavigationStatus(
     newStatus: NavigationStatus,
     loaderId?: string,
@@ -376,11 +401,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       statusChanges: Object.fromEntries(navigation.statusChanges),
       newStatus,
     });
-    this.captureNavigationUpdate(navigation);
-  }
-
-  private captureNavigationUpdate(navigation: INavigation): void {
-    this.sessionState.recordNavigation(navigation);
+    this.model.insert(navigation);
   }
 }
 

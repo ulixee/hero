@@ -5,7 +5,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IPuppetResourceRequest } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
 
@@ -25,56 +25,35 @@ export default class BrowserRequestMatcher {
     requestSession.on('response', event => this.clearRequest(event.id));
   }
 
-  public onMitmRequestedResource(mitmResource: IMitmRequestContext): IRequestedResource {
-    let browserRequest = this.findMatchingRequest(mitmResource, 'noMitmResourceId');
-
-    // if no request from browser (and unmatched), queue a new one
-    if (!browserRequest) {
-      browserRequest = {
-        url: mitmResource.url.href,
-        method: mitmResource.method,
-        ...getHeaderDetails(mitmResource),
-        isHttp2Push: mitmResource.isHttp2Push,
-        mitmResourceId: mitmResource.id,
-        requestTime: mitmResource.requestTime,
-        browserRequestedPromise: new Resolvable(),
-      };
-      this.requestedResources.push(browserRequest);
+  public cancelPending(): void {
+    for (const pending of this.requestedResources) {
+      clearTimeout(pending.resolveTimeout);
+      pending.browserRequestedPromise.reject(
+        new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
+      );
     }
+  }
 
-    browserRequest.mitmResourceId = mitmResource.id;
+  public onMitmRequestedResource(mitmResource: IHttpResourceLoadDetails): IRequestedResource {
+    const pendingBrowserRequest =
+      this.findMatchingRequest(mitmResource, 'noMitmResourceId') ??
+      // if no request from browser (and unmatched), queue a new one
+      this.queuePendingBrowserRequest(mitmResource);
 
-    const resolveTimeout = setTimeout(
-      () =>
-        this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', {
-          request: browserRequest,
-        }),
-      5e3,
-    ).unref();
-
-    const fetchDest = HeadersHandler.getRequestHeader(mitmResource, 'sec-fetch-dest');
+    pendingBrowserRequest.mitmResourceId = mitmResource.id;
 
     // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
-    if (fetchDest === 'sharedworker' || fetchDest === 'serviceworker') {
-      browserRequest.browserRequestedPromise.resolve(null);
+    if (HeadersHandler.isWorkerDest(mitmResource, 'shared', 'service')) {
+      pendingBrowserRequest.browserRequestedPromise.resolve(null);
     }
 
-    mitmResource.browserHasRequested = browserRequest.browserRequestedPromise.promise
-      .then(() => {
-        clearTimeout(resolveTimeout);
-        // copy values to mitm resource
-        if (!browserRequest?.browserRequestId) return;
-        mitmResource.resourceType = browserRequest.resourceType;
-        mitmResource.browserRequestId = browserRequest.browserRequestId;
-        mitmResource.hasUserGesture = browserRequest.hasUserGesture;
-        mitmResource.documentUrl = browserRequest.documentUrl;
-        mitmResource.browserFrameId = browserRequest.frameId;
-        return null;
-      })
-      // drown errors - we don't want to log cancels
-      .catch(() => clearTimeout(resolveTimeout));
+    mitmResource.browserHasRequested = pendingBrowserRequest.browserRequestedPromise.promise
+      .then(
+        this.copyBrowserRequestAttributesToResource.bind(this, mitmResource, pendingBrowserRequest),
+      )
+      .catch(() => clearTimeout(pendingBrowserRequest.resolveTimeout));
 
-    return browserRequest;
+    return pendingBrowserRequest;
   }
 
   public onBrowserRequestedResourceExtraDetails(
@@ -102,31 +81,26 @@ export default class BrowserRequestMatcher {
     tabId?: number,
     frameId?: number,
   ): IRequestedResource {
-    const { method } = httpResourceLoad;
+    let pendingRequest = this.findMatchingRequest(httpResourceLoad);
 
-    let resource = this.findMatchingRequest(httpResourceLoad);
-
-    if (resource && resource.browserRequestedPromise.isResolved && resource.browserRequestId) {
+    if (
+      pendingRequest &&
+      pendingRequest.browserRequestedPromise.isResolved &&
+      pendingRequest.browserRequestId
+    ) {
       // figure out how long ago this request was
-      const requestTimeDiff = Math.abs(httpResourceLoad.requestTime - resource.requestTime);
-      if (requestTimeDiff > 5e3) resource = null;
+      const requestTimeDiff = Math.abs(httpResourceLoad.requestTime - pendingRequest.requestTime);
+      if (requestTimeDiff > 5e3) pendingRequest = null;
     }
 
-    if (!resource) {
+    if (!pendingRequest) {
       if (!httpResourceLoad.url) return;
-      resource = {
-        url: httpResourceLoad.url.href,
-        method,
-        requestTime: httpResourceLoad.requestTime,
-        browserRequestedPromise: new Resolvable(),
-        ...getHeaderDetails(httpResourceLoad),
-      } as IRequestedResource;
-      this.requestedResources.push(resource);
+      pendingRequest = this.createPendingResource(httpResourceLoad);
     }
 
-    this.updatePendingResource(httpResourceLoad, resource, tabId, frameId);
+    this.updatePendingResource(httpResourceLoad, pendingRequest, tabId, frameId);
 
-    return resource;
+    return pendingRequest;
   }
 
   public onBrowserRequestFailed(event: {
@@ -136,17 +110,12 @@ export default class BrowserRequestMatcher {
     loadError: Error;
   }): number {
     this.requestIdToTabId.set(event.resource.browserRequestId, event.tabId);
-    const match =
+    const pendingRequest =
       this.requestedResources.find(x => x.browserRequestId === event.resource.browserRequestId) ??
       this.findMatchingRequest(event.resource, 'hasMitmResourceId');
-    if (match) {
-      match.resourceType = event.resource.resourceType;
-      match.browserRequestId = event.resource.browserRequestId;
-      match.tabId = event.tabId;
-      match.frameId = event.frameId;
-      match.browserLoadedTime = event.resource.browserLoadedTime;
-      match.browserRequestedPromise.resolve();
-      const id = match.mitmResourceId;
+    if (pendingRequest) {
+      this.updatePendingResource(event.resource, pendingRequest, event.tabId, event.frameId);
+      const id = pendingRequest.mitmResourceId;
       if (id) setTimeout(() => this.clearRequest(id), 500).unref();
       return id;
     }
@@ -155,36 +124,73 @@ export default class BrowserRequestMatcher {
     });
   }
 
-  public cancelPending(): void {
-    for (const pending of this.requestedResources) {
-      pending.browserRequestedPromise.reject(
-        new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
-      );
-    }
-  }
-
   private updatePendingResource(
     httpResourceLoad: IPuppetResourceRequest,
-    pendingResource: IRequestedResource,
+    browserRequest: IRequestedResource,
     tabId: number,
     frameId: number,
   ): void {
     if (tabId) {
-      pendingResource.tabId = tabId;
+      browserRequest.tabId = tabId;
       this.requestIdToTabId.set(httpResourceLoad.browserRequestId, tabId);
     }
-    pendingResource.frameId ??= frameId;
-    pendingResource.browserLoadedTime ??= httpResourceLoad.browserLoadedTime;
-    pendingResource.browserRequestId = httpResourceLoad.browserRequestId;
-    pendingResource.documentUrl = httpResourceLoad.documentUrl;
-    pendingResource.resourceType = httpResourceLoad.resourceType;
-    pendingResource.hasUserGesture = httpResourceLoad.hasUserGesture;
-    pendingResource.browserRequestedPromise.resolve();
+    browserRequest.frameId ??= frameId;
+    browserRequest.browserLoadedTime ??= httpResourceLoad.browserLoadedTime;
+    browserRequest.browserRequestId = httpResourceLoad.browserRequestId;
+    browserRequest.documentUrl = httpResourceLoad.documentUrl;
+    browserRequest.resourceType = httpResourceLoad.resourceType;
+    browserRequest.hasUserGesture = httpResourceLoad.hasUserGesture;
+    browserRequest.browserRequestedPromise.resolve();
+  }
+
+  private copyBrowserRequestAttributesToResource(
+    mitmResource: IHttpResourceLoadDetails,
+    browserRequest: IRequestedResource,
+  ): void {
+    if (!browserRequest?.browserRequestId) return;
+    clearTimeout(browserRequest.resolveTimeout);
+    mitmResource.resourceType = browserRequest.resourceType;
+    mitmResource.browserRequestId = browserRequest.browserRequestId;
+    mitmResource.hasUserGesture = browserRequest.hasUserGesture;
+    mitmResource.documentUrl = browserRequest.documentUrl;
+    mitmResource.browserFrameId = browserRequest.frameId;
   }
 
   private clearRequest(resourceId: number): void {
     const matchIdx = this.requestedResources.findIndex(x => x.mitmResourceId === resourceId);
     if (matchIdx >= 0) this.requestedResources.splice(matchIdx, 1);
+  }
+
+  private createPendingResource(
+    request: Pick<IHttpResourceLoadDetails, 'url' | 'method' | 'requestTime' | 'requestHeaders'>,
+  ): IRequestedResource {
+    const resource: IRequestedResource = {
+      url: request.url.href,
+      method: request.method,
+      requestTime: request.requestTime,
+      browserRequestedPromise: new Resolvable(),
+      ...getHeaderDetails(request),
+    } as IRequestedResource;
+    this.requestedResources.push(resource);
+    return resource;
+  }
+
+  private queuePendingBrowserRequest(mitmResource: IHttpResourceLoadDetails): IRequestedResource {
+    const pendingRequest = this.createPendingResource(mitmResource);
+    pendingRequest.mitmResourceId = mitmResource.id;
+    pendingRequest.isHttp2Push = mitmResource.isHttp2Push;
+    const toLog = {
+      request: {
+        url: pendingRequest.url,
+        method: pendingRequest.method,
+        id: pendingRequest.mitmResourceId,
+      },
+    };
+    pendingRequest.resolveTimeout = setTimeout(
+      () => this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', toLog),
+      5e3,
+    ).unref();
+    return pendingRequest;
   }
 
   private findMatchingRequest(
@@ -241,7 +247,7 @@ export default class BrowserRequestMatcher {
   }
 }
 
-function getHeaderDetails(httpResourceLoad: IPuppetResourceRequest): {
+function getHeaderDetails(httpResourceLoad: Pick<IHttpResourceLoadDetails, 'requestHeaders'>): {
   origin: string;
   referer: string;
   secFetchDest: string;
@@ -262,6 +268,7 @@ interface IRequestedResource {
   secFetchDest: string;
   referer: string;
   requestTime: number;
+  resolveTimeout?: NodeJS.Timeout;
   browserRequestedPromise: IResolvablePromise<void>;
   tabId?: number;
   frameId?: number;

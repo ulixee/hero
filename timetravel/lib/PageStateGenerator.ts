@@ -75,11 +75,13 @@ export default class PageStateGenerator {
     const state = this.statesByName.get(savedState.state);
     state.startingAssertsByFrameId = {};
     const startingAssertions = state.startingAssertsByFrameId;
-    for (const [frameId, type, query, comparison, result] of savedState.assertions) {
+    for (const [frameId, command, args, comparison, result] of savedState.assertions) {
       startingAssertions[frameId] ??= {};
-      startingAssertions[frameId][query] = {
-        query,
-        type,
+      const key = PageStateAssertions.generateKey(command, args);
+      startingAssertions[frameId][key] = {
+        key,
+        command,
+        args,
         comparison,
         result,
       };
@@ -116,8 +118,8 @@ export default class PageStateGenerator {
       for (const assertion of Object.values(assertions)) {
         exported.assertions.push([
           Number(frameId),
-          assertion.type,
-          assertion.query,
+          assertion.command,
+          assertion.args,
           assertion.comparison,
           assertion.result,
         ]);
@@ -215,8 +217,10 @@ export default class PageStateGenerator {
         // TODO: don't know how to get to subframes quite yet...
         if (!session.mainFrameIds.has(Number(frameId))) continue;
 
-        const xpathAsserts = Object.values(assertions).filter(x => x.type === 'xpath');
-        const queries = xpathAsserts.map(x => x.query);
+        const xpathAsserts = Object.values(assertions).filter(
+          x => x.command === 'FrameEnvironment.execXPath',
+        );
+        const queries = xpathAsserts.map(x => x.args[0]);
         const refreshedResults = await mirrorPage.page.evaluate(
           XPathGenerator.createEvaluateExpression(queries),
         );
@@ -228,7 +232,7 @@ export default class PageStateGenerator {
             if (typeof domResult === 'number' && domResult > xpathAssert.result) {
               xpathAssert.result = domResult;
             } else {
-              delete assertions[xpathAssert.query];
+              delete assertions[xpathAssert.key];
             }
           }
         }
@@ -262,10 +266,15 @@ export default class PageStateGenerator {
       const { frameId } = resource;
       if (!frameId) continue;
 
-      const args = { url: resource.url, status: resource.statusCode, method: resource.method };
       this.sessionAssertions.recordAssertion(sessionId, frameId, {
-        type: 'resource',
-        query: JSON.stringify(args),
+        command: 'Tab.findResource',
+        args: [
+          {
+            url: resource.url,
+            status: resource.statusCode,
+            method: resource.method,
+          },
+        ],
         comparison: '!==',
         result: null,
       });
@@ -358,8 +367,8 @@ export default class PageStateGenerator {
     result: string | number | boolean,
   ): void {
     this.sessionAssertions.recordAssertion(sessionId, frameId, {
-      type: 'xpath',
-      query: path,
+      command: 'FrameEnvironment.execXPath',
+      args: [path, typeof result],
       comparison: '===',
       result,
     });
@@ -367,8 +376,8 @@ export default class PageStateGenerator {
 
   private recordUrl(sessionId: string, frameId: number, url: string): void {
     this.sessionAssertions.recordAssertion(sessionId, frameId, {
-      type: 'url',
-      query: 'location.href',
+      command: 'FrameEnvironment.getUrl',
+      args: [],
       comparison: '===',
       result: url,
     });
@@ -430,8 +439,8 @@ export interface IExportedPageState {
   }[];
   assertions: [
     frameId: number,
-    type: IAssertionAndResult['type'],
-    query: IAssertionAndResult['query'],
+    command: IAssertionAndResult['command'],
+    args: IAssertionAndResult['args'],
     comparison: IAssertionAndResult['comparison'],
     result: IAssertionAndResult['result'],
   ][];

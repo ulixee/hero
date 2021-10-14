@@ -3,7 +3,6 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
-  public lastNavigationIdByFrameId: { [frameId: number]: number } = {};
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
@@ -35,13 +34,6 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     change: IDomChangeEvent,
   ): void {
     const [action, nodeData, timestamp, eventIndex] = change;
-    if (
-      !this.lastNavigationIdByFrameId[frameId] ||
-      this.lastNavigationIdByFrameId[frameId] < navigationId
-    ) {
-      this.lastNavigationIdByFrameId[frameId] = navigationId;
-    }
-
     const record = [
       frameId,
       navigationId,

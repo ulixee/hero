@@ -2,6 +2,7 @@ import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import * as fs from 'fs';
 import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
@@ -30,6 +31,7 @@ interface IDbOptions {
 
 export default class SessionDb {
   private static byId = new Map<string, SessionDb>();
+  private static hasInitialized = false;
 
   public get readonly(): boolean {
     return this.db?.readonly;
@@ -60,6 +62,7 @@ export default class SessionDb {
   private readonly tables: SqliteTable<any>[] = [];
 
   constructor(sessionId: string, dbOptions: IDbOptions = {}) {
+    SessionDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
     this.db = new Database(`${SessionDb.databaseDir}/${sessionId}.db`, { readonly, fileMustExist });
@@ -115,7 +118,7 @@ export default class SessionDb {
             }
             log.error('SessionDb.flushError', {
               sessionId: this.sessionId,
-              error,
+              error: String(error),
               table: table.tableName,
             });
           }
@@ -183,6 +186,13 @@ export default class SessionDb {
     return {
       session,
     };
+  }
+
+  public static createDir(): void {
+    if (!this.hasInitialized) {
+      fs.mkdirSync(this.databaseDir, { recursive: true });
+      this.hasInitialized = true;
+    }
   }
 
   public static get databaseDir(): string {

@@ -12,13 +12,9 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   private readonly commandsFromAllRuns: (T & ICommandTimelineOffset)[] = [];
   private readonly allNavigationsById = new Map<number, INavigation>();
 
-  constructor(
-    commandsFromAllRuns: T[],
-    readonly run: number,
-    allNavigationsById: Record<number, INavigation>,
-  ) {
+  constructor(commandsFromAllRuns: T[], readonly run: number, allNavigations: INavigation[]) {
     let firstCompletedNav: INavigation;
-    for (const navigation of Object.values(allNavigationsById)) {
+    for (const navigation of allNavigations) {
       if (!firstCompletedNav && navigation.statusChanges.has(LoadStatus.DomContentLoaded)) {
         firstCompletedNav = navigation;
       }
