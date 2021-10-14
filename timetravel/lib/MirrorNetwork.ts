@@ -39,7 +39,7 @@ export default class MirrorNetwork {
     request: Fetch.RequestPausedEvent,
   ): Promise<Fetch.FulfillRequestRequest> {
     const { url, method } = request.request;
-    if (request.resourceType === 'Document') {
+    if (request.resourceType === 'Document' || url === 'about:blank') {
       const doctype = this.documents.find(x => x.url === url)?.doctype ?? '';
       return {
         requestId: request.requestId,

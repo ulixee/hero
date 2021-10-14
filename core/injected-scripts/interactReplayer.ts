@@ -7,6 +7,7 @@ declare global {
   interface Window {
     selfFrameIdPath: string;
     blockClickAndSubmit: boolean;
+    repositionInteractElements();
     replayInteractions(
       resultNodeIds?: IHighlightedNodes,
       mouseEvent?: IFrontendMouseEvent,
@@ -332,6 +333,13 @@ function updateScroll(scrollEvent: IFrontendScrollEvent) {
   });
 }
 
+function repositionInteractElements() {
+  if (lastHighlightNodes)
+    highlightNodes({ frameIdPath: window.selfFrameIdPath, nodeIds: lastHighlightNodes });
+  if (lastMouseEvent) updateMouse(lastMouseEvent);
+}
+window.repositionInteractElements = repositionInteractElements;
+
 /////// BUILD UI ELEMENTS //////////////////////////////////////////////////////////////////////////////////////////////
 
 let isInitialized = false;
@@ -485,10 +493,6 @@ function createReplayItems() {
   }
 
   document.addEventListener('scroll', () => checkOverflows());
-  window.addEventListener('resize', () => {
-    if (lastHighlightNodes)
-      highlightNodes({ frameIdPath: window.selfFrameIdPath, nodeIds: lastHighlightNodes });
-    if (lastMouseEvent) updateMouse(lastMouseEvent);
-  });
+  window.addEventListener('resize', repositionInteractElements);
   document.body.appendChild(replayNode);
 }

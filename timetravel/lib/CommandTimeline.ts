@@ -15,7 +15,12 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   constructor(commandsFromAllRuns: T[], readonly run: number, allNavigations: INavigation[]) {
     let firstCompletedNav: INavigation;
     for (const navigation of allNavigations) {
-      if (!firstCompletedNav && navigation.statusChanges.has(LoadStatus.DomContentLoaded)) {
+      if (
+        navigation.statusChanges.has(LoadStatus.DomContentLoaded) &&
+        (!firstCompletedNav ||
+          navigation.statusChanges.get(LoadStatus.DomContentLoaded) <
+            firstCompletedNav.statusChanges.get(LoadStatus.DomContentLoaded))
+      ) {
         firstCompletedNav = navigation;
       }
       this.allNavigationsById.set(navigation.id, navigation);
@@ -33,8 +38,14 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
         command.startTime = command.clientStartDate;
       }
       if (command.startTime < firstHttpRequestedTime) command.startTime = firstHttpRequestedTime;
+
+      let endDate = command.endDate;
+      // if this is within 10 mins, assume it's still going
+      if (!endDate && Date.now() - command.startTime < 10 * 60e3) {
+        endDate = Date.now();
+      }
       // don't set a negative runtime
-      command.runtimeMs = Math.max(command.endDate - command.startTime, 0);
+      command.runtimeMs = Math.max(endDate - command.startTime, 0);
 
       // only use a gap if the command and previous are from the same run
       if (

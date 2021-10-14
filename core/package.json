@@ -10,6 +10,7 @@
     "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
     "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
+    "./models/*": "./models/*.js",
     "./connections/*": "./connections/*.js"
   },
   "dependencies": {
