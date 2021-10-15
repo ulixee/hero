@@ -14,7 +14,7 @@
     "./connections/*": "./connections/*.js"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.5",
+    "@ulixee/commons": "1.5.6",
     "@ulixee/default-browser-emulator": "1.5.4",
     "@ulixee/default-human-emulator": "1.5.4",
     "@ulixee/hero-interfaces": "1.5.4",
