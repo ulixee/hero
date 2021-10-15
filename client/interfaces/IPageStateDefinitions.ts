@@ -1,3 +1,5 @@
+import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+
 export default interface IPageStateDefinitions {
   [state: string]: IPageStateDefinitionFn;
 }
@@ -15,4 +17,5 @@ export interface IPageStateAssertionFns {
     assertionFnOrValue?: ((state: T) => boolean) | T,
   ): IStateAndAssertion<T>;
   assertAny(count: number, assertions: IStateAndAssertion<any>[]): void;
+  loadFrom(path: string | IPageStateAssertionBatch): void;
 }

@@ -1,5 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import PageStateGenerator from '@ulixee/hero-timetravel/lib/PageStateGenerator';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import Core from '@ulixee/hero-core';
+import * as Fs from 'fs';
 import Hero from '../index';
 
 let koaServer: ITestKoaServer;
@@ -182,6 +186,70 @@ setInterval(() => {
   });
   expect(state).toBe('gotDivs');
   await new Promise(resolve => setTimeout(resolve, 500));
+});
+
+test('can load a generated pageState', async () => {
+  koaServer.get('/img.png', ctx => {
+    ctx.set('Content-Type', 'image/png');
+    ctx.body = Helpers.getLogo();
+  });
+  koaServer.get('/logo.png', ctx => {
+    ctx.set('Content-Type', 'image/png');
+    ctx.body = Helpers.getLogo();
+  });
+  koaServer.get('/waitForPageStateGenerated1', ctx => {
+    ctx.body = `<body>
+<h1>Hi</h1>
+<img src="/img.png">
+</body>`;
+  });
+  koaServer.get('/waitForPageStateGenerated2', ctx => {
+    ctx.body = `<body>
+<h2>Hi</h2>
+<img src="/logo.png"></body>`;
+  });
+
+  /////// generate state
+  const pageStateGenerator = new PageStateGenerator();
+  await Promise.all(
+    ['1', '1', '2', '2'].map(async x => {
+      const { tab, session } = await createSession();
+      const resource = await tab.goto(`${koaServer.baseUrl}/waitForPageStateGenerated${x}`);
+      const startTime = resource.response.timestamp;
+      await tab.waitForLoad(LoadStatus.PaintingStable);
+      await tab.flushDomChanges();
+      await tab.close();
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addState(x, session.id);
+    }),
+  );
+  await pageStateGenerator.evaluate();
+  const state1 = pageStateGenerator.export('1');
+  const state2 = `${Core.dataDir}/waitForPageState2.json`;
+  Fs.writeFileSync(state2, JSON.stringify(pageStateGenerator.export('2')));
+
+  // create a page that sort of matches, but also doesn't
+  koaServer.get('/waitForPageStatePrep', async ctx => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    ctx.body = `<body><h2>Hi</h2>
+<script>
+setTimeout(() => {
+  location.href = "${koaServer.baseUrl}/waitForPageStateGenerated1"
+}, 50)
+</script>
+</body>`;
+  });
+
+  const hero = await openBrowser('/waitForPageStatePrep');
+  const state = hero.activeTab.waitForPageState({
+    state1({ loadFrom }) {
+      loadFrom(state1);
+    },
+    state2({ loadFrom }) {
+      loadFrom(state2);
+    },
+  });
+  await expect(state).resolves.toBe('state1');
 });
 
 async function openBrowser(path: string) {

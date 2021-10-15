@@ -5,7 +5,8 @@
   "dependencies": {
     "@ulixee/commons": "1.5.5",
     "@ulixee/hero-interfaces": "1.5.4",
-    "@ulixee/hero-core": "1.5.4"
+    "@ulixee/hero-core": "1.5.4",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@ulixee/hero-testing": "1.5.4"

@@ -25,6 +25,7 @@ import IPoint from '@ulixee/hero-interfaces/IPoint';
 import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
 import Tab from './Tab';
@@ -104,6 +105,8 @@ export default class FrameEnvironment
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
   private lastDomChangeNavigationId: number;
+
+  private readonly installedDomAssertions = new Set<string>();
 
   public get url(): string {
     return this.navigations.currentUrl;
@@ -356,6 +359,37 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       if (frame.domNodeId === domId) {
         return frame.toJSON();
       }
+    }
+  }
+
+  public async runDomAssertions(
+    id: string,
+    assertions: IPageStateAssertionBatch['assertions'],
+  ): Promise<number> {
+    if (!this.installedDomAssertions.has(id)) {
+      await this.runIsolatedFn('HERO.DomAssertions.install', id, assertions);
+      this.installedDomAssertions.add(id);
+    }
+    try {
+      const { failedIndices } = await this.runIsolatedFn<{ failedIndices: Record<number, any> }>(
+        'HERO.DomAssertions.run',
+        id,
+      );
+      return Object.keys(failedIndices).length;
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) return 0;
+      if (String(error).includes('This assertion batch has not been installed')) {
+        this.installedDomAssertions.delete(id);
+        return this.runDomAssertions(id, assertions);
+      }
+      return 1;
+    }
+  }
+
+  public async clearDomAssertions(id: string): Promise<void> {
+    if (this.installedDomAssertions.has(id)) {
+      this.installedDomAssertions.delete(id);
+      await this.runIsolatedFn('HERO.DomAssertions.clear', id);
     }
   }
 
@@ -655,6 +689,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         this.tab.lastCommandId,
         event.loaderId,
       );
+    } else {
+      this.installedDomAssertions.clear();
     }
     this.puppetFrame = frame;
     this.record();

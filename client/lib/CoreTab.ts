@@ -49,7 +49,7 @@ export default class CoreTab implements IJsPathEventTarget {
       sessionName,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(meta, connection, coreSession as ICommandCounter);
+    this.commandQueue = new CoreCommandQueue(this.meta, connection, coreSession as ICommandCounter);
     this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));

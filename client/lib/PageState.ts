@@ -4,6 +4,8 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
+import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
+import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import CoreTab from './CoreTab';
 import IPageStateDefinitions, {
   IPageStateDefinitionFn,
@@ -16,19 +18,22 @@ let counter = 0;
 const NullPropertyAccessRegex = /Cannot read property '.+' of (?:null|undefined)/;
 const NullPropertyAccessRegexNode16 =
   /Cannot read properties of (?:null|undefined) \(reading '.+'\)/;
+const BatchAssertionCommand = 'Tab.assert';
 
 export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   readonly #coreTab: CoreTab;
   readonly #tab: Tab;
   readonly #states: T;
   readonly #jsPath: IJsPath = ['page-state', (counter += 1)];
+  #idCounter = 0;
 
-  readonly #rawCommands: {
-    [id: string]: [frameId: number, command: string, args: any[]];
+  readonly #rawCommandsById: {
+    [id: string]: IRawCommand;
   } = {};
 
-  readonly #serializedCommandsById = new Map<string, string>();
+  readonly #idBySerializedCommand = new Map<string, string>();
   readonly #stateResolvable = new Resolvable<K>();
+  readonly #batchAssertionPathToId: Record<string, string> = {};
 
   constructor(tab: Tab, coreTab: CoreTab, states: T) {
     this.#tab = tab;
@@ -43,7 +48,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
 
     const timer = new Timer(timeoutMs);
     await this.#coreTab.addEventListener(this.#jsPath, 'page-state', this.onStateChanged, {
-      commands: this.#rawCommands,
+      commands: this.#rawCommandsById,
     });
 
     try {
@@ -67,12 +72,11 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
 
   private async findActivePageState(stateResult: IPageStateResult): Promise<K> {
     try {
-      const interceptFn = PageState.createCommandLookupFn(
-        this.#serializedCommandsById,
-        stateResult,
-      );
-      // intercept commands with "pushed" state
-      this.#coreTab.commandQueue.intercept(interceptFn);
+      // intercept commands with "pushed" state when commands "run"
+      this.#coreTab.commandQueue.intercept((meta: ISessionMeta, command, ...args) => {
+        const id = this.getCommandId(meta.frameId, command, args);
+        return stateResult[id];
+      });
 
       for (const [stateKey, assertion] of Object.entries(this.#states)) {
         const assertionSets = await this.createAssertionSets(assertion);
@@ -134,36 +138,48 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     assertionDefinitionFn: IPageStateDefinitionFn,
   ): Promise<IAssertionSet[]> {
     const assertionSets: IAssertionSet[] = [];
+    function removeSoloAssert(assertion: IStateAndAssertion<any>): void {
+      const matchingIndex = assertionSets.findIndex(
+        x => x.stateAndAssertions.length === 1 && x.stateAndAssertions[0] === assertion,
+      );
+      if (matchingIndex >= 0) assertionSets.splice(matchingIndex, 1);
+    }
+
+    const runAssertionBatch = this.runAssertionBatch;
 
     assertionDefinitionFn({
       assert(statePromise, assertion) {
-        const stateAndAssertion = [
-          statePromise.catch(err => err),
-          assertion,
-        ] as IStateAndAssertion<any>;
-        assertionSets.push({
-          stateAndAssertions: [stateAndAssertion],
+        const assertionSet: IAssertionSet = {
+          stateAndAssertions: [[statePromise.catch(err => err), assertion]],
           minValidAssertions: 1,
-        });
-        return stateAndAssertion;
+        };
+        assertionSets.push(assertionSet);
+        return assertionSet.stateAndAssertions[0];
       },
       assertAny(count, stateAndAssertions) {
         // remove from solo entries (since all flow through the "assert" fn). need to consolidate to one entry
         for (const assertion of stateAndAssertions) {
-          const matchingIndex = assertionSets.findIndex(
-            x => x.stateAndAssertions.length === 1 && x.stateAndAssertions.includes(assertion),
-          );
-          if (matchingIndex >= 0) assertionSets.splice(matchingIndex, 1);
+          removeSoloAssert(assertion);
         }
         assertionSets.push({
           stateAndAssertions,
           minValidAssertions: count,
         });
       },
+      loadFrom(exportedStateOrPath) {
+        assertionSets.push({
+          stateAndAssertions: [[runAssertionBatch(exportedStateOrPath).catch(err => err), true]],
+          minValidAssertions: 1,
+        });
+      },
     });
 
-    // give things a second to settle
-    await new Promise(setImmediate);
+    // wait for all to complete
+    for (const assertionSet of assertionSets) {
+      for (const assertion of assertionSet.stateAndAssertions) {
+        await assertion[0];
+      }
+    }
 
     return assertionSets;
   }
@@ -171,20 +187,27 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   private async collectAssertionCommands(): Promise<void> {
     // run first pass where we just collect all the commands
     // we're going to get periodic updates that we're going to intercept as mock results
-    const capture = (state: Promise<any>): void => {
-      this.captureCommands(state).catch(() => null);
+    const promises: Promise<any>[] = [];
+    const capture = (assert: IStateAndAssertion<any>): void => {
+      const promise = this.captureCommands(assert).catch(() => null);
+      promises.push(promise);
     };
+    const loadAssertionBatch = this.loadAssertionBatch;
 
     for (const [key, assertion] of Object.entries(this.#states)) {
       const result = assertion({
-        assert(statePromise) {
-          capture(statePromise);
+        assert(statePromise, assert) {
+          capture([statePromise, assert]);
           return [statePromise];
         },
         assertAny(count, stateAndAssertions) {
-          for (const [statePromise] of stateAndAssertions) {
-            capture(statePromise);
+          for (const assert of stateAndAssertions) {
+            capture(assert);
           }
+        },
+        loadFrom(exportedStateOrPath) {
+          const promise = loadAssertionBatch(exportedStateOrPath);
+          promises.push(promise);
         },
       });
 
@@ -195,60 +218,74 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
       }
     }
 
-    // wait a tick for all promises to be called
-    await new Promise(setImmediate);
+    await Promise.all(promises);
   }
 
-  private async captureCommands(promise: Promise<any>): Promise<void> {
-    try {
-      let commandCounter = 0;
-      this.#coreTab.commandQueue.intercept((meta, command, ...args) => {
-        const commandAlreadyLogged = Object.values(this.#rawCommands).some(x => {
-          return (
-            x[0] === meta.frameId &&
-            x[1] === command &&
-            JSON.stringify(x[2]) === JSON.stringify(args)
-          );
-        });
-        if (commandAlreadyLogged) return;
+  private runAssertionBatch(
+    exportedStateOrPath: string | IPageStateAssertionBatch,
+  ): Promise<number> {
+    const id =
+      typeof exportedStateOrPath === 'string'
+        ? this.#batchAssertionPathToId[exportedStateOrPath]
+        : exportedStateOrPath.id;
+    return this.#coreTab.commandQueue.run(BatchAssertionCommand, id);
+  }
 
-        commandCounter += 1;
-        const id = `${commandCounter}-${command}`;
-        this.#rawCommands[id] = [meta.frameId, command, args];
-        this.#serializedCommandsById.set(id, JSON.stringify([meta.frameId, command, args]));
+  private async loadAssertionBatch(
+    exportedStateOrPath: IPageStateAssertionBatch | string,
+  ): Promise<void> {
+    let assertionBatch = exportedStateOrPath as IPageStateAssertionBatch;
+    if (typeof exportedStateOrPath === 'string') {
+      assertionBatch = await readFileAsJson(exportedStateOrPath);
+      this.#batchAssertionPathToId[exportedStateOrPath] = assertionBatch.id;
+    }
+
+    this.#idCounter += 1;
+    const id = `${this.#idCounter}-${BatchAssertionCommand}`;
+    this.#rawCommandsById[id] = [
+      null,
+      BatchAssertionCommand,
+      [assertionBatch.id, this.#jsPath, assertionBatch.assertions],
+    ];
+    // NOTE: subtly different serialization - serialized command and local run just stores the id
+    this.#idBySerializedCommand.set(
+      JSON.stringify([null, BatchAssertionCommand, [assertionBatch.id]]),
+      id,
+    );
+  }
+
+  private async captureCommands(assert: IStateAndAssertion<any>): Promise<void> {
+    try {
+      this.#coreTab.commandQueue.intercept((meta, command, ...args) => {
+        const record = [meta.frameId, command, args] as IRawCommand;
+        // see if already logged
+        const serialized = JSON.stringify(record);
+        if (this.#idBySerializedCommand.has(serialized)) return;
+
+        this.#idCounter += 1;
+        const id = `${this.#idCounter}-${command}`;
+        this.#rawCommandsById[id] = record;
+        this.#idBySerializedCommand.set(serialized, id);
       });
 
       // trigger a run so we can see commands that get triggered
-      await promise;
+      await assert[0];
     } finally {
       this.#coreTab.commandQueue.intercept(undefined);
     }
   }
 
-  private static createCommandLookupFn(
-    serializedCommandsById: Map<string, string>,
-    stateResult: IPageStateResult,
-  ): (meta: ISessionMeta, command: string, ...args: any[]) => any {
-    const stateMapBySerializedCommand: {
-      [serializedCommand: string]: any;
-    } = {};
-
-    for (const [id, result] of Object.entries(stateResult)) {
-      const key = serializedCommandsById.get(id);
-      stateMapBySerializedCommand[key] = result;
-    }
-
-    return (meta: ISessionMeta, command, ...args) => {
-      const { frameId } = meta;
-      const key = JSON.stringify([frameId, command, args]);
-      return stateMapBySerializedCommand[key];
-    };
+  private getCommandId(frameId: number, command: string, args: any[]): string {
+    const key = JSON.stringify([frameId ?? null, command, args]);
+    return this.#idBySerializedCommand.get(key);
   }
 }
 
 function isPromise(value: any): boolean {
   return !!value && typeof value === 'object' && 'then' in value && typeof 'then' === 'function';
 }
+
+type IRawCommand = [frameId: number, command: string, args: any[]];
 
 interface IAssertionSet {
   stateAndAssertions: IStateAndAssertion<any>[];

@@ -142,10 +142,7 @@ describe('pageStateGenerator', () => {
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
 
-    const liKey = PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
-      'count(/HTML/BODY/UL/LI)',
-      'number',
-    ]);
+    const liKey = PageStateAssertions.generateKey('xpath', ['count(/HTML/BODY/UL/LI)']);
     // add 2 to 3 existing
     expect(states1[liKey].result).toBe(5);
     // add 1 to non-existent
@@ -196,10 +193,7 @@ describe('pageStateGenerator', () => {
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
 
-    const liKey = PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
-      'count(/HTML/BODY/UL/LI)',
-      'number',
-    ]);
+    const liKey = PageStateAssertions.generateKey('xpath', ['count(/HTML/BODY/UL/LI)']);
 
     expect(states1[liKey].result).toBe(1);
     expect(states2[liKey].result).toBe(2);
@@ -245,13 +239,11 @@ describe('pageStateGenerator', () => {
     const states50 = pageStateGenerator.statesByName.get('50').assertsByFrameId[1];
     expect(states100).not.toEqual(states50);
 
-    const sliderKey50 = PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
+    const sliderKey50 = PageStateAssertions.generateKey('xpath', [
       'count(/HTML/BODY/DIV[@class="slider"][@style="width: 50%;"])',
-      'number',
     ]);
-    const sliderKey100 = PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
+    const sliderKey100 = PageStateAssertions.generateKey('xpath', [
       'count(/HTML/BODY/DIV[@class="slider"][@style="width: 100%;"])',
-      'number',
     ]);
     expect(states100[sliderKey100].result).toBe(1);
     expect(states50[sliderKey50].result).toBe(1);
@@ -303,29 +295,16 @@ describe('pageStateGenerator', () => {
     const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
-    const h1Key = PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
-      'string(/HTML/BODY/H1)',
-      'string',
-    ]);
+    const h1Key = PageStateAssertions.generateKey('xpath', ['string(/HTML/BODY/H1)']);
     expect(states1[h1Key]).toBeTruthy();
     expect(states2[h1Key]).toBeTruthy();
     expect(states1[h1Key].result).toBe('Page 1');
     expect(states2[h1Key].result).toBe('Page 2');
     expect(
-      states1[
-        PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
-          'count(//H1[text()="Page 1"])',
-          'number',
-        ])
-      ].result,
+      states1[PageStateAssertions.generateKey('xpath', ['count(//H1[text()="Page 1"])'])].result,
     ).toBe(1);
     expect(
-      states2[
-        PageStateAssertions.generateKey('FrameEnvironment.execXPath', [
-          'count(//H1[text()="Page 2"])',
-          'number',
-        ])
-      ].result,
+      states2[PageStateAssertions.generateKey('xpath', ['count(//H1[text()="Page 2"])'])].result,
     ).toBe(1);
   }, 20e3);
 
@@ -377,8 +356,8 @@ describe('pageStateGenerator', () => {
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
 
-    expect(Object.values(states1).filter(x => x.command === 'Tab.findResource')).toHaveLength(1);
-    expect(Object.values(states2).filter(x => x.command === 'Tab.findResource')).toHaveLength(1);
+    expect(Object.values(states1).filter(x => x.type === 'resource')).toHaveLength(1);
+    expect(Object.values(states2).filter(x => x.type === 'resource')).toHaveLength(1);
   }, 20e3);
 
   test('can export and re-import states', async () => {

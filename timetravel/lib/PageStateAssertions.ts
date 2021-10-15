@@ -1,3 +1,5 @@
+import { IAssertionAndResult } from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+
 export default class PageStateAssertions {
   private assertsBySessionId: { [sessionId: string]: IFrameAssertions } = {};
 
@@ -27,7 +29,7 @@ export default class PageStateAssertions {
     this.assertsBySessionId[sessionId] ??= {};
     this.assertsBySessionId[sessionId][frameId] ??= {};
     const assertion = assert as IAssertionAndResult;
-    assertion.key ??= PageStateAssertions.generateKey(assertion.command, assertion.args);
+    assertion.key ??= PageStateAssertions.generateKey(assertion.type, assertion.args);
     this.assertsBySessionId[sessionId][frameId][assertion.key] = assertion;
   }
 
@@ -82,8 +84,8 @@ export default class PageStateAssertions {
     return state;
   }
 
-  public static generateKey(command: IAssertionAndResult['command'], args: any[]): string {
-    return [command, args ? JSON.stringify(args) : ''].join(':');
+  public static generateKey(type: IAssertionAndResult['type'], args: any[]): string {
+    return [type, args ? JSON.stringify(args) : ''].join(':');
   }
 
   public static removeAssertsSharedBetweenStates(states: IFrameAssertions[]): void {
@@ -117,14 +119,6 @@ function clone<T>(obj: T): T {
 
 export interface IFrameAssertions {
   [frameId: string]: IAssertionAndResultByQuery;
-}
-
-export interface IAssertionAndResult {
-  key: string;
-  command: 'Tab.findResource' | 'FrameEnvironment.execXPath' | 'FrameEnvironment.getUrl';
-  args: any[];
-  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=' | 'contains';
-  result: number | string | boolean;
 }
 
 interface IAssertionAndResultByQuery {

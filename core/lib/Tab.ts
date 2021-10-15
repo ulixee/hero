@@ -27,6 +27,9 @@ import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import IPageStateAssertionBatch, {
+  IAssertionAndResult,
+} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -66,7 +69,7 @@ export default class Tab
     atCommandId: number;
   };
 
-  private pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
+  private readonly pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
 
   private onFrameCreatedResourceEventsByFrameId: {
     [frameId: string]: {
@@ -153,6 +156,7 @@ export default class Tab
       this.goBack,
       this.goForward,
       this.reload,
+      this.assert,
       this.takeScreenshot,
       this.waitForFileChooser,
       this.waitForMillis,
@@ -291,18 +295,11 @@ export default class Tab
     resourceId: number,
     propertyPath: string,
   ): Promise<T> {
-    let finalResourceId = resourceId;
-    // if no resource id, this is a request for the default resource (page)
-    if (!resourceId) {
-      await this.navigationsObserver.waitForReady();
-      finalResourceId = await this.navigationsObserver.waitForNavigationResourceId();
-    }
-
     if (propertyPath === 'data' || propertyPath === 'response.data') {
-      return (await this.session.db.resources.getResourceBodyById(finalResourceId, true)) as any;
+      return (await this.session.db.resources.getResourceBodyById(resourceId, true)) as any;
     }
 
-    const resource = this.session.resources.get(finalResourceId);
+    const resource = this.session.resources.get(resourceId);
 
     const pathParts = propertyPath.split('.');
 
@@ -483,18 +480,6 @@ export default class Tab
     return newTab;
   }
 
-  public getResource(filter: IResourceFilterProperties): IResourceMeta {
-    // escape query string ? if url filter is a string
-    // ie http://test.com?param=1 will treat the question mark as an optional char
-    if (typeof filter.url === 'string' && filter.url.includes('?')) {
-      filter.url = escapeUnescapedChar(filter.url, '?');
-    }
-    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
-      if (this.isResourceFilterMatch(resourceMeta, filter)) return resourceMeta;
-    }
-    return null;
-  }
-
   public async waitForResource(
     filter: IResourceFilterProperties,
     options?: IWaitForResourceOptions,
@@ -664,6 +649,52 @@ export default class Tab
   }
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public async assert(
+    batchId: string,
+    pageStateIdJsPath: IJsPath,
+    assertions: IPageStateAssertionBatch['assertions'],
+  ): Promise<boolean> {
+    function compare<T>(
+      value: T,
+      comparison: IAssertionAndResult['comparison'],
+      result: T,
+    ): boolean {
+      if (comparison === '===') return value === result;
+      if (comparison === '!==') return value !== result;
+      if (comparison === '<=') return value <= result;
+      if (comparison === '<') return value < result;
+      if (comparison === '>=') return value >= result;
+      if (comparison === '>') return value > result;
+      return false;
+    }
+
+    const domAssertionsByFrameId: { [frameId: number]: IPageStateAssertionBatch['assertions'] } =
+      {};
+    let failedCount = 0;
+    for (const assertion of assertions) {
+      const [frameId, type, args, comparison, result] = assertion;
+      if (type === 'url') {
+        const frame = this.frameEnvironmentsById.get(frameId) ?? this.mainFrameEnvironment;
+        const url = frame.navigations.currentUrl;
+        if (!compare(url, comparison, result)) failedCount += 1;
+      }
+      if (type === 'resource') {
+        const resource = this.findResource(args[0]);
+        if (!resource) failedCount += 1;
+      }
+      if (type === 'xpath' || type === 'jspath') {
+        domAssertionsByFrameId[frameId] ??= [];
+        domAssertionsByFrameId[frameId].push(assertion);
+      }
+    }
+    for (const [frameId, frameAssertions] of Object.entries(domAssertionsByFrameId)) {
+      const frame = this.frameEnvironmentsById.get(Number(frameId));
+      const failedDomAssertions = await frame.runDomAssertions(batchId, frameAssertions);
+      failedCount += failedDomAssertions;
+    }
+    return failedCount === 0;
+  }
 
   public addPageStateListener(
     pageStateId: string,
@@ -859,6 +890,19 @@ export default class Tab
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
+
+  private findResource(filter: IResourceFilterProperties): IResourceMeta {
+    // escape query string ? so it can run as regex
+    if (typeof filter.url === 'string' && filter.url.includes('?')) {
+      filter.url = escapeUnescapedChar(filter.url, '?');
+    }
+    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
+      if (this.isResourceFilterMatch(resourceMeta, filter)) {
+        return resourceMeta;
+      }
+    }
+    return null;
+  }
 
   private isResourceFilterMatch(
     resourceMeta: IResourceMeta,

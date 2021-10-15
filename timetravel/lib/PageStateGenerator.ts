@@ -9,12 +9,15 @@ import DomChangesTable, {
 } from '@ulixee/hero-core/models/DomChangesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import IResourceFilterProperties from '@ulixee/hero-core/interfaces/IResourceFilterProperties';
+import { v1 as uuidv1 } from 'uuid';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
 import MirrorNetwork from './MirrorNetwork';
 import MirrorContext from './MirrorContext';
-import PageStateAssertions, { IAssertionAndResult, IFrameAssertions } from './PageStateAssertions';
+import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
 
 inspect.defaultOptions.depth = 10;
@@ -70,17 +73,17 @@ export default class PageStateGenerator {
     this.sessionsById.get(sessionId).timeRange = timeRange;
   }
 
-  public import(savedState: IExportedPageState): void {
+  public import(savedState: IPageStateAssertionBatch): void {
     this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
     const state = this.statesByName.get(savedState.state);
     state.startingAssertsByFrameId = {};
     const startingAssertions = state.startingAssertsByFrameId;
-    for (const [frameId, command, args, comparison, result] of savedState.assertions) {
+    for (const [frameId, type, args, comparison, result] of savedState.assertions) {
       startingAssertions[frameId] ??= {};
-      const key = PageStateAssertions.generateKey(command, args);
+      const key = PageStateAssertions.generateKey(type, args);
       startingAssertions[frameId][key] = {
         key,
-        command,
+        type,
         args,
         comparison,
         result,
@@ -98,8 +101,9 @@ export default class PageStateGenerator {
     }
   }
 
-  public export(stateName: string): IExportedPageState {
-    const exported = <IExportedPageState>{
+  public export(stateName: string): IPageStateAssertionBatch {
+    const exported = <IPageStateAssertionBatch>{
+      id: uuidv1(),
       sessions: [],
       assertions: [],
       state: stateName,
@@ -118,7 +122,7 @@ export default class PageStateGenerator {
       for (const assertion of Object.values(assertions)) {
         exported.assertions.push([
           Number(frameId),
-          assertion.command,
+          assertion.type,
           assertion.args,
           assertion.comparison,
           assertion.result,
@@ -217,9 +221,7 @@ export default class PageStateGenerator {
         // TODO: don't know how to get to subframes quite yet...
         if (!session.mainFrameIds.has(Number(frameId))) continue;
 
-        const xpathAsserts = Object.values(assertions).filter(
-          x => x.command === 'FrameEnvironment.execXPath',
-        );
+        const xpathAsserts = Object.values(assertions).filter(x => x.type === 'xpath');
         const queries = xpathAsserts.map(x => x.args[0]);
         const refreshedResults = await mirrorPage.page.evaluate(
           XPathGenerator.createEvaluateExpression(queries),
@@ -267,12 +269,14 @@ export default class PageStateGenerator {
       if (!frameId) continue;
 
       this.sessionAssertions.recordAssertion(sessionId, frameId, {
-        command: 'Tab.findResource',
+        type: 'resource',
         args: [
-          {
+          <IResourceFilterProperties>{
             url: resource.url,
-            status: resource.statusCode,
-            method: resource.method,
+            httpRequest: {
+              statusCode: resource.statusCode,
+              method: resource.method,
+            },
           },
         ],
         comparison: '!==',
@@ -367,8 +371,8 @@ export default class PageStateGenerator {
     result: string | number | boolean,
   ): void {
     this.sessionAssertions.recordAssertion(sessionId, frameId, {
-      command: 'FrameEnvironment.execXPath',
-      args: [path, typeof result],
+      type: 'xpath',
+      args: [path],
       comparison: '===',
       result,
     });
@@ -376,7 +380,7 @@ export default class PageStateGenerator {
 
   private recordUrl(sessionId: string, frameId: number, url: string): void {
     this.sessionAssertions.recordAssertion(sessionId, frameId, {
-      command: 'FrameEnvironment.getUrl',
+      type: 'url',
       args: [],
       comparison: '===',
       result: url,
@@ -427,21 +431,4 @@ interface IPageStateByName {
   sessionIds: Set<string>;
   assertsByFrameId?: IFrameAssertions;
   startingAssertsByFrameId?: IFrameAssertions;
-}
-
-export interface IExportedPageState {
-  state: string;
-  sessions: {
-    sessionId: string;
-    dbLocation: string; // could be on another machine
-    tabId: number;
-    timeRange: [start: number, end: number];
-  }[];
-  assertions: [
-    frameId: number,
-    command: IAssertionAndResult['command'],
-    args: IAssertionAndResult['args'],
-    comparison: IAssertionAndResult['comparison'],
-    result: IAssertionAndResult['result'],
-  ][];
 }
