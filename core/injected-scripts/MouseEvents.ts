@@ -1,7 +1,5 @@
-// eslint-disable-next-line max-classes-per-file
 import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class MouseEvents {
   private static pendingMouseover?: EventResolvable<MouseEvent, boolean>;
   private static pendingMouseup?: EventResolvable<MouseEvent, IMouseUpResult>;

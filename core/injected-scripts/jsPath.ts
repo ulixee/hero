@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import type INodePointer from 'awaited-dom/base/INodePointer';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
@@ -9,7 +8,6 @@ import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 const pointerFnName = '__getNodePointer__';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class JsPath {
   public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
     let left = Math.max(coordinates[0], 0);
