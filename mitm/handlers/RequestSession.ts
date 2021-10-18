@@ -44,7 +44,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     url: string;
     redirectedToUrl: string;
     redirectChain: string[];
-    responseTime: Date;
+    responseTime: number;
   }[] = [];
 
   public respondWithHttpErrorStacks = true;
@@ -80,8 +80,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
     const redirect = this.requestedUrls.find(
       x =>
-        x.redirectedToUrl === resourceRedirect.url &&
-        resource.requestTime.getTime() - x.responseTime.getTime() < 5e3,
+        x.redirectedToUrl === resourceRedirect.url && resource.requestTime - x.responseTime < 5e3,
     );
     resource.isFromRedirect = !!redirect;
     if (redirect) {
@@ -230,6 +229,7 @@ export interface IResourceStateChangeEvent {
 
 export interface IRequestSessionResponseEvent extends IRequestSessionRequestEvent {
   browserRequestId: string;
+  frameId: number;
   response: IResourceResponse;
   wasCached: boolean;
   dnsResolvedIp?: string;

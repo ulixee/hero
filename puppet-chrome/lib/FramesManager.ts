@@ -19,6 +19,7 @@ import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
 import Page = Protocol.Page;
+import { NetworkManager } from './NetworkManager';
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__hero_world__';
@@ -44,12 +45,14 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   private activeContextIds = new Set<number>();
   private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly devtoolsSession: DevtoolsSession;
+  private readonly networkManager: NetworkManager;
 
   private isReady: Promise<void>;
 
-  constructor(devtoolsSession: DevtoolsSession, logger: IBoundLog) {
+  constructor(devtoolsSession: DevtoolsSession, networkManager: NetworkManager, logger: IBoundLog) {
     super();
     this.devtoolsSession = devtoolsSession;
+    this.networkManager = networkManager;
     this.logger = logger.createChild(module);
     this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
       ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
@@ -111,11 +114,16 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   public async addPageCallback(
     name: string,
     onCallback: (payload: any, frameId: string) => any,
+    isolateFromWebPageEnvironment?: boolean,
   ): Promise<IRegisteredEventListener> {
-    // add binding to every new context automatically
-    await this.devtoolsSession.send('Runtime.addBinding', {
+    const params: Protocol.Runtime.AddBindingRequest = {
       name,
-    });
+    };
+    if (isolateFromWebPageEnvironment) {
+      (params as any).executionContextName = ISOLATED_WORLD;
+    }
+    // add binding to every new context automatically
+    await this.devtoolsSession.send('Runtime.addBinding', params);
     return eventUtils.addEventListener(
       this.devtoolsSession,
       'Runtime.bindingCalled',
@@ -257,9 +265,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
 
   private async onLifecycleEvent(event: LifecycleEventEvent) {
     await this.isReady;
-    const { frameId, name, loaderId } = event;
+    const { frameId, name, loaderId, timestamp } = event;
+    const eventTime = this.networkManager.monotonicTimeToUnix(timestamp);
     const frame = this.recordFrame({ id: frameId, loaderId } as any);
-    return frame.onLifecycleEvent(name, loaderId);
+    return frame.onLifecycleEvent(name, eventTime, loaderId);
   }
 
   private recurseFrameTree(frameTree: FrameTree) {

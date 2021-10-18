@@ -3,7 +3,6 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
-  public lastNavigationIdByFrameId: { [frameId: number]: number } = {};
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
@@ -35,13 +34,6 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     change: IDomChangeEvent,
   ): void {
     const [action, nodeData, timestamp, eventIndex] = change;
-    if (
-      !this.lastNavigationIdByFrameId[frameId] ||
-      this.lastNavigationIdByFrameId[frameId] < navigationId
-    ) {
-      this.lastNavigationIdByFrameId[frameId] = navigationId;
-    }
-
     const record = [
       frameId,
       navigationId,
@@ -72,10 +64,10 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     return query.all(frameId, sinceCommandId ?? 0).map(DomChangesTable.inflateRecord);
   }
 
-  public getChangesSince(timestamp: number): IDomChangeRecord[] {
-    const query = this.db.prepare(`select * from ${this.tableName} where timestamp >= ?`);
+  public getChangesSinceNavigation(navigationId: number): IDomChangeRecord[] {
+    const query = this.db.prepare(`select * from ${this.tableName} where frameNavigationId >= ?`);
 
-    return query.all(timestamp).map(DomChangesTable.inflateRecord);
+    return query.all(navigationId).map(DomChangesTable.inflateRecord);
   }
 
   public static inflateRecord(record: IDomChangeRecord): IDomChangeRecord {

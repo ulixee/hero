@@ -4,7 +4,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import { ISessionResource } from '../apis/Session.resources';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -15,6 +15,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['devtoolsRequestId', 'TEXT'],
         ['tabId', 'INTEGER'],
+        ['frameId', 'INTEGER'],
         ['socketId', 'INTEGER'],
         ['protocol', 'TEXT'],
         ['type', 'TEXT'],
@@ -42,6 +43,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['requestOriginalHeaders', 'TEXT'],
         ['responseOriginalHeaders', 'TEXT'],
         ['httpError', 'TEXT'],
+        ['browserLoadedTimestamp', 'INTEGER'],
         ['browserServedFromCache', 'TEXT'],
         ['browserLoadFailure', 'TEXT'],
         ['browserBlockedReason', 'TEXT'],
@@ -49,6 +51,19 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       ],
       true,
     );
+  }
+
+  public updateReceivedTime(id: number, timestamp: number): void {
+    const pendingInserts = this.findPendingInserts(x => x[0] === id);
+    if (pendingInserts.length) {
+      const pending = pendingInserts.pop();
+      const index = this.columns.findIndex(x => x[0] === 'browserLoadedTimestamp');
+      pending[index] = timestamp;
+      return;
+    }
+    this.db
+      .prepare(`update ${this.tableName} set browserLoadedTimestamp=? where id=?`)
+      .run(timestamp, id);
   }
 
   public updateResource(id: number, data: { tabId: number; browserRequestId: string }): void {
@@ -76,6 +91,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       record.id,
       record.devtoolsRequestId,
       record.tabId,
+      record.frameId,
       record.socketId,
       record.protocol,
       record.type,
@@ -103,6 +119,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       record.requestOriginalHeaders,
       record.responseOriginalHeaders,
       record.httpError,
+      record.browserLoadedTimestamp,
       record.browserServedFromCache,
       record.browserLoadFailure,
       record.browserBlockedReason,
@@ -142,6 +159,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.id,
       extras.browserRequestId,
       tabId,
+      meta.frameId,
       extras.socketId,
       extras.protocol,
       meta.type,
@@ -169,6 +187,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       JSON.stringify(extras.originalHeaders ?? {}),
       JSON.stringify(extras.responseOriginalHeaders ?? {}),
       errorString,
+      meta.response?.browserLoadedTime,
       meta.response?.browserServedFromCache,
       meta.response?.browserLoadFailure,
       extras.browserBlockedReason,
@@ -176,32 +195,43 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     ]);
   }
 
-  public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): ISessionResource[] {
+  public withResponseTimeInRange(
+    tabId: number,
+    startTime: number,
+    endTime: number,
+  ): IResourceSummary[] {
+    return this.db
+      .prepare(
+        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl,
+        responseHeaders, browserLoadedTimestamp, responseTimestamp
+        from ${this.tableName} where tabId = ? and (
+          (browserLoadedTimestamp is null and responseTimestamp >= ? and responseTimestamp <= ?) or
+          (browserLoadedTimestamp is not null and browserLoadedTimestamp >= ? and browserLoadedTimestamp <= ?)
+        )`,
+      )
+      .all(tabId, startTime, endTime, startTime, endTime)
+      .map(ResourcesTable.toResourceSummary);
+  }
+
+  public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): IResourceSummary[] {
     const { hasResponse, isGetOrDocument } = filters;
     const records = this.db
       .prepare(
-        `select requestUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
+        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
       )
       .all();
 
     return records
       .filter(resource => {
-        if (hasResponse && !resource.responseHeaders) return false;
+        if ((hasResponse && !resource.responseHeaders) || resource.responseHeaders === '{}')
+          return false;
         if (isGetOrDocument && resource.requestMethod !== 'GET') {
           // if this is a POST of a document, allow it
           if (resource.type !== 'Document' && resource.method === 'POST') return false;
         }
         return true;
       })
-      .map(resource => ({
-        url: resource.requestUrl,
-        statusCode: resource.statusCode,
-        method: resource.requestMethod,
-        id: resource.id,
-        tabId: resource.tabId,
-        type: resource.type,
-        redirectedToUrl: resource.redirectedToUrl,
-      }));
+      .map(ResourcesTable.toResourceSummary);
   }
 
   public getResponse(
@@ -236,6 +266,21 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     return await decodeBuffer(responseData, responseEncoding);
   }
 
+  public static toResourceSummary(record: IResourcesRecord): IResourceSummary {
+    return {
+      id: record.id,
+      frameId: record.frameId,
+      tabId: record.tabId,
+      url: record.responseUrl ?? record.requestUrl,
+      method: record.requestMethod,
+      type: record.type,
+      statusCode: record.statusCode,
+      redirectedToUrl: record.redirectedToUrl,
+      timestamp: record.browserLoadedTimestamp ?? record.responseTimestamp,
+      hasResponse: !!record.responseHeaders,
+    };
+  }
+
   public static getErrorString(error: Error | string): string {
     if (error) {
       if (typeof error === 'string') return error;
@@ -253,6 +298,7 @@ export interface IResourcesRecord {
   id: number;
   devtoolsRequestId: string;
   tabId: number;
+  frameId: number;
   socketId: number;
   protocol: string;
   type: ResourceType;
@@ -281,6 +327,7 @@ export interface IResourcesRecord {
   responseOriginalHeaders: string;
   httpError: string;
 
+  browserLoadedTimestamp?: number;
   browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'memory';
   browserLoadFailure?: string;
   browserBlockedReason?: string;

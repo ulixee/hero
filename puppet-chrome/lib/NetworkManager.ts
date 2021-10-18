@@ -53,6 +53,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly proxyConnectionOptions: IProxyConnectionOptions;
   private isChromeRetainingResources = false;
 
+  private monotonicOffsetTime: number;
+
   constructor(
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
@@ -80,7 +82,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   public emit<
-    K extends (keyof IPuppetNetworkEvents & string) | (keyof IPuppetNetworkEvents & symbol)
+    K extends (keyof IPuppetNetworkEvents & string) | (keyof IPuppetNetworkEvents & symbol),
   >(eventType: K, event?: IPuppetNetworkEvents[K]): boolean {
     if (this.parentManager) {
       this.parentManager.emit(eventType, event);
@@ -146,6 +148,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
     return this.initialize();
+  }
+
+  public monotonicTimeToUnix(monotonicTime: number): number | undefined {
+    if (this.monotonicOffsetTime) return 1e3 * (monotonicTime + this.monotonicOffsetTime);
   }
 
   private onAuthRequired(event: Protocol.Fetch.AuthRequiredEvent): void {
@@ -214,7 +220,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        requestTime: new Date(),
+        requestTime: Date.now(),
         protocol: null,
         hasUserGesture: false,
         documentUrl: networkRequest.request.headers.Referer,
@@ -253,6 +259,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent): void {
+    if (!this.monotonicOffsetTime)
+      this.monotonicOffsetTime = networkRequest.wallTime - networkRequest.timestamp;
     const redirectedFromUrl = networkRequest.redirectResponse?.url;
 
     const isNavigation =
@@ -269,7 +277,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        requestTime: new Date(networkRequest.wallTime * 1e3),
+        requestTime: networkRequest.wallTime * 1e3,
         protocol: null,
         browserRequestId: networkRequest.requestId,
         resourceType: getResourceTypeForChromeValue(
@@ -415,7 +423,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       resource.remoteAddress = `${response.remoteIPAddress}:${response.remotePort}`;
       resource.protocol = response.protocol;
       resource.responseUrl = response.url;
-      resource.responseTime = new Date();
+      resource.responseTime = response.responseTime;
       if (response.fromDiskCache) resource.browserServedFromCache = 'disk';
       if (response.fromServiceWorker) resource.browserServedFromCache = 'service-worker';
       if (response.fromPrefetchCache) resource.browserServedFromCache = 'prefetch';
@@ -440,6 +448,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         location: response.headers.location,
         url: response.url,
         loaderId: event.loaderId,
+        timestamp: response.responseTime,
       });
     }
   }
@@ -449,12 +458,12 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const resource = this.requestsById.get(requestId);
     if (resource) {
       resource.browserServedFromCache = 'memory';
-      setTimeout(() => this.emitLoaded(requestId), 500).unref();
+      setTimeout(() => this.emitLoaded(requestId, resource.requestTime), 500).unref();
     }
   }
 
   private onLoadingFailed(event: LoadingFailedEvent): void {
-    const { requestId, canceled, blockedReason, errorText } = event;
+    const { requestId, canceled, blockedReason, errorText, timestamp } = event;
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
@@ -465,6 +474,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       if (canceled) resource.browserCanceled = true;
       if (blockedReason) resource.browserBlockedReason = blockedReason;
       if (errorText) resource.browserLoadFailure = errorText;
+      resource.browserLoadedTime = this.monotonicTimeToUnix(timestamp);
 
       if (!this.requestPublishingById.get(requestId)?.isPublished) {
         this.doEmitResourceRequested(requestId);
@@ -480,31 +490,41 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   private onLoadingFinished(event: LoadingFinishedEvent): void {
-    const { requestId } = event;
-    this.emitLoaded(requestId);
+    const { requestId, timestamp } = event;
+    const eventTime = this.monotonicTimeToUnix(timestamp);
+    this.emitLoaded(requestId, eventTime);
   }
 
-  private emitLoaded(id: string): void {
+  private emitLoaded(id: string, timestamp: number): void {
     const resource = this.requestsById.get(id);
     if (resource) {
       if (!this.requestPublishingById.get(id)?.isPublished) this.emitResourceRequested(id);
       this.requestsById.delete(id);
       this.requestPublishingById.delete(id);
       const loaderId = this.navigationRequestIdsToLoaderId.get(id);
+
+      resource.browserLoadedTime = timestamp;
+
       if (this.redirectsById.has(id)) {
         for (const redirect of this.redirectsById.get(id)) {
+          redirect.browserLoadedTime = timestamp;
           this.emit('resource-loaded', {
             resource: redirect,
             frameId: redirect.frameId,
             loaderId,
-            // eslint-disable-next-line require-await
-            body: async () => Buffer.from(''),
+            body: () => Promise.resolve(Buffer.from('')),
           });
         }
         this.redirectsById.delete(id);
       }
+
       const body = this.downloadRequestBody.bind(this, id);
-      this.emit('resource-loaded', { resource, frameId: resource.frameId, loaderId, body });
+      this.emit('resource-loaded', {
+        resource,
+        frameId: resource.frameId,
+        loaderId,
+        body,
+      });
     }
   }
 

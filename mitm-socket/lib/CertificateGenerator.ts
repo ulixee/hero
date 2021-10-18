@@ -10,7 +10,7 @@ let certRequestId = 0;
 export default class CertificateGenerator extends BaseIpcHandler {
   protected logger: IBoundLog = log.createChild(module);
 
-  private pendingCertsById = new Map<number, Resolvable<{ cert: string; expireDate: Date }>>();
+  private pendingCertsById = new Map<number, Resolvable<{ cert: string; expireDate: number }>>();
 
   private privateKey: string;
   private waitForInit = new Resolvable<void>();
@@ -31,12 +31,12 @@ export default class CertificateGenerator extends BaseIpcHandler {
     return this.privateKey;
   }
 
-  public async generateCerts(host: string): Promise<{ cert: string; expireDate: Date }> {
+  public async generateCerts(host: string): Promise<{ cert: string; expireDate: number }> {
     await this.waitForConnected;
     certRequestId += 1;
     const id = certRequestId;
 
-    const resolvable = new Resolvable<{ cert: string; expireDate: Date }>(10e3);
+    const resolvable = new Resolvable<{ cert: string; expireDate: number }>(10e3);
     this.pendingCertsById.set(id, resolvable);
 
     try {
@@ -90,7 +90,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
     if (message.status === 'error') {
       pending.reject(new Error(message.error));
     } else if (message.status === 'certs') {
-      pending.resolve({ cert: message.cert, expireDate: new Date(message.expireDate * 1e3) });
+      pending.resolve({ cert: message.cert, expireDate: message.expireDate * 1e3 });
     }
   }
 

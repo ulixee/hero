@@ -21,7 +21,7 @@ export default function extractPlugins<T = IPluginClass>(obj: any, pluginType?: 
   return Plugins;
 }
 
-function isPluginMatch(PotentialPlugin: any, pluginType?: IPluginType) {
+function isPluginMatch(PotentialPlugin: any, pluginType?: IPluginType): boolean {
   if (pluginType) {
     return PotentialPlugin.type === pluginType;
   }

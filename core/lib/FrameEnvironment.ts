@@ -20,13 +20,12 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 
 import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as Os from 'os';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
-import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
+import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import SessionState from './SessionState';
+import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
 import Tab from './Tab';
@@ -105,13 +104,12 @@ export default class FrameEnvironment
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
+  private lastDomChangeNavigationId: number;
+
+  private readonly installedDomAssertions = new Set<string>();
 
   public get url(): string {
     return this.navigations.currentUrl;
-  }
-
-  private get sessionState(): SessionState {
-    return this.session.sessionState;
   }
 
   constructor(tab: Tab, frame: IPuppetFrame) {
@@ -119,7 +117,7 @@ export default class FrameEnvironment
     this.puppetFrame = frame;
     this.tab = tab;
     this.createdTime = new Date();
-    this.id = tab.session.nextFrameId();
+    this.id = this.session.db.frames.nextId;
     this.logger = log.createChild(module, {
       tabId: tab.id,
       sessionId: tab.session.id,
@@ -127,8 +125,13 @@ export default class FrameEnvironment
     });
     this.jsPath = new JsPath(this, tab.isDetached);
     this.isDetached = tab.isDetached;
-    this.createdAtCommandId = this.sessionState.lastCommand?.id;
-    this.navigations = new FrameNavigations(this.tab.id, this.id, tab.sessionState);
+    this.createdAtCommandId = this.session.commands.lastId;
+    this.navigations = new FrameNavigations(
+      this.tab.id,
+      this.id,
+      this.tab.sessionId,
+      tab.session.db.frameNavigations,
+    );
     this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.interactor = new Interactor(this);
 
@@ -242,28 +245,12 @@ export default class FrameEnvironment
   public recordDetachedJsPath(index: number, runStartDate: number, endDate: number): void {
     const entry = this.prefetchedJsPaths[index];
 
-    const commandMeta = <ICommandMeta>{
-      name: 'execJsPath',
-      args: TypeSerializer.stringify([entry.jsPath]),
-      id: this.sessionState.commands.length + 1,
-      wasPrefetched: true,
-      tabId: this.tab.id,
-      frameId: this.id,
-      result: entry.result,
-      runStartDate,
-      endDate,
-      run: this.session.resumeCounter,
-    };
-    if (this.sessionState.nextCommandMeta) {
-      const { commandId, sendDate, startDate: clientStartDate } = this.sessionState.nextCommandMeta;
-      this.sessionState.nextCommandMeta = null;
-      commandMeta.id = commandId;
-      commandMeta.clientSendDate = sendDate?.getTime();
-      commandMeta.clientStartDate = clientStartDate?.getTime();
-    }
-
-    // only need to record start
-    this.sessionState.recordCommandStart(commandMeta);
+    const commands = this.session.commands;
+    const command = commands.create(this.tab.id, this.id, undefined, 'execJsPath', [entry.jsPath]);
+    command.wasPrefetched = true;
+    command.endDate = endDate;
+    command.result = entry.result;
+    commands.onStart(command, runStartDate);
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
@@ -375,6 +362,37 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     }
   }
 
+  public async runDomAssertions(
+    id: string,
+    assertions: IPageStateAssertionBatch['assertions'],
+  ): Promise<number> {
+    if (!this.installedDomAssertions.has(id)) {
+      await this.runIsolatedFn('HERO.DomAssertions.install', id, assertions);
+      this.installedDomAssertions.add(id);
+    }
+    try {
+      const { failedIndices } = await this.runIsolatedFn<{ failedIndices: Record<number, any> }>(
+        'HERO.DomAssertions.run',
+        id,
+      );
+      return Object.keys(failedIndices).length;
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) return 0;
+      if (String(error).includes('This assertion batch has not been installed')) {
+        this.installedDomAssertions.delete(id);
+        return this.runDomAssertions(id, assertions);
+      }
+      return 1;
+    }
+  }
+
+  public async clearDomAssertions(id: string): Promise<void> {
+    if (this.installedDomAssertions.has(id)) {
+      this.installedDomAssertions.delete(id);
+      await this.runIsolatedFn('HERO.DomAssertions.clear', id);
+    }
+  }
+
   public async runPluginCommand(toPluginId: string, args: any[]): Promise<any> {
     const commandMeta = {
       puppetPage: this.tab.puppetPage,
@@ -383,21 +401,27 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }
 
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
     return this.navigationsObserver.waitForLoad(status, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(
+    trigger: ILocationTrigger,
+    options?: IWaitForOptions,
+  ): Promise<INavigation> {
     return this.navigationsObserver.waitForLocation(trigger, options);
   }
 
   // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which
   // can break waitForLocation
-  public async waitForDom(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public async waitForDom(
+    jsPath: IJsPath,
+    options?: IWaitForElementOptions,
+  ): Promise<INodePointer> {
     const waitForVisible = options?.waitForVisible ?? false;
     const timeoutMs = options?.timeoutMs ?? 30e3;
     const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
@@ -423,7 +447,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
           const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
           let isValid = isNodeVisible.value?.isVisible;
           if (!waitForVisible) isValid = isNodeVisible.value?.nodeExists;
-          if (isValid) return true;
+          if (isValid) return isNodeVisible.nodePointer;
         } catch (err) {
           if (String(err).includes('not a valid selector')) throw err;
           // don't log during loop
@@ -434,7 +458,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     } finally {
       timer.clear();
     }
-    return false;
+    return null;
   }
 
   public moveMouseToStartLocation(): Promise<void> {
@@ -462,9 +486,14 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
     const hasRecords = results.some(x => x.length > 0);
     if (!hasRecords) return false;
+
+    const commands = this.session.commands;
+    const tabId = this.tab.id;
+    const frameId = this.id;
+
     this.logger.stats('FrameEnvironment.onPageEvents', {
-      tabId: this.tab.id,
-      frameId: this.id,
+      tabId,
+      frameId,
       dom: domChanges.length,
       mouse: mouseEvents.length,
       focusEvents: focusEvents.length,
@@ -473,23 +502,56 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     });
 
     for (const [event, url, timestamp] of loadEvents) {
-      const incomingStatus = pageStateToLoadStatus[event];
-
-      this.navigations.onLoadStatusChanged(incomingStatus, url, null, new Date(timestamp));
+      this.navigations.onLoadStatusChanged(pageStateToLoadStatus[event], url, null, timestamp);
     }
 
     if (domChanges.length) {
       this.emit('paint');
     }
 
-    this.sessionState.captureDomEvents(
-      this.tab.id,
-      this.id,
-      domChanges,
-      mouseEvents,
-      focusEvents,
-      scrollEvents,
-    );
+    let lastCommand = commands.last;
+    if (!lastCommand) return; // nothing to store yet
+
+    let navigation = this.navigations.get(this.lastDomChangeNavigationId);
+    const db = this.session.db;
+
+    for (const domChange of domChanges) {
+      lastCommand = commands.getCommandForTimestamp(lastCommand, domChange[2]);
+      if (domChange[0] === DomActionType.newDocument || domChange[0] === DomActionType.location) {
+        const url = domChange[1].textContent;
+        navigation = this.navigations.findHistory(x => x.finalUrl === url);
+
+        if (
+          navigation &&
+          (!this.lastDomChangeNavigationId || this.lastDomChangeNavigationId < navigation.id)
+        ) {
+          this.lastDomChangeNavigationId = navigation.id;
+        }
+      }
+
+      // if this is a doctype, set into the navigation
+      if (navigation && domChange[0] === DomActionType.added && domChange[1].nodeType === 10) {
+        navigation.doctype = domChange[1].textContent;
+        db.frameNavigations.insert(navigation);
+      }
+
+      db.domChanges.insert(tabId, frameId, navigation?.id, lastCommand.id, domChange);
+    }
+
+    for (const mouseEvent of mouseEvents) {
+      lastCommand = commands.getCommandForTimestamp(lastCommand, mouseEvent[8]);
+      db.mouseEvents.insert(tabId, frameId, lastCommand.id, mouseEvent);
+    }
+
+    for (const focusEvent of focusEvents) {
+      lastCommand = commands.getCommandForTimestamp(lastCommand, focusEvent[3]);
+      db.focusEvents.insert(tabId, frameId, lastCommand.id, focusEvent);
+    }
+
+    for (const scrollEvent of scrollEvents) {
+      lastCommand = commands.getCommandForTimestamp(lastCommand, scrollEvent[2]);
+      db.scrollEvents.insert(tabId, frameId, lastCommand.id, scrollEvent);
+    }
     return true;
   }
 
@@ -589,7 +651,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         frameId: this.id,
       });
     }
-    this.sessionState.captureFrameDetails(this);
+    this.record();
   }
 
   private listen(): void {
@@ -607,7 +669,12 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
-      this.navigations.onLoadStatusChanged(status, event.frame.url, event.loaderId);
+      this.navigations.onLoadStatusChanged(
+        status,
+        event.frame.url,
+        event.loaderId,
+        event.timestamp,
+      );
     }
   }
 
@@ -622,8 +689,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         this.tab.lastCommandId,
         event.loaderId,
       );
+    } else {
+      this.installedDomAssertions.clear();
     }
-    this.sessionState.captureFrameDetails(this);
+    this.puppetFrame = frame;
+    this.record();
   }
 
   // client-side frame navigations (form posts/gets, redirects/ page reloads)
@@ -634,6 +704,17 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     // disposition options: currentTab, newTab, newWindow, download
     const { url, reason } = event;
     this.navigations.updateNavigationReason(url, reason);
+  }
+
+  private record(): void {
+    this.session.db.frames.insert({
+      ...this.toJSON(),
+      domNodeId: this.domNodeId,
+      parentId: this.parentId,
+      devtoolsFrameId: this.devtoolsFrameId,
+      startCommandId: this.createdAtCommandId,
+      createdTimestamp: this.createdTime.getTime(),
+    });
   }
 }
 

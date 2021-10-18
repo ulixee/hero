@@ -61,15 +61,17 @@ test('records a single resource for failed mitm requests', async () => {
   const goToPromise = tab.goto(`http://localhost:2344/not-there`);
 
   await expect(goToPromise).rejects.toThrowError();
-  expect(session.mitmErrorsByUrl.get(`http://localhost:2344/not-there`)).toHaveLength(1);
-  expect(session.sessionState.getResources(meta.tabId)).toHaveLength(1);
   // @ts-ignore
-  expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(0);
+  const mitmErrorsByUrl = session.resources.mitmErrorsByUrl;
+  expect(mitmErrorsByUrl.get(`http://localhost:2344/not-there`)).toHaveLength(1);
+  expect(session.resources.getForTab(meta.tabId)).toHaveLength(1);
+  // @ts-ignore
+  expect(Object.keys(session.resources.browserRequestIdToResources)).toHaveLength(0);
   resolvable.resolve();
   await didEmit.promise;
   await new Promise(setImmediate);
-  expect(session.sessionState.getResources(meta.tabId)).toHaveLength(1);
+  expect(session.resources.getForTab(meta.tabId)).toHaveLength(1);
   // @ts-ignore
-  expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(1);
+  expect(Object.keys(session.resources.browserRequestIdToResources)).toHaveLength(1);
   await session.close();
 });

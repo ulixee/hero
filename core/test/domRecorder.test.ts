@@ -213,22 +213,22 @@ function sort() {
     Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/iframe`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
-    const state = tab.sessionState;
+    const session = tab.session;
 
     expect(tab.puppetPage.frames).toHaveLength(4);
     await tab.puppetPage.frames[1].waitForLoad();
     await tab.puppetPage.frames[2].waitForLoad();
     // await tab.puppetPage.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
-    await state.db.flush();
-    const domChanges = state.db.domChanges.all();
+    await session.db.flush();
+    const domChanges = session.db.domChanges.all();
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
     await tab.puppetPage.frames[3].waitForLoad();
 
-    await state.db.flush();
-    const frames = state.db.frames.all();
+    await session.db.flush();
+    const frames = session.db.frames.all();
     expect(frames).toHaveLength(4);
     const test1 = frames.find(x => x.name === 'test1');
     expect(test1).toBeTruthy();
@@ -369,7 +369,7 @@ describe('basic Mouse Event tests', () => {
     });
     const tab = Session.getTab(meta);
     Helpers.needsClosing.push(tab.session);
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.goto(`${koaServer.baseUrl}/mouse1`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
@@ -379,7 +379,7 @@ describe('basic Mouse Event tests', () => {
     ]);
 
     await tab.getDomChanges();
-    const mouseMoves = state.db.mouseEvents.all();
+    const mouseMoves = session.db.mouseEvents.all();
 
     expect(mouseMoves.filter(x => x.event === MouseEventType.MOVE)).toHaveLength(1);
     expect(mouseMoves.filter(x => x.event === MouseEventType.OVER).length).toBeGreaterThanOrEqual(
@@ -395,7 +395,7 @@ describe('basic Mouse Event tests', () => {
 
     expect(mouseDownEvents[0].targetNodeId).toBe(linkNode.nodeId);
 
-    const scrollRecords = state.db.scrollEvents.all();
+    const scrollRecords = session.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
 
     await tab.session.close();
@@ -422,7 +422,7 @@ describe('basic Form element tests', () => {
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.interact([
       {
@@ -447,7 +447,7 @@ describe('basic Form element tests', () => {
     const textValue2 = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await state.db.flush();
+    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
@@ -456,7 +456,7 @@ describe('basic Form element tests', () => {
       'Hello world!'.length + 1,
     );
 
-    const focusRecords = state.db.focusEvents.all();
+    const focusRecords = session.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
@@ -484,7 +484,7 @@ describe('basic Form element tests', () => {
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.interact([
       {
@@ -509,7 +509,7 @@ describe('basic Form element tests', () => {
     const textValue2 = await tab.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await state.db.flush();
+    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
@@ -518,7 +518,7 @@ describe('basic Form element tests', () => {
       'Hello world!'.length + 1,
     );
 
-    const focusRecords = state.db.focusEvents.all();
+    const focusRecords = session.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'TEXTAREA');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
@@ -548,7 +548,7 @@ describe('basic Form element tests', () => {
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.interact([
       {
@@ -566,14 +566,14 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(2);
 
-    await state.db.flush();
+    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
     expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(2);
 
-    const focusRecords = state.db.focusEvents.all();
+    const focusRecords = session.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
@@ -603,7 +603,7 @@ describe('basic Form element tests', () => {
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.interact([
       {
@@ -621,7 +621,7 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
 
-    await state.db.flush();
+    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
@@ -633,7 +633,7 @@ describe('basic Form element tests', () => {
       ),
     ).toHaveLength(2);
 
-    const focusRecords = state.db.focusEvents.all();
+    const focusRecords = session.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.attributes?.id === 'radio2');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
@@ -663,7 +663,7 @@ describe('basic Form element tests', () => {
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    const state = tab.sessionState;
+    const session = tab.session;
 
     await tab.interact([
       {
@@ -685,11 +685,11 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
 
-    await state.db.flush();
+    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
-    const focusRecords = state.db.focusEvents.all();
+    const focusRecords = session.db.focusEvents.all();
 
     expect(focusRecords).toHaveLength(3);
     const select = changesAfterType.find(x => x.tagName === 'SELECT');

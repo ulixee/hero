@@ -30,16 +30,16 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
 }
 
 export interface ILifecycleEvents {
-  DOMContentLoaded?: Date;
-  load?: Date;
-  init?: Date;
+  DOMContentLoaded?: number;
+  load?: number;
+  init?: number;
 }
 
 export interface IPuppetFrameManagerEvents {
   'frame-created': { frame: IPuppetFrame; loaderId: string };
 }
 export interface IPuppetFrameEvents {
-  'frame-lifecycle': { frame: IPuppetFrame; name: string; loaderId: string };
+  'frame-lifecycle': { frame: IPuppetFrame; name: string; loaderId: string; timestamp: number };
   'frame-navigated': { frame: IPuppetFrame; navigatedInDocument?: boolean; loaderId?: string };
   'frame-requested-navigation': {
     frame: IPuppetFrame;

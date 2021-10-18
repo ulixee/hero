@@ -21,7 +21,7 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   public insert(record: ICertificateRecord): void {
     const { host, pem, expireDate } = record;
     this.pemByHost.set(host, record);
-    this.queuePendingInsert([host, pem, expireDate.getTime()]);
+    this.queuePendingInsert([host, pem, expireDate]);
   }
 
   public get(host: string): ICertificateRecord {
@@ -31,12 +31,11 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
     if (!record) {
       return null;
     }
-    const millisUntilExpire = (record.expireDate as any) - Date.now();
+    const millisUntilExpire = record.expireDate - Date.now();
     if (millisUntilExpire < 60 * 60e3) {
       return null;
     }
 
-    record.expireDate = new Date(record.expireDate);
     this.pemByHost.set(host, record);
     return record;
   }
@@ -45,5 +44,5 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
 export interface ICertificateRecord {
   host: string;
   pem: string;
-  expireDate: Date;
+  expireDate: number;
 }

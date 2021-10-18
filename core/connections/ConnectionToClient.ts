@@ -205,7 +205,7 @@ export default class ConnectionToClient
     });
 
     if (session && commandMeta) {
-      session.sessionState.nextCommandMeta = commandMeta;
+      session.commands.nextCommandMeta = commandMeta;
     }
 
     return await commandRunner.runFn();

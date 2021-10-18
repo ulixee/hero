@@ -40,7 +40,7 @@ test('can wait for sub-frames to load', async () => {
   const frameMeta = frames.find(x => x.parentFrameId !== null);
   const subFrame = tab.frameEnvironmentsById.get(frameMeta.id);
 
-  await expect(subFrame.waitForLoad('PaintingStable')).resolves.toBe(undefined);
+  await expect(subFrame.waitForLoad('PaintingStable')).resolves.toBeTruthy();
 
   await tab.close();
 });

@@ -1,15 +1,15 @@
 import { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
-import { ISessionResource } from '@ulixee/hero-core/apis/Session.resources';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
-import { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
+import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import { IDocument } from '@ulixee/hero-core/models/DomChangesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import Fetch = Protocol.Fetch;
 
 export default class MirrorNetwork {
-  public resourceLookup: { [method_url: string]: ISessionResource[] } = {};
+  public resourceLookup: { [method_url: string]: IResourceSummary[] } = {};
   public documents: IDocument[] = [];
   public headersFilter: (string | RegExp)[];
   public ignoreJavascriptRequests: boolean;
@@ -39,7 +39,7 @@ export default class MirrorNetwork {
     request: Fetch.RequestPausedEvent,
   ): Promise<Fetch.FulfillRequestRequest> {
     const { url, method } = request.request;
-    if (request.resourceType === 'Document') {
+    if (request.resourceType === 'Document' || url === 'about:blank') {
       const doctype = this.documents.find(x => x.url === url)?.doctype ?? '';
       return {
         requestId: request.requestId,
@@ -93,23 +93,14 @@ export default class MirrorNetwork {
   }
 
   public loadResources(
-    resources: (ISessionResource | IResourcesRecord)[],
+    resources: (IResourceSummary | IResourcesRecord)[],
     loadResourceDetails: (id: number) => Promise<ISessionResourceDetails> | ISessionResourceDetails,
   ): void {
     for (let resource of resources) {
-      if (!(resource as ISessionResource).method) {
-        resource = resource as IResourcesRecord;
-        resource = {
-          url: resource.requestUrl,
-          id: resource.id,
-          method: resource.requestMethod,
-          statusCode: resource.statusCode,
-          tabId: resource.tabId,
-          type: resource.type,
-          redirectedToUrl: resource.redirectedToUrl,
-        };
+      if (!(resource as IResourceSummary).method) {
+        resource = ResourcesTable.toResourceSummary(resource as IResourcesRecord);
       }
-      resource = resource as ISessionResource;
+      resource = resource as IResourceSummary;
       const key = `${resource.method}_${resource.url}`;
       this.resourceLookup[key] ??= [];
       this.resourceLookup[key].push(resource);
@@ -173,7 +164,10 @@ export default class MirrorNetwork {
     return network;
   }
 
-  public static loadResourceFromDb(db: SessionDb, resourceId: number) {
+  public static loadResourceFromDb(
+    db: SessionDb,
+    resourceId: number,
+  ): { statusCode: number; headers: Record<string, string | string[]>; body: Buffer } {
     const resource = db.resources.getResponse(resourceId);
     const headers = JSON.parse(resource.responseHeaders ?? '{}');
     return {

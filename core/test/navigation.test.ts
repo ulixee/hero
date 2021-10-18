@@ -91,7 +91,7 @@ describe('basic Navigation tests', () => {
     // need to give the last image a second to show that it loaded from cache
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    const resources = tab.sessionState.getResources(tab.id);
+    const resources = tab.session.resources.getForTab(tab.id);
     expect(resources).toHaveLength(20);
   });
 
@@ -466,7 +466,7 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     }
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
-    tab.sessionState.db.flush();
+    tab.session.db.flush();
     expect(await popupTab.getUrl()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
 
     const history = popupTab.navigations.history;

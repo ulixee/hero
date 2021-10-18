@@ -3,6 +3,7 @@ import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import DomChangesTable, {
   IDomChangeRecord,
   IDomRecording,
@@ -10,7 +11,8 @@ import DomChangesTable, {
 } from '../models/DomChangesTable';
 import Session from './Session';
 import Tab from './Tab';
-import { ISessionResource } from '../apis/Session.resources';
+import SessionsDb from '../dbs/SessionsDb';
+import { IJsPathHistory } from './JsPath';
 
 export default class DetachedTabState {
   public get url(): string {
@@ -49,14 +51,16 @@ export default class DetachedTabState {
     readonly sourceTab: Tab,
     initialPageNavigation: INavigation,
     domChangeRecords: IDomChangeRecord[],
+    readonly callsite: string,
+    readonly key?: string,
   ) {
     const session = sourceTab.session;
-    this.detachedAtCommandId = session.sessionState.lastCommand.id;
+    this.detachedAtCommandId = session.commands.lastId;
     this.session = session;
     this.initialPageNavigation = initialPageNavigation;
     this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTab);
 
-    const db = sourceTab.session.sessionState.db;
+    const db = sourceTab.session.db;
 
     this.domRecording = DomChangesTable.toDomRecording(
       domChangeRecords,
@@ -93,10 +97,25 @@ export default class DetachedTabState {
     };
   }
 
+  public getJsPathHistory(): IJsPathHistory[] {
+    const { scriptInstanceMeta } = this.sourceTab.session.options;
+    return SessionsDb.find().findDetachedJsPathCalls(scriptInstanceMeta, this.callsite, this.key);
+  }
+
+  public saveHistory(history: IJsPathHistory[]): void {
+    const { scriptInstanceMeta } = this.sourceTab.session.options;
+    SessionsDb.find().recordDetachedJsPathCalls(
+      scriptInstanceMeta,
+      history,
+      this.callsite,
+      this.key,
+    );
+  }
+
   private static createMirrorNetwork(sourceTab: Tab): MirrorNetwork {
-    const db = sourceTab.sessionState.db;
-    const resources = sourceTab.sessionState.getResources(sourceTab.id).map(x => {
-      return <ISessionResource>{
+    const db = sourceTab.session.db;
+    const resources = sourceTab.session.resources.getForTab(sourceTab.id).map(x => {
+      return <IResourceSummary>{
         url: x.request.url,
         method: x.request.method,
         id: x.id,

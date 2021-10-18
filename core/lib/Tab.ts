@@ -4,7 +4,7 @@ import * as Url from 'url';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import Timer from '@ulixee/commons/lib/Timer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { createPromise } from '@ulixee/commons/lib/utils';
+import { createPromise, escapeUnescapedChar } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -13,7 +13,6 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
-import MitmRequestContext from '@ulixee/hero-mitm/lib/MitmRequestContext';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
@@ -25,18 +24,24 @@ import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
+import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
+import INavigation from '@ulixee/hero-interfaces/INavigation';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import IPageStateAssertionBatch, {
+  IAssertionAndResult,
+} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
 import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
-import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import CommandFormatter from './CommandFormatter';
 import CommandRunner, { ICommandableTarget } from './CommandRunner';
+import Resources from './Resources';
 
 const { log } = Log(module);
 
@@ -64,7 +69,7 @@ export default class Tab
     atCommandId: number;
   };
 
-  private pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
+  private readonly pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
 
   private onFrameCreatedResourceEventsByFrameId: {
     [frameId: string]: {
@@ -85,12 +90,8 @@ export default class Tab
     return this.navigations.currentUrl;
   }
 
-  public get sessionState(): SessionState {
-    return this.session.sessionState;
-  }
-
   public get lastCommandId(): number | undefined {
-    return this.sessionState.lastCommand?.id;
+    return this.session.commands.lastId;
   }
 
   // need to implement ISessionMeta for serialization
@@ -120,14 +121,14 @@ export default class Tab
   ) {
     super();
     this.setEventsToLog(['child-tab-created', 'close', 'dialog', 'websocket-message']);
-    this.id = session.nextTabId();
+    this.id = session.db.tabs.nextId;
     this.logger = log.createChild(module, {
       tabId: this.id,
       sessionId: session.id,
     });
     this.session = session;
     this.parentTabId = parentTabId;
-    this.createdAtCommandId = session.sessionState.lastCommand?.id;
+    this.createdAtCommandId = session.commands.lastId;
     this.puppetPage = puppetPage;
     this.isDetached = isDetached;
 
@@ -155,6 +156,7 @@ export default class Tab
       this.goBack,
       this.goForward,
       this.reload,
+      this.assert,
       this.takeScreenshot,
       this.waitForFileChooser,
       this.waitForMillis,
@@ -182,9 +184,9 @@ export default class Tab
     resource: IResourceMeta,
     error?: Error,
   ): boolean {
-    const frame = this.findFrameWithUnresolvedNavigation(
+    if (resource.request?.method !== 'GET') return false;
+    const frame = this.frameWithPendingNavigation(
       browserRequestId,
-      resource.request?.method,
       resource.request?.url,
       resource.response?.url,
     );
@@ -195,25 +197,14 @@ export default class Tab
     return false;
   }
 
-  public findFrameWithUnresolvedNavigation(
+  public frameWithPendingNavigation(
     browserRequestId: string,
-    method: string,
     requestedUrl: string,
     finalUrl: string,
-  ): FrameEnvironment {
-    if (method !== 'GET') return null;
-
+  ): FrameEnvironment | null {
     for (const frame of this.frameEnvironmentsById.values()) {
-      const top = frame.navigations.top;
-      if (!top || top.resourceIdResolvable.isResolved) continue;
-
-      if (
-        (top.finalUrl && finalUrl === top.finalUrl) ||
-        requestedUrl === top.requestedUrl ||
-        browserRequestId === top.browserRequestId
-      ) {
-        return frame;
-      }
+      const isMatch = frame.navigations.doesMatchPending(browserRequestId, requestedUrl, finalUrl);
+      if (isMatch) return frame;
     }
   }
 
@@ -304,18 +295,11 @@ export default class Tab
     resourceId: number,
     propertyPath: string,
   ): Promise<T> {
-    let finalResourceId = resourceId;
-    // if no resource id, this is a request for the default resource (page)
-    if (!resourceId) {
-      await this.navigationsObserver.waitForReady();
-      finalResourceId = await this.navigationsObserver.waitForNavigationResourceId();
-    }
-
     if (propertyPath === 'data' || propertyPath === 'response.data') {
-      return (await this.sessionState.getResourceData(finalResourceId, true)) as any;
+      return (await this.session.db.resources.getResourceBodyById(resourceId, true)) as any;
     }
 
-    const resource = this.sessionState.getResourceMeta(finalResourceId);
+    const resource = this.session.resources.get(resourceId);
 
     const pathParts = propertyPath.split('.');
 
@@ -360,15 +344,18 @@ export default class Tab
     return this.mainFrameEnvironment.getUrl();
   }
 
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
     return this.mainFrameEnvironment.waitForElement(jsPath, options);
   }
 
-  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
     return this.mainFrameEnvironment.waitForLoad(status, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(
+    trigger: ILocationTrigger,
+    options?: IWaitForOptions,
+  ): Promise<INavigation> {
     return this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 
@@ -400,7 +387,7 @@ export default class Tab
       this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
     );
-    return this.sessionState.getResourceMeta(resource);
+    return this.session.resources.get(resource);
   }
 
   public async goBack(timeoutMs?: number): Promise<string> {
@@ -448,7 +435,7 @@ export default class Tab
       this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
     );
-    return this.sessionState.getResourceMeta(resource);
+    return this.session.resources.get(resource);
   }
 
   public async focus(): Promise<void> {
@@ -498,57 +485,45 @@ export default class Tab
     options?: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
     const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
-    const resourceMetas: IResourceMeta[] = [];
+    const resourcesById: Record<number, IResourceMeta> = {};
     const promise = createPromise();
     const sinceCommandId =
       options?.sinceCommandId && Number.isInteger(options.sinceCommandId)
         ? options.sinceCommandId
         : -1;
 
-    const onResource = (resourceMeta: IResourceMeta): void => {
-      if (resourceMeta.tabId !== this.id) return;
-      if (resourceMeta.seenAtCommandId === undefined) {
-        resourceMeta.seenAtCommandId = this.lastCommandId;
-        // need to set directly since passed in object is a copy
-        this.sessionState.getResourceMeta(resourceMeta.id).seenAtCommandId = this.lastCommandId;
-      }
-      if (resourceMeta.seenAtCommandId <= sinceCommandId) return;
-      if (filter.type && resourceMeta.type !== filter.type) return;
-      if (filter.url) {
-        if (typeof filter.url === 'string') {
-          // don't let query string url
-          if (filter.url.match(/[\w.:/_\-@;$]\?[-+;%@.\w_]+=.+/) && !filter.url.includes('\\?')) {
-            filter.url = filter.url.replace('?', '\\?');
-          }
-        }
-        if (!resourceMeta.url.match(filter.url)) return;
-      }
-      // if already included, skip
-      if (resourceMetas.some(x => x.id === resourceMeta.id)) return;
+    // escape query string ? if url filter is a string
+    // ie http://test.com?param=1 will treat the question mark as an optional char
+    if (typeof filter.url === 'string' && filter.url.includes('?')) {
+      filter.url = escapeUnescapedChar(filter.url, '?');
+    }
 
-      resourceMetas.push(resourceMeta);
+    const onResource = (resourceMeta: IResourceMeta): void => {
+      if (
+        resourcesById[resourceMeta.id] ||
+        !this.isResourceFilterMatch(resourceMeta, filter, sinceCommandId)
+      )
+        return;
+      resourcesById[resourceMeta.id] = resourceMeta;
       // resolve if any match
       promise.resolve();
     };
 
     try {
       this.on('resource', onResource);
-      for (const resource of this.sessionState.getResources(this.id)) {
+      for (const resource of this.session.resources.getForTab(this.id)) {
         onResource(resource);
       }
-      await timer.waitForPromise(promise.promise, 'Timeout waiting for DomContentLoaded');
+      await timer.waitForPromise(promise.promise, 'Timeout waiting for resources');
     } catch (err) {
-      const isTimeout = err instanceof TimeoutError;
-      if (isTimeout && options?.throwIfTimeout === false) {
-        return resourceMetas;
-      }
-      throw err;
+      const shouldIgnoreError = err instanceof TimeoutError && options?.throwIfTimeout === false;
+      if (!shouldIgnoreError) throw err;
     } finally {
       this.off('resource', onResource);
       timer.clear();
     }
 
-    return resourceMetas;
+    return Object.values(resourcesById);
   }
 
   public async waitForFileChooser(options?: IWaitForOptions): Promise<IFileChooserPrompt> {
@@ -557,8 +532,8 @@ export default class Tab
         ? options.sinceCommandId
         : null;
 
-    if (!startCommandId && this.sessionState.commands.length >= 2) {
-      startCommandId = this.sessionState.commands[this.sessionState.commands.length - 2]?.id;
+    if (!startCommandId && this.session.commands.length >= 2) {
+      startCommandId = this.session.commands.history[this.session.commands.length - 2]?.id;
     }
 
     let event: IPuppetPageEvents['filechooser'];
@@ -612,7 +587,7 @@ export default class Tab
       const hideMouse = false;
       const hideOverlays = false;
 
-      const lastCommand = this.sessionState.lastCommand;
+      const lastCommand = this.session.commands.last;
       const prevFrameId = lastCommand?.frameId ?? this.mainFrameId;
       if (lastCommand && prevFrameId !== frame.id) {
         const prevPuppetFrame = this.frameEnvironmentsById.get(prevFrameId)?.puppetFrame;
@@ -640,7 +615,7 @@ export default class Tab
     for (const frame of this.frameEnvironmentsById.values()) {
       await frame.flushPageEventsRecorder();
     }
-    this.sessionState.db.flush();
+    this.session.db.flush();
   }
 
   public async getDomChanges(
@@ -648,15 +623,12 @@ export default class Tab
     sinceCommandId?: number,
   ): Promise<IDomChangeRecord[]> {
     await this.mainFrameEnvironment.flushPageEventsRecorder();
-    this.sessionState.db.flush();
+    this.session.db.flush();
 
-    return this.sessionState.db.domChanges.getFrameChanges(
-      frameId ?? this.mainFrameId,
-      sinceCommandId,
-    );
+    return this.session.db.domChanges.getFrameChanges(frameId ?? this.mainFrameId, sinceCommandId);
   }
 
-  public async createDetachedState(): Promise<DetachedTabState> {
+  public async createDetachedState(callsite: string, key?: string): Promise<DetachedTabState> {
     // need the dom to be loaded on the page
     await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     // find last page load
@@ -673,14 +645,60 @@ export default class Tab
           : [],
       domChanges: domChanges.length,
     });
-    return new DetachedTabState(this, lastLoadedNavigation, domChanges);
+    return new DetachedTabState(this, lastLoadedNavigation, domChanges, callsite, key);
   }
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
 
+  public async assert(
+    batchId: string,
+    pageStateIdJsPath: IJsPath,
+    assertions: IPageStateAssertionBatch['assertions'],
+  ): Promise<boolean> {
+    function compare<T>(
+      value: T,
+      comparison: IAssertionAndResult['comparison'],
+      result: T,
+    ): boolean {
+      if (comparison === '===') return value === result;
+      if (comparison === '!==') return value !== result;
+      if (comparison === '<=') return value <= result;
+      if (comparison === '<') return value < result;
+      if (comparison === '>=') return value >= result;
+      if (comparison === '>') return value > result;
+      return false;
+    }
+
+    const domAssertionsByFrameId: { [frameId: number]: IPageStateAssertionBatch['assertions'] } =
+      {};
+    let failedCount = 0;
+    for (const assertion of assertions) {
+      const [frameId, type, args, comparison, result] = assertion;
+      if (type === 'url') {
+        const frame = this.frameEnvironmentsById.get(frameId) ?? this.mainFrameEnvironment;
+        const url = frame.navigations.currentUrl;
+        if (!compare(url, comparison, result)) failedCount += 1;
+      }
+      if (type === 'resource') {
+        const resource = this.findResource(args[0]);
+        if (!resource) failedCount += 1;
+      }
+      if (type === 'xpath' || type === 'jspath') {
+        domAssertionsByFrameId[frameId] ??= [];
+        domAssertionsByFrameId[frameId].push(assertion);
+      }
+    }
+    for (const [frameId, frameAssertions] of Object.entries(domAssertionsByFrameId)) {
+      const frame = this.frameEnvironmentsById.get(Number(frameId));
+      const failedDomAssertions = await frame.runDomAssertions(batchId, frameAssertions);
+      failedCount += failedDomAssertions;
+    }
+    return failedCount === 0;
+  }
+
   public addPageStateListener(
     pageStateId: string,
-    commands: { [id: string]: () => Promise<any> },
+    commandsById: { [id: string]: () => Promise<any> },
     frames: FrameEnvironment[],
     listenFn: (results: IPageStateResult) => void,
   ): { stop: () => void } {
@@ -691,7 +709,7 @@ export default class Tab
       return this.isClosing || !this.pageStateListeners[pageStateId];
     };
 
-    const sessionState = this.sessionState;
+    const commands = this.session.commands;
 
     async function checkState(): Promise<void> {
       if (shouldStop()) return;
@@ -707,9 +725,9 @@ export default class Tab
         const results: IPageStateResult = {};
 
         // make sure to clear out any meta
-        sessionState.nextCommandMeta = null;
+        commands.nextCommandMeta = null;
         await Promise.all(
-          Object.entries(commands).map(async ([id, runFn]) => {
+          Object.entries(commandsById).map(async ([id, runFn]) => {
             results[id] = await runFn().catch(err => err);
           }),
         );
@@ -768,7 +786,7 @@ export default class Tab
         throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
       }
       // need to give client time to register function sending events
-      process.nextTick(() => this.sessionState.onWebsocketMessages(Number(resourceId), listenFn));
+      process.nextTick(() => this.session.websocketMessages.listen(Number(resourceId), listenFn));
     }
 
     if (type === 'page-state') {
@@ -800,7 +818,7 @@ export default class Tab
       if (domain !== 'resources') {
         throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
       }
-      this.sessionState.stopWebsocketMessages(Number(resourceId), listenFn);
+      this.session.websocketMessages.unlisten(Number(resourceId), listenFn);
     }
 
     if (type === 'page-state') {
@@ -873,180 +891,152 @@ export default class Tab
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
 
+  private findResource(filter: IResourceFilterProperties): IResourceMeta {
+    // escape query string ? so it can run as regex
+    if (typeof filter.url === 'string' && filter.url.includes('?')) {
+      filter.url = escapeUnescapedChar(filter.url, '?');
+    }
+    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
+      if (this.isResourceFilterMatch(resourceMeta, filter)) {
+        return resourceMeta;
+      }
+    }
+    return null;
+  }
+
+  private isResourceFilterMatch(
+    resourceMeta: IResourceMeta,
+    filter: IResourceFilterProperties,
+    sinceCommandId?: number,
+  ): boolean {
+    if (resourceMeta.tabId !== this.id) return false;
+    if (resourceMeta.seenAtCommandId === undefined) {
+      resourceMeta.seenAtCommandId = this.lastCommandId;
+      // need to set directly since passed in object is a copy
+      this.session.resources.recordSeen(resourceMeta, this.lastCommandId);
+    }
+    if (sinceCommandId && resourceMeta.seenAtCommandId <= sinceCommandId) return false;
+    if (filter.type && resourceMeta.type !== filter.type) return false;
+    if (filter.url && !resourceMeta.url.match(filter.url)) return false;
+    if (!filter.httpRequest) return true;
+
+    const { method, statusCode } = filter.httpRequest;
+    if (method && resourceMeta.request.method !== method) return false;
+    if (statusCode && resourceMeta.response?.statusCode !== statusCode) {
+      return false;
+    }
+    return true;
+  }
+
   private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']): void {
     const { session, lastCommandId } = this;
     const { resource, isDocumentNavigation, frameId, redirectedFromUrl } = event;
-    const { browserRequestId } = resource;
     const url = resource.url.href;
 
-    let navigations = this.frameEnvironmentsByPuppetId.get(frameId)?.navigations;
-    // if no frame id provided, use default
-    if (!frameId && !navigations) {
-      navigations = this.navigations;
-    }
+    const frame = frameId
+      ? this.getFrameForEventOrQueueForReady('resource-will-be-requested', event)
+      : this.mainFrameEnvironment;
 
-    if (!navigations && frameId) {
-      this.onFrameCreatedResourceEventsByFrameId[frameId] ??= [];
-      const events = this.onFrameCreatedResourceEventsByFrameId[frameId];
-      if (!events.some(x => x.event === event)) {
-        events.push({ event, type: 'resource-will-be-requested' });
-      }
-      return;
-    }
+    if (!frame) return;
+
+    const navigations = frame.navigations;
 
     if (isDocumentNavigation && !navigations.top) {
       navigations.onNavigationRequested(
         'newFrame',
         url,
         lastCommandId,
-        browserRequestId,
+        resource.browserRequestId,
         event.loaderId,
       );
     }
     resource.hasUserGesture ||= navigations.didGotoUrl(url);
 
-    session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(resource, this.id);
+    session.resources.onBrowserWillRequest(this.id, frame.id, resource);
 
     if (isDocumentNavigation && !event.resource.browserCanceled) {
       navigations.onHttpRequested(
         url,
         lastCommandId,
         redirectedFromUrl,
-        browserRequestId,
+        resource.browserRequestId,
         event.loaderId,
       );
     }
   }
 
   private onResourceWasRequested(event: IPuppetPageEvents['resource-was-requested']): void {
-    this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
-      event.resource,
+    this.session.resources.onBrowserDidRequest(
       this.id,
+      this.translatePuppetFrameId(event.frameId),
+      event.resource,
     );
   }
 
   private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
-    this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
-      event.resource,
-      this.id,
-    );
+    const { resource, frameId, loaderId } = event;
 
-    let frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
-    // if no frame id provided, use default
-    if (!frame && !event.frameId) frame = this.mainFrameEnvironment;
+    const frame = frameId
+      ? this.getFrameForEventOrQueueForReady('resource-loaded', event as any)
+      : this.mainFrameEnvironment;
+    this.session.resources.onBrowserDidRequest(this.id, frame?.id, resource);
 
-    if (!frame && event.frameId) {
-      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
-      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
-      if (!events.some(x => x.event === event)) {
-        events.push({ event, type: 'resource-loaded' });
-      }
-      return;
-    }
+    // if we didn't get a frame, don't keep going
+    if (!frame) return;
 
     if (
-      !!event.resource.browserServedFromCache &&
-      event.resource.url?.href === frame.navigations?.top?.requestedUrl &&
+      !!resource.browserServedFromCache &&
+      resource.url?.href === frame.navigations?.top?.requestedUrl &&
       frame.navigations?.top?.resourceIdResolvable?.isResolved === false
     ) {
       frame.navigations.onHttpResponded(
-        event.resource.browserRequestId,
-        event.resource.responseUrl ?? event.resource.url?.href,
-        event.loaderId,
+        resource.browserRequestId,
+        resource.responseUrl ?? resource.url?.href,
+        loaderId,
+        resource.browserLoadedTime,
       );
     }
 
-    const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
-      event.resource.browserRequestId,
+    const isKnownResource = this.session.resources.onBrowserResourceLoaded(
+      this.id,
+      frame.id,
+      resource,
     );
 
-    if (!resourcesWithBrowserRequestId?.length) {
-      // first check if this is a mitm error
-      const errorsMatchingUrl = this.session.mitmErrorsByUrl.get(event.resource.url.href);
-
-      // if this resource error-ed out,
-      for (let i = 0; i < errorsMatchingUrl?.length ?? 0; i += 1) {
-        const error = errorsMatchingUrl[i];
-        const request = error.event?.request?.request;
-        if (!request) continue;
-        if (
-          request.method === event.resource.method &&
-          Math.abs(request.timestamp - event.resource.requestTime.getTime()) < 500
-        ) {
-          errorsMatchingUrl.splice(i, 1);
-          this.sessionState.captureResourceRequestId(
-            error.resourceId,
-            event.resource.browserRequestId,
-            this.id,
-          );
-          return;
-        }
-      }
-
-      setImmediate(r => this.checkForResourceCapture(r), event);
+    if (!isKnownResource) {
+      setImmediate(this.createResourceOnDelayIfStillUncaptured.bind(this, event));
     }
   }
 
-  private async checkForResourceCapture(
+  private async createResourceOnDelayIfStillUncaptured(
     event: IPuppetPageEvents['resource-loaded'],
   ): Promise<void> {
-    const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
-      event.resource.browserRequestId,
+    const browserRequestId = event.resource.browserRequestId;
+    const resource = await this.session.resources.createNewResourceIfUnseen(
+      this.id,
+      event.resource,
+      event.body,
     );
-
-    if (resourcesWithBrowserRequestId?.length) return;
-
-    const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
-    const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
-    if (!event.resource.browserServedFromCache) {
-      resourceDetails.body = await event.body();
-      if (resourceDetails.body) {
-        delete resourceDetails.response.headers['content-encoding'];
-        delete resourceDetails.response.headers['Content-Encoding'];
-      }
-    }
-    const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
-    this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
+    if (resource) this.checkForResolvedNavigation(browserRequestId, resource);
   }
 
   private onResourceFailed(event: IPuppetPageEvents['resource-failed']): void {
     const { resource } = event;
+    const loadError = Resources.translateResourceError(resource);
 
-    let loadError: Error;
-    if (resource.browserLoadFailure) {
-      loadError = new Error(resource.browserLoadFailure);
-    } else if (resource.browserBlockedReason) {
-      loadError = new Error(`Resource blocked: "${resource.browserBlockedReason}"`);
-    } else if (resource.browserCanceled) {
-      loadError = new Error('Load canceled');
-    } else {
-      loadError = new Error(
-        'Resource failed to load, but the reason was not provided by devtools.',
-      );
-    }
+    const frame = this.frameEnvironmentsByPuppetId.get(event.resource.frameId);
 
-    const browserRequestId = event.resource.browserRequestId;
-
-    let resourceId = this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestFailed({
-      resource,
-      tabId: this.id,
-      loadError,
-    });
-
-    if (!resourceId) {
-      const resources = this.sessionState.getBrowserRequestResources(browserRequestId);
-      if (resources?.length) {
-        resourceId = resources[resources.length - 1].resourceId;
-      }
-    }
-
-    // this function will resolve any pending resourceId for a navigation
-    const resourceMeta = this.sessionState.captureResourceFailed(
+    const resourceMeta = this.session.resources.onBrowserRequestFailed(
       this.id,
-      MitmRequestContext.toEmittedResource({ id: resourceId, ...resource } as any),
+      frame?.id,
+      resource,
       loadError,
     );
-    if (resourceMeta) this.checkForResolvedNavigation(browserRequestId, resourceMeta, loadError);
+
+    if (resourceMeta) {
+      const browserRequestId = event.resource.browserRequestId;
+      this.checkForResolvedNavigation(browserRequestId, resourceMeta, loadError);
+    }
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
@@ -1066,13 +1056,25 @@ export default class Tab
       return;
     }
 
-    frame.navigations.onHttpResponded(event.browserRequestId, event.url, event.loaderId);
+    frame.navigations.onHttpResponded(
+      event.browserRequestId,
+      event.url,
+      event.loaderId,
+      event.timestamp,
+    );
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
   }
 
   private onWebsocketFrame(event: IPuppetPageEvents['websocket-frame']): void {
-    const wsResource = this.sessionState.captureWebsocketMessage(event);
-    this.emit('websocket-message', wsResource);
+    const resourceId = this.session.resources.getBrowserRequestLatestResource(
+      event.browserRequestId,
+    )?.id;
+    this.session.websocketMessages.record({
+      resourceId,
+      message: event.message,
+      isFromServer: event.isFromServer,
+      lastCommandId: this.lastCommandId,
+    });
   }
 
   private onFrameCreated(event: IPuppetPageEvents['frame-created']): void {
@@ -1093,19 +1095,53 @@ export default class Tab
     delete this.onFrameCreatedResourceEventsByFrameId[frame.devtoolsFrameId];
   }
 
+  private getFrameForEventOrQueueForReady(
+    type: keyof IPuppetPageEvents,
+    event: IPuppetPageEvents[keyof IPuppetPageEvents] & { frameId: string },
+  ): FrameEnvironment {
+    const frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
+    if (event.frameId && !frame) {
+      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
+      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
+      if (!events.some(x => x.event === event)) {
+        events.push({ event, type });
+      }
+    }
+    return frame;
+  }
+
   /////// LOGGING EVENTS ///////////////////////////////////////////////////////////////////////////
 
   private onPageError(event: IPuppetPageEvents['page-error']): void {
     const { error, frameId } = event;
     this.logger.info('Window.pageError', { error, frameId });
-    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
-    this.sessionState.captureError(this.id, translatedFrameId, `events.page-error`, error);
+    const translatedFrameId = this.translatePuppetFrameId(frameId);
+    this.session.db.pageLogs.insert(
+      this.id,
+      translatedFrameId,
+      `events.page-error`,
+      error.stack || String(error),
+      new Date(),
+    );
   }
 
   private onConsole(event: IPuppetPageEvents['console']): void {
     const { frameId, type, message, location } = event;
-    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
-    this.sessionState.captureLog(this.id, translatedFrameId, type, message, location);
+    const translatedFrameId = this.translatePuppetFrameId(frameId);
+
+    let level = 'info';
+    if (message.startsWith('ERROR:') && message.includes(injectedSourceUrl)) {
+      level = 'error';
+    }
+    this.logger[level]('Window.console', { message });
+    this.session.db.pageLogs.insert(
+      this.id,
+      translatedFrameId,
+      type,
+      message,
+      new Date(),
+      location,
+    );
   }
 
   private onTargetCrashed(event: IPuppetPageEvents['crashed']): void {
@@ -1113,8 +1149,17 @@ export default class Tab
 
     const errorLevel = event.fatal ? 'error' : 'info';
     this.logger[errorLevel]('BrowserEngine.Tab.crashed', { error });
+    this.session.db.pageLogs.insert(
+      this.id,
+      this.mainFrameId,
+      `events.error`,
+      error.stack || String(error),
+      new Date(),
+    );
+  }
 
-    this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
+  private translatePuppetFrameId(puppetFrameId: string): number {
+    return this.frameEnvironmentsByPuppetId.get(puppetFrameId)?.id ?? this.mainFrameId;
   }
 
   /////// DIALOGS //////////////////////////////////////////////////////////////////////////////////

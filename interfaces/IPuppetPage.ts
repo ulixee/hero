@@ -53,6 +53,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   addPageCallback(
     name: string,
     onCallback?: (payload: any, frameId: string) => any,
+    isolateFromWebPageEnvironment?: boolean,
   ): Promise<IRegisteredEventListener>;
 }
 

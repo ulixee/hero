@@ -63,6 +63,8 @@ module.exports = {
         'commons/**/*.ts',
         'core/**/*.ts',
         'mitm*/**/*.ts',
+        'plugin-utils/**/*.ts',
+        'timetravel/**/*.ts',
       ],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [

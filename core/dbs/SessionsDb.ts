@@ -1,8 +1,12 @@
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase } from 'better-sqlite3';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
+import * as fs from 'fs';
 import SessionsTable from '../models/SessionsTable';
 import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
 import Core from '../index';
+import { IJsPathHistory } from '../lib/JsPath';
+import Session from '../lib/Session';
 
 interface IDbOptions {
   readonly?: boolean;
@@ -11,12 +15,14 @@ interface IDbOptions {
 
 export default class SessionsDb {
   private static instance: SessionsDb;
+  private static hasInitialized = false;
   public readonly sessions: SessionsTable;
   public readonly detachedJsPathCalls: DetachedJsPathCallsTable;
   public readonly readonly: boolean;
   private db: SqliteDatabase;
 
   constructor(dbOptions: IDbOptions = {}) {
+    SessionsDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.db = new Database(SessionsDb.databasePath, { readonly, fileMustExist });
     this.readonly = readonly;
@@ -76,6 +82,33 @@ export default class SessionsDb {
     };
   }
 
+  public recordSession(session: Session): void {
+    if (!session.options?.scriptInstanceMeta) return;
+    this.sessions.insert(session);
+  }
+
+  public findDetachedJsPathCalls(
+    scriptInstanceMeta: IScriptInstanceMeta,
+    callsite: string,
+    key?: string,
+  ): IJsPathHistory[] {
+    const detachedCalls = this.detachedJsPathCalls.find(scriptInstanceMeta, callsite, key);
+    if (detachedCalls?.execJsPathHistory) {
+      return JSON.parse(detachedCalls.execJsPathHistory);
+    }
+    return null;
+  }
+
+  public recordDetachedJsPathCalls(
+    scriptInstanceMeta: IScriptInstanceMeta,
+    calls: IJsPathHistory[],
+    callsite: string,
+    key?: string,
+  ): void {
+    if (!calls?.length) return;
+    this.detachedJsPathCalls.insert(scriptInstanceMeta, callsite, calls, new Date(), key);
+  }
+
   public close(): void {
     if (this.db) {
       this.db.close();
@@ -92,6 +125,13 @@ export default class SessionsDb {
   public static find(): SessionsDb {
     this.instance = this.instance || new SessionsDb();
     return this.instance;
+  }
+
+  public static createDir(): void {
+    if (!this.hasInitialized) {
+      fs.mkdirSync(this.databaseDir, { recursive: true });
+      this.hasInitialized = true;
+    }
   }
 
   public static get databaseDir(): string {

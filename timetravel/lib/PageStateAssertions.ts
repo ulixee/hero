@@ -1,10 +1,14 @@
+import { IAssertionAndResult } from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+
 export default class PageStateAssertions {
   private assertsBySessionId: { [sessionId: string]: IFrameAssertions } = {};
 
   public iterateSessionAssertionsByFrameId(
     sessionId: string,
   ): [frameId: string, assertion: IAssertionAndResultByQuery][] {
-    return Object.entries(this.assertsBySessionId[sessionId]);
+    this.assertsBySessionId[sessionId] ??= {};
+    const assertions = this.assertsBySessionId[sessionId];
+    return Object.entries(assertions);
   }
 
   public getSessionAssertionWithQuery(
@@ -17,44 +21,71 @@ export default class PageStateAssertions {
     if (frameAssertions) return frameAssertions[query];
   }
 
-  public recordAssertion(sessionId: string, frameId: number, assertion: IAssertionAndResult) {
+  public recordAssertion(
+    sessionId: string,
+    frameId: number,
+    assert: Omit<IAssertionAndResult, 'key'>,
+  ): void {
     this.assertsBySessionId[sessionId] ??= {};
     this.assertsBySessionId[sessionId][frameId] ??= {};
-    this.assertsBySessionId[sessionId][frameId][assertion.query] = assertion;
+    const assertion = assert as IAssertionAndResult;
+    assertion.key ??= PageStateAssertions.generateKey(assertion.type, assertion.args);
+    this.assertsBySessionId[sessionId][frameId][assertion.key] = assertion;
   }
 
   public getCommonSessionAssertions(
     sessionIds: Set<string>,
     startingAssertions: IFrameAssertions,
   ): IFrameAssertions {
-    let state = startingAssertions;
+    // clone starting point
+    let state = clone(startingAssertions);
     for (const sessionId of sessionIds) {
       // need a starting place
       if (!state) {
-        state = this.assertsBySessionId[sessionId];
+        state = clone(this.assertsBySessionId[sessionId]);
         continue;
       }
+
+      const sessionAssertionsByFrameId = this.assertsBySessionId[sessionId] ?? {};
       // now compare other sessions to "starting state"
       // TODO: match frames better than just "id" (check frame loaded url/name/id/dom path)
-      for (const [frameId, assertions] of this.iterateSessionAssertionsByFrameId(sessionId)) {
-        for (const [key, value] of Object.entries(assertions)) {
+      for (const [frameId, sessionAssertions] of Object.entries(sessionAssertionsByFrameId)) {
+        for (const [key, sessionAssert] of Object.entries(sessionAssertions)) {
           if (!state[frameId]) continue;
-          const existing = state[frameId][key];
-          if (!existing) continue;
+          const sharedAssertion = state[frameId][key];
+          if (!sharedAssertion) continue;
 
-          if (existing.result === value.result) {
+          if (sharedAssertion.result === sessionAssert.result) {
             continue;
           }
-          if (typeof existing.result === 'number' && typeof value.result === 'number') {
-            existing.result = Math.min(existing.result, value.result);
-            existing.comparison = '>=';
+          if (
+            typeof sharedAssertion.result === 'number' &&
+            typeof sessionAssert.result === 'number'
+          ) {
+            sharedAssertion.result = Math.min(sharedAssertion.result, sessionAssert.result);
+            sharedAssertion.comparison = '>=';
             continue;
           }
           delete state[frameId][key];
         }
       }
+
+      // remove anything in the shared state that's not in this run
+      for (const [frameId, sharedAssertions] of Object.entries(state)) {
+        for (const key of Object.keys(sharedAssertions)) {
+          if (!sessionAssertionsByFrameId[frameId]) continue;
+          const sessionFrameAssertions = sessionAssertionsByFrameId[frameId];
+          if (!sessionFrameAssertions[key]) {
+            delete state[frameId][key];
+          }
+        }
+      }
     }
     return state;
+  }
+
+  public static generateKey(type: IAssertionAndResult['type'], args: any[]): string {
+    return [type, args ? JSON.stringify(args) : ''].join(':');
   }
 
   public static removeAssertsSharedBetweenStates(states: IFrameAssertions[]): void {
@@ -81,15 +112,13 @@ export default class PageStateAssertions {
   }
 }
 
-export interface IFrameAssertions {
-  [frameId: string]: IAssertionAndResultByQuery;
+function clone<T>(obj: T): T {
+  if (!obj) return obj;
+  return JSON.parse(JSON.stringify(obj));
 }
 
-export interface IAssertionAndResult {
-  type: 'xpath' | 'qs' | 'resource' | 'url';
-  query: string;
-  comparison: '===' | '>=' | '>' | '<' | '<=' | 'contains';
-  result: number | string | boolean;
+export interface IFrameAssertions {
+  [frameId: string]: IAssertionAndResultByQuery;
 }
 
 interface IAssertionAndResultByQuery {

@@ -3,6 +3,7 @@ import { Helpers } from '@ulixee/hero-testing';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import Core from '@ulixee/hero-core';
 import PageStateGenerator from '../lib/PageStateGenerator';
+import PageStateAssertions from '../lib/PageStateAssertions';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -45,7 +46,7 @@ describe('pageStateGenerator', () => {
       await tab.getJsValue(`add()`);
       await tab.getJsValue(`add()`);
       await tab.close();
-      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState('1', session.id);
     }
     await Promise.all([run(), run(), run()]);
@@ -58,11 +59,13 @@ describe('pageStateGenerator', () => {
     const asserts = Object.values(state.assertsByFrameId[1]);
     expect(
       asserts.filter(x => {
-        return x.query.includes('TITLE') || x.query.includes('DIV') || x.query.endsWith('/UL)');
+        return (
+          x.args[0].includes('TITLE') || x.args[0].includes('DIV') || x.args[0].endsWith('/UL)')
+        );
       }),
     ).toHaveLength(0);
 
-    expect(asserts.find(x => x.query === 'count(/HTML/BODY/UL/LI)').result).toBe(3);
+    expect(asserts.find(x => x.args[0] === 'count(/HTML/BODY/UL/LI)').result).toBe(3);
   }, 20e3);
 
   test('can find differences between two pages', async () => {
@@ -122,7 +125,7 @@ describe('pageStateGenerator', () => {
       await tab.getJsValue(`add()`);
       if (state === '1') await tab.getJsValue(`add()`);
       await tab.close();
-      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
 
@@ -139,10 +142,11 @@ describe('pageStateGenerator', () => {
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
 
+    const liKey = PageStateAssertions.generateKey('xpath', ['count(/HTML/BODY/UL/LI)']);
     // add 2 to 3 existing
-    expect(states1['count(/HTML/BODY/UL/LI)'].result).toBe(5);
+    expect(states1[liKey].result).toBe(5);
     // add 1 to non-existent
-    expect(states2['count(/HTML/BODY/UL/LI)'].result).toBe(1);
+    expect(states2[liKey].result).toBe(1);
   }, 20e3);
 
   test('can diff pages based on removed elements', async () => {
@@ -177,7 +181,7 @@ describe('pageStateGenerator', () => {
       await tab.getJsValue(`remove()`);
       if (state === '1') await tab.getJsValue(`remove()`);
       await tab.close();
-      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
 
@@ -189,8 +193,10 @@ describe('pageStateGenerator', () => {
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
 
-    expect(states1['count(/HTML/BODY/UL/LI)'].result).toBe(1);
-    expect(states2['count(/HTML/BODY/UL/LI)'].result).toBe(2);
+    const liKey = PageStateAssertions.generateKey('xpath', ['count(/HTML/BODY/UL/LI)']);
+
+    expect(states1[liKey].result).toBe(1);
+    expect(states2[liKey].result).toBe(2);
   }, 20e3);
 
   test('can find attribute changes', async () => {
@@ -218,23 +224,29 @@ describe('pageStateGenerator', () => {
       await tab.waitForLoad(LoadStatus.PaintingStable);
       await tab.flushDomChanges();
       const startTime = Date.now();
-      if (state === '1') await tab.getJsValue(`tick(100)`);
+      if (state === '100') await tab.getJsValue(`tick(100)`);
       else await tab.getJsValue(`tick(50)`);
       await tab.close();
-      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
 
-    await Promise.all([run('1'), run('1'), run('2'), run('2')]);
+    await Promise.all([run('100'), run('100'), run('50'), run('50')]);
 
     await pageStateGenerator.evaluate();
 
-    const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
-    const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
-    expect(states1).not.toEqual(states2);
+    const states100 = pageStateGenerator.statesByName.get('100').assertsByFrameId[1];
+    const states50 = pageStateGenerator.statesByName.get('50').assertsByFrameId[1];
+    expect(states100).not.toEqual(states50);
 
-    expect(states1['count(/HTML/BODY/DIV[@class="slider"][@style="width: 100%;"])'].result).toBe(1);
-    expect(states2['count(/HTML/BODY/DIV[@class="slider"][@style="width: 50%;"])'].result).toBe(1);
+    const sliderKey50 = PageStateAssertions.generateKey('xpath', [
+      'count(/HTML/BODY/DIV[@class="slider"][@style="width: 50%;"])',
+    ]);
+    const sliderKey100 = PageStateAssertions.generateKey('xpath', [
+      'count(/HTML/BODY/DIV[@class="slider"][@style="width: 100%;"])',
+    ]);
+    expect(states100[sliderKey100].result).toBe(1);
+    expect(states50[sliderKey50].result).toBe(1);
   }, 20e3);
 
   test('can handle redirects', async () => {
@@ -272,7 +284,7 @@ describe('pageStateGenerator', () => {
       await tab.waitForLoad(LoadStatus.PaintingStable);
 
       await tab.close();
-      pageStateGenerator.addSession(session.sessionState.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
 
@@ -283,16 +295,136 @@ describe('pageStateGenerator', () => {
     const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
     const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
     expect(states1).not.toEqual(states2);
-
-    expect(states1['string(/HTML/BODY/H1)']).toBeTruthy();
-    expect(states2['string(/HTML/BODY/H1)']).toBeTruthy();
-    expect(states1['string(/HTML/BODY/H1)'].result).toBe('Page 1');
-    expect(states2['string(/HTML/BODY/H1)'].result).toBe('Page 2');
-    expect(states1['count(//H1[text()="Page 1"])'].result).toBe(1);
-    expect(states2['count(//H1[text()="Page 2"])'].result).toBe(1);
+    const h1Key = PageStateAssertions.generateKey('xpath', ['string(/HTML/BODY/H1)']);
+    expect(states1[h1Key]).toBeTruthy();
+    expect(states2[h1Key]).toBeTruthy();
+    expect(states1[h1Key].result).toBe('Page 1');
+    expect(states2[h1Key].result).toBe('Page 2');
+    expect(
+      states1[PageStateAssertions.generateKey('xpath', ['count(//H1[text()="Page 1"])'])].result,
+    ).toBe(1);
+    expect(
+      states2[PageStateAssertions.generateKey('xpath', ['count(//H1[text()="Page 2"])'])].result,
+    ).toBe(1);
   }, 20e3);
 
-  test.todo('can add more sessions without re-running the old ones');
+  test('can find resources', async () => {
+    koaServer.get('/pageStateResources', ctx => {
+      const xhrParam = ctx.query.state;
 
-  test.todo('can save and reload results');
+      ctx.body = `
+<body>
+<h1>Resources Page</h1>
+<script>
+  fetch('/xhr?param=${xhrParam}')
+    .then(x => x.text())
+    .then(text => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      div.id="ready";
+      document.body.appendChild(div)
+    })
+</script>
+</body>`;
+    });
+
+    koaServer.get('/xhr', ctx => {
+      ctx.body = `ok ${ctx.query.param}`;
+    });
+
+    const pageStateGenerator = new PageStateGenerator('1');
+    async function run(state: string) {
+      // just give some time randomization
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession();
+      await tab.goto(`${koaServer.baseUrl}/pageStateResources?state=${state}`);
+      const startTime = Date.now();
+
+      await tab.waitForLoad(LoadStatus.PaintingStable);
+      await tab.waitForElement(['document', ['querySelector', '#ready']]);
+
+      await tab.close();
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    await Promise.all([run('1'), run('2'), run('1'), run('2')]);
+
+    await pageStateGenerator.evaluate();
+
+    const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
+    const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
+    expect(states1).not.toEqual(states2);
+
+    expect(Object.values(states1).filter(x => x.type === 'resource')).toHaveLength(1);
+    expect(Object.values(states2).filter(x => x.type === 'resource')).toHaveLength(1);
+  }, 20e3);
+
+  test('can export and re-import states', async () => {
+    let changeTitle = false;
+    koaServer.get('/restorePage1', ctx => {
+      ctx.body = `<body><h1>Title 1</h1></body>`;
+    });
+    koaServer.get('/restorePage2', ctx => {
+      if (changeTitle) {
+        ctx.body = `<body><h2>Title 3</h2></body>`;
+      } else {
+        ctx.body = `<body><h2>Title 2</h2></body>`;
+      }
+    });
+
+    async function run(page: string, pageStateGenerator: PageStateGenerator) {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession();
+      const startTime = Date.now();
+      await tab.goto(`${koaServer.baseUrl}/${page}`);
+      await tab.waitForLoad('PaintingStable');
+      await tab.close();
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
+
+      const state = page.endsWith('1') ? '1' : '2';
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    const psg1 = new PageStateGenerator('c');
+
+    await Promise.all([
+      run('restorePage1', psg1),
+      run('restorePage1', psg1),
+      run('restorePage2', psg1),
+      run('restorePage2', psg1),
+    ]);
+
+    await psg1.evaluate();
+
+    const state1 = psg1.export('1');
+    expect(state1).toBeTruthy();
+    expect(state1.assertions.length).toBeGreaterThanOrEqual(3);
+    expect(state1.sessions).toHaveLength(2);
+
+    const state2 = psg1.export('2');
+    expect(state2).toBeTruthy();
+    expect(state2.assertions.length).toBeGreaterThanOrEqual(3);
+    expect(state2.sessions).toHaveLength(2);
+
+    const psg2 = new PageStateGenerator('c');
+    psg2.import(state1);
+    psg2.import(state2);
+
+    changeTitle = true;
+    // add sessions to the second round
+    await Promise.all([run('restorePage1', psg2), run('restorePage2', psg2)]);
+    await psg2.evaluate();
+
+    const state1Round2 = psg2.export('1');
+    const state2Round2 = psg2.export('2');
+
+    expect(state1Round2.sessions).toHaveLength(3);
+    expect(state2Round2.sessions).toHaveLength(3);
+
+    expect(state1Round2.assertions).toEqual(state1.assertions);
+    // should take into account the new change
+    expect(state2Round2.assertions).not.toEqual(state2.assertions);
+    expect(state2Round2.assertions.filter(x => x.toString().includes('Title 2'))).toHaveLength(0);
+  });
 });

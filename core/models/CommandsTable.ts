@@ -1,10 +1,9 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
+import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class CommandsTable extends SqliteTable<ICommandMeta> {
-  private readonly getQuery: Statement;
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
@@ -27,7 +26,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       ],
       true,
     );
-    this.getQuery = db.prepare(`select * from ${this.tableName} where id = ? limit 1`);
     this.defaultSortOrder = 'id ASC';
   }
 
@@ -50,9 +48,5 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       commandMeta.resultType,
       commandMeta.reusedCommandFromRun,
     ]);
-  }
-
-  public get(id: number): ICommandMeta {
-    return this.getQuery.get(id) as ICommandMeta;
   }
 }

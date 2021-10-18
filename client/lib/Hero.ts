@@ -391,7 +391,10 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.waitForResource(filter, options);
   }
 
-  public waitForElement(element: ISuperElement, options?: IWaitForElementOptions): Promise<void> {
+  public waitForElement(
+    element: ISuperElement,
+    options?: IWaitForElementOptions,
+  ): Promise<ISuperElement | null> {
     return this.activeTab.waitForElement(element, options);
   }
 

@@ -5,6 +5,8 @@ import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
+  public idCounter = 0;
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,

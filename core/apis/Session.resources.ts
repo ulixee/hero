@@ -1,4 +1,4 @@
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import SessionDb from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
 
@@ -27,15 +27,5 @@ export interface ISessionResourcesApi extends ICoreApi {
 }
 
 export interface ISessionResourcesResult {
-  resources: ISessionResource[];
-}
-
-export interface ISessionResource {
-  url: string;
-  method: string;
-  id: number;
-  tabId: number;
-  statusCode: number;
-  type: ResourceType;
-  redirectedToUrl?: string;
+  resources: IResourceSummary[];
 }

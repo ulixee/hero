@@ -7,9 +7,11 @@ declare global {
     loadPaintEvents(paintEvents: IFrontendDomChangeEvent[][]);
     applyDomChanges(changes: IFrontendDomChangeEvent[]);
     setPaintIndexRange(startIndex: number, endIndex: number);
+    repositionInteractElements();
     debugLogs: any[];
     isMainFrame: boolean;
     debugToConsole: boolean;
+    waitForFramesReady?: boolean;
     selfFrameIdPath: string;
   }
   function debugLog(message: string, ...args: any[]): void;
@@ -24,14 +26,16 @@ class DomReplayer {
   private frameContentWindows = new WeakMap<Window, { isReady: boolean; frameNodeId: number }>();
 
   constructor() {
-    window.DomActions.onFrameModifiedCallbacks.push((element, change) => {
-      if (element.contentWindow && change.nodeId) {
-        this.frameContentWindows.set(element.contentWindow, {
-          frameNodeId: change.nodeId,
-          isReady: false,
-        });
-      }
-    });
+    if (window.waitForFramesReady) {
+      window.DomActions.onFrameModifiedCallbacks.push((element, change) => {
+        if (element.contentWindow && change.nodeId) {
+          this.frameContentWindows.set(element.contentWindow, {
+            frameNodeId: change.nodeId,
+            isReady: false,
+          });
+        }
+      });
+    }
   }
 
   public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
@@ -103,7 +107,7 @@ class DomReplayer {
       return;
     }
 
-    if (!this.frameContentWindows.get(frame.contentWindow)?.isReady) {
+    if (window.waitForFramesReady && !this.frameContentWindows.get(frame.contentWindow)?.isReady) {
       return;
     }
 
@@ -113,7 +117,7 @@ class DomReplayer {
     this.pendingDelegatedEventsByChildNodeId[frameNodeId] = [];
 
     frame.contentWindow.postMessage(
-      { recipientFrameIdPath: `${window.selfFrameIdPath}_${frameNodeId}`, events },
+      { recipientFrameIdPath: `${window.selfFrameIdPath}_${frameNodeId}`, events, action: 'dom' },
       '*',
     );
   }
@@ -130,7 +134,9 @@ class DomReplayer {
   }
 
   static register(): void {
-    if (window.isMainFrame || window.parent === window.self) return;
+    if (window.waitForFramesReady !== true || window.isMainFrame || window.parent === window.self) {
+      return;
+    }
     window.parent.postMessage({ action: 'ready' }, '*');
   }
 
@@ -149,7 +155,9 @@ class DomReplayer {
       if (ev.data.recipientFrameIdPath && !window.selfFrameIdPath) {
         window.selfFrameIdPath = ev.data.recipientFrameIdPath;
       }
-      replayer.applyDomChanges(ev.data.events);
+      if (ev.data.action === 'dom') {
+        replayer.applyDomChanges(ev.data.events);
+      }
     });
 
     if (document.readyState === 'complete') {

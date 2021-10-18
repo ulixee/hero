@@ -74,7 +74,7 @@ describe('MirrorPage tests', () => {
       const domRecordingUpdates = DomChangesTable.toDomRecording(
         pageChangesByFrame,
         new Set([tab.mainFrameId]),
-        tab.sessionState.db.frames.frameDomNodePathsById,
+        tab.session.db.frames.frameDomNodePathsById,
       );
       await mirrorPage.updateDomRecording(domRecordingUpdates);
       await mirrorPage.load();
@@ -179,7 +179,7 @@ describe('MirrorPage tests', () => {
       const domRecordingUpdates = DomChangesTable.toDomRecording(
         changes,
         new Set([tab.mainFrameId]),
-        tab.sessionState.db.frames.frameDomNodePathsById,
+        tab.session.db.frames.frameDomNodePathsById,
       );
       await mirrorPage.updateDomRecording(domRecordingUpdates);
       await mirrorPage.load();
@@ -215,7 +215,7 @@ async function createMirrorPage(tab: Tab, isDebug = false): Promise<MirrorPage> 
   const domRecording = DomChangesTable.toDomRecording(
     mainPageChanges,
     new Set([tab.mainFrameId]),
-    tab.sessionState.db.frames.frameDomNodePathsById,
+    tab.session.db.frames.frameDomNodePathsById,
   );
 
   const mirrorPage = new MirrorPage(new MirrorNetwork(), domRecording, false, isDebug);

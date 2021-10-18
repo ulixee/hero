@@ -7,7 +7,7 @@
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.5",
+    "@ulixee/commons": "1.5.6",
     "@ulixee/hero": "1.5.4",
     "@ulixee/hero-core": "1.5.4",
     "@ulixee/hero-interfaces": "1.5.4",
@@ -17,9 +17,11 @@
     "@ulixee/default-browser-emulator": "1.5.4",
     "@ulixee/hero-mitm": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
+    "@ulixee/hero-timetravel": "1.5.4",
     "@ulixee/hero-testing": "1.5.4",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
+    "awaited-dom": "^1.3.0",
     "ws": "^7.4.4"
   }
 }

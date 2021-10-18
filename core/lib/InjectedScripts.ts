@@ -6,6 +6,7 @@ const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
   interactReplayer: fs.readFileSync(`${__dirname}/../injected-scripts/interactReplayer.js`, 'utf8'),
   NodeTracker: fs.readFileSync(`${__dirname}/../injected-scripts/NodeTracker.js`, 'utf8'),
+  DomAssertions: fs.readFileSync(`${__dirname}/../injected-scripts/DomAssertions.js`, 'utf8'),
   jsPath: fs.readFileSync(`${__dirname}/../injected-scripts/jsPath.js`, 'utf8'),
   Fetcher: fs.readFileSync(`${__dirname}/../injected-scripts/Fetcher.js`, 'utf8'),
   MouseEvents: fs.readFileSync(`${__dirname}/../injected-scripts/MouseEvents.js`, 'utf8'),
@@ -23,11 +24,13 @@ ${stringifiedTypeSerializerClass};
 ${pageScripts.NodeTracker};
 ${pageScripts.jsPath};
 ${pageScripts.Fetcher};
+${pageScripts.DomAssertions};
 
 window.HERO = {
   JsPath,
   TypeSerializer,
   Fetcher,
+  DomAssertions,
 };
 `;
 
@@ -74,9 +77,8 @@ export default class InjectedScripts {
     puppetPage[installedSymbol] = true;
 
     return Promise.all([
-      puppetPage.addPageCallback(pageEventsCallbackName),
+      puppetPage.addPageCallback(pageEventsCallbackName, null, true),
       puppetPage.addNewDocumentScript(injectedScript, true),
-      puppetPage.addNewDocumentScript(`delete window.${pageEventsCallbackName}`, false),
       showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
     ]);
   }

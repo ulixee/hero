@@ -4,6 +4,7 @@ import IResourceHeaders from './IResourceHeaders';
 import OriginType from './OriginType';
 
 export default interface IHttpResourceLoadDetails {
+  id: number;
   isSSL: boolean;
   isUpgrade: boolean;
   isServerHttp2: boolean;
@@ -22,7 +23,7 @@ export default interface IHttpResourceLoadDetails {
   dnsResolvedIp?: string;
   url: URL;
   method: string;
-  requestTime: Date;
+  requestTime: number;
   requestOriginalHeaders: IResourceHeaders;
   requestHeaders: IResourceHeaders;
   requestTrailers?: IResourceHeaders;
@@ -33,12 +34,14 @@ export default interface IHttpResourceLoadDetails {
   responseUrl?: string;
   responseOriginalHeaders?: IResourceHeaders;
   responseHeaders?: IResourceHeaders;
-  responseTime?: Date;
+  responseTime?: number;
   responseTrailers?: IResourceHeaders;
   resourceType?: ResourceType;
   browserRequestId?: string;
+  browserFrameId?: number;
   browserHasRequested?: Promise<void>;
   browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'memory';
+  browserLoadedTime?: number;
   browserLoadFailure?: string;
   browserBlockedReason?: string;
   browserCanceled?: boolean;

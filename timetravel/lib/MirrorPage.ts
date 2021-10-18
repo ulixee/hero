@@ -180,7 +180,12 @@ export default class MirrorPage extends TypedEventEmitter<{
       if (showOverlay) await this.evaluate(`window.showReplayOverlay();`);
 
       await this.evaluate(`window.setPaintIndexRange(${startIndex}, ${endIndex});`);
-      if (showOverlay) await this.evaluate(`window.hideReplayOverlay();`);
+
+      if (showOverlay)
+        await this.evaluate(`(() => {
+      window.hideReplayOverlay();
+      window.repositionInteractElements();
+      })()`);
     }
   }
 
