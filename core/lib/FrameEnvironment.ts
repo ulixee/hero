@@ -283,20 +283,20 @@ export default class FrameEnvironment
     );
   }
 
-  public getUrl(): string {
-    return this.navigations.currentUrl || this.puppetFrame.url;
+  public getUrl(): Promise<string> {
+    return Promise.resolve(this.navigations.currentUrl || this.puppetFrame.url);
   }
 
-  public isPaintingStable(): boolean {
-    return this.navigations.hasLoadStatus(LoadStatus.PaintingStable);
+  public isPaintingStable(): Promise<boolean> {
+    return Promise.resolve(this.navigations.hasLoadStatus(LoadStatus.PaintingStable));
   }
 
-  public isDomContentLoaded(): boolean {
-    return this.navigations.hasLoadStatus(LoadStatus.DomContentLoaded);
+  public isDomContentLoaded(): Promise<boolean> {
+    return Promise.resolve(this.navigations.hasLoadStatus(LoadStatus.DomContentLoaded));
   }
 
-  public isAllContentLoaded(): boolean {
-    return this.navigations.hasLoadStatus(LoadStatus.AllContentLoaded);
+  public isAllContentLoaded(): Promise<boolean> {
+    return Promise.resolve(this.navigations.hasLoadStatus(LoadStatus.AllContentLoaded));
   }
 
   public async getCookies(): Promise<ICookie[]> {

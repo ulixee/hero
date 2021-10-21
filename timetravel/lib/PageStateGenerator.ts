@@ -1,7 +1,6 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import Log from '@ulixee/commons/lib/Logger';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
-import { inspect } from 'util';
 import { IFrameNavigationRecord } from '@ulixee/hero-core/models/FrameNavigationsTable';
 import DomChangesTable, {
   IDomChangeRecord,
@@ -20,26 +19,24 @@ import MirrorContext from './MirrorContext';
 import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
 
-inspect.defaultOptions.depth = 10;
-
 const { log } = Log(module);
 
 export default class PageStateGenerator {
-  public locationId: string;
   public browserContext: Promise<IPuppetContext>;
   public sessionsById = new Map<string, IPageStateSession>();
   public sessionAssertions = new PageStateAssertions();
 
-  public statesByName = new Map<string, IPageStateByName>();
-
-  constructor(locationId?: string) {
-    this.locationId = locationId;
+  public get states(): string[] {
+    return [...this.statesByName.keys()];
   }
+
+  public statesByName = new Map<string, IPageStateByName>();
 
   public addSession(
     sessionDb: SessionDb,
     tabId: number,
-    timeRange?: [start: number, end: number],
+    loadingRange: [start: number, end: number],
+    timelineRange?: [start: number, end: number],
   ): void {
     const sessionId = sessionDb.sessionId;
     this.sessionsById.set(sessionId, {
@@ -49,7 +46,8 @@ export default class PageStateGenerator {
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
-      timeRange,
+      timelineRange,
+      loadingRange,
     });
     this.browserContext ??= MirrorContext.createFromSessionDb(sessionId, false).catch(err => err);
   }
@@ -58,6 +56,9 @@ export default class PageStateGenerator {
     const context = await this.browserContext;
     if (!context || context instanceof Error) return;
     await context.close();
+    for (const session of this.sessionsById.values()) {
+      session.mirrorPage = null;
+    }
   }
 
   public addState(name: string, ...sessionIds: string[]): void {
@@ -69,11 +70,7 @@ export default class PageStateGenerator {
     }
   }
 
-  public updateSessionTimes(sessionId: string, timeRange: [start: number, end: number]): void {
-    this.sessionsById.get(sessionId).timeRange = timeRange;
-  }
-
-  public import(savedState: IPageStateAssertionBatch): void {
+  public import(savedState: IPageStateGeneratorAssertionBatch): void {
     this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
     const state = this.statesByName.get(savedState.state);
     state.startingAssertsByFrameId = {};
@@ -101,8 +98,8 @@ export default class PageStateGenerator {
     }
   }
 
-  public export(stateName: string): IPageStateAssertionBatch {
-    const exported = <IPageStateAssertionBatch>{
+  public export(stateName: string): IPageStateGeneratorAssertionBatch {
+    const exported = <IPageStateGeneratorAssertionBatch>{
       id: uuidv1(),
       sessions: [],
       assertions: [],
@@ -114,7 +111,8 @@ export default class PageStateGenerator {
       exported.sessions.push({
         sessionId: session.sessionId,
         dbLocation: session.dbLocation,
-        timeRange: session.timeRange,
+        loadingRange: session.loadingRange,
+        timelineRange: session.timelineRange,
         tabId: session.tabId,
       });
     }
@@ -134,11 +132,11 @@ export default class PageStateGenerator {
 
   public async evaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      const { db, timeRange, tabId, sessionId, needsResultsVerification } = session;
+      const { db, loadingRange, tabId, sessionId, needsResultsVerification } = session;
 
       if (!needsResultsVerification) continue;
 
-      const [start, end] = timeRange;
+      const [start, end] = loadingRange;
       const timeoutMs = end - Date.now();
 
       // wait for end point
@@ -389,8 +387,8 @@ export default class PageStateGenerator {
 
   private findLastNavigation(session: IPageStateSession): IFrameNavigationRecord {
     let lastNavigation: IFrameNavigationRecord;
-    const { tabId, db, timeRange, sessionId } = session;
-    const [, endTime] = timeRange;
+    const { tabId, db, loadingRange, sessionId } = session;
+    const [, endTime] = loadingRange;
 
     for (const nav of db.frameNavigations.getMostRecentTabNavigations(
       tabId,
@@ -407,7 +405,7 @@ export default class PageStateGenerator {
       log.error('No navigation found for session during page state generation', {
         sessionId,
         mainFrameIds: [...session.mainFrameIds],
-        timeRange,
+        loadingRange,
         tabId,
       });
     }
@@ -415,6 +413,16 @@ export default class PageStateGenerator {
   }
 }
 
+export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBatch {
+  state: string;
+  sessions: {
+    sessionId: string;
+    dbLocation: string; // could be on another machine
+    tabId: number;
+    timelineRange: [start: number, end: number];
+    loadingRange: [start: number, end: number];
+  }[];
+}
 interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
@@ -424,7 +432,8 @@ interface IPageStateSession {
   domRecording?: IDomRecording;
   mirrorPage?: MirrorPage;
   tabId: number;
-  timeRange: [start: number, end: number];
+  timelineRange: [start: number, end: number];
+  loadingRange: [start: number, end: number];
 }
 
 interface IPageStateByName {

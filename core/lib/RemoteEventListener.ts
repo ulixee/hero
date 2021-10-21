@@ -86,7 +86,7 @@ export default class RemoteEventListener implements ICommandableTarget {
     return Promise.resolve({ listenerId });
   }
 
-  public removeEventListener(id: string): Promise<void> {
+  public removeEventListener(id: string, options?: any): Promise<void> {
     const listener = this.listenersById.get(id);
     this.listenersById.delete(id);
 
@@ -96,7 +96,7 @@ export default class RemoteEventListener implements ICommandableTarget {
 
     if (jsPath && 'removeJsPathEventListener' in target) {
       const fn = target.removeJsPathEventListener.bind(target);
-      fn(type as any, jsPath, listenFn);
+      fn(type as any, jsPath, listenFn, options);
     } else if ('off' in target) {
       const fn = target.off.bind(target) as any;
       fn(type, listenFn);

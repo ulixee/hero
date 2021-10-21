@@ -35,7 +35,7 @@ describe('pageStateGenerator', () => {
       `;
     });
 
-    const pageStateGenerator = new PageStateGenerator('a');
+    const pageStateGenerator = new PageStateGenerator();
     async function run() {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
       const { tab, session } = await createSession();
@@ -110,10 +110,7 @@ describe('pageStateGenerator', () => {
       `;
     });
 
-    // first time through, get the line number, otherwise use the "id"
-    // should not run any more commands after waitForPageState
-    const locationId = '1';
-    const pageStateGenerator = new PageStateGenerator(locationId);
+    const pageStateGenerator = new PageStateGenerator();
     async function run(path: string, state: string) {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -169,7 +166,7 @@ describe('pageStateGenerator', () => {
       `;
     });
 
-    const pageStateGenerator = new PageStateGenerator('remove');
+    const pageStateGenerator = new PageStateGenerator();
     async function run(state: string) {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -215,7 +212,7 @@ describe('pageStateGenerator', () => {
       `;
     });
 
-    const pageStateGenerator = new PageStateGenerator('attr');
+    const pageStateGenerator = new PageStateGenerator();
     async function run(state: string) {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -269,7 +266,7 @@ describe('pageStateGenerator', () => {
       ctx.body = `<body><h1>Page 2</h1></body>`;
     });
 
-    const pageStateGenerator = new PageStateGenerator('1');
+    const pageStateGenerator = new PageStateGenerator();
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -332,7 +329,7 @@ describe('pageStateGenerator', () => {
       ctx.body = `ok ${ctx.query.param}`;
     });
 
-    const pageStateGenerator = new PageStateGenerator('1');
+    const pageStateGenerator = new PageStateGenerator();
     async function run(state: string) {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -386,7 +383,7 @@ describe('pageStateGenerator', () => {
       pageStateGenerator.addState(state, session.id);
     }
 
-    const psg1 = new PageStateGenerator('c');
+    const psg1 = new PageStateGenerator();
 
     await Promise.all([
       run('restorePage1', psg1),
@@ -407,7 +404,7 @@ describe('pageStateGenerator', () => {
     expect(state2.assertions.length).toBeGreaterThanOrEqual(3);
     expect(state2.sessions).toHaveLength(2);
 
-    const psg2 = new PageStateGenerator('c');
+    const psg2 = new PageStateGenerator();
     psg2.import(state1);
     psg2.import(state2);
 

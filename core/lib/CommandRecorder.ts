@@ -5,7 +5,7 @@ import Tab from './Tab';
 import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
-type AsyncFunc = (...args: any[]) => Promise<any> | any;
+type AsyncFunc = (...args: any[]) => Promise<any>;
 
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();

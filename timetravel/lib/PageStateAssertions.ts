@@ -11,6 +11,15 @@ export default class PageStateAssertions {
     return Object.entries(assertions);
   }
 
+  public sessionAssertionsCount(sessionId: string): number {
+    let counter = 0;
+    if (!this.assertsBySessionId[sessionId]) return counter;
+    for (const assertions of Object.entries(this.assertsBySessionId[sessionId])) {
+      counter += assertions.length;
+    }
+    return counter;
+  }
+
   public getSessionAssertionWithQuery(
     sessionId: string,
     frameId: number,

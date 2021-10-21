@@ -48,7 +48,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
     return await this.goto(timelineOffsetPercent);
   }
 
-  public isReplayPage(pageId: string): boolean {
+  public isOwnPage(pageId: string): boolean {
     for (const tab of this.tabsById.values()) {
       if (tab.isPage(pageId)) return true;
     }

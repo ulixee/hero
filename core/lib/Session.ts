@@ -54,19 +54,40 @@ export default class Session
 
   public readonly id: string;
   public readonly baseDir: string;
-  public browserEngine: IBrowserEngine;
-  public plugins: CorePlugins;
+  public readonly plugins: CorePlugins;
 
-  public viewport: IViewport;
-  public timezoneId: string;
-  public locale: string;
-  public geolocation: IGeolocation;
+  public get browserEngine(): IBrowserEngine {
+    return this.plugins.browserEngine;
+  }
+
+  public get viewport(): IViewport {
+    return this.options.viewport;
+  }
+
+  public get timezoneId(): string {
+    return this.options.timezoneId;
+  }
+
+  public get locale(): string {
+    return this.options.locale;
+  }
+
+  public get geolocation(): IGeolocation {
+    return this.options.geolocation;
+  }
+
+  public get userProfile(): IUserProfile {
+    return this.options.userProfile;
+  }
+
+  public get mode(): ISessionCreateOptions['mode'] {
+    return this.options.mode;
+  }
+
   public readonly createdTime: number;
 
-  public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
   public browserContext?: IPuppetContext;
-  public userProfile?: IUserProfile;
   public resources: Resources;
   public commands: Commands;
   public websocketMessages: WebsocketMessages;
@@ -85,6 +106,26 @@ export default class Session
     };
   }
 
+  public get meta(): IHeroMeta {
+    const { plugins, viewport, locale, timezoneId, geolocation } = this;
+
+    const { userAgentString, operatingSystemPlatform } = this.plugins.browserEmulator;
+
+    return {
+      sessionId: this.id,
+      ...this.options,
+      browserEmulatorId: plugins.browserEmulator.id,
+      humanEmulatorId: plugins.humanEmulator.id,
+      upstreamProxyUrl: this.options.upstreamProxyUrl,
+      viewport,
+      locale,
+      timezoneId,
+      geolocation,
+      userAgentString,
+      operatingSystemPlatform,
+    };
+  }
+
   protected readonly logger: IBoundLog;
 
   private hasLoadedUserProfile = false;
@@ -97,19 +138,8 @@ export default class Session
 
   constructor(readonly options: ISessionCreateOptions) {
     super();
-    if (options.sessionId) {
-      if (Session.byId[options.sessionId]) {
-        throw new Error('The pre-provided sessionId is already in use.');
-      }
-      // make sure this is a valid sessionid
-      if (/^[0-9a-zA-Z-]{1,48}/.test(options.sessionId) === false) {
-        throw new Error(
-          'Unsupported sessionId format provided. Must be 5-48 characters including: a-z, 0-9 and dashes.',
-        );
-      }
-    }
-    this.id = options.sessionId ?? uuidv1();
     this.createdTime = Date.now();
+    this.id = this.getId(options.sessionId);
     Session.byId[this.id] = this;
     this.db = new SessionDb(this.id);
 
@@ -118,52 +148,33 @@ export default class Session
     this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
 
     const providedOptions = { ...options };
-    const {
-      browserEmulatorId,
-      humanEmulatorId,
-      dependencyMap,
-      corePluginPaths,
-      userProfile,
-      userAgent,
-    } = options;
+    const { userProfile, userAgent } = options;
 
-    if (!options.showBrowser) {
-      options.showBrowser = false;
-      options.showBrowserInteractions = false;
-    }
-
-    const userAgentSelector = userAgent ?? userProfile?.userAgentString;
     this.plugins = new CorePlugins(
       {
-        userAgentSelector,
-        browserEmulatorId,
-        humanEmulatorId,
-        dependencyMap,
-        corePluginPaths,
+        ...options,
+        userAgentSelector: userAgent ?? userProfile?.userAgentString,
         deviceProfile: userProfile?.deviceProfile,
         getSessionSummary: () => this.summary,
       },
       this.logger,
     );
-
-    this.browserEngine = this.plugins.browserEngine;
-    this.browserEngine.isHeaded ??= options.showBrowser;
-
-    this.userProfile = options.userProfile;
-    this.upstreamProxyUrl = options.upstreamProxyUrl;
-    this.geolocation = options.geolocation;
+    this.configureHeaded(options);
 
     this.plugins.configure(options);
-    this.timezoneId = options.timezoneId || '';
-    this.locale = options.locale;
-    this.viewport = options.viewport;
 
+    // should come after plugins can initiate
     this.recordSession(providedOptions);
 
     SessionsDb.find().recordSession(this);
 
-    this.mitmRequestSession = new RequestSession(this.id, this.plugins, this.upstreamProxyUrl);
-    this.mitmRequestSession.respondWithHttpErrorStacks = options.showBrowserInteractions === true;
+    this.mitmRequestSession = new RequestSession(
+      this.id,
+      this.plugins,
+      this.options.upstreamProxyUrl,
+    );
+    this.mitmRequestSession.respondWithHttpErrorStacks =
+      this.mode === 'development' && this.options.showBrowserInteractions === true;
     this.resources = new Resources(this, this.mitmRequestSession.browserRequestMatcher);
     this.websocketMessages = new WebsocketMessages(this.db);
     this.commands = new Commands(this.db);
@@ -176,6 +187,15 @@ export default class Session
       this.getTabs,
       this.getHeroMeta,
     ]);
+  }
+
+  public configureHeaded(options: ISessionCreateOptions): void {
+    if (options.showBrowser === undefined) {
+      options.showBrowser = false;
+      options.showBrowserInteractions = false;
+    }
+
+    this.browserEngine.isHeaded ??= options.showBrowser;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -191,47 +211,27 @@ export default class Session
     return this.tabsById.get(id) ?? this.detachedTabsById.get(id);
   }
 
-  public getTabs(): Tab[] {
-    return [...this.tabsById.values()].filter(x => !x.isClosing);
+  public getTabs(): Promise<Tab[]> {
+    return Promise.resolve([...this.tabsById.values()].filter(x => !x.isClosing));
   }
 
-  public flush(): void {
+  public flush(): Promise<void> {
     this.logger.info('SessionFlushing');
+    return Promise.resolve();
   }
 
-  public getHeroMeta(): IHeroMeta {
-    const { plugins, viewport, locale, timezoneId, geolocation } = this;
-
-    const { userAgentString, operatingSystemPlatform } = this.plugins.browserEmulator;
-
-    return {
-      sessionId: this.id,
-      ...this.options,
-      browserEmulatorId: plugins.browserEmulator.id,
-      humanEmulatorId: plugins.humanEmulator.id,
-      upstreamProxyUrl: this.upstreamProxyUrl,
-      viewport,
-      locale,
-      timezoneId,
-      geolocation,
-      userAgentString,
-      operatingSystemPlatform,
-    };
+  public getHeroMeta(): Promise<IHeroMeta> {
+    return Promise.resolve(this.meta);
   }
 
   public async configure(options: IConfigureSessionOptions): Promise<void> {
-    if (options.upstreamProxyUrl !== undefined) {
-      this.upstreamProxyUrl = options.upstreamProxyUrl;
-      this.mitmRequestSession.upstreamProxyUrl = options.upstreamProxyUrl;
-    }
+    Object.assign(this.options, options);
+    this.mitmRequestSession.upstreamProxyUrl = this.options.upstreamProxyUrl;
+
     if (options.blockedResourceTypes !== undefined) {
       for (const tab of this.tabsById.values()) {
         await tab.setBlockedResourceTypes(options.blockedResourceTypes);
       }
-    }
-
-    if (options.userProfile !== undefined) {
-      this.userProfile = options.userProfile;
     }
     this.plugins.configure(options);
   }
@@ -279,8 +279,11 @@ export default class Session
   }
 
   public useIncognitoContext(): boolean {
-    const options = this.options;
-    return !(options.showBrowser === true && options.sessionKeepAlive === true);
+    const isChromeAlive =
+      this.options.showBrowser === true &&
+      this.options.sessionKeepAlive === true &&
+      this.mode === 'development';
+    return isChromeAlive === false;
   }
 
   public async registerWithMitm(
@@ -458,6 +461,21 @@ export default class Session
     this.emit('resumed');
   }
 
+  private getId(sessionId?: string): string {
+    if (sessionId) {
+      if (Session.byId[sessionId]) {
+        throw new Error('The pre-provided sessionId is already in use.');
+      }
+      // make sure this is a valid sessionid
+      if (/^[0-9a-zA-Z-]{1,48}/.test(sessionId) === false) {
+        throw new Error(
+          'Unsupported sessionId format provided. Must be 5-48 characters including: a-z, 0-9 and dashes.',
+        );
+      }
+    }
+    return sessionId ?? uuidv1();
+  }
+
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {
     this.db.devtoolsMessages.insert(event);
   }
@@ -581,7 +599,7 @@ export default class Session
   }
 
   private recordSession(providedOptions: ISessionCreateOptions): void {
-    const configuration = this.getHeroMeta();
+    const configuration = this.meta;
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
     this.db.session.insert(
       this.id,

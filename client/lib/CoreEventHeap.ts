@@ -83,6 +83,7 @@ export default class CoreEventHeap {
     jsPath: IJsPath | null,
     type: string,
     listenerFn: (...args: any[]) => void,
+    options?: any,
   ): void {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);
@@ -94,7 +95,7 @@ export default class CoreEventHeap {
         meta: this.meta,
         startDate: new Date(),
         command: 'Events.removeEventListener',
-        args: [listenerId],
+        args: [listenerId, options],
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });

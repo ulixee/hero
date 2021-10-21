@@ -8,7 +8,7 @@ export default class CommandRunner {
     const [targetName, method] = command.split('.');
 
     if (!targets[targetName]) {
-      if (method === 'close' || (targetName === 'Events' && args[1] === 'close')) {
+      if (method === 'close' || (targetName === 'Events' && args[1] === 'removeEventListener')) {
         this.runFn = () => Promise.resolve({});
         return;
       }

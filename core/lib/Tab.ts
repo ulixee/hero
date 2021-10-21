@@ -23,13 +23,10 @@ import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
-import IPageStateAssertionBatch, {
-  IAssertionAndResult,
-} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import IPageStateListenArgs from '@ulixee/hero-interfaces/IPageStateListenArgs';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -40,8 +37,9 @@ import FrameNavigationsObserver from './FrameNavigationsObserver';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import CommandFormatter from './CommandFormatter';
-import CommandRunner, { ICommandableTarget } from './CommandRunner';
+import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
+import PageStateListener from './PageStateListener';
 
 const { log } = Log(module);
 
@@ -69,7 +67,9 @@ export default class Tab
     atCommandId: number;
   };
 
-  private readonly pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
+  private readonly pageStateListeners: {
+    [pageStateId: string]: PageStateListener;
+  } = {};
 
   private onFrameCreatedResourceEventsByFrameId: {
     [frameId: string]: {
@@ -314,21 +314,34 @@ export default class Tab
     return propertyParent[property];
   }
 
+  public findResource(filter: IResourceFilterProperties): IResourceMeta {
+    // escape query string ? so it can run as regex
+    if (typeof filter.url === 'string' && filter.url.includes('?')) {
+      filter.url = escapeUnescapedChar(filter.url, '?');
+    }
+    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
+      if (this.isResourceFilterMatch(resourceMeta, filter)) {
+        return resourceMeta;
+      }
+    }
+    return null;
+  }
+
   /////// DELEGATED FNS ////////////////////////////////////////////////////////////////////////////////////////////////
 
   public interact(...interactionGroups: IInteractionGroups): Promise<void> {
     return this.mainFrameEnvironment.interact(...interactionGroups);
   }
 
-  public isPaintingStable(): boolean {
+  public isPaintingStable(): Promise<boolean> {
     return this.mainFrameEnvironment.isPaintingStable();
   }
 
-  public isDomContentLoaded(): boolean {
+  public isDomContentLoaded(): Promise<boolean> {
     return this.mainFrameEnvironment.isDomContentLoaded();
   }
 
-  public isAllContentLoaded(): boolean {
+  public isAllContentLoaded(): Promise<boolean> {
     return this.mainFrameEnvironment.isAllContentLoaded();
   }
 
@@ -340,7 +353,7 @@ export default class Tab
     return this.mainFrameEnvironment.execJsPath<T>(jsPath);
   }
 
-  public getUrl(): string {
+  public getUrl(): Promise<string> {
     return this.mainFrameEnvironment.getUrl();
   }
 
@@ -650,128 +663,20 @@ export default class Tab
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public async assert(
-    batchId: string,
-    pageStateIdJsPath: IJsPath,
-    assertions: IPageStateAssertionBatch['assertions'],
-  ): Promise<boolean> {
-    function compare<T>(
-      value: T,
-      comparison: IAssertionAndResult['comparison'],
-      result: T,
-    ): boolean {
-      if (comparison === '===') return value === result;
-      if (comparison === '!==') return value !== result;
-      if (comparison === '<=') return value <= result;
-      if (comparison === '<') return value < result;
-      if (comparison === '>=') return value >= result;
-      if (comparison === '>') return value > result;
-      return false;
-    }
-
-    const domAssertionsByFrameId: { [frameId: number]: IPageStateAssertionBatch['assertions'] } =
-      {};
-    let failedCount = 0;
-    for (const assertion of assertions) {
-      const [frameId, type, args, comparison, result] = assertion;
-      if (type === 'url') {
-        const frame = this.frameEnvironmentsById.get(frameId) ?? this.mainFrameEnvironment;
-        const url = frame.navigations.currentUrl;
-        if (!compare(url, comparison, result)) failedCount += 1;
-      }
-      if (type === 'resource') {
-        const resource = this.findResource(args[0]);
-        if (!resource) failedCount += 1;
-      }
-      if (type === 'xpath' || type === 'jspath') {
-        domAssertionsByFrameId[frameId] ??= [];
-        domAssertionsByFrameId[frameId].push(assertion);
-      }
-    }
-    for (const [frameId, frameAssertions] of Object.entries(domAssertionsByFrameId)) {
-      const frame = this.frameEnvironmentsById.get(Number(frameId));
-      const failedDomAssertions = await frame.runDomAssertions(batchId, frameAssertions);
-      failedCount += failedDomAssertions;
-    }
-    return failedCount === 0;
+  public async assert(batchId: string, pageStateIdJsPath: IJsPath): Promise<boolean> {
+    const pageStateListener = this.pageStateListeners[JSON.stringify(pageStateIdJsPath)];
+    return await pageStateListener.runBatchAssert(batchId);
   }
 
   public addPageStateListener(
-    pageStateId: string,
-    commandsById: { [id: string]: () => Promise<any> },
-    frames: FrameEnvironment[],
-    listenFn: (results: IPageStateResult) => void,
-  ): { stop: () => void } {
-    let lastResults: string = null;
-    let isRunning = false;
-    let runAgain = false;
-    const shouldStop = (): boolean => {
-      return this.isClosing || !this.pageStateListeners[pageStateId];
-    };
-
-    const commands = this.session.commands;
-
-    async function checkState(): Promise<void> {
-      if (shouldStop()) return;
-      if (isRunning) {
-        runAgain = true;
-        return;
-      }
-
-      try {
-        isRunning = true;
-        runAgain = false;
-
-        const results: IPageStateResult = {};
-
-        // make sure to clear out any meta
-        commands.nextCommandMeta = null;
-        await Promise.all(
-          Object.entries(commandsById).map(async ([id, runFn]) => {
-            results[id] = await runFn().catch(err => err);
-          }),
-        );
-
-        if (shouldStop()) return;
-
-        const stringifiedResults = JSON.stringify(results);
-        if (lastResults !== stringifiedResults) {
-          listenFn(results);
-        }
-        lastResults = stringifiedResults;
-      } finally {
-        isRunning = false;
-        if (runAgain) process.nextTick(checkState);
-      }
-    }
-
-    this.pageStateListeners[pageStateId] = [];
-
-    for (const frame of frames) {
-      frame.on('paint', checkState);
-      frame.navigations.on('status-change', checkState);
-      const interval = setInterval(checkState, 2e3).unref();
-      setImmediate(checkState);
-
-      this.pageStateListeners[pageStateId].push(() => {
-        clearInterval(interval);
-        frame.off('paint', checkState);
-        frame.navigations.off('status-change', checkState);
-      });
-    }
-
-    const stop = this.clearPageStateListener.bind(this, pageStateId);
-    this.on('close', stop);
-
-    return { stop };
-  }
-
-  public clearPageStateListener(id: string): void {
-    const unsubscribes = this.pageStateListeners[id];
-    delete this.pageStateListeners[id];
-    if (unsubscribes) {
-      for (const fn of unsubscribes) fn();
-    }
+    id: string,
+    options: IPageStateListenArgs,
+    listenFn: (...args) => void,
+  ): PageStateListener {
+    const listener = new PageStateListener(id, options, this, listenFn);
+    this.pageStateListeners[id] = listener;
+    this.emit('wait-for-pagestate', { listener });
+    return listener;
   }
 
   public addJsPathEventListener(
@@ -790,21 +695,8 @@ export default class Tab
     }
 
     if (type === 'page-state') {
-      const commandFunctions: { [id: string]: () => Promise<any> } = {};
-      const frames: FrameEnvironment[] = [];
-      for (const [id, rawCommand] of Object.entries(options.commands)) {
-        const [frameId, command, args] = rawCommand as any[];
-        const frame = this.getFrameEnvironment(frameId);
-        if (!frames.includes(frame)) frames.push(frame);
-
-        const commandRunner = new CommandRunner(command, args, {
-          FrameEnvironment: frame,
-          Tab: this,
-          Session: this.session,
-        });
-        commandFunctions[id] = commandRunner.runFn;
-      }
-      this.addPageStateListener(JSON.stringify(jsPath), commandFunctions, frames, listenFn);
+      const id = JSON.stringify(jsPath);
+      this.addPageStateListener(id, options, listenFn);
     }
   }
 
@@ -812,6 +704,7 @@ export default class Tab
     type: 'message' | 'page-state',
     jsPath: IJsPath,
     listenFn: (...args) => void,
+    options?: any,
   ): void {
     if (type === 'message') {
       const [domain, resourceId] = jsPath;
@@ -822,7 +715,9 @@ export default class Tab
     }
 
     if (type === 'page-state') {
-      this.clearPageStateListener(JSON.stringify(jsPath));
+      const id = JSON.stringify(jsPath);
+      this.pageStateListeners[id]?.stop(options);
+      delete this.pageStateListeners[id];
     }
   }
 
@@ -890,19 +785,6 @@ export default class Tab
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
-
-  private findResource(filter: IResourceFilterProperties): IResourceMeta {
-    // escape query string ? so it can run as regex
-    if (typeof filter.url === 'string' && filter.url.includes('?')) {
-      filter.url = escapeUnescapedChar(filter.url, '?');
-    }
-    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
-      if (this.isResourceFilterMatch(resourceMeta, filter)) {
-        return resourceMeta;
-      }
-    }
-    return null;
-  }
 
   private isResourceFilterMatch(
     resourceMeta: IResourceMeta,
@@ -1040,19 +922,11 @@ export default class Tab
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
-    let frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
+    const frame = event.frameId
+      ? this.getFrameForEventOrQueueForReady('navigation-response', event)
+      : this.mainFrameEnvironment;
 
-    // if no frame id provided, use default
-    if (!frame && !event.frameId) {
-      frame = this.mainFrameEnvironment;
-    }
-
-    if (event.frameId && !frame) {
-      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
-      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
-      if (!events.some(x => x.event === event)) {
-        events.push({ event, type: 'navigation-response' });
-      }
+    if (!frame) {
       return;
     }
 
@@ -1190,11 +1064,12 @@ export default class Tab
   }
 }
 
-interface ITabEventParams {
+export interface ITabEventParams {
+  'child-tab-created': Tab;
   close: null;
+  dialog: IPuppetDialog;
+  'wait-for-pagestate': { listener: PageStateListener };
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;
-  dialog: IPuppetDialog;
   'websocket-message': IWebsocketResourceMessage;
-  'child-tab-created': Tab;
 }

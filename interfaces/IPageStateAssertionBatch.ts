@@ -1,12 +1,5 @@
 export default interface IPageStateAssertionBatch {
-  state: string;
   id: string;
-  sessions: {
-    sessionId: string;
-    dbLocation: string; // could be on another machine
-    tabId: number;
-    timeRange: [start: number, end: number];
-  }[];
   assertions: [
     frameId: number,
     type: IAssertionAndResult['type'],

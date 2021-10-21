@@ -30,27 +30,40 @@ test('can wait for page state events', async () => {
   });
 
   await tab.goto(`${koaServer.baseUrl}/pageState1`);
-  const mainFrame = tab.mainFrameEnvironment;
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
-  const { stop } = tab.addPageStateListener(
+  const listener = tab.addPageStateListener(
     '1',
     {
-      url: () => Promise.resolve(mainFrame.url),
-      paintStable: () => Promise.resolve(mainFrame.isPaintingStable()),
-      h1Text: () => mainFrame.execJsPath(['document', ['querySelector', 'h1'], 'textContent']),
-      divText: () => mainFrame.execJsPath(['document', ['querySelector', '#test'], 'textContent']),
-      div2Text: () =>
-        mainFrame.execJsPath(['document', ['querySelector', '#notthere'], 'textContent']),
+      callsite: 'callsite',
+      states: ['states'],
+      commands: {
+        url: [1, 'FrameEnvironment.getUrl', []],
+        paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+        h1Text: [
+          1,
+          'FrameEnvironment.execJsPath',
+          [['document', ['querySelector', 'h1'], 'textContent']],
+        ],
+        divText: [
+          1,
+          'FrameEnvironment.execJsPath',
+          [['document', ['querySelector', '#test'], 'textContent']],
+        ],
+        div2Text: [
+          1,
+          'FrameEnvironment.execJsPath',
+          [['document', ['querySelector', '#notthere'], 'textContent']],
+        ],
+      },
     },
-    [mainFrame],
     status => {
       callbackFn(status);
       if (status.divText?.value === 'hi' && status.paintStable === true) hasDiv.resolve();
     },
   );
   await hasDiv.promise;
-  stop();
+  listener.stop();
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(1);
   expect(callbackFn.mock.calls[callbackFn.mock.calls.length - 1][0]).toEqual({
     url: `${koaServer.baseUrl}/pageState1`,
@@ -81,17 +94,23 @@ test('can continue to get events as dom changes', async () => {
   });
 
   await tab.goto(`${koaServer.baseUrl}/pageState2`);
-  const mainFrame = tab.mainFrameEnvironment;
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
   const { stop } = tab.addPageStateListener(
     '2',
     {
-      url: () => Promise.resolve(mainFrame.url),
-      paintStable: () => Promise.resolve(mainFrame.isPaintingStable()),
-      divs: () => mainFrame.execJsPath(['document', ['querySelectorAll', '.test'], 'length']),
+      callsite: 'callsite',
+      states: ['states'],
+      commands: {
+        url: [1, 'FrameEnvironment.getUrl', []],
+        paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+        divs: [
+          1,
+          'FrameEnvironment.execJsPath',
+          [['document', ['querySelectorAll', '.test'], 'length']],
+        ],
+      },
     },
-    [mainFrame],
     status => {
       callbackFn(status);
       if (status.divs?.value >= 5) {
