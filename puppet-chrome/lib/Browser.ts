@@ -21,7 +21,7 @@ let browserIdCounter = 0;
 
 export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
   public readonly devtoolsSession: DevtoolsSession;
-  public onDevtoolsAttached?: (session: DevtoolsSession) => Promise<any>;
+  public onDevtoolsPanelOpened?: (session: DevtoolsSession) => Promise<any>;
   public id: string;
 
   public get name(): string {
@@ -139,25 +139,25 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       context?.onSharedWorkerAttached(devtoolsSession, targetInfo).catch(() => null);
     }
 
-    if (event.waitingForDebugger && targetInfo.type === 'service_worker') {
+    if (targetInfo.type === 'service_worker') {
       const devtoolsSession = this.connection.getSession(sessionId);
       if (!devtoolsSession) return;
 
-      const promise = devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
-      if (targetInfo.url.startsWith('chrome-extension://')) {
-        promise
-          .then(() => this.devtoolsSession.send('Target.detachFromTarget', { sessionId }))
-          .catch(() => null);
+      if (event.waitingForDebugger) {
+        devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
       }
+      const context = this.getBrowserContext(targetInfo.browserContextId);
+      context.plugins.onServiceWorkerStarted(devtoolsSession, event).catch(() => null);
     }
 
     if (
       targetInfo.type === 'other' &&
-      targetInfo.url.startsWith('devtools://devtools') &&
-      this.onDevtoolsAttached
+      targetInfo.url.startsWith('devtools://devtools')
     ) {
       const devtoolsSession = this.connection.getSession(sessionId);
-      this.onDevtoolsAttached(devtoolsSession).catch(() => null);
+      if (this.onDevtoolsPanelOpened) this.onDevtoolsPanelOpened(devtoolsSession).catch(() => null);
+      const context = this.getBrowserContext(targetInfo.browserContextId);
+      context.plugins.onDevtoolsPanelOpened(devtoolsSession).catch(() => null);
       return;
     }
 

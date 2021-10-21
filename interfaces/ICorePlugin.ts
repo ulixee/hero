@@ -1,4 +1,5 @@
 import { URL } from 'url';
+import Protocol from 'devtools-protocol';
 import IPluginTypes, { PluginTypes } from './IPluginTypes';
 import ICorePluginCreateOptions from './ICorePluginCreateOptions';
 import { IInteractionGroups, IInteractionStep } from './IInteractions';
@@ -18,6 +19,7 @@ import IDeviceProfile from './IDeviceProfile';
 import IHttp2ConnectSettings from './IHttp2ConnectSettings';
 import ISessionCreateOptions from './ISessionCreateOptions';
 import { IPuppetFrame } from './IPuppetFrame';
+import IDevtoolsSession from './IDevtoolsSession';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,
@@ -34,6 +36,8 @@ export interface ICorePluginClass {
 
 export interface ICorePluginMethods {
   onClientCommand?(meta: IOnClientCommandMeta, ...args: any[]): Promise<any>;
+  onDevtoolsPanelOpened?(devtoolsSession: IDevtoolsSession): Promise<any>;
+  onServiceWorkerStarted?(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any>;
 }
 
 export interface IOnClientCommandMeta {
