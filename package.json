@@ -22,7 +22,7 @@
     "test": "yarn copy:build && node ./prepare-build.js && cd build && yarn test:build",
     "lint": "eslint --cache ./"
   },
-  "repository": "git@github.com:ulixee/secret-agent.git",
+  "repository": "git@github.com:ulixee/hero.git",
   "author": "Data Liberation Foundation",
   "contributors": [
     "Caleb Clark",
@@ -30,7 +30,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ulixee/secret-agent/issues"
+    "url": "https://github.com/ulixee/hero/issues"
   },
   "homepage": "https://ulixee.org",
   "engines": {

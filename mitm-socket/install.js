@@ -12,7 +12,7 @@ if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir);
 }
 const { version } = packageJson;
-const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/download/v${version}`;
+const releasesAssetsUrl = `https://github.com/ulixee/hero/releases/download/v${version}`;
 
 // tslint:disable:no-console
 
@@ -175,10 +175,7 @@ function compile() {
     execSync('go build', { cwd: `${__dirname}/go` });
     return true;
   } catch (err) {
-    console.log(
-      'Error compiling Hero MitmSocket library.\n\nWill download instead.',
-      err.message,
-    );
+    console.log('Error compiling Hero MitmSocket library.\n\nWill download instead.', err.message);
     return false;
   }
 }
