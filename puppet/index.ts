@@ -70,7 +70,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       launchedProcess.on('close', () => this.emit('close'));
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
-      this.browser.onDevtoolsPanelOpened = attachToDevtools;
+      this.browser.onDevtoolsPanelAttached = attachToDevtools;
 
       this.supportsBrowserContextProxy = this.browser.majorVersion >= 85;
 

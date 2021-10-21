@@ -268,19 +268,19 @@ export default class CorePlugins implements ICorePlugins {
 
   // MISCELLANEOUS
 
-  public async onDevtoolsPanelOpened(devtoolsSession: IDevtoolsSession): Promise<any> {
+  public async onDevtoolsPanelAttached(devtoolsSession: IDevtoolsSession): Promise<any> {
     await Promise.all(
       this.instances
-        .filter(p => p.onDevtoolsPanelOpened)
-        .map(p => p.onDevtoolsPanelOpened(devtoolsSession)),
+        .filter(p => p.onDevtoolsPanelAttached)
+        .map(p => p.onDevtoolsPanelAttached(devtoolsSession)),
     );
   }
 
-  public async onServiceWorkerStarted(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any> {
+  public async onServiceWorkerAttached(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any> {
     await Promise.all(
       this.instances
-        .filter(p => p.onServiceWorkerStarted)
-        .map(p => p.onServiceWorkerStarted(devtoolsSession, event)),
+        .filter(p => p.onServiceWorkerAttached)
+        .map(p => p.onServiceWorkerAttached(devtoolsSession, event)),
     );
   }
 

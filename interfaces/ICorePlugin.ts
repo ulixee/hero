@@ -36,8 +36,8 @@ export interface ICorePluginClass {
 
 export interface ICorePluginMethods {
   onClientCommand?(meta: IOnClientCommandMeta, ...args: any[]): Promise<any>;
-  onDevtoolsPanelOpened?(devtoolsSession: IDevtoolsSession): Promise<any>;
-  onServiceWorkerStarted?(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any>;
+  onDevtoolsPanelAttached?(devtoolsSession: IDevtoolsSession): Promise<any>;
+  onServiceWorkerAttached?(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any>;
 }
 
 export interface IOnClientCommandMeta {

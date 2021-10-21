@@ -21,7 +21,7 @@ let browserIdCounter = 0;
 
 export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
   public readonly devtoolsSession: DevtoolsSession;
-  public onDevtoolsPanelOpened?: (session: DevtoolsSession) => Promise<any>;
+  public onDevtoolsPanelAttached?: (session: DevtoolsSession) => Promise<any>;
   public id: string;
 
   public get name(): string {
@@ -147,7 +147,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
         devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
       }
       const context = this.getBrowserContext(targetInfo.browserContextId);
-      context.plugins.onServiceWorkerStarted(devtoolsSession, event).catch(() => null);
+      context.plugins.onServiceWorkerAttached(devtoolsSession, event).catch(() => null);
     }
 
     if (
@@ -155,9 +155,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       targetInfo.url.startsWith('devtools://devtools')
     ) {
       const devtoolsSession = this.connection.getSession(sessionId);
-      if (this.onDevtoolsPanelOpened) this.onDevtoolsPanelOpened(devtoolsSession).catch(() => null);
+      if (this.onDevtoolsPanelAttached) this.onDevtoolsPanelAttached(devtoolsSession).catch(() => null);
       const context = this.getBrowserContext(targetInfo.browserContextId);
-      context.plugins.onDevtoolsPanelOpened(devtoolsSession).catch(() => null);
+      context.plugins.onDevtoolsPanelAttached(devtoolsSession).catch(() => null);
       return;
     }
 
