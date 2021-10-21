@@ -1,5 +1,4 @@
 import { URL } from 'url';
-import Protocol from 'devtools-protocol';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
@@ -24,7 +23,7 @@ import ICorePlugin, {
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
-import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
+import IDevtoolsSession, { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';

@@ -27,8 +27,7 @@
     "better-sqlite3": "^7.4.1",
     "moment": "^2.24.1",
     "uuid": "^8.3.2",
-    "ws": "^7.4.4",
-    "devtools-protocol": "^0.0.799653"
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "@ulixee/chrome-app": "1.0.2",
