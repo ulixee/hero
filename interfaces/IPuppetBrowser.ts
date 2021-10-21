@@ -9,7 +9,7 @@ export default interface IPuppetBrowser {
   name: string;
   fullVersion: string;
   majorVersion: number;
-  onDevtoolsAttached?: (devtoolsSession: IDevtoolsSession) => Promise<any>;
+  onDevtoolsPanelAttached?: (devtoolsSession: IDevtoolsSession) => Promise<any>;
   newContext(
     plugins: ICorePlugins,
     logger: IBoundLog,
