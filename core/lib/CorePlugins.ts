@@ -153,12 +153,10 @@ export default class CorePlugins implements ICorePlugins {
       .forEach(p => p.onTlsConfiguration(settings, sessionSummary));
   }
 
-  public async onBrowserLaunchConfiguration(launchArguments: string[]): Promise<void> {
-    await Promise.all(
-      this.instances
-        .filter(p => p.onBrowserLaunchConfiguration)
-        .map(p => p.onBrowserLaunchConfiguration(launchArguments)),
-    );
+  public onBrowserLaunchConfiguration(launchArguments: string[]): void {
+    this.instances
+      .filter(p => p.onBrowserLaunchConfiguration)
+      .map(p => p.onBrowserLaunchConfiguration(launchArguments));
   }
 
   public async onNewPuppetPage(page: IPuppetPage): Promise<void> {
@@ -275,7 +273,10 @@ export default class CorePlugins implements ICorePlugins {
     );
   }
 
-  public async onServiceWorkerAttached(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any> {
+  public async onServiceWorkerAttached(
+    devtoolsSession: IDevtoolsSession,
+    event: Protocol.Target.AttachedToTargetEvent,
+  ): Promise<any> {
     await Promise.all(
       this.instances
         .filter(p => p.onServiceWorkerAttached)

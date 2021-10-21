@@ -54,7 +54,7 @@ export default class RemoteEventListener implements ICommandableTarget {
   public close(): void {
     for (const [id, entry] of this.listenersById) {
       if (entry.type !== 'close') {
-        this.removeEventListener(id);
+        void this.removeEventListener(id);
       }
     }
   }

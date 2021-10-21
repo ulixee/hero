@@ -66,7 +66,7 @@ test('should create up to a max number of secure connections per origin', async 
       proxyCredentials,
       { connection: 'keep-alive' },
     ).then(
-      // eslint-disable-next-line promise/always-return
+      // eslint-disable-next-line promise/always-return,@typescript-eslint/no-floating-promises
       res => {
         expect(res).toBe('I am here');
       },
@@ -107,7 +107,7 @@ test('should create new connections as needed when no keepalive', async () => {
       `http://localhost:${mitmServer.port}`,
       proxyCredentials,
     ).then(
-      // eslint-disable-next-line promise/always-return
+      // eslint-disable-next-line promise/always-return,@typescript-eslint/no-floating-promises
       res => {
         expect(res).toBe('here 2');
       },

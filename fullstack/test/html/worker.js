@@ -240,4 +240,4 @@ function logError() {
     method: 'POST',
     body: JSON.stringify({ windowScope, dedicatedWorker, sharedWorker, serviceWorker }),
   });
-})();
+})().catch(console.error);

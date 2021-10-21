@@ -49,7 +49,7 @@ describe('basic Hero tests', () => {
     const hero = await new Hero({ connectionToCore });
     const events = [];
 
-    hero.on('command', (command, commandId, args) => {
+    void hero.on('command', (command, commandId, args) => {
       events.push({ command, commandId, args });
     });
 

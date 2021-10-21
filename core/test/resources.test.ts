@@ -51,7 +51,7 @@ test('records a single resource for failed mitm requests', async () => {
   const originalEmit = tab.puppetPage.emit.bind(tab.puppetPage);
   // @ts-ignore
   jest.spyOn(tab.puppetPage.networkManager, 'emit').mockImplementation((evt, args) => {
-    // eslint-disable-next-line promise/always-return,promise/catch-or-return
+    // eslint-disable-next-line promise/always-return,promise/catch-or-return,@typescript-eslint/no-floating-promises
     resolvable.promise.then(() => {
       originalEmit(evt as any, args);
     });

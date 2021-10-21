@@ -24,7 +24,7 @@ declare module 'awaited-dom/base/interfaces/super' {
 }
 
 for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
-  Object.defineProperty(Super.prototype, '$', {
+  void Object.defineProperty(Super.prototype, '$', {
     get: function $() {
       const click = async (): Promise<void> => {
         const { awaitedOptions } = getState(this);

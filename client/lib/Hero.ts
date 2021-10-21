@@ -304,7 +304,7 @@ export default class Hero extends AwaitedEventTarget<{
 
   // PLUGINS
 
-  public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): Hero {
+  public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): void {
     const { clientPlugins, options, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
@@ -333,8 +333,6 @@ export default class Hero extends AwaitedEventTarget<{
 
       options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     });
-
-    return this;
   }
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////

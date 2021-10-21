@@ -37,7 +37,10 @@ export interface ICorePluginClass {
 export interface ICorePluginMethods {
   onClientCommand?(meta: IOnClientCommandMeta, ...args: any[]): Promise<any>;
   onDevtoolsPanelAttached?(devtoolsSession: IDevtoolsSession): Promise<any>;
-  onServiceWorkerAttached?(devtoolsSession: IDevtoolsSession, event: Protocol.Target.AttachedToTargetEvent): Promise<any>;
+  onServiceWorkerAttached?(
+    devtoolsSession: IDevtoolsSession,
+    event: Protocol.Target.AttachedToTargetEvent,
+  ): Promise<any>;
 }
 
 export interface IOnClientCommandMeta {
@@ -91,7 +94,7 @@ export interface IBrowserEmulatorClass {
       disableGpu?: boolean;
       disableDevtools?: boolean;
     },
-  ): Promise<any> | void;
+  ): void;
   new (createOptions: ICorePluginCreateOptions): IBrowserEmulator;
 }
 
@@ -117,20 +120,11 @@ export interface IBrowserEmulator extends ICorePlugin {
 export interface IBrowserEmulatorMethods {
   configure?(options: IBrowserEmulatorConfig, sessionSummary?: ISessionSummary): void;
 
-  onBrowserLaunchConfiguration?(launchArguments: string[]): Promise<any> | void;
+  onBrowserLaunchConfiguration?(launchArguments: string[]): void;
 
-  onDnsConfiguration?(
-    settings: IDnsSettings,
-    sessionSummary?: ISessionSummary,
-  ): Promise<any> | void;
-  onTcpConfiguration?(
-    settings: ITcpSettings,
-    sessionSummary?: ISessionSummary,
-  ): Promise<any> | void;
-  onTlsConfiguration?(
-    settings: ITlsSettings,
-    sessionSummary?: ISessionSummary,
-  ): Promise<any> | void;
+  onDnsConfiguration?(settings: IDnsSettings, sessionSummary?: ISessionSummary): void;
+  onTcpConfiguration?(settings: ITcpSettings, sessionSummary?: ISessionSummary): void;
+  onTlsConfiguration?(settings: ITlsSettings, sessionSummary?: ISessionSummary): void;
 
   onHttp2SessionConnect?(
     request: IHttpResourceLoadDetails,

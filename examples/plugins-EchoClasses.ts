@@ -49,6 +49,6 @@ type EchoPluginAdditions = {
 };
 
 declare module '@ulixee/hero/lib/extendables' {
-  interface Hero extends EchoPluginAdditions {}
-  interface Tab extends EchoPluginAdditions {}
+  interface Hero extends EchoPluginAdditions {} // eslint-disable-line @typescript-eslint/no-shadow
+  interface Tab extends EchoPluginAdditions {} // eslint-disable-line @typescript-eslint/no-shadow
 }

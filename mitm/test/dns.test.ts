@@ -169,7 +169,6 @@ test('should properly expose errors if nothing is found', async () => {
   try {
     await dns.lookupIp('not-real-123423423443433434343-fake-domain.com');
   } catch (error) {
-    // eslint-disable-next-line jest/no-try-expect
     expect(error.message).toMatch('Not found');
   }
 

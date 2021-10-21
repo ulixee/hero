@@ -104,7 +104,6 @@ describe('basic Document tests', () => {
         expect(child).not.toBeTruthy();
       }
     } catch (error) {
-      // eslint-disable-next-line jest/no-try-expect
       expect(String(error)).toMatch(/Please add an await/);
     }
   });

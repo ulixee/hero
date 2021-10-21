@@ -49,6 +49,7 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('should be able to handle an http2->http2 request', async () => {
+  // eslint-disable-next-line prefer-const
   let headers: any;
   const server = await Helpers.runHttp2Server((req, res1) => {
     expect(

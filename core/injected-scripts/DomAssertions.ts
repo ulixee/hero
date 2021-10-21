@@ -78,7 +78,7 @@ class DomAssertions {
           const index = i;
           const promise = this.jsPath(path[0], comparison, expectedResult)
             .then(result => {
-              // eslint-disable-next-line promise/always-return
+              // eslint-disable-next-line promise/always-return,@typescript-eslint/no-floating-promises
               if (!result.isValid) results[index] = result.failedResult;
             })
             .catch(err => {

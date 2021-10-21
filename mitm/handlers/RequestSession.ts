@@ -95,7 +95,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     context.setState(ResourceState.EmulationWillSendResponse);
 
     if (context.resourceType === 'Document' && context.status === 200) {
-      this.plugins.websiteHasFirstPartyInteraction(context.url);
+      await this.plugins.websiteHasFirstPartyInteraction(context.url);
     }
 
     await this.plugins.beforeHttpResponse(context);
@@ -163,7 +163,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public recordDocumentUserActivity(documentUrl: string): void {
-    this.plugins.websiteHasFirstPartyInteraction(new URL(documentUrl));
+    void this.plugins.websiteHasFirstPartyInteraction(new URL(documentUrl));
   }
 
   /////// Websockets ///////////////////////////////////////////////////////////
