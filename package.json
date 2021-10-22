@@ -43,8 +43,10 @@
     "@types/node": "^13.13.52",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
+    "awaited-dom": "^1.3.0",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
+    "decamelize": "^4.0.0",
     "eslint": "^7.21.0",
     "eslint-config-airbnb-typescript": "^14.0.1",
     "eslint-config-prettier": "^8.3.0",
@@ -52,26 +54,24 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jest": "^25.2.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-monorepo-cop": "^1.0.2",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.1.1",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "jest-environment-node": "^27.0.6",
     "jest-summary-reporter": "^0.0.2",
-    "lerna": "^3.22.1",
+    "json2md": "^1.7.0",
+    "lerna": "^4.0.0",
     "lint-staged": "^10.5.2",
+    "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
     "prettier": "^2.2.1",
     "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",
-    "typescript": "~4.4.3",
-    "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
-    "json2md": "^1.7.0",
-    "awaited-dom": "^1.3.0",
-    "decamelize": "^4.0.0"
+    "typescript": "~4.4.3"
   },
   "workspaces": {
     "packages": [
@@ -99,6 +99,7 @@
     ]
   },
   "resolutions": {
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "**/ua-parser-js": "0.7.28"
   }
 }

@@ -105,7 +105,7 @@ jobs:
         run: cp -r mitm-socket/go build/mitm-socket/go
 
       - name: Build modules
-        run: yarn --network-timeout 1000000
+        run: yarn --network-timeout 1000000 --verbose
         working-directory: ./build
         env:
           HERO_REBUILD_MITM_SOCKET: 1
