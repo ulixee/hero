@@ -29,8 +29,13 @@ inspect.defaultOptions.depth = null;
 
   const context = await MirrorContext.createFromSessionDb(session.id, true);
 
-  const player = new TimetravelPlayer(session.id, connectionToCoreApi);
-  const startTab = await player.open(context);
+  const player = TimetravelPlayer.create(
+    session.id,
+    { browserContext: context },
+    null,
+    connectionToCoreApi,
+  );
+  const startTab = await player.goto(100);
 
   readline.createInterface({
     input: process.stdin,
@@ -58,7 +63,8 @@ inspect.defaultOptions.depth = null;
 
   async function close() {
     await player.connection.disconnect();
-    await player.close(true);
+    await player.close();
+    await context.close();
     await Core.shutdown();
   }
 

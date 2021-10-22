@@ -42,8 +42,9 @@ const { log } = Log(module);
 export default class Session
   extends TypedEventEmitter<{
     closing: void;
-    closed: void;
+    closed: { waitForPromise?: Promise<any> };
     resumed: void;
+    'will-close': { waitForPromise?: Promise<any> };
     'kept-alive': { message: string };
     'tab-created': { tab: Tab };
     'all-tabs-closed': void;
@@ -189,13 +190,13 @@ export default class Session
     ]);
   }
 
-  public configureHeaded(options: ISessionCreateOptions): void {
-    if (options.showBrowser === undefined) {
-      options.showBrowser = false;
-      options.showBrowserInteractions = false;
-    }
+  public configureHeaded(
+    options: Pick<ISessionCreateOptions, 'showBrowser' | 'showBrowserInteractions'>,
+  ): void {
+    this.options.showBrowser = options.showBrowser ?? false;
+    this.options.showBrowserInteractions = options.showBrowserInteractions ?? options.showBrowser;
 
-    this.browserEngine.isHeaded ??= options.showBrowser;
+    this.browserEngine.isHeaded = this.options.showBrowser;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -387,24 +388,20 @@ export default class Session
   }
 
   public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
-    // if this session is set to keep alive and core is closing,
+    // if this session is set to keep alive and core isn't closing
     if (!force && this.options.sessionKeepAlive && !Core.isClosing) {
-      const result = { didKeepAlive: false, message: null };
-      result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
-      result.didKeepAlive = true;
-      this.emit('kept-alive', result);
-      for (const tab of this.tabsById.values()) {
-        await tab.flushDomChanges();
-      }
-      return result;
+      return await this.keepAlive();
     }
 
     delete Session.byId[this.id];
     if (this._isClosing) return;
+    this._isClosing = true;
+
+    await this.willClose();
+
     // client events are listening to "close"
     this.emit('close' as any);
     this.emit('closing');
-    this._isClosing = true;
     const start = log.info('Session.Closing', {
       sessionId: this.id,
     });
@@ -424,16 +421,14 @@ export default class Session
       log.error('Session.CloseMitmError', { error, sessionId: this.id });
     }
 
-    try {
-      await this.browserContext?.close();
-    } catch (error) {
-      log.error('Session.CloseBrowserContextError', { error, sessionId: this.id });
-    }
     log.stats('Session.Closed', {
       sessionId: this.id,
       parentLogId: start,
     });
-    this.emit('closed');
+
+    const closedEvent = { waitForPromise: null };
+    this.emit('closed', closedEvent);
+    await closedEvent.waitForPromise;
     // should go last so we can capture logs
     this.db.session.close(this.id, Date.now());
     LogEvents.unsubscribe(this.logSubscriptionId);
@@ -448,6 +443,24 @@ export default class Session
         // drown
       }
     });
+  }
+
+  private async willClose(): Promise<void> {
+    const willCloseEvent = { waitForPromise: null };
+    this.emit('will-close', willCloseEvent);
+    await willCloseEvent.waitForPromise;
+  }
+
+  private async keepAlive(): Promise<{ didKeepAlive: boolean; message?: string }> {
+    await this.willClose();
+    const result = { didKeepAlive: false, message: null };
+    result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
+    result.didKeepAlive = true;
+    this.emit('kept-alive', result);
+    for (const tab of this.tabsById.values()) {
+      await tab.flushDomChanges();
+    }
+    return result;
   }
 
   private async resume(options: ISessionCreateOptions): Promise<void> {

@@ -283,21 +283,25 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   async startScreenRecording(
-    options: Pick<IScreenRecordingOptions, 'format' | 'quality'> = {},
+    options: Pick<IScreenRecordingOptions, 'format' | 'jpegQuality'> = {},
   ): Promise<void> {
+    if (this.screencastOptions) return;
+
     options.format ??= 'jpeg';
-    options.quality ??= 30;
+    options.jpegQuality ??= 30;
     this.screencastOptions = options;
     await this.devtoolsSession.send('Page.startScreencast', {
       format: options.format,
-      quality: options.quality,
+      quality: options.jpegQuality,
     });
   }
 
   async stopScreenRecording(): Promise<void> {
-    await this.devtoolsSession.send('Page.stopScreencast');
-    await this.screenshot(this.screencastOptions);
-    this.screencastOptions = null;
+    if (this.screencastOptions) {
+      await this.devtoolsSession.send('Page.stopScreencast');
+      await this.screenshot(this.screencastOptions);
+      this.screencastOptions = null;
+    }
   }
 
   onWorkerAttached(

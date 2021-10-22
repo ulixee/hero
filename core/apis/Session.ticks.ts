@@ -347,6 +347,7 @@ export interface ISessionTicksApi extends ICoreApi {
 
 export interface ISessionTicksArgs {
   sessionId: string;
+  timelineRange?: [startTime: number, endTime?: number];
   includeInteractionEvents?: boolean;
   includeCommands?: boolean;
   includePaintEvents?: boolean;

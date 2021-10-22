@@ -3,6 +3,8 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
+  public countByTimestamp = new Map<number, number>();
+
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
@@ -34,6 +36,10 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     change: IDomChangeEvent,
   ): void {
     const [action, nodeData, timestamp, eventIndex] = change;
+
+    const count = this.countByTimestamp.get(timestamp) ?? 0;
+    this.countByTimestamp.set(timestamp, count + 1);
+
     const record = [
       frameId,
       navigationId,
@@ -54,6 +60,16 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       timestamp,
     ];
     this.queuePendingInsert(record);
+  }
+
+  public all(): IDomChangeRecord[] {
+    this.countByTimestamp.clear();
+    const records = super.all();
+    for (const record of records) {
+      const count = this.countByTimestamp.get(record.timestamp) ?? 0;
+      this.countByTimestamp.set(record.timestamp, count + 1);
+    }
+    return records;
   }
 
   public getFrameChanges(frameId: number, sinceCommandId?: number): IDomChangeRecord[] {

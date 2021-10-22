@@ -8,6 +8,7 @@ import { IPuppetWorker } from './IPuppetWorker';
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
   id: string;
   browserId: string;
+  isIncognito: boolean;
   workersById: Map<string, IPuppetWorker>;
   defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
   sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(

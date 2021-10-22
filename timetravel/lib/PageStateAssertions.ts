@@ -90,7 +90,7 @@ export default class PageStateAssertions {
         }
       }
     }
-    return state;
+    return state ?? {};
   }
 
   public static generateKey(type: IAssertionAndResult['type'], args: any[]): string {

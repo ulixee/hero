@@ -15,7 +15,7 @@ export default interface ISessionCreateOptions extends ISessionOptions {
     startNavigationId?: number;
   };
   browserEmulatorId?: string;
-  mode?: 'development' | 'multiverse' | 'production';
+  mode?: 'development' | 'multiverse' | 'production' | 'timetravel';
   userAgent?: string;
   scriptInstanceMeta?: IScriptInstanceMeta;
   userProfile?: IUserProfile;

@@ -14,6 +14,13 @@ import CommandRunner from './CommandRunner';
 
 export interface IPageStateEvents {
   resolved: { state: string; error?: Error };
+  state: IPageStateResult;
+}
+
+interface IBatchAssertion {
+  domAssertionsByFrameId: Map<number, IPageStateAssertionBatch['assertions']>;
+  assertions: IPageStateAssertionBatch['assertions'];
+  rawAssertionsData?: unknown;
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
@@ -23,30 +30,21 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   public readonly startingCommandId: number;
   public readonly commandStartTime: number;
 
-  public readonly batchAssertionsById = new Map<
-    string,
-    {
-      domAssertionsByFrameId: Map<number, IPageStateAssertionBatch['assertions']>;
-      assertions: IPageStateAssertionBatch['assertions'];
-      rawAssertionsData?: unknown;
-    }
-  >();
+  public readonly batchAssertionsById = new Map<string, IBatchAssertion>();
 
   private onCloseFns: (() => any)[] = [];
   private commandFnsById = new Map<string, () => Promise<any>>();
-  private readonly checkInterval: NodeJS.Timer;
+  private checkInterval: NodeJS.Timer;
   private lastResults: any;
   private isStopping = false;
   private isCheckingState = false;
   private runAgain = false;
-
   private readyPromise: Promise<void | Error>;
 
   constructor(
     public readonly jsPathId: string,
     private readonly options: IPageStateListenArgs,
     private readonly tab: Tab,
-    private readonly publishResultsFn: (result: IPageStateResult) => void,
   ) {
     super();
     bindFunctions(this);
@@ -63,16 +61,19 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     // go one ms after the previous command
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
 
+    tab.once('close', this.stop);
+  }
+
+  public start(): void {
     this.readyPromise = this.bindFrameEvents().catch(err => err);
     this.checkInterval = setInterval(this.checkState, 2e3).unref();
-
-    tab.once('close', this.stop);
   }
 
   public stop(result?: { state: string; error?: Error }): void {
     clearTimeout(this.checkInterval);
     if (this.isStopping) return;
     this.isStopping = true;
+    this.removeAllListeners('state');
     this.emit('resolved', {
       state: result?.state,
       error: result?.error,
@@ -101,6 +102,18 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       failedCount += failedDomAssertions;
     }
     return failedCount === 0;
+  }
+
+  public addAssertBatch(state: string, batch: IPageStateAssertionBatch): void {
+    if (this.readyPromise) {
+      throw new Error('PageStateListener already initialized. Cannot add assertions');
+    }
+    if (!this.states.includes(state)) this.states.push(state);
+    this.options.commands[batch.id] = [
+      1,
+      'Tab.assert',
+      [batch.id, JSON.parse(this.jsPathId), batch.assertions],
+    ];
   }
 
   private async loadBatchAssert(
@@ -171,7 +184,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
     const stringifiedResults = JSON.stringify(results);
     if (this.lastResults !== stringifiedResults) {
-      this.publishResultsFn(results);
+      this.emit('state', results);
     }
     this.lastResults = stringifiedResults;
   }

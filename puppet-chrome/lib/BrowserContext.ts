@@ -47,6 +47,8 @@ export class BrowserContext
     return this.browser.id;
   }
 
+  public isIncognito = true;
+
   private attachedTargetIds = new Set<string>();
   private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
@@ -70,6 +72,7 @@ export class BrowserContext
     this.plugins = plugins;
     this.browser = browser;
     this.id = contextId;
+    this.isIncognito = !contextId;
     this.logger = logger.createChild(module, {
       browserContextId: contextId,
     });
@@ -226,6 +229,7 @@ export class BrowserContext
 
     if (this.browser.devtoolsSession.isConnected()) {
       await Promise.all([...this.pagesById.values()].map(x => x.close()));
+      // can only close with id
       if (this.id) {
         await this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
           browserContextId: this.id,

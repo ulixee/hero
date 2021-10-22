@@ -13,18 +13,25 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
       db,
       'Screenshots',
       [
-        ['timestamp', 'DATETIME', 'NOT NULL PRIMARY KEY'],
+        // need text for full precision (will be rounded to two decimals otherwise)
+        ['timestamp', 'TEXT', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['image', 'BLOB'],
       ],
-      false,
+      true,
     );
   }
 
   public getImage(tabId: number, timestamp: number): Buffer {
+    const lookupTimestamp = String(timestamp);
+    if (this.pendingInserts.length) {
+      for (const record of this.pendingInserts) {
+        if (record[0] === lookupTimestamp && record[1] === tabId) return record[2] as Buffer;
+      }
+    }
     const record = this.db
       .prepare(`select image from ${this.tableName} where tabId=? and timestamp=?`)
-      .get(tabId, timestamp);
+      .get(tabId, lookupTimestamp);
     return record.image;
   }
 
@@ -44,7 +51,7 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
     }
     this.screenshotTimesByTabId.get(tabId).push(timestamp);
 
-    this.queuePendingInsert([timestamp, tabId, image]);
+    this.queuePendingInsert([String(timestamp), tabId, image]);
   }
 
   public static isBlankImage(imageBase64: string): boolean {

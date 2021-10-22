@@ -10,7 +10,6 @@ import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import IResourceFilterProperties from '@ulixee/hero-core/interfaces/IResourceFilterProperties';
-import { v1 as uuidv1 } from 'uuid';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
@@ -32,6 +31,8 @@ export default class PageStateGenerator {
 
   public statesByName = new Map<string, IPageStateByName>();
 
+  constructor(readonly id: string) {}
+
   public addSession(
     sessionDb: SessionDb,
     tabId: number,
@@ -49,24 +50,30 @@ export default class PageStateGenerator {
       timelineRange,
       loadingRange,
     });
-    this.browserContext ??= MirrorContext.createFromSessionDb(sessionId, false).catch(err => err);
   }
 
   public async close(): Promise<void> {
-    const context = await this.browserContext;
-    if (!context || context instanceof Error) return;
-    await context.close();
+    if (this.browserContext) {
+      const browserContext = this.browserContext;
+      this.browserContext = null;
+      const context = await browserContext;
+      if (!context || context instanceof Error) return;
+      await context.close();
+    }
     for (const session of this.sessionsById.values()) {
       session.mirrorPage = null;
     }
   }
 
-  public addState(name: string, ...sessionIds: string[]): void {
+  public addState(name: string, ...addSessionIds: string[]): void {
     if (!this.statesByName.has(name)) {
-      this.statesByName.set(name, { sessionIds: new Set<string>() });
+      this.statesByName.set(name, { sessionIds: new Set<string>(), assertsByFrameId: {} });
     }
-    for (const id of sessionIds) {
-      this.statesByName.get(name).sessionIds.add(id);
+    for (const id of addSessionIds) {
+      for (const [stateName, { sessionIds }] of this.statesByName) {
+        if (stateName === name) sessionIds.add(id);
+        else sessionIds.delete(id);
+      }
     }
   }
 
@@ -100,7 +107,7 @@ export default class PageStateGenerator {
 
   public export(stateName: string): IPageStateGeneratorAssertionBatch {
     const exported = <IPageStateGeneratorAssertionBatch>{
-      id: uuidv1(),
+      id: `${this.id}-${stateName}`,
       sessions: [],
       assertions: [],
       state: stateName,
@@ -193,10 +200,13 @@ export default class PageStateGenerator {
     PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
   }
 
-  private async checkResultsInPage(): Promise<void> {
-    const context = await this.browserContext;
-    if (context instanceof Error) throw context;
+  public createBrowserContext(fromSessionId: string): void {
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+      .then(context => context.once('close', () => (this.browserContext = null)))
+      .catch(err => err);
+  }
 
+  private async checkResultsInPage(): Promise<void> {
     for (const session of this.sessionsById.values()) {
       if (!session.domRecording || !session.needsResultsVerification) continue;
       const paintEvents = session.domRecording?.paintEvents;
@@ -206,9 +216,9 @@ export default class PageStateGenerator {
         continue;
       }
 
-      await this.createMirrorPageIfNeeded(context, session);
+      await this.createMirrorPageIfNeeded(session);
       // create at "loaded" state
-      const { mirrorPage } = session;
+      const mirrorPage = session.mirrorPage;
       await mirrorPage.load();
       // only need to do this once?
       session.needsResultsVerification = false;
@@ -240,11 +250,12 @@ export default class PageStateGenerator {
     }
   }
 
-  private async createMirrorPageIfNeeded(
-    context: IPuppetContext,
-    session: IPageStateSession,
-  ): Promise<void> {
-    if (session.mirrorPage) return;
+  private async createMirrorPageIfNeeded(session: IPageStateSession): Promise<void> {
+    if (session.mirrorPage?.isReady) {
+      await session.mirrorPage.isReady;
+      if (session.mirrorPage.page) return;
+    }
+
     const networkInterceptor = MirrorNetwork.createFromSessionDb(session.db, session.tabId, {
       hasResponse: true,
       isGetOrDocument: true,
@@ -252,6 +263,10 @@ export default class PageStateGenerator {
     networkInterceptor.useResourcesOnce = true;
 
     session.mirrorPage = new MirrorPage(networkInterceptor, session.domRecording, false);
+    await this.createBrowserContext(session.sessionId);
+
+    const context = await this.browserContext;
+    if (context instanceof Error) throw context;
 
     const sessionRecord = session.db.session.get();
     await session.mirrorPage.open(context, session.sessionId, sessionRecord.viewport, page => {
@@ -423,7 +438,8 @@ export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBa
     loadingRange: [start: number, end: number];
   }[];
 }
-interface IPageStateSession {
+
+export interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;

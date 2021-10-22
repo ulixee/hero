@@ -58,7 +58,7 @@ export default class CoreEventHeap {
     });
 
     this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
-
+    await this.pendingRegistrations;
     const response = await subscriptionPromise;
     const { listenerId } = response.data;
     let wrapped = listenerFn;

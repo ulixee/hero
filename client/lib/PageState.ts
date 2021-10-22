@@ -6,7 +6,6 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IRawCommand } from '@ulixee/hero-interfaces/IPageStateListenArgs';
 import CoreTab from './CoreTab';
 import IPageStateDefinitions, {
@@ -62,9 +61,6 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     let finalState: K;
     let waitError: Error;
     try {
-      if (!states.length) {
-        throw new CanceledPromiseError('No states provided to waitForPageState');
-      }
       finalState = await timer.waitForPromise(
         this.#stateResolvable.promise,
         'Timeout waiting for PageState',

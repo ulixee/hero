@@ -22,6 +22,30 @@ export default class TabPlaybackController {
     return this.ticks[this.currentTickIndex - 1];
   }
 
+  public get nextTimelineOffsetPercent(): number {
+    const currentOffset = this.currentTick?.timelineOffsetPercent || 0;
+    let tick: ITick;
+    for (let i = this.currentTickIndex; i < this.ticks.length; i += 1) {
+      tick = this.ticks[i];
+      if (tick && tick.timelineOffsetPercent > currentOffset) {
+        return tick.timelineOffsetPercent;
+      }
+    }
+    return 100;
+  }
+
+  public get previousTimelineOffsetPercent(): number {
+    const currentOffset = this.currentTick?.timelineOffsetPercent || 0;
+    let tick: ITick;
+    for (let i = this.currentTickIndex; i >= 0; i -= 1) {
+      tick = this.ticks[i];
+      if (tick && tick.timelineOffsetPercent < currentOffset) {
+        return tick.timelineOffsetPercent;
+      }
+    }
+    return 0;
+  }
+
   public get isOpen(): boolean {
     return !!this.mirrorPage?.puppetPageId;
   }
@@ -36,7 +60,7 @@ export default class TabPlaybackController {
   private readonly mainFrameId: number;
 
   constructor(
-    private readonly tabDetails: ITabDetails,
+    public readonly tabDetails: ITabDetails,
     private readonly mirrorNetwork: MirrorNetwork,
     private readonly sessionId: string,
     debugLogging = false,
@@ -114,15 +138,15 @@ export default class TabPlaybackController {
     let newTickIdx = this.currentTickIndex;
     // if going forward, load next ticks
     if (timelineOffset > this.currentTimelineOffsetPct) {
-      for (let i = this.currentTickIndex; i < ticks.length; i += 1) {
+      for (let i = newTickIdx; i < ticks.length; i += 1) {
         if (i < 0) continue;
         if (ticks[i].timelineOffsetPercent > timelineOffset) break;
         newTickIdx = i;
       }
     } else {
-      for (let i = this.currentTickIndex - 1; i >= 0; i -= 1) {
-        if (ticks[i].timelineOffsetPercent < timelineOffset) break;
+      for (let i = newTickIdx; i >= 0; i -= 1) {
         newTickIdx = i;
+        if (ticks[i].timelineOffsetPercent <= timelineOffset) break;
       }
     }
 

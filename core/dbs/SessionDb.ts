@@ -57,6 +57,8 @@ export default class SessionDb {
   public readonly tabs: TabsTable;
   public readonly sessionId: string;
 
+  public keepAlive = false;
+
   private readonly batchInsert?: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
 
@@ -116,7 +118,6 @@ export default class SessionDb {
           try {
             table.runPendingInserts();
           } catch (error) {
-            console.log(error);
             if (String(error).match('attempt to write a readonly database')) {
               clearInterval(this.saveInterval);
               this.db = null;
@@ -134,10 +135,18 @@ export default class SessionDb {
 
   public close(): void {
     clearInterval(this.saveInterval);
-    if (this.db) {
+
+    if (this.db?.open) {
       this.flush();
-      this.db.close();
     }
+
+    if (this.keepAlive) {
+      this.db.readonly = true;
+      return;
+    }
+
+    SessionDb.byId.delete(this.sessionId);
+    // NOTE: db will close when out of scope
     this.db = null;
   }
 

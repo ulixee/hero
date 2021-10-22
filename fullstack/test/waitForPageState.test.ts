@@ -210,7 +210,7 @@ test('can load a generated pageState', async () => {
   });
 
   /////// generate state
-  const pageStateGenerator = new PageStateGenerator();
+  const pageStateGenerator = new PageStateGenerator('1');
   await Promise.all(
     ['1', '1', '2', '2'].map(async x => {
       const { tab, session } = await createSession();

@@ -241,7 +241,7 @@ describe('Pages', () => {
 
   describe('screencast', () => {
     it('should be able to take a screen recording', async () => {
-      await page.startScreenRecording({ format: 'jpeg', quality: 30 });
+      await page.startScreenRecording({ format: 'jpeg', jpegQuality: 30 });
       const onSs = jest.fn();
       page.on('screenshot', onSs);
       await page.goto(server.emptyPage);

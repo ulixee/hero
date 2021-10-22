@@ -651,14 +651,22 @@ export default class Tab
     return await pageStateListener.runBatchAssert(batchId);
   }
 
-  public addPageStateListener(
-    id: string,
-    options: IPageStateListenArgs,
-    listenFn: (...args) => void,
-  ): PageStateListener {
-    const listener = new PageStateListener(id, options, this, listenFn);
+  public addPageStateListener(id: string, options: IPageStateListenArgs): PageStateListener {
+    const listener = new PageStateListener(id, options, this);
     this.pageStateListeners[id] = listener;
     this.emit('wait-for-pagestate', { listener });
+
+    if (!listener.states.length) {
+      const cancelError = new CanceledPromiseError('No states provided to waitForPageState');
+      listener.stop({
+        state: null,
+        error: cancelError,
+      });
+      delete this.pageStateListeners[id];
+      throw cancelError;
+    }
+
+    listener.start();
     return listener;
   }
 
@@ -679,7 +687,8 @@ export default class Tab
 
     if (type === 'page-state') {
       const id = JSON.stringify(jsPath);
-      this.addPageStateListener(id, options, listenFn);
+      const listener = this.addPageStateListener(id, options);
+      listener.on('state', listenFn);
     }
   }
 

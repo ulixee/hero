@@ -7,6 +7,8 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
   public idCounter = 0;
 
+  private allNavigationsById = new Map<number, INavigation>();
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
@@ -35,7 +37,17 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     this.defaultSortOrder = 'initiatedTime ASC';
   }
 
+  public getAllNavigations(): INavigation[] {
+    if (!this.allNavigationsById.size) {
+      for (const record of this.all()) {
+        this.allNavigationsById.set(record.id, FrameNavigationsTable.toNavigation(record));
+      }
+    }
+    return [...this.allNavigationsById.values()];
+  }
+
   public insert(navigation: INavigation): void {
+    this.allNavigationsById.set(navigation.id, navigation);
     const record = [
       navigation.id,
       navigation.frameId,
