@@ -6,7 +6,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'SessionLogs', [
       ['id', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
       ['action', 'TEXT'],
       ['level', 'TEXT'],
       ['module', 'TEXT'],

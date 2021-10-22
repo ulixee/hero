@@ -22,7 +22,6 @@ import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEven
 import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRect from '@ulixee/hero-interfaces/IRect';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -32,6 +31,8 @@ import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
 import ConsoleMessage from './ConsoleMessage';
 import Frame from './Frame';
+import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
+import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
@@ -78,6 +79,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   protected readonly logger: IBoundLog;
   private closePromise = createPromise();
   private readonly registeredEvents: IRegisteredEventListener[];
+  private screencastOptions: IScreenRecordingOptions & { lastImage?: string };
 
   constructor(
     devtoolsSession: DevtoolsSession,
@@ -136,6 +138,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       ['Page.javascriptDialogOpening', this.onJavascriptDialogOpening.bind(this)],
       ['Page.fileChooserOpened', this.onFileChooserOpened.bind(this)],
       ['Page.windowOpen', this.onWindowOpen.bind(this)],
+      ['Page.screencastFrame', this.onScreencastFrame.bind(this)],
     ]);
 
     this.isReady = this.initialize().catch(error => {
@@ -242,11 +245,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     await this.devtoolsSession.send('Page.bringToFront');
   }
 
-  async screenshot(
-    format: 'jpeg' | 'png' = 'jpeg',
-    clipRect?: IRect & { scale: number },
-    quality = 100,
-  ): Promise<Buffer> {
+  async screenshot(options: IScreenshotOptions): Promise<Buffer> {
+    options ??= {};
+    const quality = options.jpegQuality ?? 100;
+    const clipRect = options.rectangle;
     assert(
       quality >= 0 && quality <= 100,
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
@@ -263,14 +265,39 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       clip.width = Math.round(clip.width);
       clip.height = Math.round(clip.height);
     }
+
+    const timestamp = Date.now();
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
-      format,
+      format: options.format ?? 'jpeg',
       quality,
       clip,
       captureBeyondViewport: true, // added in chrome 87
     } as Protocol.Page.CaptureScreenshotRequest);
 
+    this.emit('screenshot', {
+      imageBase64: result.data,
+      timestamp,
+    });
+
     return Buffer.from(result.data, 'base64');
+  }
+
+  async startScreenRecording(
+    options: Pick<IScreenRecordingOptions, 'format' | 'quality'> = {},
+  ): Promise<void> {
+    options.format ??= 'jpeg';
+    options.quality ??= 30;
+    this.screencastOptions = options;
+    await this.devtoolsSession.send('Page.startScreencast', {
+      format: options.format,
+      quality: options.quality,
+    });
+  }
+
+  async stopScreenRecording(): Promise<void> {
+    await this.devtoolsSession.send('Page.stopScreencast');
+    await this.screenshot(this.screencastOptions);
+    this.screencastOptions = null;
   }
 
   onWorkerAttached(
@@ -487,5 +514,16 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         }),
       )
       .catch(() => null);
+  }
+
+  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent) {
+    this.devtoolsSession
+      .send('Page.screencastFrameAck', { sessionId: event.sessionId })
+      .catch(() => null);
+
+    this.emit('screenshot', {
+      imageBase64: event.data,
+      timestamp: event.metadata.timestamp * 1000,
+    });
   }
 }

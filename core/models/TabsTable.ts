@@ -21,7 +21,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
       ['viewportHeight', 'INTEGER'],
       ['browserPositionX', 'INTEGER'],
       ['browserPositionY', 'INTEGER'],
-      ['createdTime', 'INTEGER'],
+      ['createdTime', 'DATETIME'],
     ]);
   }
 

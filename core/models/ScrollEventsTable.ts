@@ -10,7 +10,7 @@ export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
       ['scrollX', 'INTEGER'],
       ['scrollY', 'INTEGER'],
       ['commandId', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
     ]);
   }
 

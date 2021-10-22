@@ -16,7 +16,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       ['buttons', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
       ['relatedTargetNodeId', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
     ]);
   }
 

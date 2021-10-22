@@ -39,6 +39,8 @@ import DetachedTabState from './DetachedTabState';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import PageStateListener from './PageStateListener';
+import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
+import ScreenshotsTable from '../models/ScreenshotsTable';
 
 const { log } = Log(module);
 
@@ -456,7 +458,22 @@ export default class Tab
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
     if (options.rectangle) options.rectangle.scale ??= 1;
-    return this.puppetPage.screenshot(options.format, options.rectangle, options.jpegQuality);
+    return this.puppetPage.screenshot(options);
+  }
+
+  public async recordScreen(
+    options: IScreenRecordingOptions & {
+      includeDuplicates?: boolean;
+      includeWhiteScreens?: boolean;
+    } = {},
+  ): Promise<void> {
+    this.session.db.screenshots.storeDuplicates = options.includeDuplicates ?? false;
+    this.session.db.screenshots.includeWhiteScreens = options.includeWhiteScreens ?? false;
+    await this.puppetPage.startScreenRecording(options);
+  }
+
+  public async stopRecording(): Promise<void> {
+    await this.puppetPage.stopScreenRecording();
   }
 
   public dismissDialog(accept: boolean, promptText?: string): Promise<void> {
@@ -720,6 +737,7 @@ export default class Tab
     page.on('page-callback-triggered', this.onPageCallback.bind(this));
     page.on('dialog-opening', this.onDialogOpening.bind(this));
     page.on('filechooser', this.onFileChooser.bind(this));
+    page.on('screenshot', this.onScreenshot.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
@@ -933,6 +951,21 @@ export default class Tab
       }
     }
     delete this.onFrameCreatedResourceEventsByFrameId[frame.devtoolsFrameId];
+  }
+
+  private onScreenshot(event: IPuppetPageEvents['screenshot']): void {
+    if (
+      !this.session.db.screenshots.includeWhiteScreens &&
+      ScreenshotsTable.isBlankImage(event.imageBase64)
+    ) {
+      return;
+    }
+
+    this.session.db.screenshots.insert({
+      tabId: this.id,
+      image: Buffer.from(event.imageBase64, 'base64'),
+      timestamp: event.timestamp,
+    });
   }
 
   private getFrameForEventOrQueueForReady(

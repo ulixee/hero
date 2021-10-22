@@ -15,6 +15,7 @@ import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
+import ScreenshotsTable from '../models/ScreenshotsTable';
 import SessionsDb from './SessionsDb';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
@@ -51,6 +52,7 @@ export default class SessionDb {
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
+  public readonly screenshots: ScreenshotsTable;
   public readonly devtoolsMessages: DevtoolsMessagesTable;
   public readonly tabs: TabsTable;
   public readonly sessionId: string;
@@ -85,6 +87,7 @@ export default class SessionDb {
     this.focusEvents = new FocusEventsTable(this.db);
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
+    this.screenshots = new ScreenshotsTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
 
     this.tables.push(
@@ -104,6 +107,7 @@ export default class SessionDb {
       this.scrollEvents,
       this.sessionLogs,
       this.devtoolsMessages,
+      this.screenshots,
     );
 
     if (!readonly) {
@@ -112,6 +116,7 @@ export default class SessionDb {
           try {
             table.runPendingInserts();
           } catch (error) {
+            console.log(error);
             if (String(error).match('attempt to write a readonly database')) {
               clearInterval(this.saveInterval);
               this.db = null;

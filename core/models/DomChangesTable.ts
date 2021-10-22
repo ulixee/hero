@@ -21,7 +21,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       ['namespaceUri', 'TEXT'],
       ['commandId', 'INTEGER'],
       ['tabId', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
     ]);
     this.defaultSortOrder = 'timestamp ASC,eventIndex ASC';
   }
