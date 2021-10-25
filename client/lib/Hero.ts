@@ -308,6 +308,12 @@ export default class Hero extends AwaitedEventTarget<{
     const { clientPlugins, options, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
+    if (connection.hasConnected) {
+      throw new Error(
+        'You must call .use before any Hero "await" calls (ie, before the Agent connects to Core).',
+      );
+    }
+
     if (typeof PluginObject === 'string') {
       const Plugins = requirePlugins(PluginObject as string);
       const CorePlugins = filterPlugins(Plugins, PluginTypes.CorePlugin);
