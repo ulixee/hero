@@ -28,6 +28,7 @@ const propertyKeys: (keyof Resource)[] = [
   'type',
   'request',
   'response',
+  'documentUrl',
   'data',
   'json',
   'text',
@@ -44,6 +45,10 @@ export default class Resource {
 
   public get url(): string {
     return getState(this).resource.url;
+  }
+
+  public get documentUrl(): string {
+    return getState(this).resource.documentUrl;
   }
 
   public get type(): ResourceType {

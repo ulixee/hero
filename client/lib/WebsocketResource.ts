@@ -51,6 +51,10 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     return getState(this).resource.url;
   }
 
+  public get documentUrl(): string {
+    return getState(this).resource.documentUrl;
+  }
+
   public get type(): ResourceType {
     return 'Websocket';
   }

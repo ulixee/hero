@@ -335,6 +335,7 @@ export default class Resources {
       receivedAtCommandId: this.session.commands.lastId,
       type: resourceType,
       isRedirect: !!redirectedToUrl,
+      documentUrl: resourceEvent.documentUrl,
       request: {
         ...request,
       },
