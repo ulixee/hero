@@ -7,16 +7,15 @@ declare global {
   interface Window {
     selfFrameIdPath: string;
     blockClickAndSubmit: boolean;
+    debugLogs: any[];
+    debugToConsole: boolean;
     repositionInteractElements();
     replayInteractions(
       resultNodeIds?: IHighlightedNodes,
       mouseEvent?: IFrontendMouseEvent,
       scrollEvent?: IFrontendScrollEvent,
     );
-    debugLogs: any[];
-    debugToConsole: boolean;
-    showCommandGrowl(id: number, name: string, fadeAfterMs?: number);
-    toggleCommandActive(trackMouse: boolean, hideMouse: boolean, hideOverlays: boolean);
+    setInteractionDisplay(trackMouse: boolean, hideMouse: boolean, hideOverlays: boolean);
     getNodeById(id: number): Node;
   }
 }
@@ -39,44 +38,24 @@ export interface IFrontendScrollEvent
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
 let replayNode: HTMLElement;
-let commandGrowl: HTMLElement;
-let commandText: HTMLElement;
-let hideCommandTimeout: any;
-let shouldTrackMouse = true;
+let shouldTrackMouse = false;
 
 let replayShadow: ShadowRoot;
 let lastHighlightNodes: number[] = [];
 
-window.showCommandGrowl = function showCommandGrowl(
-  id: number,
-  name: string,
-  fadeAfterMs?: number,
-) {
-  clearTimeout(hideCommandTimeout);
-  createReplayItems();
-  commandGrowl.classList.remove('fade');
-  commandGrowl.dataset.commandId = String(id);
-  commandText.textContent = name;
-  if (fadeAfterMs) hideCommandTimeout = setTimeout(hideCommandGrowl, fadeAfterMs);
-};
-
-window.toggleCommandActive = function toggleCommandActive(
+window.setInteractionDisplay = function setInteractionDisplay(
   trackMouse: boolean,
   hideMouse: boolean,
   hideOverlays: boolean,
 ) {
   shouldTrackMouse = trackMouse;
-  if (hideMouse) mouse.style.display = 'none';
+  if (hideMouse) clearMouse();
   if (hideOverlays === true) {
     highlightElements.forEach(x => x.remove());
     highlightElements.length = 0;
     lastHighlightNodes = [];
   }
 };
-
-function hideCommandGrowl() {
-  if (commandGrowl) commandGrowl.classList.add('fade');
-}
 
 window.replayInteractions = function replayInteractions(
   resultNodeIds: IHighlightedNodes,
@@ -358,13 +337,13 @@ function createReplayItems() {
 
   replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
-  commandGrowl = document.createElement('hero-command');
-  const label = document.createElement('command-label');
-  label.textContent = 'Command';
-  commandText = document.createElement('command-text');
-  commandGrowl.append(label, commandText);
-  commandGrowl.classList.add('fade');
-  replayShadow.appendChild(commandGrowl);
+  // commandGrowl = document.createElement('hero-command');
+  // const label = document.createElement('command-label');
+  // label.textContent = 'Command';
+  // commandText = document.createElement('command-text');
+  // commandGrowl.append(label, commandText);
+  // commandGrowl.classList.add('fade');
+  // replayShadow.appendChild(commandGrowl);
 
   showMoreUp = document.createElement('hero-overflow');
   showMoreUp.style.top = '0';

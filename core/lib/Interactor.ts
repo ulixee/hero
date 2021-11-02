@@ -104,10 +104,12 @@ export default class Interactor implements IInteractionsHelper {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
     this.preInteractionPaintStableStatus = this.frameEnvironment.navigations.getPaintStableStatus();
+    // eslint-disable-next-line promise/catch-or-return
     this.plugins
       .playInteractions(finalInteractions, this.playInteraction.bind(this, resolvablePromise), this)
       .then(resolvablePromise.resolve)
-      .catch(resolvablePromise.reject);
+      .catch(resolvablePromise.reject)
+      .finally(() => this.frameEnvironment.setInteractionDisplay(false));
   }
 
   public async lookupBoundingRect(
@@ -195,6 +197,10 @@ export default class Interactor implements IInteractionsHelper {
     if (resolvable.isResolved) return;
     if (this.tab.isClosing) {
       throw new CanceledPromiseError('Canceling interaction - tab closing');
+    }
+
+    if (mouseCommands.has(interaction.command)) {
+      this.frameEnvironment.setInteractionDisplay(true);
     }
 
     switch (interaction.command) {
@@ -570,3 +576,14 @@ async function waitFor(millis: number, resolvable: IResolvablePromise): Promise<
 function round(num: number): number {
   return Math.round(10 * num) / 10;
 }
+
+const mouseCommands = new Set(
+  [
+    InteractionCommand.move,
+    InteractionCommand.click,
+    InteractionCommand.doubleclick,
+    InteractionCommand.click,
+    InteractionCommand.clickUp,
+    InteractionCommand.clickDown,
+  ].map(String),
+);

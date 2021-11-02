@@ -17,7 +17,6 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-
 import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as Os from 'os';
@@ -105,6 +104,7 @@ export default class FrameEnvironment
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
   private lastDomChangeNavigationId: number;
+  private isTrackingMouse = false;
 
   private readonly installedDomAssertions = new Set<string>();
 
@@ -188,6 +188,21 @@ export default class FrameEnvironment
         this.logger.error('FrameEnvironment.ClosingError', { error, parentLogId });
       }
     }
+  }
+
+  public setInteractionDisplay(
+    followMouseMoves: boolean,
+    hideMouse = false,
+    hideHighlightedNodes = false,
+  ): void {
+    if (!this.session.options.showBrowserInteractions) return;
+    if (this.isTrackingMouse === followMouseMoves) return;
+    this.isTrackingMouse = followMouseMoves;
+    this.puppetFrame
+      .evaluate(
+        `window.setInteractionDisplay(${followMouseMoves}, ${hideMouse}, ${hideHighlightedNodes})`,
+      )
+      .catch(() => null);
   }
 
   /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////

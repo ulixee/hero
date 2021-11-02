@@ -90,7 +90,6 @@ export default class CommandRecorder {
     } finally {
       const mainFrame = frame ?? (tab ?? this.session.getLastActiveTab())?.mainFrameEnvironment;
       commands.onFinished(commandMeta, result, mainFrame?.navigations?.top?.id);
-      tab?.didRunCommand(commandMeta);
       this.logger.stats('Command.done', { result, parentLogId: id });
     }
   }

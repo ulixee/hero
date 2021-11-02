@@ -36,7 +36,6 @@ import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
-import CommandFormatter from './CommandFormatter';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import PageStateListener from './PageStateListener';
@@ -583,44 +582,11 @@ export default class Tab
   }
 
   public willRunCommand(command: ICommandMeta): void {
-    if (this.session.options.showBrowserInteractions) {
-      const fadeGrowlAfterMs: number = undefined;
-      const commandName = CommandFormatter.toString(command);
-      this.puppetPage.mainFrame
-        .evaluate(
-          `window.showCommandGrowl(${command.id}, ${JSON.stringify(
-            commandName,
-          )}, ${fadeGrowlAfterMs})`,
-        )
-        .catch(() => null);
-
-      const frameId = command.frameId ?? this.mainFrameId;
-      const frame = this.frameEnvironmentsById.get(frameId);
-      const trackMouse = true;
-      const hideMouse = false;
-      const hideOverlays = false;
-
-      const lastCommand = this.session.commands.last;
-      const prevFrameId = lastCommand?.frameId ?? this.mainFrameId;
-      if (lastCommand && prevFrameId !== frame.id) {
-        const prevPuppetFrame = this.frameEnvironmentsById.get(prevFrameId)?.puppetFrame;
-        if (prevPuppetFrame) {
-          prevPuppetFrame
-            .evaluate(`window.toggleCommandActive(false, true, true);`)
-            .catch(() => null);
-        }
-      }
-
-      frame.puppetFrame
-        .evaluate(`window.toggleCommandActive(${trackMouse}, ${hideMouse}, ${hideOverlays});`)
-        .catch(() => null);
-    }
-  }
-
-  public didRunCommand(command: ICommandMeta): void {
-    if (this.session.options.showBrowserInteractions) {
-      const frame = this.frameEnvironmentsById.get(command.frameId) ?? this.mainFrameEnvironment;
-      frame?.puppetFrame.evaluate(`window.toggleCommandActive(false)`).catch(() => null);
+    const lastCommand = this.session.commands.last;
+    const prevFrameId = lastCommand?.frameId ?? this.mainFrameId;
+    if (lastCommand && prevFrameId !== command.frameId) {
+      // if changing frames, need to clear out interactions
+      this.frameEnvironmentsById.get(prevFrameId)?.setInteractionDisplay(false, true, true);
     }
   }
 
