@@ -2,6 +2,7 @@ import { Helpers } from '@ulixee/hero-testing';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';
+import { stringToRegex } from '../lib/Tab';
 
 let connection: ConnectionToClient;
 beforeAll(() => {
@@ -74,4 +75,9 @@ test('records a single resource for failed mitm requests', async () => {
   // @ts-ignore
   expect(Object.keys(session.resources.browserRequestIdToResources)).toHaveLength(1);
   await session.close();
+});
+
+test('should convert a url with special chars into a valid regex', () => {
+  const regexp = stringToRegex('https://fonts.com?family=Open+Sans:300,300i');
+  expect('https://fonts.com?family=Open+Sans:300,300i'.match(regexp)).toBeTruthy();
 });

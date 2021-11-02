@@ -36,6 +36,9 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
               ...value,
             };
           }
+          if (value instanceof RegExp) {
+            return `/${value.source}/${value.flags}`;
+          }
           if (value === context) {
             if (!Object.keys(value).length) return undefined;
 

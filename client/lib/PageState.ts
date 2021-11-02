@@ -89,6 +89,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   }
 
   private async findActivePageState(stateResult: IPageStateResult): Promise<K> {
+    if (stateResult.resolvedState) return stateResult.resolvedState as any;
     try {
       // intercept commands with "pushed" state when commands "run"
       this.#coreTab.commandQueue.intercept((meta: ISessionMeta, command, ...args) => {

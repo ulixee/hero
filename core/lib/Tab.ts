@@ -4,7 +4,7 @@ import * as Url from 'url';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import Timer from '@ulixee/commons/lib/Timer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { createPromise, escapeUnescapedChar } from '@ulixee/commons/lib/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -317,8 +317,8 @@ export default class Tab
 
   public findResource(filter: IResourceFilterProperties): IResourceMeta {
     // escape query string ? so it can run as regex
-    if (typeof filter.url === 'string' && filter.url.includes('?')) {
-      filter.url = escapeUnescapedChar(filter.url, '?');
+    if (typeof filter.url === 'string') {
+      filter.url = stringToRegex(filter.url);
     }
     for (const resourceMeta of this.session.resources.getForTab(this.id)) {
       if (this.isResourceFilterMatch(resourceMeta, filter)) {
@@ -523,8 +523,8 @@ export default class Tab
 
     // escape query string ? if url filter is a string
     // ie http://test.com?param=1 will treat the question mark as an optional char
-    if (typeof filter.url === 'string' && filter.url.includes('?')) {
-      filter.url = escapeUnescapedChar(filter.url, '?');
+    if (typeof filter.url === 'string') {
+      filter.url = stringToRegex(filter.url);
     }
 
     const onResource = (resourceMeta: IResourceMeta): void => {
@@ -654,6 +654,8 @@ export default class Tab
   public addPageStateListener(id: string, options: IPageStateListenArgs): PageStateListener {
     const listener = new PageStateListener(id, options, this);
     this.pageStateListeners[id] = listener;
+    listener.on('resolved', () => delete this.pageStateListeners[id]);
+
     this.emit('wait-for-pagestate', { listener });
 
     if (!listener.states.length) {
@@ -662,11 +664,9 @@ export default class Tab
         state: null,
         error: cancelError,
       });
-      delete this.pageStateListeners[id];
       throw cancelError;
     }
 
-    listener.start();
     return listener;
   }
 
@@ -708,8 +708,8 @@ export default class Tab
 
     if (type === 'page-state') {
       const id = JSON.stringify(jsPath);
-      this.pageStateListeners[id]?.stop(options);
-      delete this.pageStateListeners[id];
+      const listener = this.pageStateListeners[id];
+      if (listener) listener.stop(options);
     }
   }
 
@@ -1080,4 +1080,9 @@ export interface ITabEventParams {
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;
   'websocket-message': IWebsocketResourceMessage;
+}
+
+export function stringToRegex(str: string): RegExp {
+  const escaped = str.replace(/[-[/\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return new RegExp(escaped);
 }

@@ -47,9 +47,15 @@ export default class PageStateGenerator {
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
-      timelineRange,
-      loadingRange,
+      loadingRange: [...loadingRange],
+      timelineRange: timelineRange ? [...timelineRange] : undefined,
     });
+  }
+
+  public getStateForSessionId(sessionId: string): string {
+    for (const [state, details] of this.statesByName) {
+      if (details.sessionIds.has(sessionId)) return state;
+    }
   }
 
   public async close(): Promise<void> {

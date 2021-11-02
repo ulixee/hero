@@ -4,13 +4,13 @@ import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
-import * as Path from 'path';
-import { getCacheDirectory } from '@ulixee/commons/lib/dirUtils';
-import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import { createHash } from 'crypto';
 import Tab from './Tab';
-import FrameEnvironment from './FrameEnvironment';
 import CommandRunner from './CommandRunner';
+import Log from '@ulixee/commons/lib/Logger';
+import PageStateCodeBlock from '@ulixee/hero-timetravel/lib/PageStateCodeBlock';
+
+const { log } = Log(module);
 
 export interface IPageStateEvents {
   resolved: { state: string; error?: Error };
@@ -20,7 +20,6 @@ export interface IPageStateEvents {
 interface IBatchAssertion {
   domAssertionsByFrameId: Map<number, IPageStateAssertionBatch['assertions']>;
   assertions: IPageStateAssertionBatch['assertions'];
-  rawAssertionsData?: unknown;
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
@@ -30,16 +29,17 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   public readonly startingCommandId: number;
   public readonly commandStartTime: number;
 
-  public readonly batchAssertionsById = new Map<string, IBatchAssertion>();
+  public readonly rawBatchAssertionsById = new Map<string, IPageStateAssertionBatch>();
 
-  private onCloseFns: (() => any)[] = [];
+  private batchAssertionsById = new Map<string, IBatchAssertion>();
   private commandFnsById = new Map<string, () => Promise<any>>();
-  private checkInterval: NodeJS.Timer;
+  private readonly checkInterval: NodeJS.Timer;
   private lastResults: any;
   private isStopping = false;
   private isCheckingState = false;
   private runAgain = false;
   private readyPromise: Promise<void | Error>;
+  private watchedFrameIds = new Set<number>();
 
   constructor(
     public readonly jsPathId: string,
@@ -50,6 +50,10 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     bindFunctions(this);
     this.id = createHash('md5').update(`${options.callsite}`).digest('hex');
     this.states = options.states;
+
+    this.logger = log.createChild(module, {
+      sessionId: tab.sessionId,
+    });
 
     const commands = tab.session.commands;
     // make sure to clear out any meta
@@ -62,9 +66,6 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
 
     tab.once('close', this.stop);
-  }
-
-  public start(): void {
     this.readyPromise = this.bindFrameEvents().catch(err => err);
     this.checkInterval = setInterval(this.checkState, 2e3).unref();
   }
@@ -78,63 +79,66 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       state: result?.state,
       error: result?.error,
     });
-    for (const fn of this.onCloseFns) fn();
+
+    for (const frameId of this.watchedFrameIds) {
+      const frame = this.tab.getFrameEnvironment(frameId);
+      if (!frame) continue;
+      frame.off('paint', this.checkState);
+      frame.navigations.off('status-change', this.checkState);
+    }
   }
 
   public async runBatchAssert(batchId: string): Promise<boolean> {
-    let failedCount = 0;
+    const failCounts = {
+      url: 0,
+      resource: [],
+      dom: 0,
+    };
     const { domAssertionsByFrameId, assertions } = this.batchAssertionsById.get(batchId);
     for (const assertion of assertions) {
       const [frameId, type, args, , result] = assertion;
       if (type === 'url') {
         const frame = this.tab.frameEnvironmentsById.get(frameId) ?? this.tab.mainFrameEnvironment;
         const url = await frame.getUrl();
-        if (url !== result) failedCount += 1;
+        if (url !== result) failCounts.url += 1;
       }
       if (type === 'resource') {
         const resource = this.tab.findResource(args[0]);
-        if (!resource) failedCount += 1;
+        if (!resource) failCounts.resource.push(args[0]);
       }
     }
     for (const [frameId, frameAssertions] of domAssertionsByFrameId) {
       const frame = this.tab.frameEnvironmentsById.get(frameId);
       const failedDomAssertions = await frame.runDomAssertions(batchId, frameAssertions);
-      failedCount += failedDomAssertions;
+      failCounts.dom += failedDomAssertions;
     }
+    this.logger.stats('BatchAssert results', {
+      batchId,
+      failCounts,
+    });
+    const failedCount = failCounts.url + failCounts.resource.length + failCounts.dom;
+
     return failedCount === 0;
   }
 
-  public addAssertBatch(state: string, batch: IPageStateAssertionBatch): void {
-    if (this.readyPromise) {
-      throw new Error('PageStateListener already initialized. Cannot add assertions');
-    }
+  public addAssertionBatch(state: string, batch: IPageStateAssertionBatch): string {
     if (!this.states.includes(state)) this.states.push(state);
-    this.options.commands[batch.id] = [
-      1,
-      'Tab.assert',
-      [batch.id, JSON.parse(this.jsPathId), batch.assertions],
-    ];
+    const args = [batch.id, JSON.parse(this.jsPathId), batch.assertions];
+    this.trackCommand(batch.id, this.tab.mainFrameId, 'Tab.assert', args);
+    this.loadBatchAssert(args as any);
+    return batch.id;
   }
 
-  private async loadBatchAssert(
+  private loadBatchAssert(
     args: [
       batchId: string,
       pageStateIdJsPath: IJsPath,
       assertions: IPageStateAssertionBatch['assertions'],
     ],
-  ): Promise<void> {
-    const [batchId] = args;
+  ): void {
+    const [batchId, , assertions] = args;
     this.batchAssertionsById.set(batchId, { assertions: [], domAssertionsByFrameId: new Map() });
     const entry = this.batchAssertionsById.get(batchId);
-
-    let assertions = args[2];
-    if (batchId.startsWith('@')) {
-      // load now
-      const filepath = Path.join(getCacheDirectory(), batchId);
-      const assertionsBatch = await readFileAsJson<IPageStateAssertionBatch>(filepath);
-      assertions = assertionsBatch.assertions;
-      entry.rawAssertionsData = assertionsBatch;
-    }
 
     const { domAssertionsByFrameId } = entry;
     for (const assertion of assertions) {
@@ -148,35 +152,55 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     }
   }
 
+  private async loadBatchFromCacheDir(
+    args: [
+      batchId: string,
+      pageStateIdJsPath: IJsPath,
+      assertions: IPageStateAssertionBatch['assertions'],
+    ],
+  ): Promise<void> {
+    const [batchId] = args;
+    if (!batchId.startsWith('@')) return;
+    const assertionsBatch = await PageStateCodeBlock.loadAssertionBatch(batchId);
+    if (assertionsBatch) {
+      args[2] = assertionsBatch.assertions;
+
+      this.rawBatchAssertionsById.set(batchId, assertionsBatch);
+    }
+  }
+
   private async bindFrameEvents(): Promise<void> {
-    const frames = new Set<FrameEnvironment>();
     for (const [id, rawCommand] of Object.entries(this.options.commands)) {
       const [frameId, command, args] = rawCommand;
-      const frame = this.tab.getFrameEnvironment(frameId);
-      if (frame) frames.add(frame);
-
       if (command === 'Tab.assert') {
-        await this.loadBatchAssert(args as any);
+        await this.loadBatchFromCacheDir(args as any);
       }
-
-      const commandRunner = new CommandRunner(command, args, {
-        FrameEnvironment: frame,
-        Tab: this.tab,
-        Session: this.tab.session,
-      });
-      this.commandFnsById.set(id, commandRunner.runFn);
+      this.trackCommand(id, frameId, command, args);
     }
 
-    for (const frame of frames) {
+    setImmediate(this.checkState);
+  }
+
+  private trackCommand(id: string, frameId: number, command: string, args: any[]): void {
+    const frame = this.tab.getFrameEnvironment(frameId);
+
+    if (command === 'Tab.assert') {
+      this.loadBatchAssert(args as any);
+    }
+
+    const commandRunner = new CommandRunner(command, args, {
+      FrameEnvironment: frame,
+      Tab: this.tab,
+      Session: this.tab.session,
+    });
+    this.commandFnsById.set(id, commandRunner.runFn);
+
+    if (!this.watchedFrameIds.has(frame.id)) {
+      this.watchedFrameIds.add(frame.id);
+
       frame.on('paint', this.checkState);
       frame.navigations.on('status-change', this.checkState);
-
-      this.onCloseFns.push(() => {
-        frame.off('paint', this.checkState);
-        frame.navigations.off('status-change', this.checkState);
-      });
     }
-    setImmediate(this.checkState);
   }
 
   private publishResult(results: IPageStateResult): void {
