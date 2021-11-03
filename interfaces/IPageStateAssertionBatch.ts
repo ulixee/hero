@@ -1,5 +1,6 @@
 export default interface IPageStateAssertionBatch {
   id: string;
+  minValidAssertions: number;
   assertions: [
     frameId: number,
     type: IAssertionAndResult['type'],

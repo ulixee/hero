@@ -20,6 +20,8 @@ export interface IPageStateEvents {
 interface IBatchAssertion {
   domAssertionsByFrameId: Map<number, IPageStateAssertionBatch['assertions']>;
   assertions: IPageStateAssertionBatch['assertions'];
+  minValidAssertions: number;
+  totalAssertions: number;
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
@@ -94,7 +96,8 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       resource: [],
       dom: 0,
     };
-    const { domAssertionsByFrameId, assertions } = this.batchAssertionsById.get(batchId);
+    const { domAssertionsByFrameId, assertions, totalAssertions, minValidAssertions } =
+      this.batchAssertionsById.get(batchId);
     for (const assertion of assertions) {
       const [frameId, type, args, , result] = assertion;
       if (type === 'url') {
@@ -107,23 +110,28 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
         if (!resource) failCounts.resource.push(args[0]);
       }
     }
+
     for (const [frameId, frameAssertions] of domAssertionsByFrameId) {
       const frame = this.tab.frameEnvironmentsById.get(frameId);
       const failedDomAssertions = await frame.runDomAssertions(batchId, frameAssertions);
       failCounts.dom += failedDomAssertions;
     }
+
+    const failedCount = failCounts.url + failCounts.resource.length + failCounts.dom;
+    const validAssertions = totalAssertions - failedCount;
     this.logger.stats('BatchAssert results', {
       batchId,
+      validAssertions,
+      minValidAssertions,
       failCounts,
     });
-    const failedCount = failCounts.url + failCounts.resource.length + failCounts.dom;
 
-    return failedCount === 0;
+    return validAssertions >= minValidAssertions;
   }
 
   public addAssertionBatch(state: string, batch: IPageStateAssertionBatch): string {
     if (!this.states.includes(state)) this.states.push(state);
-    const args = [batch.id, JSON.parse(this.jsPathId), batch.assertions];
+    const args = [batch.id, JSON.parse(this.jsPathId), batch.assertions, batch.minValidAssertions];
     this.trackCommand(batch.id, this.tab.mainFrameId, 'Tab.assert', args);
     this.loadBatchAssert(args as any);
     return batch.id;
@@ -134,10 +142,16 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       batchId: string,
       pageStateIdJsPath: IJsPath,
       assertions: IPageStateAssertionBatch['assertions'],
+      minValidAssertions: number,
     ],
   ): void {
-    const [batchId, , assertions] = args;
-    this.batchAssertionsById.set(batchId, { assertions: [], domAssertionsByFrameId: new Map() });
+    const [batchId, , assertions, minValidAssertions] = args;
+    this.batchAssertionsById.set(batchId, {
+      assertions: [],
+      domAssertionsByFrameId: new Map(),
+      totalAssertions: assertions.length,
+      minValidAssertions: minValidAssertions ?? assertions.length,
+    });
     const entry = this.batchAssertionsById.get(batchId);
 
     const { domAssertionsByFrameId } = entry;

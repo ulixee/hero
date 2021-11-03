@@ -111,7 +111,10 @@ export default class PageStateGenerator {
     }
   }
 
-  public export(stateName: string): IPageStateGeneratorAssertionBatch {
+  public export(
+    stateName: string,
+    minValidAssertionPercent = 80,
+  ): IPageStateGeneratorAssertionBatch {
     const exported = <IPageStateGeneratorAssertionBatch>{
       id: `${this.id}-${stateName}`,
       sessions: [],
@@ -140,6 +143,16 @@ export default class PageStateGenerator {
         ]);
       }
     }
+    exported.minValidAssertions = Math.round(
+      exported.assertions.length * (minValidAssertionPercent / 100),
+    );
+    if (
+      exported.minValidAssertions > exported.assertions.length ||
+      exported.minValidAssertions <= 0
+    ) {
+      exported.minValidAssertions = exported.assertions.length;
+    }
+
     return exported;
   }
 

@@ -259,6 +259,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
       if (exportedStateOrPath.startsWith('@')) {
         assertionBatch = {
           id: exportedStateOrPath,
+          minValidAssertions: null,
           assertions: null,
         };
       } else {
@@ -272,7 +273,12 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     this.#rawCommandsById[id] = [
       null,
       BatchAssertionCommand,
-      [assertionBatch.id, this.#jsPath, assertionBatch.assertions],
+      [
+        assertionBatch.id,
+        this.#jsPath,
+        assertionBatch.assertions,
+        assertionBatch.minValidAssertions,
+      ],
     ];
     // NOTE: subtly different serialization - serialized command and local run just stores the id
     this.#idBySerializedCommand.set(
