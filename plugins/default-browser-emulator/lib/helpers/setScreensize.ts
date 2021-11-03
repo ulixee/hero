@@ -1,18 +1,23 @@
-import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
+import IDevtoolsSession, { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import BrowserEmulator from '../../index';
 
 export default async function setScreensize(
   emulator: BrowserEmulator,
   page: IPuppetPage,
   devtools: IDevtoolsSession,
-  sessionMeta: ISessionSummary,
 ): Promise<void> {
   const { viewport } = emulator;
   if (!viewport) return;
 
   const promises: Promise<any>[] = [];
+
+  const metricsOverrideRequest: Protocol.Emulation.SetDeviceMetricsOverrideRequest = {
+    width: viewport.width,
+    height: viewport.height,
+    deviceScaleFactor: viewport.deviceScaleFactor ?? 0,
+    mobile: false,
+  };
 
   if (emulator.browserEngine.isHeaded && viewport.screenWidth) {
     promises.push(
@@ -31,23 +36,21 @@ export default async function setScreensize(
         });
       }),
     );
+    Object.assign(metricsOverrideRequest, {
+      width: viewport.screenWidth,
+      height: viewport.screenHeight,
+    });
+  } else {
+    Object.assign(metricsOverrideRequest, {
+      positionX: viewport.positionX,
+      positionY: viewport.positionY,
+      screenWidth: viewport.screenWidth,
+      screenHeight: viewport.screenHeight,
+    });
   }
 
-  const ignoreViewport = sessionMeta.options?.showBrowserInteractions === true;
-  if (!ignoreViewport) {
-    promises.push(
-      devtools.send('Emulation.setDeviceMetricsOverride', {
-        width: viewport.width,
-        height: viewport.height,
-        deviceScaleFactor: viewport.deviceScaleFactor ?? 0,
-        positionX: viewport.positionX,
-        positionY: viewport.positionY,
-        screenWidth: viewport.screenWidth,
-        screenHeight: viewport.screenHeight,
-        mobile: false,
-      }),
-    );
-  }
+  promises.push(devtools.send('Emulation.setDeviceMetricsOverride', metricsOverrideRequest));
+
   if (viewport.width === 0 || viewport.height === 0) {
     promises.push(
       devtools.send('Page.getLayoutMetrics').then(x => {

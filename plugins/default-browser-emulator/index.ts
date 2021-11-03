@@ -7,7 +7,6 @@ import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulatorConfig,
-  ISessionSummary,
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
@@ -113,14 +112,14 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     configureHttp2Session(this, this.data, request, settings);
   }
 
-  public onNewPuppetPage(page: IPuppetPage, sessionMeta: ISessionSummary): Promise<any> {
+  public onNewPuppetPage(page: IPuppetPage): Promise<any> {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
     return Promise.all([
       setUserAgent(this, devtools),
       setTimezone(this, devtools),
       setLocale(this, devtools),
-      setScreensize(this, page, devtools, sessionMeta),
+      setScreensize(this, page, devtools),
       setActiveAndFocused(this, devtools),
       setPageDomOverrides(this.domOverridesBuilder, this.data, page),
       setGeolocation(this, page),

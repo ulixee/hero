@@ -72,7 +72,7 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     if (!this.liveHeroSession) return;
 
     for (const tab of this.liveHeroSession.tabsById.values()) {
-      tab.recordScreen().catch(console.error);
+      this.recordTab(tab);
     }
   }
 
@@ -107,7 +107,18 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     });
     if (this.isPaused) return;
 
-    tab.recordScreen().catch(console.error);
+    this.recordTab(tab);
+  }
+
+  private recordTab(tab: Tab): void {
+    tab
+      .recordScreen({
+        includeWhiteScreens: true,
+        includeDuplicates: true,
+        jpegQuality: 1,
+        format: 'jpeg',
+      })
+      .catch(console.error);
   }
 
   private onStatusChange(status: IFrameNavigationEvents['status-change']): void {

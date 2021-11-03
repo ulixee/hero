@@ -39,6 +39,10 @@ import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
 import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
+import Size = Protocol.SystemInfo.Size;
+import Rect = Protocol.DOM.Rect;
+import SetDeviceMetricsOverrideRequest = Protocol.Emulation.SetDeviceMetricsOverrideRequest;
+import Viewport = Protocol.Page.Viewport;
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -249,30 +253,70 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     options ??= {};
     const quality = options.jpegQuality ?? 100;
     const clipRect = options.rectangle;
+    const format = options.format ?? 'jpeg';
     assert(
       quality >= 0 && quality <= 100,
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
     );
-    await this.devtoolsSession.send('Target.activateTarget', {
-      targetId: this.targetId,
-    });
 
-    const clip: Protocol.Page.Viewport = clipRect;
+    const { viewportSize } = await this.mainFrame.evaluate<{
+      viewportSize: Size;
+      scrollHeight: number;
+    }>(`(() => ({
+        viewportSize: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+        scrollHeight: document.body.scrollHeight,
+      }))()`);
 
-    if (clip) {
-      clip.x = Math.round(clip.x);
-      clip.y = Math.round(clip.y);
-      clip.width = Math.round(clip.width);
-      clip.height = Math.round(clip.height);
+    const {
+      contentSize,
+      visualViewport: { scale, pageX, pageY },
+    } = await this.devtoolsSession.send('Page.getLayoutMetrics');
+
+    let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;
+    let clip: Viewport;
+    if (options.fullPage) {
+      // Ignore current page scale when taking fullpage screenshots (based on the page content, not viewport),
+      clip = { x: 0, y: 0, ...contentSize, scale: 1 };
+
+      if (contentSize.width > viewportSize.width || contentSize.height > viewportSize.height) {
+        await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
+          ...contentSize,
+          deviceScaleFactor: scale,
+          mobile: false,
+        });
+        resizeAfterScreenshot = {
+          ...viewportSize,
+          deviceScaleFactor: scale,
+          mobile: false,
+        };
+      }
+    } else {
+      const viewportRect = clipRect
+        ? this.trimClipToSize(clipRect, viewportSize)
+        : { x: 0, y: 0, ...viewportSize };
+      clip = {
+        x: pageX + viewportRect.x,
+        y: pageY + viewportRect.y,
+        width: Math.floor(viewportRect.width / scale),
+        height: Math.floor(viewportRect.height / scale),
+        scale,
+      };
     }
 
     const timestamp = Date.now();
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
-      format: options.format ?? 'jpeg',
+      format,
       quality,
       clip,
       captureBeyondViewport: true, // added in chrome 87
     } as Protocol.Page.CaptureScreenshotRequest);
+
+    if (resizeAfterScreenshot) {
+      await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', resizeAfterScreenshot);
+    }
 
     this.emit('screenshot', {
       imageBase64: result.data,
@@ -299,7 +343,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   async stopScreenRecording(): Promise<void> {
     if (this.screencastOptions) {
       await this.devtoolsSession.send('Page.stopScreencast');
-      await this.screenshot(this.screencastOptions);
       this.screencastOptions = null;
     }
   }
@@ -529,5 +572,23 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       imageBase64: event.data,
       timestamp: event.metadata.timestamp * 1000,
     });
+  }
+
+  // COPIED FROM PLAYWRIGHT
+  private trimClipToSize(clip: Rect, size: Size): Rect {
+    const p1 = {
+      x: Math.max(0, Math.min(clip.x, size.width)),
+      y: Math.max(0, Math.min(clip.y, size.height)),
+    };
+    const p2 = {
+      x: Math.max(0, Math.min(clip.x + clip.width, size.width)),
+      y: Math.max(0, Math.min(clip.y + clip.height, size.height)),
+    };
+    const result = { x: p1.x, y: p1.y, width: p2.x - p1.x, height: p2.y - p1.y };
+    assert(
+      result.width && result.height,
+      'Clipped area is either empty or outside the resulting image',
+    );
+    return result;
   }
 }
