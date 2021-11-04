@@ -145,6 +145,7 @@ export default class TimelineBuilder extends TypedEventEmitter<{
       [LoadStatus.DomContentLoaded, 'DOM Content Loaded'],
     ];
 
+    const urlChangeTimestamps: number[] = [];
     for (const nav of commandTimeline.loadedNavigations) {
       if (!mainFrameIds.has(nav.frameId)) continue;
 
@@ -161,6 +162,9 @@ export default class TimelineBuilder extends TypedEventEmitter<{
       for (const [loadStatus, name] of loadStatusLookups) {
         const timestamp = nav.statusChanges.get(loadStatus as LoadStatus);
         const offsetPercent = commandTimeline.getTimelineOffsetForTimestamp(timestamp);
+        if (loadStatus === LoadStatus.HttpResponded) {
+          urlChangeTimestamps.push(nav.initiatedTime);
+        }
         if (offsetPercent !== -1) {
           lastUrl.loadStatusOffsets.push({
             status: name,
@@ -184,11 +188,18 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     }
 
     const paintEvents: ITimelineMetadata['paintEvents'] = [];
+    let domChangeForUrl = 0;
     for (const [timestamp, domChanges] of db.domChanges.countByTimestamp) {
+      // if we got back the response, reset our counter
+      if (urlChangeTimestamps.length && timestamp > urlChangeTimestamps[0]) {
+        urlChangeTimestamps.shift();
+        domChangeForUrl = 0;
+      }
+      domChangeForUrl += domChanges;
       const offsetPercent = commandTimeline.getTimelineOffsetForTimestamp(timestamp);
       if (offsetPercent === -1) continue;
       paintEvents.push({
-        domChanges,
+        domChanges: domChangeForUrl,
         offsetPercent,
       });
     }
