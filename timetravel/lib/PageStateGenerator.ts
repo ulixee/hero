@@ -17,6 +17,7 @@ import MirrorNetwork from './MirrorNetwork';
 import MirrorContext from './MirrorContext';
 import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
+import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 
 const { log } = Log(module);
 
@@ -202,6 +203,9 @@ export default class PageStateGenerator {
 
       const resources = db.resources.withResponseTimeInRange(tabId, start, end);
       this.processResources(resources, sessionId);
+
+      const storage = db.storageChanges.withTimeInRange(tabId, start, end);
+      this.processStorageChanges(storage, sessionId, session.mainFrameIds.values().next().value);
     }
 
     await this.checkResultsInPage();
@@ -311,9 +315,39 @@ export default class PageStateGenerator {
             },
           },
         ],
-        comparison: '!==',
+        comparison: '!!',
         result: null,
       });
+    }
+  }
+
+  private processStorageChanges(
+    changes: IStorageChangesEntry[],
+    sessionId: string,
+    frameId: number,
+  ): void {
+    for (const change of changes) {
+      const entry = {
+        securityOrigin: change.securityOrigin,
+        type: change.type,
+        action: change.action,
+        key: change.key,
+      };
+      this.sessionAssertions.recordAssertion(sessionId, frameId, {
+        type: 'storage',
+        args: [entry],
+        comparison: '!!',
+        result: null,
+      });
+
+      if (change.type !== 'indexedDB' && change.action !== 'remove') {
+        this.sessionAssertions.recordAssertion(sessionId, frameId, {
+          type: 'storage',
+          args: [entry, 'value'],
+          comparison: '===',
+          result: change.value,
+        });
+      }
     }
   }
 

@@ -22,6 +22,7 @@ import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
+import StorageChangesTable from '../models/StorageChangesTable';
 
 const { log } = Log(module);
 
@@ -52,6 +53,7 @@ export default class SessionDb {
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
+  public readonly storageChanges: StorageChangesTable;
   public readonly screenshots: ScreenshotsTable;
   public readonly devtoolsMessages: DevtoolsMessagesTable;
   public readonly tabs: TabsTable;
@@ -90,6 +92,7 @@ export default class SessionDb {
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
     this.screenshots = new ScreenshotsTable(this.db);
+    this.storageChanges = new StorageChangesTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
 
     this.tables.push(
@@ -110,6 +113,7 @@ export default class SessionDb {
       this.sessionLogs,
       this.devtoolsMessages,
       this.screenshots,
+      this.storageChanges,
     );
 
     if (!readonly) {

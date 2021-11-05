@@ -33,6 +33,7 @@ import ConsoleMessage from './ConsoleMessage';
 import Frame from './Frame';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import { DomStorageTracker } from './DomStorageTracker';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
@@ -52,6 +53,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public readonly opener: Page | null;
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
+  public domStorageTracker: DomStorageTracker;
 
   public popupInitializeFn?: (
     page: IPuppetPage,
@@ -109,7 +111,18 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.logger,
       this.browserContext.proxy,
     );
-    this.framesManager = new FramesManager(devtoolsSession, this.networkManager, this.logger);
+    this.domStorageTracker = new DomStorageTracker(
+      this,
+      browserContext.domStorage,
+      this.networkManager,
+      this.logger,
+    );
+    this.framesManager = new FramesManager(
+      devtoolsSession,
+      this.networkManager,
+      this.domStorageTracker,
+      this.logger,
+    );
     this.opener = opener;
 
     this.setEventsToLog([
@@ -121,7 +134,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     ]);
 
     this.framesManager.addEventEmitter(this, ['frame-created']);
-
+    this.domStorageTracker.addEventEmitter(this, ['dom-storage-updated']);
     this.networkManager.addEventEmitter(this, [
       'navigation-response',
       'websocket-frame',
@@ -183,26 +196,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       },
       isolateFromWebPageEnvironment,
     );
-  }
-
-  async getIndexedDbDatabaseNames(): Promise<
-    { frameId: string; origin: string; databases: string[] }[]
-  > {
-    const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
-    for (const { origin, frameId } of this.framesManager.getSecurityOrigins()) {
-      try {
-        const { databaseNames } = await this.devtoolsSession.send(
-          'IndexedDB.requestDatabaseNames',
-          {
-            securityOrigin: origin,
-          },
-        );
-        dbs.push({ origin, frameId, databases: databaseNames });
-      } catch (err) {
-        // can throw if document not found in page
-      }
-    }
-    return dbs;
   }
 
   async setJavaScriptEnabled(enabled: boolean): Promise<void> {
@@ -409,6 +402,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     try {
       this.framesManager.close(closeError);
       this.networkManager.close();
+      this.domStorageTracker.close();
       eventUtils.removeEventListeners(this.registeredEvents);
       this.cancelPendingEvents('Page closed', ['close']);
       for (const worker of this.workersById.values()) {
@@ -439,6 +433,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const promises = [
       this.networkManager.initialize().catch(err => err),
       this.framesManager.initialize().catch(err => err),
+      this.domStorageTracker.initialize().catch(err => err),
       this.devtoolsSession
         .send('Target.setAutoAttach', {
           autoAttach: true,

@@ -246,6 +246,84 @@ describe('pageStateGenerator', () => {
     expect(states50[sliderKey50].result).toBe(1);
   }, 20e3);
 
+  test('can track storage changes', async () => {
+    koaServer.get('/storage', ctx => {
+      ctx.set('set-cookie', 'test=' + ctx.query.state);
+      ctx.body = `
+  <body>
+    <h1>Storage Page</h1>
+
+    <script>
+    window.storage = function (state) {
+      if (state === '1') {
+        const openDBRequest = indexedDB.open('db1', 1);
+        openDBRequest.onupgradeneeded = function(ev) {
+          const db = ev.target.result;
+          const store1 = db.createObjectStore('store1', {
+            keyPath: 'id',
+            autoIncrement: false
+          });
+          store1.transaction.oncomplete = function() {
+            const insertStore = db
+              .transaction('store1', 'readwrite')
+              .objectStore('store1');
+            insertStore.add({ id: 1, child: { name: 'Richard', age: new Date() }});
+            insertStore.add({ id: 2, child: { name: 'Jill' } });
+            insertStore.transaction.oncomplete = () => {
+              document.body.classList.add('db-ready');
+            }
+          };
+        }
+      } else {
+        localStorage.setItem('test', '1');
+        localStorage.setItem('test2', '2');
+        localStorage.removeItem('test2');
+        document.body.classList.add('db-ready');
+      }
+    }
+    </script>
+  </body>
+      `;
+    });
+
+    const pageStateGenerator = new PageStateGenerator('id');
+    async function run(state: string) {
+      // just give some time randomization
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession();
+      const startTime = Date.now();
+      await tab.goto(`${koaServer.baseUrl}/storage?state=${state}`);
+      await tab.waitForLoad(LoadStatus.PaintingStable);
+      await tab.getJsValue(`storage('${state}')`);
+      await tab.waitForElement(['document', ['querySelector', '.db-ready']]);
+      await tab.flushDomChanges();
+      await tab.close();
+
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    await Promise.all([run('1'), run('1'), run('2'), run('2')]);
+
+    await pageStateGenerator.evaluate();
+
+    const states1 = pageStateGenerator.statesByName.get('1').assertsByFrameId[1];
+    const states2 = pageStateGenerator.statesByName.get('2').assertsByFrameId[1];
+    expect(
+      Object.values(states1).filter(
+        x => x.args?.length && x.args[0].type === 'cookie' && x.result === '1',
+      ),
+    ).toHaveLength(1);
+    expect(
+      Object.values(states1).filter(x => x.args?.length && x.args[0].type === 'indexedDB').length,
+    ).toBeGreaterThanOrEqual(1);
+
+    expect(
+      Object.values(states2).filter(x => x.args?.length && x.args[0].type === 'localStorage')
+        .length,
+    ).toBeGreaterThanOrEqual(1);
+  }, 20e3);
+
   test('can handle redirects', async () => {
     let counter = 0;
     koaServer.get('/pageStateRedirect', ctx => {
@@ -423,5 +501,5 @@ describe('pageStateGenerator', () => {
     // should take into account the new change
     expect(state2Round2.assertions).not.toEqual(state2.assertions);
     expect(state2Round2.assertions.filter(x => x.toString().includes('Title 2'))).toHaveLength(0);
-  });
+  }, 30e3);
 });

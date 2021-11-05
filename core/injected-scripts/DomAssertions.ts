@@ -101,6 +101,7 @@ class DomAssertions {
     comparison: IAssertionAndResult['comparison'],
     result: T,
   ): boolean {
+    if (comparison === '!!') return !!value;
     if (comparison === '===') return value === result;
     if (comparison === '!==') return value !== result;
     if (comparison === '<=') return value <= result;

@@ -218,6 +218,61 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await tab2.close();
   });
 
+  it("should keep profile information for sites that aren't loaded in a session", async () => {
+    const meta = await connection.createSession({
+      userProfile: {
+        cookies: [],
+        storage: {
+          [koaServer.baseUrl]: {
+            indexedDB: [],
+            localStorage: [
+              ['Test1', 'value0'],
+              ['test2', 'value1'],
+            ],
+            sessionStorage: [],
+          },
+          'https://previousSite.org': {
+            indexedDB: [],
+            localStorage: [['test', 'site1.org']],
+            sessionStorage: [],
+          },
+          'https://site2.org': {
+            indexedDB: [],
+            localStorage: [['test2', 'site2.org']],
+            sessionStorage: [],
+          },
+        },
+      },
+    });
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+
+    koaServer.get('/unloaded', ctx => {
+      ctx.body = `<body>
+<h1>storage page</h1>
+<script>
+localStorage.setItem('Test1', 'value1');
+</script>
+</body>`;
+    });
+
+    await tab.goto(`${koaServer.baseUrl}/unloaded`);
+    await tab.waitForLoad('PaintingStable');
+
+    const profile = await tab.session.exportUserProfile();
+    expect(profile.cookies).toHaveLength(0);
+    expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(2);
+    expect(profile.storage[koaServer.baseUrl]?.localStorage.find(x => x[0] === 'Test1')).toEqual([
+      'Test1',
+      'value1',
+    ]);
+    expect(profile.storage['https://previousSite.org'].localStorage).toEqual([
+      ['test', 'site1.org'],
+    ]);
+    expect(profile.storage['https://site2.org'].localStorage).toEqual([['test2', 'site2.org']]);
+    await tab.close();
+  });
+
   it('should not make requests to end sites during profile "install"', async () => {
     const mitmSpy = jest.spyOn(HttpRequestHandler, 'onRequest');
     await connection.createSession({

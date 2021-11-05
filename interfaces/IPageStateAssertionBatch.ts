@@ -14,7 +14,7 @@ export interface IAssertionAndResult {
   key: string;
   type: 'resource' | 'xpath' | 'jspath' | 'url' | 'storage';
   args: any[];
-  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=';
+  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=' | '!!';
   result: number | string | boolean;
 }
 

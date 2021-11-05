@@ -11,6 +11,9 @@ import MitmRequestContext from '@ulixee/hero-mitm/lib/MitmRequestContext';
 import { IPuppetResourceRequest } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
 import ResourcesTable from '../models/ResourcesTable';
 import Session from './Session';
+import { ICookie } from '@ulixee/hero-interfaces/ICookie';
+import { Cookie } from 'tough-cookie';
+import StorageChangesTable, { IStorageChangesEntry } from '../models/StorageChangesTable';
 
 const { log } = Log(module);
 
@@ -20,6 +23,7 @@ export default class Resources {
   } = {};
 
   public readonly resourcesById = new Map<number, IResourceMeta>();
+  public readonly cookiesByDomain = new Map<string, Record<string, ICookie>>();
 
   private readonly mitmErrorsByUrl = new Map<
     string,
@@ -31,12 +35,14 @@ export default class Resources {
 
   private readonly logger: IBoundLog;
   private readonly model: ResourcesTable;
+  private readonly cookiesModel: StorageChangesTable;
 
   constructor(
     private readonly session: Session,
     readonly browserRequestMatcher: BrowserRequestMatcher,
   ) {
     this.model = session.db.resources;
+    this.cookiesModel = session.db.storageChanges;
     this.logger = log.createChild(module, {
       sessionId: session.id,
     });
@@ -185,6 +191,9 @@ export default class Resources {
 
     if (isResponse) {
       this.resourcesById.set(resource.id, resource);
+
+      const responseEvent = resourceEvent as IRequestSessionResponseEvent;
+      this.recordCookies(tabId, responseEvent);
     }
     return resource;
   }
@@ -288,6 +297,66 @@ export default class Resources {
     return resource;
   }
 
+  private recordCookies(tabId: number, responseEvent: IRequestSessionResponseEvent): void {
+    const { response } = responseEvent;
+    if (!response?.headers) return;
+
+    let setCookie = response.headers['set-cookie'] ?? response.headers['Set-Cookie'];
+    if (!setCookie) return;
+
+    if (!Array.isArray(setCookie)) setCookie = [setCookie];
+    const defaultDomain = responseEvent.url.host;
+    for (const cookieHeader of setCookie) {
+      const cookie = Cookie.parse(cookieHeader, { loose: true });
+      let domain = cookie.domain || defaultDomain;
+      // restore stripped leading .
+      if (cookie.domain && cookieHeader.toLowerCase().includes(`domain=.${domain}`)) {
+        domain = `.${domain}`;
+      }
+      if (!this.cookiesByDomain.has(domain)) this.cookiesByDomain.set(domain, {});
+      const domainCookies = this.cookiesByDomain.get(domain);
+      let action: IStorageChangesEntry['action'] = 'add';
+      const existing = domainCookies[cookie.key];
+      if (existing) {
+        if (cookie.expires && cookie.expires < new Date()) {
+          action = 'remove';
+        } else {
+          action = 'update';
+        }
+      }
+
+      let finalCookie: ICookie;
+      if (action === 'remove') {
+        delete domainCookies[cookie.key];
+      } else {
+        finalCookie = {
+          name: cookie.key,
+          sameSite: cookie.sameSite as any,
+          url: responseEvent.url.href,
+          domain,
+          path: cookie.path,
+          httpOnly: cookie.httpOnly,
+          value: cookie.value,
+          secure: cookie.secure,
+          expires: cookie.expires instanceof Date ? cookie.expires.toISOString() : undefined,
+        };
+
+        if (areCookiesEqual(existing, finalCookie)) continue;
+
+        domainCookies[finalCookie.name] = finalCookie;
+      }
+      this.cookiesModel.insert(tabId, responseEvent.frameId, {
+        type: 'cookie' as any,
+        action,
+        securityOrigin: responseEvent.url.origin,
+        key: cookie.key,
+        value: finalCookie?.value,
+        meta: finalCookie,
+        timestamp: response.browserLoadedTime ?? response.timestamp,
+      });
+    }
+  }
+
   private matchesMitmError(
     tabId: number,
     url: string,
@@ -364,4 +433,16 @@ export default class Resources {
     }
     return new Error('Resource failed to load, but the reason was not provided by devtools.');
   }
+}
+
+function areCookiesEqual(a: ICookie, b: ICookie): boolean {
+  if ((a && !b) || (b && !a)) return false;
+  if (a.name !== b.name) return false;
+  if (a.value !== b.value) return false;
+  if (a.expires !== b.expires) return false;
+  if (a.path !== b.path) return false;
+  if (a.secure !== b.secure) return false;
+  if (a.sameParty !== b.sameParty) return false;
+  if (a.httpOnly !== b.httpOnly) return false;
+  return true;
 }

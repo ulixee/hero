@@ -182,6 +182,7 @@ export default class MitmRequestContext {
     return {
       id: ctx.id,
       browserRequestId: ctx.browserRequestId,
+      url: ctx.url,
       frameId: ctx.browserFrameId,
       request,
       response,

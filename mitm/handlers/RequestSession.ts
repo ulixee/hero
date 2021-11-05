@@ -244,6 +244,7 @@ export interface IRequestSessionResponseEvent extends IRequestSessionRequestEven
 
 export interface IRequestSessionRequestEvent {
   id: number;
+  url: URL;
   request: IResourceRequest;
   documentUrl: string;
   serverAlpn: string;

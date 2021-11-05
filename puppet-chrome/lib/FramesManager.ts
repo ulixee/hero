@@ -8,6 +8,8 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
+import { NetworkManager } from './NetworkManager';
+import { DomStorageTracker } from './DomStorageTracker';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
@@ -19,7 +21,6 @@ import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
 import Page = Protocol.Page;
-import { NetworkManager } from './NetworkManager';
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__hero_world__';
@@ -46,13 +47,20 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly devtoolsSession: DevtoolsSession;
   private readonly networkManager: NetworkManager;
+  private readonly domStorageTracker: DomStorageTracker;
 
   private isReady: Promise<void>;
 
-  constructor(devtoolsSession: DevtoolsSession, networkManager: NetworkManager, logger: IBoundLog) {
+  constructor(
+    devtoolsSession: DevtoolsSession,
+    networkManager: NetworkManager,
+    domStorageTracker: DomStorageTracker,
+    logger: IBoundLog,
+  ) {
     super();
     this.devtoolsSession = devtoolsSession;
     this.networkManager = networkManager;
+    this.domStorageTracker = domStorageTracker;
     this.logger = logger.createChild(module);
     this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
       ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
@@ -288,6 +296,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);
       if (isFrameTreeRecurse) frame.onLoaded(newFrame);
+      this.domStorageTracker.track(frame.securityOrigin);
       return frame;
     }
 
@@ -303,6 +312,8 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     this.framesById.set(id, frame);
 
     this.emit('frame-created', { frame, loaderId: newFrame.loaderId });
+
+    this.domStorageTracker.track(frame.securityOrigin);
 
     return frame;
   }

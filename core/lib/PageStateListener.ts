@@ -95,19 +95,30 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       url: 0,
       resource: [],
       dom: 0,
+      storage: 0,
     };
     const { domAssertionsByFrameId, assertions, totalAssertions, minValidAssertions } =
       this.batchAssertionsById.get(batchId);
     for (const assertion of assertions) {
-      const [frameId, type, args, , result] = assertion;
-      if (type === 'url') {
+      const [frameId, assertType, args, comparison, result] = assertion;
+      if (assertType === 'url') {
         const frame = this.tab.frameEnvironmentsById.get(frameId) ?? this.tab.mainFrameEnvironment;
         const url = await frame.getUrl();
         if (url !== result) failCounts.url += 1;
       }
-      if (type === 'resource') {
-        const resource = this.tab.findResource(args[0]);
-        if (!resource) failCounts.resource.push(args[0]);
+      if (assertType === 'resource') {
+        const filter = args[0];
+        const resource = this.tab.findResource(filter);
+        if (comparison === '!!' && !resource) failCounts.resource.push(filter);
+      }
+      if (assertType === 'storage') {
+        const [filter, prop] = args;
+        const storage = this.tab.findStorageChange(filter);
+        if (comparison === '!!' && !storage) failCounts.storage += 1;
+
+        if (comparison === '===' && prop) {
+          if (!storage || storage[prop] !== result) failCounts.storage += 1;
+        }
       }
     }
 
@@ -117,7 +128,8 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       failCounts.dom += failedDomAssertions;
     }
 
-    const failedCount = failCounts.url + failCounts.resource.length + failCounts.dom;
+    const failedCount =
+      failCounts.url + failCounts.resource.length + failCounts.dom + failCounts.storage;
     const validAssertions = totalAssertions - failedCount;
     this.logger.stats('BatchAssert results', {
       batchId,

@@ -4,11 +4,13 @@ import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { ICookie } from './ICookie';
 import { IPuppetPage } from './IPuppetPage';
 import { IPuppetWorker } from './IPuppetWorker';
+import IDomStorage from './IDomStorage';
 
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
   id: string;
   browserId: string;
   isIncognito: boolean;
+  domStorage: IDomStorage;
   workersById: Map<string, IPuppetWorker>;
   defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
   sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(

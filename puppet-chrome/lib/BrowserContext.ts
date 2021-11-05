@@ -30,6 +30,7 @@ import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
+import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
 
 export class BrowserContext
   extends TypedEventEmitter<IPuppetContextEvents>
@@ -41,6 +42,7 @@ export class BrowserContext
   public pagesById = new Map<string, Page>();
   public plugins: ICorePlugins;
   public proxy: IProxyConnectionOptions;
+  public domStorage: IDomStorage;
   public readonly id: string;
 
   public get browserId(): string {
@@ -249,13 +251,17 @@ export class BrowserContext
     });
     return cookies
       .map(c => {
-        const copy: any = { sameSite: 'None', ...c };
-        delete copy.size;
-        delete copy.priority;
-        delete copy.session;
-
-        copy.expires = String(copy.expires);
-        return copy as ICookie;
+        return <ICookie>{
+          name: c.name,
+          value: c.value,
+          secure: c.secure,
+          sameSite: c.sameSite ?? 'None',
+          sameParty: (c as any).sameParty,
+          expires: c.expires === -1 ? undefined : new Date(c.expires * 1000).toISOString(),
+          httpOnly: c.httpOnly,
+          path: c.path,
+          domain: c.domain,
+        };
       })
       .filter(c => {
         if (!url) return true;
@@ -280,13 +286,16 @@ export class BrowserContext
 
       let expires = cookie.expires ?? -1;
       if (expires && typeof expires === 'string') {
-        if (expires.match(/\d+/)) {
+        if (expires === '-1') {
+          expires = undefined;
+        } else if (expires.match(/^[.\d]+$/)) {
           expires = parseInt(expires, 10);
+          if (expires > 1e10) expires = expires / 1e3;
         } else {
-          expires = new Date(expires).getTime();
+          expires = new Date(expires).getTime() / 1e3;
         }
       } else if (expires && expires instanceof Date) {
-        expires = expires.getTime();
+        expires = expires.getTime() / 1e3;
       }
 
       const cookieToSend: CookieParam = {

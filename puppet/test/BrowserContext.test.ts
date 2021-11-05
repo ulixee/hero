@@ -294,7 +294,7 @@ describe('BrowserContext', () => {
         [server.emptyPage],
       );
       const cookies = await context.getCookies();
-      expect(cookies[0].expires).toBe('-1');
+      expect(cookies[0].expires).toBe(undefined);
     });
 
     it('should set a cookie with a path', async () => {
@@ -312,7 +312,7 @@ describe('BrowserContext', () => {
         value: 'GRID',
         domain: 'localhost',
         path: '/grid.html',
-        expires: '-1',
+        expires: undefined,
         secure: false,
         httpOnly: false,
         sameSite: 'None',
@@ -359,7 +359,7 @@ describe('BrowserContext', () => {
         expect(cookies).toEqual([
           {
             domain: '127.0.0.1',
-            expires: -1,
+            expires: undefined,
             httpOnly: false,
             name: 'username',
             path: '/',
@@ -385,7 +385,7 @@ describe('BrowserContext', () => {
         value: 'John Doe',
         domain: 'localhost',
         path: '/',
-        expires: '-1',
+        expires: undefined,
         httpOnly: false,
         secure: false,
         sameSite: 'None',
@@ -409,7 +409,7 @@ describe('BrowserContext', () => {
         value: 'John Doe',
         domain: 'localhost',
         path: '/',
-        expires: String(date / 1000),
+        expires: new Date('1/1/2038').toISOString(),
         httpOnly: false,
         secure: false,
         sameSite: 'None',
@@ -464,7 +464,7 @@ describe('BrowserContext', () => {
         value: 'woofs',
         domain: 'foo.com',
         path: '/',
-        expires: '-1',
+        expires: undefined,
         httpOnly: false,
         secure: true,
         sameSite: 'None',

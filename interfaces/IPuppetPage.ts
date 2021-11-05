@@ -10,6 +10,7 @@ import IPuppetDialog from './IPuppetDialog';
 import IPuppetContext from './IPuppetContext';
 import IScreenRecordingOptions from './IScreenRecordingOptions';
 import IScreenshotOptions from './IScreenshotOptions';
+import IPuppetDomStorageTracker, { IPuppetStorageEvents } from './IPuppetDomStorageTracker';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   id: string;
@@ -20,6 +21,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   frames: IPuppetFrame[];
   workers: IPuppetWorker[];
   mainFrame: IPuppetFrame;
+  domStorageTracker: IPuppetDomStorageTracker;
   opener?: IPuppetPage;
 
   isClosed: boolean;
@@ -45,7 +47,6 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
     ) => Promise<Protocol.Fetch.FulfillRequestRequest>,
   ): Promise<void>;
 
-  getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
 
   evaluate<T>(expression: string): Promise<T>;
@@ -57,7 +58,10 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   ): Promise<IRegisteredEventListener>;
 }
 
-export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNetworkEvents {
+export interface IPuppetPageEvents
+  extends IPuppetFrameManagerEvents,
+    IPuppetNetworkEvents,
+    IPuppetStorageEvents {
   close: void;
   worker: { worker: IPuppetWorker };
   crashed: { error: Error; fatal?: boolean };

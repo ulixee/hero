@@ -41,6 +41,7 @@ import Resources from './Resources';
 import PageStateListener from './PageStateListener';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import ScreenshotsTable from '../models/ScreenshotsTable';
+import { IStorageChangesEntry } from '../models/StorageChangesTable';
 
 const { log } = Log(module);
 
@@ -326,6 +327,12 @@ export default class Tab
       }
     }
     return null;
+  }
+
+  public findStorageChange(
+    filter: Omit<IStorageChangesEntry, 'tabId' | 'timestamp' | 'value' | 'meta'>,
+  ): IStorageChangesEntry {
+    return this.session.db.storageChanges.findChange(this.id, filter);
   }
 
   /////// DELEGATED FNS ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -755,6 +762,8 @@ export default class Tab
     page.on('resource-failed', this.onResourceFailed.bind(this), true);
     page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
 
+    page.on('dom-storage-updated', this.onStorageUpdated.bind(this), true);
+
     // websockets
     page.on('websocket-handshake', ev => {
       this.session.mitmRequestSession?.registerWebsocketHeaders(this.id, ev);
@@ -975,6 +984,10 @@ export default class Tab
       image: Buffer.from(event.imageBase64, 'base64'),
       timestamp: event.timestamp,
     });
+  }
+
+  private onStorageUpdated(event: IPuppetPageEvents['dom-storage-updated']): void {
+    this.session.db.storageChanges.insert(this.id, null, event);
   }
 
   private getFrameForEventOrQueueForReady(
