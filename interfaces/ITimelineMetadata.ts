@@ -1,3 +1,5 @@
+import { LoadStatus } from './Location';
+
 export default interface ITimelineMetadata {
   // don't group by tabid/frameid for now
   paintEvents: {
@@ -10,6 +12,7 @@ export default interface ITimelineMetadata {
     url: string;
     offsetPercent: number;
     loadStatusOffsets: {
+      loadStatus: LoadStatus;
       status: string;
       offsetPercent: number;
     }[];

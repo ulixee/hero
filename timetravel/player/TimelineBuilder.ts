@@ -143,17 +143,21 @@ export default class TimelineBuilder extends TypedEventEmitter<{
       [LoadStatus.HttpRequested, 'Http Requested'],
       [LoadStatus.HttpResponded, 'Http Received'],
       [LoadStatus.DomContentLoaded, 'DOM Content Loaded'],
+      [LoadStatus.AllContentLoaded, 'Load'],
     ];
 
     const urlChangeTimestamps: number[] = [];
     for (const nav of commandTimeline.loadedNavigations) {
       if (!mainFrameIds.has(nav.frameId)) continue;
 
+      const urlOffset =
+        urls.length === 0 ? 0 : commandTimeline.getTimelineOffsetForTimestamp(nav.initiatedTime);
+      if (urlOffset === -1) continue;
+
       urls.push({
         tabId: nav.tabId,
         url: nav.finalUrl ?? nav.requestedUrl,
-        offsetPercent:
-          urls.length === 0 ? 0 : commandTimeline.getTimelineOffsetForTimestamp(nav.initiatedTime),
+        offsetPercent: urlOffset,
         navigationId: nav.id,
         loadStatusOffsets: [],
       });
@@ -167,6 +171,7 @@ export default class TimelineBuilder extends TypedEventEmitter<{
         }
         if (offsetPercent !== -1) {
           lastUrl.loadStatusOffsets.push({
+            loadStatus: loadStatus as LoadStatus,
             status: name,
             offsetPercent,
           });
