@@ -5,5 +5,6 @@ export default class PuppetLaunchError extends Error implements IPuppetLaunchErr
     super(message);
     this.stack = stack;
     this.name = 'PuppetLaunchError';
+    this.stack = `${this.name}: ${this.message}\n${stack}`;
   }
 }
