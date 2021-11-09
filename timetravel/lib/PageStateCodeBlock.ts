@@ -20,7 +20,7 @@ export default class PageStateCodeBlock {
     await Fs.promises.mkdir(`${defaultCacheDir}/pagestate/${id}`, { recursive: true });
     for (const state of generator.statesByName.keys()) {
       const exported = generator.export(state);
-      const savePath = Path.normalize(`${defaultCacheDir}/pagestate/${id}/${state}.json`);
+      const savePath = Path.normalize(`${defaultCacheDir}/pagestate/${id}/${exported.id}.json`);
       await Fs.promises.writeFile(savePath, JSON.stringify(exported));
       code += `\n  ${JSON.stringify(state)}: ({ loadFrom }) => loadFrom(${JSON.stringify(
         `@/pagestate/${id}/${state}.json`,

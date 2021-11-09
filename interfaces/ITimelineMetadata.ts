@@ -12,6 +12,7 @@ export default interface ITimelineMetadata {
     url: string;
     offsetPercent: number;
     loadStatusOffsets: {
+      timestamp: number;
       loadStatus: LoadStatus;
       status: string;
       offsetPercent: number;

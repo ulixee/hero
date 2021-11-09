@@ -171,6 +171,7 @@ export default class TimelineBuilder extends TypedEventEmitter<{
         }
         if (offsetPercent !== -1) {
           lastUrl.loadStatusOffsets.push({
+            timestamp,
             loadStatus: loadStatus as LoadStatus,
             status: name,
             offsetPercent,

@@ -17,6 +17,7 @@ import MirrorNetwork from './MirrorNetwork';
 import MirrorContext from './MirrorContext';
 import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
+import { nanoid } from 'nanoid';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 
 const { log } = Log(module);
@@ -74,7 +75,11 @@ export default class PageStateGenerator {
 
   public addState(name: string, ...addSessionIds: string[]): void {
     if (!this.statesByName.has(name)) {
-      this.statesByName.set(name, { sessionIds: new Set<string>(), assertsByFrameId: {} });
+      this.statesByName.set(name, {
+        sessionIds: new Set<string>(),
+        assertsByFrameId: {},
+        id: nanoid(),
+      });
     }
     for (const id of addSessionIds) {
       for (const [stateName, { sessionIds }] of this.statesByName) {
@@ -85,6 +90,13 @@ export default class PageStateGenerator {
   }
 
   public import(savedState: IPageStateGeneratorAssertionBatch): void {
+    if (!this.statesByName.has(savedState.state)) {
+      this.statesByName.set(savedState.state, {
+        sessionIds: new Set<string>(),
+        assertsByFrameId: {},
+        id: savedState.id,
+      });
+    }
     this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
     const state = this.statesByName.get(savedState.state);
     state.startingAssertsByFrameId = {};
@@ -117,7 +129,7 @@ export default class PageStateGenerator {
     minValidAssertionPercent = 80,
   ): IPageStateGeneratorAssertionBatch {
     const exported = <IPageStateGeneratorAssertionBatch>{
-      id: `${this.id}-${stateName}`,
+      id: this.statesByName.get(stateName).id,
       sessions: [],
       assertions: [],
       state: stateName,
@@ -507,6 +519,7 @@ export interface IPageStateSession {
 
 interface IPageStateByName {
   sessionIds: Set<string>;
+  id: string;
   assertsByFrameId?: IFrameAssertions;
   startingAssertsByFrameId?: IFrameAssertions;
 }
