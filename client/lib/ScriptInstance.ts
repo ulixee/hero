@@ -10,6 +10,7 @@ export default class ScriptInstance {
   public get meta(): IScriptInstanceMeta {
     return {
       id: this.id,
+      workingDirectory: process.cwd(),
       entrypoint: this.entrypoint,
       startDate: this.startDate,
     };
