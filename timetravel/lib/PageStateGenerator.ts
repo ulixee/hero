@@ -175,6 +175,7 @@ export default class PageStateGenerator {
 
       if (!needsResultsVerification) continue;
 
+      this.sessionAssertions.clearSessionAssertions(sessionId);
       const [start, end] = loadingRange;
       const timeoutMs = end - Date.now();
 
@@ -470,15 +471,16 @@ export default class PageStateGenerator {
     const { tabId, db, loadingRange, sessionId } = session;
     const [, endTime] = loadingRange;
 
+    // going in descending order
     for (const nav of db.frameNavigations.getMostRecentTabNavigations(
       tabId,
       session.mainFrameIds,
     )) {
       if (nav.httpRespondedTime && !nav.httpRedirectedTime) {
         lastNavigation = nav;
-        if (nav.httpRespondedTime < endTime) break;
+        // if this was requested before the end time, use it
+        if (nav.httpRequestedTime && nav.httpRequestedTime < endTime) break;
       }
-      if (nav.httpRequestedTime && nav.httpRequestedTime < endTime) break;
     }
 
     if (!lastNavigation) {

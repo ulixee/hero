@@ -74,7 +74,7 @@ describe('MirrorPage tests', () => {
         new Set([tab.mainFrameId]),
         tab.session.db.frames.frameDomNodePathsById,
       );
-      await mirrorPage.updateDomRecording(domRecordingUpdates);
+      await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
       await mirrorPage.load();
 
       const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
@@ -178,7 +178,7 @@ describe('MirrorPage tests', () => {
         new Set([tab.mainFrameId]),
         tab.session.db.frames.frameDomNodePathsById,
       );
-      await mirrorPage.updateDomRecording(domRecordingUpdates);
+      await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
       await mirrorPage.load();
     }
 

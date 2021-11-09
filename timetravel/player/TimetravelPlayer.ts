@@ -159,25 +159,8 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   public async refreshTicks(
     timelineOffsetRange: [startTime: number, endTime?: number],
   ): Promise<void> {
-    this.timelineRange = timelineOffsetRange;
-    const ticksResult = await this.connection.run({
-      api: 'Session.ticks',
-      args: {
-        sessionId: this.sessionId,
-        includeCommands: true,
-        includeInteractionEvents: false,
-        includePaintEvents: false,
-        timelineRange: this.timelineRange,
-      },
-    });
-    for (const tabDetails of ticksResult.tabDetails) {
-      const entry = this.tabsById.get(tabDetails.tab.id);
-      if (!entry) continue;
-
-      // only do a partial update... doesn't work if information is already loaded onto page
-      entry.tabDetails.ticks = tabDetails.ticks;
-      entry.tabDetails.commands = tabDetails.commands;
-    }
+    this.timelineRange = [...timelineOffsetRange];
+    await this.load();
   }
 
   private async openTab(tab: TabPlaybackController): Promise<void> {
@@ -228,6 +211,11 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     }
 
     for (const tabDetails of ticksResult.tabDetails) {
+      const tabPlaybackController = this.tabsById.get(tabDetails.tab.id);
+      if (tabPlaybackController) {
+        await tabPlaybackController.updateTabDetails(tabDetails);
+        continue;
+      }
       const tab = new TabPlaybackController(
         tabDetails,
         this.mirrorNetwork,

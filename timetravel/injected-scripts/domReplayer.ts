@@ -39,6 +39,7 @@ class DomReplayer {
   }
 
   public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
+    this.pendingDomChanges.length = 0;
     this.paintEvents = newPaintEvents;
     this.loadedIndex = -1;
     debugLog('Loaded PaintEvents', newPaintEvents);
@@ -163,7 +164,7 @@ class DomReplayer {
     if (document.readyState === 'complete') {
       DomReplayer.register();
     } else {
-      window.addEventListener('DOMContentLoaded', () => DomReplayer.register());
+      window.addEventListener('DOMContentLoaded', () => DomReplayer.register(), { once: true });
     }
   }
 }

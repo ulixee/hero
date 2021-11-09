@@ -47,9 +47,10 @@ export default class TimelineBuilder extends TypedEventEmitter<{
 
   public setTimeRange(startTime: number, endTime?: number): void {
     this.timelineRange = [startTime, endTime];
-    this.commandTimeline = this.liveHeroSession
-      ? CommandTimeline.fromSession(this.liveHeroSession, this.timelineRange)
-      : CommandTimeline.fromDb(this.db, this.timelineRange);
+    // need to refresh from db. RefreshMetadata will update live
+    if (!this.liveHeroSession) {
+      this.commandTimeline = CommandTimeline.fromDb(this.db, this.timelineRange);
+    }
     this.refreshMetadata();
   }
 

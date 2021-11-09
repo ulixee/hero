@@ -96,6 +96,7 @@ export default class MirrorNetwork {
     resources: (IResourceSummary | IResourcesRecord)[],
     loadResourceDetails: (id: number) => Promise<ISessionResourceDetails> | ISessionResourceDetails,
   ): void {
+    this.resourceLookup = {};
     for (let resource of resources) {
       if (!(resource as IResourceSummary).method) {
         resource = ResourcesTable.toResourceSummary(resource as IResourcesRecord);

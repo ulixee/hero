@@ -28,6 +28,10 @@ export default class PageStateAssertions {
     if (frameAssertions) return frameAssertions[query];
   }
 
+  public clearSessionAssertions(sessionId: string): void {
+    this.assertsBySessionId[sessionId] = {};
+  }
+
   public recordAssertion(
     sessionId: string,
     frameId: number,

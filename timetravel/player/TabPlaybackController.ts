@@ -57,25 +57,14 @@ export default class TabPlaybackController {
 
   // put in placeholder
   private paintEventsLoadedIdx = -1;
-  private readonly mainFrameId: number;
 
   constructor(
-    public readonly tabDetails: ITabDetails,
+    private readonly tabDetails: ITabDetails,
     private readonly mirrorNetwork: MirrorNetwork,
     private readonly sessionId: string,
     debugLogging = false,
   ) {
-    const domNodePathByFrameId: { [frameId: number]: string } = {};
-    for (const frame of this.tabDetails.tab.frames) {
-      if (frame.isMainFrame) this.mainFrameId = frame.id;
-      domNodePathByFrameId[frame.id] = frame.domNodePath;
-    }
-    const domRecording = <IDomRecording>{
-      paintEvents: tabDetails.paintEvents,
-      documents: tabDetails.documents,
-      domNodePathByFrameId,
-      mainFrameIds: new Set([this.mainFrameId]),
-    };
+    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
     this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
     this.mirrorPage.on('close', () => {
       this.paintEventsLoadedIdx = -1;
@@ -83,6 +72,16 @@ export default class TabPlaybackController {
       this.currentTickIndex = -1;
       this.currentTimelineOffsetPct = 0;
     });
+  }
+
+  public updateTabDetails(tabDetails: ITabDetails): Promise<void> {
+    Object.assign(this.tabDetails, tabDetails);
+    if (this.currentTickIndex >= 0) {
+      this.currentTimelineOffsetPct =
+        this.tabDetails.ticks[this.currentTickIndex]?.timelineOffsetPercent;
+    }
+    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
+    return this.mirrorPage.replaceDomRecording(domRecording);
   }
 
   public isPage(id: string): boolean {
@@ -161,6 +160,11 @@ export default class TabPlaybackController {
     newTickOrIdx: number | ITick,
     specificTimelineOffset?: number,
   ): Promise<void> {
+    console.log('loading new tick', {
+      newTickOrIdx,
+      specificTimelineOffset,
+      willProcess: newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick,
+    });
     if (newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick) {
       return;
     }
@@ -190,6 +194,7 @@ export default class TabPlaybackController {
         startIndex = this.paintEventsLoadedIdx + 1;
       }
 
+      console.log('loading ticks', [startIndex, newPaintIndex]);
       this.paintEventsLoadedIdx = newPaintIndex;
       await mirrorPage.load([startIndex, newPaintIndex]);
     }
@@ -205,5 +210,20 @@ export default class TabPlaybackController {
 
   public async showStatusText(text: string): Promise<void> {
     await this.mirrorPage.showStatusText(text);
+  }
+
+  private static tabDetailsToDomRecording(tabDetails: ITabDetails): IDomRecording {
+    const mainFrameIds = new Set<number>();
+    const domNodePathByFrameId: { [frameId: number]: string } = {};
+    for (const frame of tabDetails.tab.frames) {
+      if (frame.isMainFrame) mainFrameIds.add(frame.id);
+      domNodePathByFrameId[frame.id] = frame.domNodePath;
+    }
+    return <IDomRecording>{
+      paintEvents: tabDetails.paintEvents,
+      documents: tabDetails.documents,
+      domNodePathByFrameId,
+      mainFrameIds,
+    };
   }
 }
