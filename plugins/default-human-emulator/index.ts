@@ -136,10 +136,11 @@ export default class DefaultHumanEmulator extends HumanEmulator {
 
     const { nodeId } = targetRect;
 
-    const targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
+    let targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, runFn, helper);
     if (didMoveMouse) {
       targetRect = await helper.lookupBoundingRect([nodeId], true, true);
+      targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent)
     }
 
     if (targetRect.elementTag === 'option') {
