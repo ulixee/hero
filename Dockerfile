@@ -1,6 +1,6 @@
 FROM node:14-slim
 
-ENV GO_URL https://golang.org/dl/go1.14.2.linux-amd64.tar.gz
+ENV GO_URL https://golang.org/dl/go1.17.2.linux-amd64.tar.gz
 
 # fonts
 RUN echo "deb http://httpredir.debian.org/debian buster main contrib non-free" > /etc/apt/sources.list \

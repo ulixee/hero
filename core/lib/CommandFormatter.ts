@@ -11,7 +11,7 @@ export default class CommandFormatter {
     if (!command.args) {
       return `${command.name}()`;
     }
-    const args = JSON.parse(command.args).filter(x => x !== null);
+    const args = TypeSerializer.parse(command.args).filter(x => x !== null);
     if (command.name === 'execJsPath') {
       return formatJsPath(args[0]);
     }
@@ -72,7 +72,14 @@ export default class CommandFormatter {
       return `waitForElement( ${formatJsPath(args[0])} )`;
     }
 
-    return `${command.name}(${args.map(JSON.stringify).join(', ')})`;
+    return `${command.name}(${args
+      .map(x =>
+        JSON.stringify(x, (key, value) => {
+          if (value instanceof Error) return `Error(${value.message})`;
+          return value;
+        }),
+      )
+      .join(', ')})`;
   }
 
   public static parseResult(meta: ICommandMeta & ICommandTimelineOffset): ICommandWithResult {

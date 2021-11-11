@@ -15,6 +15,7 @@ export default interface ISessionCreateOptions extends ISessionOptions {
     startNavigationId?: number;
   };
   browserEmulatorId?: string;
+  mode?: 'development' | 'multiverse' | 'production' | 'timetravel';
   userAgent?: string;
   scriptInstanceMeta?: IScriptInstanceMeta;
   userProfile?: IUserProfile;
@@ -26,7 +27,7 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   geolocation?: IGeolocation;
   dependencyMap?: { [clientPluginId: string]: string[] };
   corePluginPaths?: string[];
-  dnsOverTlsProvider?: { host: string; port: number };
+  dnsOverTlsProvider?: { host: string; servername: string; port?: number };
   showBrowser?: boolean;
   showBrowserInteractions?: boolean;
   allowManualBrowserInteraction?: boolean;

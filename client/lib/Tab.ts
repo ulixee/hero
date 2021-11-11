@@ -22,13 +22,14 @@ import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import * as Util from 'util';
+import { getCallSite } from '@ulixee/commons/lib/utils';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Hero, { IState as IHeroState } from './Hero';
+import Hero, { IState as IHeroState, scriptInstance } from './Hero';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -227,11 +228,15 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async waitForPageState<T extends IPageStateDefinitions>(
-    states: T,
+    states?: T,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<keyof T> {
+    const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
+      .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
+      .join('\n');
+
     const coreTab = await getCoreTab(this);
-    const pageState = new PageState(this, coreTab, states);
+    const pageState = new PageState(this, coreTab, states, callSitePath);
     return await pageState.waitFor(options.timeoutMs);
   }
 

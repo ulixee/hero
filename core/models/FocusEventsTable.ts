@@ -10,7 +10,7 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
       ['event', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
       ['relatedTargetNodeId', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
     ]);
   }
 

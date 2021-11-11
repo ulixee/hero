@@ -6,7 +6,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'SessionLogs', [
       ['id', 'INTEGER'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
       ['action', 'TEXT'],
       ['level', 'TEXT'],
       ['module', 'TEXT'],
@@ -35,6 +35,9 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
               toString: value.toString(),
               ...value,
             };
+          }
+          if (value instanceof RegExp) {
+            return `/${value.source}/${value.flags}`;
           }
           if (value === context) {
             if (!Object.keys(value).length) return undefined;

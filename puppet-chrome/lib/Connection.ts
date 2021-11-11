@@ -41,7 +41,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     super();
 
     transport.onMessageFn = this.onMessage.bind(this);
-    transport.onCloseFns.push(this.onClosed);
+    transport.onCloseFns.push(this.onClosed.bind(this));
 
     this.rootSession = new DevtoolsSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);

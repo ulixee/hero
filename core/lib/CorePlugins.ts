@@ -56,6 +56,12 @@ export default class CorePlugins implements ICorePlugins {
   public readonly humanEmulator: IHumanEmulator;
   public readonly instances: ICorePlugin[] = [];
 
+  public get corePlugins(): ICorePlugin[] {
+    return this.instances.filter(x => {
+      return x.id !== this.humanEmulator.id && x.id !== this.browserEmulator.id;
+    });
+  }
+
   private readonly instanceById: { [id: string]: ICorePlugin } = {};
   private readonly createOptions: ICorePluginCreateOptions;
   private readonly logger: IBoundLog;

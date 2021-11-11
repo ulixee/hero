@@ -10,6 +10,8 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   }
 
   #idCounter = 0;
+  #mainFrameIds = new Set<number>();
+  #tabIdByFrameId = new Map<number, number>();
 
   constructor(readonly db: SqliteDatabase) {
     super(
@@ -46,16 +48,14 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   }
 
   public mainFrameIds(tabId?: number): Set<number> {
-    const all = super.all();
-    const mainFrameIds = new Set<number>();
-    for (const frame of all) {
-      if (!frame.parentId && frame.tabId === tabId) {
-        mainFrameIds.add(frame.id);
-      }
-
-      this.recordDomNodePath(frame);
+    if (!this.#mainFrameIds.size) {
+      // load all frames up
+      this.all();
     }
-    return mainFrameIds;
+    if (tabId) {
+      return new Set([...this.#mainFrameIds].filter(x => this.#tabIdByFrameId.get(x) === tabId));
+    }
+    return new Set(this.#mainFrameIds);
   }
 
   public all(): IFrameRecord[] {
@@ -69,7 +69,9 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   private recordDomNodePath(frame: IFrameRecord): void {
     if (!frame.parentId) {
       this.frameDomNodePathsById[frame.id] = 'main';
+      this.#mainFrameIds.add(frame.id);
     }
+    this.#tabIdByFrameId.set(frame.id, frame.tabId);
     if (frame.domNodeId) {
       const parentPath = this.frameDomNodePathsById[frame.parentId];
       this.frameDomNodePathsById[frame.id] = `${parentPath ?? ''}_${frame.domNodeId}`;

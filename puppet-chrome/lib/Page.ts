@@ -22,7 +22,6 @@ import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEven
 import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRect from '@ulixee/hero-interfaces/IRect';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -32,12 +31,19 @@ import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
 import ConsoleMessage from './ConsoleMessage';
 import Frame from './Frame';
+import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
+import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import { DomStorageTracker } from './DomStorageTracker';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
 import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
+import Size = Protocol.SystemInfo.Size;
+import Rect = Protocol.DOM.Rect;
+import SetDeviceMetricsOverrideRequest = Protocol.Emulation.SetDeviceMetricsOverrideRequest;
+import Viewport = Protocol.Page.Viewport;
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -47,6 +53,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public readonly opener: Page | null;
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
+  public domStorageTracker: DomStorageTracker;
 
   public popupInitializeFn?: (
     page: IPuppetPage,
@@ -78,6 +85,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   protected readonly logger: IBoundLog;
   private closePromise = createPromise();
   private readonly registeredEvents: IRegisteredEventListener[];
+  private screencastOptions: IScreenRecordingOptions & { lastImage?: string };
 
   constructor(
     devtoolsSession: DevtoolsSession,
@@ -103,7 +111,18 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.logger,
       this.browserContext.proxy,
     );
-    this.framesManager = new FramesManager(devtoolsSession, this.networkManager, this.logger);
+    this.domStorageTracker = new DomStorageTracker(
+      this,
+      browserContext.domStorage,
+      this.networkManager,
+      this.logger,
+    );
+    this.framesManager = new FramesManager(
+      devtoolsSession,
+      this.networkManager,
+      this.domStorageTracker,
+      this.logger,
+    );
     this.opener = opener;
 
     this.setEventsToLog([
@@ -115,7 +134,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     ]);
 
     this.framesManager.addEventEmitter(this, ['frame-created']);
-
+    this.domStorageTracker.addEventEmitter(this, ['dom-storage-updated']);
     this.networkManager.addEventEmitter(this, [
       'navigation-response',
       'websocket-frame',
@@ -136,6 +155,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       ['Page.javascriptDialogOpening', this.onJavascriptDialogOpening.bind(this)],
       ['Page.fileChooserOpened', this.onFileChooserOpened.bind(this)],
       ['Page.windowOpen', this.onWindowOpen.bind(this)],
+      ['Page.screencastFrame', this.onScreencastFrame.bind(this)],
     ]);
 
     this.isReady = this.initialize().catch(error => {
@@ -176,26 +196,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       },
       isolateFromWebPageEnvironment,
     );
-  }
-
-  async getIndexedDbDatabaseNames(): Promise<
-    { frameId: string; origin: string; databases: string[] }[]
-  > {
-    const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
-    for (const { origin, frameId } of this.framesManager.getSecurityOrigins()) {
-      try {
-        const { databaseNames } = await this.devtoolsSession.send(
-          'IndexedDB.requestDatabaseNames',
-          {
-            securityOrigin: origin,
-          },
-        );
-        dbs.push({ origin, frameId, databases: databaseNames });
-      } catch (err) {
-        // can throw if document not found in page
-      }
-    }
-    return dbs;
   }
 
   async setJavaScriptEnabled(enabled: boolean): Promise<void> {
@@ -242,27 +242,64 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     await this.devtoolsSession.send('Page.bringToFront');
   }
 
-  async screenshot(
-    format: 'jpeg' | 'png' = 'jpeg',
-    clipRect?: IRect & { scale: number },
-    quality = 100,
-  ): Promise<Buffer> {
+  async screenshot(options: IScreenshotOptions): Promise<Buffer> {
+    options ??= {};
+    const quality = options.jpegQuality ?? 100;
+    const clipRect = options.rectangle;
+    const format = options.format ?? 'jpeg';
     assert(
       quality >= 0 && quality <= 100,
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
     );
-    await this.devtoolsSession.send('Target.activateTarget', {
-      targetId: this.targetId,
-    });
 
-    const clip: Protocol.Page.Viewport = clipRect;
+    const { viewportSize } = await this.mainFrame.evaluate<{
+      viewportSize: Size;
+      scrollHeight: number;
+    }>(`(() => ({
+        viewportSize: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+        scrollHeight: document.body.scrollHeight,
+      }))()`);
 
-    if (clip) {
-      clip.x = Math.round(clip.x);
-      clip.y = Math.round(clip.y);
-      clip.width = Math.round(clip.width);
-      clip.height = Math.round(clip.height);
+    const {
+      contentSize,
+      visualViewport: { scale, pageX, pageY },
+    } = await this.devtoolsSession.send('Page.getLayoutMetrics');
+
+    let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;
+    let clip: Viewport;
+    if (options.fullPage) {
+      // Ignore current page scale when taking fullpage screenshots (based on the page content, not viewport),
+      clip = { x: 0, y: 0, ...contentSize, scale: 1 };
+
+      if (contentSize.width > viewportSize.width || contentSize.height > viewportSize.height) {
+        await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
+          ...contentSize,
+          deviceScaleFactor: scale,
+          mobile: false,
+        });
+        resizeAfterScreenshot = {
+          ...viewportSize,
+          deviceScaleFactor: scale,
+          mobile: false,
+        };
+      }
+    } else {
+      const viewportRect = clipRect
+        ? this.trimClipToSize(clipRect, viewportSize)
+        : { x: 0, y: 0, ...viewportSize };
+      clip = {
+        x: pageX + viewportRect.x,
+        y: pageY + viewportRect.y,
+        width: Math.floor(viewportRect.width / scale),
+        height: Math.floor(viewportRect.height / scale),
+        scale,
+      };
     }
+
+    const timestamp = Date.now();
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
       format,
       quality,
@@ -270,7 +307,37 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       captureBeyondViewport: true, // added in chrome 87
     } as Protocol.Page.CaptureScreenshotRequest);
 
+    if (resizeAfterScreenshot) {
+      await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', resizeAfterScreenshot);
+    }
+
+    this.emit('screenshot', {
+      imageBase64: result.data,
+      timestamp,
+    });
+
     return Buffer.from(result.data, 'base64');
+  }
+
+  async startScreenRecording(
+    options: Pick<IScreenRecordingOptions, 'format' | 'jpegQuality'> = {},
+  ): Promise<void> {
+    if (this.screencastOptions) return;
+
+    options.format ??= 'jpeg';
+    options.jpegQuality ??= 30;
+    this.screencastOptions = options;
+    await this.devtoolsSession.send('Page.startScreencast', {
+      format: options.format,
+      quality: options.jpegQuality,
+    });
+  }
+
+  async stopScreenRecording(): Promise<void> {
+    if (this.screencastOptions) {
+      await this.devtoolsSession.send('Page.stopScreencast');
+      this.screencastOptions = null;
+    }
   }
 
   onWorkerAttached(
@@ -335,6 +402,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     try {
       this.framesManager.close(closeError);
       this.networkManager.close();
+      this.domStorageTracker.close();
       eventUtils.removeEventListeners(this.registeredEvents);
       this.cancelPendingEvents('Page closed', ['close']);
       for (const worker of this.workersById.values()) {
@@ -365,6 +433,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const promises = [
       this.networkManager.initialize().catch(err => err),
       this.framesManager.initialize().catch(err => err),
+      this.domStorageTracker.initialize().catch(err => err),
       this.devtoolsSession
         .send('Target.setAutoAttach', {
           autoAttach: true,
@@ -487,5 +556,34 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         }),
       )
       .catch(() => null);
+  }
+
+  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent) {
+    this.devtoolsSession
+      .send('Page.screencastFrameAck', { sessionId: event.sessionId })
+      .catch(() => null);
+
+    this.emit('screenshot', {
+      imageBase64: event.data,
+      timestamp: event.metadata.timestamp * 1000,
+    });
+  }
+
+  // COPIED FROM PLAYWRIGHT
+  private trimClipToSize(clip: Rect, size: Size): Rect {
+    const p1 = {
+      x: Math.max(0, Math.min(clip.x, size.width)),
+      y: Math.max(0, Math.min(clip.y, size.height)),
+    };
+    const p2 = {
+      x: Math.max(0, Math.min(clip.x + clip.width, size.width)),
+      y: Math.max(0, Math.min(clip.y + clip.height, size.height)),
+    };
+    const result = { x: p1.x, y: p1.y, width: p2.x - p1.x, height: p2.y - p1.y };
+    assert(
+      result.width && result.height,
+      'Clipped area is either empty or outside the resulting image',
+    );
+    return result;
   }
 }

@@ -61,10 +61,8 @@ describe('MirrorPage tests', () => {
     await mirrorPage.load();
 
     const mirrorHtml = await mirrorPage.page.mainFrame.html();
-    const replayNode = '<hero-replay style="z-index: 2147483647;"></hero-replay>';
     // source should have a replay node that should not be rebuilt in mirror
-    expect(mirrorHtml).not.toBe(sourceHtml);
-    expect(mirrorHtml).toBe(sourceHtml.replace(replayNode, ''));
+    expect(mirrorHtml).toBe(sourceHtml);
 
     let lastCommandId = tab.lastCommandId;
     async function compareTabsAfterEvaluate(evaluateScript: string) {
@@ -82,8 +80,7 @@ describe('MirrorPage tests', () => {
       const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
       const mirrorHtmlNext = await mirrorPage.page.mainFrame.html();
       // mirror page should not know about the hero-replay nodes
-      expect(mirrorHtmlNext).not.toBe(sourceHtmlNext);
-      expect(mirrorHtmlNext).toBe(sourceHtmlNext.replace(replayNode, ''));
+      expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
 
     // 1. Append list

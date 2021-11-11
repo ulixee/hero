@@ -6,12 +6,14 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import { IRawCommand } from '@ulixee/hero-interfaces/IPageStateListenArgs';
 import CoreTab from './CoreTab';
 import IPageStateDefinitions, {
   IPageStateDefinitionFn,
   IStateAndAssertion,
 } from '../interfaces/IPageStateDefinitions';
 import Tab from './Tab';
+import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 let counter = 0;
 
@@ -24,6 +26,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   readonly #coreTab: CoreTab;
   readonly #tab: Tab;
   readonly #states: T;
+  readonly #callsite: string;
   readonly #jsPath: IJsPath = ['page-state', (counter += 1)];
   #idCounter = 0;
 
@@ -35,10 +38,11 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   readonly #stateResolvable = new Resolvable<K>();
   readonly #batchAssertionPathToId: Record<string, string> = {};
 
-  constructor(tab: Tab, coreTab: CoreTab, states: T) {
+  constructor(tab: Tab, coreTab: CoreTab, states: T, callSitePath: string) {
     this.#tab = tab;
     this.#coreTab = coreTab;
-    this.#states = states;
+    this.#states = states ?? ({} as T);
+    this.#callsite = callSitePath;
     bindFunctions(this);
   }
 
@@ -47,17 +51,31 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     await this.collectAssertionCommands();
 
     const timer = new Timer(timeoutMs);
+    const states = Object.keys(this.#states);
     await this.#coreTab.addEventListener(this.#jsPath, 'page-state', this.onStateChanged, {
       commands: this.#rawCommandsById,
+      callsite: this.#callsite,
+      states,
     });
 
+    let finalState: K;
+    let waitError: Error;
     try {
-      return await timer.waitForPromise(
+      finalState = await timer.waitForPromise(
         this.#stateResolvable.promise,
         'Timeout waiting for PageState',
       );
+      return finalState;
+    } catch (error) {
+      if (!(error instanceof DisconnectedFromCoreError)) {
+        waitError = error;
+        throw error;
+      }
     } finally {
-      await this.#coreTab.removeEventListener(this.#jsPath, 'page-state', this.onStateChanged);
+      await this.#coreTab.removeEventListener(this.#jsPath, 'page-state', this.onStateChanged, {
+        state: finalState,
+        error: waitError,
+      });
     }
   }
 
@@ -71,6 +89,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   }
 
   private async findActivePageState(stateResult: IPageStateResult): Promise<K> {
+    if (stateResult.resolvedState) return stateResult.resolvedState as any;
     try {
       // intercept commands with "pushed" state when commands "run"
       this.#coreTab.commandQueue.intercept((meta: ISessionMeta, command, ...args) => {
@@ -236,8 +255,17 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   ): Promise<void> {
     let assertionBatch = exportedStateOrPath as IPageStateAssertionBatch;
     if (typeof exportedStateOrPath === 'string') {
-      assertionBatch = await readFileAsJson(exportedStateOrPath);
-      this.#batchAssertionPathToId[exportedStateOrPath] = assertionBatch.id;
+      // if @, read from core
+      if (exportedStateOrPath.startsWith('@')) {
+        assertionBatch = {
+          id: exportedStateOrPath,
+          minValidAssertions: null,
+          assertions: null,
+        };
+      } else {
+        assertionBatch = await readFileAsJson(exportedStateOrPath);
+        this.#batchAssertionPathToId[exportedStateOrPath] = assertionBatch.id;
+      }
     }
 
     this.#idCounter += 1;
@@ -245,7 +273,12 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     this.#rawCommandsById[id] = [
       null,
       BatchAssertionCommand,
-      [assertionBatch.id, this.#jsPath, assertionBatch.assertions],
+      [
+        assertionBatch.id,
+        this.#jsPath,
+        assertionBatch.assertions,
+        assertionBatch.minValidAssertions,
+      ],
     ];
     // NOTE: subtly different serialization - serialized command and local run just stores the id
     this.#idBySerializedCommand.set(
@@ -284,8 +317,6 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
 function isPromise(value: any): boolean {
   return !!value && typeof value === 'object' && 'then' in value && typeof 'then' === 'function';
 }
-
-type IRawCommand = [frameId: number, command: string, args: any[]];
 
 interface IAssertionSet {
   stateAndAssertions: IStateAndAssertion<any>[];

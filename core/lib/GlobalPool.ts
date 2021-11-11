@@ -13,6 +13,7 @@ import Session from './Session';
 import DevtoolsPreferences from './DevtoolsPreferences';
 import CorePlugins from './CorePlugins';
 import Core from '../index';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 
 const { log } = Log(module);
 const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
@@ -152,10 +153,11 @@ export default class GlobalPool {
         await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);
       }
 
+      const sessionId = session.id;
       const browserContext = await puppet.newContext(
         session.plugins,
         log.createChild(module, {
-          sessionId: session.id,
+          sessionId,
         }),
         session.getMitmProxy(),
         session.useIncognitoContext(),
@@ -163,13 +165,28 @@ export default class GlobalPool {
       await session.initialize(browserContext);
 
       session.on('all-tabs-closed', this.checkForInactiveBrowserEngine.bind(this, session));
-
+      session.once(
+        'closed',
+        ev => (ev.waitForPromise = this.closeBrowserContext(browserContext, sessionId)),
+      );
       session.once('closing', this.releaseConnection.bind(this));
       return session;
     } catch (err) {
       this._activeSessionCount -= 1;
-
       throw err;
+    }
+  }
+
+  private static async closeBrowserContext(
+    browserContext: IPuppetContext,
+    sessionId: string,
+  ): Promise<void> {
+    // don't close non-incongito contexts
+    if (!browserContext.isIncognito) return;
+    try {
+      await browserContext.close();
+    } catch (error) {
+      log.error('Session.CloseBrowserContextError', { error, sessionId });
     }
   }
 

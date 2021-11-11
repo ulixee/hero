@@ -78,7 +78,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: 1.17
 
       - name: Download built typescript files
         uses: actions/download-artifact@v2

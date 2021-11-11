@@ -1,7 +1,6 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import Log from '@ulixee/commons/lib/Logger';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
-import { inspect } from 'util';
 import { IFrameNavigationRecord } from '@ulixee/hero-core/models/FrameNavigationsTable';
 import DomChangesTable, {
   IDomChangeRecord,
@@ -11,7 +10,6 @@ import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import IResourceFilterProperties from '@ulixee/hero-core/interfaces/IResourceFilterProperties';
-import { v1 as uuidv1 } from 'uuid';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
@@ -19,27 +17,29 @@ import MirrorNetwork from './MirrorNetwork';
 import MirrorContext from './MirrorContext';
 import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
-
-inspect.defaultOptions.depth = 10;
+import { nanoid } from 'nanoid';
+import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 
 const { log } = Log(module);
 
 export default class PageStateGenerator {
-  public locationId: string;
   public browserContext: Promise<IPuppetContext>;
   public sessionsById = new Map<string, IPageStateSession>();
   public sessionAssertions = new PageStateAssertions();
 
+  public get states(): string[] {
+    return [...this.statesByName.keys()];
+  }
+
   public statesByName = new Map<string, IPageStateByName>();
 
-  constructor(locationId?: string) {
-    this.locationId = locationId;
-  }
+  constructor(readonly id: string) {}
 
   public addSession(
     sessionDb: SessionDb,
     tabId: number,
-    timeRange?: [start: number, end: number],
+    loadingRange: [start: number, end: number],
+    timelineRange?: [start: number, end: number],
   ): void {
     const sessionId = sessionDb.sessionId;
     this.sessionsById.set(sessionId, {
@@ -49,31 +49,54 @@ export default class PageStateGenerator {
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
-      timeRange,
+      loadingRange: [...loadingRange],
+      timelineRange: timelineRange ? [...timelineRange] : undefined,
     });
-    this.browserContext ??= MirrorContext.createFromSessionDb(sessionId, false).catch(err => err);
+  }
+
+  public getStateForSessionId(sessionId: string): string {
+    for (const [state, details] of this.statesByName) {
+      if (details.sessionIds.has(sessionId)) return state;
+    }
   }
 
   public async close(): Promise<void> {
-    const context = await this.browserContext;
-    if (!context || context instanceof Error) return;
-    await context.close();
+    if (this.browserContext) {
+      const browserContext = this.browserContext;
+      this.browserContext = null;
+      const context = await browserContext;
+      if (!context || context instanceof Error) return;
+      await context.close();
+    }
+    for (const session of this.sessionsById.values()) {
+      session.mirrorPage = null;
+    }
   }
 
-  public addState(name: string, ...sessionIds: string[]): void {
+  public addState(name: string, ...addSessionIds: string[]): void {
     if (!this.statesByName.has(name)) {
-      this.statesByName.set(name, { sessionIds: new Set<string>() });
+      this.statesByName.set(name, {
+        sessionIds: new Set<string>(),
+        assertsByFrameId: {},
+        id: nanoid(),
+      });
     }
-    for (const id of sessionIds) {
-      this.statesByName.get(name).sessionIds.add(id);
+    for (const id of addSessionIds) {
+      for (const [stateName, { sessionIds }] of this.statesByName) {
+        if (stateName === name) sessionIds.add(id);
+        else sessionIds.delete(id);
+      }
     }
   }
 
-  public updateSessionTimes(sessionId: string, timeRange: [start: number, end: number]): void {
-    this.sessionsById.get(sessionId).timeRange = timeRange;
-  }
-
-  public import(savedState: IPageStateAssertionBatch): void {
+  public import(savedState: IPageStateGeneratorAssertionBatch): void {
+    if (!this.statesByName.has(savedState.state)) {
+      this.statesByName.set(savedState.state, {
+        sessionIds: new Set<string>(),
+        assertsByFrameId: {},
+        id: savedState.id,
+      });
+    }
     this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
     const state = this.statesByName.get(savedState.state);
     state.startingAssertsByFrameId = {};
@@ -101,9 +124,12 @@ export default class PageStateGenerator {
     }
   }
 
-  public export(stateName: string): IPageStateAssertionBatch {
-    const exported = <IPageStateAssertionBatch>{
-      id: uuidv1(),
+  public export(
+    stateName: string,
+    minValidAssertionPercent = 80,
+  ): IPageStateGeneratorAssertionBatch {
+    const exported = <IPageStateGeneratorAssertionBatch>{
+      id: this.statesByName.get(stateName).id,
       sessions: [],
       assertions: [],
       state: stateName,
@@ -114,7 +140,8 @@ export default class PageStateGenerator {
       exported.sessions.push({
         sessionId: session.sessionId,
         dbLocation: session.dbLocation,
-        timeRange: session.timeRange,
+        loadingRange: session.loadingRange,
+        timelineRange: session.timelineRange,
         tabId: session.tabId,
       });
     }
@@ -129,16 +156,26 @@ export default class PageStateGenerator {
         ]);
       }
     }
+    exported.minValidAssertions = Math.round(
+      exported.assertions.length * (minValidAssertionPercent / 100),
+    );
+    if (
+      exported.minValidAssertions > exported.assertions.length ||
+      exported.minValidAssertions <= 0
+    ) {
+      exported.minValidAssertions = exported.assertions.length;
+    }
+
     return exported;
   }
 
   public async evaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      const { db, timeRange, tabId, sessionId, needsResultsVerification } = session;
+      const { db, loadingRange, tabId, sessionId, needsResultsVerification } = session;
 
       if (!needsResultsVerification) continue;
 
-      const [start, end] = timeRange;
+      const [start, end] = loadingRange;
       const timeoutMs = end - Date.now();
 
       // wait for end point
@@ -178,6 +215,9 @@ export default class PageStateGenerator {
 
       const resources = db.resources.withResponseTimeInRange(tabId, start, end);
       this.processResources(resources, sessionId);
+
+      const storage = db.storageChanges.withTimeInRange(tabId, start, end);
+      this.processStorageChanges(storage, sessionId, session.mainFrameIds.values().next().value);
     }
 
     await this.checkResultsInPage();
@@ -195,10 +235,13 @@ export default class PageStateGenerator {
     PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
   }
 
-  private async checkResultsInPage(): Promise<void> {
-    const context = await this.browserContext;
-    if (context instanceof Error) throw context;
+  public createBrowserContext(fromSessionId: string): void {
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+      .then(context => context.once('close', () => (this.browserContext = null)))
+      .catch(err => err);
+  }
 
+  private async checkResultsInPage(): Promise<void> {
     for (const session of this.sessionsById.values()) {
       if (!session.domRecording || !session.needsResultsVerification) continue;
       const paintEvents = session.domRecording?.paintEvents;
@@ -208,9 +251,9 @@ export default class PageStateGenerator {
         continue;
       }
 
-      await this.createMirrorPageIfNeeded(context, session);
+      await this.createMirrorPageIfNeeded(session);
       // create at "loaded" state
-      const { mirrorPage } = session;
+      const mirrorPage = session.mirrorPage;
       await mirrorPage.load();
       // only need to do this once?
       session.needsResultsVerification = false;
@@ -242,11 +285,12 @@ export default class PageStateGenerator {
     }
   }
 
-  private async createMirrorPageIfNeeded(
-    context: IPuppetContext,
-    session: IPageStateSession,
-  ): Promise<void> {
-    if (session.mirrorPage) return;
+  private async createMirrorPageIfNeeded(session: IPageStateSession): Promise<void> {
+    if (session.mirrorPage?.isReady) {
+      await session.mirrorPage.isReady;
+      if (session.mirrorPage.page) return;
+    }
+
     const networkInterceptor = MirrorNetwork.createFromSessionDb(session.db, session.tabId, {
       hasResponse: true,
       isGetOrDocument: true,
@@ -254,6 +298,10 @@ export default class PageStateGenerator {
     networkInterceptor.useResourcesOnce = true;
 
     session.mirrorPage = new MirrorPage(networkInterceptor, session.domRecording, false);
+    await this.createBrowserContext(session.sessionId);
+
+    const context = await this.browserContext;
+    if (context instanceof Error) throw context;
 
     const sessionRecord = session.db.session.get();
     await session.mirrorPage.open(context, session.sessionId, sessionRecord.viewport, page => {
@@ -279,9 +327,39 @@ export default class PageStateGenerator {
             },
           },
         ],
-        comparison: '!==',
+        comparison: '!!',
         result: null,
       });
+    }
+  }
+
+  private processStorageChanges(
+    changes: IStorageChangesEntry[],
+    sessionId: string,
+    frameId: number,
+  ): void {
+    for (const change of changes) {
+      const entry = {
+        securityOrigin: change.securityOrigin,
+        type: change.type,
+        action: change.action,
+        key: change.key,
+      };
+      this.sessionAssertions.recordAssertion(sessionId, frameId, {
+        type: 'storage',
+        args: [entry],
+        comparison: '!!',
+        result: null,
+      });
+
+      if (change.type !== 'indexedDB' && change.action !== 'remove') {
+        this.sessionAssertions.recordAssertion(sessionId, frameId, {
+          type: 'storage',
+          args: [entry, 'value'],
+          comparison: '===',
+          result: change.value,
+        });
+      }
     }
   }
 
@@ -389,8 +467,8 @@ export default class PageStateGenerator {
 
   private findLastNavigation(session: IPageStateSession): IFrameNavigationRecord {
     let lastNavigation: IFrameNavigationRecord;
-    const { tabId, db, timeRange, sessionId } = session;
-    const [, endTime] = timeRange;
+    const { tabId, db, loadingRange, sessionId } = session;
+    const [, endTime] = loadingRange;
 
     for (const nav of db.frameNavigations.getMostRecentTabNavigations(
       tabId,
@@ -407,7 +485,7 @@ export default class PageStateGenerator {
       log.error('No navigation found for session during page state generation', {
         sessionId,
         mainFrameIds: [...session.mainFrameIds],
-        timeRange,
+        loadingRange,
         tabId,
       });
     }
@@ -415,7 +493,18 @@ export default class PageStateGenerator {
   }
 }
 
-interface IPageStateSession {
+export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBatch {
+  state: string;
+  sessions: {
+    sessionId: string;
+    dbLocation: string; // could be on another machine
+    tabId: number;
+    timelineRange: [start: number, end: number];
+    loadingRange: [start: number, end: number];
+  }[];
+}
+
+export interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;
@@ -424,11 +513,13 @@ interface IPageStateSession {
   domRecording?: IDomRecording;
   mirrorPage?: MirrorPage;
   tabId: number;
-  timeRange: [start: number, end: number];
+  timelineRange: [start: number, end: number];
+  loadingRange: [start: number, end: number];
 }
 
 interface IPageStateByName {
   sessionIds: Set<string>;
+  id: string;
   assertsByFrameId?: IFrameAssertions;
   startingAssertsByFrameId?: IFrameAssertions;
 }

@@ -1,7 +1,6 @@
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import Log from '@ulixee/commons/lib/Logger';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
-import ICorePlugin from '@ulixee/hero-interfaces/ICorePlugin';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ConnectionToCoreApi from '@ulixee/hero-core/connections/ConnectionToCoreApi';
@@ -10,10 +9,24 @@ import { Session } from '@ulixee/hero-core';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import TabPlaybackController from './TabPlaybackController';
 import MirrorNetwork from '../lib/MirrorNetwork';
+import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
+import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 
 const { log } = Log(module);
 
-export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-closed': void }> {
+export default class TimetravelPlayer extends TypedEventEmitter<{
+  'all-tabs-closed': void;
+  'timetravel-to-end': void;
+  'new-tick-command': void;
+  open: void;
+}> {
+  public get activeCommandId(): number {
+    if (this.isOpen) {
+      return this.activeTab?.currentTick?.commandId;
+    }
+  }
+
   public activeTab: TabPlaybackController;
   public get isOpen(): boolean {
     for (const tab of this.tabsById.values()) {
@@ -25,30 +38,24 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
   private mirrorNetwork = new MirrorNetwork();
   private tabsById = new Map<number, TabPlaybackController>();
   private readonly sessionOptions: ISessionCreateOptions;
-  private browserContext: IPuppetContext;
   private isReady: Promise<void>;
 
-  constructor(
+  private constructor(
     readonly sessionId: string,
     readonly connection: ConnectionToCoreApi,
-    readonly plugins: ICorePlugin[] = [],
+    readonly loadIntoContext: { browserContext?: IPuppetContext; plugins?: CorePlugins },
+    private timelineRange?: [startTime: number, endTime?: number],
     readonly debugLogging = false,
   ) {
     super();
-    this.sessionOptions =
-      Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId);
+    this.sessionOptions = Object.assign(
+      {},
+      Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId),
+    );
+    this.sessionOptions.mode = 'timetravel';
   }
 
-  public async open(
-    browserContext: IPuppetContext,
-    timelineOffsetPercent?: number,
-  ): Promise<TabPlaybackController> {
-    this.browserContext = browserContext;
-    this.isReady ??= this.load();
-    return await this.goto(timelineOffsetPercent);
-  }
-
-  public isReplayPage(pageId: string): boolean {
+  public isOwnPage(pageId: string): boolean {
     for (const tab of this.tabsById.values()) {
       if (tab.isPage(pageId)) return true;
     }
@@ -58,12 +65,29 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
   public async loadTick(tick: ITick): Promise<void> {
     await this.isReady;
     const tab = this.activeTab;
-    if (!tab.isOpen) await tab.open(this.browserContext);
+    if (!tab.isOpen) await tab.open(this.loadIntoContext.browserContext);
 
     await tab.loadTick(tick);
   }
 
-  public async goto(sessionOffsetPercent: number): Promise<TabPlaybackController> {
+  public async step(direction: 'forward' | 'back'): Promise<number> {
+    let percentOffset: number;
+    if (!this.isOpen) {
+      percentOffset = this.activeTab.ticks[this.activeTab.ticks.length - 1]?.timelineOffsetPercent;
+    } else if (direction === 'forward') {
+      percentOffset = this.activeTab.nextTimelineOffsetPercent;
+    } else {
+      percentOffset = this.activeTab.previousTimelineOffsetPercent;
+    }
+    await this.goto(percentOffset);
+    return percentOffset;
+  }
+
+  public async goto(
+    sessionOffsetPercent: number,
+    statusMetadata?: ITimelineMetadata,
+  ): Promise<TabPlaybackController> {
+    this.isReady ??= this.load();
     await this.isReady;
 
     /**
@@ -71,13 +95,45 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
      *       If 1 tab is active, switch to it, otherwise, need to show the multi-timeline view and pick one tab to show
      */
     const tab = this.activeTab;
+
+    const startTick = tab.currentTick;
+    const startedOpen = this.isOpen;
     await this.openTab(tab);
     if (sessionOffsetPercent !== undefined) {
       await tab.setTimelineOffset(sessionOffsetPercent);
     } else {
       await tab.loadEndState();
     }
+
+    if (startedOpen && sessionOffsetPercent === 100) {
+      this.emit('timetravel-to-end');
+    }
+    if (tab.currentTick?.commandId !== startTick?.commandId) {
+      this.emit('new-tick-command');
+    }
+    if (statusMetadata) await this.showLoadStatus(statusMetadata);
     return tab;
+  }
+
+  public async showLoadStatus(metadata: ITimelineMetadata): Promise<void> {
+    const timelineOffsetPercent = this.activeTab.currentTimelineOffsetPct;
+    if (!metadata || timelineOffsetPercent === 100) return;
+
+    let currentUrl: ITimelineMetadata['urls'][0];
+    let activeStatus: ITimelineMetadata['urls'][0]['loadStatusOffsets'][0];
+    for (const url of metadata.urls) {
+      if (url.offsetPercent > timelineOffsetPercent) break;
+      currentUrl = url;
+    }
+
+    for (const status of currentUrl?.loadStatusOffsets ?? []) {
+      if (status.offsetPercent > timelineOffsetPercent) break;
+      activeStatus = status;
+    }
+
+    if (activeStatus) {
+      await this.showStatusText(activeStatus.status);
+    }
   }
 
   public async showStatusText(text: string): Promise<void> {
@@ -87,17 +143,12 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
     await tab.showStatusText(text);
   }
 
-  public async close(closeContext = false): Promise<void> {
+  public async close(): Promise<void> {
     this.isReady = null;
-    if (!closeContext) {
-      for (const tab of this.tabsById.values()) {
-        await tab.close();
-      }
-      this.activeTab = null;
-    } else {
-      await this.browserContext?.close();
-      this.browserContext = null;
+    for (const tab of this.tabsById.values()) {
+      await tab.close();
     }
+    this.activeTab = null;
     this.tabsById.clear();
   }
 
@@ -105,14 +156,40 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
     this.activeTab = tabPlaybackController;
   }
 
+  public async refreshTicks(
+    timelineOffsetRange: [startTime: number, endTime?: number],
+  ): Promise<void> {
+    this.timelineRange = timelineOffsetRange;
+    const ticksResult = await this.connection.run({
+      api: 'Session.ticks',
+      args: {
+        sessionId: this.sessionId,
+        includeCommands: true,
+        includeInteractionEvents: false,
+        includePaintEvents: false,
+        timelineRange: this.timelineRange,
+      },
+    });
+    for (const tabDetails of ticksResult.tabDetails) {
+      const entry = this.tabsById.get(tabDetails.tab.id);
+      if (!entry) continue;
+
+      // only do a partial update... doesn't work if information is already loaded onto page
+      entry.tabDetails.ticks = tabDetails.ticks;
+      entry.tabDetails.commands = tabDetails.commands;
+    }
+  }
+
   private async openTab(tab: TabPlaybackController): Promise<void> {
     if (tab.isOpen) return;
-    await tab.open(this.browserContext, this.activePlugins.bind(this));
+    this.emit('open');
+    await tab.open(this.loadIntoContext.browserContext, this.activePlugins.bind(this));
   }
 
   private async activePlugins(page: IPuppetPage): Promise<void> {
+    if (!this.loadIntoContext.plugins) return;
     await Promise.all(
-      this.plugins
+      this.loadIntoContext.plugins.corePlugins
         .filter(x => x.onNewPuppetPage)
         .map(x =>
           x.onNewPuppetPage(page, {
@@ -139,6 +216,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
         includeCommands: true,
         includeInteractionEvents: true,
         includePaintEvents: true,
+        timelineRange: this.timelineRange,
       },
     });
 
@@ -179,5 +257,15 @@ export default class TimetravelPlayer extends TypedEventEmitter<{ 'all-tabs-clos
       },
     });
     return resource;
+  }
+
+  public static create(
+    heroSessionId: string,
+    loadIntoContext: { browserContext?: IPuppetContext; plugins?: CorePlugins },
+    timelineRange?: [startTime: number, endTime: number],
+    connectionToCoreApi?: ConnectionToCoreApi,
+  ): TimetravelPlayer {
+    connectionToCoreApi ??= new DirectConnectionToCoreApi();
+    return new TimetravelPlayer(heroSessionId, connectionToCoreApi, loadIntoContext, timelineRange);
   }
 }

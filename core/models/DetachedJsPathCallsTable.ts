@@ -13,7 +13,7 @@ export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPat
       ['scriptEntrypoint', 'TEXT'],
       ['callsitePath', 'TEXT'],
       ['execJsPathHistory', 'TEXT'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
       ['key', 'TEXT'],
     ]);
   }

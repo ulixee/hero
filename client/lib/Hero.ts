@@ -64,7 +64,7 @@ export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
   defaultUserProfile: {},
 };
-const scriptInstance = new ScriptInstance();
+export const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
@@ -126,8 +126,13 @@ export default class Hero extends AwaitedEventTarget<{
 
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
+
+    const nodeEnv = process.env.NODE_ENV;
+    let mode = options.mode ?? nodeEnv;
+    if (!['development', 'production', 'multiverse'].includes(mode)) mode = 'development';
     options = {
       ...options,
+      mode,
       sessionName,
       scriptInstanceMeta: scriptInstance.meta,
       dependencyMap: {},
@@ -308,6 +313,12 @@ export default class Hero extends AwaitedEventTarget<{
     const { clientPlugins, options, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
+    if (connection.hasConnected) {
+      throw new Error(
+        'You must call .use before any Hero "await" calls (ie, before the Agent connects to Core).',
+      );
+    }
+
     if (typeof PluginObject === 'string') {
       const Plugins = requirePlugins(PluginObject as string);
       const CorePlugins = filterPlugins(Plugins, PluginTypes.CorePlugin);
@@ -409,7 +420,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async waitForPageState<T extends IPageStateDefinitions>(
-    states: T,
+    states?: T,
     options?: Pick<IWaitForOptions, 'timeoutMs'>,
   ): Promise<keyof T> {
     return await this.activeTab.waitForPageState(states, options);

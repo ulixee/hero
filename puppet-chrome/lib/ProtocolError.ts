@@ -17,7 +17,7 @@ export default class ProtocolError extends Error {
     super(message);
     this.name = 'ProtocolError';
     this.method = method;
-    this.stack = stack;
+    this.stack = `${this.name}: ${this.message}\n${stack}`;
     this.remoteError = remoteError;
   }
 }

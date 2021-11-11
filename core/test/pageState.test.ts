@@ -30,27 +30,37 @@ test('can wait for page state events', async () => {
   });
 
   await tab.goto(`${koaServer.baseUrl}/pageState1`);
-  const mainFrame = tab.mainFrameEnvironment;
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
-  const { stop } = tab.addPageStateListener(
-    '1',
-    {
-      url: () => Promise.resolve(mainFrame.url),
-      paintStable: () => Promise.resolve(mainFrame.isPaintingStable()),
-      h1Text: () => mainFrame.execJsPath(['document', ['querySelector', 'h1'], 'textContent']),
-      divText: () => mainFrame.execJsPath(['document', ['querySelector', '#test'], 'textContent']),
-      div2Text: () =>
-        mainFrame.execJsPath(['document', ['querySelector', '#notthere'], 'textContent']),
+  const listener = tab.addPageStateListener('1', {
+    callsite: 'callsite',
+    states: ['states'],
+    commands: {
+      url: [1, 'FrameEnvironment.getUrl', []],
+      paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+      h1Text: [
+        1,
+        'FrameEnvironment.execJsPath',
+        [['document', ['querySelector', 'h1'], 'textContent']],
+      ],
+      divText: [
+        1,
+        'FrameEnvironment.execJsPath',
+        [['document', ['querySelector', '#test'], 'textContent']],
+      ],
+      div2Text: [
+        1,
+        'FrameEnvironment.execJsPath',
+        [['document', ['querySelector', '#notthere'], 'textContent']],
+      ],
     },
-    [mainFrame],
-    status => {
-      callbackFn(status);
-      if (status.divText?.value === 'hi' && status.paintStable === true) hasDiv.resolve();
-    },
-  );
+  });
+  listener.on('state', status => {
+    callbackFn(status);
+    if (status.divText?.value === 'hi' && status.paintStable === true) hasDiv.resolve();
+  });
   await hasDiv.promise;
-  stop();
+  listener.stop();
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(1);
   expect(callbackFn.mock.calls[callbackFn.mock.calls.length - 1][0]).toEqual({
     url: `${koaServer.baseUrl}/pageState1`,
@@ -63,6 +73,7 @@ test('can wait for page state events', async () => {
 
 test('can continue to get events as dom changes', async () => {
   const { tab } = await createSession();
+  await tab.recordScreen({ jpegQuality: 10, format: 'jpeg' });
 
   koaServer.get('/pageState2', ctx => {
     ctx.body = `
@@ -81,27 +92,34 @@ test('can continue to get events as dom changes', async () => {
   });
 
   await tab.goto(`${koaServer.baseUrl}/pageState2`);
-  const mainFrame = tab.mainFrameEnvironment;
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
-  const { stop } = tab.addPageStateListener(
-    '2',
-    {
-      url: () => Promise.resolve(mainFrame.url),
-      paintStable: () => Promise.resolve(mainFrame.isPaintingStable()),
-      divs: () => mainFrame.execJsPath(['document', ['querySelectorAll', '.test'], 'length']),
+  const listener = tab.addPageStateListener('2', {
+    callsite: 'callsite',
+    states: ['states'],
+    commands: {
+      url: [1, 'FrameEnvironment.getUrl', []],
+      paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+      divs: [
+        1,
+        'FrameEnvironment.execJsPath',
+        [['document', ['querySelectorAll', '.test'], 'length']],
+      ],
     },
-    [mainFrame],
-    status => {
-      callbackFn(status);
-      if (status.divs?.value >= 5) {
-        stop();
-        hasDiv.resolve();
-      }
-    },
-  );
+  });
+
+  listener.on('state', status => {
+    callbackFn(status);
+    if (status.divs?.value >= 5) {
+      listener.stop();
+      hasDiv.resolve();
+    }
+  });
+
   await hasDiv.promise;
-  stop();
+  listener.stop();
+  await tab.stopRecording();
+  expect(tab.session.db.screenshots.screenshotTimesByTabId.size).toBeGreaterThanOrEqual(1);
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(2);
   const lastCall = callbackFn.mock.calls.slice(-1).shift()[0];
   expect(lastCall.url).toBe(`${koaServer.baseUrl}/pageState2`);

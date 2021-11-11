@@ -206,6 +206,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async close(): Promise<void> {
+    if (this.isReady === null) return;
     this.isReady = null;
     if (this.page && !this.page.isClosed) {
       await this.page.close();

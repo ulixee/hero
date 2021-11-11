@@ -5,7 +5,7 @@ import Tab from './Tab';
 import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
-type AsyncFunc = (...args: any[]) => Promise<any> | any;
+type AsyncFunc = (...args: any[]) => Promise<any>;
 
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();
@@ -90,7 +90,6 @@ export default class CommandRecorder {
     } finally {
       const mainFrame = frame ?? (tab ?? this.session.getLastActiveTab())?.mainFrameEnvironment;
       commands.onFinished(commandMeta, result, mainFrame?.navigations?.top?.id);
-      tab?.didRunCommand(commandMeta);
       this.logger.stats('Command.done', { result, parentLogId: id });
     }
   }

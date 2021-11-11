@@ -151,7 +151,7 @@ export default class CoreTab implements IJsPathEventTarget {
     jsPath: IJsPath | null,
     eventType: string,
     listenerFn: (...args: any[]) => void,
-    options?,
+    options?: any,
   ): Promise<void> {
     await this.eventHeap.addListener(jsPath, eventType, listenerFn, options);
   }
@@ -160,8 +160,9 @@ export default class CoreTab implements IJsPathEventTarget {
     jsPath: IJsPath | null,
     eventType: string,
     listenerFn: (...args: any[]) => void,
+    options?: any,
   ): Promise<void> {
-    await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
+    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options);
   }
 
   public async flush(): Promise<void> {

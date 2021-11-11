@@ -19,7 +19,7 @@ test('should process commands into a timeline', async () => {
   expect(commandTimeline.commands).toHaveLength(2);
   expect(commandTimeline.commands[0].commandGapMs).toBe(0);
   expect(commandTimeline.commands[1].commandGapMs).toBe(1);
-  expect(commandTimeline.commands[1].timelineOffsetEndMs).toBe(110);
+  expect(commandTimeline.commands[1].relativeStartMs).toBe(101);
 });
 
 test('should handle a second run', async () => {
@@ -38,8 +38,8 @@ test('should handle a second run', async () => {
   expect(commandTimeline.commands).toHaveLength(3);
   expect(commandTimeline.commands[0].commandGapMs).toBe(0);
   expect(commandTimeline.commands[1].commandGapMs).toBe(1);
-  expect(commandTimeline.commands[1].timelineOffsetEndMs).toBe(110);
-  expect(commandTimeline.commands[2].timelineOffsetEndMs).toBe(120);
+  expect(commandTimeline.commands[1].relativeStartMs).toBe(101);
+  expect(commandTimeline.commands[2].relativeStartMs).toBe(110);
 });
 
 test('should be able to calculate offsets', async () => {
@@ -60,7 +60,7 @@ test('should be able to calculate offsets', async () => {
   expect(commandTimeline.getTimelineOffsetForTimestamp(1510)).toBe(100);
 });
 
-test('should start at the first http request', async () => {
+test('should start by default at the first http request', async () => {
   const commands = [
     { id: 1, run: 0, runStartDate: 500, endDate: 600 } as ICommandMeta,
     { id: 2, run: 0, runStartDate: 601, endDate: 610 } as ICommandMeta,
@@ -77,6 +77,35 @@ test('should start at the first http request', async () => {
   ] as INavigation[];
 
   const commandTimeline = new CommandTimeline(commands, 0, navigations);
+  // normal runtime
   expect(commandTimeline.runtimeMs).toBe(60);
-  expect(commandTimeline.getTimelineOffset(30)).toBe(50);
+  expect(commandTimeline.getTimelineOffsetForTimestamp(600)).toBe(83.3); // 50/60
+});
+
+test('should be able to get timestamps for slices of the timeline', async () => {
+  const commands = [
+    { id: 1, run: 1, runStartDate: 10, endDate: 20 } as ICommandMeta,
+    { id: 2, run: 1, runStartDate: 21, endDate: 30 } as ICommandMeta,
+    { id: 3, run: 1, runStartDate: 31, endDate: 36 } as ICommandMeta,
+    { id: 3, run: 1, runStartDate: 36, endDate: 40 } as ICommandMeta,
+  ] as ICommandMeta[];
+  const navigations = [{ id: 1, url: '1', statusChanges: new Map() } as any] as INavigation[];
+  {
+    const commandTimeline = new CommandTimeline(commands, 1, navigations);
+    expect(commandTimeline.getTimelineOffsetForTimestamp(36)).toBe(86.6);
+  }
+  {
+    const commandTimeline = new CommandTimeline(commands, 1, navigations, [35]);
+    expect(commandTimeline.getTimelineOffsetForTimestamp(36)).toBe(20);
+  }
+
+  {
+    const commandTimeline = new CommandTimeline(commands, 1, navigations, [35, 45]);
+    expect(commandTimeline.getTimelineOffsetForTimestamp(36)).toBe(10);
+  }
+
+  {
+    const commandTimeline = new CommandTimeline(commands, 1, navigations, [35, 45]);
+    expect(commandTimeline.getTimelineOffsetForTimestamp(41)).toBe(60);
+  }
 });

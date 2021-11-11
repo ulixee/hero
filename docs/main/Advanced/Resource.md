@@ -26,6 +26,12 @@ The requested url
 
 #### **Returns** `string`
 
+### documentUrl
+
+The document (if applicable) that requested this resource.
+
+#### **Returns** `string`
+
 ### type
 
 The type of resource. Possible values are:

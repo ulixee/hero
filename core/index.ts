@@ -23,7 +23,7 @@ import GlobalPool from './lib/GlobalPool';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
-let dataDir = process.env.HERO_DATA_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
+let dataDir = process.env.HERO_DATA_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to static variable below class definition
 
 export { GlobalPool, Tab, Session, LocationTrigger };
 

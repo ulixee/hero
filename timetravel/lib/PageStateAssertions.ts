@@ -1,4 +1,7 @@
-import { IAssertionAndResult } from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import {
+  IAssertionAndResult,
+  IAssertionCounts,
+} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 
 export default class PageStateAssertions {
   private assertsBySessionId: { [sessionId: string]: IFrameAssertions } = {};
@@ -9,6 +12,10 @@ export default class PageStateAssertions {
     this.assertsBySessionId[sessionId] ??= {};
     const assertions = this.assertsBySessionId[sessionId];
     return Object.entries(assertions);
+  }
+
+  public sessionAssertionsCount(sessionId: string): IAssertionCounts {
+    return PageStateAssertions.countAssertions(this.assertsBySessionId[sessionId]);
   }
 
   public getSessionAssertionWithQuery(
@@ -81,7 +88,24 @@ export default class PageStateAssertions {
         }
       }
     }
-    return state;
+    return state ?? {};
+  }
+
+  public static countAssertions(asserts: IFrameAssertions): IAssertionCounts {
+    const result: IAssertionCounts = { total: 0, dom: 0, resources: 0, urls: 0, storage: 0 };
+    if (!asserts) return result;
+
+    for (const assertionsWithResults of Object.values(asserts)) {
+      for (const assert of Object.values(assertionsWithResults)) {
+        result.total += 1;
+        if (assert.type === 'jspath' || assert.type === 'xpath') result.dom += 1;
+        else if (assert.type === 'resource') result.resources += 1;
+        else if (assert.type === 'url') result.urls += 1;
+        else if (assert.type === 'storage') result.storage += 1;
+      }
+    }
+
+    return result;
   }
 
   public static generateKey(type: IAssertionAndResult['type'], args: any[]): string {

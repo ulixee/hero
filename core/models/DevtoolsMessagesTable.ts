@@ -31,7 +31,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       ['params', 'TEXT'],
       ['error', 'TEXT'],
       ['result', 'TEXT'],
-      ['timestamp', 'INTEGER'],
+      ['timestamp', 'DATETIME'],
     ]);
   }
 

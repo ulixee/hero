@@ -1,7 +1,6 @@
 import Protocol from 'devtools-protocol';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
-import IRect from './IRect';
 import { IPuppetFrame, IPuppetFrameManagerEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
@@ -9,6 +8,9 @@ import { IPuppetWorker } from './IPuppetWorker';
 import IDevtoolsSession from './IDevtoolsSession';
 import IPuppetDialog from './IPuppetDialog';
 import IPuppetContext from './IPuppetContext';
+import IScreenRecordingOptions from './IScreenRecordingOptions';
+import IScreenshotOptions from './IScreenshotOptions';
+import IPuppetDomStorageTracker, { IPuppetStorageEvents } from './IPuppetDomStorageTracker';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   id: string;
@@ -19,6 +21,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   frames: IPuppetFrame[];
   workers: IPuppetWorker[];
   mainFrame: IPuppetFrame;
+  domStorageTracker: IPuppetDomStorageTracker;
   opener?: IPuppetPage;
 
   isClosed: boolean;
@@ -29,11 +32,10 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   reload(): Promise<void>;
   close(): Promise<void>;
   bringToFront(): Promise<void>;
-  screenshot(
-    format?: 'jpeg' | 'png',
-    clipRect?: IRect & { scale: number },
-    quality?: number,
-  ): Promise<Buffer>;
+  screenshot(options: IScreenshotOptions): Promise<Buffer>;
+  startScreenRecording(options: IScreenRecordingOptions): Promise<void>;
+  stopScreenRecording(): Promise<void>;
+
   popupInitializeFn?: (
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
@@ -45,7 +47,6 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
     ) => Promise<Protocol.Fetch.FulfillRequestRequest>,
   ): Promise<void>;
 
-  getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
 
   evaluate<T>(expression: string): Promise<T>;
@@ -57,7 +58,10 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   ): Promise<IRegisteredEventListener>;
 }
 
-export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNetworkEvents {
+export interface IPuppetPageEvents
+  extends IPuppetFrameManagerEvents,
+    IPuppetNetworkEvents,
+    IPuppetStorageEvents {
   close: void;
   worker: { worker: IPuppetWorker };
   crashed: { error: Error; fatal?: boolean };
@@ -66,4 +70,5 @@ export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNet
   filechooser: { frameId: string; selectMultiple: boolean; objectId: string };
   'page-error': { frameId: string; error: Error };
   'page-callback-triggered': { name: string; frameId: string; payload: any };
+  screenshot: { imageBase64: string; timestamp: number };
 }

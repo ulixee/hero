@@ -1,12 +1,6 @@
 export default interface IPageStateAssertionBatch {
-  state: string;
   id: string;
-  sessions: {
-    sessionId: string;
-    dbLocation: string; // could be on another machine
-    tabId: number;
-    timeRange: [start: number, end: number];
-  }[];
+  minValidAssertions: number;
   assertions: [
     frameId: number,
     type: IAssertionAndResult['type'],
@@ -18,8 +12,16 @@ export default interface IPageStateAssertionBatch {
 
 export interface IAssertionAndResult {
   key: string;
-  type: 'resource' | 'xpath' | 'jspath' | 'url';
+  type: 'resource' | 'xpath' | 'jspath' | 'url' | 'storage';
   args: any[];
-  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=';
+  comparison: '===' | '!==' | '>=' | '>' | '<' | '<=' | '!!';
   result: number | string | boolean;
+}
+
+export interface IAssertionCounts {
+  total: number;
+  dom?: number;
+  resources?: number;
+  urls?: number;
+  storage?: number;
 }

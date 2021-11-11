@@ -137,7 +137,7 @@ describe('basic Full Client tests', () => {
     {
       expect(await cookieStorage.length).toBe(1);
       const cookie = await cookieStorage.getItem('Cookie1');
-      expect(cookie.expires).toBe('-1');
+      expect(cookie.expires).toBe(undefined);
       expect(cookie.httpOnly).toBe(true);
       // httponly not in doc
       const documentCookies = await hero.getJsValue('document.cookie');
@@ -149,7 +149,7 @@ describe('basic Full Client tests', () => {
       await cookieStorage.setItem('Cookie2', 'test2', { expires });
       expect(await cookieStorage.length).toBe(2);
       const cookie = await cookieStorage.getItem('Cookie2');
-      expect(Math.round(Number(cookie.expires))).toBe(expires.getTime());
+      expect(cookie.expires).toBe(expires.toISOString());
       expect(cookie.httpOnly).toBe(false);
 
       const documentCookies = await hero.getJsValue('document.cookie');

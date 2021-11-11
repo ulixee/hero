@@ -6,7 +6,7 @@ export interface ICookie {
   path?: string;
   expires?: string;
   httpOnly?: boolean;
-  session?: boolean;
   secure?: boolean;
+  sameParty?: boolean;
   sameSite?: 'Strict' | 'Lax' | 'None';
 }

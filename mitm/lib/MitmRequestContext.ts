@@ -182,9 +182,11 @@ export default class MitmRequestContext {
     return {
       id: ctx.id,
       browserRequestId: ctx.browserRequestId,
+      url: ctx.url,
       frameId: ctx.browserFrameId,
       request,
       response,
+      documentUrl: ctx.documentUrl,
       redirectedToUrl: ctx.redirectedToUrl,
       wasCached: ctx.cacheHandler?.didProposeCachedResource ?? false,
       resourceType: ctx.resourceType,

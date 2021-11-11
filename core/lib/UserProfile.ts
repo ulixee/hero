@@ -1,5 +1,5 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
+import IDomStorage, { IDomStorageForOrigin } from '@ulixee/hero-interfaces/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { assert } from '@ulixee/commons/lib/utils';
@@ -12,24 +12,46 @@ export default class UserProfile {
   public static async export(session: Session): Promise<IUserProfile> {
     const cookies = await session.browserContext.getCookies();
 
-    const storage: IDomStorage = {};
+    const exportedStorage: IDomStorage = { ...(session.options.userProfile?.storage ?? {}) };
     for (const tab of session.tabsById.values()) {
       const page = tab.puppetPage;
 
-      const dbs = await page.getIndexedDbDatabaseNames();
-      const frames = page.frames;
-      for (const { origin, frameId, databases } of dbs) {
-        const frame = frames.find(x => x.id === frameId);
-        storage[origin] = await frame?.evaluate(
-          `window.exportDomStorage(${JSON.stringify(databases)})`,
-          true,
-        );
+      for (const {
+        origin,
+        storageForOrigin,
+        databaseNames,
+        frame,
+      } of await page.domStorageTracker.getStorageByOrigin()) {
+        const originStorage = {
+          ...storageForOrigin,
+          indexedDB: storageForOrigin.indexedDB.map(x => ({
+            ...x,
+            data: { ...x.data },
+            objectStores: [...x.objectStores],
+          })),
+        };
+        exportedStorage[origin] = originStorage;
+
+        if (frame) {
+          const databases = JSON.stringify(databaseNames);
+          const liveData = await frame.evaluate<IDomStorageForOrigin>(
+            `window.exportDomStorage(${databases})`,
+            true,
+          );
+          originStorage.localStorage = liveData.localStorage;
+          originStorage.sessionStorage = liveData.sessionStorage;
+          for (const dbWithData of liveData.indexedDB) {
+            if (!dbWithData) continue;
+            const idx = originStorage.indexedDB.findIndex(x => x.name === dbWithData.name);
+            originStorage.indexedDB[idx] = dbWithData;
+          }
+        }
       }
     }
 
     return {
       cookies,
-      storage,
+      storage: exportedStorage,
       userAgentString: session.plugins.browserEmulator.userAgentString,
       deviceProfile: session.plugins.browserEmulator.deviceProfile,
     } as IUserProfile;
@@ -48,7 +70,11 @@ export default class UserProfile {
       return this;
     }
 
-    const parentLogId = log.info('UserProfile.install', { sessionId });
+    const parentLogId = log.info('UserProfile.install', {
+      sessionId,
+      cookies: cookies?.length,
+      storageDomains: origins?.length,
+    });
 
     let page: IPuppetPage;
     try {
@@ -59,6 +85,8 @@ export default class UserProfile {
       }
 
       if (hasStorage) {
+        session.browserContext.domStorage = {};
+
         // install scripts so we can restore storage
         await InjectedScripts.installDomStorageRestore(page);
 
@@ -73,11 +101,27 @@ export default class UserProfile {
             continue;
           }
 
-          await page.navigate(origin);
-          await page.mainFrame.evaluate(
-            `window.restoreUserStorage(${JSON.stringify(originStorage)})`,
-            true,
-          );
+          try {
+            await page.navigate(origin);
+            await page.mainFrame.evaluate(
+              `window.restoreUserStorage(${JSON.stringify(originStorage)})`,
+              true,
+            );
+
+            session.browserContext.domStorage[origin] = {
+              indexedDB: originStorage.indexedDB.map(x => ({
+                ...x,
+                data: { ...x.data },
+                objectStores: [...x.objectStores],
+              })),
+              sessionStorage: originStorage.sessionStorage.map(x => ({ ...x })),
+              localStorage: originStorage.localStorage.map(x => ({ ...x })),
+            };
+          } catch (error) {
+            throw new Error(
+              `Could not restore profile for origin ("${origin}") => ${error.message}`,
+            );
+          }
         }
       }
     } finally {

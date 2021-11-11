@@ -15,12 +15,14 @@ import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
+import ScreenshotsTable from '../models/ScreenshotsTable';
 import SessionsDb from './SessionsDb';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
+import StorageChangesTable from '../models/StorageChangesTable';
 
 const { log } = Log(module);
 
@@ -51,9 +53,13 @@ export default class SessionDb {
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
+  public readonly storageChanges: StorageChangesTable;
+  public readonly screenshots: ScreenshotsTable;
   public readonly devtoolsMessages: DevtoolsMessagesTable;
   public readonly tabs: TabsTable;
   public readonly sessionId: string;
+
+  public keepAlive = false;
 
   private readonly batchInsert?: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
@@ -85,6 +91,8 @@ export default class SessionDb {
     this.focusEvents = new FocusEventsTable(this.db);
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
+    this.screenshots = new ScreenshotsTable(this.db);
+    this.storageChanges = new StorageChangesTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
 
     this.tables.push(
@@ -104,6 +112,8 @@ export default class SessionDb {
       this.scrollEvents,
       this.sessionLogs,
       this.devtoolsMessages,
+      this.screenshots,
+      this.storageChanges,
     );
 
     if (!readonly) {
@@ -129,10 +139,18 @@ export default class SessionDb {
 
   public close(): void {
     clearInterval(this.saveInterval);
-    if (this.db) {
+
+    if (this.db?.open) {
       this.flush();
-      this.db.close();
     }
+
+    if (this.keepAlive) {
+      this.db.readonly = true;
+      return;
+    }
+
+    SessionDb.byId.delete(this.sessionId);
+    // NOTE: db will close when out of scope
     this.db = null;
   }
 
