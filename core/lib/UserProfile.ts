@@ -40,11 +40,7 @@ export default class UserProfile {
           );
           originStorage.localStorage = liveData.localStorage;
           originStorage.sessionStorage = liveData.sessionStorage;
-          for (const dbWithData of liveData.indexedDB) {
-            if (!dbWithData) continue;
-            const idx = originStorage.indexedDB.findIndex(x => x.name === dbWithData.name);
-            originStorage.indexedDB[idx] = dbWithData;
-          }
+          originStorage.indexedDB = liveData.indexedDB;
         }
       }
     }
