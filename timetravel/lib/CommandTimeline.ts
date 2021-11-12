@@ -145,6 +145,27 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
     return -1;
   }
 
+  public toJSON(): unknown {
+    return {
+      startTime: this.startTime,
+      endTime: this.endTime,
+      runtimeMs: this.runtimeMs,
+      commands: this.commands.map(x => {
+        return {
+          id: x.id,
+          run: x.run,
+          reusedCommandFromRun: x.reusedCommandFromRun,
+          name: x.name,
+          startTime: x.startTime,
+          endTime: x.endDate,
+          relativeStartMs: x.relativeStartMs,
+          commandGapMs: x.commandGapMs,
+          runtimeMs: x.runtimeMs,
+        }
+      })
+    }
+  }
+
   private getTimelineOffsetForRuntimeMillis(timelineOffsetMs: number): number {
     return roundFloor((100 * timelineOffsetMs) / this.runtimeMs);
   }

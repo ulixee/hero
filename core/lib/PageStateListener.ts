@@ -22,6 +22,7 @@ interface IBatchAssertion {
   assertions: IPageStateAssertionBatch['assertions'];
   minValidAssertions: number;
   totalAssertions: number;
+  state: string;
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
@@ -90,6 +91,10 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     }
   }
 
+  public getStateUsingBatchAssertion(id: string): string {
+    return this.batchAssertionsById.get(id).state;
+  }
+
   public async runBatchAssert(batchId: string): Promise<boolean> {
     const failCounts = {
       url: 0,
@@ -143,10 +148,23 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
   public addAssertionBatch(state: string, batch: IPageStateAssertionBatch): string {
     if (!this.states.includes(state)) this.states.push(state);
-    const args = [batch.id, JSON.parse(this.jsPathId), batch.assertions, batch.minValidAssertions];
-    this.trackCommand(batch.id, this.tab.mainFrameId, 'Tab.assert', args);
+    let fullId = batch.id;
+    for (const id of this.batchAssertionsById.keys()) {
+      if (id.endsWith(batch.id + '.json')) {
+        fullId = id;
+        break;
+      }
+    }
+    const args = [
+      fullId,
+      JSON.parse(this.jsPathId),
+      batch.assertions,
+      batch.minValidAssertions,
+      state,
+    ];
+    this.trackCommand(fullId, this.tab.mainFrameId, 'Tab.assert', args);
     this.loadBatchAssert(args as any);
-    return batch.id;
+    return fullId;
   }
 
   private loadBatchAssert(
@@ -155,14 +173,16 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       pageStateIdJsPath: IJsPath,
       assertions: IPageStateAssertionBatch['assertions'],
       minValidAssertions: number,
+      state: string,
     ],
   ): void {
-    const [batchId, , assertions, minValidAssertions] = args;
+    const [batchId, , assertions, minValidAssertions, state] = args;
     this.batchAssertionsById.set(batchId, {
       assertions: [],
       domAssertionsByFrameId: new Map(),
       totalAssertions: assertions.length,
       minValidAssertions: minValidAssertions ?? assertions.length,
+      state,
     });
     const entry = this.batchAssertionsById.get(batchId);
 

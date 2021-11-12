@@ -238,7 +238,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
           }
         },
         loadFrom(exportedStateOrPath) {
-          const promise = loadAssertionBatch(exportedStateOrPath);
+          const promise = loadAssertionBatch(key, exportedStateOrPath);
           promises.push(promise);
         },
       });
@@ -264,6 +264,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   }
 
   private async loadAssertionBatch(
+    state: string,
     exportedStateOrPath: IPageStateAssertionBatch | string,
   ): Promise<void> {
     let assertionBatch = exportedStateOrPath as IPageStateAssertionBatch;
@@ -291,6 +292,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
         this.#jsPath,
         assertionBatch.assertions,
         assertionBatch.minValidAssertions,
+        state,
       ],
     ];
     // NOTE: subtly different serialization - serialized command and local run just stores the id

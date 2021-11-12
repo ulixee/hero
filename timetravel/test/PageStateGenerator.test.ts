@@ -483,8 +483,8 @@ describe('pageStateGenerator', () => {
     expect(state2.sessions).toHaveLength(2);
 
     const psg2 = new PageStateGenerator('id');
-    psg2.import(state1);
-    psg2.import(state2);
+    psg2.import('1', state1);
+    psg2.import('2', state2);
 
     changeTitle = true;
     // add sessions to the second round

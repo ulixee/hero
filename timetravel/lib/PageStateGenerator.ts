@@ -93,16 +93,16 @@ export default class PageStateGenerator {
     }
   }
 
-  public import(savedState: IPageStateGeneratorAssertionBatch): void {
-    if (!this.statesByName.has(savedState.state)) {
-      this.statesByName.set(savedState.state, {
+  public import(stateName: string, savedState: IPageStateGeneratorAssertionBatch): void {
+    if (!this.statesByName.has(stateName)) {
+      this.statesByName.set(stateName, {
         sessionIds: new Set<string>(),
         assertsByFrameId: {},
         id: savedState.id,
       });
     }
-    this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
-    const state = this.statesByName.get(savedState.state);
+    this.addState(stateName, ...savedState.sessions.map(x => x.sessionId));
+    const state = this.statesByName.get(stateName);
     state.startingAssertsByFrameId = {};
     const startingAssertions = state.startingAssertsByFrameId;
     for (const [frameId, type, args, comparison, result] of savedState.assertions) {
@@ -135,7 +135,6 @@ export default class PageStateGenerator {
       id: this.statesByName.get(stateName).id,
       sessions: [],
       assertions: [],
-      state: stateName,
     };
     const state = this.statesByName.get(stateName);
     for (const sessionId of state.sessionIds) {
@@ -522,7 +521,6 @@ export default class PageStateGenerator {
 }
 
 export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBatch {
-  state: string;
   sessions: {
     sessionId: string;
     dbLocation: string; // could be on another machine

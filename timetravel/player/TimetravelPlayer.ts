@@ -148,7 +148,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     for (const tab of this.tabsById.values()) {
       await tab.close();
     }
-    this.activeTab = null;
+    if (this.activeTab) await this.activeTab.mirrorPage.close();
     this.tabsById.clear();
   }
 

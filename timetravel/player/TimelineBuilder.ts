@@ -1,22 +1,14 @@
 import CommandTimeline from '../lib/CommandTimeline';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import { IFrameNavigationEvents } from '@ulixee/hero-core/lib/FrameNavigations';
-import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
-import { Session, Tab } from '@ulixee/hero-core';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
+import Session from '@ulixee/hero-core/lib/Session';
 
-export default class TimelineBuilder extends TypedEventEmitter<{
-  updated: void;
-}> {
-  public static bySessionId = new Map<string, TimelineBuilder>();
-
+export default class TimelineBuilder {
   public commandTimeline: CommandTimeline;
-  public recordScreenUntilTime = 0;
-  public recordScreenUntilLoad = false;
   public lastMetadata: ITimelineMetadata;
+  public readonly liveSession: Session;
 
   public get sessionId(): string {
     return this.db.sessionId;
@@ -35,49 +27,19 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     this.refreshMetadata();
   }
 
+  private readonly db: SessionDb;
   private _timelineRange: [startTime: number, endTime?: number];
-  private isPaused = false;
-  private liveSession?: Session;
 
-  constructor(readonly db: SessionDb, timelineRange?: TimelineBuilder['_timelineRange']) {
-    super();
+  constructor(options: {
+    db?: SessionDb;
+    liveSession?: Session;
+    timelineRange?: TimelineBuilder['_timelineRange'];
+  }) {
     bindFunctions(this);
-    TimelineBuilder.bySessionId.set(db.sessionId, this);
-    this._timelineRange = timelineRange;
+    this.liveSession = options.liveSession;
+    this.db = options.db ?? options.liveSession?.db;
+    this._timelineRange = options.timelineRange;
     this.commandTimeline = CommandTimeline.fromDb(this.db, this._timelineRange);
-    if (db.sessionId === 'eB3F-gYGfTj_a72wvcqmj') {
-      console.log(
-        {
-          startTime: this.commandTimeline.startTime,
-          endTime: this.commandTimeline.endTime,
-          runtime: this.commandTimeline.runtimeMs,
-        },
-        ...this.commandTimeline.commands.map(x => {
-          return {
-            ...x,
-            result: undefined,
-            args: undefined,
-            reusedCommandFromRun: undefined,
-            resultType: undefined,
-          };
-        }),
-      );
-    }
-  }
-
-  public trackLiveSession(liveSession: Session): void {
-    if (this.liveSession) return;
-    this.liveSession = liveSession;
-    liveSession.on('tab-created', this.onTabCreated);
-    liveSession.on('kept-alive', this.onHeroSessionPaused);
-    liveSession.on('resumed', this.onHeroSessionResumed);
-    liveSession.on('will-close', this.onHeroSessionWillClose);
-
-    liveSession.db.screenshots.subscribe(() => this.emit('updated'));
-    liveSession.once('closed', () => {
-      liveSession.off('tab-created', this.onTabCreated);
-      liveSession.db.screenshots.unsubscribe();
-    });
   }
 
   public getScreenshot(tabId: number, timestamp: number): string {
@@ -92,87 +54,6 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     }
     this.lastMetadata = TimelineBuilder.createTimelineMetadata(this.commandTimeline, this.db);
     return this.lastMetadata;
-  }
-
-  private onHeroSessionResumed(): void {
-    this.isPaused = false;
-    if (!this.liveSession) return;
-
-    for (const tab of this.liveSession.tabsById.values()) {
-      this.recordTab(tab);
-    }
-  }
-
-  private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
-    if (!this.recordScreenUntilTime && !this.recordScreenUntilLoad) return;
-    let loadPromise: Promise<any>;
-    if (this.recordScreenUntilLoad && this.liveSession) {
-      loadPromise = Promise.all(
-        [...this.liveSession.tabsById.values()].map(x => {
-          return x.navigationsObserver.waitForLoad(LoadStatus.AllContentLoaded);
-        }),
-      );
-    }
-
-    const delay = this.recordScreenUntilTime - Date.now();
-    let delayPromise: Promise<void>;
-    if (delay > 0) {
-      delayPromise = new Promise<void>(resolve => setTimeout(resolve, delay));
-    }
-    if (loadPromise || delayPromise) {
-      event.waitForPromise = Promise.race([
-        // max wait time
-        new Promise<void>(resolve => setTimeout(resolve, 60e3)),
-        Promise.all([loadPromise, delayPromise]),
-      ]).catch(() => null);
-    }
-  }
-
-  private onHeroSessionPaused(): void {
-    this.isPaused = true;
-    if (!this.liveSession) return;
-    this.stopRecording();
-  }
-
-  private stopRecording(): void {
-    for (const tab of this.liveSession.tabsById.values()) {
-      tab
-        .stopRecording()
-        .then(() => this.emit('updated'))
-        .catch(console.error);
-    }
-  }
-
-  private onTabCreated(event: { tab: Tab }): void {
-    const tab = event.tab;
-    tab.navigations.on('status-change', this.onStatusChange);
-    tab.once('close', () => {
-      tab.navigations.off('status-change', this.onStatusChange);
-    });
-    if (this.isPaused) return;
-
-    this.recordTab(tab);
-  }
-
-  private recordTab(tab: Tab): void {
-    tab
-      .recordScreen({
-        includeWhiteScreens: true,
-        includeDuplicates: true,
-        jpegQuality: 1,
-        format: 'jpeg',
-      })
-      .catch(console.error);
-  }
-
-  private onStatusChange(status: IFrameNavigationEvents['status-change']): void {
-    if (
-      [LoadStatus.DomContentLoaded, LoadStatus.AllContentLoaded, ContentPaint].includes(
-        status.newStatus,
-      )
-    ) {
-      this.emit('updated');
-    }
   }
 
   public static createTimelineMetadata(
