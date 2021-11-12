@@ -195,7 +195,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     return this.coreSessions.get(sessionId);
   }
 
-  public closeSession(coreSession: CoreSession): void {
+  public untrackSession(coreSession: CoreSession): void {
     this.coreSessions.untrack(coreSession.sessionId);
   }
 

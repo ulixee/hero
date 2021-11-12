@@ -29,7 +29,7 @@
     "better-sqlite3": "^7.4.1",
     "moment": "^2.24.1",
     "tough-cookie": "^4.0.0",
-    "uuid": "^8.3.2",
+    "nanoid": "^3.1.30",
     "ws": "^7.4.4"
   },
   "devDependencies": {

@@ -15,7 +15,7 @@ export interface IFrameNavigationEvents {
   'status-change': {
     id: number;
     url: string;
-    statusChanges: { [status: string]: Date };
+    statusChanges: Record<NavigationStatus, number>;
     newStatus: NavigationStatus;
   };
 }

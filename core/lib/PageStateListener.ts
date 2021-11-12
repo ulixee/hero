@@ -30,6 +30,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   public readonly startTime: number;
   public readonly startingCommandId: number;
   public readonly commandStartTime: number;
+  public readonly isLoaded: Promise<void | Error>;
 
   public readonly rawBatchAssertionsById = new Map<string, IPageStateAssertionBatch>();
 
@@ -40,7 +41,6 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   private isStopping = false;
   private isCheckingState = false;
   private runAgain = false;
-  private readyPromise: Promise<void | Error>;
   private watchedFrameIds = new Set<number>();
 
   constructor(
@@ -68,7 +68,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
 
     tab.once('close', this.stop);
-    this.readyPromise = this.bindFrameEvents().catch(err => err);
+    this.isLoaded = this.bindFrameEvents().catch(err => err);
     this.checkInterval = setInterval(this.checkState, 2e3).unref();
   }
 

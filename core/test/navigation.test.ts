@@ -404,7 +404,7 @@ setTimeout(function() {
       },
     ]);
 
-    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingStatus');
+    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingTrigger');
 
     // clear data before this run
     const popupTab = await tab.waitForNewTab();

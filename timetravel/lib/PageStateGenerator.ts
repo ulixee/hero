@@ -19,6 +19,7 @@ import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
 import { nanoid } from 'nanoid';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 const { log } = Log(module);
 
@@ -33,6 +34,9 @@ export default class PageStateGenerator {
 
   public statesByName = new Map<string, IPageStateByName>();
 
+  private pendingEvaluate: Resolvable<void>;
+  private isEvaluating = false;
+
   constructor(readonly id: string) {}
 
   public addSession(
@@ -45,7 +49,7 @@ export default class PageStateGenerator {
     this.sessionsById.set(sessionId, {
       tabId,
       sessionId,
-      needsResultsVerification: true,
+      needsProcessing: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
@@ -114,11 +118,10 @@ export default class PageStateGenerator {
     }
     for (const session of savedState.sessions) {
       const db = SessionDb.getCached(session.sessionId, false);
-      // store flag to indicate this session should not be refreshed
       this.sessionsById.set(session.sessionId, {
         ...session,
         db,
-        needsResultsVerification: false,
+        needsProcessing: !!db,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
       });
     }
@@ -170,10 +173,36 @@ export default class PageStateGenerator {
   }
 
   public async evaluate(): Promise<void> {
-    for (const session of this.sessionsById.values()) {
-      const { db, loadingRange, tabId, sessionId, needsResultsVerification } = session;
+    if (this.isEvaluating) {
+      this.pendingEvaluate ??= new Resolvable<void>();
+      return await this.pendingEvaluate.promise;
+    }
 
-      if (!needsResultsVerification) continue;
+    this.isEvaluating = true;
+    try {
+      await this.doEvaluate();
+    } finally {
+      this.isEvaluating = false;
+
+      if (this.pendingEvaluate) {
+        const evaluate = this.pendingEvaluate;
+        this.pendingEvaluate = null;
+        this.evaluate().then(evaluate.resolve).catch(evaluate.reject);
+      }
+    }
+  }
+
+  public createBrowserContext(fromSessionId: string): void {
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+      .then(context => context.once('close', () => (this.browserContext = null)))
+      .catch(err => err);
+  }
+
+  private async doEvaluate(): Promise<void> {
+    for (const session of this.sessionsById.values()) {
+      const { db, loadingRange, tabId, sessionId, needsProcessing } = session;
+
+      if (!needsProcessing || !db) continue;
 
       this.sessionAssertions.clearSessionAssertions(sessionId);
       const [start, end] = loadingRange;
@@ -210,8 +239,9 @@ export default class PageStateGenerator {
         if (paintEvent.timestamp < start) {
           continue;
         }
+        if (paintEvent.timestamp > end) break;
 
-        this.processDomChanges(domRebuilder, sessionId, paintEvent.changeEvents);
+        this.processDomChanges(domRebuilder, session, paintEvent.changeEvents);
       }
 
       const resources = db.resources.withResponseTimeInRange(tabId, start, end);
@@ -236,15 +266,9 @@ export default class PageStateGenerator {
     PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
   }
 
-  public createBrowserContext(fromSessionId: string): void {
-    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
-      .then(context => context.once('close', () => (this.browserContext = null)))
-      .catch(err => err);
-  }
-
   private async checkResultsInPage(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      if (!session.domRecording || !session.needsResultsVerification) continue;
+      if (!session.domRecording || !session.needsProcessing) continue;
       const paintEvents = session.domRecording?.paintEvents;
       if (!paintEvents.length) {
         // no paint events for page!
@@ -257,14 +281,11 @@ export default class PageStateGenerator {
       const mirrorPage = session.mirrorPage;
       await mirrorPage.load();
       // only need to do this once?
-      session.needsResultsVerification = false;
+      session.needsProcessing = false;
 
-      for (const [frameId, assertions] of this.sessionAssertions.iterateSessionAssertionsByFrameId(
+      for (const [, assertions] of this.sessionAssertions.iterateSessionAssertionsByFrameId(
         session.sessionId,
       )) {
-        // TODO: don't know how to get to subframes quite yet...
-        if (!session.mainFrameIds.has(Number(frameId))) continue;
-
         const xpathAsserts = Object.values(assertions).filter(x => x.type === 'xpath');
         const queries = xpathAsserts.map(x => x.args[0]);
         const refreshedResults = await mirrorPage.page.evaluate(
@@ -288,6 +309,7 @@ export default class PageStateGenerator {
 
   private async createMirrorPageIfNeeded(session: IPageStateSession): Promise<void> {
     if (session.mirrorPage?.isReady) {
+      await session.mirrorPage.replaceDomRecording(session.domRecording);
       await session.mirrorPage.isReady;
       if (session.mirrorPage.page) return;
     }
@@ -366,11 +388,15 @@ export default class PageStateGenerator {
 
   private processDomChanges(
     dom: DomRebuilder,
-    sessionId: string,
+    session: IPageStateSession,
     changes: IDomChangeRecord[],
   ): void {
+    const sessionId = session.sessionId;
+
     for (const change of changes) {
       const { frameId, nodeId, action, nodeType } = change;
+      // TODO: don't know how to get to subframes quite yet...
+      if (!session.mainFrameIds.has(Number(frameId))) continue;
 
       if (change.action === DomActionType.location || change.action === DomActionType.newDocument) {
         this.recordUrl(sessionId, change.frameId, change.textContent);
@@ -510,7 +536,7 @@ export interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;
-  needsResultsVerification: boolean;
+  needsProcessing: boolean;
   mainFrameIds: Set<number>;
   domRecording?: IDomRecording;
   mirrorPage?: MirrorPage;

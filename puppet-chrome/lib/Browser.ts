@@ -143,11 +143,15 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       const devtoolsSession = this.connection.getSession(sessionId);
       if (!devtoolsSession) return;
 
-      if (event.waitingForDebugger) {
-        devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
-      }
       const context = this.getBrowserContext(targetInfo.browserContextId);
       context?.plugins.onServiceWorkerAttached(devtoolsSession, event).catch(() => null);
+      if (event.waitingForDebugger) {
+        devtoolsSession
+          .send('Runtime.runIfWaitingForDebugger')
+          .catch(() => null)
+          .then(() => this.devtoolsSession.send('Target.detachFromTarget', { sessionId }))
+          .catch(() => null);
+      }
     }
 
     if (targetInfo.type === 'other' && targetInfo.url.startsWith('devtools://devtools')) {

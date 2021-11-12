@@ -159,6 +159,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   public async refreshTicks(
     timelineOffsetRange: [startTime: number, endTime?: number],
   ): Promise<void> {
+    if (this.timelineRange && this.timelineRange.toString() === timelineOffsetRange.toString()) return;
     this.timelineRange = [...timelineOffsetRange];
     await this.load();
   }

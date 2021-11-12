@@ -78,18 +78,23 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
           continue;
         }
       }
-
-      // don't set a negative runtime
-      command.runtimeMs = Math.max(endDate - command.startTime, 0);
-
       // only use a gap if the command and previous are from the same run
       const prev = this.commandsFromAllRuns[this.commandsFromAllRuns.length - 1];
       if (
         prev?.run === command.run &&
         prev?.reusedCommandFromRun === command.reusedCommandFromRun
       ) {
+        if (command.startTime < prev.endDate) command.startTime = prev.endDate;
+        // if this ended before previous ended, need to skip it (probably in parallel)
+        if (endDate < prev.endDate) {
+          continue;
+        }
         command.commandGapMs = Math.max(command.startTime - prev.endDate, 0);
       }
+
+      // don't set a negative runtime
+      command.runtimeMs = Math.max(endDate - command.startTime, 0);
+
       this.commandsFromAllRuns.push(command);
 
       if (command.run === this.run) {
@@ -134,13 +139,13 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
         const msSinceCommandStart = timestamp - command.startTime;
         const adjustedTime = msSinceCommandStart + command.relativeStartMs;
 
-        return this.getTimelineOffset(adjustedTime);
+        return this.getTimelineOffsetForRuntimeMillis(adjustedTime);
       }
     }
     return -1;
   }
 
-  public getTimelineOffset(timelineOffsetMs: number): number {
+  private getTimelineOffsetForRuntimeMillis(timelineOffsetMs: number): number {
     return roundFloor((100 * timelineOffsetMs) / this.runtimeMs);
   }
 
@@ -187,5 +192,5 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
 }
 
 function roundFloor(num: number): number {
-  return Math.floor(10 * num) / 10;
+  return Math.round(10 * num) / 10;
 }

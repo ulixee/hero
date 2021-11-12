@@ -160,11 +160,6 @@ export default class TabPlaybackController {
     newTickOrIdx: number | ITick,
     specificTimelineOffset?: number,
   ): Promise<void> {
-    console.log('loading new tick', {
-      newTickOrIdx,
-      specificTimelineOffset,
-      willProcess: newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick,
-    });
     if (newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick) {
       return;
     }
@@ -194,7 +189,6 @@ export default class TabPlaybackController {
         startIndex = this.paintEventsLoadedIdx + 1;
       }
 
-      console.log('loading ticks', [startIndex, newPaintIndex]);
       this.paintEventsLoadedIdx = newPaintIndex;
       await mirrorPage.load([startIndex, newPaintIndex]);
     }

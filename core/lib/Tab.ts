@@ -658,10 +658,15 @@ export default class Tab
     return await pageStateListener.runBatchAssert(batchId);
   }
 
-  public addPageStateListener(id: string, options: IPageStateListenArgs): PageStateListener {
+  public async addPageStateListener(
+    id: string,
+    options: IPageStateListenArgs,
+  ): Promise<PageStateListener> {
     const listener = new PageStateListener(id, options, this);
     this.pageStateListeners[id] = listener;
     listener.on('resolved', () => delete this.pageStateListeners[id]);
+
+    await listener.isLoaded;
 
     this.emit('wait-for-pagestate', { listener });
 
@@ -677,12 +682,12 @@ export default class Tab
     return listener;
   }
 
-  public addJsPathEventListener(
+  public async addJsPathEventListener(
     type: 'message' | 'page-state',
     jsPath: IJsPath,
     options: any,
     listenFn: (...args) => void,
-  ): void {
+  ): Promise<void> {
     if (type === 'message') {
       const [domain, resourceId] = jsPath;
       if (domain !== 'resources') {
@@ -694,7 +699,7 @@ export default class Tab
 
     if (type === 'page-state') {
       const id = JSON.stringify(jsPath);
-      const listener = this.addPageStateListener(id, options);
+      const listener = await this.addPageStateListener(id, options);
       listener.on('state', listenFn);
     }
   }

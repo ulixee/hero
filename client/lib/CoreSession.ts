@@ -44,6 +44,7 @@ export default class CoreSession implements IJsPathEventTarget {
   private readonly connectionToCore: ConnectionToCore;
   private commandId = 0;
   private cliPrompt: ReadLine;
+  private isClosing = false;
 
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
@@ -136,7 +137,9 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async close(force = false): Promise<void> {
+    if (this.isClosing) return;
     try {
+      this.isClosing = true;
       this.closeCliPrompt();
       await this.commandQueue.flush();
       for (const tab of this.tabsById.values()) {
@@ -150,13 +153,14 @@ export default class CoreSession implements IJsPathEventTarget {
         force,
       );
       if (result?.didKeepAlive === true) {
+        this.isClosing = false;
         const closedResolvable = new Resolvable();
         await this.addEventListener(null, 'close', closedResolvable.resolve);
         await this.showSessionKeepAlivePrompt(result.message);
         await closedResolvable.promise;
       }
     } finally {
-      process.nextTick(() => this.connectionToCore.closeSession(this));
+      process.nextTick(() => this.connectionToCore.untrackSession(this));
       loggerSessionIdNames.delete(this.sessionId);
     }
   }

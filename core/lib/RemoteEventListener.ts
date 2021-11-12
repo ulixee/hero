@@ -59,7 +59,7 @@ export default class RemoteEventListener implements ICommandableTarget {
     }
   }
 
-  public addEventListener(
+  public async addEventListener(
     jsPath: IJsPath | null,
     type: string,
     options?: any,
@@ -77,18 +77,19 @@ export default class RemoteEventListener implements ICommandableTarget {
 
     if (jsPath && 'addJsPathEventListener' in target) {
       const fn = target.addJsPathEventListener.bind(target);
-      fn(type as any, jsPath, options, listener.listenFn);
+      await fn(type as any, jsPath, options, listener.listenFn);
     } else if ('on' in target) {
       const fn = target.on.bind(target) as any;
       fn(type, listener.listenFn);
     }
 
-    return Promise.resolve({ listenerId });
+    return { listenerId };
   }
 
   public removeEventListener(id: string, options?: any): Promise<void> {
     const listener = this.listenersById.get(id);
     this.listenersById.delete(id);
+    if (!listener) return;
 
     const { type, listenFn, jsPath } = listener;
     const target = this.target;
