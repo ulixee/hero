@@ -7,7 +7,8 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
-import { createId, createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
+import { createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
+import { nanoid } from 'nanoid';
 import * as Fs from 'fs';
 import * as Path from 'path';
 
@@ -201,7 +202,7 @@ export default abstract class BaseIpcHandler {
     options.mode = mode;
 
     if (options.ipcSocketPath === undefined) {
-      const id = createId();
+      const id = nanoid();
       options.ipcSocketPath = createIpcSocketPath(`ipc-${mode}-${id}`);
     }
     return options as IGoIpcOpts;

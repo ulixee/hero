@@ -22,6 +22,7 @@ interface IBatchAssertion {
   assertions: IPageStateAssertionBatch['assertions'];
   minValidAssertions: number;
   totalAssertions: number;
+  state: string;
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
@@ -30,6 +31,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   public readonly startTime: number;
   public readonly startingCommandId: number;
   public readonly commandStartTime: number;
+  public readonly isLoaded: Promise<void | Error>;
 
   public readonly rawBatchAssertionsById = new Map<string, IPageStateAssertionBatch>();
 
@@ -40,7 +42,6 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   private isStopping = false;
   private isCheckingState = false;
   private runAgain = false;
-  private readyPromise: Promise<void | Error>;
   private watchedFrameIds = new Set<number>();
 
   constructor(
@@ -68,7 +69,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
 
     tab.once('close', this.stop);
-    this.readyPromise = this.bindFrameEvents().catch(err => err);
+    this.isLoaded = this.bindFrameEvents().catch(err => err);
     this.checkInterval = setInterval(this.checkState, 2e3).unref();
   }
 
@@ -88,6 +89,10 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       frame.off('paint', this.checkState);
       frame.navigations.off('status-change', this.checkState);
     }
+  }
+
+  public getStateUsingBatchAssertion(id: string): string {
+    return this.batchAssertionsById.get(id).state;
   }
 
   public async runBatchAssert(batchId: string): Promise<boolean> {
@@ -143,10 +148,23 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
   public addAssertionBatch(state: string, batch: IPageStateAssertionBatch): string {
     if (!this.states.includes(state)) this.states.push(state);
-    const args = [batch.id, JSON.parse(this.jsPathId), batch.assertions, batch.minValidAssertions];
-    this.trackCommand(batch.id, this.tab.mainFrameId, 'Tab.assert', args);
+    let fullId = batch.id;
+    for (const id of this.batchAssertionsById.keys()) {
+      if (id.endsWith(batch.id + '.json')) {
+        fullId = id;
+        break;
+      }
+    }
+    const args = [
+      fullId,
+      JSON.parse(this.jsPathId),
+      batch.assertions,
+      batch.minValidAssertions,
+      state,
+    ];
+    this.trackCommand(fullId, this.tab.mainFrameId, 'Tab.assert', args);
     this.loadBatchAssert(args as any);
-    return batch.id;
+    return fullId;
   }
 
   private loadBatchAssert(
@@ -155,14 +173,16 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       pageStateIdJsPath: IJsPath,
       assertions: IPageStateAssertionBatch['assertions'],
       minValidAssertions: number,
+      state: string,
     ],
   ): void {
-    const [batchId, , assertions, minValidAssertions] = args;
+    const [batchId, , assertions, minValidAssertions, state] = args;
     this.batchAssertionsById.set(batchId, {
       assertions: [],
       domAssertionsByFrameId: new Map(),
       totalAssertions: assertions.length,
       minValidAssertions: minValidAssertions ?? assertions.length,
+      state,
     });
     const entry = this.batchAssertionsById.get(batchId);
 

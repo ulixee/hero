@@ -1,56 +1,45 @@
 import CommandTimeline from '../lib/CommandTimeline';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import { IFrameNavigationEvents } from '@ulixee/hero-core/lib/FrameNavigations';
-import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
-import { Session as HeroSession, Tab } from '@ulixee/hero-core';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
+import Session from '@ulixee/hero-core/lib/Session';
 
-export default class TimelineBuilder extends TypedEventEmitter<{
-  updated: void;
-}> {
-  public static bySessionId = new Map<string, TimelineBuilder>();
-
+export default class TimelineBuilder {
   public commandTimeline: CommandTimeline;
-  public recordScreenUntilTime = 0;
   public lastMetadata: ITimelineMetadata;
+  public readonly liveSession: Session;
 
   public get sessionId(): string {
     return this.db.sessionId;
   }
 
-  private timelineRange?: [startTime: number, endTime?: number];
-
-  private isPaused = false;
-
-  constructor(readonly db: SessionDb, readonly liveHeroSession?: HeroSession) {
-    super();
-    bindFunctions(this);
-    TimelineBuilder.bySessionId.set(db.sessionId, this);
-    this.commandTimeline = CommandTimeline.fromDb(this.db);
-
-    if (liveHeroSession) {
-      liveHeroSession.on('tab-created', this.onTabCreated);
-      liveHeroSession.on('kept-alive', this.onHeroSessionPaused);
-      liveHeroSession.on('resumed', this.onHeroSessionResumed);
-      liveHeroSession.on('will-close', this.onHeroSessionWillClose);
-
-      liveHeroSession.db.screenshots.subscribe(() => this.emit('updated'));
-      liveHeroSession.once('closed', () => {
-        liveHeroSession.off('tab-created', this.onTabCreated);
-        liveHeroSession.db.screenshots.unsubscribe();
-      });
-    }
+  public get timelineRange(): [startTime: number, endTime?: number] {
+    return this._timelineRange;
   }
 
-  public setTimeRange(startTime: number, endTime?: number): void {
-    this.timelineRange = [startTime, endTime];
-    this.commandTimeline = this.liveHeroSession
-      ? CommandTimeline.fromSession(this.liveHeroSession, this.timelineRange)
-      : CommandTimeline.fromDb(this.db, this.timelineRange);
+  public set timelineRange(value) {
+    this._timelineRange = value;
+    // need to refresh from db. RefreshMetadata will update live
+    if (!this.liveSession) {
+      this.commandTimeline = CommandTimeline.fromDb(this.db, this.timelineRange);
+    }
     this.refreshMetadata();
+  }
+
+  private readonly db: SessionDb;
+  private _timelineRange: [startTime: number, endTime?: number];
+
+  constructor(options: {
+    db?: SessionDb;
+    liveSession?: Session;
+    timelineRange?: TimelineBuilder['_timelineRange'];
+  }) {
+    bindFunctions(this);
+    this.liveSession = options.liveSession;
+    this.db = options.db ?? options.liveSession?.db;
+    this._timelineRange = options.timelineRange;
+    this.commandTimeline = CommandTimeline.fromDb(this.db, this._timelineRange);
   }
 
   public getScreenshot(tabId: number, timestamp: number): string {
@@ -60,75 +49,11 @@ export default class TimelineBuilder extends TypedEventEmitter<{
 
   public refreshMetadata(): ITimelineMetadata {
     // update if live
-    if (this.liveHeroSession) {
-      this.commandTimeline = CommandTimeline.fromSession(this.liveHeroSession, this.timelineRange);
+    if (this.liveSession) {
+      this.commandTimeline = CommandTimeline.fromSession(this.liveSession, this.timelineRange);
     }
     this.lastMetadata = TimelineBuilder.createTimelineMetadata(this.commandTimeline, this.db);
     return this.lastMetadata;
-  }
-
-  private onHeroSessionResumed(): void {
-    this.isPaused = false;
-    if (!this.liveHeroSession) return;
-
-    for (const tab of this.liveHeroSession.tabsById.values()) {
-      this.recordTab(tab);
-    }
-  }
-
-  private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
-    if (!this.recordScreenUntilTime) return;
-    const delay = this.recordScreenUntilTime - Date.now();
-    if (delay > 0) {
-      event.waitForPromise = new Promise<void>(resolve => setTimeout(resolve, delay));
-    }
-  }
-
-  private onHeroSessionPaused(): void {
-    this.isPaused = true;
-    if (!this.liveHeroSession) return;
-    this.stopRecording();
-  }
-
-  private stopRecording(): void {
-    for (const tab of this.liveHeroSession.tabsById.values()) {
-      tab
-        .stopRecording()
-        .then(() => this.emit('updated'))
-        .catch(console.error);
-    }
-  }
-
-  private onTabCreated(event: { tab: Tab }): void {
-    const tab = event.tab;
-    tab.navigations.on('status-change', this.onStatusChange);
-    tab.once('close', () => {
-      tab.navigations.off('status-change', this.onStatusChange);
-    });
-    if (this.isPaused) return;
-
-    this.recordTab(tab);
-  }
-
-  private recordTab(tab: Tab): void {
-    tab
-      .recordScreen({
-        includeWhiteScreens: true,
-        includeDuplicates: true,
-        jpegQuality: 1,
-        format: 'jpeg',
-      })
-      .catch(console.error);
-  }
-
-  private onStatusChange(status: IFrameNavigationEvents['status-change']): void {
-    if (
-      [LoadStatus.DomContentLoaded, LoadStatus.AllContentLoaded, ContentPaint].includes(
-        status.newStatus,
-      )
-    ) {
-      this.emit('updated');
-    }
   }
 
   public static createTimelineMetadata(
@@ -181,7 +106,7 @@ export default class TimelineBuilder extends TypedEventEmitter<{
     }
 
     const screenshots: ITimelineMetadata['screenshots'] = [];
-    for (const [tabId, times] of db.screenshots.screenshotTimesByTabId) {
+    for (const [tabId, times] of db.screenshots.getScreenshotTimesByTabId()) {
       for (const timestamp of times) {
         const offsetPercent = commandTimeline.getTimelineOffsetForTimestamp(timestamp);
         if (offsetPercent === -1) continue;

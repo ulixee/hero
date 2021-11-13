@@ -11,6 +11,7 @@ export default class SessionsTable extends SqliteTable<ISessionsRecord> {
       ['scriptInstanceId', 'TEXT'],
       ['scriptEntrypoint', 'TEXT'],
       ['scriptStartDate', 'TEXT'],
+      ['workingDirectory', 'TEXT'],
     ]);
   }
 
@@ -25,6 +26,7 @@ export default class SessionsTable extends SqliteTable<ISessionsRecord> {
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.entrypoint,
       new Date(scriptInstanceMeta?.startDate).toISOString(),
+      scriptInstanceMeta?.workingDirectory,
     ];
     this.insertNow(record);
   }
@@ -49,4 +51,5 @@ export interface ISessionsRecord {
   scriptInstanceId: string;
   scriptEntrypoint: string;
   scriptStartDate: string;
+  workingDirectory: string;
 }

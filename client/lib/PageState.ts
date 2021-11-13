@@ -6,7 +6,7 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
-import { IRawCommand } from '@ulixee/hero-interfaces/IPageStateListenArgs';
+import IPageStateListenArgs, { IRawCommand } from '@ulixee/hero-interfaces/IPageStateListenArgs';
 import CoreTab from './CoreTab';
 import IPageStateDefinitions, {
   IPageStateDefinitionFn,
@@ -14,6 +14,7 @@ import IPageStateDefinitions, {
 } from '../interfaces/IPageStateDefinitions';
 import Tab from './Tab';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 let counter = 0;
 
@@ -51,12 +52,15 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     await this.collectAssertionCommands();
 
     const timer = new Timer(timeoutMs);
-    const states = Object.keys(this.#states);
-    await this.#coreTab.addEventListener(this.#jsPath, 'page-state', this.onStateChanged, {
+    const pageStateOptions: IPageStateListenArgs = {
       commands: this.#rawCommandsById,
       callsite: this.#callsite,
-      states,
-    });
+      states: Object.keys(this.#states),
+    };
+
+    await this.#coreTab
+      .addEventListener(this.#jsPath, 'page-state', this.onStateChanged, pageStateOptions)
+      .catch(this.rewriteNoStateError);
 
     let finalState: K;
     let waitError: Error;
@@ -77,6 +81,15 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
         error: waitError,
       });
     }
+  }
+
+  private rewriteNoStateError(error: Error): void {
+    const states = Object.keys(this.#states);
+    if (error instanceof CanceledPromiseError && !states.length) {
+      error.name = 'ConfigurationRequired';
+      error.stack = `${error.name}: ${error.message}\n${error.stack.split(/\r?\n/).pop()}`;
+    }
+    throw error;
   }
 
   private async onStateChanged(stateResult: IPageStateResult): Promise<void> {
@@ -225,7 +238,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
           }
         },
         loadFrom(exportedStateOrPath) {
-          const promise = loadAssertionBatch(exportedStateOrPath);
+          const promise = loadAssertionBatch(key, exportedStateOrPath);
           promises.push(promise);
         },
       });
@@ -251,11 +264,12 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   }
 
   private async loadAssertionBatch(
+    state: string,
     exportedStateOrPath: IPageStateAssertionBatch | string,
   ): Promise<void> {
     let assertionBatch = exportedStateOrPath as IPageStateAssertionBatch;
     if (typeof exportedStateOrPath === 'string') {
-      // if @, read from core
+      // @ is a shortcut meaning, "read from Core::CacheLocation"
       if (exportedStateOrPath.startsWith('@')) {
         assertionBatch = {
           id: exportedStateOrPath,
@@ -264,8 +278,8 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
         };
       } else {
         assertionBatch = await readFileAsJson(exportedStateOrPath);
-        this.#batchAssertionPathToId[exportedStateOrPath] = assertionBatch.id;
       }
+      this.#batchAssertionPathToId[exportedStateOrPath] = assertionBatch.id;
     }
 
     this.#idCounter += 1;
@@ -278,6 +292,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
         this.#jsPath,
         assertionBatch.assertions,
         assertionBatch.minValidAssertions,
+        state,
       ],
     ];
     // NOTE: subtly different serialization - serialized command and local run just stores the id

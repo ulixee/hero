@@ -1,8 +1,8 @@
-import { v1 as uuidv1 } from 'uuid';
+import { nanoid } from 'nanoid';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 
 export default class ScriptInstance {
-  public readonly id: string = uuidv1();
+  public readonly id: string = nanoid();
   public readonly entrypoint = require.main?.filename ?? process.argv[1];
   public readonly startDate = Date.now();
   private sessionNameCountByName: { [name: string]: number } = {};
@@ -10,6 +10,7 @@ export default class ScriptInstance {
   public get meta(): IScriptInstanceMeta {
     return {
       id: this.id,
+      workingDirectory: process.cwd(),
       entrypoint: this.entrypoint,
       startDate: this.startDate,
     };

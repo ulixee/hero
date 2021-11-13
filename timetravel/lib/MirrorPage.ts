@@ -91,7 +91,12 @@ export default class MirrorPage extends TypedEventEmitter<{
     }
   }
 
-  public async updateDomRecording(domRecording: IDomRecording): Promise<void> {
+  public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
+    this.domRecording = domRecording;
+    if (this.page) await this.injectPaintEvents();
+  }
+
+  public async addDomRecordingUpdates(domRecording: IDomRecording): Promise<void> {
     this.domRecording.domNodePathByFrameId = domRecording.domNodePathByFrameId;
 
     for (const document of domRecording.documents) {
@@ -131,6 +136,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       }
       iteratedPaintIndex += 1;
     }
+    if (!this.page) return;
     await this.injectPaintEvents();
   }
 
@@ -230,7 +236,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   private async evaluate<T>(expression: string): Promise<T> {
-    return await this.page.mainFrame.evaluate(expression, true);
+    return await this.page.mainFrame.evaluate(expression, true, { retriesWaitingForLoad: 2 });
   }
 
   private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
@@ -289,7 +295,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     const records = ${JSON.stringify(events).replace(/,null/g, ',')};
     const tagNamesById = ${JSON.stringify(tagNamesById)};
     const domNodePathsByFrameId = ${JSON.stringify(domNodePathByFrameId ?? {})};
-    window.records=  { records,tagNamesById, domNodePathsByFrameId};
+    window.records = { records,tagNamesById, domNodePathsByFrameId};
     const paintEvents = [];
     for (const event of records) {
       const changeEvents = [];

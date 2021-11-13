@@ -19,6 +19,7 @@ import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
 import XPathGenerator from './XPathGenerator';
 import { nanoid } from 'nanoid';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 const { log } = Log(module);
 
@@ -33,6 +34,9 @@ export default class PageStateGenerator {
 
   public statesByName = new Map<string, IPageStateByName>();
 
+  private pendingEvaluate: Resolvable<void>;
+  private isEvaluating = false;
+
   constructor(readonly id: string) {}
 
   public addSession(
@@ -45,7 +49,7 @@ export default class PageStateGenerator {
     this.sessionsById.set(sessionId, {
       tabId,
       sessionId,
-      needsResultsVerification: true,
+      needsProcessing: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       db: sessionDb,
       dbLocation: SessionDb.databaseDir,
@@ -89,16 +93,16 @@ export default class PageStateGenerator {
     }
   }
 
-  public import(savedState: IPageStateGeneratorAssertionBatch): void {
-    if (!this.statesByName.has(savedState.state)) {
-      this.statesByName.set(savedState.state, {
+  public import(stateName: string, savedState: IPageStateGeneratorAssertionBatch): void {
+    if (!this.statesByName.has(stateName)) {
+      this.statesByName.set(stateName, {
         sessionIds: new Set<string>(),
         assertsByFrameId: {},
         id: savedState.id,
       });
     }
-    this.addState(savedState.state, ...savedState.sessions.map(x => x.sessionId));
-    const state = this.statesByName.get(savedState.state);
+    this.addState(stateName, ...savedState.sessions.map(x => x.sessionId));
+    const state = this.statesByName.get(stateName);
     state.startingAssertsByFrameId = {};
     const startingAssertions = state.startingAssertsByFrameId;
     for (const [frameId, type, args, comparison, result] of savedState.assertions) {
@@ -114,11 +118,10 @@ export default class PageStateGenerator {
     }
     for (const session of savedState.sessions) {
       const db = SessionDb.getCached(session.sessionId, false);
-      // store flag to indicate this session should not be refreshed
       this.sessionsById.set(session.sessionId, {
         ...session,
         db,
-        needsResultsVerification: false,
+        needsProcessing: !!db,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
       });
     }
@@ -132,7 +135,6 @@ export default class PageStateGenerator {
       id: this.statesByName.get(stateName).id,
       sessions: [],
       assertions: [],
-      state: stateName,
     };
     const state = this.statesByName.get(stateName);
     for (const sessionId of state.sessionIds) {
@@ -170,11 +172,38 @@ export default class PageStateGenerator {
   }
 
   public async evaluate(): Promise<void> {
+    if (this.isEvaluating) {
+      this.pendingEvaluate ??= new Resolvable<void>();
+      return await this.pendingEvaluate.promise;
+    }
+
+    this.isEvaluating = true;
+    try {
+      await this.doEvaluate();
+    } finally {
+      this.isEvaluating = false;
+
+      if (this.pendingEvaluate) {
+        const evaluate = this.pendingEvaluate;
+        this.pendingEvaluate = null;
+        this.evaluate().then(evaluate.resolve).catch(evaluate.reject);
+      }
+    }
+  }
+
+  public createBrowserContext(fromSessionId: string): void {
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+      .then(context => context.once('close', () => (this.browserContext = null)))
+      .catch(err => err);
+  }
+
+  private async doEvaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      const { db, loadingRange, tabId, sessionId, needsResultsVerification } = session;
+      const { db, loadingRange, tabId, sessionId, needsProcessing } = session;
 
-      if (!needsResultsVerification) continue;
+      if (!needsProcessing || !db) continue;
 
+      this.sessionAssertions.clearSessionAssertions(sessionId);
       const [start, end] = loadingRange;
       const timeoutMs = end - Date.now();
 
@@ -209,8 +238,9 @@ export default class PageStateGenerator {
         if (paintEvent.timestamp < start) {
           continue;
         }
+        if (paintEvent.timestamp > end) break;
 
-        this.processDomChanges(domRebuilder, sessionId, paintEvent.changeEvents);
+        this.processDomChanges(domRebuilder, session, paintEvent.changeEvents);
       }
 
       const resources = db.resources.withResponseTimeInRange(tabId, start, end);
@@ -235,15 +265,9 @@ export default class PageStateGenerator {
     PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
   }
 
-  public createBrowserContext(fromSessionId: string): void {
-    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
-      .then(context => context.once('close', () => (this.browserContext = null)))
-      .catch(err => err);
-  }
-
   private async checkResultsInPage(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      if (!session.domRecording || !session.needsResultsVerification) continue;
+      if (!session.domRecording || !session.needsProcessing) continue;
       const paintEvents = session.domRecording?.paintEvents;
       if (!paintEvents.length) {
         // no paint events for page!
@@ -256,14 +280,11 @@ export default class PageStateGenerator {
       const mirrorPage = session.mirrorPage;
       await mirrorPage.load();
       // only need to do this once?
-      session.needsResultsVerification = false;
+      session.needsProcessing = false;
 
-      for (const [frameId, assertions] of this.sessionAssertions.iterateSessionAssertionsByFrameId(
+      for (const [, assertions] of this.sessionAssertions.iterateSessionAssertionsByFrameId(
         session.sessionId,
       )) {
-        // TODO: don't know how to get to subframes quite yet...
-        if (!session.mainFrameIds.has(Number(frameId))) continue;
-
         const xpathAsserts = Object.values(assertions).filter(x => x.type === 'xpath');
         const queries = xpathAsserts.map(x => x.args[0]);
         const refreshedResults = await mirrorPage.page.evaluate(
@@ -287,6 +308,7 @@ export default class PageStateGenerator {
 
   private async createMirrorPageIfNeeded(session: IPageStateSession): Promise<void> {
     if (session.mirrorPage?.isReady) {
+      await session.mirrorPage.replaceDomRecording(session.domRecording);
       await session.mirrorPage.isReady;
       if (session.mirrorPage.page) return;
     }
@@ -365,11 +387,15 @@ export default class PageStateGenerator {
 
   private processDomChanges(
     dom: DomRebuilder,
-    sessionId: string,
+    session: IPageStateSession,
     changes: IDomChangeRecord[],
   ): void {
+    const sessionId = session.sessionId;
+
     for (const change of changes) {
       const { frameId, nodeId, action, nodeType } = change;
+      // TODO: don't know how to get to subframes quite yet...
+      if (!session.mainFrameIds.has(Number(frameId))) continue;
 
       if (change.action === DomActionType.location || change.action === DomActionType.newDocument) {
         this.recordUrl(sessionId, change.frameId, change.textContent);
@@ -470,15 +496,16 @@ export default class PageStateGenerator {
     const { tabId, db, loadingRange, sessionId } = session;
     const [, endTime] = loadingRange;
 
+    // going in descending order
     for (const nav of db.frameNavigations.getMostRecentTabNavigations(
       tabId,
       session.mainFrameIds,
     )) {
       if (nav.httpRespondedTime && !nav.httpRedirectedTime) {
         lastNavigation = nav;
-        if (nav.httpRespondedTime < endTime) break;
+        // if this was requested before the end time, use it
+        if (nav.httpRequestedTime && nav.httpRequestedTime < endTime) break;
       }
-      if (nav.httpRequestedTime && nav.httpRequestedTime < endTime) break;
     }
 
     if (!lastNavigation) {
@@ -494,7 +521,6 @@ export default class PageStateGenerator {
 }
 
 export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBatch {
-  state: string;
   sessions: {
     sessionId: string;
     dbLocation: string; // could be on another machine
@@ -508,7 +534,7 @@ export interface IPageStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;
-  needsResultsVerification: boolean;
+  needsProcessing: boolean;
   mainFrameIds: Set<number>;
   domRecording?: IDomRecording;
   mirrorPage?: MirrorPage;

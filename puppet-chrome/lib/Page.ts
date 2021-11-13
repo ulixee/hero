@@ -330,6 +330,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     await this.devtoolsSession.send('Page.startScreencast', {
       format: options.format,
       quality: options.jpegQuality,
+      everyNthFrame: 1,
     });
   }
 

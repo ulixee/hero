@@ -28,6 +28,10 @@ export default class PageStateAssertions {
     if (frameAssertions) return frameAssertions[query];
   }
 
+  public clearSessionAssertions(sessionId: string): void {
+    this.assertsBySessionId[sessionId] = {};
+  }
+
   public recordAssertion(
     sessionId: string,
     frameId: number,
@@ -80,9 +84,11 @@ export default class PageStateAssertions {
       // remove anything in the shared state that's not in this run
       for (const [frameId, sharedAssertions] of Object.entries(state)) {
         for (const key of Object.keys(sharedAssertions)) {
-          if (!sessionAssertionsByFrameId[frameId]) continue;
           const sessionFrameAssertions = sessionAssertionsByFrameId[frameId];
-          if (!sessionFrameAssertions[key]) {
+          
+          if (!sessionFrameAssertions) {
+            delete state[frameId];
+          } else if (!sessionFrameAssertions[key]) {
             delete state[frameId][key];
           }
         }

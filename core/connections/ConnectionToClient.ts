@@ -148,9 +148,9 @@ export default class ConnectionToClient
     if (this.isClosing) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
 
-    const { session, tab, isSessionResume } = await Session.create(options);
-    if (!isSessionResume) {
-      const sessionId = session.id;
+    const { session, tab } = await Session.create(options);
+    const sessionId = session.id;
+    if (!this.sessionIdToRemoteEvents.has(sessionId)) {
       this.sessionIdToRemoteEvents.set(
         sessionId,
         new RemoteEvents(this.emit.bind(this, 'message')),

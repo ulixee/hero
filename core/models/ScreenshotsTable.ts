@@ -2,10 +2,10 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
-  public screenshotTimesByTabId = new Map<number, number[]>();
   public storeDuplicates = false;
   public includeWhiteScreens = false;
 
+  private screenshotTimesByTabId = new Map<number, number[]>();
   private lastImageByTab: { [tabId: number]: Buffer } = {};
 
   constructor(readonly db: SqliteDatabase) {
@@ -35,6 +35,15 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
     return record.image;
   }
 
+  public getScreenshotTimesByTabId(): ScreenshotsTable['screenshotTimesByTabId'] {
+    if (this.screenshotTimesByTabId.size) return this.screenshotTimesByTabId;
+    const timestamps = this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
+    for (const { timestamp, tabId } of timestamps) {
+      this.trackScreenshotTime(tabId, timestamp);
+    }
+    return this.screenshotTimesByTabId;
+  }
+
   public insert(screenshot: IScreenshot): void {
     const { tabId, timestamp, image } = screenshot;
     if (
@@ -45,13 +54,16 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
       return;
     }
     this.lastImageByTab[tabId] = image;
+    this.trackScreenshotTime(tabId, timestamp);
 
+    this.queuePendingInsert([String(timestamp), tabId, image]);
+  }
+
+  private trackScreenshotTime(tabId: number, timestamp: number): void {
     if (!this.screenshotTimesByTabId.has(tabId)) {
       this.screenshotTimesByTabId.set(tabId, []);
     }
     this.screenshotTimesByTabId.get(tabId).push(timestamp);
-
-    this.queuePendingInsert([String(timestamp), tabId, image]);
   }
 
   public static isBlankImage(imageBase64: string): boolean {

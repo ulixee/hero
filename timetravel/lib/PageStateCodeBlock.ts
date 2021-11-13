@@ -14,7 +14,7 @@ export default class PageStateCodeBlock {
   }
 
   public static async generateCodeBlock(generator: PageStateGenerator): Promise<string> {
-    let code = `tab.waitForPageState({`;
+    let code = `{`;
 
     const id = generator.id;
     await Fs.promises.mkdir(`${defaultCacheDir}/pagestate/${id}`, { recursive: true });
@@ -22,12 +22,14 @@ export default class PageStateCodeBlock {
       const exported = generator.export(state);
       const savePath = Path.normalize(`${defaultCacheDir}/pagestate/${id}/${exported.id}.json`);
       await Fs.promises.writeFile(savePath, JSON.stringify(exported));
-      code += `\n  ${JSON.stringify(state)}: ({ loadFrom }) => loadFrom(${JSON.stringify(
-        `@/pagestate/${id}/${state}.json`,
+      const stateKey = JSON.stringify(state);
+
+      code += `\n  ${stateKey}: ({ loadFrom }) => loadFrom(${JSON.stringify(
+        `@/pagestate/${id}/${exported.id}.json`,
       )}),`;
     }
 
-    code += `\n});`;
+    code += `\n}`;
 
     return code;
   }

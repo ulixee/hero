@@ -43,7 +43,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
       .prepare(
         `select * from ${this.tableName}
                 where tabId = ? and securityOrigin = :securityOrigin
-                    and type = :type and action = :type and key = :key
+                    and type = :type and action = :action and key = :key
                 limit 1`,
       )
       .get(tabId, filter);

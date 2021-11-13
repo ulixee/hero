@@ -67,7 +67,7 @@ describe('Load test', () => {
         await navigate;
         expect(page.mainFrame.url).toBe(`${server.crossProcessBaseUrl}/empty.html`);
       } finally {
-        await page.close();
+        await page?.close();
       }
     });
     await Promise.all(concurrent);

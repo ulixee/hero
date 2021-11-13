@@ -33,6 +33,7 @@ describe('basic Apis tests', () => {
       humanEmulatorId: 'basic',
       scriptInstanceMeta: {
         startDate: Date.now(),
+        workingDirectory: process.cwd(),
         entrypoint: 'testEntrypoint.js',
         id: '1234',
       },

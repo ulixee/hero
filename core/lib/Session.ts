@@ -1,4 +1,4 @@
-import { v1 as uuidv1 } from 'uuid';
+import { nanoid } from 'nanoid';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
@@ -480,13 +480,13 @@ export default class Session
         throw new Error('The pre-provided sessionId is already in use.');
       }
       // make sure this is a valid sessionid
-      if (/^[0-9a-zA-Z-]{1,48}/.test(sessionId) === false) {
+      if (/^[0-9a-zA-Z-_]{6,}/.test(sessionId) === false) {
         throw new Error(
-          'Unsupported sessionId format provided. Must be 5-48 characters including: a-z, 0-9 and dashes.',
+          'Unsupported sessionId format provided. Must be > 10 characters including: a-z, 0-9 and dashes.',
         );
       }
     }
-    return sessionId ?? uuidv1();
+    return sessionId ?? nanoid();
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {

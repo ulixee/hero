@@ -10,7 +10,7 @@
   "dependencies": {
     "@ulixee/commons": "1.5.7",
     "@ulixee/hero-interfaces": "1.5.4",
-    "uuid": "^8.3.2"
+    "nanoid": "^3.1.30"
   },
   "devDependencies": {
     "@ulixee/hero-testing": "1.5.4",

@@ -32,7 +32,7 @@ test('can wait for page state events', async () => {
   await tab.goto(`${koaServer.baseUrl}/pageState1`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
-  const listener = tab.addPageStateListener('1', {
+  const listener = await tab.addPageStateListener('1', {
     callsite: 'callsite',
     states: ['states'],
     commands: {
@@ -73,8 +73,6 @@ test('can wait for page state events', async () => {
 
 test('can continue to get events as dom changes', async () => {
   const { tab } = await createSession();
-  await tab.recordScreen({ jpegQuality: 10, format: 'jpeg' });
-
   koaServer.get('/pageState2', ctx => {
     ctx.body = `
   <body>
@@ -94,7 +92,7 @@ test('can continue to get events as dom changes', async () => {
   await tab.goto(`${koaServer.baseUrl}/pageState2`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
-  const listener = tab.addPageStateListener('2', {
+  const listener = await tab.addPageStateListener('2', {
     callsite: 'callsite',
     states: ['states'],
     commands: {
@@ -118,8 +116,6 @@ test('can continue to get events as dom changes', async () => {
 
   await hasDiv.promise;
   listener.stop();
-  await tab.stopRecording();
-  expect(tab.session.db.screenshots.screenshotTimesByTabId.size).toBeGreaterThanOrEqual(1);
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(2);
   const lastCall = callbackFn.mock.calls.slice(-1).shift()[0];
   expect(lastCall.url).toBe(`${koaServer.baseUrl}/pageState2`);
