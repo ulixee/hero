@@ -249,6 +249,14 @@ export default class Tab
     const errors: Error[] = [];
 
     try {
+      await this.puppetPage.domStorageTracker.flush(5e3);
+    } catch (error) {
+      if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
+        errors.push(error);
+      }
+    }
+
+    try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
       for (const frame of this.frameEnvironmentsById.values()) {

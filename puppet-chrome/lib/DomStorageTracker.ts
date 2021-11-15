@@ -26,10 +26,6 @@ export class DomStorageTracker
   extends TypedEventEmitter<IPuppetStorageEvents>
   implements IPuppetDomStorageTracker
 {
-  public get processing(): Promise<void> {
-    return Promise.race([this.closePromise, this.processingPromise]);
-  }
-
   public readonly storageByOrigin: {
     [origin: string]: IDomStorageForOrigin;
   };
@@ -40,8 +36,9 @@ export class DomStorageTracker
   private readonly devtoolsSession: DevtoolsSession;
   private readonly page: Page;
   private readonly networkManager: NetworkManager;
-  private closePromise = new Resolvable<void>();
   private processingPromise = Promise.resolve();
+  private readonly indexedDBListUpdatingOrigins = new Set<string>();
+  private readonly indexedDBContentUpdatingOrigins = new Set<string>();
 
   private trackedOrigins = new Set<string>();
 
@@ -71,7 +68,13 @@ export class DomStorageTracker
   public close() {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('DomStorageTracker closed');
-    this.closePromise.resolve();
+  }
+
+  public async flush(timeoutMs = 30e3): Promise<void> {
+    await Promise.race([
+      this.processingPromise,
+      new Promise<void>(resolve => setTimeout(resolve, timeoutMs ?? 0)),
+    ]);
   }
 
   public initialize(): Promise<void> {
@@ -244,6 +247,8 @@ export class DomStorageTracker
   private async onIndexedDBListUpdated(event: IndexedDBListUpdatedEvent): Promise<void> {
     const timestamp = Date.now();
     const securityOrigin = event.origin;
+    if (this.indexedDBListUpdatingOrigins.has(securityOrigin)) return;
+    this.indexedDBListUpdatingOrigins.add(securityOrigin);
 
     const resolvable = new Resolvable<void>();
     this.processingPromise = this.processingPromise.then(() => resolvable.promise);
@@ -277,12 +282,16 @@ export class DomStorageTracker
         event,
       });
     } finally {
+      this.indexedDBListUpdatingOrigins.delete(securityOrigin);
       resolvable.resolve();
     }
   }
 
   private async onIndexedDBContentUpdated(event: IndexedDBContentUpdatedEvent): Promise<void> {
     const { origin: securityOrigin, databaseName, objectStoreName } = event;
+    if (this.indexedDBContentUpdatingOrigins.has(securityOrigin)) return;
+    this.indexedDBContentUpdatingOrigins.add(securityOrigin);
+
     const timestamp = Date.now();
     try {
       const db = await this.getLatestIndexedDB(securityOrigin, databaseName);
@@ -318,6 +327,8 @@ export class DomStorageTracker
         error,
         event,
       });
+    } finally {
+      this.indexedDBContentUpdatingOrigins.delete(securityOrigin);
     }
   }
 

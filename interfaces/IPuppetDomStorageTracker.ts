@@ -10,6 +10,7 @@ export default interface IPuppetDomStorageTracker {
       storageForOrigin: IDomStorageForOrigin;
     }[]
   >;
+  flush(timeoutMs?: number): Promise<void>;
 }
 
 export interface IPuppetStorageEvents {
