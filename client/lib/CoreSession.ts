@@ -215,7 +215,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
     ShutdownHandler.register(() => this.close(true));
     process.stdin.on('keypress', async (chunk, key) => {
-      if (key.name.toLowerCase() === 'q') {
+      if (key.name?.toLowerCase() === 'q') {
         try {
           await this.close(true);
         } catch (error) {

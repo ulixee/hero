@@ -37,6 +37,15 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     this.stopRecording();
   }
 
+  public stopRecording(): void {
+    for (const tab of this.heroSession.tabsById.values()) {
+      tab
+        .stopRecording()
+        .then(() => this.emit('updated'))
+        .catch(console.error);
+    }
+  }
+
   public getScreenshot(tabId: number, timestamp: number): string {
     const image = this.heroSession.db.screenshots.getImage(tabId, timestamp);
     if (image) return image.toString('base64');
@@ -80,15 +89,6 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     this.isPaused = true;
     if (!this.heroSession) return;
     this.stopRecording();
-  }
-
-  private stopRecording(): void {
-    for (const tab of this.heroSession.tabsById.values()) {
-      tab
-        .stopRecording()
-        .then(() => this.emit('updated'))
-        .catch(console.error);
-    }
   }
 
   private onTabCreated(event: { tab: Tab }): void {

@@ -91,7 +91,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     }
   }
 
-  public getStateUsingBatchAssertion(id: string): string {
+  public stateThatImportedBatchAssertion(id: string): string {
     return this.batchAssertionsById.get(id).state;
   }
 

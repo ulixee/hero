@@ -27,6 +27,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   private sessionId: string;
+  private lastLoadedPaintIndex = -1;
 
   constructor(
     public network: MirrorNetwork,
@@ -170,7 +171,10 @@ export default class MirrorPage extends TypedEventEmitter<{
 
     const page = this.page;
     let isLoadingDocument = false;
-    if (loadingDocument && loadingDocument.url !== page.mainFrame.url) {
+    if (
+      loadingDocument &&
+      (loadingDocument.url !== page.mainFrame.url || endIndex < this.lastLoadedPaintIndex)
+    ) {
       isLoadingDocument = true;
       await this.navigate(loadingDocument.url);
     }
@@ -183,6 +187,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       }
       const showOverlay = isLoadingDocument && this.showBrowserInteractions;
 
+      this.lastLoadedPaintIndex = endIndex;
       if (showOverlay) await this.evaluate(`window.showReplayOverlay();`);
 
       await this.evaluate(`window.setPaintIndexRange(${startIndex}, ${endIndex});`);
