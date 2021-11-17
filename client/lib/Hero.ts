@@ -127,12 +127,9 @@ export default class Hero extends AwaitedEventTarget<{
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
 
-    const nodeEnv = process.env.NODE_ENV;
-    let mode = options.mode ?? nodeEnv;
-    if (!['development', 'production', 'multiverse'].includes(mode)) mode = 'development';
     options = {
       ...options,
-      mode,
+      mode: options.mode ?? scriptInstance.mode,
       sessionName,
       scriptInstanceMeta: scriptInstance.meta,
       dependencyMap: {},

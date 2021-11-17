@@ -36,6 +36,7 @@ import Resources from './Resources';
 import Commands from './Commands';
 import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
+import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 
 const { log } = Log(module);
 
@@ -49,7 +50,7 @@ export default class Session
     'tab-created': { tab: Tab };
     'all-tabs-closed': void;
   }>
-  implements ICommandableTarget
+  implements ICommandableTarget, IRemoteEventListener
 {
   private static readonly byId: { [id: string]: Session } = {};
 
@@ -127,6 +128,8 @@ export default class Session
     };
   }
 
+  public awaitedEventEmitter = new TypedEventEmitter<{ close: void }>();
+
   protected readonly logger: IBoundLog;
 
   private hasLoadedUserProfile = false;
@@ -187,6 +190,8 @@ export default class Session
       this.exportUserProfile,
       this.getTabs,
       this.getHeroMeta,
+      this.addRemoteEventListener,
+      this.removeRemoteEventListener,
     ]);
   }
 
@@ -389,7 +394,12 @@ export default class Session
 
   public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
     // if this session is set to keep alive and core isn't closing
-    if (!force && this.options.sessionKeepAlive && !Core.isClosing) {
+    if (
+      !force &&
+      this.options.sessionKeepAlive &&
+      !Core.isClosing &&
+      !this.commands.requiresScriptRestart
+    ) {
       return await this.keepAlive();
     }
 
@@ -399,8 +409,7 @@ export default class Session
 
     await this.willClose();
 
-    // client events are listening to "close"
-    this.emit('close' as any);
+    this.awaitedEventEmitter.emit('close');
     this.emit('closing');
     const start = log.info('Session.Closing', {
       sessionId: this.id,
@@ -443,6 +452,21 @@ export default class Session
         // drown
       }
     });
+  }
+
+  public addRemoteEventListener(
+    type: string,
+    emitFn: IRemoteEmitFn,
+  ): Promise<{ listenerId: string }> {
+    const listener = this.commands.observeRemoteEvents(type, emitFn);
+    this.awaitedEventEmitter.on(type as any, listener.listenFn);
+    return Promise.resolve({ listenerId: listener.id });
+  }
+
+  public removeRemoteEventListener(listenerId: string): Promise<any> {
+    const details = this.commands.getRemoteEventListener(listenerId);
+    this.awaitedEventEmitter.off(details.type as any, details.listenFn);
+    return Promise.resolve();
   }
 
   private async willClose(): Promise<void> {
@@ -616,19 +640,11 @@ export default class Session
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
     this.db.session.insert(
       this.id,
-      configuration.sessionName,
-      configuration.browserEmulatorId,
+      configuration,
       this.browserEngine.fullVersion,
-      configuration.userAgentString,
-      configuration.humanEmulatorId,
       this.createdTime,
-      scriptInstanceMeta?.id,
-      scriptInstanceMeta?.entrypoint,
-      scriptInstanceMeta?.startDate,
-      configuration.timezoneId,
+      scriptInstanceMeta,
       this.plugins.browserEmulator.deviceProfile,
-      configuration.viewport,
-      configuration.locale,
       optionsToStore,
     );
   }

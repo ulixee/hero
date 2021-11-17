@@ -5,8 +5,11 @@ import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import { scriptInstance } from './Hero';
 
 export default class CoreCommandQueue {
+  public mode: ISessionCreateOptions['mode'];
   public get lastCommandId(): number {
     return this.commandCounter?.lastCommandId;
   }
@@ -33,11 +36,13 @@ export default class CoreCommandQueue {
 
   constructor(
     meta: (ISessionMeta & { sessionName: string }) | null,
+    mode: ISessionCreateOptions['mode'],
     connection: ConnectionToCore,
     commandCounter: ICommandCounter,
     internalState?: CoreCommandQueue['internalState'],
   ) {
     this.connection = connection;
+    this.mode = mode;
     if (meta) {
       const markers = [
         ''.padEnd(50, '-'),
@@ -103,6 +108,10 @@ export default class CoreCommandQueue {
       }
     }
 
+    let callsite: string;
+    if (this.mode !== 'production') {
+      callsite = scriptInstance.getScriptCallsite();
+    }
     if (this.internalState.interceptFn) {
       const result = this.internalState.interceptFn(this.meta, command, ...args);
       if (result && result instanceof Error) {
@@ -128,6 +137,7 @@ export default class CoreCommandQueue {
           startDate: startTime,
           commandId,
           recordCommands,
+          callsite,
         });
 
         let data: T = null;
@@ -151,6 +161,6 @@ export default class CoreCommandQueue {
   }
 
   public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
-    return new CoreCommandQueue(meta, this.connection, this.commandCounter, this.internalState);
+    return new CoreCommandQueue(meta, this.mode, this.connection, this.commandCounter, this.internalState);
   }
 }

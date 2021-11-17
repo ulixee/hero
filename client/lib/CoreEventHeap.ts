@@ -3,6 +3,7 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
+import { scriptInstance } from './Hero';
 
 const { log } = Log(module);
 
@@ -55,6 +56,7 @@ export default class CoreEventHeap {
       startDate: new Date(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
+      callsite: this.shouldIncludeCallSite() ? scriptInstance.getScriptCallsite() : null,
     });
 
     this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
@@ -96,6 +98,7 @@ export default class CoreEventHeap {
         startDate: new Date(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
+        callsite: this.shouldIncludeCallSite() ? scriptInstance.getScriptCallsite() : null,
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
@@ -114,6 +117,10 @@ export default class CoreEventHeap {
       .catch(error => {
         log.error('incomingEvent Error: ', { error, sessionId: this.meta?.sessionId });
       });
+  }
+
+  private shouldIncludeCallSite(): boolean {
+    return this.connection.commandQueue.mode !== 'production';
   }
 
   private generateListenerHandle(

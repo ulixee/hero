@@ -3,6 +3,7 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 
 export default class CommandRunner {
   public runFn: () => Promise<any>;
+  public shouldRecord = true;
 
   constructor(command: string, args: any[], targets: { [targetName: string]: ICommandableTarget }) {
     const [targetName, method] = command.split('.');
@@ -29,11 +30,16 @@ export default class CommandRunner {
       );
     }
 
-    this.runFn = async () => await target[method](...args);
+    this.runFn = async () => {
+      if (!this.shouldRecord) {
+        return await target[`___${method}`](...args);
+      }
+      return await target[method](...args);
+    };
   }
 }
 
 export interface ICommandableTarget {
   isAllowedCommand(method: string): boolean;
-  canReuseCommand?(command: ICommandMeta, reuseCommand: ICommandMeta): boolean | Promise<boolean>;
+  canReuseCommand?(command: ICommandMeta): boolean;
 }

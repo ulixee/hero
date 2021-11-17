@@ -4,6 +4,7 @@ import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import * as os from 'os';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero from '../index';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -91,7 +92,8 @@ describe('Multi-tab scenarios', () => {
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/page1`);
-    await hero.waitForPaintingStable();
+    // need to wait for all images to load
+    await hero.activeTab.waitForLoad(LoadStatus.AllContentLoaded);
     expect(await hero.tabs).toHaveLength(1);
     expect(await hero.url).toBe(`${koaServer.baseUrl}/page1`);
 

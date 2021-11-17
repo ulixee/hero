@@ -37,7 +37,8 @@ export default class ConnectionToClient
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const { commandId, startDate, sendDate, messageId, command, meta, recordCommands } = payload;
+    const { commandId, startDate, sendDate, messageId, command, meta, recordCommands, callsite } =
+      payload;
     const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
 
     // json converts args to null which breaks undefined argument handlers
@@ -47,7 +48,12 @@ export default class ConnectionToClient
     try {
       this.hasActiveCommand = true;
       if (recordCommands) await this.recordCommands(meta, sendDate, recordCommands);
-      data = await this.executeCommand(command, args, meta, { commandId, startDate, sendDate });
+      data = await this.executeCommand(command, args, meta, {
+        commandId,
+        startDate,
+        sendDate,
+        callsite,
+      });
 
       // make sure to get tab metadata
       data = this.serializeToMetadata(data);
@@ -118,8 +124,7 @@ export default class ConnectionToClient
     const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
     clearTimeout(this.autoShutdownTimer);
     const closeAll: Promise<any>[] = [];
-    for (const [id, listeners] of this.sessionIdToRemoteEvents) {
-      listeners.close();
+    for (const id of this.sessionIdToRemoteEvents.keys()) {
       const session = Session.get(id);
       if (session) closeAll.push(session.close().catch(err => err));
     }
@@ -190,15 +195,16 @@ export default class ConnectionToClient
     command: string,
     args: any[],
     meta: ISessionMeta,
-    commandMeta: { commandId: number; startDate: Date; sendDate: Date },
+    commandMeta: { commandId: number; startDate: Date; sendDate: Date; callsite?: string },
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);
     const tab = Session.getTab(meta);
     const frame = tab?.getFrameEnvironment(meta?.frameId);
+    const events = this.sessionIdToRemoteEvents.get(meta?.sessionId);
 
     const commandRunner = new CommandRunner(command, args, {
       Session: session,
-      Events: this.sessionIdToRemoteEvents.get(meta?.sessionId)?.get(meta),
+      Events: events?.getEventTarget(meta),
       Core: this,
       Tab: tab,
       FrameEnvironment: frame,

@@ -7,6 +7,8 @@ import Core, { GlobalPool, Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import Interactor from '../lib/Interactor';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;
@@ -121,20 +123,25 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionAddon`);
 
+
       simulateScriptSendingCommandMeta(session, 2);
       await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', 'h5']] },
+        { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
+      ]);
+
+      simulateScriptSendingCommandMeta(session, 3);
+      await tab.interact([
+        { command: 'click', mousePosition: ['document', ['querySelector', 'h5']] },
       ]);
       expect(playInteractionSpy).toHaveBeenCalledTimes(2);
 
-      expect(session.commands.history).toHaveLength(4);
+      expect(session.commands.history).toHaveLength(5);
 
-      // should reuse the commands from only the first one
-      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(1);
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(2);
     }
   });
 
-  test('should run all commands once the commands have diverged from previous run', async () => {
+  test('should throw an error if commands have diverged from previous run', async () => {
     playInteractionSpy.mockClear();
     koaServer.get(
       '/sessionResumeDivergence',
@@ -194,26 +201,123 @@ describe('sessionResume tests when resume location is currentLocation', () => {
 
       simulateScriptSendingCommandMeta(session, 3);
       // DIFFERENT DIV! should diverge
-      await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', '#div3']] },
-      ]);
+      await expect(tab.interact([
+        { command: 'move', mousePosition: ['document', ['querySelector', '#div3']] }, // changed order
+      ])).rejects.toThrowError('Your script has changed');
+
+
+      // should not have run any interactions in this step
+      expect(playInteractionSpy).toHaveBeenCalledTimes(4);
+
+      // blows up on 8
+      expect(session.commands.history).toHaveLength(7);
+
+      // should reuse the commands from only the first one
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(2);
+    }
+  });
+
+  test('should replay awaited events', async () => {
+    playInteractionSpy.mockClear();
+    koaServer.get(
+      '/resumeAwaitedEvents',
+      ctx =>
+        (ctx.body = `<body>
+<div id="div1">div 1</div>
+</body>`),
+    );
+    let sessionId: string;
+
+    {
+      const { session, tab } = await createSession({ sessionKeepAlive: true });
+      sessionId = session.id;
+
+      simulateScriptSendingCommandMeta(session, 1);
+      await tab.goto(`${koaServer.baseUrl}/resumeAwaitedEvents`);
+
+      simulateScriptSendingCommandMeta(session, 2);
+      const hasDiv = new Resolvable<void>();
+      const result = await tab.addRemoteEventListener(
+        'page-state',
+        (listenerId: string, status: IPageStateResult) => {
+          if (result.listenerId === listenerId) {
+            if (status.divText?.value === 'div 1' && status.paintStable === true) hasDiv.resolve();
+          }
+        },
+        ['page-state', 1],
+        {
+          callsite: 'callsite',
+          states: ['states'],
+          commands: {
+            paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+            divText: [
+              1,
+              'FrameEnvironment.execJsPath',
+              [['document', ['querySelector', '#div1'], 'textContent']],
+            ],
+          },
+        },
+      );
+      await hasDiv;
+      simulateScriptSendingCommandMeta(session, 3);
+      await tab.removeRemoteEventListener(result.listenerId);
 
       simulateScriptSendingCommandMeta(session, 4);
       await tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', '#div3']] },
+        { command: 'move', mousePosition: ['document', ['querySelector', '#div1']] },
       ]);
+      expect(playInteractionSpy).toHaveBeenCalledTimes(1);
+    }
+    {
+      const { session, tab } = await createSession({
+        sessionKeepAlive: true,
+        sessionResume: {
+          sessionId,
+          startLocation: 'currentLocation',
+        },
+      });
 
-      simulateScriptSendingCommandMeta(session, 5);
+      simulateScriptSendingCommandMeta(session, 1);
+      await tab.goto(`${koaServer.baseUrl}/resumeAwaitedEvents`);
+
+      simulateScriptSendingCommandMeta(session, 2);
+      const hasDiv = new Resolvable<void>();
+      const result = await tab.addRemoteEventListener(
+        'page-state',
+        (listenerId: string, status: IPageStateResult) => {
+          if (result.listenerId === listenerId) {
+            if (status.divText?.value === 'div 1' && status.paintStable === true) hasDiv.resolve();
+          }
+        },
+        ['page-state', 1],
+        {
+          callsite: 'callsite',
+          states: ['states'],
+          commands: {
+            paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
+            divText: [
+              1,
+              'FrameEnvironment.execJsPath',
+              [['document', ['querySelector', '#div1'], 'textContent']],
+            ],
+          },
+        },
+      );
+      await hasDiv;
+      simulateScriptSendingCommandMeta(session, 3);
+      await tab.removeRemoteEventListener(result.listenerId);
+
+      simulateScriptSendingCommandMeta(session, 4);
       await tab.interact([
         { command: 'move', mousePosition: ['document', ['querySelector', '#div1']] },
       ]);
 
-      expect(playInteractionSpy).toHaveBeenCalledTimes(4 + 3);
+      expect(playInteractionSpy).toHaveBeenCalledTimes(1);
 
-      expect(session.commands.history).toHaveLength(10);
+      expect(session.commands.history).toHaveLength(8);
 
       // should reuse the commands from only the first one
-      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(2);
+      expect(session.commands.history.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(4);
     }
   });
 });
@@ -399,6 +503,6 @@ async function createSession(
 ): Promise<{ session: Session; tab: Tab }> {
   const meta = await connectionToClient.createSession(options);
   const tab = Session.getTab(meta);
-  Helpers.needsClosing.push(tab.session);
+  Helpers.onClose(() => tab.session.close(true));
   return { session: tab.session, tab };
 }

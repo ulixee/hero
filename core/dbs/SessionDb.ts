@@ -23,6 +23,7 @@ import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
 import StorageChangesTable from '../models/StorageChangesTable';
+import AwaitedEventsTable from '../models/AwaitedEventsTable';
 
 const { log } = Log(module);
 
@@ -56,6 +57,7 @@ export default class SessionDb {
   public readonly storageChanges: StorageChangesTable;
   public readonly screenshots: ScreenshotsTable;
   public readonly devtoolsMessages: DevtoolsMessagesTable;
+  public readonly awaitedEvents: AwaitedEventsTable;
   public readonly tabs: TabsTable;
   public readonly sessionId: string;
 
@@ -94,6 +96,7 @@ export default class SessionDb {
     this.screenshots = new ScreenshotsTable(this.db);
     this.storageChanges = new StorageChangesTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
+    this.awaitedEvents = new AwaitedEventsTable(this.db);
 
     this.tables.push(
       this.commands,
@@ -114,6 +117,7 @@ export default class SessionDb {
       this.devtoolsMessages,
       this.screenshots,
       this.storageChanges,
+      this.awaitedEvents,
     );
 
     if (!readonly) {

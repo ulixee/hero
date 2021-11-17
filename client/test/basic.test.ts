@@ -3,19 +3,19 @@ import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { Helpers } from '@ulixee/hero-testing';
 import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import { scriptInstance } from '../lib/Hero';
 
 afterAll(Helpers.afterAll);
 
 class MockedConnectionToCore extends ConnectionToCore {
-  public outgoing = jest.fn(
-    async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-      if (command === 'Core.createSession') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id' },
-        };
-      }
-    },
-  );
+  public outgoing = jest.fn(async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+    const { command } = payload;
+    if (command === 'Core.createSession') {
+      return {
+        data: { tabId: 'tab-id', sessionId: 'session-id' },
+      };
+    }
+  });
 
   async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     const response = await this.outgoing(payload);
@@ -69,5 +69,36 @@ describe('basic Hero tests', () => {
         args: [false],
       },
     ]);
+  });
+
+  it('includes callsites during non-production mode', async () => {
+    const connectionToCore = new MockedConnectionToCore();
+    const hero = await new Hero({ connectionToCore });
+    await hero.close();
+
+    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+
+    // Core.connect doesn't run over a command queue, so never gets callsites
+    expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(2);
+  });
+
+  it('does not include callsites during non-production mode', async () => {
+    const connectionToCore = new MockedConnectionToCore();
+    const hero = await new Hero({ connectionToCore, mode: 'production' });
+    await hero.close();
+
+    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+
+    expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(0)
+  });
+});
+
+describe('ScriptInstance tests', () => {
+  it('should be able to properly get a script location', () => {
+    expect(scriptInstance.getScriptCallsite().split(/\r?\n/)).toHaveLength(1);
+
+    (function testNested() {
+      expect(scriptInstance.getScriptCallsite().split(/\r?\n/)).toHaveLength(2);
+    })();
   });
 });

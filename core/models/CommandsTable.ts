@@ -23,6 +23,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
         ['result', 'TEXT'],
         ['resultType', 'TEXT'],
         ['reusedCommandFromRun', 'INTEGER'],
+        ['callsite', 'TEXT'],
       ],
       true,
     );
@@ -47,6 +48,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       TypeSerializer.stringify(commandMeta.result),
       commandMeta.resultType,
       commandMeta.reusedCommandFromRun,
+      commandMeta.callsite,
     ]);
   }
 }

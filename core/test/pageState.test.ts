@@ -32,6 +32,7 @@ test('can wait for page state events', async () => {
   await tab.goto(`${koaServer.baseUrl}/pageState1`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
+  // @ts-ignore
   const listener = await tab.addPageStateListener('1', {
     callsite: 'callsite',
     states: ['states'],
@@ -92,6 +93,7 @@ test('can continue to get events as dom changes', async () => {
   await tab.goto(`${koaServer.baseUrl}/pageState2`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
+  // @ts-ignore
   const listener = await tab.addPageStateListener('2', {
     callsite: 'callsite',
     states: ['states'],
