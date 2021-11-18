@@ -28,15 +28,15 @@ export const ISOLATED_WORLD = '__hero_world__';
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameManagerEvents> {
   public framesById = new Map<string, Frame>();
 
-  public get mainFrameId() {
+  public get mainFrameId(): string {
     return Array.from(this.attachedFrameIds).find(id => !this.framesById.get(id).parentId);
   }
 
-  public get main() {
+  public get main(): Frame {
     return this.framesById.get(this.mainFrameId);
   }
 
-  public get activeFrames() {
+  public get activeFrames(): Frame[] {
     return Array.from(this.attachedFrameIds).map(x => this.framesById.get(x));
   }
 
@@ -76,7 +76,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     ]);
   }
 
-  public initialize() {
+  public initialize(): Promise<void> {
     this.isReady = new Promise<void>(async (resolve, reject) => {
       try {
         const [framesResponse, , readyStateResult] = await Promise.all([
@@ -111,7 +111,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     return this.isReady;
   }
 
-  public close(error?: Error) {
+  public close(error?: Error): void {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('FramesManager closed');
     for (const frame of this.framesById.values()) {
@@ -145,7 +145,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     );
   }
 
-  public async addNewDocumentScript(script: string, installInIsolatedScope = true) {
+  public async addNewDocumentScript(script: string, installInIsolatedScope = true): Promise<void> {
     await this.devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
@@ -160,7 +160,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
 
-  public getSecurityOrigins() {
+  public getSecurityOrigins(): { origin: string; frameId: string }[] {
     const origins: { origin: string; frameId: string }[] = [];
     for (const frame of this.framesById.values()) {
       if (this.attachedFrameIds.has(frame.id)) {
@@ -177,7 +177,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     frameDetails: { frameId: string; loaderId?: string },
     url: string,
     isInitiatingNavigation = false,
-  ) {
+  ): Promise<void> {
     await this.isReady;
     const { frameId, loaderId } = frameDetails;
     const frame = this.framesById.get(frameId);
@@ -188,13 +188,13 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     if (loaderError) throw loaderError;
   }
 
-  public getFrameIdForExecutionContext(executionContextId: number) {
+  public getFrameIdForExecutionContext(executionContextId: number): string | undefined {
     for (const frame of this.framesById.values()) {
       if (frame.hasContextId(executionContextId)) return frame.id;
     }
   }
 
-  private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
+  private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent): Promise<void> {
     await this.isReady;
     this.activeContextIds.delete(event.executionContextId);
     for (const frame of this.framesById.values()) {
@@ -202,7 +202,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     }
   }
 
-  private async onExecutionContextsCleared() {
+  private async onExecutionContextsCleared(): Promise<void> {
     await this.isReady;
     this.activeContextIds.clear();
     for (const frame of this.framesById.values()) {
@@ -210,7 +210,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     }
   }
 
-  private async onExecutionContextCreated(event: ExecutionContextCreatedEvent) {
+  private async onExecutionContextCreated(event: ExecutionContextCreatedEvent): Promise<void> {
     await this.isReady;
     const { context } = event;
     const frameId = context.auxData.frameId as string;
@@ -232,38 +232,43 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
 
   /////// FRAMES ///////////////////////////////////////////////////////////////
 
-  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
+  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent): Promise<void> {
     await this.isReady;
     const frame = this.recordFrame(navigatedEvent.frame);
     frame.onNavigated(navigatedEvent.frame);
+    this.domStorageTracker.track(frame.securityOrigin);
   }
 
-  private async onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
+  private async onFrameStoppedLoading(event: FrameStoppedLoadingEvent): Promise<void> {
     await this.isReady;
     const { frameId } = event;
 
     this.framesById.get(frameId).onStoppedLoading();
   }
 
-  private async onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
+  private async onFrameRequestedNavigation(
+    navigatedEvent: FrameRequestedNavigationEvent,
+  ): Promise<void> {
     await this.isReady;
     const { frameId, url, reason, disposition } = navigatedEvent;
     this.framesById.get(frameId).requestedNavigation(url, reason, disposition);
   }
 
-  private async onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
+  private async onFrameNavigatedWithinDocument(
+    navigatedEvent: NavigatedWithinDocumentEvent,
+  ): Promise<void> {
     await this.isReady;
     const { frameId, url } = navigatedEvent;
     this.framesById.get(frameId).onNavigatedWithinDocument(url);
   }
 
-  private async onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
+  private async onFrameDetached(frameDetachedEvent: FrameDetachedEvent): Promise<void> {
     await this.isReady;
     const { frameId } = frameDetachedEvent;
     this.attachedFrameIds.delete(frameId);
   }
 
-  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
+  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent): Promise<void> {
     await this.isReady;
     const { frameId, parentFrameId } = frameAttachedEvent;
 
@@ -271,15 +276,16 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     this.attachedFrameIds.add(frameId);
   }
 
-  private async onLifecycleEvent(event: LifecycleEventEvent) {
+  private async onLifecycleEvent(event: LifecycleEventEvent): Promise<void> {
     await this.isReady;
     const { frameId, name, loaderId, timestamp } = event;
     const eventTime = this.networkManager.monotonicTimeToUnix(timestamp);
     const frame = this.recordFrame({ id: frameId, loaderId } as any);
-    return frame.onLifecycleEvent(name, eventTime, loaderId);
+    frame.onLifecycleEvent(name, eventTime, loaderId);
+    this.domStorageTracker.track(frame.securityOrigin);
   }
 
-  private recurseFrameTree(frameTree: FrameTree) {
+  private recurseFrameTree(frameTree: FrameTree): void {
     const { frame, childFrames } = frameTree;
     this.recordFrame(frame, true);
 
@@ -291,7 +297,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     }
   }
 
-  private recordFrame(newFrame: Page.Frame, isFrameTreeRecurse = false) {
+  private recordFrame(newFrame: Page.Frame, isFrameTreeRecurse = false): Frame {
     const { id, parentId } = newFrame;
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);

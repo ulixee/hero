@@ -65,7 +65,7 @@ export class DomStorageTracker
     ]);
   }
 
-  public close() {
+  public close():void {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('DomStorageTracker closed');
   }

@@ -106,7 +106,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     this.onLoaded(internalFrame);
   }
 
-  public close(error: Error) {
+  public close(error: Error): void {
     this.cancelPendingEvents('Frame closed');
     error ??= new CanceledPromiseError('Frame closed');
     this.activeLoader.resolve(error);
@@ -431,7 +431,10 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     return this.getActiveContextId(isolatedFromWebPageEnvironment) !== undefined;
   }
 
-  public toJSON() {
+  public toJSON(): Pick<
+    IPuppetFrame,
+    'id' | 'parentId' | 'activeLoaderId' | 'name' | 'url' | 'navigationReason' | 'disposition'
+  > & { isLoaderResolved: boolean; lifecycle: ILifecycleEvents } {
     return {
       id: this.id,
       parentId: this.parentId,

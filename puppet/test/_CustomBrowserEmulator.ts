@@ -10,7 +10,7 @@ import IViewport from '@ulixee/hero-interfaces/IViewport';
 
 const id = 'test';
 const locale = 'en';
-const timezoneId = 'est';
+const timezoneId = 'America/New_York';
 const viewport: IViewport = {
   screenHeight: 900,
   screenWidth: 1024,

@@ -55,7 +55,7 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     });
   }
 
-  private bindProcessEvents() {
+  private bindProcessEvents(): void {
     // Prevent Unhandled 'error' event.
     let error: Error;
     this.launchedProcess.on('error', e => {

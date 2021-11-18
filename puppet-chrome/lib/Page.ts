@@ -559,7 +559,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       .catch(() => null);
   }
 
-  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent) {
+  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent):void {
     this.devtoolsSession
       .send('Page.screencastFrameAck', { sessionId: event.sessionId })
       .catch(() => null);

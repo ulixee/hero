@@ -111,7 +111,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
     return this.browser.newContext(plugins, logger, proxy, isIncognito);
   }
 
-  public async close() {
+  public async close(): Promise<void | Error> {
     if (!this.isStarted) return;
     if (this.isShuttingDown) return this.isShuttingDown;
 
