@@ -65,6 +65,21 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     this.insertNow(record);
   }
 
+  public updateConfiguration(id: string, configuration: IHeroMeta): void {
+    const toUpdate = {
+      viewport: JSON.stringify(configuration.viewport),
+      timezoneId: configuration.timezoneId,
+      locale: configuration.locale,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE ${this.tableName} SET viewport=:viewport, timezoneId=:timezoneId, locale=:locale WHERE id=?`,
+      )
+      .run(id, toUpdate);
+    if (this.insertCallbackFn) this.insertCallbackFn([]);
+  }
+
   public close(id: string, closeDate: number): void {
     const values = [closeDate, id];
     const fields = ['closeDate'];

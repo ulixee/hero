@@ -42,10 +42,10 @@ class JsPath {
 
   public static getWindowOffset() {
     return {
-      innerHeight: window.innerHeight || document.documentElement.clientHeight,
-      innerWidth: window.innerWidth || document.documentElement.clientWidth,
-      scrollY: window.scrollY || document.documentElement.scrollTop,
-      scrollX: window.scrollX || document.documentElement.scrollLeft,
+      innerHeight: window.innerHeight ?? document.documentElement?.clientHeight,
+      innerWidth: window.innerWidth ?? document.documentElement?.clientWidth,
+      scrollY: window.scrollY ?? document.documentElement?.scrollTop,
+      scrollX: window.scrollX ?? document.documentElement?.scrollLeft,
     };
   }
 

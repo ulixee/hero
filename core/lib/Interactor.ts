@@ -24,7 +24,6 @@ import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { IPuppetKeyboard, IPuppetMouse } from '@ulixee/hero-interfaces/IPuppetInput';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import { getClientRectFnName, getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
@@ -57,13 +56,13 @@ export default class Interactor implements IInteractionsHelper {
     });
   }
 
-  public get viewport(): IViewport {
-    return this.frameEnvironment.session.viewport;
-  }
-
   public logger: IBoundLog;
 
+  public viewportSize: { width: number; height: number };
+
   private preInteractionPaintStableStatus: { isStable: boolean; timeUntilReadyMs?: number };
+
+  private isReady: Promise<void>;
 
   private readonly frameEnvironment: FrameEnvironment;
 
@@ -95,9 +94,9 @@ export default class Interactor implements IInteractionsHelper {
     });
   }
 
-  public async initialize(): Promise<void> {
-    const startingMousePosition = await this.plugins.getStartingMousePoint(this);
-    this.mouse.position = startingMousePosition || this.mouse.position;
+  public async initialize(isMainFrame:boolean): Promise<void> {
+    this.isReady ??= this.initializeViewport(isMainFrame);
+    return await this.isReady;
   }
 
   public play(interactions: IInteractionGroups, resolvablePromise: IResolvablePromise<any>): void {
@@ -336,6 +335,15 @@ export default class Interactor implements IInteractionsHelper {
     }
   }
 
+  private async initializeViewport(isMainFrame: boolean): Promise<void> {
+    const windowOffset = await this.tab.mainFrameEnvironment.getViewportSize();
+    this.viewportSize = { width: windowOffset.innerWidth, height: windowOffset.innerHeight };
+    if (isMainFrame) {
+      const startingMousePosition = await this.plugins.getStartingMousePoint(this);
+      this.mouse.position = startingMousePosition || this.mouse.position;
+    }
+  }
+
   private async getScrollOffset(
     targetPosition: IMousePosition,
     windowBounds: IWindowOffset,
@@ -385,8 +393,8 @@ export default class Interactor implements IInteractionsHelper {
     let x = round(rect.x + rect.width / 2);
     let y = round(rect.y + rect.height / 2);
     // if coordinates go out of screen, bring back
-    if (x > this.viewport.width) x = this.viewport.width - 1;
-    if (y > this.viewport.height) y = this.viewport.height - 1;
+    if (x > this.viewportSize.width) x = this.viewportSize.width - 1;
+    if (y > this.viewportSize.height) y = this.viewportSize.height - 1;
 
     return { x, y };
   }

@@ -164,7 +164,6 @@ export default class Session
       this.logger,
     );
     this.configureHeaded(options);
-
     this.plugins.configure(options);
 
     // should come after plugins can initiate
@@ -337,10 +336,12 @@ export default class Session
       this.hasLoadedUserProfile = true;
     }
 
+    const first = this.tabsById.size === 0;
     const tab = Tab.create(this, page);
     this.recordTab(tab.id, page.id, page.devtoolsSession.id);
     this.registerTab(tab, page);
     await tab.isReady;
+    if (first) this.db.session.updateConfiguration(this.id, this.meta);
     return tab;
   }
 

@@ -10,7 +10,6 @@ import { HumanEmulatorClassDecorator } from '@ulixee/hero-interfaces/ICorePlugin
 import IRect from '@ulixee/hero-interfaces/IRect';
 import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
@@ -34,7 +33,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   private millisPerCharacter: number;
 
   public getStartingMousePoint(helper: IInteractionsHelper): Promise<IPoint> {
-    const viewport = helper.viewport;
+    const viewport = helper.viewportSize;
     return Promise.resolve(
       getRandomRectPoint({
         x: 0,
@@ -140,7 +139,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, runFn, helper);
     if (didMoveMouse) {
       targetRect = await helper.lookupBoundingRect([nodeId], true, true);
-      targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent)
+      targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
     }
 
     if (targetRect.elementTag === 'option') {
@@ -148,10 +147,10 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       return await runFn(interactionStep);
     }
 
-    const viewport = helper.viewport;
+    const viewportSize = helper.viewportSize;
     const isRectInViewport =
-      isVisible(targetRect.y, targetRect.height, viewport.height) &&
-      isVisible(targetRect.x, targetRect.width, viewport.width);
+      isVisible(targetRect.y, targetRect.height, viewportSize.height) &&
+      isVisible(targetRect.x, targetRect.width, viewportSize.width);
 
     // make sure target is still visible
     if (
@@ -190,7 +189,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
             nodeVisibility: targetRect.nodeVisibility,
             domCoordinates: { x: targetPoint.x, y: targetPoint.y },
           },
-          viewport,
+          viewport: viewportSize,
         },
       );
 
@@ -303,12 +302,12 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     if (!isCoordinates) {
       const targetRect = await helper.lookupBoundingRect(mousePosition);
       // figure out if target is in view
-      const viewport = helper.viewport;
-      shouldScrollY = isVisible(targetRect.y, targetRect.height, viewport.height) === false;
-      shouldScrollX = isVisible(targetRect.x, targetRect.width, viewport.width) === false;
+      const viewportSize = helper.viewportSize;
+      shouldScrollY = isVisible(targetRect.y, targetRect.height, viewportSize.height) === false;
+      shouldScrollX = isVisible(targetRect.x, targetRect.width, viewportSize.width) === false;
 
       // positions are all relative to viewport, so act like we're at 0,0
-      scrollToPoint = getScrollRectPoint(targetRect, viewport);
+      scrollToPoint = getScrollRectPoint(targetRect, viewportSize);
 
       if (shouldScrollY) scrollToPoint.y += startScrollOffset.y;
       else scrollToPoint.y = startScrollOffset.y;
@@ -432,7 +431,10 @@ function getRandomPositiveOrNegativeNumber(): number {
   return Math.random() * negativeMultiplier;
 }
 
-function getScrollRectPoint(targetRect: IRect, viewport: IViewport): IPoint {
+function getScrollRectPoint(
+  targetRect: IRect,
+  viewport: { width: number; height: number },
+): IPoint {
   let { y, x } = targetRect;
   const fudge = 2 * Math.random();
   // target rect inside bounds

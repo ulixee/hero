@@ -3,7 +3,6 @@ import type IMouseUpResult from './IMouseUpResult';
 import { IMousePosition } from './IInteractions';
 import IRect from './IRect';
 import IPoint from './IPoint';
-import IViewport from './IViewport';
 import { INodeVisibility } from './INodeVisibility';
 
 export default interface IInteractionsHelper {
@@ -26,6 +25,6 @@ export default interface IInteractionsHelper {
   createMouseoverTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<boolean> }>;
   mousePosition: IPoint;
   scrollOffset: Promise<IPoint>;
-  viewport: IViewport;
+  viewportSize: { width: number; height: number };
   logger: IBoundLog;
 }

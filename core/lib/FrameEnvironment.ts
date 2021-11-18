@@ -214,6 +214,9 @@ export default class FrameEnvironment
     if (this.isDetached) {
       throw new Error("Sorry, you can't interact with a detached frame");
     }
+
+    // only install interactor on the main frame
+    await this.interactor.initialize(this.isMainFrame);
     await this.navigationsObserver.waitForReady();
     const interactionResolvable = createPromise<void>(120e3);
     this.waitTimeouts.push({
@@ -299,6 +302,10 @@ export default class FrameEnvironment
       // @ts-ignore
       init,
     );
+  }
+
+  public getViewportSize(): Promise<{ innerWidth: number; innerHeight: number }> {
+    return this.jsPath.getWindowOffset();
   }
 
   public getUrl(): Promise<string> {
@@ -477,11 +484,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       timer.clear();
     }
     return null;
-  }
-
-  public moveMouseToStartLocation(): Promise<void> {
-    if (this.isDetached) return;
-    return this.interactor.initialize();
   }
 
   public async flushPageEventsRecorder(): Promise<boolean> {
@@ -676,10 +678,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   protected async install(): Promise<void> {
     try {
-      if (this.isMainFrame) {
-        // only install interactor on the main frame
-        await this.interactor?.initialize();
-      } else {
+      if (!this.isMainFrame) {
         const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
         this.domNodeId = await this.getDomNodeId(frameElementNodeId);

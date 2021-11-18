@@ -107,8 +107,11 @@ export default class TimelineRecorder extends TypedEventEmitter<{
       .recordScreen({
         includeWhiteScreens: true,
         includeDuplicates: true,
-        jpegQuality: 1,
+        jpegQuality: 75,
         format: 'jpeg',
+        imageSize: {
+          height: 200,
+        },
       })
       .catch(console.error);
   }
