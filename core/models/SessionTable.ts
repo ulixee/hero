@@ -3,6 +3,8 @@ import IViewport from '@ulixee/hero-interfaces/IViewport';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
+import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -18,6 +20,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
         ['scriptInstanceId', 'TEXT'],
+        ['workingDirectory', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
         ['scriptStartDate', 'INTEGER'],
         ['userAgentString', 'TEXT'],
@@ -33,40 +36,48 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
 
   public insert(
     id: string,
-    name: string,
-    browserEmulatorId: string,
+    configuration: IHeroMeta,
     browserVersion: string,
-    userAgentString: string,
-    humanEmulatorId: string,
     startDate: number,
-    scriptInstanceId: string,
-    scriptEntrypoint: string,
-    scriptStartDate: number,
-    timezoneId: string,
+    scriptInstanceMeta: IScriptInstanceMeta,
     deviceProfile: IDeviceProfile,
-    viewport: IViewport,
-    locale: string,
     createSessionOptions: any,
   ): void {
     const record = [
       id,
-      name,
-      browserEmulatorId,
+      configuration.sessionName,
+      configuration.browserEmulatorId,
       browserVersion,
-      humanEmulatorId,
+      configuration.humanEmulatorId,
       startDate,
       null,
-      scriptInstanceId,
-      scriptEntrypoint,
-      scriptStartDate,
-      userAgentString,
-      JSON.stringify(viewport),
+      scriptInstanceMeta?.id,
+      scriptInstanceMeta?.workingDirectory,
+      scriptInstanceMeta?.entrypoint,
+      scriptInstanceMeta?.startDate,
+      configuration.userAgentString,
+      JSON.stringify(configuration.viewport),
       JSON.stringify(deviceProfile),
-      timezoneId,
-      locale,
+      configuration.timezoneId,
+      configuration.locale,
       JSON.stringify(createSessionOptions),
     ];
     this.insertNow(record);
+  }
+
+  public updateConfiguration(id: string, configuration: IHeroMeta): void {
+    const toUpdate = {
+      viewport: JSON.stringify(configuration.viewport),
+      timezoneId: configuration.timezoneId,
+      locale: configuration.locale,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE ${this.tableName} SET viewport=:viewport, timezoneId=:timezoneId, locale=:locale WHERE id=?`,
+      )
+      .run(id, toUpdate);
+    if (this.insertCallbackFn) this.insertCallbackFn([]);
   }
 
   public close(id: string, closeDate: number): void {
@@ -95,6 +106,7 @@ export interface ISessionRecord {
   startDate: number;
   closeDate: number;
   scriptInstanceId: string;
+  workingDirectory: string;
   scriptEntrypoint: string;
   scriptStartDate: number;
   userAgentString: string;

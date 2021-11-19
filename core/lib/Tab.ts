@@ -42,12 +42,13 @@ import PageStateListener from './PageStateListener';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
+import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 
 const { log } = Log(module);
 
 export default class Tab
   extends TypedEventEmitter<ITabEventParams>
-  implements ISessionMeta, ICommandableTarget
+  implements ISessionMeta, ICommandableTarget, IRemoteEventListener
 {
   public readonly id: number;
   public readonly parentTabId?: number;
@@ -165,6 +166,8 @@ export default class Tab
       this.waitForNewTab,
       this.waitForResource,
       this.runPluginCommand,
+      this.addRemoteEventListener,
+      this.removeRemoteEventListener,
       // DO NOT ADD waitForReady
     ]);
   }
@@ -666,7 +669,75 @@ export default class Tab
     return await pageStateListener.runBatchAssert(batchId);
   }
 
-  public async addPageStateListener(
+  public async addRemoteEventListener(
+    type: string,
+    emitFn: IRemoteEmitFn,
+    jsPath?: IJsPath,
+    options?: any,
+  ): Promise<{ listenerId: string }> {
+    const details = this.session.commands.observeRemoteEvents(type, emitFn, jsPath, this.id);
+
+    if (jsPath) {
+      if (type === 'message') {
+        const [domain, resourceId] = jsPath;
+        if (domain !== 'resources') {
+          throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
+        }
+        // need to give client time to register function sending events
+        process.nextTick(() =>
+          this.session.websocketMessages.listen(Number(resourceId), details.listenFn),
+        );
+      }
+
+      if (type === 'page-state') {
+        const id = JSON.stringify(jsPath);
+        const listener = await this.addPageStateListener(id, options);
+        listener.on('state', details.listenFn);
+      }
+    } else {
+      this.on(type as any, details.listenFn);
+    }
+    return Promise.resolve({ listenerId: details.id });
+  }
+
+  public removeRemoteEventListener(listenerId: string, options?: any): Promise<any> {
+    const details = this.session.commands.getRemoteEventListener(listenerId);
+    const { listenFn, type, jsPath } = details;
+    if (jsPath) {
+      if (type === 'message') {
+        const [domain, resourceId] = jsPath;
+        if (domain !== 'resources') {
+          throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
+        }
+        this.session.websocketMessages.unlisten(Number(resourceId), listenFn);
+      }
+
+      if (type === 'page-state') {
+        const id = JSON.stringify(jsPath);
+        const listener = this.pageStateListeners[id];
+        if (listener) listener.stop(options);
+      }
+    } else {
+      this.off(type as any, listenFn);
+    }
+    return Promise.resolve();
+  }
+
+  /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public toJSON(): ISessionMeta {
+    return {
+      tabId: this.id,
+      frameId: this.mainFrameId,
+      parentTabId: this.parentTabId,
+      sessionId: this.sessionId,
+      url: this.url,
+      createdAtCommandId: this.createdAtCommandId,
+      isDetached: this.isDetached,
+    } as ISessionMeta; // must adhere to session meta spec
+  }
+
+  private async addPageStateListener(
     id: string,
     options: IPageStateListenArgs,
   ): Promise<PageStateListener> {
@@ -688,63 +759,6 @@ export default class Tab
     }
 
     return listener;
-  }
-
-  public async addJsPathEventListener(
-    type: 'message' | 'page-state',
-    jsPath: IJsPath,
-    options: any,
-    listenFn: (...args) => void,
-  ): Promise<void> {
-    if (type === 'message') {
-      const [domain, resourceId] = jsPath;
-      if (domain !== 'resources') {
-        throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
-      }
-      // need to give client time to register function sending events
-      process.nextTick(() => this.session.websocketMessages.listen(Number(resourceId), listenFn));
-    }
-
-    if (type === 'page-state') {
-      const id = JSON.stringify(jsPath);
-      const listener = await this.addPageStateListener(id, options);
-      listener.on('state', listenFn);
-    }
-  }
-
-  public removeJsPathEventListener(
-    type: 'message' | 'page-state',
-    jsPath: IJsPath,
-    listenFn: (...args) => void,
-    options?: any,
-  ): void {
-    if (type === 'message') {
-      const [domain, resourceId] = jsPath;
-      if (domain !== 'resources') {
-        throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
-      }
-      this.session.websocketMessages.unlisten(Number(resourceId), listenFn);
-    }
-
-    if (type === 'page-state') {
-      const id = JSON.stringify(jsPath);
-      const listener = this.pageStateListeners[id];
-      if (listener) listener.stop(options);
-    }
-  }
-
-  /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  public toJSON(): ISessionMeta {
-    return {
-      tabId: this.id,
-      frameId: this.mainFrameId,
-      parentTabId: this.parentTabId,
-      sessionId: this.sessionId,
-      url: this.url,
-      createdAtCommandId: this.createdAtCommandId,
-      isDetached: this.isDetached,
-    } as ISessionMeta; // must adhere to session meta spec
   }
 
   private async waitForReady(): Promise<void> {

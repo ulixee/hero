@@ -5,4 +5,14 @@ module.exports = {
   parserOptions: {
     project: join(__dirname, 'tsconfig.json'),
   },
+  overrides: [
+    {
+      files: ['**/*.ts'],
+      rules: {
+        'max-classes-per-file': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
+      },
+    },
+  ],
 };

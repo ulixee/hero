@@ -63,7 +63,10 @@ window.replayInteractions = function replayInteractions(
   scrollEvent: IFrontendScrollEvent,
 ) {
   highlightNodes(resultNodeIds);
+  const startingTracking = shouldTrackMouse;
+  shouldTrackMouse = true;
   updateMouse(mouseEvent);
+  shouldTrackMouse = startingTracking;
   updateScroll(scrollEvent);
 };
 

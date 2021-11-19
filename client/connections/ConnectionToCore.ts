@@ -18,6 +18,7 @@ import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 import { IHeroCreateOptions } from '../index';
+import { scriptInstance } from '../lib/Hero';
 
 const { log } = Log(module);
 
@@ -50,7 +51,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   constructor(options?: IConnectionToCoreOptions) {
     super();
     this.options = options ?? { isPersistent: true };
-    this.commandQueue = new CoreCommandQueue(null, this, null);
+    this.commandQueue = new CoreCommandQueue(null, scriptInstance.mode, this, null);
     this.coreSessions = new CoreSessions(
       this.options.maxConcurrency,
       this.options.instanceTimeoutMillis,
@@ -181,8 +182,21 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
           options.externalIds[key] = await value;
         }
       }
+
+      let restoreMode:CoreCommandQueue['mode'];
+      if (this.commandQueue.mode !== options.mode) {
+        restoreMode = this.commandQueue.mode;
+        this.commandQueue.mode = options.mode;
+      }
       const sessionMeta = await this.commandQueue.run<ISessionMeta>('Core.createSession', options);
-      const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
+      if (restoreMode) {
+        this.commandQueue.mode = restoreMode;
+      }
+      const session = new CoreSession(
+        { ...sessionMeta, sessionName: options.sessionName },
+        this,
+        options.mode,
+      );
       this.coreSessions.track(session);
       return session;
     } catch (error) {

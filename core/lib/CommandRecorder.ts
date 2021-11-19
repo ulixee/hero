@@ -3,6 +3,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import Session from './Session';
 import Tab from './Tab';
 import { ICommandableTarget } from './CommandRunner';
+import { ScriptChangedNeedsRestartError } from './errorTypes';
 
 const { log } = Log(module);
 type AsyncFunc = (...args: any[]) => Promise<any>;
@@ -10,6 +11,7 @@ type AsyncFunc = (...args: any[]) => Promise<any>;
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();
   private logger: IBoundLog;
+
   constructor(
     readonly owner: ICommandableTarget,
     readonly session: Session,
@@ -18,6 +20,7 @@ export default class CommandRecorder {
     fns: AsyncFunc[],
   ) {
     for (const fn of fns) {
+      owner[`___${fn.name}`] = fn.bind(owner);
       owner[fn.name] = ((...args) => this.runCommandFn(fn, ...args)) as any;
       this.fnNames.add(fn.name);
     }
@@ -54,21 +57,27 @@ export default class CommandRecorder {
       args,
     );
 
-    if (commandMeta.run > 0) {
-      const sessionResumeLocation = session.options.sessionResume?.startLocation;
+    let shouldTryToReuse = commandMeta.run > 0;
+
+    if (shouldTryToReuse && 'canReuseCommand' in this.owner) {
+      shouldTryToReuse = this.owner.canReuseCommand(commandMeta);
+    }
+
+    if (shouldTryToReuse && session.options.sessionResume) {
+      const { startLocation } = session.options.sessionResume;
       const reusableCommand = commands.findReusableCommandFromRun(
-        sessionResumeLocation,
+        startLocation,
         commandMeta,
         commandMeta.run - 1,
       );
 
-      let isReusable = !!reusableCommand;
-      if (isReusable && 'canReuseCommand' in this.owner) {
-        isReusable = await this.owner.canReuseCommand(commandMeta, reusableCommand);
+      if (!!reusableCommand) {
+        return commands.reuseCommand(commandMeta, reusableCommand, args);
       }
-      if (isReusable) {
-        return commands.reuseCommand(commandMeta, reusableCommand);
-      }
+
+      // if we couldn't find a reusable command, see if we need to restart
+      const needsRestart = commands.doesUnreusableCommandRequireRestart(startLocation, commandMeta);
+      if (needsRestart) throw ScriptChangedNeedsRestartError.atCommand(commandMeta);
     }
 
     tab?.willRunCommand(commandMeta);

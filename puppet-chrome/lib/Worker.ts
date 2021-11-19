@@ -112,7 +112,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     eventUtils.removeEventListeners(this.registeredEvents);
   }
 
-  toJSON() {
+  toJSON(): unknown {
     return {
       id: this.id,
       url: this.url,

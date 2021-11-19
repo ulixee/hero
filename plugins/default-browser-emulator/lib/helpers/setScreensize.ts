@@ -36,10 +36,6 @@ export default async function setScreensize(
         });
       }),
     );
-    Object.assign(metricsOverrideRequest, {
-      width: viewport.screenWidth,
-      height: viewport.screenHeight,
-    });
   } else {
     Object.assign(metricsOverrideRequest, {
       positionX: viewport.positionX,

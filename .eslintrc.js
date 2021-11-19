@@ -57,23 +57,6 @@ module.exports = {
   },
   overrides: [
     {
-      files: [
-        '*client/**/*.ts',
-        '*interfaces/**/*.ts',
-        'commons/**/*.ts',
-        'core/**/*.ts',
-        'mitm*/**/*.ts',
-        'plugin-utils/**/*.ts',
-        'timetravel/**/*.ts',
-      ],
-      rules: {
-        '@typescript-eslint/explicit-function-return-type': [
-          'error',
-          { allowExpressions: true, allowHigherOrderFunctions: true },
-        ],
-      },
-    },
-    {
       files: 'plugin*/**/test/*.ts',
       rules: {
         'no-console': 'off',
@@ -92,7 +75,11 @@ module.exports = {
       },
     },
     {
-      files: ['**/injected-scripts/**/*.js', '**/injected-scripts/**/*.ts'],
+      files: [
+        '**/injected-scripts/**/*.js',
+        '**/injected-scripts/**/*.ts',
+        '**/injected-scripts/*',
+      ],
       rules: {
         'no-console': 'off',
         'no-undef': 'off',
@@ -100,6 +87,7 @@ module.exports = {
         'max-classes-per-file': 'off',
         'func-names': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {
@@ -110,16 +98,23 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'off',
         'import/no-extraneous-dependencies': 'off',
         '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {
-      files: '**/test/*.ts',
+      files: ['**/test/*.ts', '**/test/**/*', '**/testing/*'],
       rules: {
         'max-classes-per-file': 'off',
         'promise/valid-params': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         'require-await': 'off',
         '@typescript-eslint/require-await': 'off',
+      },
+    },
+    {
+      files: ['**/plugins/**/*', '**/*.js', '**/docs/**'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {
@@ -212,7 +207,10 @@ module.exports = {
     '@typescript-eslint/object-shorthand-properties-first': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-function-return-type': [
+      'error',
+      { allowExpressions: true, allowHigherOrderFunctions: true },
+    ],
     '@typescript-eslint/no-inferrable-types': 'warn',
     '@typescript-eslint/lines-between-class-members': [
       'error',

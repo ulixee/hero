@@ -16,6 +16,7 @@ import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -25,6 +26,7 @@ export default class CoreSession implements IJsPathEventTarget {
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
   public emitter = new EventEmitter();
+  public readonly mode: ISessionCreateOptions['mode'];
 
   public get lastCommandId(): number {
     return this.commandId;
@@ -49,7 +51,9 @@ export default class CoreSession implements IJsPathEventTarget {
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
     connectionToCore: ConnectionToCore,
+    mode: ISessionCreateOptions['mode']
   ) {
+    this.mode = mode;
     const { sessionId, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
@@ -60,6 +64,7 @@ export default class CoreSession implements IJsPathEventTarget {
     loggerSessionIdNames.set(sessionId, sessionName);
     this.commandQueue = new CoreCommandQueue(
       { sessionId, sessionName },
+      mode,
       connectionToCore,
       this as ICommandCounter,
     );

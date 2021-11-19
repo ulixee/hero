@@ -164,7 +164,7 @@ export class BrowserContext
     return page;
   }
 
-  onPageDetached(targetId: string) {
+  onPageDetached(targetId: string): void {
     this.attachedTargetIds.delete(targetId);
     const page = this.pagesById.get(targetId);
     if (page) {
@@ -173,7 +173,10 @@ export class BrowserContext
     }
   }
 
-  async onSharedWorkerAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo) {
+  async onSharedWorkerAttached(
+    devtoolsSession: DevtoolsSession,
+    targetInfo: TargetInfo,
+  ): Promise<void> {
     const page: Page =
       [...this.pagesById.values()].find(x => !x.isClosed) ?? this.pagesById.values().next().value;
     await page.onWorkerAttached(devtoolsSession, targetInfo);
@@ -183,7 +186,7 @@ export class BrowserContext
     devtoolsSession: DevtoolsSession,
     workerTargetId: string,
     pageTargetId: string,
-  ) {
+  ): void {
     this.subscribeToDevtoolsMessages(devtoolsSession, {
       sessionType: 'worker' as const,
       pageTargetId,
@@ -191,24 +194,24 @@ export class BrowserContext
     });
   }
 
-  onWorkerAttached(worker: IPuppetWorker) {
+  onWorkerAttached(worker: IPuppetWorker): void {
     this.workersById.set(worker.id, worker);
     worker.on('close', () => this.workersById.delete(worker.id));
     this.emit('worker', { worker });
   }
 
-  targetDestroyed(targetId: string) {
+  targetDestroyed(targetId: string): void {
     this.attachedTargetIds.delete(targetId);
     const page = this.pagesById.get(targetId);
     if (page) page.didClose();
   }
 
-  targetKilled(targetId: string, errorCode: number) {
+  targetKilled(targetId: string, errorCode: number): void {
     const page = this.pagesById.get(targetId);
     if (page) page.onTargetKilled(errorCode);
   }
 
-  async attachToTarget(targetId: string) {
+  async attachToTarget(targetId: string): Promise<void> {
     // chrome 80 still needs you to manually attach
     if (!this.attachedTargetIds.has(targetId)) {
       await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
@@ -218,7 +221,7 @@ export class BrowserContext
     }
   }
 
-  async attachToWorker(targetInfo: TargetInfo) {
+  async attachToWorker(targetInfo: TargetInfo): Promise<void> {
     await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
       targetId: targetInfo.targetId,
       flatten: true,
@@ -276,7 +279,7 @@ export class BrowserContext
   async addCookies(
     cookies: (Omit<ICookie, 'expires'> & { expires?: string | Date | number })[],
     origins?: string[],
-  ) {
+  ): Promise<void> {
     const originUrls = (origins ?? []).map(x => new URL(x));
     const parsedCookies: CookieParam[] = [];
     for (const cookie of cookies) {
@@ -337,7 +340,7 @@ export class BrowserContext
       IPuppetContextEvents['devtools-message'],
       'pageTargetId' | 'sessionType' | 'workerTargetId'
     >,
-  ) {
+  ): void {
     if (this.devtoolsSessions.has(devtoolsSession)) return;
 
     this.devtoolsSessions.add(devtoolsSession);

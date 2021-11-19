@@ -1,5 +1,4 @@
 import { IInteractionStep, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
@@ -86,10 +85,10 @@ describe('move', () => {
       },
       {
         mousePosition: { x: 25, y: 25 },
-        viewport: {
+        viewportSize: {
           height: 600,
           width: 800,
-        } as IViewport,
+        },
         async lookupBoundingRect() {
           return {
             elementTag: 'div',
@@ -133,10 +132,10 @@ describe('scroll', () => {
       },
       {
         mousePosition: { x: 25, y: 25 },
-        viewport: {
+        viewportSize: {
           height: 600,
           width: 800,
-        } as IViewport,
+        },
         async lookupBoundingRect() {
           return {
             elementTag: 'div',
@@ -178,10 +177,10 @@ describe('scroll', () => {
       },
       {
         mousePosition: { x: 25, y: 25 },
-        viewport: {
+        viewportSize: {
           height: 600,
           width: 800,
-        } as IViewport,
+        },
         async lookupBoundingRect() {
           return {
             elementTag: 'div',
@@ -223,10 +222,10 @@ describe('scroll', () => {
       },
       {
         mousePosition: { x: 25, y: 25 },
-        viewport: {
+        viewportSize: {
           height: 600,
           width: 800,
-        } as IViewport,
+        },
         async lookupBoundingRect() {
           return {
             elementTag: 'div',

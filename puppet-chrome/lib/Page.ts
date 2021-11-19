@@ -319,9 +319,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return Buffer.from(result.data, 'base64');
   }
 
-  async startScreenRecording(
-    options: Pick<IScreenRecordingOptions, 'format' | 'jpegQuality'> = {},
-  ): Promise<void> {
+  async startScreenRecording(options: IScreenRecordingOptions = {}): Promise<void> {
     if (this.screencastOptions) return;
 
     options.format ??= 'jpeg';
@@ -331,6 +329,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       format: options.format,
       quality: options.jpegQuality,
       everyNthFrame: 1,
+      maxHeight: options.imageSize?.height,
+      maxWidth: options.imageSize?.width,
     });
   }
 
@@ -559,7 +559,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       .catch(() => null);
   }
 
-  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent) {
+  private onScreencastFrame(event: Protocol.Page.ScreencastFrameEvent): void {
     this.devtoolsSession
       .send('Page.screencastFrameAck', { sessionId: event.sessionId })
       .catch(() => null);

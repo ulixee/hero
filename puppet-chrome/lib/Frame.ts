@@ -73,6 +73,9 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private readonly devtoolsSession: DevtoolsSession;
 
+  private startedLoaderId: string;
+  private resolveLoaderTimeout: NodeJS.Timeout;
+
   private get activeLoader(): IResolvablePromise<Error | null> {
     return this.loaderIdResolvers.get(this.activeLoaderId);
   }
@@ -103,7 +106,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     this.onLoaded(internalFrame);
   }
 
-  public close(error: Error) {
+  public close(error: Error): void {
     this.cancelPendingEvents('Frame closed');
     error ??= new CanceledPromiseError('Frame closed');
     this.activeLoader.resolve(error);
@@ -287,19 +290,32 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
     // clear out any active one
     this.activeLoaderId = null;
-    this.setLoader('inpage');
-    this.loaderIdResolvers.get('inpage').resolve();
-    this.onStoppedLoading();
+    const loaderId = 'inpage';
+    this.setLoader(loaderId);
+    this.markLoaded(loaderId);
     this.emit('frame-navigated', { frame: this, navigatedInDocument: true });
   }
 
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public onStoppedLoading(): void {
-    if (!this.lifecycleEvents.load) {
+    if (this.startedLoaderId || !this.loaderLifecycles.has(this.startedLoaderId)) return;
+
+    clearTimeout(this.resolveLoaderTimeout);
+
+    this.resolveLoaderTimeout = setTimeout(
+      this.markLoaded.bind(this),
+      50,
+      this.startedLoaderId,
+    ).unref();
+  }
+
+  public markLoaded(loaderId: string): void {
+    const loader = this.loaderLifecycles.get(loaderId);
+    if (loader && !loader.load) {
       const time = Date.now();
-      this.onLifecycleEvent('DOMContentLoaded', time);
-      this.onLifecycleEvent('load', time);
+      this.onLifecycleEvent('DOMContentLoaded', time, loaderId);
+      this.onLifecycleEvent('load', time, loaderId);
     }
   }
 
@@ -314,6 +330,12 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public onLifecycleEvent(name: string, timestamp?: number, pageLoaderId?: string): void {
+    if (pageLoaderId) {
+      // if we see any load events, clear at stopped loading lifecycle
+      if (this.startedLoaderId === pageLoaderId) clearTimeout(this.resolveLoaderTimeout);
+      if (name === 'init') this.startedLoaderId = pageLoaderId;
+    }
+
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init') {
       if (!this.loaderIdResolvers.has(loaderId)) {
@@ -409,7 +431,10 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     return this.getActiveContextId(isolatedFromWebPageEnvironment) !== undefined;
   }
 
-  public toJSON() {
+  public toJSON(): Pick<
+    IPuppetFrame,
+    'id' | 'parentId' | 'activeLoaderId' | 'name' | 'url' | 'navigationReason' | 'disposition'
+  > & { isLoaderResolved: boolean; lifecycle: ILifecycleEvents } {
     return {
       id: this.id,
       parentId: this.parentId,

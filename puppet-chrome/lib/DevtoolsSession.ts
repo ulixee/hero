@@ -38,7 +38,7 @@ import RemoteObject = Protocol.Runtime.RemoteObject;
 export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implements IDevtoolsSession {
   public connection: Connection;
   public messageEvents = new TypedEventEmitter<IMessageEvents>();
-  public get id() {
+  public get id(): string {
     return this.sessionId;
   }
 
@@ -135,7 +135,7 @@ export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implement
     this.emit('disconnected');
   }
 
-  public isConnected() {
+  isConnected(): boolean {
     return this.connection && !this.connection.isClosed;
   }
 }

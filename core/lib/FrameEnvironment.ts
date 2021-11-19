@@ -37,12 +37,13 @@ import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
+import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 
 const { log } = Log(module);
 
 export default class FrameEnvironment
   extends TypedEventEmitter<{ paint: void }>
-  implements ICommandableTarget
+  implements ICommandableTarget, IRemoteEventListener
 {
   public get session(): Session {
     return this.tab.session;
@@ -156,6 +157,8 @@ export default class FrameEnvironment
       this.waitForElement,
       this.waitForLoad,
       this.waitForLocation,
+      this.addRemoteEventListener,
+      this.removeRemoteEventListener,
       // DO NOT ADD waitForReady
     ]);
     // don't let this explode
@@ -211,6 +214,9 @@ export default class FrameEnvironment
     if (this.isDetached) {
       throw new Error("Sorry, you can't interact with a detached frame");
     }
+
+    // only install interactor on the main frame
+    await this.interactor.initialize(this.isMainFrame);
     await this.navigationsObserver.waitForReady();
     const interactionResolvable = createPromise<void>(120e3);
     this.waitTimeouts.push({
@@ -296,6 +302,10 @@ export default class FrameEnvironment
       // @ts-ignore
       init,
     );
+  }
+
+  public getViewportSize(): Promise<{ innerWidth: number; innerHeight: number }> {
+    return this.jsPath.getWindowOffset();
   }
 
   public getUrl(): Promise<string> {
@@ -476,11 +486,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return null;
   }
 
-  public moveMouseToStartLocation(): Promise<void> {
-    if (this.isDetached) return;
-    return this.interactor.initialize();
-  }
-
   public async flushPageEventsRecorder(): Promise<boolean> {
     try {
       // don't wait for env to be available
@@ -638,6 +643,28 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     this.cleanPaths.push(tmpDir);
   }
 
+  public addRemoteEventListener(
+    type: string,
+    emitFn: IRemoteEmitFn,
+    jsPath?: IJsPath,
+  ): Promise<{ listenerId: string }> {
+    const details = this.session.commands.observeRemoteEvents(
+      type,
+      emitFn,
+      jsPath,
+      this.tab.id,
+      this.id,
+    );
+    this.on(details.type as any, details.listenFn);
+    return Promise.resolve({ listenerId: details.id });
+  }
+
+  public removeRemoteEventListener(listenerId: string): Promise<any> {
+    const details = this.session.commands.getRemoteEventListener(listenerId);
+    this.off(details.type as any, details.listenFn);
+    return Promise.resolve();
+  }
+
   protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
     const result = await this.puppetFrame.evaluate<T>(serializedFn, true);
 
@@ -651,10 +678,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   protected async install(): Promise<void> {
     try {
-      if (this.isMainFrame) {
-        // only install interactor on the main frame
-        await this.interactor?.initialize();
-      } else {
+      if (!this.isMainFrame) {
         const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
         this.domNodeId = await this.getDomNodeId(frameElementNodeId);

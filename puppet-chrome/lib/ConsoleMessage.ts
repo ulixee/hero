@@ -24,7 +24,7 @@ import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 export default class ConsoleMessage {
   constructor(readonly message: string, readonly location: string, readonly type: string) {}
 
-  static create(devtoolsSession: DevtoolsSession, event: ConsoleAPICalledEvent) {
+  static create(devtoolsSession: DevtoolsSession, event: ConsoleAPICalledEvent): ConsoleMessage {
     const { args, stackTrace, type, context } = event;
 
     const message = args
@@ -39,17 +39,17 @@ export default class ConsoleMessage {
     return new ConsoleMessage(message, location, type);
   }
 
-  static exceptionToError(exceptionDetails: ExceptionDetails) {
+  static exceptionToError(exceptionDetails: ExceptionDetails): Error {
     const error = new Error(exceptionDetails.text);
     if (exceptionDetails.exception) {
-      error.stack = stringifyRemoteObject(exceptionDetails.exception);
+      error.stack = stringifyRemoteObject(exceptionDetails.exception) as string;
     } else if (exceptionDetails.stackTrace) {
       error.stack = this.printStackTrace(exceptionDetails.stackTrace);
     }
     return error;
   }
 
-  private static printStackTrace(stackTrace: StackTrace) {
+  private static printStackTrace(stackTrace: StackTrace): string {
     let message = '';
     if (!stackTrace) return message;
     for (const callframe of stackTrace.callFrames) {
@@ -61,7 +61,7 @@ export default class ConsoleMessage {
   }
 }
 
-function stringifyRemoteObject(remoteObject: Protocol.Runtime.RemoteObject) {
+function stringifyRemoteObject(remoteObject: Protocol.Runtime.RemoteObject): unknown {
   if (remoteObject.unserializableValue) {
     if (remoteObject.type === 'bigint' && typeof BigInt !== 'undefined') {
       return BigInt(remoteObject.unserializableValue.replace('n', ''));
@@ -86,7 +86,7 @@ function stringifyRemoteObject(remoteObject: Protocol.Runtime.RemoteObject) {
   return remoteObject.value ?? remoteObject.description;
 }
 
-function previewToObject(preview: ObjectPreview) {
+function previewToObject(preview: ObjectPreview):string {
   const subProps = preview.properties.map(
     prop => `${prop.name}: ${prop.valuePreview ? previewToObject(prop.valuePreview) : prop.value}`,
   );

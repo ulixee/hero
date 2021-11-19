@@ -120,7 +120,7 @@ export class Keyboard implements IPuppetKeyboard {
     return description;
   }
 
-  private macCommandsForCode(code: string) {
+  private macCommandsForCode(code: string): string[] {
     if (process.platform !== 'darwin') return [];
     const parts = ['Shift', 'Control', 'Alt', 'Meta'].filter(x => this.isModifierActive(x));
     parts.push(code);

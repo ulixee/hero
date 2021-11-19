@@ -7,7 +7,11 @@ import {
   LocationStatus,
   LocationTrigger,
 } from '@ulixee/hero-interfaces/Location';
-import INavigation, { ContentPaint, NavigationReason, NavigationStatus } from '@ulixee/hero-interfaces/INavigation';
+import INavigation, {
+  ContentPaint,
+  NavigationReason,
+  NavigationStatus,
+} from '@ulixee/hero-interfaces/INavigation';
 import type ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import type IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import type IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
@@ -89,7 +93,11 @@ export default class FrameNavigationsObserver {
     const top = this.navigations.top;
     if (top && top.statusChanges.has(status)) return Promise.resolve(top);
 
-    const promise = this.createStatusTriggeredPromise(status, options.timeoutMs, options.sinceCommandId);
+    const promise = this.createStatusTriggeredPromise(
+      status,
+      options.timeoutMs,
+      options.sinceCommandId,
+    );
 
     if (top) this.onLoadStatusChange();
     return promise;
@@ -208,7 +216,7 @@ export default class FrameNavigationsObserver {
     clearTimeout(trigger.waitingForLoadTimeout);
     trigger.resolvable.resolve(navigation);
     const index = this.statusTriggers.indexOf(trigger);
-    if (index >= 0) this.statusTriggers.splice(index,1);
+    if (index >= 0) this.statusTriggers.splice(index, 1);
   }
 
   private hasLocationTrigger(
@@ -218,17 +226,23 @@ export default class FrameNavigationsObserver {
     let previousLoadedNavigation: INavigation;
     for (const history of this.navigations.history) {
       const isMatch = history.startCommandId >= sinceCommandId;
+      const hasResponse =
+        (history.statusChanges.has(LoadStatus.HttpResponded) ||
+          history.statusChanges.has(LoadStatus.DomContentLoaded) ||
+          history.statusChanges.has(LoadStatus.AllContentLoaded)) &&
+        !history.statusChanges.has(LoadStatus.HttpRedirected);
+
       if (isMatch) {
-        let isLocationChange = false;
+        let isTriggered = false;
         if (trigger === LocationTrigger.reload) {
-          isLocationChange = FrameNavigationsObserver.isNavigationReload(history.navigationReason);
+          isTriggered = FrameNavigationsObserver.isNavigationReload(history.navigationReason);
           if (
-            !isLocationChange &&
+            !isTriggered &&
             !history.statusChanges.has(LoadStatus.HttpRedirected) &&
             previousLoadedNavigation &&
             previousLoadedNavigation.finalUrl === history.finalUrl
           ) {
-            isLocationChange = previousLoadedNavigation.loaderId !== history.loaderId;
+            isTriggered = previousLoadedNavigation.loaderId !== history.loaderId;
           }
         }
 
@@ -236,17 +250,18 @@ export default class FrameNavigationsObserver {
         if (
           trigger === LocationTrigger.change &&
           previousLoadedNavigation &&
-          previousLoadedNavigation.finalUrl !== history.finalUrl
+          previousLoadedNavigation.finalUrl !== history.finalUrl &&
+          hasResponse
         ) {
           // Don't accept adding a slash as a page change
           const isInPageUrlAdjust =
             history.navigationReason === 'inPage' &&
             history.finalUrl.replace(previousLoadedNavigation.finalUrl, '').length <= 1;
 
-          if (!isInPageUrlAdjust) isLocationChange = true;
+          if (!isInPageUrlAdjust) isTriggered = true;
         }
 
-        if (isLocationChange) {
+        if (isTriggered) {
           this.logger.info(`Resolving waitForLocation(${trigger}) with navigation history`, {
             historyEntry: history,
             status: trigger,
@@ -256,11 +271,7 @@ export default class FrameNavigationsObserver {
         }
       }
 
-      if (
-        (history.statusChanges.has(LoadStatus.HttpResponded) ||
-          history.statusChanges.has(LoadStatus.DomContentLoaded)) &&
-        !history.statusChanges.has(LoadStatus.HttpRedirected)
-      ) {
+      if (hasResponse) {
         previousLoadedNavigation = history;
       }
     }

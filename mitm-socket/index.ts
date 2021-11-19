@@ -177,7 +177,7 @@ export default class MitmSocket extends TypedEventEmitter<{
 
   private triggerConnectErrorIfNeeded(isExiting = false): void {
     if (this.connectPromise?.isResolved) return;
-    if (!isExiting && !this.connectError) return;
+    if (isExiting && !this.connectError) return;
     this.connectPromise?.reject(
       buildConnectError(
         this.connectError ?? `Socket process exited during connect`,

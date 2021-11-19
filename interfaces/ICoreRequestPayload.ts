@@ -5,6 +5,7 @@ export default interface ICoreRequestPayload {
   meta?: ISessionMeta;
   command: string;
   commandId?: number;
+  callsite?: string;
   startDate: Date;
   sendDate: Date;
   args: any[];

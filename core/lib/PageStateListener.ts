@@ -26,7 +26,7 @@ interface IBatchAssertion {
 }
 
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
-  public readonly id: string;
+  public readonly id: string = 'default';
   public readonly states: string[];
   public readonly startTime: number;
   public readonly startingCommandId: number;
@@ -51,7 +51,9 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   ) {
     super();
     bindFunctions(this);
-    this.id = createHash('md5').update(`${options.callsite}`).digest('hex');
+    if (options.callsite) {
+      this.id = createHash('md5').update(`${options.callsite}`).digest('hex');
+    }
     this.states = options.states;
 
     this.logger = log.createChild(module, {
@@ -108,7 +110,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       const [frameId, assertType, args, comparison, result] = assertion;
       if (assertType === 'url') {
         const frame = this.tab.frameEnvironmentsById.get(frameId) ?? this.tab.mainFrameEnvironment;
-        const url = await frame.getUrl();
+        const url = frame.url;
         if (url !== result) failCounts.url += 1;
       }
       if (assertType === 'resource') {
@@ -184,18 +186,29 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       minValidAssertions: minValidAssertions ?? assertions.length,
       state,
     });
+
     const entry = this.batchAssertionsById.get(batchId);
 
     const { domAssertionsByFrameId } = entry;
+    let domAssertionCount = 0;
     for (const assertion of assertions) {
       const [frameId, type] = assertion;
       if (type === 'xpath' || type === 'jspath') {
         if (!domAssertionsByFrameId.has(frameId)) domAssertionsByFrameId.set(frameId, []);
         domAssertionsByFrameId.get(frameId).push(assertion);
+        domAssertionCount += 1;
       } else {
         entry.assertions.push(assertion);
       }
     }
+
+    this.logger.stats('Loading BatchAssert', {
+      batchId,
+      minValidAssertions,
+      state,
+      domAssertionCount,
+      otherAssertions: entry.assertions,
+    });
   }
 
   private async loadBatchFromCacheDir(
@@ -239,6 +252,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       Tab: this.tab,
       Session: this.tab.session,
     });
+    commandRunner.shouldRecord = false;
     this.commandFnsById.set(id, commandRunner.runFn);
 
     if (!this.watchedFrameIds.has(frame.id)) {

@@ -30,7 +30,7 @@ describe('Core events tests', () => {
     // @ts-ignore
     const events = connection.sessionIdToRemoteEvents
       .get(meta.sessionId)
-      .get({ sessionId: meta.sessionId });
+      .getEventTarget({ sessionId: meta.sessionId });
     await events.addEventListener(null, 'close');
     await Session.get(meta.sessionId).close();
 
@@ -42,7 +42,7 @@ describe('Core events tests', () => {
 
     const meta = await connection.createSession();
     // @ts-ignore
-    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).get({
+    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).getEventTarget({
       tabId: meta.tabId,
       sessionId: meta.sessionId,
     });
@@ -67,7 +67,7 @@ describe('Core events tests', () => {
 
     const meta = await connection.createSession();
     // @ts-ignore
-    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).get({
+    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).getEventTarget({
       tabId: meta.tabId,
       sessionId: meta.sessionId,
     });

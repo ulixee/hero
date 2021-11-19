@@ -22,7 +22,6 @@ import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import * as Util from 'util';
-import { getCallSite } from '@ulixee/commons/lib/utils';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -231,9 +230,8 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     states?: T,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<keyof T> {
-    const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
-      .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
-      .join('\n');
+
+    const callSitePath = scriptInstance.getScriptCallSite();
 
     const coreTab = await getCoreTab(this);
     const pageState = new PageState(this, coreTab, states, callSitePath);

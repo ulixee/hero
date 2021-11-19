@@ -91,7 +91,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return this.createBrowserContext(browserContextId, plugins, logger, proxy);
   }
 
-  public getBrowserContext(id: string) {
+  public getBrowserContext(id: string): BrowserContext {
     return this.browserContextsById.get(id) ?? this.defaultBrowserContext;
   }
 
@@ -107,7 +107,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return !this.connection.isClosed;
   }
 
-  protected async listen() {
+  protected async listen(): Promise<Browser> {
     await this.devtoolsSession.send('Target.setAutoAttach', {
       autoAttach: true,
       waitForDebuggerOnStart: true,
@@ -121,7 +121,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return this;
   }
 
-  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
+  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent): void {
     const { targetInfo, sessionId } = event;
 
     assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
@@ -175,7 +175,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent) {
+  private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent): Promise<void> {
     const { targetInfo } = event;
     if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.getBrowserContext(targetInfo.browserContextId);
@@ -187,14 +187,14 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent) {
+  private onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent): void {
     const { targetId } = event;
     for (const context of this.browserContextsById.values()) {
       context.targetDestroyed(targetId);
     }
   }
 
-  private onTargetCrashed(event: Protocol.Target.TargetCrashedEvent) {
+  private onTargetCrashed(event: Protocol.Target.TargetCrashedEvent): void {
     const { targetId, errorCode, status } = event;
     if (status === 'killed') {
       for (const context of this.browserContextsById.values()) {
@@ -203,7 +203,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent) {
+  private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent): void {
     const targetId = payload.targetId;
     for (const [, context] of this.browserContextsById) {
       context.onPageDetached(targetId);
@@ -215,7 +215,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
-  ) {
+  ): BrowserContext {
     const context = new BrowserContext(this, plugins, browserContextId, logger, proxy);
     this.browserContextsById.set(browserContextId, context);
     context.on('close', () => this.browserContextsById.delete(browserContextId));
