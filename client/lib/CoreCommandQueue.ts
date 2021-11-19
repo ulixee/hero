@@ -110,7 +110,7 @@ export default class CoreCommandQueue {
 
     let callsite: string;
     if (this.mode !== 'production') {
-      callsite = scriptInstance.getScriptCallsite();
+      callsite = scriptInstance.getScriptCallSite();
     }
     if (this.internalState.interceptFn) {
       const result = this.internalState.interceptFn(this.meta, command, ...args);

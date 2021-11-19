@@ -50,7 +50,7 @@ export default class ScriptInstance {
     return name;
   }
 
-  public getScriptCallsite(ignoreMode = false): string {
+  public getScriptCallSite(ignoreMode = false): string {
     if (!ignoreMode && this.mode === 'production') return;
     const stack = getCallSite(module.filename);
 

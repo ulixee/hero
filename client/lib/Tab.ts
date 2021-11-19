@@ -231,7 +231,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<keyof T> {
 
-    const callSitePath = scriptInstance.getScriptCallsite();
+    const callSitePath = scriptInstance.getScriptCallSite();
 
     const coreTab = await getCoreTab(this);
     const pageState = new PageState(this, coreTab, states, callSitePath);
