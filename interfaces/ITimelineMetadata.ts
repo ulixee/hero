@@ -23,4 +23,9 @@ export default interface ITimelineMetadata {
     offsetPercent: number;
     tabId: number;
   }[];
+  storageEvents: {
+    offsetPercent: number;
+    tabId: number;
+    count: number;
+  }[];
 }

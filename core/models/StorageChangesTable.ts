@@ -4,6 +4,12 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { IPuppetStorageEvents } from '@ulixee/hero-interfaces/IPuppetDomStorageTracker';
 
 export default class StorageChangesTable extends SqliteTable<IStorageChangesEntry> {
+  private changesByTabIdAndTime: {
+    [tabId_timestamp: string]: { tabId: number; timestamp: number; count: number };
+  } = {};
+
+  private hasLoadedCounts = false;
+
   constructor(readonly db: SqliteDatabase) {
     super(db, 'StorageChanges', [
       ['tabId', 'INTEGER'],
@@ -33,6 +39,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
       TypeSerializer.stringify(entry.meta),
       entry.timestamp,
     ]);
+    this.trackChangeTime(tabId, entry.timestamp);
   }
 
   public findChange(
@@ -59,6 +66,26 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
         `select * from ${this.tableName} where tabId = ? and timestamp >= ? and timestamp <= ?`,
       )
       .all(tabId, startTime, endTime);
+  }
+
+  public getChangesByTabIdAndTime(): { tabId: number; timestamp: number; count: number }[] {
+    if (!this.hasLoadedCounts) {
+      this.hasLoadedCounts = true;
+      const timestamps = this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
+      for (const { timestamp, tabId } of timestamps) {
+        this.trackChangeTime(tabId, timestamp);
+      }
+    }
+    const times = Object.values(this.changesByTabIdAndTime);
+    times.sort((a, b) => a.timestamp - b.timestamp);
+    return times;
+  }
+
+  private trackChangeTime(tabId: number, timestamp: number): void {
+    this.hasLoadedCounts = true;
+    const key = `${tabId}_${timestamp}`;
+    this.changesByTabIdAndTime[key] ??= { tabId, timestamp, count: 0 };
+    this.changesByTabIdAndTime[key].count += 1;
   }
 }
 

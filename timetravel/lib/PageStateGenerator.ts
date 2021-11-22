@@ -117,7 +117,12 @@ export default class PageStateGenerator {
       };
     }
     for (const session of savedState.sessions) {
-      const db = SessionDb.getCached(session.sessionId, false);
+      let db: SessionDb;
+      try {
+        db = SessionDb.getCached(session.sessionId, false);
+      } catch (err) {
+        // couldn't load
+      }
       this.sessionsById.set(session.sessionId, {
         ...session,
         db,

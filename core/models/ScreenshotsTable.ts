@@ -6,6 +6,7 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
   public includeWhiteScreens = false;
 
   private screenshotTimesByTabId = new Map<number, number[]>();
+  private hasLoadedCounts = false;
   private lastImageByTab: { [tabId: number]: Buffer } = {};
 
   constructor(readonly db: SqliteDatabase) {
@@ -36,7 +37,8 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
   }
 
   public getScreenshotTimesByTabId(): ScreenshotsTable['screenshotTimesByTabId'] {
-    if (this.screenshotTimesByTabId.size) return this.screenshotTimesByTabId;
+    if (this.hasLoadedCounts) return this.screenshotTimesByTabId;
+    this.hasLoadedCounts = true;
     const timestamps = this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
     for (const { timestamp, tabId } of timestamps) {
       this.trackScreenshotTime(tabId, timestamp);
@@ -60,6 +62,7 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
   }
 
   private trackScreenshotTime(tabId: number, timestamp: number): void {
+    this.hasLoadedCounts = true;
     if (!this.screenshotTimesByTabId.has(tabId)) {
       this.screenshotTimesByTabId.set(tabId, []);
     }
