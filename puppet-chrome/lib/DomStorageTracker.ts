@@ -305,7 +305,6 @@ export class DomStorageTracker
 
       const originStorage = this.storageForOrigin(securityOrigin);
       const dbIndex = originStorage.indexedDB.findIndex(x => x.name === databaseName);
-      const action = dbIndex === -1 ? 'add' : 'update';
       if (dbIndex === -1) {
         originStorage.indexedDB.push(db);
       } else {
@@ -313,7 +312,7 @@ export class DomStorageTracker
       }
 
       this.emit('dom-storage-updated', {
-        action,
+        action: 'update',
         type: 'indexedDB',
         value: null,
         meta: { metadata, objectStore },
