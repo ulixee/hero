@@ -119,6 +119,7 @@ export default class Session
       browserEmulatorId: plugins.browserEmulator.id,
       humanEmulatorId: plugins.humanEmulator.id,
       upstreamProxyUrl: this.options.upstreamProxyUrl,
+      upstreamProxyIpMask: this.options.upstreamProxyIpMask,
       viewport,
       locale,
       timezoneId,
@@ -321,6 +322,7 @@ export default class Session
     requestSession.on('resource-state', this.onResourceStates.bind(this));
     requestSession.on('socket-close', this.onSocketClose.bind(this));
     requestSession.on('socket-connect', this.onSocketConnect.bind(this));
+    await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
   }
 
   public exportUserProfile(): Promise<IUserProfile> {

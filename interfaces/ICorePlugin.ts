@@ -13,13 +13,12 @@ import ITlsSettings from './ITlsSettings';
 import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 import { IPuppetPage } from './IPuppetPage';
 import { IPuppetWorker } from './IPuppetWorker';
-import IViewport from './IViewport';
-import IGeolocation from './IGeolocation';
 import IDeviceProfile from './IDeviceProfile';
 import IHttp2ConnectSettings from './IHttp2ConnectSettings';
 import ISessionCreateOptions from './ISessionCreateOptions';
 import { IPuppetFrame } from './IPuppetFrame';
 import IDevtoolsSession from './IDevtoolsSession';
+import IHttpSocketAgent from './IHttpSocketAgent';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,
@@ -125,6 +124,7 @@ export interface IBrowserEmulatorMethods {
   onDnsConfiguration?(settings: IDnsSettings, sessionSummary?: ISessionSummary): void;
   onTcpConfiguration?(settings: ITcpSettings, sessionSummary?: ISessionSummary): void;
   onTlsConfiguration?(settings: ITlsSettings, sessionSummary?: ISessionSummary): void;
+  onHttpAgentInitialized?(agent: IHttpSocketAgent): Promise<any> | void;
 
   onHttp2SessionConnect?(
     request: IHttpResourceLoadDetails,
@@ -151,13 +151,16 @@ export interface ISessionSummary {
   options?: ISessionCreateOptions;
 }
 
-export interface IBrowserEmulatorConfig {
-  viewport?: IViewport;
-  geolocation?: IGeolocation;
-  timezoneId?: string;
-  locale?: string;
-  dnsOverTlsProvider?: IDnsSettings['dnsOverTlsConnection'];
-}
+export type IBrowserEmulatorConfig = Pick<
+  ISessionCreateOptions,
+  | 'viewport'
+  | 'geolocation'
+  | 'timezoneId'
+  | 'locale'
+  | 'upstreamProxyIpMask'
+  | 'upstreamProxyUrl'
+  | 'dnsOverTlsProvider'
+>;
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

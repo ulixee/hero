@@ -29,6 +29,7 @@ import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import Core from '../index';
+import IHttpSocketAgent from '@ulixee/hero-interfaces/IHttpSocketAgent';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
 const DefaultHumanEmulatorId = 'default-human-emulator';
@@ -159,6 +160,14 @@ export default class CorePlugins implements ICorePlugins {
       .forEach(p => p.onTlsConfiguration(settings, sessionSummary));
   }
 
+  public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
+    await Promise.all(
+      this.instances
+        .filter(p => p.onHttpAgentInitialized)
+        .map(p => p.onHttpAgentInitialized(agent)),
+    );
+  }
+  
   public onBrowserLaunchConfiguration(launchArguments: string[]): void {
     this.instances
       .filter(p => p.onBrowserLaunchConfiguration)

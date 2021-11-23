@@ -1,4 +1,4 @@
-import MitmSocket, { IGoTlsSocketConnectOpts } from '@ulixee/hero-mitm-socket';
+import MitmSocket  from '@ulixee/hero-mitm-socket';
 import * as http2 from 'http2';
 import { ClientHttp2Session, Http2ServerRequest } from 'http2';
 import Log from '@ulixee/commons/lib/Logger';
@@ -18,6 +18,7 @@ import ResourceState from '../interfaces/ResourceState';
 import SocketPool from './SocketPool';
 import Http2PushPromiseHandler from '../handlers/Http2PushPromiseHandler';
 import Http2SessionBinding from './Http2SessionBinding';
+import IHttpSocketConnectOptions from '@ulixee/hero-interfaces/IHttpSocketConnectOptions';
 
 const { log } = Log(module);
 
@@ -135,27 +136,7 @@ export default class MitmRequestAgent {
     return await pool.isHttp2(false, () => this.createSocketConnection(options));
   }
 
-  private async assignSocket(
-    ctx: IMitmRequestContext,
-    options: IGoTlsSocketConnectOpts & { headers: IResourceHeaders },
-  ): Promise<MitmSocket> {
-    ctx.setState(ResourceState.GetSocket);
-    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
-
-    options.isSsl = ctx.isSSL;
-    options.keepAlive = !(
-      (options.headers.connection ?? options.headers.Connection) as string
-    )?.match(/close/i);
-    options.isWebsocket = ctx.isUpgrade;
-
-    const mitmSocket = await pool.getSocket(options.isWebsocket, () =>
-      this.createSocketConnection(options),
-    );
-    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
-    return mitmSocket;
-  }
-
-  private async createSocketConnection(options: IGoTlsSocketConnectOpts): Promise<MitmSocket> {
+  public async createSocketConnection(options: IHttpSocketConnectOptions): Promise<MitmSocket> {
     const session = this.session;
 
     const dnsLookupTime = new Date();
@@ -184,6 +165,26 @@ export default class MitmRequestAgent {
       mitmSocket.socket.setNoDelay(true);
       mitmSocket.socket.setTimeout(0);
     }
+    return mitmSocket;
+  }
+
+  private async assignSocket(
+    ctx: IMitmRequestContext,
+    options: IHttpSocketConnectOptions & { headers: IResourceHeaders },
+  ): Promise<MitmSocket> {
+    ctx.setState(ResourceState.GetSocket);
+    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
+
+    options.isSsl = ctx.isSSL;
+    options.keepAlive = !(
+      (options.headers.connection ?? options.headers.Connection) as string
+    )?.match(/close/i);
+    options.isWebsocket = ctx.isUpgrade;
+
+    const mitmSocket = await pool.getSocket(options.isWebsocket, () =>
+      this.createSocketConnection(options),
+    );
+    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
     return mitmSocket;
   }
 

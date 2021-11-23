@@ -6,17 +6,22 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
 import MitmSocketSession from './lib/MitmSocketSession';
+import IHttpSocketWrapper from '@ulixee/hero-interfaces/IHttpSocketWrapper';
+import IHttpSocketConnectOptions from '@ulixee/hero-interfaces/IHttpSocketConnectOptions';
 
 const { log } = Log(module);
 
 let idCounter = 0;
 
-export default class MitmSocket extends TypedEventEmitter<{
-  connect: void;
-  dial: void;
-  eof: void;
-  close: void;
-}> {
+export default class MitmSocket
+  extends TypedEventEmitter<{
+    connect: void;
+    dial: void;
+    eof: void;
+    close: void;
+  }>
+  implements IHttpSocketWrapper
+{
   public get isWebsocket(): boolean {
     return this.connectOpts.isWebsocket === true;
   }
@@ -50,7 +55,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   private socketReadyPromise = new Resolvable<void>();
   private readonly callStack: string;
 
-  constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
+  constructor(readonly sessionId: string, readonly connectOpts: IHttpSocketConnectOptions) {
     super();
     this.callStack = new Error().stack.replace('Error:', '').trim();
     this.serverName = connectOpts.servername;
@@ -224,18 +229,6 @@ export default class MitmSocket extends TypedEventEmitter<{
   private onSocketClose(): void {
     this.close();
   }
-}
-
-export interface IGoTlsSocketConnectOpts {
-  host: string;
-  port: string;
-  isSsl: boolean;
-  keepAlive?: boolean;
-  debug?: boolean;
-  servername?: string;
-  isWebsocket?: boolean;
-  keylogPath?: string;
-  proxyUrl?: string;
 }
 
 class Socks5ProxyConnectError extends Error {}

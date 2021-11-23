@@ -16,6 +16,7 @@
     "@ulixee/hero": "1.5.4",
     "@ulixee/hero-core": "1.5.4",
     "@ulixee/hero-fullstack": "1.5.4",
+    "@ulixee/hero-mitm": "1.5.4",
     "@ulixee/hero-puppet": "1.5.4",
     "@ulixee/hero-testing": "1.5.4",
     "@types/tough-cookie": "^4.0.0",
