@@ -1,16 +1,9 @@
 import { assert } from '@ulixee/commons/lib/utils';
-import IPuppetContext, {
-  IPuppetContextEvents,
-  IPuppetPageOptions,
-} from '@ulixee/hero-interfaces/IPuppetContext';
+import IPuppetContext, { IPuppetContextEvents, IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import {
-  addTypedEventListener,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@ulixee/commons/lib/eventUtils';
+import { addTypedEventListener, removeEventListeners, TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -20,17 +13,14 @@ import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import {
-  IDevtoolsEventMessage,
-  IDevtoolsResponseMessage,
-} from '@ulixee/hero-interfaces/IDevtoolsSession';
+import { IDevtoolsEventMessage, IDevtoolsResponseMessage } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
+import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
-import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
 
 export class BrowserContext
   extends TypedEventEmitter<IPuppetContextEvents>
@@ -55,6 +45,7 @@ export class BrowserContext
   private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
   private creatingTargetPromises: Promise<void>[] = [];
+  private waitForPageAttachedById = new Map<string, Resolvable<Page>>();
   private readonly browser: Browser;
 
   private isClosing = false;
@@ -88,8 +79,8 @@ export class BrowserContext
   public defaultPageInitializationFn: (page: IPuppetPage) => Promise<any> = () => Promise.resolve();
 
   async newPage(options?: IPuppetPageOptions): Promise<Page> {
-    const resolvable = new Resolvable<void>();
-    this.creatingTargetPromises.push(resolvable.promise);
+    const createTargetPromise = new Resolvable<void>();
+    this.creatingTargetPromises.push(createTargetPromise.promise);
 
     const { targetId } = await this.sendWithBrowserDevtoolsSession('Target.createTarget', {
       url: 'about:blank',
@@ -101,29 +92,24 @@ export class BrowserContext
 
     await this.attachToTarget(targetId);
 
-    resolvable.resolve();
-    const idx = this.creatingTargetPromises.indexOf(resolvable.promise);
+    createTargetPromise.resolve();
+    const idx = this.creatingTargetPromises.indexOf(createTargetPromise.promise);
     if (idx >= 0) this.creatingTargetPromises.splice(idx, 1);
 
-    let hasTimedOut = false;
-    const timeout = setTimeout(() => {
-      hasTimedOut = true;
-    }, 10e3).unref();
-
-    // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
-    while (!this.isClosing) {
-      const page = this.pagesById.get(targetId);
-      if (!page) {
-        if (hasTimedOut) throw new Error('Error creating page. Timed out waiting to attach');
-        await new Promise(setImmediate);
-
-        continue;
-      }
-      clearTimeout(timeout);
-      await page.isReady;
-      if (page.isClosed) throw new Error('Page has been closed.');
-      return page;
+    let page = this.pagesById.get(targetId);
+    if (!page) {
+      const pageAttachedPromise = new Resolvable<Page>(
+        60e3,
+        'Error creating page. Timed out waiting to attach',
+      );
+      this.waitForPageAttachedById.set(targetId, pageAttachedPromise);
+      page = await pageAttachedPromise.promise;
+      this.waitForPageAttachedById.delete(targetId);
     }
+
+    await page.isReady;
+    if (page.isClosed) throw new Error('Page has been closed.');
+    return page;
   }
 
   initializePage(page: Page): Promise<any> {
@@ -159,6 +145,7 @@ export class BrowserContext
 
     const page = new Page(devtoolsSession, targetInfo.targetId, this, this.logger, opener);
     this.pagesById.set(page.targetId, page);
+    this.waitForPageAttachedById.get(page.targetId)?.resolve(page);
     await page.isReady;
     this.emit('page', { page });
     return page;
@@ -232,6 +219,9 @@ export class BrowserContext
     if (this.isClosing) return;
     this.isClosing = true;
 
+    for (const waitingPage of this.waitForPageAttachedById.values()) {
+      await waitingPage.reject(new CanceledPromiseError('BrowserContext shutting down'));
+    }
     if (this.browser.devtoolsSession.isConnected()) {
       await Promise.all([...this.pagesById.values()].map(x => x.close()));
       // can only close with id

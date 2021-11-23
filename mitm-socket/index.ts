@@ -182,7 +182,10 @@ export default class MitmSocket
 
   private triggerConnectErrorIfNeeded(isExiting = false): void {
     if (this.connectPromise?.isResolved) return;
-    if (isExiting && !this.connectError) return;
+    if (isExiting && !this.connectError) {
+      this.connectPromise.resolve()
+      return;
+    }
     this.connectPromise?.reject(
       buildConnectError(
         this.connectError ?? `Socket process exited during connect`,
