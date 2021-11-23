@@ -9,7 +9,7 @@
     "@ulixee/hero-mitm-socket": "1.5.4",
     "better-sqlite3": "^7.4.1",
     "devtools-protocol": "^0.0.799653",
-    "dns-packet": "^5.2.1",
+    "dns-packet": "^5.2.4",
     "moment": "^2.24.1"
   },
   "devDependencies": {
@@ -21,6 +21,6 @@
     "agent-base": "4.3.0",
     "http-proxy-agent": "^4.0.1",
     "proxy": "^1.0.1",
-    "ws": "^7.4.4"
+    "ws": "^7.4.6"
   }
 }
