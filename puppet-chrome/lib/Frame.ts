@@ -73,6 +73,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private readonly devtoolsSession: DevtoolsSession;
 
+  private defaultLoaderId: string;
+
   private startedLoaderId: string;
   private resolveLoaderTimeout: NodeJS.Timeout;
 
@@ -255,11 +257,15 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   public onLoaded(internalFrame: PageFrame): void {
     this.internalFrame = internalFrame;
     this.updateUrl();
-    this.setLoader(internalFrame.loaderId);
-    if (internalFrame.loaderId && this.url) {
-      this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
+    if (!internalFrame.loaderId) return;
+
+    // if we this is the first loader and url is default, this is the first loader
+    if (this.isDefaultUrl && !this.defaultLoaderId && this.loaderIdResolvers.size === 0) {
+      this.defaultLoaderId = internalFrame.loaderId;
     }
-    if (internalFrame.loaderId && internalFrame.unreachableUrl) {
+    this.setLoader(internalFrame.loaderId);
+
+    if (this.url || internalFrame.unreachableUrl) {
       // if this is a loaded frame, just count it as loaded. it shouldn't fail
       this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
     }
@@ -320,8 +326,16 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public async waitForLoader(loaderId?: string): Promise<Error | null> {
-    const hasLoaderError = await this.loaderIdResolvers.get(loaderId ?? this.activeLoaderId)
-      ?.promise;
+    if (!loaderId) {
+      loaderId = this.activeLoaderId;
+      if (loaderId === this.defaultLoaderId) {
+        // wait for an actual frame to load
+        const frameLoader = await this.waitOn('frame-loader-created', null, 60e3);
+        loaderId = frameLoader.loaderId;
+      }
+    }
+
+    const hasLoaderError = await this.loaderIdResolvers.get(loaderId)?.promise;
     if (hasLoaderError) return hasLoaderError;
 
     if (!this.getActiveContextId(false)) {
@@ -368,7 +382,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       lifecycle[name] = timestamp ?? Date.now();
     }
 
-    if (!this.isDefaultUrl) {
+    if (loaderId !== this.defaultLoaderId) {
       this.emit('frame-lifecycle', { frame: this, name, loaderId: pageLoaderId, timestamp });
     }
   }
