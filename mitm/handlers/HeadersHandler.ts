@@ -108,8 +108,10 @@ export default class HeadersHandler {
           headers[canonizedKey] = value[0];
         } else {
           headers[canonizedKey] = [...value];
+          headers[canonizedKey] = [...value].filter(x => !checkInvalidHeaderChar(x));
         }
       } else {
+        if (checkInvalidHeaderChar(value)) continue;
         headers[canonizedKey] = value;
       }
     }
@@ -200,6 +202,18 @@ export default class HeadersHandler {
       }
     }
   }
+}
+
+
+const headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
+/**
+ * True if val contains an invalid field-vchar
+ *  field-value    = *( field-content / obs-fold )
+ *  field-content  = field-vchar [ 1*( SP / HTAB ) field-vchar ]
+ *  field-vchar    = VCHAR / obs-text
+ */
+function checkInvalidHeaderChar(val): boolean {
+  return headerCharRegex.test(val);
 }
 
 const lowerCaseMap = new Map<string, string>();

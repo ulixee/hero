@@ -62,7 +62,7 @@ describe('Load test', () => {
         page = createTestPage(await context.newPage());
         await page.goto(server.url('link.html'));
 
-        const navigate = page.mainFrame.waitOn('frame-navigated', null, 60e3);
+        const navigate = page.mainFrame.waitOn('frame-navigated', null, 75e3);
         await page.click('a');
         await navigate;
         expect(page.mainFrame.url).toBe(`${server.crossProcessBaseUrl}/empty.html`);
@@ -71,5 +71,5 @@ describe('Load test', () => {
       }
     });
     await Promise.all(concurrent);
-  }, 60e3);
+  }, 75e3);
 });

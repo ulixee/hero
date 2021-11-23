@@ -203,13 +203,24 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
   private writeResponseHead(): void {
     const context = this.context;
-    const { serverToProxyResponse, proxyToClientResponse } = context;
+    const { serverToProxyResponse, proxyToClientResponse, requestSession } = context;
 
     proxyToClientResponse.statusCode = context.status;
     // write individually so we properly write header-lists
     for (const [key, value] of Object.entries(context.responseHeaders)) {
       proxyToClientResponse.setHeader(key, value);
+      try {
+        proxyToClientResponse.setHeader(key, value);
+      } catch (error) {
+        log.info(`MitmHttpRequest.writeResponseHeadError`, {
+          sessionId: requestSession.sessionId,
+          request: `${context.method}: ${context.url.href}`,
+          error,
+          header: [key, value],
+        });
+      }
     }
+
 
     serverToProxyResponse.once('trailers', headers => {
       context.responseTrailers = headers;

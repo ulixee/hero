@@ -62,6 +62,7 @@ export default class DataLoader implements IDataCore {
   }
 
   public getBrowserOperatingSystemVersions(browserId: string, osName: string): string[] {
+    if (!this.browserOsEmulatorsByVersion[`as-${browserId}`]) return [];
     return this.browserOsEmulatorsByVersion[`as-${browserId}`][osName];
   }
 }

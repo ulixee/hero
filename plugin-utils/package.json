@@ -8,7 +8,7 @@
     "@ulixee/commons": "1.5.7",
     "@ulixee/hero-interfaces": "1.5.4",
     "progress": "^2.0.3",
-    "tar": "^6.1.0"
+    "tar": "^6.1.11"
   },
   "devDependencies": {
     "@ulixee/hero-core": "1.5.4",

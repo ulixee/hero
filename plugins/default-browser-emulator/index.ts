@@ -4,10 +4,7 @@ import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
 import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
 import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import {
-  BrowserEmulatorClassDecorator,
-  IBrowserEmulatorConfig,
-} from '@ulixee/hero-interfaces/ICorePlugin';
+import { BrowserEmulatorClassDecorator, IBrowserEmulatorConfig } from '@ulixee/hero-interfaces/ICorePlugin';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
@@ -15,6 +12,7 @@ import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
 import BrowserEngine from '@ulixee/hero-plugin-utils/lib/BrowserEngine';
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
+import IHttpSocketAgent from '@ulixee/hero-interfaces/IHttpSocketAgent';
 import Viewports from './lib/Viewports';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
 import setPageDomOverrides from './lib/setPageDomOverrides';
@@ -38,6 +36,7 @@ import loadDomOverrides from './lib/loadDomOverrides';
 import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
+import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
 
 const dataLoader = new DataLoader(__dirname);
 export const latestBrowserEngineId = 'chrome-89-0';
@@ -52,6 +51,8 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public viewport: IViewport;
   public geolocation: IGeolocation;
   public dnsOverTlsProvider: IDnsSettings['dnsOverTlsConnection'];
+  public upstreamProxyIpMask: IBrowserEmulatorConfig['upstreamProxyIpMask'];
+  public upstreamProxyUrl: string;
 
   protected readonly data: IBrowserData;
   private readonly domOverridesBuilder: DomOverridesBuilder;
@@ -77,12 +78,18 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
       this.viewport ?? Viewports.getDefault(this.data.windowBaseFraming, this.data.windowFraming);
     config.timezoneId ??= this.timezoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
     config.geolocation ??= this.geolocation;
+    if (config.upstreamProxyUrl) {
+      config.upstreamProxyIpMask ??= {};
+      config.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
+    }
 
     this.locale = config.locale;
     this.viewport = config.viewport;
     this.timezoneId = config.timezoneId;
     this.geolocation = config.geolocation;
     this.dnsOverTlsProvider = config.dnsOverTlsProvider;
+    this.upstreamProxyIpMask = config.upstreamProxyIpMask;
+    this.upstreamProxyUrl = config.upstreamProxyUrl;
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
@@ -103,6 +110,26 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
 
   public beforeHttpRequest(resource: IHttpResourceLoadDetails): void {
     modifyHeaders(this, this.data, resource);
+  }
+
+  public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
+    if (this.upstreamProxyIpMask) {
+      this.upstreamProxyIpMask.publicIp ??= await lookupPublicIp(
+        this.upstreamProxyIpMask.ipLookupService,
+      );
+      this.upstreamProxyIpMask.proxyIp ??= await lookupPublicIp(
+        this.upstreamProxyIpMask.ipLookupService,
+        agent,
+        this.upstreamProxyUrl,
+      );
+      this.logger.info('PublicIp Lookup', {
+        ...this.upstreamProxyIpMask,
+      });
+      this.domOverridesBuilder.add('webrtc', {
+        localIp: this.upstreamProxyIpMask.publicIp,
+        proxyIp: this.upstreamProxyIpMask.proxyIp,
+      });
+    }
   }
 
   public onHttp2SessionConnect(

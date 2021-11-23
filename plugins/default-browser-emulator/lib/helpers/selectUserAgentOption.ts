@@ -14,12 +14,12 @@ export default function selectUserAgentOption(
   if (userAgentSelector === 'chrome-latest') userAgentSelector = '';
 
   if (!userAgentSelector) {
-    const filteredOptions = dataUserAgentOptions.filter(x => {
-      if (x.browserName !== 'chrome') return false;
-      if (x.browserVersion.major !== latestChromeBrowserVersion.major) return false;
-      if (x.browserVersion.minor !== latestChromeBrowserVersion.minor) return false;
-      return true;
-    });
+    const filteredOptions = dataUserAgentOptions.filter(
+      x =>
+        x.browserName === 'chrome' &&
+        x.browserVersion.major === latestChromeBrowserVersion.major &&
+        x.browserVersion.minor === latestChromeBrowserVersion.minor,
+    );
     return pickRandomUserAgentOption(filteredOptions);
   }
 
@@ -45,6 +45,10 @@ function findUserAgentOption(
     return isSelectorMatch(userAgentOption, selectors);
   });
 
+  if (!filteredOptions.length) {
+    throw new Error(`No installed UserAgent Emulators match your criteria (${userAgentSelector})`);
+  }
+
   const dataUserAgentOption = pickRandom<IDataUserAgentOption>(filteredOptions);
   return convertToUserAgentOption(dataUserAgentOption);
 }
@@ -69,14 +73,18 @@ function isSelectorMatch(userAgentOption: IDataUserAgentOption, selectors: ISele
       version = browserVersion;
     } else if (name === userAgentOption.operatingSystemName) {
       version = operatingSystemVersion;
-    } else continue;
+    } else {
+      return false;
+    }
+    for (const match of matches) {
+      if (match.version === '*.*.*') continue;
+      const isValid = compareVersions.compare(version, match.version, match.operator);
 
-    const isMatch = matches.every(match =>
-      compareVersions.compare(version, match.version, match.operator),
-    );
-    if (isMatch) return true;
+      // must match every selector
+      if (!isValid) return false;
+    }
   }
-  return false;
+  return true;
 }
 
 interface ISelectorMatch {
@@ -135,10 +143,12 @@ function cleanupName(name: string) {
 }
 
 function cleanupOperator(operator: string) {
+  if (!operator) return '=';
   return operator.replace(/[^<>=]+/g, '');
 }
 
 function cleanupVersion(version: string) {
+  if (!version) return '*';
   return version.trim().replace(/[^0-9x*]+/g, '.');
 }
 

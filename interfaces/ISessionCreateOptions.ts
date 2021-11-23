@@ -23,6 +23,7 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   timezoneId?: string;
   locale?: string;
   upstreamProxyUrl?: string;
+  upstreamProxyIpMask?: { publicIp?: string; proxyIp?: string; ipLookupService?: string };
   input?: { command?: string } & any;
   geolocation?: IGeolocation;
   dependencyMap?: { [clientPluginId: string]: string[] };

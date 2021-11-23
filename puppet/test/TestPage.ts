@@ -88,6 +88,8 @@ export async function goto(
 }
 
 export async function setContent(page: IPuppetPage, content: string) {
+  // @ts-ignore
+  page.mainFrame.defaultLoaderId = null;
   await page.evaluate(`((content) => {
         window.stop();
         document.open();
