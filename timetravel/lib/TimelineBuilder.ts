@@ -135,10 +135,25 @@ export default class TimelineBuilder {
       });
     }
 
+    const storageEvents: ITimelineMetadata['storageEvents'] = [];
+    const changesByTabId: { [tabId: number]: number } = {};
+    for (const { tabId, timestamp, count } of db.storageChanges.getChangesByTabIdAndTime()) {
+      changesByTabId[tabId] ??= 0;
+      changesByTabId[tabId] += count;
+      const offsetPercent = commandTimeline.getTimelineOffsetForTimestamp(timestamp);
+      if (offsetPercent === -1) continue;
+      storageEvents.push({
+        offsetPercent,
+        tabId,
+        count: changesByTabId[tabId],
+      });
+    }
+
     return {
       urls,
       screenshots,
       paintEvents,
+      storageEvents,
     };
   }
 }

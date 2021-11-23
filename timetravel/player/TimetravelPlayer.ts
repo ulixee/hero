@@ -97,7 +97,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     const tab = this.activeTab;
 
     const startTick = tab.currentTick;
-    const startedOpen = this.isOpen;
+    const startedOpen = tab.isOpen;
     await this.openTab(tab);
     if (sessionOffsetPercent !== undefined) {
       await tab.setTimelineOffset(sessionOffsetPercent);
@@ -205,12 +205,12 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     });
 
     if (this.debugLogging) {
-      log.info('Replay Tab State', {
+      log.info('Timetravel Tab State', {
         sessionId: this.sessionId,
         tabDetails: ticksResult.tabDetails,
       });
     }
-
+    
     for (const tabDetails of ticksResult.tabDetails) {
       const tabPlaybackController = this.tabsById.get(tabDetails.tab.id);
       if (tabPlaybackController) {

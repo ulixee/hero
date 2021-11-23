@@ -36,7 +36,9 @@ export default class MirrorPage extends TypedEventEmitter<{
     private debugLogging: boolean = false,
   ) {
     super();
-    network.documents = domRecording.documents;
+    for (const document of domRecording.documents ?? []) {
+      if (document.doctype) this.network.registerDoctype(document.url, document.doctype);
+    }
   }
 
   public async open(
@@ -142,6 +144,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async navigate(url: string): Promise<void> {
+    await this.isReady;
     if (this.debugLogging) {
       log.info('MirrorPage.goto', {
         url,
@@ -156,17 +159,19 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async load(paintIndexRange?: [number, number]): Promise<void> {
+    await this.isReady;
     paintIndexRange ??= [0, this.domRecording.paintEvents.length - 1];
     let [startIndex] = paintIndexRange;
     const endIndex = paintIndexRange[1];
 
     let loadingDocument: IDocument;
-    for (const document of this.network.documents) {
+    for (const document of this.domRecording.documents) {
       if (!document.isMainframe) continue;
       if (document.paintEventIndex >= startIndex && document.paintEventIndex <= endIndex) {
         loadingDocument = document;
         if (document.paintEventIndex > startIndex) startIndex = document.paintEventIndex;
       }
+      this.network.registerDoctype(document.url, document.doctype);
     }
 
     const page = this.page;
@@ -241,6 +246,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   private async evaluate<T>(expression: string): Promise<T> {
+    await this.isReady;
     return await this.page.mainFrame.evaluate(expression, true, { retriesWaitingForLoad: 2 });
   }
 

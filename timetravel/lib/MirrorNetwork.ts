@@ -4,17 +4,16 @@ import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
-import { IDocument } from '@ulixee/hero-core/models/DomChangesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import Fetch = Protocol.Fetch;
 
 export default class MirrorNetwork {
   public resourceLookup: { [method_url: string]: IResourceSummary[] } = {};
-  public documents: IDocument[] = [];
   public headersFilter: (string | RegExp)[];
   public ignoreJavascriptRequests: boolean;
   public useResourcesOnce: boolean;
 
+  private readonly doctypesByUrl: { [url: string]: string } = {};
   private loadResourceDetails: (
     id: number,
   ) => Promise<ISessionResourceDetails> | ISessionResourceDetails;
@@ -30,9 +29,12 @@ export default class MirrorNetwork {
     bindFunctions(this);
   }
 
+  public registerDoctype(url: string, doctype: string): void {
+    this.doctypesByUrl[url] = doctype;
+  }
+
   public close(): void {
     this.resourceLookup = {};
-    this.documents.length = 0;
   }
 
   public async mirrorNetworkRequests(
@@ -40,7 +42,7 @@ export default class MirrorNetwork {
   ): Promise<Fetch.FulfillRequestRequest> {
     const { url, method } = request.request;
     if (request.resourceType === 'Document' || url === 'about:blank') {
-      const doctype = this.documents.find(x => x.url === url)?.doctype ?? '';
+      const doctype = this.doctypesByUrl[url] ?? '';
       return {
         requestId: request.requestId,
         responseCode: 200,
