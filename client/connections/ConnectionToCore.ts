@@ -30,6 +30,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
   public isDisconnecting = false;
+  public isConnectionTerminated = false;
 
   protected resolvedHost: string;
 
@@ -293,6 +294,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     if (!pending) return;
     this.pendingRequestsById.delete(id);
     const isInternalRequest = this.connectRequestId === id || this.disconnectRequestId === id;
+    if (this.disconnectRequestId === id) this.disconnectRequestId = null;
+    if (this.connectRequestId === id) this.connectRequestId = null;
 
     if (message.data instanceof Error) {
       let responseError = message.data;
@@ -308,6 +311,23 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       this.rejectPendingRequest(pending, responseError);
     } else {
       pending.resolve({ data: message.data });
+    }
+  }
+
+  protected async onConnectionTerminated(): Promise<void> {
+    if (this.isConnectionTerminated) return;
+
+    this.isConnectionTerminated = true;
+    await this.internalDisconnect();
+    if (this.connectRequestId) {
+      this.onResponse(this.connectRequestId, {
+        data: new DisconnectedFromCoreError(this.resolvedHost),
+      });
+    }
+    if (this.disconnectRequestId) {
+      this.onResponse(this.disconnectRequestId, {
+        data: new DisconnectedFromCoreError(this.resolvedHost),
+      });
     }
   }
 

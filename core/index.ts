@@ -5,11 +5,7 @@ import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions
 import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import {
-  IHumanEmulatorClass,
-  IBrowserEmulatorClass,
-  ICorePluginClass,
-} from '@ulixee/hero-interfaces/ICorePlugin';
+import { IBrowserEmulatorClass, ICorePluginClass, IHumanEmulatorClass } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
 import DefaultHumanEmulator from '@ulixee/default-human-emulator';
@@ -20,7 +16,7 @@ import ConnectionToClient from './connections/ConnectionToClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
-import Signals = NodeJS.Signals;
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 
 const { log } = Log(module);
 let dataDir = process.env.HERO_DATA_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to static variable below class definition
@@ -86,6 +82,7 @@ export default class Core {
     options: ICoreConfigureOptions = {},
     isExplicitlyStarted = true,
   ): Promise<void> {
+    if (isExplicitlyStarted) this.wasManuallyStarted = true;
     if (this.isStarting) return;
     const startLogId = log.info('Core.start', {
       options,
@@ -94,7 +91,7 @@ export default class Core {
     });
     this.isClosing = null;
     this.isStarting = true;
-    if (isExplicitlyStarted) this.wasManuallyStarted = true;
+    this.registerSignals();
 
     const { localProxyPortStart, maxConcurrentClientCount } = options;
 
@@ -158,13 +155,13 @@ export default class Core {
 
   private static checkForAutoShutdown(): void {
     if (
-      Core.wasManuallyStarted ||
+      this.wasManuallyStarted ||
       this.connections.some(x => x.isActive()) ||
       Session.hasKeepAliveSessions()
     )
       return;
 
-    Core.shutdown().catch(error => {
+    this.shutdown().catch(error => {
       log.error('Core.autoShutdown', {
         error,
         sessionId: null,
@@ -183,23 +180,20 @@ export default class Core {
     }
     dataDir = absoluteDataDir;
   }
+
+  private static registerSignals(): void {
+    ShutdownHandler.register(() => this.shutdown());
+
+    if (process.env.NODE_ENV !== 'test') {
+      process.on('uncaughtExceptionMonitor', async (error: Error) => {
+        await this.logUnhandledError(error, true);
+        await this.shutdown();
+      });
+      process.on('unhandledRejection', async (error: Error) => {
+        await this.logUnhandledError(error, false);
+      });
+    }
+  }
 }
 
 Core.dataDir = dataDir;
-
-['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
-  process.once(name as Signals, async () => {
-    await Core.shutdown();
-    process.exit(0);
-  });
-});
-
-if (process.env.NODE_ENV !== 'test') {
-  process.on('uncaughtExceptionMonitor', async (error: Error) => {
-    await Core.logUnhandledError(error, true);
-    await Core.shutdown();
-  });
-  process.on('unhandledRejection', async (error: Error) => {
-    await Core.logUnhandledError(error, false);
-  });
-}

@@ -43,7 +43,7 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
     const webSocket = await this.getWebsocket(false);
     if (webSocket?.readyState === WebSocket.OPEN) {
       try {
-        webSocket.off('close', this.internalDisconnect);
+        webSocket.off('close', this.onConnectionTerminated);
         webSocket.off('error', this.internalDisconnect);
         webSocket.terminate();
       } catch (_) {
@@ -61,7 +61,7 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
       this.webSocketOrError = connectToWebsocketHost(hostOrError);
       try {
         const webSocket = await this.getWebsocket();
-        webSocket.once('close', this.internalDisconnect);
+        webSocket.once('close', this.onConnectionTerminated);
         webSocket.once('error', this.internalDisconnect);
         webSocket.on('message', message => {
           const payload = TypeSerializer.parse(message.toString(), 'REMOTE CORE');
