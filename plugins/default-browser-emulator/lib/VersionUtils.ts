@@ -11,6 +11,7 @@ export function convertMacOsVersionString(versionString: string) {
 
 export function findClosestVersionMatch(versionToMatch: string, versions: string[]) {
   if (versions.length === 1 && versions[0] === 'ALL') return 'ALL';
+  if (!versions.length) return null;
 
   // there is no guarantee we have an exact match, so let's get the closest
   const versionTree = convertVersionsToTree(versions);

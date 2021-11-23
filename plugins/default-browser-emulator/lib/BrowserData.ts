@@ -31,6 +31,9 @@ export default class BrowserData implements IBrowserData {
     this.osDataDir = `${this.baseDataDir}/as-${os.name}-${os.version}`;
     if (!this.dataLoader.isSupportedEmulator(this.osDataDir)) {
       const otherVersions = this.dataLoader.getBrowserOperatingSystemVersions(browserId, os.name);
+      if (!otherVersions.length) {
+        throw new Error(`${browserId} has no emulation data for ${os.name}`);
+      }
       const closestVersionMatch = findClosestVersionMatch(os.version, otherVersions);
       this.osDataDir = `${this.baseDataDir}/as-${os.name}-${closestVersionMatch}`;
     }
