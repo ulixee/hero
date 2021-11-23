@@ -463,6 +463,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public async waitForLoad(event: keyof ILifecycleEvents = 'load'): Promise<void> {
+    await this.waitForLoader();
     if (this.lifecycleEvents[event]) return;
     await this.waitOn('frame-lifecycle', x => x.name === event, 30e3);
   }
