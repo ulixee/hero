@@ -60,7 +60,7 @@ describe('Load test', () => {
       let page: ITestPage;
       try {
         page = createTestPage(await context.newPage());
-        await page.goto(server.url('link.html'));
+        await page.goto(server.url('link.html'), null, 75e3);
 
         const navigate = page.mainFrame.waitOn('frame-navigated', null, 75e3);
         await page.click('a');

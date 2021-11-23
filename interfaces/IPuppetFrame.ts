@@ -15,7 +15,7 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   html(): Promise<string>;
   isAttached(): boolean;
   resolveNodeId(backendNodeId: number): Promise<string>;
-  waitForLoad(eventName?: keyof ILifecycleEvents): Promise<void>;
+  waitForLoad(eventName?: keyof ILifecycleEvents, timeoutMs?: number): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
   getFrameElementNodeId(): Promise<string>;

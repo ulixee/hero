@@ -45,7 +45,7 @@ describe('pageStateGenerator', () => {
       const startTime = Date.now();
       await tab.getJsValue(`add()`);
       await tab.getJsValue(`add()`);
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState('1', session.id);
     }
@@ -121,7 +121,7 @@ describe('pageStateGenerator', () => {
       const startTime = Date.now();
       await tab.getJsValue(`add()`);
       if (state === '1') await tab.getJsValue(`add()`);
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
@@ -177,7 +177,7 @@ describe('pageStateGenerator', () => {
       const startTime = Date.now();
       await tab.getJsValue(`remove()`);
       if (state === '1') await tab.getJsValue(`remove()`);
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
@@ -223,7 +223,7 @@ describe('pageStateGenerator', () => {
       const startTime = Date.now();
       if (state === '100') await tab.getJsValue(`tick(100)`);
       else await tab.getJsValue(`tick(50)`);
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
@@ -297,7 +297,7 @@ describe('pageStateGenerator', () => {
       await tab.getJsValue(`storage('${state}')`);
       await tab.waitForElement(['document', ['querySelector', '.db-ready']]);
       await tab.flushDomChanges();
-      await tab.close();
+      await session.close();
 
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
@@ -358,7 +358,7 @@ describe('pageStateGenerator', () => {
       const state = tab.navigations.top.finalUrl.endsWith('1') ? '1' : '2';
       await tab.waitForLoad(LoadStatus.PaintingStable);
 
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
@@ -418,7 +418,7 @@ describe('pageStateGenerator', () => {
       await tab.waitForLoad(LoadStatus.PaintingStable);
       await tab.waitForElement(['document', ['querySelector', '#ready']]);
 
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
       pageStateGenerator.addState(state, session.id);
     }
@@ -454,7 +454,7 @@ describe('pageStateGenerator', () => {
       const startTime = Date.now();
       await tab.goto(`${koaServer.baseUrl}/${page}`);
       await tab.waitForLoad('PaintingStable');
-      await tab.close();
+      await session.close();
       pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
 
       const state = page.endsWith('1') ? '1' : '2';

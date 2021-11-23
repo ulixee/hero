@@ -430,7 +430,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
+  public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
+    await this.isReady;
     return this.navigationsObserver.waitForLoad(status, options);
   }
 
