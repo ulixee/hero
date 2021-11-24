@@ -103,6 +103,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
         }
       } catch (error) {
         if (error instanceof CanceledPromiseError) {
+          resolve();
           return;
         }
         reject(error);
@@ -225,7 +226,8 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
       });
     }
 
-    const isDefault = context.name === '' && context.auxData.isDefault === true && type === 'default';
+    const isDefault =
+      context.name === '' && context.auxData.isDefault === true && type === 'default';
     const isHeroWorld = context.name === ISOLATED_WORLD && type === 'isolated';
     if (isDefault || isHeroWorld) {
       frame?.addContextId(context.id, isDefault);
