@@ -211,7 +211,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     });
   }
 
-  private async loadBatchFromCacheDir(
+  private async loadGeneratedBatchAssertions(
     args: [
       batchId: string,
       pageStateIdJsPath: IJsPath,
@@ -220,7 +220,11 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   ): Promise<void> {
     const [batchId] = args;
     if (!batchId.startsWith('@')) return;
-    const assertionsBatch = await PageStateCodeBlock.loadAssertionBatch(batchId);
+
+    const assertionsBatch = await PageStateCodeBlock.loadAssertionBatch(
+      batchId,
+      this.tab.session.options.scriptInstanceMeta,
+    );
     if (assertionsBatch) {
       args[2] = assertionsBatch.assertions;
 
@@ -232,7 +236,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     for (const [id, rawCommand] of Object.entries(this.options.commands)) {
       const [frameId, command, args] = rawCommand;
       if (command === 'Tab.assert') {
-        await this.loadBatchFromCacheDir(args as any);
+        await this.loadGeneratedBatchAssertions(args as any);
       }
       this.trackCommand(id, frameId, command, args);
     }

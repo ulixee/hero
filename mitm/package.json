@@ -4,7 +4,7 @@
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/commons": "1.5.7",
+    "@ulixee/commons": "1.5.8",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-mitm-socket": "1.5.4",
     "better-sqlite3": "^7.4.1",

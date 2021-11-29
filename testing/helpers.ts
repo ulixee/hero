@@ -22,6 +22,8 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import MitmSocket from '@ulixee/hero-mitm-socket';
 import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
 import { Helpers } from './index';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -462,10 +464,21 @@ export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOn
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
 }
 
-export async function createSession(): Promise<{ session: Session; tab: Tab }> {
+export function createScriptMeta(module: NodeModule, id: string): IScriptInstanceMeta {
+  return {
+    workingDirectory: process.cwd(),
+    entrypoint: module.filename,
+    id,
+    startDate: Date.now(),
+  };
+}
+
+export async function createSession(
+  options?: ISessionCreateOptions,
+): Promise<{ session: Session; tab: Tab }> {
   const connection = Core.addConnection();
   Helpers.onClose(() => connection.disconnect());
-  const meta = await connection.createSession();
+  const meta = await connection.createSession(options);
   const tab = Session.getTab(meta);
   Helpers.needsClosing.push(tab.session);
 

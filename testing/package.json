@@ -10,8 +10,9 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
-    "@ulixee/commons": "1.5.7",
+    "@ulixee/commons": "1.5.8",
     "@ulixee/hero-core": "1.5.4",
+    "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-mitm-socket": "1.5.4",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",

@@ -1,9 +1,13 @@
-import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { createScriptMeta, createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { Helpers } from '@ulixee/hero-testing';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import Core from '@ulixee/hero-core';
 import PageStateGenerator from '../lib/PageStateGenerator';
 import PageStateAssertions from '../lib/PageStateAssertions';
+import * as Fs from 'fs';
+import * as Path from 'path';
+import PageStateCodeBlock from '../lib/PageStateCodeBlock';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -501,5 +505,80 @@ describe('pageStateGenerator', () => {
     // should take into account the new change
     expect(state2Round2.assertions).not.toEqual(state2.assertions);
     expect(state2Round2.assertions.filter(x => x.toString().includes('Title 2'))).toHaveLength(0);
+  }, 30e3);
+
+  test('can import generated code blocks', async () => {
+    koaServer.get('/restorePageCode1', ctx => {
+      ctx.body = `<body><h1>Title 1</h1></body>`;
+    });
+    koaServer.get('/restorePageCode2', ctx => {
+      ctx.body = `<body><h2>Title 2</h2></body>`;
+    });
+
+    const scriptInstanceMeta = createScriptMeta(module, 'codeBlock');
+    async function run(page: string, pageStateGenerator: PageStateGenerator) {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
+      const { tab, session } = await createSession({ scriptInstanceMeta });
+      const startTime = Date.now();
+      await tab.goto(`${koaServer.baseUrl}/${page}`);
+      await tab.waitForLoad('DomContentLoaded');
+      await session.close();
+      pageStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
+
+      const state = page.endsWith('1') ? '1' : '2';
+      pageStateGenerator.addState(state, session.id);
+    }
+
+    const generator = new PageStateGenerator('id');
+
+    await Promise.all([
+      run('restorePageCode1', generator),
+      run('restorePageCode1', generator),
+      run('restorePageCode2', generator),
+      run('restorePageCode2', generator),
+    ]);
+
+    await generator.evaluate();
+    // now write to disk
+    if (!Fs.existsSync(Path.join(process.cwd(), '.ulixee'))) {
+      Fs.mkdirSync(Path.join(process.cwd(), '.ulixee'));
+    }
+    const result = await PageStateCodeBlock.generateCodeBlock(generator, scriptInstanceMeta);
+    expect(result).toBeTruthy();
+
+    const { tab } = await createSession({ scriptInstanceMeta });
+    await tab.goto(`${koaServer.baseUrl}/restorePageCode1`);
+    const callbackFn = jest.fn();
+    const isResolved = new Resolvable<void>();
+    // @ts-ignore
+    const listener = await tab.addPageStateListener('[1]', {
+      callsite: 'callsite',
+      states: ['1', '2'],
+      commands: {
+        '1-Tab.assert': [
+          null,
+          'Tab.assert',
+          [`@/pagestate/id/${generator.statesByName.get('1').id}.json`, [1]],
+        ],
+        '2-Tab.assert': [
+          null,
+          'Tab.assert',
+          [`@/pagestate/id/${generator.statesByName.get('2').id}.json`, [1]],
+        ],
+      },
+    });
+
+
+    listener.on('state', status => {
+      callbackFn(status);
+      if (status['1-Tab.assert'] === true) {
+        listener.stop();
+        isResolved.resolve();
+      }
+    });
+
+    await isResolved.promise;
+    listener.stop();
+    expect(callbackFn).toHaveBeenCalled();
   }, 30e3);
 });

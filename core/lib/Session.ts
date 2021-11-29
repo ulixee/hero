@@ -152,6 +152,14 @@ export default class Session
     loggerSessionIdNames.set(this.id, options.sessionName);
     this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
 
+    // set default script instance if not provided
+    options.scriptInstanceMeta ??= {
+      id: nanoid(),
+      workingDirectory: process.cwd(),
+      entrypoint: require.main?.filename ?? process.argv[1],
+      startDate: this.createdTime,
+    };
+
     const providedOptions = { ...options };
     const { userProfile, userAgent } = options;
 
