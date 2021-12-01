@@ -76,7 +76,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       : {};
     if (!isIncognito) {
       if (!this.browserContextsById.has(undefined)) {
-        this.createBrowserContext(undefined, plugins, logger, proxy);
+        await this.createBrowserContext(undefined, plugins, logger, proxy);
       }
       const context = this.browserContextsById.get(undefined);
       context.proxy = proxy;
@@ -88,7 +88,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       disposeOnDetach: true,
       ...proxySettings,
     });
-    return this.createBrowserContext(browserContextId, plugins, logger, proxy);
+    return await this.createBrowserContext(browserContextId, plugins, logger, proxy);
   }
 
   public getBrowserContext(id: string): BrowserContext {
@@ -210,15 +210,16 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private createBrowserContext(
+  private async createBrowserContext(
     browserContextId: string,
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
-  ): BrowserContext {
+  ): Promise<BrowserContext> {
     const context = new BrowserContext(this, plugins, browserContextId, logger, proxy);
     this.browserContextsById.set(browserContextId, context);
     context.on('close', () => this.browserContextsById.delete(browserContextId));
+    await plugins.onNewPuppetContext(context);
 
     return context;
   }

@@ -181,8 +181,6 @@ export default class GlobalPool {
     browserContext: IPuppetContext,
     sessionId: string,
   ): Promise<void> {
-    // don't close non-incongito contexts
-    if (!browserContext.isIncognito) return;
     try {
       await browserContext.close();
     } catch (error) {

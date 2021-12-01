@@ -47,11 +47,12 @@ export default class CoreSession implements IJsPathEventTarget {
   private commandId = 0;
   private cliPrompt: ReadLine;
   private isClosing = false;
+  private shutdownPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
 
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
     connectionToCore: ConnectionToCore,
-    mode: ISessionCreateOptions['mode']
+    mode: ISessionCreateOptions['mode'],
   ) {
     this.mode = mode;
     const { sessionId, sessionName } = sessionMeta;
@@ -142,27 +143,20 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async close(force = false): Promise<void> {
+    await this.shutdownPromise;
     if (this.isClosing) return;
+
     try {
       this.isClosing = true;
       this.closeCliPrompt();
-      await this.commandQueue.flush();
-      for (const tab of this.tabsById.values()) {
-        await tab.flush();
-      }
-      for (const tab of this.frozenTabsById.values()) {
-        await tab.flush();
-      }
-      const result = await this.commandQueue.run<{ didKeepAlive: boolean; message: string }>(
-        'Session.close',
-        force,
-      );
+      this.shutdownPromise = this.doClose(force);
+      const result = await this.shutdownPromise;
+      this.shutdownPromise = null;
       if (result?.didKeepAlive === true) {
         this.isClosing = false;
-        const closedResolvable = new Resolvable();
-        await this.addEventListener(null, 'close', closedResolvable.resolve);
-        await this.showSessionKeepAlivePrompt(result.message);
-        await closedResolvable.promise;
+        const didClose = new Promise(resolve => this.addEventListener(null, 'close', resolve));
+        this.showSessionKeepAlivePrompt(result.message);
+        await didClose;
       }
     } finally {
       process.nextTick(() => this.connectionToCore.untrackSession(this));
@@ -195,6 +189,17 @@ export default class CoreSession implements IJsPathEventTarget {
     }
   }
 
+  private async doClose(force: boolean): Promise<{ didKeepAlive: boolean; message: string }> {
+    await this.commandQueue.flush();
+    for (const tab of this.tabsById.values()) {
+      await tab.flush();
+    }
+    for (const tab of this.frozenTabsById.values()) {
+      await tab.flush();
+    }
+    return await this.commandQueue.run('Session.close', force);
+  }
+
   private closeCliPrompt(): void {
     if (this.cliPrompt) {
       this.cliPrompt.close();
@@ -202,7 +207,7 @@ export default class CoreSession implements IJsPathEventTarget {
     }
   }
 
-  private showSessionKeepAlivePrompt(message: string): Promise<void> {
+  private showSessionKeepAlivePrompt(message: string): void {
     if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
 
     this.cliPrompt = readline.createInterface({
@@ -220,7 +225,10 @@ export default class CoreSession implements IJsPathEventTarget {
 
     ShutdownHandler.register(() => this.close(true));
     process.stdin.on('keypress', async (chunk, key) => {
-      if (key.name?.toLowerCase() === 'q') {
+      if (
+        key.name?.toLowerCase() === 'q' ||
+        (key.name?.toLowerCase() === 'c' && key.ctrl === true)
+      ) {
         try {
           await this.close(true);
         } catch (error) {

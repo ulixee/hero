@@ -24,7 +24,7 @@ export function configureBrowserLaunchArgs(
     '--disable-default-apps', // Disable installation of default apps on first run
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
-    '--disable-features=PaintHolding,TranslateUI,site-per-process,OutOfBlinkCors,DestroyProfileOnBrowserClose', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+    '--disable-features=PaintHolding,Translate,site-per-process,OutOfBlinkCors,DestroyProfileOnBrowserClose', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
@@ -36,8 +36,6 @@ export function configureBrowserLaunchArgs(
     '--use-gl=any', // Select which implementation of GL the GPU process should use. Options are: desktop: whatever desktop OpenGL the user has installed (Linux and Mac default). egl: whatever EGL / GLES2 the user has installed (Windows default - actually ANGLE). swiftshader: The SwiftShader software renderer.
     '--disable-partial-raster', // https://crbug.com/919955
     '--disable-skia-runtime-opts', // Do not use runtime-detected high-end CPU optimizations in Skia.
-
-    '--incognito',
 
     '--use-fake-device-for-media-stream',
 
