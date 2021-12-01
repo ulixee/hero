@@ -65,7 +65,7 @@ export class BrowserContext
     this.plugins = plugins;
     this.browser = browser;
     this.id = contextId;
-    this.isIncognito = !contextId;
+    this.isIncognito = !!contextId;
     this.logger = logger.createChild(module, {
       browserContextId: contextId,
     });

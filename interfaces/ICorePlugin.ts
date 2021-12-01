@@ -19,6 +19,7 @@ import ISessionCreateOptions from './ISessionCreateOptions';
 import { IPuppetFrame } from './IPuppetFrame';
 import IDevtoolsSession from './IDevtoolsSession';
 import IHttpSocketAgent from './IHttpSocketAgent';
+import IPuppetContext from './IPuppetContext';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,
@@ -142,6 +143,7 @@ export interface IBrowserEmulatorMethods {
 
   onNewPuppetPage?(page: IPuppetPage, sessionSummary?: ISessionSummary): Promise<any>;
   onNewPuppetWorker?(worker: IPuppetWorker, sessionSummary?: ISessionSummary): Promise<any>;
+  onNewPuppetContext?(context: IPuppetContext, sessionSummary?: ISessionSummary): Promise<any>;
 
   websiteHasFirstPartyInteraction?(url: URL, sessionSummary?: ISessionSummary): Promise<any> | void; // needed for implementing first-party cookies
 }

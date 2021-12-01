@@ -30,6 +30,7 @@ import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import Core from '../index';
 import IHttpSocketAgent from '@ulixee/hero-interfaces/IHttpSocketAgent';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
 const DefaultHumanEmulatorId = 'default-human-emulator';
@@ -189,6 +190,15 @@ export default class CorePlugins implements ICorePlugins {
       this.instances
         .filter(p => p.onNewPuppetWorker)
         .map(p => p.onNewPuppetWorker(worker, sessionSummary)),
+    );
+  }
+
+  public async onNewPuppetContext(context: IPuppetContext): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
+    await Promise.all(
+      this.instances
+        .filter(p => p.onNewPuppetContext)
+        .map(p => p.onNewPuppetContext(context, sessionSummary)),
     );
   }
 
