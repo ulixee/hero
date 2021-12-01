@@ -745,7 +745,8 @@ export default class Tab
     this.pageStateListeners[id] = listener;
     listener.on('resolved', () => delete this.pageStateListeners[id]);
 
-    await listener.isLoaded;
+    const error = await listener.isLoaded;
+    if (error) throw error;
 
     this.emit('wait-for-pagestate', { listener });
 

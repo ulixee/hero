@@ -1,27 +1,43 @@
 import * as Path from 'path';
-import { getCacheDirectory } from '@ulixee/commons/lib/dirUtils';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
 import * as Fs from 'fs';
 import PageStateGenerator from './PageStateGenerator';
-
-const defaultCacheDir = Path.join(getCacheDirectory(), 'ulixee');
+import UlixeeConfig, { IRuntimeLocation } from '@ulixee/commons/config';
+import { execSync } from 'child_process';
 
 export default class PageStateCodeBlock {
-  public static async loadAssertionBatch(batchId: string): Promise<IPageStateAssertionBatch> {
+  public static async loadAssertionBatch(
+    batchId: string,
+    runtimeLocation: IRuntimeLocation,
+  ): Promise<IPageStateAssertionBatch> {
     if (!batchId.startsWith('@')) return;
-    return await readFileAsJson(`${defaultCacheDir}/${batchId.substr(1)}`);
+    const dir = UlixeeConfig.findConfigDirectory(runtimeLocation);
+    return await readFileAsJson(Path.join(dir, batchId.substr(1)));
   }
 
-  public static async generateCodeBlock(generator: PageStateGenerator): Promise<string> {
+  public static async generateCodeBlock(
+    generator: PageStateGenerator,
+    runtimeLocation: IRuntimeLocation,
+  ): Promise<string> {
     let code = `{`;
 
+    const dir = UlixeeConfig.findConfigDirectory(runtimeLocation);
     const id = generator.id;
-    await Fs.promises.mkdir(`${defaultCacheDir}/pagestate/${id}`, { recursive: true });
+    await Fs.promises.mkdir(`${dir}/pagestate/${id}`, { recursive: true });
     for (const state of generator.statesByName.keys()) {
       const exported = generator.export(state);
-      const savePath = Path.normalize(`${defaultCacheDir}/pagestate/${id}/${exported.id}.json`);
-      await Fs.promises.writeFile(savePath, JSON.stringify(exported));
+      const savePath = Path.normalize(`${dir}/pagestate/${id}/${exported.id}.json`);
+      await Fs.promises.writeFile(savePath, JSON.stringify(exported, null, 2));
+      try {
+        execSync(`prettier --write ${savePath}`, {
+          cwd: runtimeLocation.workingDirectory,
+        });
+      } catch (err) {
+        console.warn(
+          'Could not run prettier on Hero PageState configurations. We recommend installing prettier in your project or globally to reduce merge conflicts.',
+        );
+      }
       const stateKey = JSON.stringify(state);
 
       code += `\n  ${stateKey}: ({ loadFrom }) => loadFrom(${JSON.stringify(
@@ -34,3 +50,4 @@ export default class PageStateCodeBlock {
     return code;
   }
 }
+

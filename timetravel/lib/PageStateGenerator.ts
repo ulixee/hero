@@ -163,6 +163,22 @@ export default class PageStateGenerator {
         ]);
       }
     }
+
+    exported.sessions.sort((a, b) => {
+      const aTime = a.timelineRange ? a.timelineRange[0] : a.loadingRange[0];
+      const bTime = b.timelineRange ? b.timelineRange[0] : b.loadingRange[0];
+      return aTime - bTime;
+    });
+
+    const stringifyCache = new Map<any, string>();
+    exported.assertions.sort((a, b) => {
+      if (a[0] !== b[0]) return a[0] - b[0];
+      if (a[1] !== b[1]) return a[1].localeCompare(b[1]);
+      if (!stringifyCache.has(a[2])) stringifyCache.set(a[2], JSON.stringify(a[2]));
+      if (!stringifyCache.has(b[2])) stringifyCache.set(b[2], JSON.stringify(b[2]));
+      return stringifyCache.get(a[2]).localeCompare(stringifyCache.get(b[2]));
+    });
+
     exported.minValidAssertions = Math.round(
       exported.assertions.length * (minValidAssertionPercent / 100),
     );
@@ -334,6 +350,12 @@ export default class PageStateGenerator {
     await session.mirrorPage.open(context, session.sessionId, sessionRecord.viewport, page => {
       return page.devtoolsSession.send('Emulation.setLocaleOverride', {
         locale: sessionRecord.locale,
+      }).catch(error => {
+        // All pages in the same renderer share locale. All such pages belong to the same
+        // context and if locale is overridden for one of them its value is the same as
+        // we are trying to set so it's not a problem.
+        if (error.message.includes('Another locale override is already in effect')) return;
+        throw error;
       });
     });
   }
@@ -451,7 +473,7 @@ export default class PageStateGenerator {
         isTextnode &&
         (isAdded || isRemoved) &&
         // don't compare long strings
-        change.textContent?.length < 200
+        change.textContent?.length < 30
       ) {
         const containingElement = domNode.parentElement;
         if (containingElement && containingElement.children.length === 1) {

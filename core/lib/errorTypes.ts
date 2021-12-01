@@ -5,7 +5,7 @@ export class ScriptChangedNeedsRestartError extends Error {
   constructor(message?: string) {
     super(message);
     this.name = 'ScriptChangedNeedsRestartError';
-    this.stack = '';
+    this.stack = `${this.name}: ${this.message}`;
   }
 
   public static atCommand(command: ICommandMeta): ScriptChangedNeedsRestartError {

@@ -3,7 +3,7 @@
   "version": "1.5.4",
   "description": "The interface to playback and examine previous Hero sessions",
   "dependencies": {
-    "@ulixee/commons": "1.5.7",
+    "@ulixee/commons": "1.5.8",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-core": "1.5.4",
     "nanoid": "^3.1.30"

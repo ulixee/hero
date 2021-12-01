@@ -83,6 +83,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   protected readonly logger: IBoundLog;
+  private isClosing = false;
   private closePromise = createPromise();
   private readonly registeredEvents: IRegisteredEventListener[];
   private screencastOptions: IScreenRecordingOptions & { lastImage?: string };
@@ -368,6 +369,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   async close(timeoutMs = 5e3): Promise<void> {
+    if (this.isClosing || this.closePromise.isResolved) return this.closePromise.promise;
+    this.isClosing = true;
     const parentLogId = this.logger.stats('Page.Closing');
     try {
       if (this.devtoolsSession.isConnected() && !this.isClosed) {
@@ -399,6 +402,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   didClose(closeError?: Error): void {
+    if (this.closePromise.isResolved) return;
     this.isClosed = true;
     try {
       this.framesManager.close(closeError);
