@@ -6,6 +6,10 @@ import MirrorPage from '../lib/MirrorPage';
 import MirrorNetwork from '../lib/MirrorNetwork';
 
 export default class TabPlaybackController {
+  public get id(): number {
+    return this.tabDetails.tab.id;
+  }
+
   public get ticks(): ITick[] {
     return this.tabDetails.ticks;
   }

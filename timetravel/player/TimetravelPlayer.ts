@@ -27,7 +27,12 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     }
   }
 
-  public activeTab: TabPlaybackController;
+  public activeTabId: number;
+
+  public get activeTab(): TabPlaybackController {
+    return this.tabsById.get(this.activeTabId);
+  }
+
   public get isOpen(): boolean {
     for (const tab of this.tabsById.values()) {
       if (tab.isOpen) return true;
@@ -71,6 +76,8 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public async step(direction: 'forward' | 'back'): Promise<number> {
+    this.isReady ??= this.load();
+    await this.isReady;
     let percentOffset: number;
     if (!this.isOpen) {
       percentOffset = this.activeTab.ticks[this.activeTab.ticks.length - 1]?.timelineOffsetPercent;
@@ -148,18 +155,22 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     for (const tab of this.tabsById.values()) {
       await tab.close();
     }
-    if (this.activeTab) await this.activeTab.mirrorPage.close();
+    this.activeTabId = null;
     this.tabsById.clear();
   }
 
   public activateTab(tabPlaybackController: TabPlaybackController): void {
-    this.activeTab = tabPlaybackController;
+    this.activeTabId = tabPlaybackController.id;
+    if (!this.tabsById.has(tabPlaybackController.id)) {
+      this.tabsById.set(tabPlaybackController.id, tabPlaybackController);
+    }
   }
 
   public async refreshTicks(
     timelineOffsetRange: [startTime: number, endTime?: number],
   ): Promise<void> {
-    if (this.timelineRange && this.timelineRange.toString() === timelineOffsetRange.toString()) return;
+    if (this.timelineRange && this.timelineRange.toString() === timelineOffsetRange.toString())
+      return;
     this.timelineRange = [...timelineOffsetRange];
     await this.load();
   }
@@ -210,7 +221,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
         tabDetails: ticksResult.tabDetails,
       });
     }
-    
+
     for (const tabDetails of ticksResult.tabDetails) {
       const tabPlaybackController = this.tabsById.get(tabDetails.tab.id);
       if (tabPlaybackController) {
@@ -226,7 +237,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       tab.mirrorPage.on('close', this.checkAllPagesClosed.bind(this));
       this.tabsById.set(tabDetails.tab.id, tab);
 
-      this.activeTab ??= tab;
+      this.activeTabId ??= tabDetails.tab.id;
     }
 
     const resourcesResult = await this.connection.run({

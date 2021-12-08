@@ -305,7 +305,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public onStoppedLoading(): void {
-    if (this.startedLoaderId || !this.loaderLifecycles.has(this.startedLoaderId)) return;
+    if (!this.startedLoaderId || !this.loaderLifecycles.has(this.startedLoaderId)) return;
 
     clearTimeout(this.resolveLoaderTimeout);
 

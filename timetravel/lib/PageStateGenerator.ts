@@ -37,7 +37,7 @@ export default class PageStateGenerator {
   private pendingEvaluate: Resolvable<void>;
   private isEvaluating = false;
 
-  constructor(readonly id: string) {}
+  constructor(readonly id: string, private emulateSessionId?: string) {}
 
   public addSession(
     sessionDb: SessionDb,
@@ -212,12 +212,6 @@ export default class PageStateGenerator {
     }
   }
 
-  public createBrowserContext(fromSessionId: string): void {
-    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
-      .then(context => context.once('close', () => (this.browserContext = null)))
-      .catch(err => err);
-  }
-
   private async doEvaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
       const { db, loadingRange, tabId, sessionId, needsProcessing } = session;
@@ -276,8 +270,10 @@ export default class PageStateGenerator {
     const states = [...this.statesByName.values()];
     // 1. Only keep assert results common to all sessions in a state
     for (const state of states) {
+      // only use loaded sessions
+      const validSessionIds = [...state.sessionIds].filter(x => !!this.sessionsById.get(x)?.db);
       state.assertsByFrameId = this.sessionAssertions.getCommonSessionAssertions(
-        state.sessionIds,
+        validSessionIds,
         state.startingAssertsByFrameId,
       );
     }
@@ -299,6 +295,7 @@ export default class PageStateGenerator {
       await this.createMirrorPageIfNeeded(session);
       // create at "loaded" state
       const mirrorPage = session.mirrorPage;
+      if (!mirrorPage) continue;
       await mirrorPage.load();
       // only need to do this once?
       session.needsProcessing = false;
@@ -341,22 +338,28 @@ export default class PageStateGenerator {
     networkInterceptor.useResourcesOnce = true;
 
     session.mirrorPage = new MirrorPage(networkInterceptor, session.domRecording, false);
-    await this.createBrowserContext(session.sessionId);
+
+    const fromSessionId = this.emulateSessionId ?? session.sessionId;
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+      .then(context => context.once('close', () => (this.browserContext = null)))
+      .catch(err => err);
 
     const context = await this.browserContext;
     if (context instanceof Error) throw context;
 
     const sessionRecord = session.db.session.get();
-    await session.mirrorPage.open(context, session.sessionId, sessionRecord.viewport, page => {
-      return page.devtoolsSession.send('Emulation.setLocaleOverride', {
-        locale: sessionRecord.locale,
-      }).catch(error => {
-        // All pages in the same renderer share locale. All such pages belong to the same
-        // context and if locale is overridden for one of them its value is the same as
-        // we are trying to set so it's not a problem.
-        if (error.message.includes('Another locale override is already in effect')) return;
-        throw error;
-      });
+    await session.mirrorPage?.open(context, session.sessionId, sessionRecord.viewport, page => {
+      return page.devtoolsSession
+        .send('Emulation.setLocaleOverride', {
+          locale: sessionRecord.locale,
+        })
+        .catch(error => {
+          // All pages in the same renderer share locale. All such pages belong to the same
+          // context and if locale is overridden for one of them its value is the same as
+          // we are trying to set so it's not a problem.
+          if (error.message.includes('Another locale override is already in effect')) return;
+          throw error;
+        });
     });
   }
 

@@ -45,7 +45,7 @@ export default class PageStateAssertions {
   }
 
   public getCommonSessionAssertions(
-    sessionIds: Set<string>,
+    sessionIds: string[],
     startingAssertions: IFrameAssertions,
   ): IFrameAssertions {
     // clone starting point
