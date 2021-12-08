@@ -1,6 +1,6 @@
 import { IOnClientCommandMeta } from '@ulixee/hero-interfaces/ICorePlugin';
 import CorePlugin from '@ulixee/hero-plugin-utils/lib/CorePlugin';
-import { IPuppetFrame } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { IExecuteJsArgs } from './IExecuteJsArgs';
 
 const { name: pluginId } = require('../package.json');
 
@@ -9,18 +9,14 @@ export default class ExecuteJsCorePlugin extends CorePlugin {
 
   public async onClientCommand(
     { puppetFrame, puppetPage }: IOnClientCommandMeta,
-    fnName: string,
-    serializedFn: string,
+    args: IExecuteJsArgs,
   ): Promise<any> {
-    const response = await this.runFn(puppetFrame ?? puppetPage.mainFrame, fnName, serializedFn);
-    return response;
-  }
-
-  private async runFn(puppetFrame: IPuppetFrame, fnName: string, serializedFn: string) {
-    const result = await puppetFrame.evaluate<any>(serializedFn, false);
+    const { fnName, fnSerialized, isolateFromWebPageEnvironment } = args;
+    const frame = puppetFrame ?? puppetPage.mainFrame;
+    const result = await frame.evaluate<any>(fnSerialized, isolateFromWebPageEnvironment);
 
     if ((result as any)?.error) {
-      this.logger.error<any>(fnName, { result });
+      this.logger.error<any>(fnName, { error: result.error });
       throw new Error((result as any).error as string);
     } else {
       return result as any;
