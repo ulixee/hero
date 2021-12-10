@@ -216,8 +216,8 @@ function sort() {
     const session = tab.session;
 
     expect(tab.puppetPage.frames).toHaveLength(4);
-    await tab.puppetPage.frames[1].waitForLoad();
-    await tab.puppetPage.frames[2].waitForLoad();
+    await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
+    await tab.puppetPage.frames[2].waitForLifecycleEvent('load');
     // await tab.puppetPage.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
     await session.db.flush();

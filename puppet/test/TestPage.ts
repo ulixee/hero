@@ -83,13 +83,13 @@ export async function goto(
   waitOnLifecycle: 'load' | 'DOMContentLoaded' = 'load',
   timeoutMs = 60e3,
 ) {
-  waitOnLifecycle ??= 'load'
+  waitOnLifecycle ??= 'load';
   timeoutMs ??= 60e3;
-  await Promise.all([
+  const [loader] = await Promise.all([
     page.navigate(url),
     page.mainFrame.waitOn('frame-navigated', null, timeoutMs),
   ]);
-  await page.mainFrame.waitForLoad(waitOnLifecycle, timeoutMs);
+  await page.mainFrame.waitForLifecycleEvent(waitOnLifecycle, loader.loaderId, timeoutMs);
 }
 
 export async function setContent(page: IPuppetPage, content: string) {

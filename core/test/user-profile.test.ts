@@ -99,7 +99,7 @@ describe('UserProfile cookie tests', () => {
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLoad();
+      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
 
       profile = await tab.session.exportUserProfile();
       expect(profile.cookies).toHaveLength(3);
@@ -387,7 +387,7 @@ localStorage.setItem('cross', '1');
 
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLoad();
+      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
       profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);

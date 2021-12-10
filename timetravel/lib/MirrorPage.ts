@@ -154,7 +154,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     const page = this.page;
     const loader = await page.navigate(url);
     this.emit('goto', { url, loaderId: loader.loaderId });
-    await page.mainFrame.waitForLoad('DOMContentLoaded');
+    await page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
     await this.injectPaintEvents();
   }
 

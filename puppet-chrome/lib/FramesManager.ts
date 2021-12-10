@@ -94,12 +94,13 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
         ]);
         this.recurseFrameTree(framesResponse.frameTree);
         resolve();
-        if (this.main.securityOrigin && !this.main.lifecycleEvents?.load) {
+        if (this.main.securityOrigin && !this.main.activeLoader?.lifecycle?.load) {
           const readyState = readyStateResult.result?.value;
+          const loaderId = this.main.activeLoaderId;
           let loadName: string;
           if (readyState === 'interactive') loadName = 'DOMContentLoaded';
           else if (readyState === 'complete') loadName = 'load';
-          if (loadName) setImmediate(() => this.main.onLifecycleEvent(loadName));
+          if (loadName) setImmediate(() => this.main.onLifecycleEvent(loadName, null, loaderId));
         }
       } catch (error) {
         if (error instanceof CanceledPromiseError) {
@@ -305,7 +306,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     const { id, parentId } = newFrame;
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);
-      if (isFrameTreeRecurse) frame.onLoaded(newFrame);
+      if (isFrameTreeRecurse) frame.onAttached(newFrame);
       this.domStorageTracker.track(frame.securityOrigin);
       return frame;
     }

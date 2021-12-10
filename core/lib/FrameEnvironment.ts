@@ -65,7 +65,7 @@ export default class FrameEnvironment
   }
 
   public get isAttached(): boolean {
-    return this.puppetFrame.isAttached();
+    return this.puppetFrame.isAttached;
   }
 
   public get securityOrigin(): string {
@@ -523,7 +523,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     });
 
     for (const [event, url, timestamp] of loadEvents) {
-      this.navigations.onLoadStatusChanged(pageStateToLoadStatus[event], url, null, timestamp);
+      const incomingStatus = pageStateToLoadStatus[event];
+      // only record the content paint
+      if (incomingStatus === ContentPaint) {
+        this.navigations.onLoadStatusChanged(incomingStatus, url, null, timestamp);
+      }
     }
 
     if (domChanges.length) {
@@ -711,8 +715,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     if (status) {
       this.navigations.onLoadStatusChanged(
         status,
-        event.frame.url,
-        event.loaderId,
+        event.loader.url ?? event.frame.url,
+        event.loader.id,
         event.timestamp,
       );
     }

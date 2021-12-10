@@ -17,8 +17,10 @@ import { DevtoolsSession } from './DevtoolsSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
+import { NavigationLoader } from './NavigationLoader';
 
 const ContextNotFoundCode = -32000;
+const InPageNavigationLoaderPrefix = 'inpage';
 
 export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> implements IPuppetFrame {
   public get id(): string {
@@ -40,7 +42,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public get securityOrigin(): string {
-    if (!this.isLoaded || this.isDefaultUrl) return '';
+    if (!this.activeLoader?.isNavigationComplete || this.isDefaultUrl) return '';
     let origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
       this.internalFrame.securityOrigin = new URL(this.url).origin;
@@ -49,38 +51,28 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     return origin;
   }
 
-  public get isLoaded(): boolean {
-    if (!this.activeLoaderId) return true;
-    return this.activeLoader.isResolved;
-  }
-
   public navigationReason?: string;
 
   public disposition?: string;
-  public get lifecycleEvents(): ILifecycleEvents {
-    return this.loaderLifecycles.get(this.activeLoaderId);
+
+  public get isAttached(): boolean {
+    return this.checkIfAttached();
   }
 
-  public waitForNonDefaultLoader;
+  public get activeLoader(): NavigationLoader {
+    return this.navigationLoadersById[this.activeLoaderId];
+  }
 
-  public readonly isAttached: () => boolean;
-  public loaderLifecycles = new Map<string, ILifecycleEvents>();
   public activeLoaderId: string;
+  public navigationLoadersById: { [loaderId: string]: NavigationLoader } = {};
 
   protected readonly logger: IBoundLog;
   private isolatedWorldElementObjectId?: string;
   private readonly parentFrame: Frame | null;
-  private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private readonly devtoolsSession: DevtoolsSession;
 
   private defaultLoaderId: string;
-
   private startedLoaderId: string;
-  private resolveLoaderTimeout: NodeJS.Timeout;
-
-  private get activeLoader(): IResolvablePromise<Error | null> {
-    return this.loaderIdResolvers.get(this.activeLoaderId);
-  }
 
   private defaultContextId: number;
   private isolatedContextId: number;
@@ -88,13 +80,15 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private internalFrame: PageFrame;
   private closedWithError: Error;
   private defaultContextCreated: Resolvable<void>;
+  private readonly checkIfAttached: () => boolean;
+  private inPageCounter = 0;
 
   constructor(
     internalFrame: PageFrame,
     activeContextIds: Set<number>,
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
-    isAttached: () => boolean,
+    checkIfAttached: () => boolean,
     parentFrame: Frame | null,
   ) {
     super();
@@ -102,16 +96,16 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     this.devtoolsSession = devtoolsSession;
     this.logger = logger.createChild(module);
     this.parentFrame = parentFrame;
-    this.isAttached = isAttached;
+    this.checkIfAttached = checkIfAttached;
     this.setEventsToLog(['frame-requested-navigation', 'frame-navigated', 'frame-lifecycle']);
     this.storeEventsWithoutListeners = true;
-    this.onLoaded(internalFrame);
+    this.onAttached(internalFrame);
   }
 
   public close(error: Error): void {
     this.cancelPendingEvents('Frame closed');
     error ??= new CanceledPromiseError('Frame closed');
-    this.activeLoader.resolve(error);
+    this.activeLoader.setNavigationResult(error);
     this.defaultContextCreated?.reject(error);
     this.closedWithError = error;
   }
@@ -185,6 +179,26 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     );
   }
 
+  public async waitForLifecycleEvent(
+    event: keyof ILifecycleEvents = 'load',
+    loaderId?: string,
+    timeoutMs = 30e3,
+  ): Promise<void> {
+    event ??= 'load';
+    timeoutMs ??= 30e3;
+    await this.waitForLoader(loaderId, timeoutMs);
+    const loader = this.navigationLoadersById[loaderId ?? this.activeLoaderId];
+    if (loader.lifecycle[event]) return;
+    await this.waitOn(
+      'frame-lifecycle',
+      x => {
+        if (loaderId && x.loader.id !== loaderId) return false;
+        return x.name === event;
+      },
+      timeoutMs,
+    );
+  }
+
   public async setFileInputFiles(objectId: string, files: string[]): Promise<void> {
     await this.devtoolsSession.send('DOM.setFileInputFiles', {
       objectId,
@@ -244,7 +258,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   public initiateNavigation(url: string, loaderId: string): void {
     // chain current listeners to new promise
-    this.setLoader(loaderId);
+    this.setLoader(loaderId, url);
   }
 
   public requestedNavigation(url: string, reason: NavigationReason, disposition: string): void {
@@ -254,20 +268,24 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     this.emit('frame-requested-navigation', { frame: this, url, reason });
   }
 
-  public onLoaded(internalFrame: PageFrame): void {
+  public onAttached(internalFrame: PageFrame): void {
     this.internalFrame = internalFrame;
     this.updateUrl();
     if (!internalFrame.loaderId) return;
 
     // if we this is the first loader and url is default, this is the first loader
-    if (this.isDefaultUrl && !this.defaultLoaderId && this.loaderIdResolvers.size === 0) {
+    if (
+      this.isDefaultUrl &&
+      !this.defaultLoaderId &&
+      Object.keys(this.navigationLoadersById).length === 0
+    ) {
       this.defaultLoaderId = internalFrame.loaderId;
     }
     this.setLoader(internalFrame.loaderId);
 
     if (this.url || internalFrame.unreachableUrl) {
       // if this is a loaded frame, just count it as loaded. it shouldn't fail
-      this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
+      this.navigationLoadersById[internalFrame.loaderId].setNavigationResult(internalFrame.url);
     }
   }
 
@@ -275,54 +293,41 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     this.internalFrame = frame;
     this.updateUrl();
 
-    let loader = this.activeLoader;
-    if (frame.loaderId && frame.loaderId !== this.activeLoaderId) {
-      loader = this.loaderIdResolvers.get(frame.loaderId) ?? this.activeLoader;
-    }
+    const loader = this.navigationLoadersById[frame.loaderId] ?? this.activeLoader;
+
     if (frame.unreachableUrl) {
-      loader.resolve(new Error(`Unreachable url for navigation "${frame.unreachableUrl}"`));
+      loader.setNavigationResult(
+        new Error(`Unreachable url for navigation "${frame.unreachableUrl}"`),
+      );
     } else {
-      loader.resolve();
+      loader.setNavigationResult(frame.url);
     }
 
-    this.emit('frame-navigated', { frame: this });
+    this.emit('frame-navigated', { frame: this, loaderId: frame.loaderId });
   }
 
   public onNavigatedWithinDocument(url: string): void {
-    if (this.url === url && this.activeLoader?.isResolved) return;
+    if (this.url === url) return;
     // we're using params on about:blank, so make sure to strip for url
     if (url.startsWith(DEFAULT_PAGE)) url = DEFAULT_PAGE;
     this.url = url;
 
-    // clear out any active one
-    this.activeLoaderId = null;
-    const loaderId = 'inpage';
-    this.setLoader(loaderId);
-    this.markLoaded(loaderId);
-    this.emit('frame-navigated', { frame: this, navigatedInDocument: true });
+    const isDomLoaded = this.activeLoader?.lifecycle?.DOMContentLoaded;
+
+    const loaderId = `${InPageNavigationLoaderPrefix}${(this.inPageCounter += 1)}`;
+    this.setLoader(loaderId, url);
+    if (isDomLoaded) {
+      this.activeLoader.markLoaded();
+    }
+    this.emit('frame-navigated', { frame: this, navigatedInDocument: true, loaderId });
   }
 
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public onStoppedLoading(): void {
-    if (!this.startedLoaderId || !this.loaderLifecycles.has(this.startedLoaderId)) return;
-
-    clearTimeout(this.resolveLoaderTimeout);
-
-    this.resolveLoaderTimeout = setTimeout(
-      this.markLoaded.bind(this),
-      50,
-      this.startedLoaderId,
-    ).unref();
-  }
-
-  public markLoaded(loaderId: string): void {
-    const loader = this.loaderLifecycles.get(loaderId);
-    if (loader && !loader.load) {
-      const time = Date.now();
-      this.onLifecycleEvent('DOMContentLoaded', time, loaderId);
-      this.onLifecycleEvent('load', time, loaderId);
-    }
+    if (!this.startedLoaderId) return;
+    const loader = this.navigationLoadersById[this.startedLoaderId];
+    loader?.onStoppedLoading();
   }
 
   public async waitForLoader(loaderId?: string, timeoutMs?: number): Promise<Error | null> {
@@ -335,8 +340,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       }
     }
 
-    const hasLoaderError = await this.loaderIdResolvers.get(loaderId)?.promise;
-    if (hasLoaderError) return hasLoaderError;
+    const hasLoaderError = await this.navigationLoadersById[loaderId]?.navigationResolver;
+    if (hasLoaderError instanceof Error) return hasLoaderError;
 
     if (!this.getActiveContextId(false)) {
       await this.waitForDefaultContext();
@@ -344,46 +349,45 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public onLifecycleEvent(name: string, timestamp?: number, pageLoaderId?: string): void {
-    if (pageLoaderId) {
-      // if we see any load events, clear at stopped loading lifecycle
-      if (this.startedLoaderId === pageLoaderId) clearTimeout(this.resolveLoaderTimeout);
-      if (name === 'init') this.startedLoaderId = pageLoaderId;
-    }
-
     const loaderId = pageLoaderId ?? this.activeLoaderId;
-    if (name === 'init') {
-      if (!this.loaderIdResolvers.has(loaderId)) {
-        this.logger.info('Queuing new loader', {
-          loaderId,
-          frameId: this.id,
-        });
-        this.setLoader(loaderId);
+    if (name === 'init' && pageLoaderId) {
+      // if the active loader never initiates before this new one, we should notify
+      if (
+        this.activeLoaderId &&
+        this.activeLoaderId !== pageLoaderId &&
+        !this.activeLoader.lifecycle.init &&
+        !this.activeLoader.isNavigationComplete
+      ) {
+        this.activeLoader.setNavigationResult(new CanceledPromiseError('Navigation canceled'));
       }
+      this.startedLoaderId = pageLoaderId;
     }
 
-    if (
-      (name === 'commit' || name === 'DOMContentLoaded' || name === 'load') &&
-      !this.loaderIdResolvers.get(loaderId)?.isResolved
-    ) {
-      this.logger.info('Resolving loader', {
-        loaderId,
-        frameId: this.id,
-      });
-
-      if (!this.loaderIdResolvers.has(loaderId)) {
-        this.setLoader(loaderId);
-      }
-      this.loaderIdResolvers.get(loaderId)?.resolve();
+    if (!this.navigationLoadersById[loaderId]) {
+      this.setLoader(loaderId);
     }
 
-    const lifecycle = this.loaderLifecycles.get(loaderId);
-
-    if (lifecycle) {
-      lifecycle[name] = timestamp ?? Date.now();
+    this.navigationLoadersById[loaderId].onLifecycleEvent(name);
+    if (loaderId !== this.activeLoaderId) {
+      let checkLoaderForInPage = false;
+      for (const [historicalLoaderId, loader] of Object.entries(this.navigationLoadersById)) {
+        if (loaderId === historicalLoaderId) {
+          checkLoaderForInPage = true;
+        }
+        if (checkLoaderForInPage && historicalLoaderId.startsWith(InPageNavigationLoaderPrefix)) {
+          loader.onLifecycleEvent(name);
+          this.emit('frame-lifecycle', { frame: this, name, loader, timestamp });
+        }
+      }
     }
 
     if (loaderId !== this.defaultLoaderId) {
-      this.emit('frame-lifecycle', { frame: this, name, loaderId: pageLoaderId, timestamp });
+      this.emit('frame-lifecycle', {
+        frame: this,
+        name,
+        loader: this.navigationLoadersById[loaderId],
+        timestamp,
+      });
     }
   }
 
@@ -425,7 +429,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public async waitForActiveContextId(isolatedContext = true): Promise<number> {
-    if (!this.isAttached()) throw new Error('Execution Context is not available in detached frame');
+    if (!this.isAttached) throw new Error('Execution Context is not available in detached frame');
 
     const existing = this.getActiveContextId(isolatedContext);
     if (existing) return existing;
@@ -447,46 +451,32 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   public toJSON(): Pick<
     IPuppetFrame,
-    'id' | 'parentId' | 'activeLoaderId' | 'name' | 'url' | 'navigationReason' | 'disposition'
-  > & { isLoaderResolved: boolean; lifecycle: ILifecycleEvents } {
+    'id' | 'parentId' | 'activeLoader' | 'name' | 'url' | 'navigationReason' | 'disposition'
+  > {
     return {
       id: this.id,
       parentId: this.parentId,
-      activeLoaderId: this.activeLoaderId,
       name: this.name,
       url: this.url,
       navigationReason: this.navigationReason,
       disposition: this.disposition,
-      isLoaderResolved: this.activeLoader?.isResolved,
-      lifecycle: this.lifecycleEvents,
+      activeLoader: this.activeLoader,
     };
   }
 
-  public async waitForLoad(
-    event: keyof ILifecycleEvents = 'load',
-    timeoutMs = 30e3,
-  ): Promise<void> {
-    event ??= 'load';
-    timeoutMs ??= 30e3;
-    await this.waitForLoader(null, timeoutMs);
-    if (this.lifecycleEvents[event]) return;
-    await this.waitOn('frame-lifecycle', x => x.name === event, timeoutMs);
-  }
-
-  private setLoader(loaderId: string): void {
+  private setLoader(loaderId: string, url?: string): void {
     if (!loaderId) return;
     if (loaderId === this.activeLoaderId) return;
-    if (loaderId === 'inpage' || !this.loaderIdResolvers.has(loaderId)) {
-      this.loaderLifecycles.set(loaderId, {});
-      const newResolver = createPromise();
+    if (this.navigationLoadersById[loaderId]) return;
 
-      if (this.activeLoader && !this.activeLoader.isResolved) {
-        this.activeLoader.resolve(newResolver.promise);
-      }
-
-      this.loaderIdResolvers.set(loaderId, newResolver);
-    }
     this.activeLoaderId = loaderId;
+    this.logger.info('Queuing new navigation loader', {
+      loaderId,
+      frameId: this.id,
+    });
+    this.navigationLoadersById[loaderId] = new NavigationLoader(loaderId, this.logger);
+    if (url) this.navigationLoadersById[loaderId].url = url;
+
     this.emit('frame-loader-created', {
       frame: this,
       loaderId,
@@ -495,7 +485,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   private async createIsolatedWorld(): Promise<number> {
     try {
-      if (!this.isAttached()) return;
+      if (!this.isAttached) return;
       const isolatedWorld = await this.devtoolsSession.send(
         'Page.createIsolatedWorld',
         {
@@ -521,7 +511,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       if (error instanceof ProtocolError) {
         // 32000 code means frame doesn't exist, see if we just missed timing
         if (error.remoteError?.code === ContextNotFoundCode) {
-          if (!this.isAttached()) return;
+          if (!this.isAttached) return;
         }
       }
       this.logger.warn('Failed to create isolated world.', {
@@ -545,6 +535,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private updateUrl(): void {
     if (this.internalFrame.url) {
       this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
+    } else {
+      this.url = undefined;
     }
   }
 }
