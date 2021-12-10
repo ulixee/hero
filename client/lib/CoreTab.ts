@@ -49,10 +49,18 @@ export default class CoreTab implements IJsPathEventTarget {
       sessionName,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(this.meta, coreSession.mode, connection, coreSession as ICommandCounter);
+    this.commandQueue = new CoreCommandQueue(
+      this.meta,
+      coreSession.mode,
+      connection,
+      coreSession as ICommandCounter,
+    );
     this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
-    this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));
+    this.frameEnvironmentsById.set(
+      frameId,
+      new CoreFrameEnvironment(meta, null, this.commandQueue),
+    );
 
     const resolvedThis = Promise.resolve(this);
     this.eventHeap.registerEventInterceptors({
@@ -75,7 +83,7 @@ export default class CoreTab implements IJsPathEventTarget {
       meta.frameId = frameMeta.id;
       this.frameEnvironmentsById.set(
         frameMeta.id,
-        new CoreFrameEnvironment(meta, this.commandQueue),
+        new CoreFrameEnvironment(meta, frameMeta.parentFrameId, this.commandQueue),
       );
     }
     return this.frameEnvironmentsById.get(frameMeta.id);

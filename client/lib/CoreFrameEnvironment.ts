@@ -17,12 +17,18 @@ export default class CoreFrameEnvironment {
   public frameId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
+  public parentFrameId: number;
 
-  constructor(meta: ISessionMeta & { sessionName: string }, commandQueue: CoreCommandQueue) {
+  constructor(
+    meta: ISessionMeta & { sessionName: string },
+    parentFrameId: number,
+    commandQueue: CoreCommandQueue,
+  ) {
     const { tabId, sessionId, frameId, sessionName } = meta;
     this.tabId = tabId;
     this.sessionId = sessionId;
     this.frameId = frameId;
+    this.parentFrameId = parentFrameId;
     const queueMeta = {
       sessionId,
       tabId,
