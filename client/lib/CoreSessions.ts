@@ -20,6 +20,10 @@ export default class CoreSessions {
     return this.queue.run(callbackFn, this.sessionTimeoutMillis);
   }
 
+  public get size(): number {
+    return this.sessionsById.size;
+  }
+
   public hasAvailability(): boolean {
     return this.queue.canRunMoreConcurrently();
   }
