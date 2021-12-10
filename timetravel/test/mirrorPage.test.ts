@@ -26,7 +26,7 @@ afterEach(Helpers.afterEach);
 
 describe('MirrorPage tests', () => {
   it('can build from dom recordings', async () => {
-    koaServer.get('/test1', ctx => {
+    koaServer.get('/domrecording', ctx => {
       ctx.body = `<body>
 <div>
     <h1>This is the starting point</h1>
@@ -51,7 +51,7 @@ describe('MirrorPage tests', () => {
     const tab = Session.getTab(meta);
     tab.session.options.showBrowserInteractions = true;
     await InjectedScripts.installInteractionScript(tab.puppetPage);
-    await tab.goto(`${koaServer.baseUrl}/test1`);
+    await tab.goto(`${koaServer.baseUrl}/domrecording`);
     await tab.waitForLoad('DomContentLoaded');
 
     const mirrorPage = await createMirrorPage(tab);
@@ -61,7 +61,6 @@ describe('MirrorPage tests', () => {
     await mirrorPage.load();
 
     const mirrorHtml = await mirrorPage.page.mainFrame.html();
-    // source should have a replay node that should not be rebuilt in mirror
     expect(mirrorHtml).toBe(sourceHtml);
 
     let lastCommandId = tab.lastCommandId;
@@ -127,18 +126,18 @@ describe('MirrorPage tests', () => {
   });
 
   it('should support multiple tabs', async () => {
-    koaServer.get('/tab1', ctx => {
+    koaServer.get('/dr-tab1', ctx => {
       ctx.body = `<body>
 <div>
     <h1>This is the starting point</h1>
     <ul>
         <li>1</li>
     </ul>
-    <a href="/tab2" target="_blank">Clickeroo</a>
+    <a href="/dr-tab2" target="_blank">Clickeroo</a>
 </div>
 </body>`;
     });
-    koaServer.get('/tab2', ctx => {
+    koaServer.get('/dr-tab2', ctx => {
       ctx.body = `
 <html>
 <head>
@@ -160,7 +159,7 @@ describe('MirrorPage tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
-    await tab.goto(`${koaServer.baseUrl}/tab1`);
+    await tab.goto(`${koaServer.baseUrl}/dr-tab1`);
     await tab.waitForLoad('DomContentLoaded');
 
     const mirrorPage = await createMirrorPage(tab);
@@ -202,6 +201,58 @@ describe('MirrorPage tests', () => {
 
     const mirrorNewTabHtml = await newTabMirrorPage.page.mainFrame.html();
     expect(mirrorNewTabHtml).toBe(newTabHtml);
+  }, 45e3);
+
+  it('can replay data attributes', async () => {
+    koaServer.get('/data-attr', ctx => {
+      ctx.body = `<body>
+<div>
+    <h1>This is the starting point</h1>
+    <a href="#" onclick="clicker()">click</a>
+    <span id="tester" class="a-declarative" data-action="open-sheet:style_name">test</span>
+</div>
+<script>
+
+ function clicker(){
+   document.querySelector('div').setAttribute('data-sheet:style_name',"{}");
+   return false;
+ }
+</script>
+</body>`;
+    });
+    const meta = await connectionToClient.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/data-attr`);
+    await tab.waitForLoad('DomContentLoaded');
+    const mirrorPage = await createMirrorPage(tab);
+
+    const sourceHtml = await tab.puppetPage.mainFrame.html();
+
+    await mirrorPage.load();
+    const mirrorHtml = await mirrorPage.page.mainFrame.html();
+    expect(mirrorHtml).toBe(sourceHtml);
+
+    const lastCommandId = tab.lastCommandId;
+    await tab.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    const changes = await tab.getDomChanges(tab.mainFrameId, lastCommandId);
+    expect(changes.length).toBe(2);
+    const domRecordingUpdates = DomChangesTable.toDomRecording(
+      changes,
+      new Set([tab.mainFrameId]),
+      tab.session.db.frames.frameDomNodePathsById,
+    );
+    await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
+    await mirrorPage.load();
+
+    const mirrorHtml2 = await mirrorPage.page.mainFrame.html();
+    const sourceHtml2 = await tab.puppetPage.mainFrame.html();
+    expect(mirrorHtml2).toBe(sourceHtml2);
   }, 45e3);
 });
 
