@@ -3,7 +3,7 @@ import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import Hero, { Core, LocationStatus } from "../index";
+import Hero, { Core, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -36,6 +36,7 @@ describe('basic Interact tests', () => {
     await hero.waitForMillis(20);
     await hero.click(hero.document.querySelector('#submit-button'));
     await hero.waitForLocation('change');
+    await hero.activeTab.waitForLoad('DomContentLoaded');
     const html = await hero.document.documentElement.outerHTML;
     expect(html).toBe(`<html><head></head><body>${text}</body></html>`);
     expect(onPost).toHaveBeenCalledTimes(1);

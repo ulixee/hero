@@ -99,6 +99,21 @@ export default class FrameEnvironment {
     return getCoreFrameEnvironment(this).then(x => x.frameId);
   }
 
+  public get children(): Promise<FrameEnvironment[]> {
+    return getState(this).tab.frameEnvironments.then(async frames => {
+      const frameId = await this.frameId;
+
+      const childFrames: FrameEnvironment[] = [];
+      for (const frame of frames) {
+        const parentFrameId = await frame.parentFrameId;
+        if (parentFrameId === frameId) {
+          childFrames.push(frame);
+        }
+      }
+      return childFrames;
+    });
+  }
+
   public get url(): Promise<string> {
     return getCoreFrameEnvironment(this).then(x => x.getUrl());
   }
@@ -122,9 +137,7 @@ export default class FrameEnvironment {
   }
 
   public get parentFrameId(): Promise<number | null> {
-    return getCoreFrameEnvironment(this)
-      .then(x => x.getFrameMeta())
-      .then(x => x.parentFrameId);
+    return getCoreFrameEnvironment(this).then(x => x.parentFrameId);
   }
 
   public get cookieStorage(): CookieStorage {

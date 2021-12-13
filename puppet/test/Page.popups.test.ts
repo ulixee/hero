@@ -113,7 +113,7 @@ describe('Page.popups', () => {
           await newPage.click('a');
           popup = await popupNavigate;
 
-          await popup.mainFrame.waitForLoad();
+          await popup.mainFrame.waitForLifecycleEvent('load');
           expect(popup.mainFrame.url).toBe(server.emptyPage);
         } finally {
           await popup?.close();

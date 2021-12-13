@@ -8,7 +8,6 @@ const { log } = Log(module);
 export type ICreateConnectionToCoreFn = (options: IConnectionToCoreOptions) => ConnectionToCore;
 
 export default class ConnectionFactory {
-
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToCore,
     overrideCreateConnectionToCoreFn?: ICreateConnectionToCoreFn,
@@ -26,8 +25,8 @@ export default class ConnectionFactory {
     } else {
       throw new Error(
         'Hero Core could not be found locally' +
-        '\n' +
-        'If you meant to connect to a remote host, include the "host" parameter for your connection'
+          '\n' +
+          'If you meant to connect to a remote host, include the "host" parameter for your connection',
       );
     }
 
@@ -41,7 +40,7 @@ export default class ConnectionFactory {
       }
     };
 
-    connection.connect().then(onError).catch(onError);
+    connection.connect(true).then(onError).catch(onError);
 
     return connection;
   }

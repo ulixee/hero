@@ -142,8 +142,10 @@ class JsPath {
       const { jsPath, sourceIndex } = jsPaths[i];
       if (sourceIndex !== undefined) {
         const parentResults = resultMapByPathIndex[sourceIndex];
+        // if we couldn't get parent results, don't try to recurse
+        if (!parentResults) continue;
         for (const parentResult of parentResults) {
-          if (parentResult.pathError) continue;
+          if (parentResult.pathError || !parentResult.nodePointer) continue;
           if (jsPath[0] === '.') {
             const nestedJsPath = [parentResult.nodePointer.id, ...jsPath.slice(1)];
             await runFn(i, nestedJsPath);

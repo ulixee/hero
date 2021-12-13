@@ -180,7 +180,7 @@ class DomActions {
     for (const [name, value] of Object.entries(attributes)) {
       const ns = namespaces ? namespaces[name] : null;
       try {
-        if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
+        if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML' || !ns) {
           if (value === null) node.removeAttribute(name);
           else node.setAttribute(name, value as any);
         } else if (value === null) {

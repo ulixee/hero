@@ -458,9 +458,14 @@ describe('Frames', () => {
       await page.type('admin');
       await page.click('input[type=submit]');
 
-      await expect(page.navigate(server.emptyPage)).resolves.toEqual({
-        loaderId: expect.any(String),
-      });
+      // when the process gets busy, it will schedule the empty page navigation but then get interrupted by the click
+      // ... ideally we could force it to always overlap, but in interim, just check for either condition
+      try {
+        const result = await page.navigate(server.emptyPage);
+        expect(result.loaderId).toBeTruthy();
+      } catch (error) {
+        expect(String(error)).toMatch(/Navigation canceled/);
+      }
     });
   });
 });
