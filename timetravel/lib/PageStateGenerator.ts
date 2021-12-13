@@ -33,6 +33,7 @@ export default class PageStateGenerator {
   }
 
   public statesByName = new Map<string, IPageStateByName>();
+  public unresolvedSessionIds = new Set<string>();
 
   private pendingEvaluate: Resolvable<void>;
   private isEvaluating = false;
@@ -86,10 +87,19 @@ export default class PageStateGenerator {
       });
     }
     for (const id of addSessionIds) {
+      this.unresolvedSessionIds.delete(id);
       for (const [stateName, { sessionIds }] of this.statesByName) {
         if (stateName === name) sessionIds.add(id);
         else sessionIds.delete(id);
       }
+    }
+  }
+
+  public deleteState(name: string): void {
+    const existing = this.statesByName.get(name);
+    this.statesByName.delete(name);
+    for (const id of existing.sessionIds) {
+      this.unresolvedSessionIds.add(id);
     }
   }
 

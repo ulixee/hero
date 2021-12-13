@@ -14,7 +14,7 @@ const { log } = Log(module);
 
 export interface IPageStateEvents {
   resolved: { state: string; error?: Error };
-  state: IPageStateResult;
+  updated: IPageStateResult;
 }
 
 interface IBatchAssertion {
@@ -272,7 +272,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
     const stringifiedResults = JSON.stringify(results);
     if (this.lastResults !== stringifiedResults) {
-      this.emit('state', results);
+      this.emit('updated', results);
     }
     this.lastResults = stringifiedResults;
   }

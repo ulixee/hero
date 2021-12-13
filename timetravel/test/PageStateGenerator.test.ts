@@ -568,8 +568,7 @@ describe('pageStateGenerator', () => {
       },
     });
 
-
-    listener.on('state', status => {
+    listener.on('updated', status => {
       callbackFn(status);
       if (status['1-Tab.assert'] === true) {
         listener.stop();

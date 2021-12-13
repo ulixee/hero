@@ -695,7 +695,7 @@ export default class Tab
       if (type === 'page-state') {
         const id = JSON.stringify(jsPath);
         const listener = await this.addPageStateListener(id, options);
-        listener.on('state', details.listenFn);
+        listener.on('updated', details.listenFn);
       }
     } else {
       this.on(type as any, details.listenFn);

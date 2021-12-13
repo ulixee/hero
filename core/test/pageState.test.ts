@@ -56,7 +56,7 @@ test('can wait for page state events', async () => {
       ],
     },
   });
-  listener.on('state', status => {
+  listener.on('updated', status => {
     callbackFn(status);
     if (status.divText?.value === 'hi' && status.paintStable === true) hasDiv.resolve();
   });
@@ -108,7 +108,7 @@ test('can continue to get events as dom changes', async () => {
     },
   });
 
-  listener.on('state', status => {
+  listener.on('updated', status => {
     callbackFn(status);
     if (status.divs?.value >= 5) {
       listener.stop();
