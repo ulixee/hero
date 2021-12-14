@@ -15,6 +15,7 @@ import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
 import CacheHandler from '../handlers/CacheHandler';
+import { IncomingHttpHeaders, IncomingHttpStatusHeader } from 'http2';
 
 const { log } = Log(module);
 const browserEmulatorId = BrowserEmulator.id;
@@ -185,13 +186,13 @@ test('should handle cache headers for h2', async () => {
   const etags: string[] = [];
   CacheHandler.isEnabled = true;
   Helpers.onClose(() => (CacheHandler.isEnabled = false));
-  const server = await Helpers.runHttp2Server((req, res1) => {
+  const server = await Helpers.runHttp2Server((req, res) => {
     if (req.headers[':path'] === '/cached') {
       etags.push(req.headers['if-none-match'] as string);
-      res1.setHeader('etag', '"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
-      return res1.end('cached');
+      res.setHeader('etag', '"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
+      return res.end('cached');
     }
-    return res1.end('bad data');
+    return res.end('bad data');
   });
 
   const client = await createH2Connection('cached-etag', server.baseUrl);
@@ -202,7 +203,10 @@ test('should handle cache headers for h2', async () => {
 
   const res2 = await client.request({ ':path': '/cached' });
   expect(res2).toBeTruthy();
-  await new Promise(resolve => res2.once('response', resolve));
+  const result = await new Promise<IncomingHttpHeaders & IncomingHttpStatusHeader>(resolve =>
+    res2.once('response', resolve),
+  );
+  expect(result[':status']).toBe(200);
   expect(etags[1]).toBe('"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
 
   const res3 = await client.request({ ':path': '/cached', 'if-none-match': 'etag2' });

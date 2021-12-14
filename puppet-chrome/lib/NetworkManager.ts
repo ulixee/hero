@@ -48,7 +48,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly registeredEvents: IRegisteredEventListener[];
   private mockNetworkRequests?: (
     request: Protocol.Fetch.RequestPausedEvent,
-  ) => Promise<Protocol.Fetch.FulfillRequestRequest>;
+  ) => Promise<Protocol.Fetch.FulfillRequestRequest | Protocol.Fetch.ContinueRequestRequest>;
 
   private readonly proxyConnectionOptions: IProxyConnectionOptions;
   private isChromeRetainingResources = false;
@@ -185,16 +185,29 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   private async onRequestPaused(networkRequest: RequestPausedEvent): Promise<void> {
     try {
+      let continueDetails: Fetch.ContinueRequestRequest = {
+        requestId: networkRequest.requestId,
+      };
       if (this.mockNetworkRequests) {
         const response = await this.mockNetworkRequests(networkRequest);
         if (response) {
-          return await this.devtools.send('Fetch.fulfillRequest', response);
+          if ((response as Fetch.FulfillRequestRequest).body) {
+            return await this.devtools.send('Fetch.fulfillRequest', response as any);
+          }
+
+          if ((response as Fetch.ContinueRequestRequest).url) {
+            continueDetails = response;
+            if (continueDetails.url) networkRequest.request.url = continueDetails.url;
+            if (continueDetails.headers) {
+              for (const [key, value] of Object.entries(continueDetails.headers)) {
+                networkRequest.request.headers[key] = value as any;
+              }
+            }
+          }
         }
       }
 
-      await this.devtools.send('Fetch.continueRequest', {
-        requestId: networkRequest.requestId,
-      });
+      await this.devtools.send('Fetch.continueRequest', continueDetails);
     } catch (error) {
       if (error instanceof CanceledPromiseError) return;
       this.logger.info('NetworkManager.continueRequestError', {

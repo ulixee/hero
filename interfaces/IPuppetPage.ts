@@ -44,7 +44,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   setNetworkRequestInterceptor(
     networkRequestsFn: (
       request: Protocol.Fetch.RequestPausedEvent,
-    ) => Promise<Protocol.Fetch.FulfillRequestRequest>,
+    ) => Promise<Protocol.Fetch.FulfillRequestRequest | Protocol.Fetch.ContinueRequestRequest>,
   ): Promise<void>;
 
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
