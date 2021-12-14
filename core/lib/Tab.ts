@@ -776,7 +776,7 @@ export default class Tab
     const page = this.puppetPage;
 
     this.close = this.close.bind(this);
-    page.on('close', this.close);
+    page.once('close', this.close);
     page.on('page-error', this.onPageError.bind(this), true);
     page.on('crashed', this.onTargetCrashed.bind(this));
     page.on('console', this.onConsole.bind(this), true);

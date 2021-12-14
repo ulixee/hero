@@ -537,6 +537,22 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 });
 
 describe('PaintingStable tests', () => {
+  it('should trigger painting stable after a redirect', async () => {
+    const startingUrl = `${koaServer.baseUrl}/stable-redirect`;
+    koaServer.get('/stable-redirect', async ctx => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      ctx.redirect('/post-stable-redirect');
+    });
+    koaServer.get('/post-stable-redirect', ctx => {
+      ctx.body = '<html lang="en"><body><h1>So stable</h1></body></html>';
+    });
+    const { tab } = await createSession();
+    const resource = await tab.goto(startingUrl);
+    await expect(tab.waitForLoad(LocationStatus.PaintingStable)).resolves.toBeTruthy();
+    expect(resource.request.url).toBe(`${koaServer.baseUrl}/post-stable-redirect`);
+    expect(resource.isRedirect).toBe(false);
+  });
+
   it('should trigger a painting stable on a page that never triggers load', async () => {
     const { tab } = await createSession();
 

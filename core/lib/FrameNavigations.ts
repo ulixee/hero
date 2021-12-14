@@ -299,7 +299,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   public assignLoaderId(navigation: INavigation, loaderId: string, url?: string): void {
     if (!loaderId) return;
-    this.historyByLoaderId[loaderId] = navigation;
+    this.historyByLoaderId[loaderId] ??= navigation;
     navigation.loaderId = loaderId;
     if (
       url &&
@@ -383,7 +383,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     if (!navigation) return;
     if (!navigation.loaderId && loaderId) {
       navigation.loaderId = loaderId;
-      this.historyByLoaderId[loaderId] = navigation;
+      this.historyByLoaderId[loaderId] ??= navigation;
     }
     if (navigation.statusChanges.has(newStatus)) {
       if (statusChangeDate && statusChangeDate < navigation.statusChanges.get(newStatus)) {

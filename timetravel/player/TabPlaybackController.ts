@@ -70,7 +70,7 @@ export default class TabPlaybackController {
   ) {
     const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
     this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
-    this.mirrorPage.on('close', () => {
+    this.mirrorPage.once('close', () => {
       this.paintEventsLoadedIdx = -1;
       this.isPlaying = false;
       this.currentTickIndex = -1;

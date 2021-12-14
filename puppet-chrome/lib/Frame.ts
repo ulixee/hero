@@ -1,4 +1,3 @@
-import { createPromise } from '@ulixee/commons/lib/utils';
 import {
   ILifecycleEvents,
   IPuppetFrame,
@@ -10,14 +9,13 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { NavigationReason } from '@ulixee/hero-interfaces/INavigation';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ProtocolError from './ProtocolError';
 import { DevtoolsSession } from './DevtoolsSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
-import PageFrame = Protocol.Page.Frame;
 import { NavigationLoader } from './NavigationLoader';
+import PageFrame = Protocol.Page.Frame;
 
 const ContextNotFoundCode = -32000;
 const InPageNavigationLoaderPrefix = 'inpage';
@@ -45,8 +43,9 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     if (!this.activeLoader?.isNavigationComplete || this.isDefaultUrl) return '';
     let origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
+      if (this.url.startsWith('about:')) return '';
       this.internalFrame.securityOrigin = new URL(this.url).origin;
-      origin = this.internalFrame.securityOrigin;
+      origin = this.internalFrame.securityOrigin ?? '';
     }
     return origin;
   }

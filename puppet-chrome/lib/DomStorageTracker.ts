@@ -65,7 +65,7 @@ export class DomStorageTracker
     ]);
   }
 
-  public close():void {
+  public close(): void {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('DomStorageTracker closed');
   }
@@ -89,7 +89,8 @@ export class DomStorageTracker
   }
 
   public track(securityOrigin: string): void {
-    if (!securityOrigin || this.trackedOrigins.has(securityOrigin)) return;
+    if (!securityOrigin || securityOrigin === 'null' || this.trackedOrigins.has(securityOrigin))
+      return;
     // just initialized if needed
     this.trackedOrigins.add(securityOrigin);
     this.storageForOrigin(securityOrigin);
