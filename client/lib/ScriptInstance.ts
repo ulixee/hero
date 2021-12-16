@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import { getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
 const AwaitedDomPath = require.resolve('awaited-dom/package.json').replace('package.json', '');
 const HeroLibPath = require.resolve('./Hero').replace(/\/Hero\.(?:ts|js)/, '');
@@ -50,14 +51,14 @@ export default class ScriptInstance {
     return name;
   }
 
-  public getScriptCallSite(ignoreMode = false): string {
-    if (!ignoreMode && this.mode === 'production') return;
+  public getScriptCallSite(getCallSiteRegardlessOfMode = false): ISourceCodeLocation[] {
+    if (!getCallSiteRegardlessOfMode && this.mode === 'production') return;
     const stack = getCallSite(module.filename);
 
-    let stackLines: string[] = [];
+    let stackLines: ISourceCodeLocation[] = [];
     let lastIndexOfEntrypoint = -1;
     for (const callSite of stack) {
-      const filename = callSite.getFileName();
+      const { filename } = callSite;
       if (!filename) continue;
 
       if (filename.startsWith(HeroLibPath) || filename.startsWith(AwaitedDomPath)) continue;
@@ -65,12 +66,12 @@ export default class ScriptInstance {
         lastIndexOfEntrypoint = stackLines.length;
       }
 
-      stackLines.push(`${filename}:${callSite.getLineNumber()}:${callSite.getColumnNumber()}`);
+      stackLines.push(callSite);
     }
 
     if (lastIndexOfEntrypoint >= 0) stackLines = stackLines.slice(0, lastIndexOfEntrypoint + 1);
 
-    return stackLines.join('\n');
+    return stackLines;
   }
 }
 

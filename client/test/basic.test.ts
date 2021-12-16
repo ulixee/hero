@@ -89,16 +89,16 @@ describe('basic Hero tests', () => {
 
     const outgoingCommands = connectionToCore.outgoing.mock.calls;
 
-    expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(0)
+    expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(0);
   });
 });
 
 describe('ScriptInstance tests', () => {
   it('should be able to properly get a script location', () => {
-    expect(scriptInstance.getScriptCallSite().split(/\r?\n/)).toHaveLength(1);
+    expect(scriptInstance.getScriptCallSite()).toHaveLength(1);
 
     (function testNested() {
-      expect(scriptInstance.getScriptCallSite().split(/\r?\n/)).toHaveLength(2);
+      expect(scriptInstance.getScriptCallSite()).toHaveLength(2);
     })();
   });
 });

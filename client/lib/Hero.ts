@@ -238,9 +238,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {
-    const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
-      .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
-      .join('\n');
+    const callSitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
 
     const coreTab = getCoreTab(tab);
     const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
