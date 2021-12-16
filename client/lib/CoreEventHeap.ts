@@ -56,7 +56,9 @@ export default class CoreEventHeap {
       startDate: new Date(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
-      callsite: this.shouldIncludeCallSite() ? scriptInstance.getScriptCallSite() : null,
+      callsite: this.shouldIncludeCallSite()
+        ? JSON.stringify(scriptInstance.getScriptCallSite())
+        : null,
     });
 
     this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
@@ -98,7 +100,9 @@ export default class CoreEventHeap {
         startDate: new Date(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
-        callsite: this.shouldIncludeCallSite() ? scriptInstance.getScriptCallSite() : null,
+        callsite: this.shouldIncludeCallSite()
+          ? JSON.stringify(scriptInstance.getScriptCallSite())
+          : null,
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });

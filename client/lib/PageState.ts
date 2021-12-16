@@ -15,6 +15,7 @@ import IPageStateDefinitions, {
 import Tab from './Tab';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
 let counter = 0;
 
@@ -27,7 +28,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   readonly #coreTab: CoreTab;
   readonly #tab: Tab;
   readonly #states: T;
-  readonly #callsite: string;
+  readonly #callsite: ISourceCodeLocation[];
   readonly #jsPath: IJsPath = ['page-state', (counter += 1)];
   #idCounter = 0;
 
@@ -39,7 +40,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
   readonly #stateResolvable = new Resolvable<K>();
   readonly #batchAssertionPathToId: Record<string, string> = {};
 
-  constructor(tab: Tab, coreTab: CoreTab, states: T, callSitePath: string) {
+  constructor(tab: Tab, coreTab: CoreTab, states: T, callSitePath: ISourceCodeLocation[]) {
     this.#tab = tab;
     this.#coreTab = coreTab;
     this.#states = states ?? ({} as T);
@@ -54,7 +55,7 @@ export default class PageState<T extends IPageStateDefinitions, K = keyof T> {
     const timer = new Timer(timeoutMs);
     const pageStateOptions: IPageStateListenArgs = {
       commands: this.#rawCommandsById,
-      callsite: this.#callsite,
+      callsite: JSON.stringify(this.#callsite),
       states: Object.keys(this.#states),
     };
 

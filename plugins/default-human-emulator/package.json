@@ -8,6 +8,6 @@
     "@ulixee/hero-plugin-utils": "1.5.4"
   },
   "devDependencies": {
-    "@ulixee/commons": "1.5.8"
+    "@ulixee/commons": "1.5.9"
   }
 }

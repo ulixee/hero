@@ -14,6 +14,10 @@ export default class CoreCommandQueue {
     return this.commandCounter?.lastCommandId;
   }
 
+  public get lastCommand(): CoreCommandQueue['internalState']['lastCommand'] {
+    return this.internalState.lastCommand;
+  }
+
   public get nextCommandId(): number {
     return this.commandCounter?.nextCommandId;
   }
@@ -22,6 +26,10 @@ export default class CoreCommandQueue {
     queue: Queue;
     commandsToRecord: ICoreRequestPayload['recordCommands'];
     interceptFn?: (meta: ISessionMeta, command: string, ...args: any[]) => any;
+    lastCommand?: Pick<
+      ICoreRequestPayload,
+      'command' | 'commandId' | 'args' | 'callsite' | 'meta' | 'startDate'
+    >;
   };
 
   private readonly commandCounter?: ICommandCounter;
@@ -110,7 +118,7 @@ export default class CoreCommandQueue {
 
     let callsite: string;
     if (this.mode !== 'production') {
-      callsite = scriptInstance.getScriptCallSite();
+      callsite = JSON.stringify(scriptInstance.getScriptCallSite());
     }
     if (this.internalState.interceptFn) {
       const result = this.internalState.interceptFn(this.meta, command, ...args);
@@ -121,20 +129,29 @@ export default class CoreCommandQueue {
       return Promise.resolve(result as T);
     }
 
-    const startTime = new Date();
+    const startDate = new Date();
     const commandId = this.nextCommandId;
 
     return this.internalQueue
       .run<T>(async () => {
         const recordCommands = [...this.internalState.commandsToRecord];
         this.internalState.commandsToRecord.length = 0;
+        this.internalState.lastCommand = {
+          meta: this.meta,
+          command,
+          args,
+          startDate,
+          commandId,
+          callsite,
+        };
+
         this.commandCounter?.emitter.emit('command', command, commandId, args);
 
         const response = await this.connection.sendRequest({
           meta: this.meta,
           command,
           args,
-          startDate: startTime,
+          startDate,
           commandId,
           recordCommands,
           callsite,
@@ -161,6 +178,12 @@ export default class CoreCommandQueue {
   }
 
   public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
-    return new CoreCommandQueue(meta, this.mode, this.connection, this.commandCounter, this.internalState);
+    return new CoreCommandQueue(
+      meta,
+      this.mode,
+      this.connection,
+      this.commandCounter,
+      this.internalState,
+    );
   }
 }
