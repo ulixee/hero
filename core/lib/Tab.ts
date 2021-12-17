@@ -189,7 +189,8 @@ export default class Tab
     resource: IResourceMeta,
     error?: Error,
   ): boolean {
-    if (resource.request?.method !== 'GET') return false;
+    if (resource.type !== 'Document') return;
+
     const frame = this.frameWithPendingNavigation(
       browserRequestId,
       resource.request?.url,
@@ -387,7 +388,7 @@ export default class Tab
   public waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<INavigation> {
+  ): Promise<IResourceMeta> {
     return this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 
@@ -463,8 +464,20 @@ export default class Tab
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     const timeoutMessage = `Timeout waiting for "tab.reload()"`;
 
+    let loaderId = this.puppetPage.mainFrame.activeLoader.id;
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
-    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id);
+    if (this.puppetPage.mainFrame.activeLoader.id === loaderId) {
+      const frameNavigated = await timer.waitForPromise(
+        this.puppetPage.mainFrame.waitOn('frame-navigated', null, timeoutMs),
+        timeoutMessage,
+      );
+      loaderId = frameNavigated.loaderId;
+    }
+
+    this.navigations.assignLoaderId(
+      navigation,
+      loaderId ?? this.puppetPage.mainFrame.activeLoader?.id,
+    );
 
     const resource = await timer.waitForPromise(
       this.navigationsObserver.waitForNavigationResourceId(),

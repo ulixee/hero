@@ -11,6 +11,7 @@ import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 
 export default class CoreFrameEnvironment {
   public tabId: number;
@@ -128,7 +129,10 @@ export default class CoreFrameEnvironment {
     await this.commandQueue.run('FrameEnvironment.waitForLoad', status, opts);
   }
 
-  public async waitForLocation(trigger: ILocationTrigger, opts: IWaitForOptions): Promise<void> {
-    await this.commandQueue.run('FrameEnvironment.waitForLocation', trigger, opts);
+  public async waitForLocation(
+    trigger: ILocationTrigger,
+    opts: IWaitForOptions,
+  ): Promise<IResourceMeta> {
+    return await this.commandQueue.run('FrameEnvironment.waitForLocation', trigger, opts);
   }
 }

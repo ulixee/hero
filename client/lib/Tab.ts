@@ -231,7 +231,6 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     states?: T,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<keyof T> {
-
     const callSitePath = scriptInstance.getScriptCallSite();
 
     const coreTab = await getCoreTab(this);
@@ -256,7 +255,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<void> {
+  ): Promise<Resource> {
     return await this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 
