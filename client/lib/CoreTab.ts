@@ -109,7 +109,7 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.goForward', timeoutMs);
   }
 
-  public async reload(timeoutMs?: number): Promise<void> {
+  public async reload(timeoutMs?: number): Promise<IResourceMeta> {
     return await this.commandQueue.run('Tab.reload', timeoutMs);
   }
 
