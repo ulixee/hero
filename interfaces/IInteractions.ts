@@ -23,6 +23,8 @@ export enum InteractionCommand {
   move = 'move',
   scroll = 'scroll',
 
+  willDismissDialog = 'willDismissDialog',
+
   click = 'click',
   clickDown = 'clickDown',
   clickUp = 'clickUp',

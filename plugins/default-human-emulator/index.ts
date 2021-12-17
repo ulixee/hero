@@ -88,6 +88,12 @@ export default class DefaultHumanEmulator extends HumanEmulator {
           continue;
         }
 
+        if (step.command === InteractionCommand.willDismissDialog) {
+          const millis = Math.random() * DefaultHumanEmulator.maxDelayBetweenInteractions;
+          await delay(millis);
+          continue;
+        }
+
         await runFn(step);
       }
     }
@@ -408,7 +414,7 @@ export function isVisible(coordinate: number, length: number, boundaryLength: nu
 
 async function delay(millis: number): Promise<void> {
   if (!millis) return;
-  await new Promise<void>(resolve => setTimeout(resolve, Math.floor(millis)));
+  await new Promise<void>(resolve => setTimeout(resolve, Math.floor(millis)).unref());
 }
 
 function splitIntoMaxLengthSegments(total: number, maxValue: number): number[] {

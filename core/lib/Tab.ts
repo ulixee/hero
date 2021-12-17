@@ -14,7 +14,7 @@ import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourc
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
+import { IInteractionGroups, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
@@ -497,7 +497,13 @@ export default class Tab
     await this.puppetPage.stopScreenRecording();
   }
 
-  public dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+  public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+    const resolvable = createPromise();
+    this.mainFrameEnvironment.interactor.play(
+      [[{ command: InteractionCommand.willDismissDialog }]],
+      resolvable,
+    );
+    await resolvable.promise;
     return this.puppetPage.dismissDialog(accept, promptText);
   }
 
