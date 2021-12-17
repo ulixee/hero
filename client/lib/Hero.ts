@@ -406,7 +406,7 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.waitForFileChooser(options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<Resource> {
     return this.activeTab.waitForLocation(trigger, options);
   }
 
