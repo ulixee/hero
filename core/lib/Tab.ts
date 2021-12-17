@@ -918,17 +918,27 @@ export default class Tab
     // if we didn't get a frame, don't keep going
     if (!frame) return;
 
-    if (
-      !!resource.browserServedFromCache &&
-      resource.url?.href === frame.navigations?.top?.requestedUrl &&
-      frame.navigations?.top?.resourceIdResolvable?.isResolved === false
-    ) {
-      frame.navigations.onHttpResponded(
-        resource.browserRequestId,
-        resource.responseUrl ?? resource.url?.href,
-        loaderId,
-        resource.browserLoadedTime,
-      );
+    const navigationTop = frame.navigations?.top;
+    if (navigationTop && !navigationTop.resourceIdResolvable.isResolved) {
+      const url = event.resource.url?.href;
+      // hash won't be in the http request
+      const frameRequestedUrl = navigationTop.requestedUrl?.split('#')?.shift();
+      if (url === frameRequestedUrl) {
+        if (event.resource.browserServedFromCache) {
+          frame.navigations.onHttpResponded(
+            resource.browserRequestId,
+            resource.responseUrl ?? resource.url?.href,
+            loaderId,
+            resource.browserLoadedTime,
+          );
+        }
+        const existingResource = this.session.resources.getBrowserRequestLatestResource(
+          event.resource.browserRequestId,
+        );
+        if (existingResource) {
+          frame.navigations.onResourceLoaded(existingResource.id, event.resource.status);
+        }
+      }
     }
 
     const isKnownResource = this.session.resources.onBrowserResourceLoaded(
