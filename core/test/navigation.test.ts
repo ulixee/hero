@@ -40,6 +40,14 @@ describe('basic Navigation tests', () => {
     expect(formattedUrl).toBe(`${unformattedUrl}/`);
   });
 
+  it('handles urls with a hash', async () => {
+    koaServer.get('/hash', ctx => {
+      ctx.body = 'done';
+    });
+    const { tab } = await createSession();
+    await expect(tab.goto(`${koaServer.baseUrl}/hash#hash`)).resolves.toBeTruthy();
+  });
+
   it('works without explicit waitForLocation', async () => {
     const { tab } = await createSession();
     await tab.goto(koaServer.baseUrl);
