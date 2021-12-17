@@ -104,7 +104,7 @@ export default class FrameNavigationsObserver {
   }
 
   public waitForReady(): Promise<INavigation> {
-    return this.waitForLoad(LoadStatus.DomContentLoaded);
+    return this.waitForLoad(LoadStatus.HttpResponded);
   }
 
   public async waitForNavigationResourceId(): Promise<number> {
