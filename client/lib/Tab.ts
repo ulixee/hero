@@ -1,6 +1,6 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
@@ -36,6 +36,7 @@ import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import PageState from './PageState';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
+import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 const awaitedPathState = StateMachine<
   any,
@@ -169,7 +170,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    return FrameEnvironment.getComputedStyle(element, pseudoElement);
+    return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
   public async goto(href: string, timeoutMs?: number): Promise<Resource> {
@@ -204,7 +205,15 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    return await FrameEnvironment.getComputedVisibility(node);
+    return await this.mainFrameEnvironment.getComputedVisibility(node);
+  }
+
+  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
+    return this.mainFrameEnvironment.magicSelector(selectorOrOptions);
+  }
+
+  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
+    return this.mainFrameEnvironment.magicSelectorAll(selectorOrOptions);
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

@@ -6,6 +6,8 @@ import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import Interactor from './Interactor';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 const { getState } = StateMachine<ISuperElement, ISuperElementProperties>();
 
@@ -14,6 +16,7 @@ interface IBaseExtend {
     click: () => Promise<void>;
     type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
     waitForVisible: () => Promise<void>;
+    getComputedVisibility: () => Promise<INodeVisibility>;
   };
 }
 
@@ -28,12 +31,12 @@ for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
     get: function $() {
       const click = async (): Promise<void> => {
         const { awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame;
+        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
         await Interactor.run(coreFrame, [{ click: this }]);
       };
       const type = async (...typeInteractions: ITypeInteraction[]): Promise<void> => {
         const { awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame;
+        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
         await click();
         await Interactor.run(
           coreFrame,
@@ -42,11 +45,16 @@ for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
       };
       const waitForVisible = async (): Promise<void> => {
         const { awaitedPath, awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame;
+        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
         await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
       };
+      const getComputedVisibility = async (): Promise<void> => {
+        const { awaitedOptions } = getState(this);
+        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+        await coreFrame.getComputedVisibility(this);
+      };
 
-      return { click, type, waitForVisible };
+      return { click, type, waitForVisible, getComputedVisibility };
     },
   });
 }
