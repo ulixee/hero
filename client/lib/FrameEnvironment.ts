@@ -1,7 +1,7 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import * as Util from 'util';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -12,6 +12,8 @@ import {
   createResponse,
   createStorage,
   createSuperDocument,
+  createSuperNode,
+  createSuperNodeList,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import { ILoadStatus, ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
@@ -26,21 +28,21 @@ import {
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Hero, { IState as IHeroState } from './Hero';
 import {
+  createHeroCommandAwaitedPath,
   createInstanceWithNodePointer,
-  delegate as AwaitedHandler,
   getAwaitedPathAsMethodArg,
 } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { IState as ITabState } from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
 import Resource, { createResource } from './Resource';
+import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
 const { getState: getTabState } = StateMachine<Tab, ITabState>();
@@ -187,11 +189,22 @@ export default class FrameEnvironment {
   }
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    return FrameEnvironment.getComputedStyle(element, pseudoElement);
+    const { awaitedPath: elementAwaitedPath, awaitedOptions } = awaitedPathState.getState(element);
+    const awaitedPath = new AwaitedPath(null, 'window', [
+      'getComputedStyle',
+      getAwaitedPathAsMethodArg(elementAwaitedPath),
+      pseudoElement,
+    ]);
+    return createCSSStyleDeclaration<IAwaitedOptions>(
+      awaitedPath,
+      awaitedOptions,
+    ) as CSSStyleDeclaration;
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    return await FrameEnvironment.getComputedVisibility(node);
+    if (!node) return { isVisible: false, nodeExists: false };
+    const coreFrame = await getCoreFrameEnvironment(this);
+    return await coreFrame.getComputedVisibility(node);
   }
 
   // @deprecated 2021-04-30: Replaced with getComputedVisibility
@@ -202,6 +215,22 @@ export default class FrameEnvironment {
   public async getJsValue<T>(path: string): Promise<T> {
     const coreFrame = await getCoreFrameEnvironment(this);
     return coreFrame.getJsValue<T>(path);
+  }
+
+  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
+    const awaitedPath = createHeroCommandAwaitedPath('FrameEnvironment.magicSelector', [
+      selectorOrOptions,
+    ]);
+    const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
+    return createSuperNode(awaitedPath, awaitedOptions);
+  }
+
+  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
+    const awaitedPath = createHeroCommandAwaitedPath('FrameEnvironment.magicSelectorAll', [
+      selectorOrOptions,
+    ]);
+    const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
+    return createSuperNodeList(awaitedPath, awaitedOptions);
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
@@ -251,27 +280,6 @@ export default class FrameEnvironment {
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
-  }
-
-  public static getComputedStyle(
-    element: IElementIsolate,
-    pseudoElement?: string,
-  ): CSSStyleDeclaration {
-    const { awaitedPath: elementAwaitedPath, awaitedOptions } = awaitedPathState.getState(element);
-    const awaitedPath = new AwaitedPath(null, 'window', [
-      'getComputedStyle',
-      getAwaitedPathAsMethodArg(elementAwaitedPath),
-      pseudoElement,
-    ]);
-    return createCSSStyleDeclaration<IAwaitedOptions>(
-      awaitedPath,
-      awaitedOptions,
-    ) as CSSStyleDeclaration;
-  }
-
-  public static async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    if (!node) return { isVisible: false, nodeExists: false };
-    return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
   }
 }
 

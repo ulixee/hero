@@ -6,6 +6,7 @@ import Dialog from '@ulixee/hero/lib/Dialog';
 import HTMLIFrameElement from 'awaited-dom/impl/official-klasses/HTMLIFrameElement';
 import HTMLHeadingElement from 'awaited-dom/impl/official-klasses/HTMLHeadingElement';
 import Hero from '../index';
+import { Session } from '@ulixee/hero-core/index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -15,16 +16,6 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('basic Document tests', () => {
-  it('runs goto', async () => {
-    const hero = await openBrowser('/');
-    const url = await hero.document.location.host;
-    const html = await hero.document.body.outerHTML;
-    const linkText = await hero.document.querySelector('a').textContent;
-    expect(html).toMatch('Example Domain');
-    expect(linkText).toBe('More information...');
-    expect(url).toBe(koaServer.baseHost);
-  });
-
   it('can iterate over multiple querySelectorElements', async () => {
     koaServer.get('/page', ctx => {
       ctx.body = `
@@ -520,6 +511,111 @@ describe('basic Document tests', () => {
 
     await hero.close();
   }, 130e3);
+});
+
+describe('Magic Selectors', () => {
+  it('can run magic selectors', async () => {
+    koaServer.get('/magic', ctx => {
+      ctx.body = `
+        <body>
+         <div class="outer">
+            <div class="inner">X</div>
+          </div>
+        </body>
+      `;
+    });
+    const hero = await openBrowser(`/magic`);
+
+    const innerDiv = hero.magicSelector({
+      minMatchingSelectors: 2,
+      querySelectors: ['.outer > .inner', 'div', '.inner'],
+    });
+    await expect(innerDiv.innerText).resolves.toBe('X');
+    await expect(innerDiv.getAttribute('class')).resolves.toBe('inner');
+
+    await expect(hero.magicSelector('.inner').textContent).resolves.toBe('X');
+    await hero.close();
+  });
+
+  it('should not resolve when multiple elements match', async () => {
+    koaServer.get('/magic2', ctx => {
+      ctx.body = `
+        <body>
+         <div class="outer">
+            <div class="inner">X</div>
+            <div class="inner">Y</div>
+          </div>
+        </body>
+      `;
+    });
+    const hero = await openBrowser(`/magic2`);
+
+    await expect(hero.magicSelector('.inner').innerText).rejects.toThrow();
+    await hero.close();
+  });
+
+  it('should be able to select many elements', async () => {
+    koaServer.get('/magicall', ctx => {
+      ctx.body = `
+        <body>
+         <div class="outer">
+            <div class="inner">X</div>
+            <div class="inner">Y</div>
+          </div>
+        </body>
+      `;
+    });
+    const hero = await openBrowser(`/magicall`);
+
+    await expect(hero.magicSelectorAll('.inner').length).resolves.toBe(2);
+    await expect(
+      hero.magicSelectorAll({
+        minMatchingSelectors: 2,
+        querySelectors: ['.inner', '.outer .inner', 'div', '.outer > div'],
+      }).length,
+    ).resolves.toBe(2);
+    await hero.close();
+  });
+
+  it("should have an empty list if the items don't match", async () => {
+    koaServer.get('/magicall2', ctx => {
+      ctx.body = `
+        <body>
+         <div class="outer">
+            <div class="inner a">X</div>
+            <div class="inner b">Y</div>
+          </div>
+        </body>
+      `;
+    });
+    const hero = await openBrowser(`/magicall2`);
+
+    const results = hero.magicSelectorAll({
+      minMatchingSelectors: 2,
+      querySelectors: ['.inner', '.outer .a', 'div'],
+    });
+    expect(await results.length).toBe(0);
+    for (const result of await results) {
+      expect(result).not.toBeTruthy();
+    }
+  });
+
+  it('should emit an event with an empty options object', async () => {
+    koaServer.get('/empty', ctx => {
+      ctx.body = `<body></body>`;
+    });
+    const hero = await openBrowser(`/empty`);
+    const session = Session.get(await hero.sessionId);
+    const tab = session.getLastActiveTab();
+
+    const fn = jest.fn();
+    tab.once('magic-selector', fn);
+
+    await expect(hero.magicSelector()).resolves.toBe(null);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][0].options).toEqual({ minMatchingSelectors: 1, querySelectors: [] });
+    await hero.close();
+  });
 });
 
 async function openBrowser(path: string) {
