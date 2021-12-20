@@ -5,5 +5,6 @@ export interface IJsPathError {
   pathState: {
     step: IPathStep;
     index: number;
+    magicSelectorMatches?: number[];
   };
 }

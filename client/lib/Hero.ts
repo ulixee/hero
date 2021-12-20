@@ -10,7 +10,7 @@ import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import { ILocationTrigger } from '@ulixee/hero-interfaces/Location';
@@ -59,6 +59,7 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import ConnectionManager from './ConnectionManager';
 import './DomExtender';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
+import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -378,6 +379,14 @@ export default class Hero extends AwaitedEventTarget<{
   // @deprecated 2021-04-30: Replaced with getComputedVisibility
   public async isElementVisible(element: IElementIsolate): Promise<boolean> {
     return await this.getComputedVisibility(element as any).then(x => x.isVisible);
+  }
+
+  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
+    return this.activeTab.magicSelector(selectorOrOptions);
+  }
+
+  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
+    return this.activeTab.magicSelectorAll(selectorOrOptions);
   }
 
   public takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

@@ -1,17 +1,28 @@
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
+import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { delegate as AwaitedHandler } from './SetupAwaitedHandler';
+import StateMachine from 'awaited-dom/base/StateMachine';
+import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import { INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+
+const awaitedPathState = StateMachine<
+  any,
+  { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions; nodePointer?: INodePointer }
+>();
 
 export default class CoreFrameEnvironment {
   public tabId: number;
@@ -89,6 +100,10 @@ export default class CoreFrameEnvironment {
 
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
     await this.commandQueue.run('FrameEnvironment.interact', ...interactionGroups);
+  }
+
+  public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
+    return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
   }
 
   public async getCookies(): Promise<ICookie[]> {
