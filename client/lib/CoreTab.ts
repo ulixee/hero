@@ -90,7 +90,7 @@ export default class CoreTab implements IJsPathEventTarget {
   }
 
   public async getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
-    return await this.commandQueue.run('Tab.getResourceProperty', id, propertyPath);
+    return await this.commandQueue.runOutOfBand('Tab.getResourceProperty', id, propertyPath);
   }
 
   public async configure(options: IConfigureSessionOptions): Promise<void> {
@@ -109,7 +109,7 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.goForward', timeoutMs);
   }
 
-  public async reload(timeoutMs?: number): Promise<void> {
+  public async reload(timeoutMs?: number): Promise<IResourceMeta> {
     return await this.commandQueue.run('Tab.reload', timeoutMs);
   }
 
@@ -152,7 +152,7 @@ export default class CoreTab implements IJsPathEventTarget {
   }
 
   public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
-    await this.commandQueue.run('Tab.dismissDialog', accept, promptText);
+    await this.commandQueue.runOutOfBand('Tab.dismissDialog', accept, promptText);
   }
 
   public async addEventListener(

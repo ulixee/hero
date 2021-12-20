@@ -332,7 +332,7 @@ Waits for a navigational change to document.location either because of a `reload
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for changes.
 
-#### **Returns**: `Promise`
+#### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The resource representing this location change or reload.
 
 Location changes are triggered in one of two ways:
 

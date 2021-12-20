@@ -103,6 +103,15 @@ export default class CoreCommandQueue {
     });
   }
 
+  public async runOutOfBand<T>(command: string, ...args: any[]): Promise<T> {
+    return await this.sendRequest({
+      command,
+      args,
+      commandId: this.nextCommandId,
+      startDate: new Date(),
+    });
+  }
+
   public run<T>(command: string, ...args: any[]): Promise<T> {
     clearTimeout(this.flushOnTimeout);
     this.flushOnTimeout = null;
@@ -147,8 +156,7 @@ export default class CoreCommandQueue {
 
         this.commandCounter?.emitter.emit('command', command, commandId, args);
 
-        const response = await this.connection.sendRequest({
-          meta: this.meta,
+        return await this.sendRequest<T>({
           command,
           args,
           startDate,
@@ -156,12 +164,6 @@ export default class CoreCommandQueue {
           recordCommands,
           callsite,
         });
-
-        let data: T = null;
-        if (response) {
-          data = response.data;
-        }
-        return data;
       })
       .catch(error => {
         error.stack += `${this.sessionMarker}`;
@@ -185,5 +187,22 @@ export default class CoreCommandQueue {
       this.commandCounter,
       this.internalState,
     );
+  }
+
+  private async sendRequest<T>(
+    payload: Omit<ICoreRequestPayload, 'meta' | 'messageId' | 'sendDate'>,
+  ): Promise<T> {
+    if (this.connection.isDisconnecting) {
+      return Promise.resolve(null);
+    }
+
+    const response = await this.connection.sendRequest({
+      meta: this.meta,
+      ...payload,
+    });
+
+    if (response) {
+      return response.data;
+    }
   }
 }

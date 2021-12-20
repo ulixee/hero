@@ -38,6 +38,7 @@ import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 
 const { log } = Log(module);
 
@@ -94,12 +95,13 @@ export default class FrameEnvironment
   public puppetFrame: IPuppetFrame;
   public isReady: Promise<Error | void>;
   public domNodeId: number;
+  public readonly interactor: Interactor;
+
   protected readonly logger: IBoundLog;
 
   private puppetNodeIdsByHeroNodeId: Record<number, string> = {};
   private prefetchedJsPaths: IJsPathResult[];
   private readonly isDetached: boolean;
-  private readonly interactor: Interactor;
   private isClosing = false;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
@@ -217,7 +219,7 @@ export default class FrameEnvironment
 
     // only install interactor on the main frame
     await this.interactor.initialize(this.isMainFrame);
-    await this.navigationsObserver.waitForReady();
+    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     const interactionResolvable = createPromise<void>(120e3);
     this.waitTimeouts.push({
       timeout: interactionResolvable.timeout,
@@ -252,7 +254,7 @@ export default class FrameEnvironment
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
     if (!this.navigations.top) return null;
-    await this.navigationsObserver.waitForReady();
+    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     const containerOffset = await this.getContainerOffset();
     return await this.jsPath.exec(jsPath, containerOffset);
   }
@@ -371,7 +373,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
-    await this.navigationsObserver.waitForReady();
+    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]], null);
     if (!nodeIdResult.value) return null;
 
@@ -435,11 +437,21 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.navigationsObserver.waitForLoad(status, options);
   }
 
-  public waitForLocation(
+  public async waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<INavigation> {
-    return this.navigationsObserver.waitForLocation(trigger, options);
+  ): Promise<IResourceMeta> {
+    const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
+    await timer.waitForPromise(
+      this.navigationsObserver.waitForLocation(trigger, options),
+      `Timeout waiting for location ${trigger}`,
+    );
+
+    const resourceId = await timer.waitForPromise(
+      this.navigationsObserver.waitForNavigationResourceId(),
+      `Timeout waiting for location ${trigger}`,
+    );
+    return this.session.resources.get(resourceId);
   }
 
   // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which

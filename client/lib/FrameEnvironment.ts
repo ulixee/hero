@@ -38,10 +38,12 @@ import {
   getAwaitedPathAsMethodArg,
 } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import Tab from './Tab';
+import Tab, { IState as ITabState } from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
+import Resource, { createResource } from './Resource';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
+const { getState: getTabState } = StateMachine<Tab, ITabState>();
 const heroState = StateMachine<Hero, IHeroState>();
 const awaitedPathState = StateMachine<
   any,
@@ -232,9 +234,12 @@ export default class FrameEnvironment {
   public async waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<void> {
+  ): Promise<Resource> {
     const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLocation(trigger, options);
+    const resourceMeta = await coreFrame.waitForLocation(trigger, options);
+    const { tab } = getState(this);
+    const { coreTab } = getTabState(tab);
+    return createResource(coreTab, resourceMeta);
   }
 
   public toJSON(): any {

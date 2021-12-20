@@ -174,7 +174,7 @@ describe('basic waitForLocation change detections', () => {
     const hero = new Hero();
     await hero.goto(`${koaServer.baseUrl}/refresh`);
 
-    await expect(hero.waitForLocation('reload')).resolves.toBe(undefined);
+    await expect(hero.waitForLocation('reload')).resolves.toBeTruthy();
   });
 
   it('will trigger reload if the same page is loaded again', async () => {
@@ -203,6 +203,6 @@ describe('basic waitForLocation change detections', () => {
     await hero.goto(`${koaServer.baseUrl}/postback`);
     await hero.click(hero.activeTab.document.querySelector('input'));
 
-    await expect(hero.waitForLocation('reload')).resolves.toBe(undefined);
+    await expect(hero.waitForLocation('reload')).resolves.toBeTruthy();
   });
 });

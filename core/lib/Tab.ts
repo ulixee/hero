@@ -14,7 +14,7 @@ import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourc
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
+import { IInteractionGroups, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
@@ -189,7 +189,8 @@ export default class Tab
     resource: IResourceMeta,
     error?: Error,
   ): boolean {
-    if (resource.request?.method !== 'GET') return false;
+    if (resource.type !== 'Document') return;
+
     const frame = this.frameWithPendingNavigation(
       browserRequestId,
       resource.request?.url,
@@ -387,7 +388,7 @@ export default class Tab
   public waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<INavigation> {
+  ): Promise<IResourceMeta> {
     return this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 
@@ -463,8 +464,20 @@ export default class Tab
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     const timeoutMessage = `Timeout waiting for "tab.reload()"`;
 
+    let loaderId = this.puppetPage.mainFrame.activeLoader.id;
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
-    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id);
+    if (this.puppetPage.mainFrame.activeLoader.id === loaderId) {
+      const frameNavigated = await timer.waitForPromise(
+        this.puppetPage.mainFrame.waitOn('frame-navigated', null, timeoutMs),
+        timeoutMessage,
+      );
+      loaderId = frameNavigated.loaderId;
+    }
+
+    this.navigations.assignLoaderId(
+      navigation,
+      loaderId ?? this.puppetPage.mainFrame.activeLoader?.id,
+    );
 
     const resource = await timer.waitForPromise(
       this.navigationsObserver.waitForNavigationResourceId(),
@@ -497,7 +510,13 @@ export default class Tab
     await this.puppetPage.stopScreenRecording();
   }
 
-  public dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+  public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+    const resolvable = createPromise();
+    this.mainFrameEnvironment.interactor.play(
+      [[{ command: InteractionCommand.willDismissDialog }]],
+      resolvable,
+    );
+    await resolvable.promise;
     return this.puppetPage.dismissDialog(accept, promptText);
   }
 
@@ -899,17 +918,27 @@ export default class Tab
     // if we didn't get a frame, don't keep going
     if (!frame) return;
 
-    if (
-      !!resource.browserServedFromCache &&
-      resource.url?.href === frame.navigations?.top?.requestedUrl &&
-      frame.navigations?.top?.resourceIdResolvable?.isResolved === false
-    ) {
-      frame.navigations.onHttpResponded(
-        resource.browserRequestId,
-        resource.responseUrl ?? resource.url?.href,
-        loaderId,
-        resource.browserLoadedTime,
-      );
+    const navigationTop = frame.navigations?.top;
+    if (navigationTop && !navigationTop.resourceIdResolvable.isResolved) {
+      const url = event.resource.url?.href;
+      // hash won't be in the http request
+      const frameRequestedUrl = navigationTop.requestedUrl?.split('#')?.shift();
+      if (url === frameRequestedUrl) {
+        if (event.resource.browserServedFromCache) {
+          frame.navigations.onHttpResponded(
+            resource.browserRequestId,
+            resource.responseUrl ?? resource.url?.href,
+            loaderId,
+            resource.browserLoadedTime,
+          );
+        }
+        const existingResource = this.session.resources.getBrowserRequestLatestResource(
+          event.resource.browserRequestId,
+        );
+        if (existingResource) {
+          frame.navigations.onResourceLoaded(existingResource.id, event.resource.status);
+        }
+      }
     }
 
     const isKnownResource = this.session.resources.onBrowserResourceLoaded(

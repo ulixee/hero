@@ -188,9 +188,10 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return coreTab.goForward(timeoutMs);
   }
 
-  public async reload(timeoutMs?: number): Promise<void> {
+  public async reload(timeoutMs?: number): Promise<Resource> {
     const coreTab = await getCoreTab(this);
-    return coreTab.reload(timeoutMs);
+    const resource = await coreTab.reload(timeoutMs);
+    return createResource(Promise.resolve(coreTab), resource);
   }
 
   public async getJsValue<T>(path: string): Promise<T> {
@@ -254,7 +255,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
-  ): Promise<void> {
+  ): Promise<Resource> {
     return await this.mainFrameEnvironment.waitForLocation(trigger, options);
   }
 

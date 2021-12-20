@@ -355,7 +355,7 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.goForward(timeoutMs);
   }
 
-  public reload(timeoutMs?: number): Promise<void> {
+  public reload(timeoutMs?: number): Promise<Resource> {
     return this.activeTab.reload(timeoutMs);
   }
 
@@ -406,7 +406,7 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.waitForFileChooser(options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<Resource> {
     return this.activeTab.waitForLocation(trigger, options);
   }
 
