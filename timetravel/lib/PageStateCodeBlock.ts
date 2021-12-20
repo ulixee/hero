@@ -13,7 +13,7 @@ export default class PageStateCodeBlock {
   ): Promise<IPageStateAssertionBatch> {
     if (!batchId.startsWith('@')) return;
     const dir = UlixeeConfig.findConfigDirectory(runtimeLocation);
-    return await readFileAsJson(Path.join(dir, batchId.substr(1)));
+    return await readFileAsJson(Path.join(dir, 'pagestate', batchId.substr(1)));
   }
 
   public static async generateCodeBlock(
@@ -23,11 +23,10 @@ export default class PageStateCodeBlock {
     let code = `{`;
 
     const dir = UlixeeConfig.findConfigDirectory(runtimeLocation);
-    const id = generator.id;
-    await Fs.promises.mkdir(`${dir}/pagestate/${id}`, { recursive: true });
+    await Fs.promises.mkdir(`${dir}/pagestate`, { recursive: true });
     for (const state of generator.statesByName.keys()) {
       const exported = generator.export(state);
-      const savePath = Path.normalize(`${dir}/pagestate/${id}/${exported.id}.json`);
+      const savePath = Path.normalize(`${dir}/pagestate/${exported.id}.json`);
       await Fs.promises.writeFile(savePath, JSON.stringify(exported, null, 2));
       try {
         execSync(`prettier --write ${savePath}`, {
@@ -41,7 +40,7 @@ export default class PageStateCodeBlock {
       const stateKey = JSON.stringify(state);
 
       code += `\n  ${stateKey}: ({ loadFrom }) => loadFrom(${JSON.stringify(
-        `@/pagestate/${id}/${exported.id}.json`,
+        `@/${exported.id}.json`,
       )}),`;
     }
 
@@ -50,4 +49,3 @@ export default class PageStateCodeBlock {
     return code;
   }
 }
-

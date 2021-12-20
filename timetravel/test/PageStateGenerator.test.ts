@@ -555,16 +555,8 @@ describe('pageStateGenerator', () => {
       callsite: 'callsite',
       states: ['1', '2'],
       commands: {
-        '1-Tab.assert': [
-          null,
-          'Tab.assert',
-          [`@/pagestate/id/${generator.statesByName.get('1').id}.json`, [1]],
-        ],
-        '2-Tab.assert': [
-          null,
-          'Tab.assert',
-          [`@/pagestate/id/${generator.statesByName.get('2').id}.json`, [1]],
-        ],
+        '1-Tab.assert': [null, 'Tab.assert', [`@/${generator.statesByName.get('1').id}.json`, [1]]],
+        '2-Tab.assert': [null, 'Tab.assert', [`@/${generator.statesByName.get('2').id}.json`, [1]]],
       },
     });
 

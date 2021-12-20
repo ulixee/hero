@@ -25,6 +25,14 @@ interface IBatchAssertion {
   state: string;
 }
 
+type IBatchAssertCommandArgs = [
+  batchId: string,
+  pageStateIdJsPath: IJsPath,
+  assertions: IPageStateAssertionBatch['assertions'],
+  minValidAssertions: number,
+  state: string,
+];
+
 export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
   public readonly id: string = 'default';
   public readonly states: string[];
@@ -157,7 +165,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
         break;
       }
     }
-    const args = [
+    const args: IBatchAssertCommandArgs = [
       fullId,
       JSON.parse(this.jsPathId),
       batch.assertions,
@@ -165,19 +173,11 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       state,
     ];
     this.trackCommand(fullId, this.tab.mainFrameId, 'Tab.assert', args);
-    this.loadBatchAssert(args as any);
+    this.loadBatchAssert(args);
     return fullId;
   }
 
-  private loadBatchAssert(
-    args: [
-      batchId: string,
-      pageStateIdJsPath: IJsPath,
-      assertions: IPageStateAssertionBatch['assertions'],
-      minValidAssertions: number,
-      state: string,
-    ],
-  ): void {
+  private loadBatchAssert(args: IBatchAssertCommandArgs): void {
     const [batchId, , assertions, minValidAssertions, state] = args;
     this.batchAssertionsById.set(batchId, {
       assertions: [],
@@ -211,13 +211,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     });
   }
 
-  private async loadGeneratedBatchAssertions(
-    args: [
-      batchId: string,
-      pageStateIdJsPath: IJsPath,
-      assertions: IPageStateAssertionBatch['assertions'],
-    ],
-  ): Promise<void> {
+  private async loadGeneratedBatchAssertions(args: IBatchAssertCommandArgs): Promise<void> {
     const [batchId] = args;
     if (!batchId.startsWith('@')) return;
 
@@ -227,6 +221,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     );
     if (assertionsBatch) {
       args[2] = assertionsBatch.assertions;
+      args[3] = assertionsBatch.minValidAssertions;
 
       this.rawBatchAssertionsById.set(batchId, assertionsBatch);
     }

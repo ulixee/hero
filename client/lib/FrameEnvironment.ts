@@ -33,16 +33,13 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Hero, { IState as IHeroState } from './Hero';
-import {
-  createHeroCommandAwaitedPath,
-  createInstanceWithNodePointer,
-  getAwaitedPathAsMethodArg,
-} from './SetupAwaitedHandler';
+import { createInstanceWithNodePointer, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { IState as ITabState } from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
 import Resource, { createResource } from './Resource';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
+import { runMagicSelector, runMagicSelectorAll } from '@ulixee/hero-interfaces/jsPathFnNames';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
 const { getState: getTabState } = StateMachine<Tab, ITabState>();
@@ -218,17 +215,13 @@ export default class FrameEnvironment {
   }
 
   public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
-    const awaitedPath = createHeroCommandAwaitedPath('FrameEnvironment.magicSelector', [
-      selectorOrOptions,
-    ]);
+    const awaitedPath = new AwaitedPath(null, [runMagicSelector, selectorOrOptions]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNode(awaitedPath, awaitedOptions);
   }
 
   public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
-    const awaitedPath = createHeroCommandAwaitedPath('FrameEnvironment.magicSelectorAll', [
-      selectorOrOptions,
-    ]);
+    const awaitedPath = new AwaitedPath(null, [runMagicSelectorAll, selectorOrOptions]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNodeList(awaitedPath, awaitedOptions);
   }

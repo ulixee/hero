@@ -12,6 +12,8 @@ import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
+import { runMagicSelector, runMagicSelectorAll } from '@ulixee/hero-interfaces/jsPathFnNames';
+import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 const { log } = Log(module);
 
@@ -38,6 +40,8 @@ export class JsPath {
   }
 
   public exec<T>(jsPath: IJsPath, containerOffset: IPoint): Promise<IExecJsPathResult<T>> {
+    if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
+
     return this.runJsPath<T>(`exec`, jsPath, containerOffset);
   }
 
@@ -47,6 +51,8 @@ export class JsPath {
     waitForVisible: boolean,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
+    if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
+
     return this.runJsPath<INodeVisibility>(
       `waitForElement`,
       jsPath,
@@ -173,6 +179,30 @@ export class JsPath {
         }
       }
     }
+  }
+
+  private emitMagicSelector(
+    jsPath: [query: string, selectorOrOptions: string | IMagicSelectorOptions],
+  ): void {
+    const [query, selectorOrOptions] = jsPath;
+    let options = (selectorOrOptions as IMagicSelectorOptions) ?? {
+      querySelectors: [],
+      minMatchingSelectors: 1,
+    };
+    if (selectorOrOptions && typeof selectorOrOptions === 'string') {
+      options = { minMatchingSelectors: 1, querySelectors: [selectorOrOptions] };
+    }
+
+    const event = query === runMagicSelectorAll ? 'magic-selector-all' : 'magic-selector';
+    this.frameEnvironment.tab.emit(event, { options, frame: this.frameEnvironment });
+    jsPath[1] = options;
+  }
+
+  private isMagicSelectorPath(jsPath: IJsPath): boolean {
+    return (
+      Array.isArray(jsPath[0]) &&
+      (jsPath[0][0] === runMagicSelector || jsPath[0][0] === runMagicSelectorAll)
+    );
   }
 }
 

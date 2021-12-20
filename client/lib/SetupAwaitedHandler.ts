@@ -103,10 +103,6 @@ export async function getAwaitedState<TClass>(
   return { awaitedPath, coreFrame: awaitedCoreFrame, awaitedOptions };
 }
 
-export function createHeroCommandAwaitedPath(command: string, args: any[]): AwaitedPath {
-  return new AwaitedPath(null, 'Hero', [command, args]);
-}
-
 export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
   return `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
 }

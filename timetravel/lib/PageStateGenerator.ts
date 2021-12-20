@@ -323,7 +323,7 @@ export default class PageStateGenerator {
           const xpathAssert = xpathAsserts[i];
           if (domResult !== xpathAssert.result) {
             // there can be more results in dom because we're only counting this small range of changes
-            if (typeof domResult === 'number' && domResult > xpathAssert.result) {
+            if (typeof domResult === 'number' && domResult !== xpathAssert.result) {
               xpathAssert.result = domResult;
             } else {
               delete assertions[xpathAssert.key];

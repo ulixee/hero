@@ -17,11 +17,7 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import {
-  getNodeIdFnName,
-  runMagicSelector,
-  runMagicSelectorAll,
-} from '@ulixee/hero-interfaces/jsPathFnNames';
+import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as Os from 'os';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
@@ -40,10 +36,9 @@ import InjectedScriptError from './InjectedScriptError';
 import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
-import CommandRunner, { ICommandableTarget } from './CommandRunner';
+import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 const { log } = Log(module);
 
@@ -157,8 +152,6 @@ export default class FrameEnvironment
       this.isDomContentLoaded,
       this.isPaintingStable,
       this.interact,
-      this.magicSelector,
-      this.magicSelectorAll,
       this.removeCookie,
       this.setCookie,
       this.setFileInputFiles,
@@ -263,53 +256,7 @@ export default class FrameEnvironment
     if (!this.navigations.top) return null;
     await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
     const containerOffset = await this.getContainerOffset();
-    if (jsPath[0] === 'Hero' && Array.isArray(jsPath[1])) {
-      const newJsPath = jsPath.slice(2);
-      const [command, args] = jsPath[1];
-      const commandRunner = new CommandRunner(command, [...args, newJsPath], {
-        FrameEnvironment: this,
-        Tab: this.tab,
-        Session: this.tab.session,
-      });
-      commandRunner.shouldRecord = false;
-      return await commandRunner.runFn();
-    }
     return await this.jsPath.exec(jsPath, containerOffset);
-  }
-
-  public async magicSelector<T>(
-    selectorOrOptions: string | IMagicSelectorOptions,
-    childJsPath: IJsPath,
-  ): Promise<IExecJsPathResult<T>> {
-    let options = (selectorOrOptions as IMagicSelectorOptions) ?? {
-      querySelectors: [],
-      minMatchingSelectors: 1,
-    };
-    if (selectorOrOptions && typeof selectorOrOptions === 'string') {
-      options = { minMatchingSelectors: 1, querySelectors: [selectorOrOptions] };
-    }
-
-    this.tab.emit('magic-selector', { options, frame: this });
-    childJsPath.unshift([runMagicSelector, options]);
-    const containerOffset = await this.getContainerOffset();
-    return await this.jsPath.exec(childJsPath, containerOffset);
-  }
-
-  public async magicSelectorAll<T>(
-    selectorOrOptions: string | IMagicSelectorOptions,
-    childJsPath: IJsPath,
-  ): Promise<IExecJsPathResult<T>> {
-    let options = (selectorOrOptions as IMagicSelectorOptions) ?? {
-      querySelectors: [],
-      minMatchingSelectors: 1,
-    };
-    if (selectorOrOptions && typeof selectorOrOptions === 'string') {
-      options = { minMatchingSelectors: 1, querySelectors: [selectorOrOptions] };
-    }
-    this.tab.emit('magic-selector-all', { options, frame: this });
-    childJsPath.unshift([runMagicSelectorAll, options]);
-    const containerOffset = await this.getContainerOffset();
-    return await this.jsPath.exec(childJsPath, containerOffset);
   }
 
   public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
