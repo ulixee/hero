@@ -551,6 +551,7 @@ describe('Magic Selectors', () => {
     const hero = await openBrowser(`/magic2`);
 
     await expect(hero.magicSelector('.inner').innerText).rejects.toThrow();
+    await expect(hero.magicSelector('.inner')).resolves.toBe(null);
     await hero.close();
   });
 

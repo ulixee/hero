@@ -431,6 +431,7 @@ class ObjectAtPath {
         results.push(-1);
       }
     }
+    return null;
   }
 
   public magicSelectorAll(options: IMagicSelectorOptions): NodeList {
@@ -458,11 +459,9 @@ class ObjectAtPath {
         results.push(-1);
       }
     }
+
     // create an empty node list if we didn't match anything
-    const emptyResult = document.querySelectorAll('Hero.Empty');
-    if (emptyResult.length !== 0)
-      throw new Error('MagicSelectorAllFailed. Could not create falsified empty resultset');
-    return emptyResult;
+    return new DocumentFragment().childNodes;
   }
 
   public toReturnError(error: Error): IExecJsPathResult {
