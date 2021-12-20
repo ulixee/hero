@@ -8,7 +8,7 @@
     "build-install": "npm run build"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.8",
+    "@ulixee/commons": "1.5.9",
     "@ulixee/hero-interfaces": "1.5.4",
     "nanoid": "^3.1.30"
   },
