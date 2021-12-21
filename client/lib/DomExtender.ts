@@ -4,6 +4,9 @@ import { ISuperElementProperties } from 'awaited-dom/base/super-klasses/SuperEle
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
+import Element from 'awaited-dom/impl/official-klasses/Element';
+import Node from 'awaited-dom/impl/official-klasses/Node';
+import HTMLElement from 'awaited-dom/impl/official-klasses/HTMLElement';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import Interactor from './Interactor';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
@@ -26,8 +29,14 @@ declare module 'awaited-dom/base/interfaces/super' {
   interface ISuperHTMLElement extends IBaseExtend {}
 }
 
-for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
-  void Object.defineProperty(Super.prototype, '$', {
+declare module 'awaited-dom/base/interfaces/official' {
+  interface IElement extends IBaseExtend {}
+  interface INode extends IBaseExtend {}
+  interface IHTMLElement extends IBaseExtend {}
+}
+
+for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
+  void Object.defineProperty(Item.prototype, '$', {
     get: function $() {
       const click = async (): Promise<void> => {
         const { awaitedOptions } = getState(this);
