@@ -218,7 +218,7 @@ function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithRes
 function sortTicks(state: ISessionState): void {
   for (const tabDetails of Object.values(state.tabsById)) {
     const { focus, mouse, commands, tab } = tabDetails;
-    const startUrl = tab.startUrl;
+    const firstDocument = tabDetails.documents[0];
 
     let lastEvents: Pick<
       ITick,
@@ -230,8 +230,8 @@ function sortTicks(state: ISessionState): void {
       | 'documentUrl'
       | 'documentLoadPaintIndex'
     > = {
-      documentLoadPaintIndex: undefined,
-      documentUrl: startUrl,
+      documentLoadPaintIndex: firstDocument.paintEventIndex,
+      documentUrl: firstDocument.url,
     };
     const commandHighlightsById = new Map<number, ICommandWithResult>();
     for (const command of commands) {
@@ -240,16 +240,12 @@ function sortTicks(state: ISessionState): void {
       }
     }
 
-    tabDetails.ticks = tabDetails.ticks.filter(tick => {
-      tick.timelineOffsetPercent ??= state.timeline.getTimelineOffsetForTimestamp(tick.timestamp);
-      return tick.timelineOffsetPercent <= 100 && tick.timelineOffsetPercent >= 0;
-    });
     tabDetails.ticks.sort((a, b) => {
-      if (a.timelineOffsetPercent === b.timelineOffsetPercent) {
+      if (a.timestamp === b.timestamp) {
         if (a.eventType === b.eventType) return a.eventTypeIndex - b.eventTypeIndex;
         return a.eventType.localeCompare(b.eventType);
       }
-      return a.timelineOffsetPercent - b.timelineOffsetPercent;
+      return a.timestamp - b.timestamp;
     });
 
     for (const tick of tabDetails.ticks) {
@@ -315,6 +311,12 @@ function sortTicks(state: ISessionState): void {
         tick.paintEventIndex = -1;
       }
     }
+
+    // filter afterwards so we get correct navigations
+    tabDetails.ticks = tabDetails.ticks.filter(tick => {
+      tick.timelineOffsetPercent ??= state.timeline.getTimelineOffsetForTimestamp(tick.timestamp);
+      return tick.timelineOffsetPercent <= 100 && tick.timelineOffsetPercent >= 0;
+    });
   }
 }
 
