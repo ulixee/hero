@@ -22,7 +22,7 @@ async function run() {
   });
   console.log('-------------------------------------');
 
-  await linkElement.$.click();
+  await linkElement.$click();
   await hero.waitForLocation(LocationTrigger.change);
   console.log('NEW LOCATION: ', await hero.document.location.href);
   console.log('-------------------------------------');

@@ -15,12 +15,10 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 const { getState } = StateMachine<ISuperElement, ISuperElementProperties>();
 
 interface IBaseExtend {
-  $: {
-    click: () => Promise<void>;
-    type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
-    waitForVisible: () => Promise<void>;
-    getComputedVisibility: () => Promise<INodeVisibility>;
-  };
+  $click: () => Promise<void>;
+  $type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
+  $waitForVisible: () => Promise<void>;
+  $getComputedVisibility: () => Promise<INodeVisibility>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -36,34 +34,52 @@ declare module 'awaited-dom/base/interfaces/official' {
 }
 
 for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
-  void Object.defineProperty(Item.prototype, '$', {
-    get: function $() {
-      const click = async (): Promise<void> => {
-        const { awaitedOptions } = getState(this);
-        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
-        await Interactor.run(coreFrame, [{ click: this }]);
-      };
-      const type = async (...typeInteractions: ITypeInteraction[]): Promise<void> => {
-        const { awaitedOptions } = getState(this);
-        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
-        await click();
-        await Interactor.run(
-          coreFrame,
-          typeInteractions.map(t => ({ type: t })),
-        );
-      };
-      const waitForVisible = async (): Promise<void> => {
-        const { awaitedPath, awaitedOptions } = getState(this);
-        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
-        await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
-      };
-      const getComputedVisibility = async (): Promise<void> => {
-        const { awaitedOptions } = getState(this);
-        const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
-        await coreFrame.getComputedVisibility(this);
-      };
+  void Object.defineProperty(Item.prototype, '$click', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async (): Promise<void> => {
+      const { awaitedOptions } = getState(this);
+      const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+      await Interactor.run(coreFrame, [{ click: this }]);
+    }
+  });
 
-      return { click, type, waitForVisible, getComputedVisibility };
-    },
+  void Object.defineProperty(Item.prototype, '$type', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async (...typeInteractions: ITypeInteraction[]): Promise<void> => {
+      const { awaitedOptions } = getState(this);
+      const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+      // @ts-ignore
+      await this.$click();
+      await Interactor.run(
+        coreFrame,
+        typeInteractions.map(t => ({ type: t })),
+      );
+    }
+  });
+
+  void Object.defineProperty(Item.prototype, '$waitForVisible', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async (): Promise<void> => {
+      const { awaitedPath, awaitedOptions } = getState(this);
+      const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+      await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
+    }
+  });
+
+  void Object.defineProperty(Item.prototype, '$getComputedVisibility', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async (): Promise<void> => {
+      const { awaitedOptions } = getState(this);
+      const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+      await coreFrame.getComputedVisibility(this);
+    }
   });
 }
