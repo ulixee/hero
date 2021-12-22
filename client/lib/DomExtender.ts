@@ -38,7 +38,7 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
     enumerable: false,
     configurable: false,
     writable: false,
-    value: async (): Promise<void> => {
+    async value(): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       await Interactor.run(coreFrame, [{ click: this }]);
@@ -49,10 +49,9 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
     enumerable: false,
     configurable: false,
     writable: false,
-    value: async (...typeInteractions: ITypeInteraction[]): Promise<void> => {
+    async value(...typeInteractions: ITypeInteraction[]): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
-      // @ts-ignore
       await this.$click();
       await Interactor.run(
         coreFrame,
@@ -65,7 +64,7 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
     enumerable: false,
     configurable: false,
     writable: false,
-    value: async (): Promise<void> => {
+    async value(): Promise<void> {
       const { awaitedPath, awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
@@ -76,7 +75,7 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
     enumerable: false,
     configurable: false,
     writable: false,
-    value: async (): Promise<void> => {
+    async value(): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       await coreFrame.getComputedVisibility(this);
