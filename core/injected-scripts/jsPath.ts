@@ -218,6 +218,8 @@ class JsPath {
 
 // / Object At Path Class //////
 
+let lastContainerOffset: { x: number; y: number };
+
 class ObjectAtPath {
   public objectAtPath: Node | any;
   public nodePath: (Node | any)[];
@@ -239,20 +241,7 @@ class ObjectAtPath {
   }
 
   public get boundingClientRect() {
-    const element = this.closestElement;
-    if (!element) {
-      return { x: 0, y: 0, width: 0, height: 0, tag: 'node' };
-    }
-
-    const rect = element.getBoundingClientRect();
-
-    return {
-      y: rect.y + this.containerOffset.y,
-      x: rect.x + this.containerOffset.x,
-      height: rect.height,
-      width: rect.width,
-      tag: element.tagName?.toLowerCase(),
-    } as IElementRect;
+    return this.getElementRect(this.closestElement);
   }
 
   public get obstructedByElement() {
@@ -299,9 +288,10 @@ class ObjectAtPath {
     return this.objectAtPath?.nodeType === this.objectAtPath?.TEXT_NODE;
   }
 
-  constructor(readonly jsPath: IJsPath, readonly containerOffset: IPoint = { x: 0, y: 0 }) {
+  constructor(readonly jsPath: IJsPath, readonly containerOffset: IPoint = lastContainerOffset) {
     if (!jsPath?.length) return;
     this.containerOffset = containerOffset;
+    lastContainerOffset = containerOffset;
 
     // @ts-ignore - start listening for events since we've just looked up something on this frame
     if ('listenToInteractionEvents' in window) window.listenToInteractionEvents();
@@ -346,6 +336,7 @@ class ObjectAtPath {
     visibility.isUnobstructedByOtherElements = !this.isObstructedByAnotherElement;
     if (visibility.isUnobstructedByOtherElements === false) {
       visibility.obstructedByElementId = this.obstructedByElementId;
+      visibility.obstructedByElementRect = this.getElementRect(this.obstructedByElement);
     }
 
     const rect = this.boundingClientRect;
@@ -479,6 +470,32 @@ class ObjectAtPath {
       value: null,
       pathError,
     };
+  }
+
+  public getElementRect(element: Element): IElementRect {
+    if (!element) {
+      return { x: 0, y: 0, width: 0, height: 0, tag: 'node' };
+    }
+
+    const tag = element.tagName?.toLowerCase();
+
+    // if this is an option, get the rect of the select since option has no position
+    if (element instanceof HTMLOptionElement) {
+      let parent: HTMLElement = element;
+      while (parent && !(parent instanceof HTMLSelectElement)) {
+        parent = parent.parentElement;
+      }
+      element = parent;
+    }
+
+    const rect = element.getBoundingClientRect();
+    return {
+      y: rect.y + this.containerOffset.y,
+      x: rect.x + this.containerOffset.x,
+      height: rect.height,
+      width: rect.width,
+      tag,
+    } as IElementRect;
   }
 
   public extractNodePointer(): INodePointer {

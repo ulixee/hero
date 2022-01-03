@@ -173,7 +173,7 @@ export function formatJsPath(path: any): string {
         return `getNodeById(${x})`;
       }
       if (Array.isArray(x)) {
-        if (x[0] === getNodePointerFnName) return;
+        if (typeof x[0] === 'string' && x[0].startsWith('__')) return;
         return `${x[0]}(${x.slice(1).map(y => JSON.stringify(y))})`;
       }
       return x;

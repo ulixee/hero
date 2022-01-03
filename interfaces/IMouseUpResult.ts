@@ -9,4 +9,5 @@ export default interface IMouseUpResult {
   targetNodePreview?: string;
   expectedNodePreview?: string;
   expectedNodeVisibility?: INodeVisibility;
+  didStartInteractWithPaintingStable?: boolean;
 }

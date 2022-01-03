@@ -126,7 +126,7 @@ export default class FrameEnvironment
       sessionId: tab.session.id,
       frameId: this.id,
     });
-    this.jsPath = new JsPath(this, tab.isDetached);
+    this.jsPath = new JsPath(this);
     this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.session.commands.lastId;
     this.navigations = new FrameNavigations(
@@ -261,7 +261,7 @@ export default class FrameEnvironment
 
   public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
     const containerOffset = await this.getContainerOffset();
-    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths, containerOffset);
+    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths, containerOffset, false);
     return this.prefetchedJsPaths;
   }
 
@@ -634,8 +634,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     const thisOffset = await this.puppetFrame.evaluateOnNode<IPoint>(
       frameElementNodeId,
       `(() => {
-      const rect = this.getBoundingClientRect().toJSON();
-      return { x:rect.x, y:rect.y};
+      const rect = this.getBoundingClientRect();
+      return { x:rect.x, y:rect.y };
  })()`,
     );
     return {

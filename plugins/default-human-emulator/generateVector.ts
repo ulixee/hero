@@ -5,6 +5,7 @@ export default function generateVector(
   startPoint: IPoint,
   destinationPoint: IPoint,
   targetWidth: number,
+  minSteps: number,
   overshoot: { threshold: number; radius: number; spread: number },
 ) {
   const shouldOvershoot = magnitude(direction(startPoint, destinationPoint)) > overshoot.threshold;
@@ -12,10 +13,16 @@ export default function generateVector(
   const firstTargetPoint = shouldOvershoot
     ? getOvershootPoint(destinationPoint, overshoot.radius)
     : destinationPoint;
-  const points = path(startPoint, firstTargetPoint);
+  const points = path(startPoint, firstTargetPoint, Math.max(targetWidth, 100), minSteps);
 
   if (shouldOvershoot) {
-    const correction = path(firstTargetPoint, destinationPoint, targetWidth, overshoot.spread);
+    const correction = path(
+      firstTargetPoint,
+      destinationPoint,
+      targetWidth,
+      minSteps,
+      overshoot.spread,
+    );
     points.push(...correction);
   }
   return points.map(point => {
@@ -23,9 +30,13 @@ export default function generateVector(
   });
 }
 
-function path(start: IPoint, finish: IPoint, targetWidth = 100, spreadOverride?: number): IPoint[] {
-  const minSteps = 25;
-
+function path(
+  start: IPoint,
+  finish: IPoint,
+  targetWidth: number,
+  minSteps: number,
+  spreadOverride?: number,
+): IPoint[] {
   if (!targetWidth || Number.isNaN(targetWidth)) targetWidth = 1;
 
   let spread = spreadOverride;
@@ -39,7 +50,7 @@ function path(start: IPoint, finish: IPoint, targetWidth = 100, spreadOverride?:
   const length = curve.length() * 0.8;
   const baseTime = Math.random() * minSteps;
   let steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
-  if (Number.isNaN(steps)) steps = 25;
+  if (Number.isNaN(steps)) steps = minSteps;
 
   return curve
     .getLookupTable(steps)

@@ -33,13 +33,18 @@ import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import filterPlugins from '@ulixee/hero-plugin-utils/lib/utils/filterPlugins';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
+import {
+  IElementInteractVerification,
+  IMousePositionXY,
+  isMousePositionXY,
+} from '@ulixee/hero-interfaces/IInteractions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
 import Interactor from './Interactor';
 import IInteractions, {
   Command,
-  IMousePosition,
+  IInteraction,
   ITypeInteraction,
 } from '../interfaces/IInteractions';
 import Tab, { createTab, getCoreTab } from './Tab';
@@ -265,10 +270,19 @@ export default class Hero extends AwaitedEventTarget<{
 
   // INTERACT METHODS
 
-  public async click(mousePosition: IMousePosition): Promise<void> {
+  public async click(
+    mousePosition: IMousePositionXY | ISuperElement,
+    clickVerification: IElementInteractVerification = 'elementAtPath',
+  ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
     coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
-    await Interactor.run(coreFrame, [{ click: mousePosition }]);
+    let interaction: IInteraction = { click: mousePosition };
+    if (!isMousePositionXY(mousePosition)) {
+      interaction = {
+        click: { element: mousePosition as ISuperElement, verification: clickVerification },
+      };
+    }
+    await Interactor.run(coreFrame, [interaction]);
   }
 
   public async getFrameEnvironment(
@@ -284,7 +298,7 @@ export default class Hero extends AwaitedEventTarget<{
     await Interactor.run(coreFrame, interactions);
   }
 
-  public async scrollTo(mousePosition: IMousePosition): Promise<void> {
+  public async scrollTo(mousePosition: IMousePositionXY | ISuperElement): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
     coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);

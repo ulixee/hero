@@ -4,27 +4,53 @@ import { IMousePosition } from './IInteractions';
 import IRect from './IRect';
 import IPoint from './IPoint';
 import { INodeVisibility } from './INodeVisibility';
+import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { INodePointer } from './AwaitedDom';
 
 export default interface IInteractionsHelper {
-  lookupBoundingRect(
-    mousePosition: IMousePosition,
-    throwIfNotPresent?: boolean,
-    includeNodeVisibility?: boolean,
-  ): Promise<
-    IRect & {
-      elementTag?: string;
-      nodeId?: number;
-      nodeVisibility?: INodeVisibility;
-    }
-  >;
-  createMouseupTrigger(
-    nodeId: number,
-  ): Promise<{
-    didTrigger: (mousePosition: IMousePosition, throwOnFail?: boolean) => Promise<IMouseUpResult>;
-  }>;
-  createMouseoverTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<boolean> }>;
   mousePosition: IPoint;
   scrollOffset: Promise<IPoint>;
-  viewportSize: { width: number; height: number };
+  viewportSize: IViewportSize;
   logger: IBoundLog;
+
+  createMouseupTrigger(nodeId: number): Promise<{
+    nodeVisibility: INodeVisibility;
+    didTrigger: () => Promise<IMouseUpResult>;
+  }>;
+
+  reloadJsPath(jsPath: IJsPath): Promise<INodePointer>;
+  lookupBoundingRect(
+    mousePosition: IMousePosition,
+    options?: {
+      relativeToScrollOffset?: IPoint;
+      includeNodeVisibility?: boolean;
+    },
+  ): Promise<IRectLookup>;
+
+  // rect utils
+  createPointInRect(
+    rect: IRect,
+    options?: {
+      paddingPercent?: { height: number; width: number };
+      constrainToViewport?: IViewportSize;
+    },
+  ): IPoint;
+  createScrollPointForRect(rect: IRect, viewport: IViewportSize): IPoint;
+  isPointWithinRect(point: IPoint, rect: IRect): boolean;
+  isRectInViewport(
+    rect: IRect,
+    viewport: { width: number; height: number },
+    percent: number,
+  ): { width: boolean; height: boolean };
+}
+
+export type IRectLookup = IRect & {
+  elementTag?: string;
+  nodeId?: number;
+  nodeVisibility?: INodeVisibility;
+};
+
+export interface IViewportSize {
+  width: number;
+  height: number;
 }
