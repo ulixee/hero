@@ -1,5 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { getLogo, ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Hero from '../index';
 
 let koaServer: ITestKoaServer;
@@ -28,6 +29,7 @@ describe('basic waitForLocation change detections', () => {
     const startUrl = `${koaServer.baseUrl}/start`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
 
     await hero.goto(startUrl);
     const firstUrl = await hero.url;
@@ -71,6 +73,7 @@ describe('basic waitForLocation change detections', () => {
 
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/page1`);
     const startlink = hero.document.querySelector('a');
     await hero.interact({ click: startlink, waitForElementVisible: startlink });
@@ -106,6 +109,7 @@ describe('basic waitForLocation change detections', () => {
     const page2Url = `${koaServer.baseUrl}/loc2`;
     const finishUrl = `${koaServer.baseUrl}/loc3`;
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
 
     await hero.goto(startUrl);
     const firstUrl = await hero.url;
@@ -129,6 +133,51 @@ describe('basic waitForLocation change detections', () => {
     await hero.close();
   });
 
+  it('should trigger location change when a page redirects in-page before load', async () => {
+    const imagePromise = new Resolvable();
+    koaServer.get('/img.png', async ctx => {
+      ctx.set('Content-Type', 'image/png');
+      await imagePromise.promise;
+      ctx.body = getLogo();
+    });
+
+    koaServer.get('/change-form', ctx => {
+      ctx.body = `
+        <body>
+          <form action="/change-inpage" method="get">
+           <input type="submit" name="submit" value="value" >
+          </form>
+        </body>
+      `;
+    });
+
+    koaServer.get('/change-inpage', ctx => {
+      ctx.body = `
+        <body>
+          <script>
+            history.pushState({}, '', '/change-inpage/1');
+          </script>
+          <img src="/img.png">
+        </body>
+      `;
+    });
+
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(`${koaServer.baseUrl}/change-form`);
+    await hero.interact({ click: hero.document.querySelector('input') });
+    const result = await hero.waitForLocation('change');
+    await expect(result.response.url).resolves.toBe(
+      `${koaServer.baseUrl}/change-inpage?submit=value`,
+    );
+    imagePromise.resolve(null);
+    await hero.waitForPaintingStable();
+    await expect(hero.url).resolves.toBe(`${koaServer.baseUrl}/change-inpage/1`);
+
+    await hero.close();
+  });
+
   it('should support timing out a location change', async () => {
     koaServer.get('/loaded1', ctx => {
       ctx.body = `
@@ -142,6 +191,7 @@ describe('basic waitForLocation change detections', () => {
     });
 
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/loaded1`);
     await hero.waitForPaintingStable();
     const link = hero.document.querySelector('a');
@@ -172,6 +222,7 @@ describe('basic waitForLocation change detections', () => {
       counter += 1;
     });
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/refresh`);
 
     await expect(hero.waitForLocation('reload')).resolves.toBeTruthy();
@@ -200,6 +251,7 @@ describe('basic waitForLocation change detections', () => {
       counter += 1;
     });
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/postback`);
     await hero.click(hero.activeTab.document.querySelector('input'));
 
