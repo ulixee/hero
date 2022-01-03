@@ -14,11 +14,13 @@ import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
 import {
   getClientRectFnName,
+  getComputedVisibilityFnName,
   getNodePointerFnName,
   runMagicSelectorAllFnName,
   runMagicSelectorFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
+import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 
 const { log } = Log(module);
 
@@ -29,6 +31,7 @@ export class JsPath {
   private readonly execHistoryIndexByKey: { [jsPath_sourceIndex: string]: number } = {};
   private readonly frameEnvironment: FrameEnvironment;
   private readonly logger: IBoundLog;
+  private readonly clientRectByNodePointerId = new Map<number, IElementRect>();
   private readonly nodeIdRedirectToNewNodeId: { [nodeId: number]: number } = {};
 
   private nodeIdToHistoryLocation = new Map<
@@ -44,9 +47,12 @@ export class JsPath {
     });
   }
 
+  public getLastClientRect(nodeId: number): IElementRect {
+    return this.clientRectByNodePointerId.get(nodeId);
+  }
+
   public exec<T>(jsPath: IJsPath, containerOffset: IPoint): Promise<IExecJsPathResult<T>> {
     if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
-
     return this.runJsPath<T>(`exec`, jsPath, containerOffset);
   }
 
@@ -55,23 +61,7 @@ export class JsPath {
     containerOffset: IPoint,
   ): Promise<IExecJsPathResult<T>> {
     if (typeof jsPath[0] === 'number') {
-      const originalPath = this.nodeIdToHistoryLocation.get(jsPath[0]);
-      let sourceIndex = originalPath.sourceIndex;
-      const paths: {
-        nodeId: number;
-        redirectedNodeId?: number;
-        jsPath: IJsPath;
-      }[] = [];
-
-      let parentNodeId = jsPath[0];
-      while (sourceIndex !== undefined) {
-        const sourcePath = this.execHistory[sourceIndex];
-        if (typeof parentNodeId === 'number') {
-          paths.unshift({ nodeId: parentNodeId, jsPath: sourcePath.jsPath });
-        }
-        sourceIndex = sourcePath.sourceIndex;
-        if (sourceIndex) parentNodeId = sourcePath.jsPath[0] as number;
-      }
+      const paths = this.getJsPathHistoryForNode(jsPath[0]);
       for (const path of paths) {
         const result = await this.runJsPath<any>('exec', path.jsPath, containerOffset);
         const nodeId = result.nodePointer?.id;
@@ -87,8 +77,7 @@ export class JsPath {
     }
 
     // add a node pointer call onto the end if needed
-    const last = jsPath[jsPath.length - 1];
-    const fnCall = Array.isArray(last) ? last[0] : '';
+    const fnCall = this.getJsPathMethod(jsPath);
     if (fnCall !== getClientRectFnName && fnCall !== getNodePointerFnName) {
       jsPath = [...jsPath, [getNodePointerFnName]];
     }
@@ -197,6 +186,27 @@ export class JsPath {
     return result;
   }
 
+  private getJsPathHistoryForNode(nodeId: number): {
+    nodeId: number;
+    redirectedNodeId?: number;
+    jsPath: IJsPath;
+  }[] {
+    const originalPath = this.nodeIdToHistoryLocation.get(nodeId);
+    let sourceIndex = originalPath.sourceIndex;
+    const paths: ReturnType<JsPath['getJsPathHistoryForNode']> = [];
+
+    let parentNodeId = nodeId;
+    while (sourceIndex !== undefined) {
+      const sourcePath = this.execHistory[sourceIndex];
+      if (typeof parentNodeId === 'number') {
+        paths.unshift({ nodeId: parentNodeId, jsPath: sourcePath.jsPath });
+      }
+      sourceIndex = sourcePath.sourceIndex;
+      if (sourceIndex) parentNodeId = sourcePath.jsPath[0] as number;
+    }
+    return paths;
+  }
+
   private recordExecResult(
     jsPath: IJsPath,
     result: IExecJsPathResult<any>,
@@ -204,9 +214,22 @@ export class JsPath {
   ): void {
     let sourceIndex: number;
     if (isLiveQuery) this.hasNewExecJsPathHistory = true;
+
+    if (result.nodePointer && isLiveQuery) {
+      // try to record last known position
+      const method = this.getJsPathMethod(jsPath);
+      if (method === getClientRectFnName) {
+        this.clientRectByNodePointerId.set(result.nodePointer.id, result.value);
+      } else if (method === getComputedVisibilityFnName) {
+        const clientRect = (result.value as INodeVisibility).boundingClientRect;
+        this.clientRectByNodePointerId.set(result.nodePointer.id, clientRect);
+      }
+    }
+
     // if jspath starts with an id, this is a nested query
     if (typeof jsPath[0] === 'number') {
       const id = jsPath[0];
+
       const queryIndex = this.nodeIdToHistoryLocation.get(id);
       if (queryIndex === undefined) return;
       const operator = queryIndex.isFromIterable ? '*.' : '.';
@@ -272,6 +295,11 @@ export class JsPath {
       Array.isArray(jsPath[0]) &&
       (jsPath[0][0] === runMagicSelectorFnName || jsPath[0][0] === runMagicSelectorAllFnName)
     );
+  }
+
+  private getJsPathMethod(jsPath: IJsPath): string {
+    const last = jsPath[jsPath.length - 1];
+    return Array.isArray(last) ? last[0] : '';
   }
 }
 

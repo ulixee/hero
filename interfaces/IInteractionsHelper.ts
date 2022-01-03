@@ -24,6 +24,7 @@ export default interface IInteractionsHelper {
     options?: {
       relativeToScrollOffset?: IPoint;
       includeNodeVisibility?: boolean;
+      useLastKnownPosition?: boolean;
     },
   ): Promise<IRectLookup>;
 

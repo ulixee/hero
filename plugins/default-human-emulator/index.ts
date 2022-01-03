@@ -109,11 +109,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
   ): Promise<void> {
-    const scrollVector = await this.getScrollVector(
-      interactionStep.mousePosition,
-      interactionStep.relativeToScrollOffset,
-      helper,
-    );
+    const scrollVector = await this.getScrollVector(interactionStep, helper);
 
     let counter = 0;
     for (const { x, y } of scrollVector) {
@@ -139,6 +135,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   ): Promise<void> {
     const { mousePosition, command, relativeToScrollOffset } = interactionStep;
     interactionStep.delayMillis ??= Math.floor(Math.random() * 100);
+    delete interactionStep.relativeToScrollOffset;
 
     const originalMousePosition = [...interactionStep.mousePosition];
 
@@ -148,6 +145,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       const targetRect = await helper.lookupBoundingRect(mousePosition, {
         relativeToScrollOffset,
         includeNodeVisibility: true,
+        useLastKnownPosition: interactionStep.verification === 'none',
       });
 
       if (targetRect.elementTag === 'option') {
@@ -262,6 +260,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   ): Promise<IPoint> {
     const rect = await helper.lookupBoundingRect(interactionStep.mousePosition, {
       relativeToScrollOffset: interactionStep.relativeToScrollOffset,
+      useLastKnownPosition: interactionStep.verification === 'none',
     });
     const targetPoint = helper.createPointInRect(rect, {
       paddingPercent: DefaultHumanEmulator.boxPaddingPercent,
@@ -347,8 +346,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   }
 
   private async getScrollVector(
-    mousePosition: IMousePosition,
-    relativeToScrollOffset: IPoint,
+    interactionStep: IInteractionStep,
     helper: IInteractionsHelper,
   ): Promise<IPoint[]> {
     let shouldScrollX: boolean;
@@ -356,6 +354,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     let scrollToPoint: IPoint;
     const currentScrollOffset = await helper.scrollOffset;
 
+    const { mousePosition, relativeToScrollOffset, verification } = interactionStep;
     if (isMousePositionXY(mousePosition)) {
       const [x, y] = mousePosition as IMousePositionXY;
       scrollToPoint = { x, y };
@@ -366,7 +365,9 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       shouldScrollY = scrollToPoint.y !== currentScrollOffset.y;
       shouldScrollX = scrollToPoint.x !== currentScrollOffset.x;
     } else {
-      const targetRect = await helper.lookupBoundingRect(mousePosition);
+      const targetRect = await helper.lookupBoundingRect(mousePosition, {
+        useLastKnownPosition: verification === 'none',
+      });
       // figure out if target is in view
       const viewportSize = helper.viewportSize;
       const isRectVisible = helper.isRectInViewport(targetRect, viewportSize, 50);

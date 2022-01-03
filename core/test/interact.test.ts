@@ -12,6 +12,7 @@ import {
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import { JsPath } from '../lib/JsPath';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -438,6 +439,61 @@ describe('basic interaction tests', () => {
       ]),
     ).resolves.toBeUndefined();
     expect(reloadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be able to click an element without verification', async () => {
+    koaServer.get('/no-verify', ctx => {
+      ctx.body = `
+      <body>
+          <div id="app" style="height: 2700px">&nbsp;</div>
+          <ul id="test"><li class="class1">Li 1</li></ul>
+        <script>
+          
+          let hasrun = false;
+          document.querySelector('#app').addEventListener('mouseleave', () => {
+             if (hasrun) return;
+             hasrun = true;
+             document.querySelector('#test').remove();
+          })
+        </script>
+      </body>
+    `;
+    });
+
+    const { tab } = await createSession({
+      humanEmulatorId,
+    });
+    const interactor = tab.mainFrameEnvironment.interactor;
+    // @ts-ignore
+    const jsPathExecSpy = jest.spyOn(interactor.jsPath, 'exec');
+    await tab.goto(`${koaServer.baseUrl}/no-verify`);
+
+    await expect(
+      tab.interact([
+        {
+          command: InteractionCommand.scroll,
+          mousePosition: [0, 1400],
+        },
+      ]),
+    ).resolves.toBeUndefined();
+
+    const ul = await tab.execJsPath([
+      'document',
+      ['querySelector', '#test'],
+      [getClientRectFnName],
+    ]);
+    // if node is exact, expect it to say that element is now gone
+    await expect(
+      tab.interact([
+        {
+          command: InteractionCommand.click,
+          mousePosition: [ul.nodePointer.id],
+          verification: 'none',
+        },
+      ]),
+    ).resolves.toBeUndefined();
+    // should only make one dom call
+    expect(jsPathExecSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should cancel pending interactions after a page clears', async () => {

@@ -474,7 +474,7 @@ class ObjectAtPath {
 
   public getElementRect(element: Element): IElementRect {
     if (!element) {
-      return { x: 0, y: 0, width: 0, height: 0, tag: 'node' };
+      return { x: 0, y: 0, width: 0, height: 0, tag: 'node', scrollX: 0, scrollY: 0 };
     }
 
     const tag = element.tagName?.toLowerCase();
@@ -494,6 +494,8 @@ class ObjectAtPath {
       x: rect.x + this.containerOffset.x,
       height: rect.height,
       width: rect.width,
+      scrollX: window.scrollX ?? document.documentElement?.scrollLeft,
+      scrollY: window.scrollY ?? document.documentElement?.scrollTop,
       tag,
     } as IElementRect;
   }

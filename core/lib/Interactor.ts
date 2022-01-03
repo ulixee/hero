@@ -35,6 +35,7 @@ import MouseupListener from './MouseupListener';
 import * as rectUtils from './rectUtils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
 
 const { log } = Log(module);
 
@@ -61,7 +62,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get scrollOffset(): Promise<IPoint> {
-    return this.jsPath.getWindowOffset().then(offset => {
+    return this.getWindowOffset().then(offset => {
       return {
         x: offset.scrollX,
         y: offset.scrollY,
@@ -146,6 +147,7 @@ export default class Interactor implements IInteractionsHelper {
     options?: {
       relativeToScrollOffset?: IPoint;
       includeNodeVisibility?: boolean;
+      useLastKnownPosition?: boolean;
     },
   ): Promise<IRectLookup> {
     if (mousePosition === null) {
@@ -169,6 +171,26 @@ export default class Interactor implements IInteractionsHelper {
         width: 1,
         height: 1,
       };
+    }
+
+    if (
+      options?.useLastKnownPosition &&
+      typeof mousePosition[0] === 'number' &&
+      mousePosition.length === 1
+    ) {
+      const nodeId = mousePosition[0] as number;
+      const lastKnownPosition = this.jsPath.getLastClientRect(nodeId);
+      if (lastKnownPosition) {
+        const currentScroll = await this.scrollOffset;
+        return {
+          x: lastKnownPosition.x + lastKnownPosition.scrollX - currentScroll.x,
+          y: lastKnownPosition.y + lastKnownPosition.scrollY - currentScroll.y,
+          height: lastKnownPosition.height,
+          width: lastKnownPosition.width,
+          elementTag: lastKnownPosition.tag,
+          nodeId,
+        };
+      }
     }
 
     const containerOffset = await this.frameEnvironment.getContainerOffset();
@@ -321,9 +343,14 @@ export default class Interactor implements IInteractionsHelper {
     }
   }
 
-  private async initializeViewport(isMainFrame: boolean): Promise<void> {
-    const windowOffset = await this.tab.mainFrameEnvironment.getViewportSize();
+  private async getWindowOffset(): Promise<IWindowOffset> {
+    const windowOffset = await this.jsPath.getWindowOffset();
     this.viewportSize = { width: windowOffset.innerWidth, height: windowOffset.innerHeight };
+    return windowOffset;
+  }
+
+  private async initializeViewport(isMainFrame: boolean): Promise<void> {
+    await this.getWindowOffset();
     if (isMainFrame) {
       const startingMousePosition = await this.plugins.getStartingMousePoint(this);
       this.mouse.position = startingMousePosition || this.mouse.position;
@@ -335,15 +362,20 @@ export default class Interactor implements IInteractionsHelper {
     constrainToViewport = true,
   ): Promise<[x: number, y: number]> {
     const mousePosition = interactionStep.mousePosition;
-    if (mousePosition && !isMousePositionXY(mousePosition)) {
-      const rect = await this.lookupBoundingRect(mousePosition);
+    const rect = await this.lookupBoundingRect(mousePosition, {
+      relativeToScrollOffset: interactionStep.relativeToScrollOffset,
+      useLastKnownPosition: interactionStep.verification === 'none',
+    });
+
+    if (isMousePositionXY(mousePosition)) {
+      return [rect.x, rect.y];
+    } else {
       const point = await rectUtils.createPointInRect(rect, {
         paddingPercent: { height: 10, width: 10 },
         constrainToViewport: constrainToViewport ? this.viewportSize : undefined,
       });
       return [point.x, point.y];
     }
-    return mousePosition as IMousePositionXY;
   }
 
   private async injectScrollToPositions(
@@ -362,6 +394,7 @@ export default class Interactor implements IInteractionsHelper {
           groupCommands.push({
             command: InteractionCommand.scroll,
             mousePosition: step.mousePosition,
+            verification: step.verification,
             relativeToScrollOffset,
           });
           step.relativeToScrollOffset = relativeToScrollOffset;
