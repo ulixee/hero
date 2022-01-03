@@ -282,13 +282,14 @@ Alias for [Tab.Request](/docs/basic-interfaces/tab#request-tab)
 
 ## Methods
 
-### hero.click*(mousePosition)* {#click}
+### hero.click*(mousePosition, verification?)* {#click}
 
 Executes a click interaction. This is a shortcut for `hero.interact({ click: mousePosition })`. See the [Interactions page](/docs/basic-interfaces/interactions) for more details.
 
 #### **Arguments**:
 
 - mousePosition [`MousePosition`](/docs/basic-interfaces/interactions#mouseposition)
+- verification [`ClickVerficiation`](/docs/basic-interfaces/interactions#clickverification)
 
 #### **Returns**: `Promise`
 

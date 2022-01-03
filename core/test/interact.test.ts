@@ -12,7 +12,6 @@ import {
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import { JsPath } from '../lib/JsPath';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
