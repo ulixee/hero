@@ -272,14 +272,19 @@ export default class Hero extends AwaitedEventTarget<{
 
   public async click(
     mousePosition: IMousePositionXY | ISuperElement,
-    clickVerification: IElementInteractVerification = 'elementAtPath',
+    options?: {
+      clickVerification?: IElementInteractVerification;
+    },
   ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
     coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     let interaction: IInteraction = { click: mousePosition };
     if (!isMousePositionXY(mousePosition)) {
       interaction = {
-        click: { element: mousePosition as ISuperElement, verification: clickVerification },
+        click: {
+          element: mousePosition as ISuperElement,
+          verification: options?.clickVerification ?? 'elementAtPath',
+        },
       };
     }
     await Interactor.run(coreFrame, [interaction]);
@@ -358,20 +363,20 @@ export default class Hero extends AwaitedEventTarget<{
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-  public goto(href: string, timeoutMs?: number): Promise<Resource> {
-    return this.activeTab.goto(href, timeoutMs);
+  public goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
+    return this.activeTab.goto(href, options);
   }
 
-  public goBack(timeoutMs?: number): Promise<string> {
-    return this.activeTab.goBack(timeoutMs);
+  public goBack(options?: { timeoutMs?: number }): Promise<string> {
+    return this.activeTab.goBack(options);
   }
 
-  public goForward(timeoutMs?: number): Promise<string> {
-    return this.activeTab.goForward(timeoutMs);
+  public goForward(options?: { timeoutMs?: number }): Promise<string> {
+    return this.activeTab.goForward(options);
   }
 
-  public reload(timeoutMs?: number): Promise<Resource> {
-    return this.activeTab.reload(timeoutMs);
+  public reload(options?: { timeoutMs?: number }): Promise<Resource> {
+    return this.activeTab.reload(options);
   }
 
   public fetch(request: Request | string, init?: IRequestInit): Promise<Response> {

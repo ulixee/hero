@@ -68,7 +68,7 @@ describe('basic Navigation tests', () => {
       ctx.body = 'done';
     });
     const { tab } = await createSession();
-    await expect(tab.goto(startingUrl, 100)).rejects.toThrowError('Timeout');
+    await expect(tab.goto(startingUrl, { timeoutMs: 100 })).rejects.toThrowError('Timeout');
     timeoutResolve();
   });
 

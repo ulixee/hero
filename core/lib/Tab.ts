@@ -401,7 +401,7 @@ export default class Tab
     );
   }
 
-  public async goto(url: string, timeoutMs = 30e3): Promise<IResourceMeta> {
+  public async goto(url: string, options?: { timeoutMs?: number }): Promise<IResourceMeta> {
     const formattedUrl = Url.format(new Url.URL(url), { unicode: true });
 
     const navigation = this.navigations.onNavigationRequested(
@@ -413,7 +413,7 @@ export default class Tab
 
     const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
-    const timer = new Timer(timeoutMs, this.waitTimeouts);
+    const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
     const loader = await timer.waitForPromise(
       this.puppetPage.navigate(formattedUrl),
       timeoutMessage,
@@ -427,7 +427,7 @@ export default class Tab
     return this.session.resources.get(resource);
   }
 
-  public async goBack(timeoutMs?: number): Promise<string> {
+  public async goBack(options?: { timeoutMs?: number }): Promise<string> {
     const navigation = this.navigations.onNavigationRequested(
       'goBack',
       null,
@@ -437,11 +437,11 @@ export default class Tab
     const backUrl = await this.puppetPage.goBack();
     this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id, backUrl);
 
-    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, { timeoutMs });
+    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, options);
     return this.url;
   }
 
-  public async goForward(timeoutMs?: number): Promise<string> {
+  public async goForward(options?: { timeoutMs?: number }): Promise<string> {
     const navigation = this.navigations.onNavigationRequested(
       'goForward',
       null,
@@ -450,11 +450,11 @@ export default class Tab
     );
     const url = await this.puppetPage.goForward();
     this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id, url);
-    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, { timeoutMs });
+    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, options);
     return this.url;
   }
 
-  public async reload(timeoutMs?: number): Promise<IResourceMeta> {
+  public async reload(options?: { timeoutMs?: number }): Promise<IResourceMeta> {
     const navigation = this.navigations.onNavigationRequested(
       'reload',
       this.url,
@@ -462,14 +462,14 @@ export default class Tab
       null,
     );
 
-    const timer = new Timer(timeoutMs, this.waitTimeouts);
+    const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
     const timeoutMessage = `Timeout waiting for "tab.reload()"`;
 
     let loaderId = this.puppetPage.mainFrame.activeLoader.id;
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
     if (this.puppetPage.mainFrame.activeLoader.id === loaderId) {
       const frameNavigated = await timer.waitForPromise(
-        this.puppetPage.mainFrame.waitOn('frame-navigated', null, timeoutMs),
+        this.puppetPage.mainFrame.waitOn('frame-navigated', null, options?.timeoutMs),
         timeoutMessage,
       );
       loaderId = frameNavigated.loaderId;

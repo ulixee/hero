@@ -42,22 +42,23 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLElement extends IBaseExtend {}
 }
 
+const propertyDefinition: PropertyDescriptor = {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+};
+
 for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
   void Object.defineProperty(Item.prototype, '$click', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     async value(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
     },
+    ...propertyDefinition,
   });
 
   void Object.defineProperty(Item.prototype, '$type', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     async value(...typeInteractions: ITypeInteraction[]): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
@@ -67,18 +68,16 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
         typeInteractions.map(t => ({ type: t })),
       );
     },
+    ...propertyDefinition,
   });
 
   void Object.defineProperty(Item.prototype, '$waitForVisible', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
-    async value(timeoutMs?: number): Promise<ISuperElement> {
+    async value(options?: { timeoutMs?: number }): Promise<ISuperElement> {
       const { awaitedPath, awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), {
         waitForVisible: true,
-        timeoutMs,
+        timeoutMs: options?.timeoutMs,
       });
       if (!nodePointer) return null;
       return createInstanceWithNodePointer(
@@ -88,16 +87,15 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
         nodePointer,
       );
     },
+    ...propertyDefinition,
   });
 
   void Object.defineProperty(Item.prototype, '$getComputedVisibility', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     async value(): Promise<void> {
       const { awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
       await coreFrame.getComputedVisibility(this);
     },
+    ...propertyDefinition,
   });
 }

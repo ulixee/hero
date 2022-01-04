@@ -173,25 +173,25 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
-  public async goto(href: string, timeoutMs?: number): Promise<Resource> {
+  public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
     const coreTab = await getCoreTab(this);
-    const resource = await coreTab.goto(href, timeoutMs);
+    const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
   }
 
-  public async goBack(timeoutMs?: number): Promise<string> {
+  public async goBack(options?: { timeoutMs?: number }): Promise<string> {
     const coreTab = await getCoreTab(this);
-    return coreTab.goBack(timeoutMs);
+    return coreTab.goBack(options);
   }
 
-  public async goForward(timeoutMs?: number): Promise<string> {
+  public async goForward(options?: { timeoutMs?: number }): Promise<string> {
     const coreTab = await getCoreTab(this);
-    return coreTab.goForward(timeoutMs);
+    return coreTab.goForward(options);
   }
 
-  public async reload(timeoutMs?: number): Promise<Resource> {
+  public async reload(options?: { timeoutMs?: number }): Promise<Resource> {
     const coreTab = await getCoreTab(this);
-    const resource = await coreTab.reload(timeoutMs);
+    const resource = await coreTab.reload(options);
     return createResource(Promise.resolve(coreTab), resource);
   }
 
