@@ -9,7 +9,7 @@ import Node from 'awaited-dom/impl/official-klasses/Node';
 import HTMLElement from 'awaited-dom/impl/official-klasses/HTMLElement';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import Interactor from './Interactor';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility, INodeVisibilityOptions } from '@ulixee/hero-interfaces/INodeVisibility';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { createInstanceWithNodePointer } from './SetupAwaitedHandler';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
@@ -26,7 +26,9 @@ const awaitedPathState = StateMachine<
 interface IBaseExtend {
   $click: (verification?: IElementInteractVerification) => Promise<void>;
   $type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
-  $waitForVisible: (options?: { timeoutMs?: number }) => Promise<ISuperElement>;
+  $waitForVisible: (
+    options?: { timeoutMs?: number } & INodeVisibilityOptions,
+  ) => Promise<ISuperElement>;
   $getComputedVisibility: () => Promise<INodeVisibility>;
 }
 
@@ -72,9 +74,20 @@ for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HT
   });
 
   void Object.defineProperty(Item.prototype, '$waitForVisible', {
-    async value(options?: { timeoutMs?: number }): Promise<ISuperElement> {
+    async value(options?: { timeoutMs?: number } & INodeVisibilityOptions): Promise<ISuperElement> {
       const { awaitedPath, awaitedOptions } = getState(this);
       const coreFrame: CoreFrameEnvironment = await awaitedOptions?.coreFrame;
+      const visibilityOptions: any = {};
+      if (options) {
+        for (const [key, value] of Object.entries(options)) {
+          if (key !== 'timeoutMs' && typeof value === 'boolean') {
+            visibilityOptions[key] = value;
+          }
+        }
+      }
+      if (!Object.keys(visibilityOptions).length) {
+        visibilityOptions.isVisible = true;
+      }
       const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), {
         waitForVisible: true,
         timeoutMs: options?.timeoutMs,

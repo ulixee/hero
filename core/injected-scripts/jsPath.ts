@@ -4,7 +4,7 @@ import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import { IJsPathError } from '@ulixee/hero-interfaces/IJsPathError';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility, INodeVisibilityOptions } from '@ulixee/hero-interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 const pointerFnName = '__getNodePointer__';
@@ -170,7 +170,7 @@ class JsPath {
   public static async waitForElement(
     jsPath: IJsPath,
     containerOffset: IPoint,
-    waitForVisible: boolean,
+    waitForVisible: INodeVisibilityOptions,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
@@ -188,10 +188,17 @@ class JsPath {
           };
           if (isElementValid && waitForVisible) {
             visibility = objectAtPath.getComputedVisibility();
-            isElementValid = visibility.isVisible;
+            for (const [key, value] of Object.entries(visibility)) {
+              if (key === 'isVisible' || typeof value !== 'boolean') continue;
+              const isRequired = key in waitForVisible ? waitForVisible[key] : true;
+              if (value === false && isRequired) {
+                isElementValid = false;
+              }
+            }
           }
 
           if (isElementValid) {
+            visibility.isVisible = true;
             return {
               nodePointer: objectAtPath.extractNodePointer(),
               value: visibility,

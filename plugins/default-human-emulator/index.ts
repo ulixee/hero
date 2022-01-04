@@ -503,6 +503,8 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       let y: number;
       if (obstructedByElementRect.y - maxHeight > 0) {
         y = obstructedByElementRect.y - maxHeight;
+      } else if (obstructedByElementRect.y - (targetRect.height + 2) > 0) {
+        y = obstructedByElementRect.y - targetRect.height - 2;
       } else {
         // move beyond the bottom of the obstruction
         y = obstructedByElementRect.y - obstructedByElementRect.height + 2;
@@ -511,6 +513,10 @@ export default class DefaultHumanEmulator extends HumanEmulator {
         ...interactionStep,
         mousePosition: [targetRect.x, y],
       };
+      helper.logger.info('Scrolling to avoid obstruction', {
+        obstructedByElementRect,
+        scrollBeyondObstruction,
+      });
       await this.scroll(scrollBeyondObstruction, runFn, helper);
       return interactionStep.mousePosition;
     }

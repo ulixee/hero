@@ -4,7 +4,7 @@ import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility, INodeVisibilityOptions } from '@ulixee/hero-interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
@@ -99,16 +99,28 @@ export class JsPath {
   public waitForElement(
     jsPath: IJsPath,
     containerOffset: IPoint,
-    waitForVisible: boolean,
+    waitForVisible: boolean | Omit<INodeVisibilityOptions, 'nodeExists'>,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
+
+    let visibilityOptions: INodeVisibilityOptions = undefined;
+    if (typeof waitForVisible === 'object') {
+      visibilityOptions = waitForVisible as INodeVisibilityOptions;
+    } else if (waitForVisible === true) {
+      // by default, don't require on-screen
+      visibilityOptions = {
+        isOnscreenHorizontal: false,
+        isOnscreenVertical: false,
+        isUnobstructedByOtherElements: false,
+      };
+    }
 
     return this.runJsPath<INodeVisibility>(
       `waitForElement`,
       jsPath,
       containerOffset,
-      waitForVisible,
+      visibilityOptions,
       timeoutMillis,
     );
   }
