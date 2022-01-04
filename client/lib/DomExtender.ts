@@ -26,7 +26,7 @@ const awaitedPathState = StateMachine<
 interface IBaseExtend {
   $click: (verification?: IElementInteractVerification) => Promise<void>;
   $type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
-  $waitForVisible: (timeoutMs?: number) => Promise<ISuperElement>;
+  $waitForVisible: (options?: { timeoutMs?: number }) => Promise<ISuperElement>;
   $getComputedVisibility: () => Promise<INodeVisibility>;
 }
 

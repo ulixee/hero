@@ -14,6 +14,7 @@ import { IPuppetFrame, IPuppetFrameEvents } from '@ulixee/hero-interfaces/IPuppe
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
@@ -496,7 +497,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     } finally {
       timer.clear();
     }
-    return null;
+
+    throw new TimeoutError(timeoutMessage);
   }
 
   public async flushPageEventsRecorder(): Promise<boolean> {
