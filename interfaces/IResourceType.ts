@@ -3,7 +3,7 @@ import Protocol from 'devtools-protocol';
 import Network = Protocol.Network;
 import DevtoolsResourceType = Network.ResourceType;
 
-export enum ResourceTypes {
+export enum ResourceType {
   Document = 'Document',
   Stylesheet = 'Stylesheet',
   Image = 'Image',
@@ -25,7 +25,7 @@ export enum ResourceTypes {
   Other = 'Other',
 }
 
-type IResourceType = keyof typeof ResourceTypes;
+type IResourceType = keyof typeof ResourceType;
 
 export function getResourceTypeForChromeValue(
   resourceType: DevtoolsResourceType,

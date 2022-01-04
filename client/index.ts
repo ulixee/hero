@@ -2,8 +2,8 @@
 import './lib/SetupAwaitedHandler';
 import { ISuperElement, ISuperNode } from "awaited-dom/base/interfaces/super";
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import IResourceType, { ResourceTypes } from '@ulixee/hero-interfaces/IResourceType';
+import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import IResourceType, { ResourceType } from '@ulixee/hero-interfaces/IResourceType';
 import { InteractionCommand, MouseButton } from '@ulixee/hero-interfaces/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
@@ -21,8 +21,8 @@ export {
   InteractionCommand,
   MouseButton,
   IResourceType,
-  ResourceTypes,
-  KeyboardKeys,
+  ResourceType,
+  KeyboardKey,
   BlockedResourceType,
   Node,
   FrameEnvironment,

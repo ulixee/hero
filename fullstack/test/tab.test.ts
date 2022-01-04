@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
-import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import * as os from 'os';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero from '../index';
@@ -141,7 +141,7 @@ describe('Multi-tab scenarios', () => {
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/tabTest2`);
-    const newTabKey = os.platform() === 'darwin' ? KeyboardKeys.MetaLeft : KeyboardKeys.ControlLeft;
+    const newTabKey = os.platform() === 'darwin' ? KeyboardKey.MetaLeft : KeyboardKey.ControlLeft;
     await hero.interact({
       [Command.keyDown]: newTabKey,
     });

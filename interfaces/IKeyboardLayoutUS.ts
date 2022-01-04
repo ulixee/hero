@@ -1,4 +1,4 @@
-export const KeyboardKeys = {
+export const KeyboardKey = {
   '0': 0,
   '1': 1,
   '2': 2,
@@ -257,13 +257,13 @@ export const KeyboardKeys = {
 } as const;
 
 export function getKeyboardKey(keyCode: IKeyboardKeyCode): IKeyboardKey | undefined {
-  for (const [key, code] of Object.entries(KeyboardKeys)) {
+  for (const [key, code] of Object.entries(KeyboardKey)) {
     if (code === keyCode) {
       return key as IKeyboardKey;
     }
   }
 }
 
-export type IKeyboardKey = keyof typeof KeyboardKeys;
-export type IKeyboardKeyCode = typeof KeyboardKeys[IKeyboardKey];
+export type IKeyboardKey = keyof typeof KeyboardKey;
+export type IKeyboardKeyCode = typeof KeyboardKey[IKeyboardKey];
 export type IKeyboardKeyCodes = IKeyboardKeyCode[];

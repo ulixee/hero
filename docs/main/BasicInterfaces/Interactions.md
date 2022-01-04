@@ -85,7 +85,7 @@ hero.interact({ click: { element: aElem, verification: 'exactElement' } });
 - keyUp: `KeyboardChar`
 - type: `(string | KeyboardChar)[]`
 
-Import KeyboardKeys from IKeyboardLayoutUS for all valid KeyboardChar values (e.g. `KeyboardKeys['\n']`, `KeyboardKeys.Enter`).
+Import KeyboardKey from IKeyboardLayoutUS for all valid KeyboardChar values (e.g. `KeyboardKey['\n']`, `KeyboardKey.Enter`).
 
 ## The Three WaitFor Commands
 
