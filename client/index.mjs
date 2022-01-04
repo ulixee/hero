@@ -6,8 +6,9 @@ const {
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
+  IResourceType,
   ResourceType,
-  KeyboardKeys,
+  KeyboardKey,
   BlockedResourceType,
   Node,
   FrameEnvironment,
@@ -15,6 +16,8 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  ISuperElement,
+  ISuperNode,
 } = cjsImport;
 
 export {
@@ -23,8 +26,9 @@ export {
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
+  IResourceType,
   ResourceType,
-  KeyboardKeys,
+  KeyboardKey,
   BlockedResourceType,
   Node,
   FrameEnvironment,
@@ -32,6 +36,8 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  ISuperElement,
+  ISuperNode,
 };
 
 export default cjsImport.default;

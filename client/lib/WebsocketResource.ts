@@ -3,7 +3,7 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
@@ -55,7 +55,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     return getState(this).resource.documentUrl;
   }
 
-  public get type(): ResourceType {
+  public get type(): IResourceType {
     return 'Websocket';
   }
 

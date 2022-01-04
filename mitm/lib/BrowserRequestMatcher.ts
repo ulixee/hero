@@ -1,4 +1,4 @@
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
@@ -275,7 +275,7 @@ interface IRequestedResource {
   mitmResourceId?: number;
   browserLoadedTime?: number;
   browserRequestId?: string;
-  resourceType?: ResourceType;
+  resourceType?: IResourceType;
   documentUrl?: string;
   hasUserGesture?: boolean;
   isHttp2Push?: boolean;

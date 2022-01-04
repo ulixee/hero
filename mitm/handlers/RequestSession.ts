@@ -1,7 +1,7 @@
 import * as http from 'http';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import IResourceRequest from '@ulixee/hero-interfaces/IResourceRequest';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
@@ -28,7 +28,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public isClosing = false;
   public blockedResources: {
-    types: ResourceType[];
+    types: IResourceType[];
     urls: string[];
     handlerFn?: (
       request: http.IncomingMessage | http2.Http2ServerRequest,
@@ -233,7 +233,7 @@ export interface IRequestSessionResponseEvent extends IRequestSessionRequestEven
   response: IResourceResponse;
   wasCached: boolean;
   dnsResolvedIp?: string;
-  resourceType: ResourceType;
+  resourceType: IResourceType;
   responseOriginalHeaders?: IResourceHeaders;
   body: Buffer;
   redirectedToUrl?: string;

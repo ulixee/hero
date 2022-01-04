@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
@@ -137,16 +137,16 @@ describe('basic Interact tests', () => {
     await hero.click(textarea);
     await hero.type('Test!');
     expect(await textarea.value).toBe('Test!');
-    await hero.type(KeyboardKeys.Backspace);
+    await hero.type(KeyboardKey.Backspace);
     expect(await textarea.value).toBe('Test');
 
     await hero.interact(
-      { [Command.keyDown]: KeyboardKeys.Shift },
-      { [Command.keyPress]: KeyboardKeys.ArrowLeft },
-      { [Command.keyPress]: KeyboardKeys.ArrowLeft },
-      { [Command.keyPress]: KeyboardKeys.ArrowLeft },
-      { [Command.keyUp]: KeyboardKeys.Shift },
-      { [Command.keyPress]: KeyboardKeys.Delete },
+      { [Command.keyDown]: KeyboardKey.Shift },
+      { [Command.keyPress]: KeyboardKey.ArrowLeft },
+      { [Command.keyPress]: KeyboardKey.ArrowLeft },
+      { [Command.keyPress]: KeyboardKey.ArrowLeft },
+      { [Command.keyUp]: KeyboardKey.Shift },
+      { [Command.keyPress]: KeyboardKey.Delete },
     );
 
     expect(await textarea.value).toBe('T');

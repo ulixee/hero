@@ -35,7 +35,7 @@ The document (if applicable) that requested this resource.
 ### type
 
 The type of resource. Possible values are:
-`Document, Redirect, Websocket, Ico, Preflight, Script, Stylesheet, Xhr, Fetch, Image, Media, Font, Text Track, Event Source, Manifest, Signed Exchange, Ping, CSP Violation Report, Other`
+`Document, Redirect, Websocket, Ico, Preflight, Script, Stylesheet, XHR, Fetch, Image, Media, Font, TextTrack, EventSource, Manifest, SignedExchange, Ping, CSPViolationReport, Other`
 
 #### **Returns** `ResourceType`
 

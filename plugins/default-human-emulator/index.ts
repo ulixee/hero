@@ -31,7 +31,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   public static maxScrollDelayMillis = 15;
   public static maxDelayBetweenInteractions = 200;
 
-  public static wordsPerMinuteRange = [30, 50];
+  public static wordsPerMinuteRange = [80, 100];
 
   private millisPerCharacter: number;
 

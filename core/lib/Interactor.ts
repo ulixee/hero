@@ -11,7 +11,7 @@ import { assert } from '@ulixee/commons/lib/utils';
 import {
   getKeyboardKey,
   IKeyboardKey,
-  KeyboardKeys,
+  KeyboardKey,
 } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import IInteractionsHelper, {
   IRectLookup,
@@ -315,7 +315,7 @@ export default class Interactor implements IInteractionsHelper {
           } else if ('string' in keyboardCommand) {
             const text = keyboardCommand.string;
             for (const char of text) {
-              if (char in KeyboardKeys) {
+              if (char in KeyboardKey) {
                 await this.keyboard.press(char as IKeyboardKey, keyupDelay);
               } else {
                 await this.keyboard.sendCharacter(char);

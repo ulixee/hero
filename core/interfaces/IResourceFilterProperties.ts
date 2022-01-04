@@ -1,8 +1,8 @@
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 
 export default interface IResourceFilterProperties {
   url?: string | RegExp;
-  type?: ResourceType;
+  type?: IResourceType;
   httpRequest?: {
     method?: string;
     statusCode?: number;
