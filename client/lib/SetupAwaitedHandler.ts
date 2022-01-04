@@ -25,9 +25,13 @@ interface IStateHandler<TClass> {
   className?: string;
 }
 
+const storageSymbol = Symbol.for('@ulixee/InternalAwaitedState');
+export function isAwaitedNode(node: any): boolean {
+  return !!node && !!node[storageSymbol];
+}
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = delegate;
-AwaitedHandler.setStorageSymbol(Symbol.for('@ulixee/InternalAwaitedState'));
+AwaitedHandler.setStorageSymbol(storageSymbol);
 
 async function getProperty<T, TClass>(
   stateHandler: IStateHandler<TClass>,

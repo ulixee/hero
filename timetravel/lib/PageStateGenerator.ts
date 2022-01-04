@@ -377,6 +377,7 @@ export default class PageStateGenerator {
     for (const resource of resources) {
       const { frameId } = resource;
       if (!frameId) continue;
+      if (typeof resource.url !== 'string') console.log(resource);
 
       this.sessionAssertions.recordAssertion(sessionId, frameId, {
         type: 'resource',

@@ -198,7 +198,14 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
         domAssertionsByFrameId.get(frameId).push(assertion);
         domAssertionCount += 1;
       } else {
-        entry.assertions.push(assertion);
+        // make a copy
+        const record: IBatchAssertion['assertions'][0] = [...assertion];
+        if (record[2])
+          record[2] = [...record[2]].map(x => {
+            if (typeof x === 'object') return { ...x };
+            return x;
+          });
+        entry.assertions.push(record);
       }
     }
 

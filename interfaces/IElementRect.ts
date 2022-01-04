@@ -6,5 +6,7 @@ export default interface IElementRect {
   height: number;
   width: number;
   tag: string;
+  scrollX: number;
+  scrollY: number;
   nodeVisibility?: INodeVisibility;
 }

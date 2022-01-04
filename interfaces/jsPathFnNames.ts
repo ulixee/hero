@@ -3,8 +3,8 @@ const getClientRectFnName = '__getClientRect__';
 const getComputedVisibilityFnName = '__getComputedVisibility__';
 const getComputedStyleFnName = '__getComputedStyle__';
 const getNodeIdFnName = '__getNodeId__';
-const runMagicSelector = '__magicSelector__';
-const runMagicSelectorAll = '__magicSelectorAll__';
+const runMagicSelectorFnName = '__magicSelector__';
+const runMagicSelectorAllFnName = '__magicSelectorAll__';
 
 export {
   getNodePointerFnName,
@@ -12,6 +12,6 @@ export {
   getNodeIdFnName,
   getComputedStyleFnName,
   getComputedVisibilityFnName,
-  runMagicSelector,
-  runMagicSelectorAll,
+  runMagicSelectorFnName,
+  runMagicSelectorAllFnName,
 };

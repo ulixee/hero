@@ -12,6 +12,7 @@ export interface INodeVisibility {
   hasCssVisibility?: boolean;
   hasDimensions?: boolean;
   obstructedByElementId?: number;
+  obstructedByElementRect?: IElementRect;
   isUnobstructedByOtherElements?: boolean;
   boundingClientRect?: IElementRect;
 }

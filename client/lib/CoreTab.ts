@@ -97,20 +97,20 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.run('Tab.configure', options);
   }
 
-  public async goto(href: string, timeoutMs?: number): Promise<IResourceMeta> {
-    return await this.commandQueue.run('Tab.goto', href, timeoutMs);
+  public async goto(href: string, options: { timeoutMs?: number }): Promise<IResourceMeta> {
+    return await this.commandQueue.run('Tab.goto', href, options);
   }
 
-  public async goBack(timeoutMs?: number): Promise<string> {
-    return await this.commandQueue.run('Tab.goBack', timeoutMs);
+  public async goBack(options: { timeoutMs?: number }): Promise<string> {
+    return await this.commandQueue.run('Tab.goBack', options);
   }
 
-  public async goForward(timeoutMs?: number): Promise<string> {
-    return await this.commandQueue.run('Tab.goForward', timeoutMs);
+  public async goForward(options: { timeoutMs?: number }): Promise<string> {
+    return await this.commandQueue.run('Tab.goForward', options);
   }
 
-  public async reload(timeoutMs?: number): Promise<IResourceMeta> {
-    return await this.commandQueue.run('Tab.reload', timeoutMs);
+  public async reload(options: { timeoutMs?: number }): Promise<IResourceMeta> {
+    return await this.commandQueue.run('Tab.reload', options);
   }
 
   public async exportUserProfile(): Promise<IUserProfile> {

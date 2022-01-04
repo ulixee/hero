@@ -12,8 +12,15 @@ import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
-import { runMagicSelector, runMagicSelectorAll } from '@ulixee/hero-interfaces/jsPathFnNames';
+import {
+  getClientRectFnName,
+  getComputedVisibilityFnName,
+  getNodePointerFnName,
+  runMagicSelectorAllFnName,
+  runMagicSelectorFnName,
+} from '@ulixee/hero-interfaces/jsPathFnNames';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
+import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 
 const { log } = Log(module);
 
@@ -21,28 +28,72 @@ export class JsPath {
   public hasNewExecJsPathHistory = false;
   public readonly execHistory: IJsPathHistory[] = [];
 
+  private readonly execHistoryIndexByKey: { [jsPath_sourceIndex: string]: number } = {};
   private readonly frameEnvironment: FrameEnvironment;
   private readonly logger: IBoundLog;
-  private readonly recordJsPaths: boolean = false;
+  private readonly clientRectByNodePointerId = new Map<number, IElementRect>();
+  private readonly nodeIdRedirectToNewNodeId: { [nodeId: number]: number } = {};
 
   private nodeIdToHistoryLocation = new Map<
     number,
     { sourceIndex: number; isFromIterable: boolean }
   >();
 
-  constructor(frameEnvironment: FrameEnvironment, recordJsPaths: boolean) {
+  constructor(frameEnvironment: FrameEnvironment) {
     this.frameEnvironment = frameEnvironment;
-    this.recordJsPaths = recordJsPaths;
     this.logger = log.createChild(module, {
       sessionId: frameEnvironment.session.id,
       frameId: frameEnvironment.id,
     });
   }
 
+  public getLastClientRect(nodeId: number): IElementRect {
+    return this.clientRectByNodePointerId.get(nodeId);
+  }
+
   public exec<T>(jsPath: IJsPath, containerOffset: IPoint): Promise<IExecJsPathResult<T>> {
     if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
-
     return this.runJsPath<T>(`exec`, jsPath, containerOffset);
+  }
+
+  public async reloadJsPath<T>(
+    jsPath: IJsPath,
+    containerOffset: IPoint,
+  ): Promise<IExecJsPathResult<T>> {
+    if (typeof jsPath[0] === 'number') {
+      const paths = this.getJsPathHistoryForNode(jsPath[0]);
+      for (const path of paths) {
+        const result = await this.runJsPath<any>('exec', path.jsPath, containerOffset);
+        const nodeId = result.nodePointer?.id;
+        if (nodeId !== path.nodeId) {
+          this.logger.info('JsPath.nodeRedirectFound', {
+            sourceNodeId: path.nodeId,
+            newNodeId: nodeId,
+            jsPath: path.jsPath,
+          });
+          this.nodeIdRedirectToNewNodeId[path.nodeId] = nodeId;
+        }
+      }
+    }
+
+    // add a node pointer call onto the end if needed
+    const fnCall = this.getJsPathMethod(jsPath);
+    if (fnCall !== getClientRectFnName && fnCall !== getNodePointerFnName) {
+      jsPath = [...jsPath, [getNodePointerFnName]];
+    }
+    return this.runJsPath<T>(`exec`, jsPath, containerOffset);
+  }
+
+  public replaceRedirectedJsPathNodePointer(jsPath: IJsPath): void {
+    if (typeof jsPath[0] === 'number') {
+      let id = jsPath[0];
+      while (id) {
+        const nextId = this.nodeIdRedirectToNewNodeId[id];
+        if (nextId === undefined || nextId === id) break;
+        id = nextId;
+      }
+      jsPath[0] = id;
+    }
   }
 
   public waitForElement(
@@ -85,8 +136,15 @@ export class JsPath {
   public async runJsPaths(
     jsPaths: IJsPathHistory[],
     containerOffset: IPoint,
+    shouldRedirectRemovedNodes = true,
   ): Promise<IJsPathResult[]> {
     if (!jsPaths?.length) return [];
+
+    if (shouldRedirectRemovedNodes && Object.keys(this.nodeIdRedirectToNewNodeId)) {
+      for (const path of jsPaths) {
+        this.replaceRedirectedJsPathNodePointer(path.jsPath);
+      }
+    }
 
     const results = await this.frameEnvironment.runIsolatedFn<IJsPathResult[]>(
       `${InjectedScripts.JsPath}.execJsPaths`,
@@ -109,6 +167,7 @@ export class JsPath {
     jsPath: IJsPath,
     ...args: Serializable[]
   ): Promise<IExecJsPathResult<T>> {
+    this.replaceRedirectedJsPathNodePointer(jsPath);
     const result = await this.frameEnvironment.runIsolatedFn<IExecJsPathResult<T>>(
       `${InjectedScripts.JsPath}.${fnName}`,
       jsPath,
@@ -121,10 +180,31 @@ export class JsPath {
       result.value = TypeSerializer.revive(result.value, 'BROWSER');
     }
 
-    if (this.recordJsPaths && fnName === 'exec') {
+    if (fnName === 'exec' || fnName === 'waitForElement') {
       this.recordExecResult(jsPath, result);
     }
     return result;
+  }
+
+  private getJsPathHistoryForNode(nodeId: number): {
+    nodeId: number;
+    redirectedNodeId?: number;
+    jsPath: IJsPath;
+  }[] {
+    const originalPath = this.nodeIdToHistoryLocation.get(nodeId);
+    let sourceIndex = originalPath.sourceIndex;
+    const paths: ReturnType<JsPath['getJsPathHistoryForNode']> = [];
+
+    let parentNodeId = nodeId;
+    while (sourceIndex !== undefined) {
+      const sourcePath = this.execHistory[sourceIndex];
+      if (typeof parentNodeId === 'number') {
+        paths.unshift({ nodeId: parentNodeId, jsPath: sourcePath.jsPath });
+      }
+      sourceIndex = sourcePath.sourceIndex;
+      if (sourceIndex) parentNodeId = sourcePath.jsPath[0] as number;
+    }
+    return paths;
   }
 
   private recordExecResult(
@@ -134,24 +214,36 @@ export class JsPath {
   ): void {
     let sourceIndex: number;
     if (isLiveQuery) this.hasNewExecJsPathHistory = true;
+
+    if (result.nodePointer && isLiveQuery) {
+      // try to record last known position
+      const method = this.getJsPathMethod(jsPath);
+      if (method === getClientRectFnName) {
+        this.clientRectByNodePointerId.set(result.nodePointer.id, result.value);
+      } else if (method === getComputedVisibilityFnName) {
+        const clientRect = (result.value as INodeVisibility).boundingClientRect;
+        this.clientRectByNodePointerId.set(result.nodePointer.id, clientRect);
+      }
+    }
+
     // if jspath starts with an id, this is a nested query
     if (typeof jsPath[0] === 'number') {
       const id = jsPath[0];
+
       const queryIndex = this.nodeIdToHistoryLocation.get(id);
+      if (queryIndex === undefined) return;
       const operator = queryIndex.isFromIterable ? '*.' : '.';
-      const plan = <IJsPathHistory>{
-        jsPath: [operator, ...jsPath.slice(1)],
-        sourceIndex: queryIndex.sourceIndex,
-      };
-      const stringified = JSON.stringify(plan.jsPath);
-      const match = this.execHistory.find(
-        x => JSON.stringify(x.jsPath) === stringified && x.sourceIndex === queryIndex.sourceIndex,
-      );
-      if (match) {
-        sourceIndex = this.execHistory.indexOf(match);
-      } else {
-        this.execHistory.push(plan);
+      const operatorPath = [operator, ...jsPath.slice(1)];
+      const key = `${JSON.stringify(operatorPath)}_${queryIndex.sourceIndex}`;
+
+      sourceIndex = this.execHistoryIndexByKey[key];
+      if (sourceIndex === undefined) {
+        this.execHistory.push({
+          jsPath: operatorPath,
+          sourceIndex: queryIndex.sourceIndex,
+        });
         sourceIndex = this.execHistory.length - 1;
+        this.execHistoryIndexByKey[key] = sourceIndex;
       }
     } else {
       this.execHistory.push({
@@ -193,7 +285,7 @@ export class JsPath {
       options = { minMatchingSelectors: 1, querySelectors: [selectorOrOptions] };
     }
 
-    const event = query === runMagicSelectorAll ? 'magic-selector-all' : 'magic-selector';
+    const event = query === runMagicSelectorAllFnName ? 'magic-selector-all' : 'magic-selector';
     this.frameEnvironment.tab.emit(event, { options, frame: this.frameEnvironment });
     jsPath[1] = options;
   }
@@ -201,8 +293,13 @@ export class JsPath {
   private isMagicSelectorPath(jsPath: IJsPath): boolean {
     return (
       Array.isArray(jsPath[0]) &&
-      (jsPath[0][0] === runMagicSelector || jsPath[0][0] === runMagicSelectorAll)
+      (jsPath[0][0] === runMagicSelectorFnName || jsPath[0][0] === runMagicSelectorAllFnName)
     );
+  }
+
+  private getJsPathMethod(jsPath: IJsPath): string {
+    const last = jsPath[jsPath.length - 1];
+    return Array.isArray(last) ? last[0] : '';
   }
 }
 

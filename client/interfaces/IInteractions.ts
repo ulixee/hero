@@ -1,6 +1,9 @@
-import { ISuperElement, ISuperNode } from "awaited-dom/base/interfaces/super";
-import { IMousePositionXY } from "@ulixee/hero-interfaces/IInteractions";
-import { IKeyboardKeyCode } from "@ulixee/hero-interfaces/IKeyboardLayoutUS";
+import { IKeyboardKeyCode } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import {
+  IElementInteractVerification,
+  IMousePositionXY,
+} from '@ulixee/hero-interfaces/IInteractions';
+import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 
 export type IInteraction = ICommand | ICommandDetailed;
 type IInteractions = IInteraction[];
@@ -44,24 +47,24 @@ export enum Command {
 export type ICommand = keyof typeof Command;
 
 export interface ICommandDetailed {
-  [Command.scroll]?: IMousePosition;
-  [Command.move]?: IMousePosition;
-  [Command.click]?: IMousePosition;
-  [Command.clickLeft]?: IMousePosition;
-  [Command.clickMiddle]?: IMousePosition;
-  [Command.clickRight]?: IMousePosition;
-  [Command.doubleclick]?: IMousePosition;
-  [Command.doubleclickLeft]?: IMousePosition;
-  [Command.doubleclickMiddle]?: IMousePosition;
-  [Command.doubleclickRight]?: IMousePosition;
-  [Command.clickUp]?: IMousePosition;
-  [Command.clickUpLeft]?: IMousePosition;
-  [Command.clickUpMiddle]?: IMousePosition;
-  [Command.clickUpRight]?: IMousePosition;
-  [Command.clickDown]?: IMousePosition;
-  [Command.clickDownLeft]?: IMousePosition;
-  [Command.clickDownMiddle]?: IMousePosition;
-  [Command.clickDownRight]?: IMousePosition;
+  [Command.scroll]?: IMousePositionXY | ISuperElement;
+  [Command.move]?: IMousePositionXY | ISuperElement;
+  [Command.click]?: IMousePositionXY | ISuperElement | ISuperElementWithVerification;
+  [Command.clickLeft]?: IMousePositionXY | ISuperElement;
+  [Command.clickMiddle]?: IMousePositionXY | ISuperElement;
+  [Command.clickRight]?: IMousePositionXY | ISuperElement;
+  [Command.doubleclick]?: IMousePositionXY | ISuperElement | ISuperElementWithVerification;
+  [Command.doubleclickLeft]?: IMousePositionXY | ISuperElement;
+  [Command.doubleclickMiddle]?: IMousePositionXY | ISuperElement;
+  [Command.doubleclickRight]?: IMousePositionXY | ISuperElement;
+  [Command.clickUp]?: IMousePositionXY | ISuperElement;
+  [Command.clickUpLeft]?: IMousePositionXY | ISuperElement;
+  [Command.clickUpMiddle]?: IMousePositionXY | ISuperElement;
+  [Command.clickUpRight]?: IMousePositionXY | ISuperElement;
+  [Command.clickDown]?: IMousePositionXY | ISuperElement;
+  [Command.clickDownLeft]?: IMousePositionXY | ISuperElement;
+  [Command.clickDownMiddle]?: IMousePositionXY | ISuperElement;
+  [Command.clickDownRight]?: IMousePositionXY | ISuperElement;
 
   [Command.type]?: ITypeInteraction;
   [Command.keyPress]?: IKeyboardKeyCode;
@@ -75,4 +78,7 @@ export interface ICommandDetailed {
 
 export type ITypeInteraction = string | IKeyboardKeyCode;
 
-export type IMousePosition = IMousePositionXY | ISuperElement;
+export type ISuperElementWithVerification = {
+  element: ISuperElement;
+  verification: IElementInteractVerification;
+};

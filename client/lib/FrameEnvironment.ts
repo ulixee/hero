@@ -36,10 +36,13 @@ import Hero, { IState as IHeroState } from './Hero';
 import { createInstanceWithNodePointer, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { IState as ITabState } from './Tab';
-import { IMousePosition } from '../interfaces/IInteractions';
 import Resource, { createResource } from './Resource';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
-import { runMagicSelector, runMagicSelectorAll } from '@ulixee/hero-interfaces/jsPathFnNames';
+import {
+  runMagicSelectorFnName,
+  runMagicSelectorAllFnName,
+} from '@ulixee/hero-interfaces/jsPathFnNames';
+import { IMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
 const { getState: getTabState } = StateMachine<Tab, ITabState>();
@@ -215,13 +218,13 @@ export default class FrameEnvironment {
   }
 
   public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
-    const awaitedPath = new AwaitedPath(null, [runMagicSelector, selectorOrOptions]);
+    const awaitedPath = new AwaitedPath(null, [runMagicSelectorFnName, selectorOrOptions]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNode(awaitedPath, awaitedOptions);
   }
 
   public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
-    const awaitedPath = new AwaitedPath(null, [runMagicSelectorAll, selectorOrOptions]);
+    const awaitedPath = new AwaitedPath(null, [runMagicSelectorAllFnName, selectorOrOptions]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNodeList(awaitedPath, awaitedOptions);
   }
@@ -287,7 +290,7 @@ export function getCoreFrameEnvironment(
 }
 
 export function getCoreFrameEnvironmentForPosition(
-  mousePosition: IMousePosition,
+  mousePosition: IMousePositionXY | ISuperElement,
 ): Promise<CoreFrameEnvironment> {
   const state = awaitedPathState.getState(mousePosition);
   if (!state) return;

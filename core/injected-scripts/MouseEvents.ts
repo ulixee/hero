@@ -1,102 +1,92 @@
 import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 
 class MouseEvents {
-  private static pendingMouseover?: EventResolvable<MouseEvent, boolean>;
-  private static pendingMouseup?: EventResolvable<MouseEvent, IMouseUpResult>;
+  private static pendingEvent?: Promise<IMouseUpResult>;
+  private static pendingEventResolve?: (result: IMouseUpResult) => void;
+  private static targetNodeId: number;
+  private static containerOffset: { x: number; y: number } = { x: 0, y: 0 };
 
-  public static listenFor(mouseEvent: 'mouseup' | 'mouseover', nodeId: number) {
-    this.clearEvent(mouseEvent);
+  public static listenFor(
+    nodeId: number,
+    containerOffset: { x: number; y: number },
+  ): INodeVisibility {
+    if (this.targetNodeId) this.clearEvent(this.targetNodeId);
 
     const node = NodeTracker.getWatchedNodeWithId(nodeId);
     if (!node) throw new Error('Node not found');
-    if (!node.isConnected) {
-      throw new Error(
-        `Target node for "${mouseEvent}" is not connected to the DOM, and won't receive mouse events.`,
-      );
-    }
 
-    if (mouseEvent === 'mouseover') {
-      this.pendingMouseover = new EventResolvable(nodeId, () => {
-        this.pendingMouseover?.resolve(true);
-      });
+    const visibility = this.getNodeVisibility(node);
 
-      node.addEventListener('mouseover', this.pendingMouseover.onEventFn, {
-        once: true,
-      });
-    } else {
-      this.pendingMouseup = new EventResolvable(nodeId, event => {
-        const targetNodeId = event.target ? NodeTracker.watchNode(event.target as Node) : undefined;
-        const relatedTargetNodeId = event.relatedTarget
-          ? NodeTracker.watchNode(event.relatedTarget as Node)
-          : undefined;
+    this.containerOffset = containerOffset;
+    this.targetNodeId = nodeId;
+    this.pendingEvent = new Promise<IMouseUpResult>(resolve => {
+      this.pendingEventResolve = resolve;
+    });
 
-        const result: IMouseUpResult = {
-          pageX: event.pageX - window.scrollX,
-          pageY: event.pageY - window.scrollY,
-          targetNodeId,
-          relatedTargetNodeId,
-          didClickLocation: node.contains(event.target as Node) || node === event.target,
-        };
+    window.addEventListener('mouseup', this.onMouseup, {
+      once: true,
+    });
 
-        if (!result.didClickLocation) {
-          // @ts-ignore
-          result.targetNodePreview = generateNodePreview(event.target);
-          // @ts-ignore
-          result.expectedNodePreview = generateNodePreview(node);
-          const expectedNode = new ObjectAtPath();
-          expectedNode.objectAtPath = node;
-          result.expectedNodeVisibility = expectedNode.getComputedVisibility();
-        }
-
-        this.pendingMouseup?.resolve(result);
-      });
-
-      window.addEventListener('mouseup', this.pendingMouseup.onEventFn, {
-        once: true,
-      });
-    }
+    return visibility;
   }
 
-  public static didTrigger(mouseEvent: 'mouseup' | 'mouseover', nodeId: number) {
+  public static init() {
+    this.onMouseup = this.onMouseup.bind(this);
+  }
+
+  public static didTrigger(nodeId: number) {
     try {
-      const pendingEvent = mouseEvent === 'mouseup' ? this.pendingMouseup : this.pendingMouseover;
-      if (pendingEvent?.nodeId !== nodeId) {
-        throw new Error(`${mouseEvent.toUpperCase()} listener not found`);
+      if (this.targetNodeId !== nodeId) {
+        throw new Error(`"mouseup" listener not found`);
       }
 
-      return pendingEvent.trigger;
+      return this.pendingEvent;
     } finally {
-      this.clearEvent(mouseEvent);
+      this.clearEvent(nodeId);
     }
   }
 
-  private static clearEvent(mouseEvent: 'mouseup' | 'mouseover') {
-    if (mouseEvent === 'mouseover') this.clearPendingMouseover();
-    if (mouseEvent === 'mouseup') this.clearPendingMouseup();
-  }
+  private static onMouseup(event: MouseEvent) {
+    const node = NodeTracker.getWatchedNodeWithId(this.targetNodeId);
+    const targetNodeId = event.target ? NodeTracker.watchNode(event.target as Node) : undefined;
+    const relatedTargetNodeId = event.relatedTarget
+      ? NodeTracker.watchNode(event.relatedTarget as Node)
+      : undefined;
 
-  private static clearPendingMouseover() {
-    if (this.pendingMouseover) {
-      const node = NodeTracker.getWatchedNodeWithId(this.pendingMouseover.nodeId);
-      node?.removeEventListener('mouseover', this.pendingMouseover.onEventFn);
-      this.pendingMouseover = null;
+    const result: IMouseUpResult = {
+      pageX: this.containerOffset.x + event.pageX - window.scrollX,
+      pageY: this.containerOffset.y + event.pageY - window.scrollY,
+      targetNodeId,
+      relatedTargetNodeId,
+      didClickLocation: node.contains(event.target as Node) || node === event.target,
+    };
+
+    if (!result.didClickLocation) {
+      // @ts-ignore
+      result.targetNodePreview = generateNodePreview(event.target);
+      // @ts-ignore
+      result.expectedNodePreview = generateNodePreview(node);
+      result.expectedNodeVisibility = this.getNodeVisibility(node);
     }
+
+    this.pendingEventResolve(result);
   }
 
-  private static clearPendingMouseup() {
-    if (this.pendingMouseup) {
-      window.removeEventListener('mouseup', this.pendingMouseup.onEventFn);
-      this.pendingMouseup = null;
+  private static getNodeVisibility(node: Node): INodeVisibility {
+    const objectAtPath = new ObjectAtPath();
+    objectAtPath.objectAtPath = node;
+    return objectAtPath.getComputedVisibility();
+  }
+
+  private static clearEvent(nodeId: number) {
+    if (this.targetNodeId === nodeId) {
+      window.removeEventListener('mouseup', this.onMouseup);
+      this.pendingEvent = null;
+      this.pendingEventResolve = null;
+      this.targetNodeId = null;
     }
   }
 }
 
-class EventResolvable<EventType, T> {
-  trigger: T;
-
-  constructor(readonly nodeId, readonly onEventFn: (ev: EventType) => void) {}
-
-  resolve(result: T) {
-    this.trigger = result;
-  }
-}
+MouseEvents.init();

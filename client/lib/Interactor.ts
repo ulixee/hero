@@ -1,10 +1,13 @@
 import {
+  IElementInteractVerification,
   IInteractionGroup,
   IInteractionGroups,
   IInteractionStep,
   IKeyboardCommand,
   IMousePosition as ICoreMousePosition,
+  IMousePositionXY,
   InteractionCommand as CoreCommand,
+  isMousePositionXY,
   MouseButton,
 } from '@ulixee/hero-interfaces/IInteractions';
 import StateMachine from 'awaited-dom/base/StateMachine';
@@ -15,9 +18,10 @@ import IInteractions, {
   Command,
   ICommand,
   IInteraction,
-  IMousePosition,
+  ISuperElementWithVerification,
 } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
+import { isAwaitedNode } from './SetupAwaitedHandler';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
@@ -65,13 +69,29 @@ function convertToInteractionGroups(interactions: IInteractions): IInteractionGr
   return interactionGroups;
 }
 
-function convertToCoreMousePosition(mousePosition: IMousePosition): ICoreMousePosition {
-  if (Array.isArray(mousePosition)) {
-    return mousePosition;
+function convertToCoreMousePosition(
+  mousePosition: IMousePositionXY | ISuperElement | ISuperElementWithVerification,
+): { mousePosition: ICoreMousePosition; verification?: IElementInteractVerification } {
+  if (isMousePositionXY(mousePosition)) {
+    return { mousePosition: mousePosition as IMousePositionXY };
   }
-  const { awaitedPath } = getState(mousePosition);
-  if (!awaitedPath) throw new Error(`Element not found -> ${mousePosition}`);
-  return awaitedPath.toJSON();
+
+  let verification: IElementInteractVerification;
+  let element: ISuperElement;
+  if (isAwaitedNode((mousePosition as ISuperElementWithVerification).element)) {
+    mousePosition = mousePosition as ISuperElementWithVerification;
+    verification = mousePosition.verification;
+    element = mousePosition.element;
+  } else {
+    element = mousePosition as ISuperElement;
+  }
+  const { awaitedPath } = getState(element);
+
+  if (!awaitedPath) throw new Error(`Element not found`);
+  return {
+    mousePosition: awaitedPath.toJSON(),
+    verification,
+  };
 }
 
 function convertInteractionToInteractionGroup(interaction: IInteraction): IInteractionGroup {
@@ -82,96 +102,96 @@ function convertInteractionToInteractionGroup(interaction: IInteraction): IInter
       case Command.scroll: {
         const command = CoreCommand.scroll;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
       case Command.move: {
         const command = CoreCommand.move;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
 
       case Command.click: {
         const command = CoreCommand.click;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
       case Command.clickLeft: {
         const command = CoreCommand.click;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.left });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.left });
       }
       case Command.clickMiddle: {
         const command = CoreCommand.click;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.middle });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.middle });
       }
       case Command.clickRight: {
         const command = CoreCommand.click;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.right });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.right });
       }
 
       case Command.clickUp: {
         const command = CoreCommand.clickUp;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
       case Command.clickUpLeft: {
         const command = CoreCommand.clickUp;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.left });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.left });
       }
       case Command.clickUpMiddle: {
         const command = CoreCommand.clickUp;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.middle });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.middle });
       }
       case Command.clickUpRight: {
         const command = CoreCommand.clickUp;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.right });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.right });
       }
 
       case Command.clickDown: {
         const command = CoreCommand.clickDown;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
       case Command.clickDownLeft: {
         const command = CoreCommand.clickDown;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.left });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.left });
       }
       case Command.clickDownMiddle: {
         const command = CoreCommand.clickDown;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.middle });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.middle });
       }
       case Command.clickDownRight: {
         const command = CoreCommand.clickDown;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.right });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.right });
       }
 
       case Command.doubleclick: {
         const command = CoreCommand.doubleclick;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition });
+        return iGroup.push({ command, ...mousePosition });
       }
       case Command.doubleclickLeft: {
         const command = CoreCommand.doubleclick;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.left });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.left });
       }
       case Command.doubleclickMiddle: {
         const command = CoreCommand.doubleclick;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.middle });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.middle });
       }
       case Command.doubleclickRight: {
         const command = CoreCommand.doubleclick;
         const mousePosition = convertToCoreMousePosition(value);
-        return iGroup.push({ command, mousePosition, mouseButton: MouseButton.right });
+        return iGroup.push({ command, ...mousePosition, mouseButton: MouseButton.right });
       }
 
       case Command.keyPress: {
