@@ -27,6 +27,9 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     return this.history.length > 0 ? this.history[this.history.length - 1] : null;
   }
 
+  // last navigation not loaded in-page
+  public lastHttpNavigation: INavigation;
+
   public get currentUrl(): string {
     const top = this.top;
     if (!top) return '';
@@ -152,6 +155,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       }
       shouldPublishLocationChange = true;
       nextTop.finalUrl = url;
+    } else {
+      this.lastHttpNavigation = nextTop;
     }
     this.history.push(nextTop);
     this.historyById[nextTop.id] = nextTop;
@@ -232,12 +237,15 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     requestedUrl: string,
     finalUrl: string,
   ): boolean {
-    const top = this.top;
+    const top = this.lastHttpNavigation;
     if (!top || top.resourceIdResolvable.isResolved) return false;
+
+    // hash won't be in the http request
+    const frameRequestedUrl = top.requestedUrl?.split('#')?.shift();
 
     if (
       (top.finalUrl && finalUrl === top.finalUrl) ||
-      requestedUrl === top.requestedUrl ||
+      requestedUrl === frameRequestedUrl ||
       browserRequestId === top.browserRequestId
     ) {
       return true;
@@ -252,7 +260,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       error,
       currentUrl: this.currentUrl,
     });
-    const top = this.top;
+    const top = this.lastHttpNavigation;
+
     if (!top || top.resourceIdResolvable.isResolved) return;
 
     // since we don't know if there are listeners yet, we need to just set the error on the return value
