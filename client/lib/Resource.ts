@@ -1,6 +1,6 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
@@ -51,7 +51,7 @@ export default class Resource {
     return getState(this).resource.documentUrl;
   }
 
-  public get type(): ResourceType {
+  public get type(): IResourceType {
     return getState(this).resource.type;
   }
 

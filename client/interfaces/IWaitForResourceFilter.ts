@@ -1,8 +1,8 @@
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import Resource from '../lib/Resource';
 
 export default interface IWaitForResourceFilter {
   url?: string | RegExp;
-  type?: ResourceType;
+  type?: IResourceType;
   filterFn?: (resource: Resource, done: () => void) => Promise<boolean> | boolean;
 }

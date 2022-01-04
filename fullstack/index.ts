@@ -10,7 +10,7 @@ import {
   LocationTrigger,
   MouseButton,
   Node,
-  ResourceType,
+  IResourceType,
   Tab,
   XPathResult,
 } from '@ulixee/hero';
@@ -34,7 +34,7 @@ export {
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
-  ResourceType,
+  IResourceType,
   KeyboardKeys,
   BlockedResourceType,
   Node,

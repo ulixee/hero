@@ -1,8 +1,9 @@
 // setup must go first
 import './lib/SetupAwaitedHandler';
+import { ISuperElement, ISuperNode } from "awaited-dom/base/interfaces/super";
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType, { ResourceTypes } from '@ulixee/hero-interfaces/IResourceType';
 import { InteractionCommand, MouseButton } from '@ulixee/hero-interfaces/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
@@ -19,7 +20,8 @@ export {
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
-  ResourceType,
+  IResourceType,
+  ResourceTypes,
   KeyboardKeys,
   BlockedResourceType,
   Node,
@@ -30,4 +32,6 @@ export {
   LocationTrigger,
   IHeroCreateOptions,
   IConnectionToCoreOptions,
+  ISuperElement,
+  ISuperNode,
 };

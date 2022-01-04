@@ -2,7 +2,7 @@ import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import * as http from 'http';
 import * as http2 from 'http2';
 import OriginType from '@ulixee/hero-interfaces/OriginType';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import { URL } from 'url';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import { parseRawHeaders } from '../lib/Utils';
@@ -223,7 +223,7 @@ function toLowerCase(header: string): string {
   return lowerCaseMap.get(header);
 }
 
-const resourceTypesBySecFetchDest = new Map<string, ResourceType>([
+const resourceTypesBySecFetchDest = new Map<string, IResourceType>([
   ['document', 'Document'],
   ['nested-document', 'Document'],
   ['iframe', 'Document'],
@@ -242,11 +242,11 @@ const resourceTypesBySecFetchDest = new Map<string, ResourceType>([
   ['manifest', 'Manifest'],
   ['embed', 'Other'], // guess
   ['object', 'Other'], // guess
-  ['report', 'CSP Violation Report'],
+  ['report', 'CSPViolationReport'],
   ['worker', 'Other'],
   ['serviceworker', 'Other'],
   ['sharedworker', 'Other'],
-  ['track', 'Text Track'], // guess
+  ['track', 'TextTrack'], // guess
 ]);
 
 const stripHttp1HeadersForH2 = new Set([

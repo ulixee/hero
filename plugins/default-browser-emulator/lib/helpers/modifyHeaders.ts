@@ -36,7 +36,7 @@ export default function modifyHeaders(
     return true;
   }
 
-  const isXhr = resource.resourceType === 'Fetch' || resource.resourceType === 'Xhr';
+  const isXhr = resource.resourceType === 'Fetch' || resource.resourceType === 'XHR';
 
   const requestLowerHeaders = {};
   for (const [key, value] of Object.entries(resource.requestHeaders)) {

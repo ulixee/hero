@@ -1,6 +1,6 @@
 import IResourceRequest from './IResourceRequest';
 import IResourceResponse from './IResourceResponse';
-import ResourceType from './ResourceType';
+import IResourceType from './IResourceType';
 
 export default interface IResourceMeta {
   id: number;
@@ -9,7 +9,7 @@ export default interface IResourceMeta {
   url: string;
   request: IResourceRequest;
   response?: IResourceResponse;
-  type: ResourceType;
+  type: IResourceType;
   documentUrl: string;
   isRedirect?: boolean;
   receivedAtCommandId?: number;

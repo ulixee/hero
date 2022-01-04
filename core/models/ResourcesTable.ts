@@ -1,7 +1,7 @@
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
@@ -304,7 +304,7 @@ export interface IResourcesRecord {
   frameId: number;
   socketId: number;
   protocol: string;
-  type: ResourceType;
+  type: IResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;
   requestMethod: string;

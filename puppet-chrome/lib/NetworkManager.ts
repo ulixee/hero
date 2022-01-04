@@ -1,5 +1,5 @@
 import { Protocol } from 'devtools-protocol';
-import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/ResourceType';
+import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/IResourceType';
 import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import {
@@ -254,7 +254,9 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         resource.requestHeaders = existing.requestHeaders ?? {};
       }
 
-      if (existing.resourceType) resource.resourceType = existing.resourceType;
+      if (existing.resourceType) {
+        resource.resourceType = existing.resourceType;
+      }
       resource.redirectedFromUrl = existing.redirectedFromUrl;
     }
     this.mergeRequestHeaders(resource, networkRequest.request.headers);

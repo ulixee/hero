@@ -81,8 +81,8 @@ describe('waitForResource', () => {
       if (command === 'Tab.waitForResource') {
         return {
           data: [
-            { id: 1, url: '/test3.js', type: 'Xhr' } as IResourceMeta,
-            { id: 2, url: '/test4.js', type: 'Xhr' } as IResourceMeta,
+            { id: 1, url: '/test3.js', type: 'XHR' } as IResourceMeta,
+            { id: 2, url: '/test4.js', type: 'XHR' } as IResourceMeta,
           ],
         };
       }
@@ -90,7 +90,7 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({ type: 'Xhr' });
+    const resources = await hero.waitForResource({ type: 'XHR' });
     expect(resources).toHaveLength(2);
 
     await hero.close();

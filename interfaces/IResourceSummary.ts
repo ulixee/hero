@@ -1,4 +1,4 @@
-import ResourceType from './ResourceType';
+import IResourceType from './IResourceType';
 
 export default interface IResourceSummary {
   url: string;
@@ -7,7 +7,7 @@ export default interface IResourceSummary {
   tabId: number;
   frameId: number;
   statusCode: number;
-  type: ResourceType;
+  type: IResourceType;
   redirectedToUrl?: string;
   timestamp?: number;
   hasResponse: boolean;

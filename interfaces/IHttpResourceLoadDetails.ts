@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import ResourceType from './ResourceType';
+import IResourceType from './IResourceType';
 import IResourceHeaders from './IResourceHeaders';
 import OriginType from './OriginType';
 
@@ -36,7 +36,7 @@ export default interface IHttpResourceLoadDetails {
   responseHeaders?: IResourceHeaders;
   responseTime?: number;
   responseTrailers?: IResourceHeaders;
-  resourceType?: ResourceType;
+  resourceType?: IResourceType;
   browserRequestId?: string;
   browserFrameId?: number;
   browserHasRequested?: Promise<void>;
