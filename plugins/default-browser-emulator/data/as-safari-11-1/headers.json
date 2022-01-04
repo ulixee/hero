@@ -156,7 +156,7 @@
         }
       }
     ],
-    "Xhr": [
+    "XHR": [
       {
         "originTypes": ["same-origin"],
         "method": "GET",
@@ -677,7 +677,7 @@
         }
       }
     ],
-    "Xhr": [
+    "XHR": [
       {
         "originTypes": ["same-origin"],
         "method": "GET",
@@ -1223,7 +1223,7 @@
         }
       }
     ],
-    "Xhr": [
+    "XHR": [
       {
         "originTypes": ["same-origin"],
         "method": "GET",
