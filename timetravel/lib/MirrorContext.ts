@@ -14,7 +14,6 @@ export default class MirrorContext {
     options.sessionResume = null;
     options.showBrowserInteractions = headed;
     options.showBrowser = headed;
-    options.allowManualBrowserInteraction = false;
 
     const plugins = new CorePlugins(
       {

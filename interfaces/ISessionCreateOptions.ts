@@ -31,5 +31,4 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   dnsOverTlsProvider?: { host: string; servername: string; port?: number };
   showBrowser?: boolean;
   showBrowserInteractions?: boolean;
-  allowManualBrowserInteraction?: boolean;
 }

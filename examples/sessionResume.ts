@@ -15,7 +15,6 @@ const resumeSessionId = Fs.existsSync(sessionIdPath)
       startLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation
       sessionId: resumeSessionId,
     },
-    allowManualBrowserInteraction: true, // enables mouse/keyboard input in headed browser
     connectionToCore: {
       host: `ws://localhost:1337`, // NOTE: you need to start your own Ulixee server
     },
