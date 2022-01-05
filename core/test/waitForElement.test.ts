@@ -91,7 +91,8 @@ describe('basic waitForElement tests', () => {
 
     await expect(
       tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
-        waitForVisible: { isOnscreenVertical: false },
+        waitForVisible: true,
+        ignoreVisibilityAttributes: ['isOnscreenVertical'],
       }),
     ).resolves.toMatchObject({
       id: expect.any(Number),
@@ -207,7 +208,7 @@ describe('basic waitForElement tests', () => {
     });
   });
 
-  it('will wait until an element off the bottom of the page', async () => {
+  it('will wait until an element off the bottom of the page comes into view', async () => {
     koaServer.get('/waitForElementTestOffBottom', ctx => {
       ctx.body = `<body>
 <div style="height: 2000px; position: relative">
@@ -231,6 +232,95 @@ describe('basic waitForElement tests', () => {
       id: expect.any(Number),
       type: 'HTMLAnchorElement',
     });
+  });
+
+  it('can wait for an element to be hidden', async () => {
+    koaServer.get('/waitForHidden', ctx => {
+      ctx.body = `<body>
+<div>
+    <a id="waitToRemove">Link</a>
+ </div>
+<script>
+    setTimeout(function() {
+      document.querySelector('a#waitToRemove').remove();
+    }, 150);
+</script>
+</body>`;
+    });
+    const { tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/waitForHidden`);
+
+    try {
+      // In this case, the element might be null if removed and cleaned up depending on timing. We need to just wait
+      await tab.waitForElement(['document', ['querySelector', 'a#waitToRemove']], {
+        waitForHidden: true,
+      });
+    } catch (err) {
+      expect(err).not.toBeTruthy();
+    }
+  });
+
+  it('can wait for an element to be hidden with specific reasons', async () => {
+    koaServer.get('/waitForDisplayNone', ctx => {
+      ctx.body = `<body>
+<div>
+    <div id="div1">Target</div>
+    <a id="clicker" onclick="click1()">Link</a>
+ </div>
+<script>
+  let count = 0;
+  function click1() {
+    const target = document.querySelector('#div1');
+    console.log('click target', target)
+    if (count === 0) {
+      target.style.opacity = 0;
+    }
+    if (count === 1) {
+      target.style.display = 'none';
+    }
+    count +=1;
+  }
+</script>
+</body>`;
+    });
+    const { tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/waitForDisplayNone`);
+
+    await expect(
+      tab.waitForElement(['document', ['querySelector', '#div1']], {
+        waitForHidden: true,
+        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
+        timeoutMs: 200,
+      }),
+    ).rejects.toThrowError();
+
+    await tab.interact([
+      {
+        command: 'click',
+        mousePosition: ['document', ['querySelector', '#clicker']],
+      },
+    ]);
+    await expect(
+      tab.waitForElement(['document', ['querySelector', '#div1']], {
+        waitForHidden: true,
+        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
+        timeoutMs: 500,
+      }),
+    ).rejects.toThrowError();
+
+    await tab.interact([
+      {
+        command: 'click',
+        mousePosition: ['document', ['querySelector', '#clicker']],
+      },
+    ]);
+    await expect(
+      tab.waitForElement(['document', ['querySelector', '#div1']], {
+        waitForHidden: true,
+        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
+        timeoutMs: 500,
+      }),
+    ).resolves.toBeTruthy();
   });
 });
 

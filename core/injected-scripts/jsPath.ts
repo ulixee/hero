@@ -4,7 +4,7 @@ import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import { IJsPathError } from '@ulixee/hero-interfaces/IJsPathError';
-import { INodeVisibility, INodeVisibilityOptions } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility, INodeVisibilityAttribute } from '@ulixee/hero-interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 const pointerFnName = '__getNodePointer__';
@@ -170,10 +170,15 @@ class JsPath {
   public static async waitForElement(
     jsPath: IJsPath,
     containerOffset: IPoint,
-    waitForVisible: INodeVisibilityOptions,
+    options: {
+      waitForVisible: boolean;
+      waitForHidden: boolean;
+      ignoreVisibilityAttributes: INodeVisibilityAttribute[];
+    },
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
+    const { waitForVisible, waitForHidden } = options;
     try {
       const end = new Date();
       end.setTime(end.getTime() + (timeoutMillis || 0));
@@ -182,23 +187,25 @@ class JsPath {
         try {
           if (!objectAtPath.objectAtPath) objectAtPath.lookup();
 
-          let isElementValid = !!objectAtPath.objectAtPath;
-          let visibility: INodeVisibility = {
-            nodeExists: isElementValid,
-          };
-          if (isElementValid && waitForVisible) {
-            visibility = objectAtPath.getComputedVisibility();
+          const visibility = objectAtPath.getComputedVisibility();
+          if (options.ignoreVisibilityAttributes) {
+            visibility.isVisible = true;
             for (const [key, value] of Object.entries(visibility)) {
-              if (key === 'isVisible' || typeof value !== 'boolean') continue;
-              const isRequired = key in waitForVisible ? waitForVisible[key] : true;
-              if (value === false && isRequired) {
-                isElementValid = false;
-              }
+              if (typeof value !== 'boolean' || key === 'isVisible') continue;
+              if (options.ignoreVisibilityAttributes.includes(key as any)) continue;
+
+              visibility.isVisible &&= value;
             }
           }
 
+          let isElementValid = visibility.nodeExists;
+          if (waitForVisible) {
+            isElementValid = visibility.isVisible;
+          } else if (waitForHidden) {
+            isElementValid = visibility.isVisible === false;
+          }
+
           if (isElementValid) {
-            visibility.isVisible = true;
             return {
               nodePointer: objectAtPath.extractNodePointer(),
               value: visibility,

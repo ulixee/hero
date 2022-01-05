@@ -17,7 +17,7 @@ export interface INodeVisibility {
   boundingClientRect?: IElementRect;
 }
 
-export type INodeVisibilityOptions = Pick<
+export type INodeVisibilityAttribute = keyof Pick<
   INodeVisibility,
   | 'nodeExists'
   | 'isConnected'

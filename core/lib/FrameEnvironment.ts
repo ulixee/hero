@@ -461,7 +461,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     jsPath: IJsPath,
     options?: IWaitForElementOptions,
   ): Promise<INodePointer> {
-    const waitForVisible = options?.waitForVisible ?? false;
     const timeoutMs = options?.timeoutMs ?? 30e3;
     const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
     const timeoutMessage = `Timeout waiting for element to be visible`;
@@ -471,6 +470,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       this.navigationsObserver.waitForReady(),
       'Timeout waiting for DomContentLoaded',
     );
+    options ??= {};
 
     try {
       while (!timer.isResolved()) {
@@ -479,14 +479,20 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
           const promise = this.jsPath.waitForElement(
             jsPath,
             containerOffset,
-            waitForVisible,
+            options,
             timeoutPerTry,
           );
 
-          const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
-          let isValid = isNodeVisible.value?.isVisible;
-          if (!waitForVisible) isValid = isNodeVisible.value?.nodeExists;
-          if (isValid) return isNodeVisible.nodePointer;
+          const result = await timer.waitForPromise(promise, timeoutMessage);
+          const isNodeVisible = result.value;
+          if (!isNodeVisible) continue;
+
+          let isValid = isNodeVisible.nodeExists;
+
+          if (options.waitForVisible) isValid = isNodeVisible.isVisible === true;
+          else if (options.waitForHidden) isValid = isNodeVisible.isVisible === false;
+
+          if (isValid) return result.nodePointer;
         } catch (err) {
           if (String(err).includes('not a valid selector')) throw err;
           // don't log during loop

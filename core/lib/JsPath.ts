@@ -4,7 +4,7 @@ import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
-import { INodeVisibility, INodeVisibilityOptions } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
@@ -21,6 +21,7 @@ import {
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 
 const { log } = Log(module);
 
@@ -99,28 +100,22 @@ export class JsPath {
   public waitForElement(
     jsPath: IJsPath,
     containerOffset: IPoint,
-    waitForVisible: boolean | Omit<INodeVisibilityOptions, 'nodeExists'>,
+    options: IWaitForElementOptions,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
 
-    let visibilityOptions: INodeVisibilityOptions = undefined;
-    if (typeof waitForVisible === 'object') {
-      visibilityOptions = waitForVisible as INodeVisibilityOptions;
-    } else if (waitForVisible === true) {
-      // by default, don't require on-screen
-      visibilityOptions = {
-        isOnscreenHorizontal: false,
-        isOnscreenVertical: false,
-        isUnobstructedByOtherElements: false,
-      };
-    }
+    options.ignoreVisibilityAttributes ??= [
+      'isOnscreenVertical',
+      'isOnscreenHorizontal',
+      'isUnobstructedByOtherElements',
+    ];
 
     return this.runJsPath<INodeVisibility>(
       `waitForElement`,
       jsPath,
       containerOffset,
-      visibilityOptions,
+      options as any,
       timeoutMillis,
     );
   }
