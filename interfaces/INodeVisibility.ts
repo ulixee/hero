@@ -16,3 +16,16 @@ export interface INodeVisibility {
   isUnobstructedByOtherElements?: boolean;
   boundingClientRect?: IElementRect;
 }
+
+export type INodeVisibilityOptions = Pick<
+  INodeVisibility,
+  | 'nodeExists'
+  | 'isConnected'
+  | 'isOnscreenVertical'
+  | 'isOnscreenHorizontal'
+  | 'hasCssDisplay'
+  | 'hasCssVisibility'
+  | 'hasCssOpacity'
+  | 'hasDimensions'
+  | 'isUnobstructedByOtherElements'
+>;

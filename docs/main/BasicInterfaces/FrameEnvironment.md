@@ -306,7 +306,7 @@ Wait until a specific element is present in the dom.
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visility).
+  - waitForVisible `boolean` | `object`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility). If a boolean is provided, the visibility check ensures that all `getComputedVisibility` attributes are true EXCEPT onscreen and obstructions. You can provide an object containing the `getComputedVisibility` properties you would like to ignore or include. A value of `false` means the property will be ignored - for instance `{ isOnscreenVertical: false }` will ignore the onscreen vertical check. It will *not* ensure the node is not on screen vertically.
 
 #### **Returns**: `Promise`
 

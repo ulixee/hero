@@ -75,6 +75,30 @@ describe('basic waitForElement tests', () => {
     });
   });
 
+  it('can customize which options to waitForVisible', async () => {
+    koaServer.get('/waitForElementTestCustom', ctx => {
+      ctx.body = `<body>
+    <a id="waitToShow" href="/anywhere" style="margin-top:2500px; display: none">Link</a>
+<script>
+    setTimeout(function() {
+      document.querySelector('a#waitToShow').style.display = 'block';
+    }, 150);
+</script>
+</body>`;
+    });
+    const { tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/waitForElementTestCustom`);
+
+    await expect(
+      tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
+        waitForVisible: { isOnscreenVertical: false },
+      }),
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
+  });
+
   it('will yield an error for a bad querySelector', async () => {
     koaServer.get('/waitForElementBadQs', ctx => {
       ctx.body = `<body><div>Middle</div></body>`;
