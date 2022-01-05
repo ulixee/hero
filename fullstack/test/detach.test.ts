@@ -4,6 +4,11 @@ import { IState } from '@ulixee/hero/lib/Hero';
 import Hero from '../index';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import CoreSession from '@ulixee/hero/lib/CoreSession';
+import IAwaitedOptions from '@ulixee/hero/interfaces/IAwaitedOptions';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
+import Core from '@ulixee/hero-core/index';
+import ConnectionToLocalCore from '../lib/ConnectionToLocalCore';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -91,17 +96,6 @@ describe('basic Detach tests', () => {
       }
     });
 
-    const { getState } = StateMachine<any, IState>();
-    async function mockDetach(agent: Partial<Hero>) {
-      const coreSession = await getState(agent).connection.getConnectedCoreSessionOrReject();
-      const origDetach = coreSession.detachTab;
-
-      const interceptDetach = jest.spyOn(CoreSession.prototype, 'detachTab');
-      interceptDetach.mockImplementationOnce((tab, callSitePath: string, key?: string) => {
-        return origDetach.call(coreSession, tab, 'path1', key);
-      });
-    }
-
     {
       const agent = await openBrowser(`/detach-notthere`);
       await mockDetach(agent);
@@ -134,6 +128,111 @@ describe('basic Detach tests', () => {
       await agent.close();
     }
   });
+
+  it('will wait for flushes to complete', async () => {
+    koaServer.get('/detach-flush', ctx => {
+      ctx.body = `
+        <body>
+          <a id="link1" href="#page1">Click Me</a>
+        </body>
+      `;
+    });
+    const connection = new ConnectionToLocalCore();
+    await connection.connect();
+    const sendRequest = connection.sendRequest.bind(connection);
+    const sendRequestSpy = jest.spyOn(connection, 'sendRequest');
+
+    {
+      const hero = await new Hero({ connectionToCore: connection });
+      Helpers.needsClosing.push(hero);
+      await hero.goto(`${koaServer.baseUrl}/detach-flush`);
+      await hero.waitForPaintingStable();
+
+      await mockDetach(hero, 'detach-flush');
+      const frozenTab = await hero.detach(hero.activeTab);
+      const link = await frozenTab.document.querySelector('#link1');
+      await link.getAttribute('id');
+      await link.getAttribute('class');
+      await link.dataset;
+      const links = await frozenTab.document.querySelectorAll('a').length;
+      expect(links).toBe(1);
+
+      const outgoingCommands = sendRequestSpy.mock.calls;
+      expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
+        'Core.createSession',
+        'Tab.goto',
+        'FrameEnvironment.waitForLoad',
+        'Session.detachTab',
+        'FrameEnvironment.execJsPath',
+        'FrameEnvironment.execJsPath',
+        'FrameEnvironment.execJsPath',
+        'FrameEnvironment.execJsPath',
+        'FrameEnvironment.execJsPath',
+      ]);
+      await hero.close();
+    }
+    {
+      const flushPromise = new Resolvable<void>();
+      sendRequestSpy.mockClear();
+      sendRequestSpy.mockImplementation(async request => {
+        if (request.command === 'Session.flush' && !flushPromise.isResolved) {
+          flushPromise.resolve();
+          await new Promise(setImmediate);
+        }
+        return sendRequest(request);
+      });
+
+      const hero = await new Hero({ connectionToCore: connection });
+      Helpers.needsClosing.push(hero);
+
+      const connectionToClient = Core.connections[Core.connections.length - 1];
+      // @ts-ignore
+      const recordCommands = connectionToClient.recordCommands;
+      const recordCommandsSpy = jest.spyOn<any, any>(connectionToClient, 'recordCommands');
+      const waitForClose = new Resolvable<void>();
+      recordCommandsSpy.mockImplementation(async (...args) => {
+        if (!waitForClose.isResolved && (args[2] as any).length > 10) {
+          await waitForClose.promise;
+        }
+
+        return recordCommands.call(connectionToClient, ...args);
+      });
+
+      await hero.goto(`${koaServer.baseUrl}/detach-flush`);
+      await hero.waitForPaintingStable();
+      await mockDetach(hero, 'detach-flush');
+      const frozenTab = await hero.detach(hero.activeTab);
+      const link = await frozenTab.document.querySelector('#link1');
+      await link.getAttribute('id');
+      await link.getAttribute('class');
+      await link.dataset;
+
+      const frameSpy = jest.spyOn(FrameEnvironment.prototype, 'recordDetachedJsPath');
+
+      const frameState = StateMachine<any, IAwaitedOptions>();
+      const coreFrame = await frameState.getState(frozenTab.mainFrameEnvironment).coreFrame;
+      for (let i = 0; i < 1001; i += 1) {
+        coreFrame.recordDetachedJsPath(1, new Date(), new Date());
+      }
+      await flushPromise;
+      const links = await frozenTab.document.querySelectorAll('a').length;
+      expect(links).toBe(1);
+
+      await Promise.all([hero.close(), waitForClose.resolve()]);
+      const outgoingCommands = sendRequestSpy.mock.calls;
+      expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
+        'Core.createSession',
+        'Tab.goto',
+        'FrameEnvironment.waitForLoad',
+        'Session.detachTab',
+        'Session.flush',
+        'Session.flush',
+        'Session.close',
+      ]);
+
+      expect(frameSpy).toHaveBeenCalledTimes(1006);
+    }
+  });
 });
 
 async function openBrowser(path: string) {
@@ -142,4 +241,15 @@ async function openBrowser(path: string) {
   await hero.goto(`${koaServer.baseUrl}${path}`);
   await hero.waitForPaintingStable();
   return hero;
+}
+
+const { getState } = StateMachine<any, IState>();
+async function mockDetach(agent: Partial<Hero>, callsitePath = 'path1') {
+  const coreSession = await getState(agent).connection.getConnectedCoreSessionOrReject();
+  const origDetach = coreSession.detachTab;
+
+  const interceptDetach = jest.spyOn(CoreSession.prototype, 'detachTab');
+  interceptDetach.mockImplementationOnce((tab, callSitePath: string, key?: string) => {
+    return origDetach.call(coreSession, tab, callsitePath, key);
+  });
 }
