@@ -340,7 +340,9 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/basic-interfaces/frame
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean` | `object`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility). If a boolean is provided, the visibility check ensures that all `getComputedVisibility` attributes are true EXCEPT onscreen and obstructions. You can provide an object containing the `getComputedVisibility` properties you would like to ignore or include. A value of `false` means the property will be ignored - for instance `{ isOnscreenVertical: false }` will ignore the onscreen vertical check. It will *not* ensure the node is not on screen vertically.
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility) - all attributes must be `true` except any properties specified in `ignoreVisibilityAttributes`).
+  - waitForHidden `boolean`. Wait until this element is hidden to a user (see [getComputedVisibility](#get-computed-visibility) - all attributes must be `false` except any properties specified in `ignoreVisibilityAttributes`).
+  - ignoreVisibilityAttributes `string[]`. Accepts an array of keys from [getComputedVisibility](#get-computed-visibility). Defaults to ['isOnscreenVertical','isOnscreenHorizontal','isUnobstructedByOtherElements'].
 
 #### **Returns**: `Promise`
 
