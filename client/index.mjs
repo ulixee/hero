@@ -16,8 +16,14 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  ISuperDocument,
   ISuperElement,
   ISuperNode,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+  ISuperText,
+  ISuperStyleSheet,
+  ISuperHTMLElement,
 } = cjsImport;
 
 export {
@@ -36,8 +42,14 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  ISuperDocument,
   ISuperElement,
   ISuperNode,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+  ISuperText,
+  ISuperStyleSheet,
+  ISuperHTMLElement,
 };
 
 export default cjsImport.default;
