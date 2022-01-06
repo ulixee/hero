@@ -1,52 +1,68 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
 import Element from 'awaited-dom/impl/official-klasses/Element';
 import Node from 'awaited-dom/impl/official-klasses/Node';
+import NodeList from 'awaited-dom/impl/official-klasses/NodeList';
+import HTMLCollection from 'awaited-dom/impl/official-klasses/HTMLCollection';
 import HTMLElement from 'awaited-dom/impl/official-klasses/HTMLElement';
-import { ITypeInteraction } from '../interfaces/IInteractions';
-import Interactor from './Interactor';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import CoreFrameEnvironment from './CoreFrameEnvironment';
-import { createInstanceWithNodePointer } from './SetupAwaitedHandler';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { IElementInteractVerification } from '@ulixee/hero-interfaces/IInteractions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
+import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
+import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
+import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { createInstanceWithNodePointer } from './SetupAwaitedHandler';
+import { ITypeInteraction } from '../interfaces/IInteractions';
+import CoreFrameEnvironment from './CoreFrameEnvironment';
+import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import Interactor from './Interactor';
 
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions; nodePointer?: INodePointer }
 >();
 
-interface IBaseExtend {
-  $click: (verification?: IElementInteractVerification) => Promise<void>;
-  $type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
-  $waitForVisible: (
+interface IBaseExtendNode {
+  $click(verification?: IElementInteractVerification): Promise<void>;
+  $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
+  $waitForVisible(
     options?: { timeoutMs?: number } & Pick<IWaitForElementOptions, 'ignoreVisibilityAttributes'>,
-  ) => Promise<ISuperElement>;
-  $waitForHidden: (
+  ): Promise<ISuperElement>;
+  $waitForHidden(
     options?: { timeoutMs?: number } & Pick<IWaitForElementOptions, 'ignoreVisibilityAttributes'>,
-  ) => Promise<ISuperElement>;
-  $getComputedVisibility: () => Promise<INodeVisibility>;
+  ): Promise<ISuperElement>;
+  $clearValue(): Promise<void>;
+  $computedVisibility: Promise<INodeVisibility>;
+}
+
+interface IBaseExtendNodeList {
+  $map<T = any>(
+    iteratorFn: (node: ISuperNode, index: number) => Promise<T>
+  ): Promise<T[]>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
-  interface ISuperElement extends IBaseExtend {}
-  interface ISuperNode extends IBaseExtend {}
-  interface ISuperHTMLElement extends IBaseExtend {}
+  interface ISuperElement extends IBaseExtendNode {}
+  interface ISuperNode extends IBaseExtendNode {}
+  interface ISuperHTMLElement extends IBaseExtendNode {}
+  interface ISuperNodeList extends IBaseExtendNodeList {}
+  interface ISuperHTMLCollection extends IBaseExtendNodeList {}
 }
 
 declare module 'awaited-dom/base/interfaces/official' {
-  interface IElement extends IBaseExtend {}
-  interface INode extends IBaseExtend {}
-  interface IHTMLElement extends IBaseExtend {}
+  interface IElement extends IBaseExtendNode {}
+  interface INode extends IBaseExtendNode {}
+  interface IHTMLElement extends IBaseExtendNode {}
+  interface INodeList extends IBaseExtendNodeList {}
+  interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-const ExtensionFns = {
+const NodeExtensionFns = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
@@ -95,14 +111,58 @@ const ExtensionFns = {
       nodePointer,
     );
   },
-  async $getComputedVisibility(): Promise<INodeVisibility> {
-    const coreFrame = await getCoreFrame(this);
-    return await coreFrame.getComputedVisibility(this);
+  async $clearValue(): Promise<void> {
+    const { awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    await Interactor.run(coreFrame, [
+      { click: this },
+      { keyDown: KeyboardKey.Meta, keyPress: KeyboardKey.a },
+      { keyUp: KeyboardKey.Meta },
+      { keyPress: KeyboardKey.Backspace },
+    ]);
   },
 };
 
+const NodeExtensionGetters = {
+  async $computedVisibility(): Promise<INodeVisibility> {
+    const coreFrame = await getCoreFrame(this);
+    return await coreFrame.getComputedVisibility(this);
+  },
+}
+
+const NodeListExtensionFns = {
+  async $map<T = any>(iteratorFn: (node: ISuperNode, index: number) => Promise<T>): Promise<T[]> {
+    let i = 0;
+    const newArray: T[] = [];
+    const nodes = await this;
+    for (const node of nodes) {
+      const newItem = await iteratorFn(node, ++i);
+      newArray.push(newItem);
+    }
+    return newArray;
+  }
+}
+
 for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
-  for (const [key, value] of Object.entries(ExtensionFns)) {
+  for (const [key, value] of Object.entries(NodeExtensionFns)) {
+    void Object.defineProperty(Item.prototype, key, {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value,
+    });
+  }
+  for (const [key, get] of Object.entries(NodeExtensionGetters)) {
+    void Object.defineProperty(Item.prototype, key, {
+      enumerable: false,
+      configurable: false,
+      get,
+    });
+  }
+}
+
+for (const Item of [SuperNodeList, SuperHTMLCollection, NodeList, HTMLCollection]) {
+  for (const [key, value] of Object.entries(NodeListExtensionFns)) {
     void Object.defineProperty(Item.prototype, key, {
       enumerable: false,
       configurable: false,
