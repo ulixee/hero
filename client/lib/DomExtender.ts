@@ -44,6 +44,10 @@ interface IBaseExtendNodeList {
   $map<T = any>(
     iteratorFn: (node: ISuperNode, index: number) => Promise<T>
   ): Promise<T[]>;
+  $reduce<T = any>(
+    iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
+    initial: T,
+  ): Promise<T>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -140,6 +144,13 @@ const NodeListExtensionFns = {
       newArray.push(newItem);
     }
     return newArray;
+  },
+  async $reduce<T = any>(iteratorFn: (initial: T, node: ISuperNode) => Promise<T>, initial: T): Promise<T> {
+    const nodes = await this;
+    for (const node of nodes) {
+      initial = await iteratorFn(initial, node);
+    }
+    return initial;
   }
 }
 

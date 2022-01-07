@@ -29,7 +29,7 @@ const propertyKeys: (keyof Resource)[] = [
   'request',
   'response',
   'documentUrl',
-  'data',
+  'buffer',
   'json',
   'text',
 ];
@@ -59,18 +59,18 @@ export default class Resource {
     return getState(this).resource.isRedirect ?? false;
   }
 
-  public get data(): Promise<Buffer> {
+  public get buffer(): Promise<Buffer> {
     const id = getState(this).resource.id;
     const coreTab = getState(this).coreTab;
-    return coreTab.then(x => x.getResourceProperty<Buffer>(id, 'data'));
+    return coreTab.then(x => x.getResourceProperty<Buffer>(id, 'buffer'));
   }
 
-  public text(): Promise<string> {
-    return this.data.then(x => x.toString());
+  public get text(): Promise<string> {
+    return this.buffer.then(x => x.toString());
   }
 
-  public json(): Promise<any> {
-    return this.text().then(JSON.parse);
+  public get json(): Promise<any> {
+    return this.text.then(JSON.parse);
   }
 
   public [Util.inspect.custom](): any {

@@ -22,7 +22,9 @@ const propertyKeys: (keyof ResourceResponse)[] = [
   'statusMessage',
   'browserLoadFailure',
   'browserServedFromCache',
-  'data',
+  'buffer',
+  'text',
+  'json',
 ];
 
 export default class ResourceResponse {
@@ -60,16 +62,16 @@ export default class ResourceResponse {
     return getResponseProperty(this, 'statusMessage');
   }
 
-  public get data(): Promise<Buffer> {
-    return getResponseProperty(this, 'data');
+  public get buffer(): Promise<Buffer> {
+    return getResponseProperty(this, 'buffer');
   }
 
-  public text(): Promise<string> {
-    return this.data.then(x => x?.toString());
+  public get text(): Promise<string> {
+    return this.buffer.then(x => x?.toString());
   }
 
-  public json(): Promise<any> {
-    return this.text().then(JSON.parse);
+  public get json(): Promise<any> {
+    return this.text.then(JSON.parse);
   }
 
   public [Util.inspect.custom](): any {
@@ -88,7 +90,7 @@ export function createResourceResponse(
 
 function getResponseProperty<T>(
   container: ResourceResponse,
-  name: keyof IResourceResponse | 'data',
+  name: keyof IResourceResponse | 'buffer',
 ): Promise<T> {
   const state = getState(container);
   const id = state.resourceId;

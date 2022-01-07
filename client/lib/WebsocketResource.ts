@@ -63,15 +63,15 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     return getState(this).resource.isRedirect ?? false;
   }
 
-  public get data(): Promise<Buffer> {
+  public get buffer(): Promise<Buffer> {
     throw new Error(subscribeErrorMessage);
   }
 
-  public text(): Promise<string> {
+  public get text(): Promise<string> {
     throw new Error(subscribeErrorMessage);
   }
 
-  public json(): Promise<any> {
+  public get json(): Promise<any> {
     throw new Error(subscribeErrorMessage);
   }
 
