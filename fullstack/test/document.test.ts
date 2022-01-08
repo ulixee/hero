@@ -320,7 +320,8 @@ describe('basic Document tests', () => {
     await expect(
       hero.getComputedVisibility(document.querySelector('#elem-8')),
     ).resolves.toMatchObject({
-      isVisible: false,
+      isVisible: true,
+      isClickable: false,
       isUnobstructedByOtherElements: false,
     });
   });

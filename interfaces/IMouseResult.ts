@@ -1,6 +1,6 @@
 import { INodeVisibility } from './INodeVisibility';
 
-export default interface IMouseUpResult {
+export default interface IMouseResult {
   pageX: number;
   pageY: number;
   targetNodeId: number;

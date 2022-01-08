@@ -22,7 +22,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
-import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import IMouseResult from '@ulixee/hero-interfaces/IMouseResult';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { IPuppetKeyboard, IPuppetMouse } from '@ulixee/hero-interfaces/IPuppetInput';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
@@ -31,7 +31,7 @@ import { getClientRectFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
-import MouseupListener from './MouseupListener';
+import MouseListener from './MouseListener';
 import * as rectUtils from './rectUtils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
@@ -212,21 +212,25 @@ export default class Interactor implements IInteractionsHelper {
     };
   }
 
-  public async createMouseupTrigger(nodeId: number): Promise<{
+  public async createMousedownTrigger(nodeId: number): Promise<{
     nodeVisibility: INodeVisibility;
-    didTrigger: () => Promise<IMouseUpResult & {}>;
+    didTrigger: () => Promise<IMouseResult>;
   }> {
     assert(nodeId, 'nodeId should not be null');
-    const mouseListener = new MouseupListener(this.frameEnvironment, nodeId);
+    const mouseListener = new MouseListener(this.frameEnvironment, nodeId);
     const nodeVisibility = await mouseListener.register();
+
+    let mouseResult: IMouseResult;
 
     return {
       nodeVisibility,
       didTrigger: async () => {
-        const mouseUpResult = await mouseListener.didTriggerMouseEvent();
-        mouseUpResult.didStartInteractWithPaintingStable =
+        if (mouseResult) return mouseResult;
+
+        mouseResult = await mouseListener.didTriggerMouseEvent();
+        mouseResult.didStartInteractWithPaintingStable =
           this.preInteractionPaintStableStatus?.isStable === true;
-        return mouseUpResult;
+        return mouseResult;
       },
     };
   }
@@ -268,7 +272,7 @@ export default class Interactor implements IInteractionsHelper {
       case InteractionCommand.clickUp:
       case InteractionCommand.clickDown:
       case InteractionCommand.doubleclick: {
-        const { delayMillis, mouseButton, command } = interaction;
+        const { delayMillis, mouseButton, command, mouseResultVerifier } = interaction;
 
         if (command === InteractionCommand.click && interaction.simulateOptionClickOnNodeId) {
           await this.jsPath.simulateOptionClick([interaction.simulateOptionClickOnNodeId]);
@@ -287,6 +291,13 @@ export default class Interactor implements IInteractionsHelper {
         if (delayMillis) {
           await waitFor(delayMillis, resolvable);
         }
+
+        // don't click up if verification failed
+        if (mouseResultVerifier) {
+          const result = await mouseResultVerifier();
+          if (!result.didClickLocation) break;
+        }
+
         if (command !== InteractionCommand.clickDown) {
           await this.mouse.up({ button, clickCount });
         }

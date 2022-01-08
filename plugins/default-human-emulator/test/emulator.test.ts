@@ -210,9 +210,9 @@ function createInteractHelper(extras: Partial<IInteractionsHelper>): IInteractio
     },
     scrollOffset: Promise.resolve({ x: 0, y: 0 }),
     logger: log,
-    createMouseupTrigger() {
+    createMousedownTrigger() {
       return Promise.resolve({
-        nodeVisibility: {},
+        nodeVisibility: { isVisible: true, isClickable: true },
         didTrigger: () => Promise.resolve({ didClickLocation: true } as any),
       });
     },

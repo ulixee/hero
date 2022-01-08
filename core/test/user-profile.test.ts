@@ -343,6 +343,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
+    await tab.waitForLocation('change');
 
     const localContent = await tab.execJsPath([
       'document',

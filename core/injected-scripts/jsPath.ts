@@ -4,7 +4,7 @@ import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import { IJsPathError } from '@ulixee/hero-interfaces/IJsPathError';
-import { INodeVisibility, INodeVisibilityAttribute } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 const pointerFnName = '__getNodePointer__';
@@ -173,12 +173,12 @@ class JsPath {
     options: {
       waitForVisible: boolean;
       waitForHidden: boolean;
-      ignoreVisibilityAttributes: INodeVisibilityAttribute[];
+      waitForClickable: boolean;
     },
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
-    const { waitForVisible, waitForHidden } = options;
+    const { waitForVisible, waitForHidden, waitForClickable } = options;
     try {
       const end = new Date();
       end.setTime(end.getTime() + (timeoutMillis || 0));
@@ -188,21 +188,14 @@ class JsPath {
           if (!objectAtPath.objectAtPath) objectAtPath.lookup();
 
           const visibility = objectAtPath.getComputedVisibility();
-          if (options.ignoreVisibilityAttributes) {
-            visibility.isVisible = true;
-            for (const [key, value] of Object.entries(visibility)) {
-              if (typeof value !== 'boolean' || key === 'isVisible') continue;
-              if (options.ignoreVisibilityAttributes.includes(key as any)) continue;
-
-              visibility.isVisible &&= value;
-            }
-          }
 
           let isElementValid = visibility.nodeExists;
           if (waitForVisible) {
-            isElementValid = visibility.isVisible;
+            isElementValid = visibility.isVisible === true;
           } else if (waitForHidden) {
             isElementValid = visibility.isVisible === false;
+          } else if (waitForClickable) {
+            isElementValid = visibility.isClickable === true;
           }
 
           if (isElementValid) {
@@ -326,10 +319,12 @@ class ObjectAtPath {
     const visibility: INodeVisibility = {
       // put here first for display
       isVisible: true,
+      isClickable: false,
       nodeExists: !!this.objectAtPath,
     };
     if (!visibility.nodeExists) {
       visibility.isVisible = false;
+      visibility.isClickable = false;
       return visibility;
     }
 
@@ -339,6 +334,7 @@ class ObjectAtPath {
 
     if (!visibility.hasContainingElement) {
       visibility.isVisible = false;
+      visibility.isClickable = false;
       return visibility;
     }
 
@@ -361,7 +357,18 @@ class ObjectAtPath {
     visibility.isOnscreenHorizontal =
       rect.x + rect.width > 0 && rect.x < window.innerWidth + this.containerOffset.x;
 
-    visibility.isVisible = Object.values(visibility).every(x => x !== false);
+    visibility.isVisible =
+      visibility.hasCssVisibility &&
+      visibility.hasCssDisplay &&
+      visibility.hasCssOpacity &&
+      visibility.isConnected &&
+      visibility.hasDimensions;
+
+    visibility.isClickable =
+      visibility.isVisible &&
+      visibility.isOnscreenVertical &&
+      visibility.isOnscreenHorizontal &&
+      visibility.isUnobstructedByOtherElements;
     return visibility;
   }
 

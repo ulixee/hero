@@ -164,7 +164,7 @@ export default class FrozenFrameEnvironment {
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    if (!node) return { isVisible: false, nodeExists: false };
+    if (!node) return { isVisible: false, nodeExists: false, isClickable: false };
     return await AwaitedHandler.delegate.runMethod<INodeVisibility, INodeIsolate>(
       awaitedPathState,
       node,

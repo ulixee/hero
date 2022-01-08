@@ -1,7 +1,8 @@
 import IElementRect from './IElementRect';
 
 export interface INodeVisibility {
-  isVisible?: boolean;
+  isVisible: boolean;
+  isClickable: boolean;
   nodeExists?: boolean;
   isOnscreenVertical?: boolean;
   isOnscreenHorizontal?: boolean;
@@ -16,16 +17,3 @@ export interface INodeVisibility {
   isUnobstructedByOtherElements?: boolean;
   boundingClientRect?: IElementRect;
 }
-
-export type INodeVisibilityAttribute = keyof Pick<
-  INodeVisibility,
-  | 'nodeExists'
-  | 'isConnected'
-  | 'isOnscreenVertical'
-  | 'isOnscreenHorizontal'
-  | 'hasCssDisplay'
-  | 'hasCssVisibility'
-  | 'hasCssOpacity'
-  | 'hasDimensions'
-  | 'isUnobstructedByOtherElements'
->;

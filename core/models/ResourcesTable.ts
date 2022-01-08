@@ -218,9 +218,12 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
 
   public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): IResourceSummary[] {
     const { hasResponse, isGetOrDocument } = filters;
+
+    const useResourceBody = hasResponse ? 'responseData is not null' : '1=1';
     const records = this.db
       .prepare(
-        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders from ${this.tableName}`,
+        `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders 
+from ${this.tableName} where ${useResourceBody}`,
       )
       .all();
 
@@ -230,7 +233,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
           return false;
         if (isGetOrDocument && resource.requestMethod !== 'GET') {
           // if this is a POST of a document, allow it
-          if (resource.type !== 'Document' && resource.method === 'POST') return false;
+          if (resource.type !== 'Document') return false;
         }
         return true;
       })

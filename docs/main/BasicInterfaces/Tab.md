@@ -267,8 +267,9 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interface
 #### **Returns**: `Promise<INodeVisibility>` Boolean values indicating if the node (or closest element) is visible to an end user.
 
 - INodeVisibility `object`
-  - isVisible `boolean`. Is the node ultimately visible.
-  - isFound `boolean`. Was the node found in the DOM.
+  - isVisible `boolean`. The node is visible (`nodeExists`, `hasContainingElement`, `isConnected`, `hasCssOpacity`,`hasCssDisplay`,`hasCssVisibility` `hasDimensions`).
+  - isClickable `boolean`. The node is visible, in the viewport and unobstructed (`isVisible`, `isOnscreenVertical`, `isOnscreenHorizontal` and `isUnobstructedByOtherElements`).
+  - nodeExists `boolean`. Was the node found in the DOM.
   - isOnscreenVertical `boolean`. The node is on-screen vertically.
   - isOnscreenHorizontal `boolean`. The node is on-screen horizontally.
   - hasContainingElement `boolean`. The node is an Element or has a containing Element providing layout.
@@ -340,9 +341,9 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/basic-interfaces/frame
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility) - all attributes must be `true` except any properties specified in `ignoreVisibilityAttributes`).
-  - waitForHidden `boolean`. Wait until this element is hidden to a user (see [getComputedVisibility](#get-computed-visibility) - all attributes must be `false` except any properties specified in `ignoreVisibilityAttributes`).
-  - ignoreVisibilityAttributes `string[]`. Accepts an array of keys from [getComputedVisibility](#get-computed-visibility). Defaults to ['isOnscreenVertical','isOnscreenHorizontal','isUnobstructedByOtherElements'].
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility).
+  - waitForHidden `boolean`. Wait until this element is hidden to a user (see [getComputedVisibility](#get-computed-visibility).
+  - waitForClickable `boolean`. Wait until this element is visible to a user, int the viewport, and unobstructed (see [getComputedVisibility](#get-computed-visibility).
 
 #### **Returns**: `Promise`
 

@@ -202,7 +202,7 @@ export default class FrameEnvironment {
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    if (!node) return { isVisible: false, nodeExists: false };
+    if (!node) return { isVisible: false, nodeExists: false, isClickable: false };
     const coreFrame = await getCoreFrameEnvironment(this);
     return await coreFrame.getComputedVisibility(node);
   }

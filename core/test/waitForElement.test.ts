@@ -4,6 +4,9 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
+import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -75,7 +78,58 @@ describe('basic waitForElement tests', () => {
     });
   });
 
-  it('can customize which options to waitForVisible', async () => {
+  it('can wait for an element to be visible with hidden parent', async () => {
+    koaServer.get('/waitForElementParent', ctx => {
+      ctx.body = `<body>
+  <div id="parent" style="position:fixed;">
+    <a id="child" href="/link">Child</a>
+  </div>
+<script>
+    function show() {
+      document.querySelector('#parent').style.display = 'block';
+    }
+    function hide() {
+      document.querySelector('#parent').style.display = 'none';
+    }
+</script>
+</body>`;
+    });
+    const { tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/waitForElementParent`);
+    await tab.waitForLoad('DomContentLoaded');
+
+    const qs: IJsPath = ['document', ['querySelector', 'a#child']];
+
+    const visibility = await tab.execJsPath<INodeVisibility>([
+      ...qs,
+      [getComputedVisibilityFnName],
+    ]);
+    expect(visibility.value.isVisible).toBe(true);
+
+    await tab.getJsValue('setTimeout(() => hide(), 100)');
+
+    await expect(
+      tab.waitForElement(qs, {
+        waitForHidden: true,
+      }),
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
+
+    await tab.getJsValue('setTimeout(() => show(), 100)');
+
+    await expect(
+      tab.waitForElement(qs, {
+        waitForVisible: true,
+      }),
+    ).resolves.toMatchObject({
+      id: expect.any(Number),
+      type: 'HTMLAnchorElement',
+    });
+  });
+
+  it('can wait for an element to be clickable', async () => {
     koaServer.get('/waitForElementTestCustom', ctx => {
       ctx.body = `<body>
     <a id="waitToShow" href="/anywhere" style="margin-top:2500px; display: none">Link</a>
@@ -91,8 +145,7 @@ describe('basic waitForElement tests', () => {
 
     await expect(
       tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
-        waitForVisible: true,
-        ignoreVisibilityAttributes: ['isOnscreenVertical'],
+        waitForClickable: true,
       }),
     ).resolves.toMatchObject({
       id: expect.any(Number),
@@ -258,69 +311,6 @@ describe('basic waitForElement tests', () => {
     } catch (err) {
       expect(err).not.toBeTruthy();
     }
-  });
-
-  it('can wait for an element to be hidden with specific reasons', async () => {
-    koaServer.get('/waitForDisplayNone', ctx => {
-      ctx.body = `<body>
-<div>
-    <div id="div1">Target</div>
-    <a id="clicker" onclick="click1()">Link</a>
- </div>
-<script>
-  let count = 0;
-  function click1() {
-    const target = document.querySelector('#div1');
-    console.log('click target', target)
-    if (count === 0) {
-      target.style.opacity = 0;
-    }
-    if (count === 1) {
-      target.style.display = 'none';
-    }
-    count +=1;
-  }
-</script>
-</body>`;
-    });
-    const { tab } = await createSession();
-    await tab.goto(`${koaServer.baseUrl}/waitForDisplayNone`);
-
-    await expect(
-      tab.waitForElement(['document', ['querySelector', '#div1']], {
-        waitForHidden: true,
-        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
-        timeoutMs: 200,
-      }),
-    ).rejects.toThrowError();
-
-    await tab.interact([
-      {
-        command: 'click',
-        mousePosition: ['document', ['querySelector', '#clicker']],
-      },
-    ]);
-    await expect(
-      tab.waitForElement(['document', ['querySelector', '#div1']], {
-        waitForHidden: true,
-        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
-        timeoutMs: 500,
-      }),
-    ).rejects.toThrowError();
-
-    await tab.interact([
-      {
-        command: 'click',
-        mousePosition: ['document', ['querySelector', '#clicker']],
-      },
-    ]);
-    await expect(
-      tab.waitForElement(['document', ['querySelector', '#div1']], {
-        waitForHidden: true,
-        ignoreVisibilityAttributes: ['hasCssVisibility', 'hasCssOpacity'],
-        timeoutMs: 500,
-      }),
-    ).resolves.toBeTruthy();
   });
 });
 
