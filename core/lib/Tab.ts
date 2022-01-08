@@ -310,7 +310,7 @@ export default class Tab
     resourceId: number,
     propertyPath: string,
   ): Promise<T> {
-    if (propertyPath === 'data' || propertyPath === 'response.data') {
+    if (propertyPath === 'buffer' || propertyPath === 'response.buffer') {
       return (await this.session.db.resources.getResourceBodyById(resourceId, true)) as any;
     }
 

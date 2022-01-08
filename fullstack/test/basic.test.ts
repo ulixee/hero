@@ -122,7 +122,7 @@ describe('basic Full Client tests', () => {
     expect(await response.remoteAddress).toBeTruthy();
     expect(await response.statusCode).toBe(200);
     expect(await response.statusMessage).toBe('OK');
-    expect(await response.text()).toMatch('<h1>Example Domain</h1>');
+    expect(await response.text).toMatch('<h1>Example Domain</h1>');
   });
 
   it('can get and set cookies', async () => {
