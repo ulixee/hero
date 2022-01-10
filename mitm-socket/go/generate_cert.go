@@ -8,8 +8,10 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"math/big"
+	"log"
 	"net"
 	"os"
 	"sync/atomic"
@@ -39,6 +41,7 @@ type CertConfig struct {
 func readCertFromDisk(file string) (*x509.Certificate, error) {
 
 	bytes, err := os.ReadFile(file)
+
 	if err != nil {
 		return nil, err
 	}
@@ -76,14 +79,18 @@ func NewAuthority() (*x509.Certificate, *rsa.PrivateKey, error) {
 	var caKeyFile string = "caKey.der"
 
 	certFromDisk, err := readCertFromDisk(caFile)
-	if err == nil {
+
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+       log.Printf("Error reading cert from disk", caFile, err)
+    } else if err == nil {
 		keyFromDisk, err := readPrivateKeyFromDisk(caKeyFile)
 		if err != nil {
-			fmt.Printf("Error reading private key from disk", caKeyFile, err)
+            log.Printf("Error reading private key from disk", caKeyFile, err)
 		} else {
 			return certFromDisk, keyFromDisk, nil
 		}
 	}
+
 
 	// Generating the private key that will be used for domain certificates
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)

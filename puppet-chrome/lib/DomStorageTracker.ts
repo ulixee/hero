@@ -70,7 +70,8 @@ export class DomStorageTracker
     this.cancelPendingEvents('DomStorageTracker closed');
   }
 
-  public async flush(timeoutMs = 30e3): Promise<void> {
+  public async finalFlush(timeoutMs = 30e3): Promise<void> {
+    eventUtils.removeEventListeners(this.registeredEvents);
     await Promise.race([
       this.processingPromise,
       new Promise<void>(resolve => setTimeout(resolve, timeoutMs ?? 0)),
@@ -294,6 +295,8 @@ export class DomStorageTracker
     this.indexedDBContentUpdatingOrigins.add(securityOrigin);
 
     const timestamp = Date.now();
+    const resolvable = new Resolvable<void>();
+    this.processingPromise = this.processingPromise.then(() => resolvable.promise);
     try {
       const db = await this.getLatestIndexedDB(securityOrigin, databaseName);
       const objectStore = db.objectStores.find(x => x.name === objectStoreName);
@@ -329,6 +332,7 @@ export class DomStorageTracker
       });
     } finally {
       this.indexedDBContentUpdatingOrigins.delete(securityOrigin);
+      resolvable.resolve();
     }
   }
 

@@ -257,7 +257,7 @@ export default class Tab
     const errors: Error[] = [];
 
     try {
-      await this.puppetPage.domStorageTracker.flush(5e3);
+      await this.puppetPage.domStorageTracker.finalFlush(5e3);
     } catch (error) {
       if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
         errors.push(error);
