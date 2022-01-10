@@ -186,10 +186,12 @@ export default class BrowserRequestMatcher {
         id: pendingRequest.mitmResourceId,
       },
     };
-    pendingRequest.resolveTimeout = setTimeout(
-      () => this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', toLog),
-      5e3,
-    ).unref();
+    pendingRequest.resolveTimeout = setTimeout(() => {
+      this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', toLog);
+      pendingRequest.browserRequestedPromise.reject(
+        new Error('BrowserRequestMatcher.ResourceNotResolved'),
+      );
+    }, 5e3).unref();
     return pendingRequest;
   }
 

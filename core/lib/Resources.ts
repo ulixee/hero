@@ -91,6 +91,7 @@ export default class Resources {
 
   public async createNewResourceIfUnseen(
     tabId: number,
+    frameId: number,
     resourceRequest: IPuppetResourceRequest,
     getBody: () => Promise<Buffer>,
   ): Promise<IResourceMeta | null> {
@@ -121,6 +122,7 @@ export default class Resources {
         knownResource.response = resourceDetails.response;
       }
       knownResource.response.browserLoadedTime = resource.browserLoadedTime;
+      knownResource.frameId ??= frameId;
       this.model.updateReceivedTime(knownResource.id, resource.browserLoadedTime);
       return true;
     }

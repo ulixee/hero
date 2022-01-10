@@ -44,6 +44,7 @@ import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
+import { disableMitm } from './GlobalPool';
 
 const { log } = Log(module);
 
@@ -192,11 +193,13 @@ export default class Tab
   ): boolean {
     if (resource.type !== 'Document') return;
 
-    const frame = this.frameWithPendingNavigation(
-      browserRequestId,
-      resource.request?.url,
-      resource.response?.url,
-    );
+    const frame = resource.frameId
+      ? this.frameEnvironmentsById.get(resource.frameId)
+      : this.frameWithPendingNavigation(
+          browserRequestId,
+          resource.request?.url,
+          resource.response?.url,
+        );
     if (frame && !resource.isRedirect) {
       frame.navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
       return true;
@@ -557,10 +560,13 @@ export default class Tab
     const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
     const resourcesById: Record<number, IResourceMeta> = {};
     const promise = createPromise();
-    const sinceCommandId =
-      options?.sinceCommandId && Number.isInteger(options.sinceCommandId)
-        ? options.sinceCommandId
-        : -1;
+    let sinceCommandId = -1;
+    if (options?.sinceCommandId !== undefined && Number.isInteger(options.sinceCommandId)) {
+      sinceCommandId = options.sinceCommandId;
+    } else {
+      const history = this.session.commands.history;
+      sinceCommandId = history[history.length - 2]?.id;
+    }
 
     // escape query string ? if url filter is a string
     // ie http://test.com?param=1 will treat the question mark as an optional char
@@ -925,7 +931,7 @@ export default class Tab
       resource.responseUrl,
     );
     if (isPending) {
-      if (event.resource.browserServedFromCache) {
+      if (resource.browserServedFromCache) {
         frame.navigations.onHttpResponded(
           resource.browserRequestId,
           resource.responseUrl ?? resource.url?.href,
@@ -934,10 +940,10 @@ export default class Tab
         );
       }
       const existingResource = this.session.resources.getBrowserRequestLatestResource(
-        event.resource.browserRequestId,
+        resource.browserRequestId,
       );
       if (existingResource) {
-        frame.navigations.onResourceLoaded(existingResource.id, event.resource.status);
+        frame.navigations.onResourceLoaded(existingResource.id, resource.status);
       }
     }
 
@@ -947,28 +953,22 @@ export default class Tab
       resource,
     );
 
-    if (!isKnownResource) {
-      setImmediate(this.createResourceOnDelayIfStillUncaptured.bind(this, event));
+    if (
+      !isKnownResource &&
+      (resource.browserServedFromCache || resource.url?.protocol === 'blob:' || disableMitm)
+    ) {
+      this.session.resources
+        .createNewResourceIfUnseen(this.id, frame.id, resource, event.body)
+        .then(meta => meta && this.checkForResolvedNavigation(resource.browserRequestId, meta))
+        .catch(() => null);
     }
-  }
-
-  private async createResourceOnDelayIfStillUncaptured(
-    event: IPuppetPageEvents['resource-loaded'],
-  ): Promise<void> {
-    const browserRequestId = event.resource.browserRequestId;
-    const resource = await this.session.resources.createNewResourceIfUnseen(
-      this.id,
-      event.resource,
-      event.body,
-    );
-    if (resource) this.checkForResolvedNavigation(browserRequestId, resource);
   }
 
   private onResourceFailed(event: IPuppetPageEvents['resource-failed']): void {
     const { resource } = event;
     const loadError = Resources.translateResourceError(resource);
 
-    const frame = this.frameEnvironmentsByPuppetId.get(event.resource.frameId);
+    const frame = this.frameEnvironmentsByPuppetId.get(resource.frameId);
 
     const resourceMeta = this.session.resources.onBrowserRequestFailed(
       this.id,
@@ -978,7 +978,7 @@ export default class Tab
     );
 
     if (resourceMeta) {
-      const browserRequestId = event.resource.browserRequestId;
+      const browserRequestId = resource.browserRequestId;
       this.checkForResolvedNavigation(browserRequestId, resourceMeta, loadError);
     }
   }

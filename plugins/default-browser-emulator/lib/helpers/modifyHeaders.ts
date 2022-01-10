@@ -96,7 +96,7 @@ function getResourceHeaderDefaults(
   headerProfiles: IDataHeaders,
   resource: IHttpResourceLoadDetails,
 ): Pick<IDataHeaderOrder, 'order' | 'orderKeys' | 'defaults'> {
-  const { method, originType, requestHeaders: headers, resourceType, isSSL } = resource;
+  const { method, originType, requestHeaders: headers, resourceType } = resource;
 
   let protocol = resource.isServerHttp2 ? 'http2' : 'https';
   if (!resource.isSSL) protocol = 'http';
@@ -130,14 +130,7 @@ function getResourceHeaderDefaults(
     }
   }
 
-  const defaultOrder = defaultOrders.length ? pickRandom(defaultOrders) : null;
-
-  if (!defaultOrder) {
-    browserEmulator.logger.info('Headers.NotFound', { resourceType, isSSL, method, originType });
-    return null;
-  }
-
-  return defaultOrder;
+  return defaultOrders.length ? pickRandom(defaultOrders) : null;
 }
 
 const lowerCaseMap = new Map<string, string>();

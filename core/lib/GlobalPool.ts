@@ -16,7 +16,7 @@ import Core from '../index';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 
 const { log } = Log(module);
-const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
+export const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
   public static maxConcurrentClientCount = 10;

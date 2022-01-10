@@ -10,7 +10,7 @@
     "@ulixee/commons": "1.5.9",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
-    "awaited-dom": "1.3.0",
+    "awaited-dom": "1.3.1",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },
