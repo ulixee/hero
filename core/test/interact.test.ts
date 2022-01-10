@@ -378,6 +378,52 @@ describe('basic interaction tests', () => {
     expect(lastClicked).toBe('clickedit');
   });
 
+  it('will not click the wrong element', async () => {
+    koaServer.get('/wrong-element', ctx => {
+      ctx.body = `
+      <body>
+          <div style="position: relative; margin-top:1400px">
+            <button id="button-1" onmousedown="clickit('down')" onmouseup="clickit('up')"  style="width:100px;top:0;left:0;position: absolute;">Click me</button>
+            <button id="button-2" onmousedown="clickit2()" style="width:100px;top:0;left:0;position: absolute;">Click me</button>
+        </div>
+        <script>
+
+          let lastClicked = '';
+          function clickit(where) {
+            lastClicked = 'wrongone-' + where;
+          }
+          function clickit2() {
+            lastClicked = 'rightone';
+          }
+        </script>
+      </body>
+    `;
+    });
+
+    const { tab } = await createSession({
+      humanEmulatorId,
+    });
+
+    const mouseDown = tab.puppetPage.mouse.down.bind(tab.puppetPage.mouse);
+    const mouseSpy = jest.spyOn(tab.puppetPage.mouse, 'down');
+    mouseSpy.mockImplementationOnce(async key => {
+      await tab.getJsValue('document.querySelector("#button-2").remove()');
+      return await mouseDown(key);
+    });
+
+    await tab.goto(`${koaServer.baseUrl}/wrong-element`);
+    await expect(
+      tab.interact([
+        {
+          command: InteractionCommand.click,
+          mousePosition: ['window', 'document', ['querySelector', '#button-2']],
+        },
+      ]),
+    ).rejects.toThrow();
+    const lastClicked = await tab.getJsValue('lastClicked');
+    expect(lastClicked).toBe('');
+  });
+
   it('should be able to click elements that are replaced', async () => {
     // test putting next to an image that will only space after it loads
     koaServer.get('/replace-node', ctx => {

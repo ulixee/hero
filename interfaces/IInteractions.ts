@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from './IKeyboardLayoutUS';
+import IMouseResult from './IMouseResult';
 import IPoint from './IPoint';
 
 export type IElementInteractVerification = 'elementAtPath' | 'exactElement' | 'none';
@@ -14,6 +15,7 @@ export interface IInteractionStep {
   command: IInteractionCommand;
   mousePosition?: IMousePosition;
   mouseButton?: IMouseButton;
+  mouseResultVerifier?: () => Promise<IMouseResult>;
   simulateOptionClickOnNodeId?: number;
   keyboardCommands?: IKeyboardCommand[];
   keyboardDelayBetween?: number;

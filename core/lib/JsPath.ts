@@ -105,12 +105,6 @@ export class JsPath {
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
 
-    options.ignoreVisibilityAttributes ??= [
-      'isOnscreenVertical',
-      'isOnscreenHorizontal',
-      'isUnobstructedByOtherElements',
-    ];
-
     return this.runJsPath<INodeVisibility>(
       `waitForElement`,
       jsPath,

@@ -1,8 +1,7 @@
 import IWaitForOptions from './IWaitForOptions';
-import { INodeVisibilityAttribute } from './INodeVisibility';
 
 export default interface IWaitForElementOptions extends IWaitForOptions {
   waitForVisible?: boolean;
+  waitForClickable?: boolean;
   waitForHidden?: boolean;
-  ignoreVisibilityAttributes?: INodeVisibilityAttribute[];
 }

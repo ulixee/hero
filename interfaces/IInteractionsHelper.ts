@@ -1,5 +1,5 @@
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import type IMouseUpResult from './IMouseUpResult';
+import IMouseResult from './IMouseResult';
 import { IMousePosition } from './IInteractions';
 import IRect from './IRect';
 import IPoint from './IPoint';
@@ -13,9 +13,9 @@ export default interface IInteractionsHelper {
   viewportSize: IViewportSize;
   logger: IBoundLog;
 
-  createMouseupTrigger(nodeId: number): Promise<{
+  createMousedownTrigger(nodeId: number): Promise<{
     nodeVisibility: INodeVisibility;
-    didTrigger: () => Promise<IMouseUpResult>;
+    didTrigger: () => Promise<IMouseResult>;
   }>;
 
   reloadJsPath(jsPath: IJsPath): Promise<INodePointer>;

@@ -1,9 +1,9 @@
-import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import IMouseResult from '@ulixee/hero-interfaces/IMouseResult';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 
 class MouseEvents {
-  private static pendingEvent?: Promise<IMouseUpResult>;
-  private static pendingEventResolve?: (result: IMouseUpResult) => void;
+  private static pendingEvent?: Promise<IMouseResult>;
+  private static pendingEventResolve?: (result: IMouseResult) => void;
   private static targetNodeId: number;
   private static containerOffset: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -20,19 +20,20 @@ class MouseEvents {
 
     this.containerOffset = containerOffset;
     this.targetNodeId = nodeId;
-    this.pendingEvent = new Promise<IMouseUpResult>(resolve => {
+    this.pendingEvent = new Promise<IMouseResult>(resolve => {
       this.pendingEventResolve = resolve;
     });
 
-    window.addEventListener('mouseup', this.onMouseup, {
+    window.addEventListener('mousedown', this.onMousedown, {
       once: true,
+      capture: true,
     });
 
     return visibility;
   }
 
   public static init() {
-    this.onMouseup = this.onMouseup.bind(this);
+    this.onMousedown = this.onMousedown.bind(this);
   }
 
   public static didTrigger(nodeId: number) {
@@ -47,14 +48,14 @@ class MouseEvents {
     }
   }
 
-  private static onMouseup(event: MouseEvent) {
+  private static onMousedown(event: MouseEvent) {
     const node = NodeTracker.getWatchedNodeWithId(this.targetNodeId);
     const targetNodeId = event.target ? NodeTracker.watchNode(event.target as Node) : undefined;
     const relatedTargetNodeId = event.relatedTarget
       ? NodeTracker.watchNode(event.relatedTarget as Node)
       : undefined;
 
-    const result: IMouseUpResult = {
+    const result: IMouseResult = {
       pageX: this.containerOffset.x + event.pageX - window.scrollX,
       pageY: this.containerOffset.y + event.pageY - window.scrollY,
       targetNodeId,
@@ -63,6 +64,8 @@ class MouseEvents {
     };
 
     if (!result.didClickLocation) {
+      event.cancelBubble = true;
+      event.preventDefault();
       // @ts-ignore
       result.targetNodePreview = generateNodePreview(event.target);
       // @ts-ignore
@@ -71,6 +74,7 @@ class MouseEvents {
     }
 
     this.pendingEventResolve(result);
+    return result.didClickLocation;
   }
 
   private static getNodeVisibility(node: Node): INodeVisibility {
@@ -81,7 +85,7 @@ class MouseEvents {
 
   private static clearEvent(nodeId: number) {
     if (this.targetNodeId === nodeId) {
-      window.removeEventListener('mouseup', this.onMouseup);
+      window.removeEventListener('mousedown', this.onMousedown);
       this.pendingEvent = null;
       this.pendingEventResolve = null;
       this.targetNodeId = null;

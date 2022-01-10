@@ -46,6 +46,7 @@ describe('Multi-tab scenarios', () => {
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
     await hero.click(hero.document.querySelector('a'));
+    await hero.waitForLocation('change');
     expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
     const meta = await hero.meta;
@@ -155,6 +156,7 @@ describe('Multi-tab scenarios', () => {
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
     await hero.click(document.querySelector('a'));
+    await hero.waitForLocation('change');
     expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
     const meta = await hero.meta;

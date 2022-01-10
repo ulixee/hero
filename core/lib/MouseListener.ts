@@ -1,8 +1,8 @@
-import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import IMouseResult from '@ulixee/hero-interfaces/IMouseResult';
 import FrameEnvironment from './FrameEnvironment';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 
-export default class MouseupListener {
+export default class MouseListener {
   private readonly frameEnvironment: FrameEnvironment;
   private readonly nodeId: number;
 
@@ -20,8 +20,8 @@ export default class MouseupListener {
     );
   }
 
-  public async didTriggerMouseEvent(): Promise<IMouseUpResult> {
-    return await this.frameEnvironment.runIsolatedFn<IMouseUpResult>(
+  public async didTriggerMouseEvent(): Promise<IMouseResult> {
+    return await this.frameEnvironment.runIsolatedFn<IMouseResult>(
       'HERO.MouseEvents.didTrigger',
       this.nodeId,
     );

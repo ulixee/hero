@@ -13,7 +13,7 @@ import IPoint from '@ulixee/hero-interfaces/IPoint';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
-import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import IMouseResult from '@ulixee/hero-interfaces/IMouseResult';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
@@ -137,8 +137,6 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     interactionStep.delayMillis ??= Math.floor(Math.random() * 100);
     delete interactionStep.relativeToScrollOffset;
 
-    const originalMousePosition = [...interactionStep.mousePosition];
-
     const retries = 3;
 
     for (let i = 0; i < retries; i += 1) {
@@ -154,7 +152,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
         interactionStep.verification = 'none';
       }
 
-      if (targetRect.nodeVisibility?.isVisible === false) {
+      if (targetRect.nodeVisibility?.isClickable === false) {
         interactionStep.mousePosition = await this.resolveMoveAndClickForInvisibleNode(
           interactionStep,
           runFn,
@@ -172,14 +170,14 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       });
       await this.moveMouseToPoint(interactionStep, runFn, helper, targetPoint, targetRect.width);
 
-      let clickConfirm: () => Promise<IMouseUpResult>;
+      let mouseResultVerifier: () => Promise<IMouseResult>;
       if (
         targetRect.nodeId &&
-        command !== InteractionCommand.clickDown &&
+        command !== InteractionCommand.clickUp &&
         interactionStep.verification !== 'none'
       ) {
-        const listener = await helper.createMouseupTrigger(targetRect.nodeId);
-        if (listener.nodeVisibility.isVisible === false) {
+        const listener = await helper.createMousedownTrigger(targetRect.nodeId);
+        if (listener.nodeVisibility.isClickable === false) {
           targetRect.nodeVisibility = listener.nodeVisibility;
           interactionStep.mousePosition = await this.resolveMoveAndClickForInvisibleNode(
             interactionStep,
@@ -189,67 +187,28 @@ export default class DefaultHumanEmulator extends HumanEmulator {
           );
           continue;
         }
-        clickConfirm = listener.didTrigger;
+        mouseResultVerifier = listener.didTrigger;
       }
 
       interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
-      await runFn(interactionStep);
-      if (clickConfirm) {
-        const mouseUpResult = await clickConfirm();
+      await runFn({
+        ...interactionStep,
+        mouseResultVerifier,
+      });
+
+      if (mouseResultVerifier) {
+        const mouseUpResult = await mouseResultVerifier();
 
         if (!mouseUpResult.didClickLocation) {
-          this.logMouseupClickFailure(
-            mouseUpResult,
-            helper,
-            originalMousePosition,
-            targetRect.nodeId,
-          );
+          continue;
         }
       }
+
       return;
     }
 
     throw new Error(
       `"Interaction.${interactionStep.command}" element invisible after ${retries} attempts to move it into view.`,
-    );
-  }
-
-  protected logMouseupClickFailure(
-    mouseUpResult: IMouseUpResult,
-    helper: IInteractionsHelper,
-    originalMousePosition: IMousePosition,
-    nodeId: number,
-  ): void {
-    let extras = '';
-    const isNodeHidden = mouseUpResult.expectedNodeVisibility.isVisible === false;
-    if (isNodeHidden) {
-      extras = `\n\nNOTE: The target node is not visible in the dom.`;
-    }
-    if (mouseUpResult.didStartInteractWithPaintingStable === false) {
-      if (!extras) extras += '\n\nNOTE:';
-      extras += ` You might have more predictable results by waiting for the page to stabilize before triggering this click -- hero.waitForPaintingStable()`;
-    }
-    helper.logger.error(
-      `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
-      {
-        'Interaction.mousePosition': originalMousePosition,
-        expected: {
-          nodeId,
-          element: mouseUpResult.expectedNodePreview,
-          visibility: mouseUpResult.expectedNodeVisibility,
-        },
-        clicked: {
-          nodeId: mouseUpResult.targetNodeId,
-          element: mouseUpResult.targetNodePreview,
-          coordinates: {
-            x: mouseUpResult.pageX,
-            y: mouseUpResult.pageY,
-          },
-        },
-      },
-    );
-    throw new Error(
-      `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
     );
   }
 
@@ -496,7 +455,7 @@ export default class DefaultHumanEmulator extends HumanEmulator {
         return interactionStep.mousePosition;
       }
 
-      if (obstructedByElementRect.height >= viewport.height)
+      if (obstructedByElementRect.height >= viewport.height * 0.9)
         throw new Error(`${interactionName} element is obstructed by a full screen element`);
 
       const maxHeight = Math.min(targetRect.height + 2, viewport.height / 2);
