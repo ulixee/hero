@@ -52,6 +52,7 @@ describe('Core events tests', () => {
     koaServer.get('/page2', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
 
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
@@ -78,6 +79,7 @@ describe('Core events tests', () => {
     koaServer.get('/page2', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
 
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
 

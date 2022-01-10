@@ -670,8 +670,7 @@ export default class Tab
   }
 
   public async createDetachedState(callsite: string, key?: string): Promise<DetachedTabState> {
-    // need the dom to be loaded on the page
-    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
+    await this.mainFrameEnvironment.waitForNavigationLoader();
     // find last page load
     const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
     const domChanges = await this.getDomChanges(

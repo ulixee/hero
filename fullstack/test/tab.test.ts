@@ -30,6 +30,7 @@ describe('Multi-tab scenarios', () => {
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/tabTest`);
+    await hero.waitForPaintingStable();
     const tab1 = hero.activeTab;
     const url = await hero.document.location.host;
     expect(url).toBe(koaServer.baseHost);
@@ -43,10 +44,12 @@ describe('Multi-tab scenarios', () => {
     await hero.focusTab(newTab);
     expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab`);
     const { document } = hero;
+    await newTab.waitForLoad('DomContentLoaded');
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
     await hero.click(hero.document.querySelector('a'));
     await hero.waitForLocation('change');
+    await newTab.waitForLoad('DomContentLoaded');
     expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
     const meta = await hero.meta;
@@ -157,6 +160,7 @@ describe('Multi-tab scenarios', () => {
 
     await hero.click(document.querySelector('a'));
     await hero.waitForLocation('change');
+    await hero.activeTab.waitForLoad('DomContentLoaded');
     expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
     const meta = await hero.meta;
@@ -198,6 +202,7 @@ document.querySelector('a').addEventListener('click', event => {
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/ajaxTab`);
+    await hero.waitForPaintingStable();
     await hero.click(hero.document.querySelector('a'));
     const newTab = await hero.waitForNewTab();
 
@@ -205,6 +210,7 @@ document.querySelector('a').addEventListener('click', event => {
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/ajaxNewResult`);
     await hero.focusTab(newTab);
     const { document } = newTab;
+    await newTab.waitForLoad('DomContentLoaded');
     expect(await document.querySelector('h1').textContent).toBe('Overridden Result');
 
     const meta = await hero.meta;

@@ -78,6 +78,7 @@ test('should pass FpScanner', async () => {
   const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}/collect`);
+  await hero.waitForPaintingStable();
 
   const data = await analyzePromise;
   const results = fpscanner.analyseFingerprint(data);

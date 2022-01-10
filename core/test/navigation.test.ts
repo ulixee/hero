@@ -51,6 +51,7 @@ describe('basic Navigation tests', () => {
   it('works without explicit waitForLocation', async () => {
     const { tab } = await createSession();
     await tab.goto(koaServer.baseUrl);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     const elem = await tab.execJsPath(['document', ['querySelector', 'a'], 'nodeName']);
     const hrefAttribute = await tab.execJsPath(['document', ['querySelector', 'a'], 'href']);
@@ -148,6 +149,7 @@ describe('basic Navigation tests', () => {
 
     await tab.goto(startingUrl);
     await tab.waitForLocation(LocationTrigger.reload);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     const text = await tab.execJsPath(['document', 'body', 'textContent']);
 
@@ -175,6 +177,7 @@ describe('basic Navigation tests', () => {
     expect(text.value).toBe('First Load');
 
     const reloadResource = await tab.reload();
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     const text2 = await tab.execJsPath(['document', 'body', 'textContent']);
     expect(text2.value).toBe('Second Load');
     expect(reloadResource.id).not.toBe(gotoResource.id);
@@ -396,6 +399,7 @@ history.pushState({}, '', '/inpagenav/1');
     });
     const { tab } = await createSession();
     await tab.goto(`${koaServer.baseUrl}/tabTest`);
+    await tab.waitForLoad('PaintingStable');
     await tab.interact([
       {
         command: InteractionCommand.click,
