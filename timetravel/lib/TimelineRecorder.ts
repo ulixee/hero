@@ -4,6 +4,8 @@ import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 
 export default class TimelineRecorder extends TypedEventEmitter<{
   updated: void;
@@ -11,6 +13,7 @@ export default class TimelineRecorder extends TypedEventEmitter<{
   public recordScreenUntilTime = 0;
   public recordScreenUntilLoad = false;
   private isPaused = false;
+  private closeTimer: IResolvablePromise;
 
   constructor(readonly heroSession: Session) {
     super();
@@ -35,6 +38,23 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     this.heroSession.off('resumed', this.onHeroSessionResumed);
     this.heroSession.on('will-close', this.onHeroSessionWillClose);
     this.stopRecording();
+    this.dontExtendSessionPastTime();
+  }
+
+  public dontExtendSessionPastTime(delayUntilTimestamp?: number): void {
+    this.recordScreenUntilLoad = false;
+    if (delayUntilTimestamp) {
+      this.recordScreenUntilTime = delayUntilTimestamp ?? Date.now();
+    }
+    if (this.closeTimer) {
+      const timer = this.closeTimer;
+      const remainingMs = this.recordScreenUntilTime ? Date.now() - this.recordScreenUntilTime : 0;
+      if (remainingMs > 0) {
+        setTimeout(() => timer.resolve(), remainingMs).unref();
+      } else {
+        this.closeTimer.resolve();
+      }
+    }
   }
 
   public stopRecording(): void {
@@ -62,6 +82,9 @@ export default class TimelineRecorder extends TypedEventEmitter<{
 
   private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
     if (!this.recordScreenUntilTime && !this.recordScreenUntilLoad) return;
+
+    this.closeTimer?.resolve();
+
     let loadPromise: Promise<any>;
     if (this.recordScreenUntilLoad && this.heroSession) {
       loadPromise = Promise.all(
@@ -77,11 +100,13 @@ export default class TimelineRecorder extends TypedEventEmitter<{
       delayPromise = new Promise<void>(resolve => setTimeout(resolve, delay));
     }
     if (loadPromise || delayPromise) {
-      event.waitForPromise = Promise.race([
-        // max wait time
-        new Promise<void>(resolve => setTimeout(resolve, 60e3)),
-        Promise.all([loadPromise, delayPromise]),
-      ]).catch(() => null);
+      this.closeTimer = new Resolvable<void>(60e3);
+
+      Promise.all([loadPromise, delayPromise])
+        .then(() => this.closeTimer.resolve())
+        .catch(() => this.closeTimer.resolve());
+
+      event.waitForPromise = this.closeTimer.promise;
     }
   }
 
