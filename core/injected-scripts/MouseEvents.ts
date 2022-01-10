@@ -7,6 +7,10 @@ class MouseEvents {
   private static targetNodeId: number;
   private static containerOffset: { x: number; y: number } = { x: 0, y: 0 };
 
+  public static init() {
+    this.onMousedown = this.onMousedown.bind(this);
+  }
+
   public static listenFor(
     nodeId: number,
     containerOffset: { x: number; y: number },
@@ -30,10 +34,6 @@ class MouseEvents {
     });
 
     return visibility;
-  }
-
-  public static init() {
-    this.onMousedown = this.onMousedown.bind(this);
   }
 
   public static didTrigger(nodeId: number) {

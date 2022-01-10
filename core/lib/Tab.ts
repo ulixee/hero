@@ -193,13 +193,11 @@ export default class Tab
   ): boolean {
     if (resource.type !== 'Document') return;
 
-    const frame = resource.frameId
-      ? this.frameEnvironmentsById.get(resource.frameId)
-      : this.frameWithPendingNavigation(
-          browserRequestId,
-          resource.request?.url,
-          resource.response?.url,
-        );
+    const frame = this.frameWithPendingNavigation(
+      browserRequestId,
+      resource.request?.url,
+      resource.response?.url,
+    );
     if (frame && !resource.isRedirect) {
       frame.navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
       return true;
@@ -823,7 +821,7 @@ export default class Tab
 
     // websockets
     page.on('websocket-handshake', ev => {
-      this.session.mitmRequestSession?.registerWebsocketHeaders(this.id, ev);
+      this.session.resources.registerWebsocketHeaders(this.id, ev);
     });
     page.on('websocket-frame', this.onWebsocketFrame.bind(this));
   }
@@ -947,11 +945,7 @@ export default class Tab
       }
     }
 
-    const isKnownResource = this.session.resources.onBrowserResourceLoaded(
-      this.id,
-      frame.id,
-      resource,
-    );
+    const isKnownResource = this.session.resources.onBrowserResourceLoaded(this.id, resource);
 
     if (
       !isKnownResource &&

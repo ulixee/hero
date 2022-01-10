@@ -17,7 +17,7 @@ import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
 import ResourceState from '../interfaces/ResourceState';
-import BrowserRequestMatcher from '../lib/BrowserRequestMatcher';
+import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
 
 const { log } = Log(module);
 
@@ -48,7 +48,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }[] = [];
 
   public respondWithHttpErrorStacks = true;
-  public readonly browserRequestMatcher: BrowserRequestMatcher;
 
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
@@ -59,6 +58,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly sessionId: string,
     readonly plugins: ICorePlugins,
     public upstreamProxyUrl?: string,
+    readonly browserRequestMatcher?: IBrowserRequestMatcher,
   ) {
     super();
     this.logger = log.createChild(module, {
@@ -66,7 +66,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     });
     this.requestAgent = new MitmRequestAgent(this);
     this.dns = new Dns(this);
-    this.browserRequestMatcher = new BrowserRequestMatcher(this);
   }
 
   public trackResourceRedirects(resource: IHttpResourceLoadDetails): void {
@@ -125,7 +124,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     const logid = this.logger.stats('MitmRequestSession.Closing');
     this.isClosing = true;
     const errors: Error[] = [];
-    this.browserRequestMatcher.cancelPending();
+    this.browserRequestMatcher?.cancelPending();
     try {
       this.requestAgent.close();
     } catch (err) {
@@ -182,7 +181,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       headers: IResourceHeaders;
     },
   ): void {
-    this.browserRequestMatcher.requestIdToTabId.set(message.browserRequestId, tabId);
     const key = this.getWebsocketHeadersKey(message.headers);
 
     this.websocketBrowserResourceIds[key] ??= createPromise<string>();

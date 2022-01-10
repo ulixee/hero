@@ -48,11 +48,10 @@ export default class HeadersHandler {
     if (hasUserActivity === '?1') ctx.hasUserGesture = true;
     if (fetchMode) ctx.isUserNavigation = isDocumentNavigation && ctx.hasUserGesture;
 
-    const requestedResource = session.browserRequestMatcher.onMitmRequestedResource(ctx);
+    session.browserRequestMatcher.determineResourceType(ctx);
 
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
-      requestedResource.browserRequestedPromise.resolve(null);
     } else if (!ctx.resourceType || ctx.resourceType === 'Fetch') {
       // if fetch, we need to wait for the browser request so we can see if we should use xhr order or fetch order
       await ctx.browserHasRequested;
@@ -203,7 +202,6 @@ export default class HeadersHandler {
     }
   }
 }
-
 
 const headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
 /**
