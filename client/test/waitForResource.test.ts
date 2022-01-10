@@ -172,8 +172,10 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
+    let calls = 0;
     const resources = await hero.waitForResource({
       filterFn(resource, done) {
+        calls += 1;
         if (resource.url === '/test5.js') {
           done();
         }
@@ -184,6 +186,7 @@ describe('waitForResource', () => {
       },
     });
     expect(resources).toHaveLength(4);
+    expect(calls).toBe(5);
 
     await hero.close();
   });

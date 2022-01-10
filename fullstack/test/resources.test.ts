@@ -1,11 +1,11 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Hero from "../index";
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
-  koaServer.get('/test', ctx => {
+  koaServer.get('/resources-test', ctx => {
     ctx.body = `<html>
 <body>
 <a onclick="clicker()" href="#nothing">Click me</a>
@@ -29,23 +29,59 @@ afterEach(Helpers.afterEach);
 
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
-    const exampleUrl = `${koaServer.baseUrl}/test`;
+    const exampleUrl = `${koaServer.baseUrl}/resources-test`;
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
 
     await hero.goto(exampleUrl);
+    await hero.waitForPaintingStable();
     const elem = hero.document.querySelector('a');
     await hero.click(elem);
 
     const resources = await hero.waitForResource({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
+  });
+
+  it('waits for resources by default since the previous command', async () => {
+    const exampleUrl = `${koaServer.baseUrl}/resources-test`;
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(exampleUrl);
+    await hero.waitForPaintingStable();
+    const elem = await hero.document.querySelector('a');
+    const startCommandId = await hero.lastCommandId;
+    await hero.click(elem);
+    await hero.click(elem);
+
+    const resources = await hero.waitForResource({ type: 'Fetch' });
+    expect(resources).toHaveLength(1);
+
+    let counter = 0;
+    const allResources = await hero.waitForResource(
+      {
+        filterFn: (resource, done) => {
+          if (resource.type === 'Fetch') {
+            counter += 1;
+            if (counter === 2) done();
+            return true;
+          }
+          return false;
+        },
+      },
+      { sinceCommandId: startCommandId },
+    );
+    expect(allResources).toHaveLength(2);
     await hero.close();
   });
 
   it('waits for a resource loaded since a previous command id', async () => {
-    const exampleUrl = `${koaServer.baseUrl}/test`;
+    const exampleUrl = `${koaServer.baseUrl}/resources-test`;
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
 
     await hero.goto(exampleUrl);
+    await hero.waitForPaintingStable();
     let lastCommandId: number;
     for (let i = 0; i <= 4; i += 1) {
       const elem = hero.document.querySelector('a');
@@ -58,12 +94,12 @@ describe('basic resource tests', () => {
       expect(resources).toHaveLength(1);
       expect(resources[0].url).toContain(`counter=${i}`);
     }
-    await hero.close();
   });
 
   it('cancels a pending resource on hero close', async () => {
-    const exampleUrl = `${koaServer.baseUrl}/test`;
+    const exampleUrl = `${koaServer.baseUrl}/resources-test`;
     const hero = new Hero();
+    Helpers.needsClosing.push(hero);
 
     await hero.goto(exampleUrl);
 

@@ -67,7 +67,7 @@ export default class SocketPool {
       if (this.free.size) {
         const first = this.free.values().next().value;
         this.free.delete(first);
-        return first;
+        if (first) return first;
       }
 
       const mitmSocket = await createSocket();
