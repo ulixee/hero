@@ -74,6 +74,7 @@ test('should allow query selectors in cross-domain frames', async () => {
   };
 
   await tab.goto(`${koaServer.baseUrl}/iframePage`);
+  await tab.waitForLoad('DomContentLoaded');
 
   const outerH1 = await tab.execJsPath([
     'window',

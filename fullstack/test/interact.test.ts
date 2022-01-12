@@ -30,6 +30,7 @@ describe('basic Interact tests', () => {
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${url}page1`);
+    await hero.waitForPaintingStable();
     await hero.document.querySelector('#input').focus();
     await hero.waitForMillis(50);
     await hero.interact({ type: text });

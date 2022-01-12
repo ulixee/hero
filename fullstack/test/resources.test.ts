@@ -13,7 +13,8 @@ beforeAll(async () => {
 <script>
   let counter = 0;
   function clicker() {
-    fetch('/ajax?counter=' + (counter++) )
+    fetch('/ajax?counter=' + (counter++) );
+    return false;
   }
 </script>
 </html>`;
@@ -52,10 +53,15 @@ describe('basic resource tests', () => {
     const elem = await hero.document.querySelector('a');
     const startCommandId = await hero.lastCommandId;
     await hero.click(elem);
-    await hero.click(elem);
 
     const resources = await hero.waitForResource({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
+
+    await hero.interact({ move: elem });
+    await hero.click(elem);
+
+    const resources2 = await hero.waitForResource({ type: 'Fetch' });
+    expect(resources2).toHaveLength(1);
 
     let counter = 0;
     const allResources = await hero.waitForResource(

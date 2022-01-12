@@ -220,8 +220,9 @@ export default class FrameEnvironment
 
     // only install interactor on the main frame
     await this.interactor.initialize(this.isMainFrame);
-    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
-    const interactionResolvable = createPromise<void>(120e3);
+    const timeoutMs = 120e3;
+    const interactionResolvable = createPromise<void>(timeoutMs);
+    await this.waitForNavigationLoader(timeoutMs);
     this.waitTimeouts.push({
       timeout: interactionResolvable.timeout,
       reject: interactionResolvable.reject,
@@ -255,7 +256,7 @@ export default class FrameEnvironment
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
     if (!this.navigations.top) return null;
-    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
+    await this.waitForNavigationLoader();
     const containerOffset = await this.getContainerOffset();
     return await this.jsPath.exec(jsPath, containerOffset);
   }
@@ -283,7 +284,7 @@ export default class FrameEnvironment
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
       );
     }
-    await this.navigationsObserver.waitForReady();
+    await this.waitForNavigationLoader();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.createRequest`,
       input,
@@ -298,7 +299,7 @@ export default class FrameEnvironment
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
       );
     }
-    await this.navigationsObserver.waitForReady();
+    await this.waitForNavigationLoader();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.fetch`,
       input,
@@ -328,7 +329,7 @@ export default class FrameEnvironment
   }
 
   public async getCookies(): Promise<ICookie[]> {
-    await this.navigationsObserver.waitForReady();
+    await this.waitForNavigationLoader();
     return await this.session.browserContext.getCookies(
       new URL(this.puppetFrame.securityOrigin ?? this.puppetFrame.url),
     );
@@ -348,7 +349,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       `);
     }
 
-    await this.navigationsObserver.waitForReady();
+    await this.waitForNavigationLoader();
     const url = this.navigations.currentUrl;
     await this.session.browserContext.addCookies([
       {
@@ -374,7 +375,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
-    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
+    await this.waitForNavigationLoader();
     const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]], null);
     if (!nodeIdResult.value) return null;
 
@@ -455,6 +456,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.session.resources.get(resourceId);
   }
 
+  public async waitForNavigationLoader(timeoutMs?: number): Promise<void> {
+    await this.puppetFrame.waitForLoader(undefined, timeoutMs);
+  }
+
   // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which
   // can break waitForLocation
   public async waitForDom(
@@ -467,8 +472,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     await timer.waitForPromise(
-      this.navigationsObserver.waitForReady(),
-      'Timeout waiting for DomContentLoaded',
+      this.waitForNavigationLoader(),
+      'Timeout waiting for page to be ready',
     );
     options ??= {};
 

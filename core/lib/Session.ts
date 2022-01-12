@@ -180,14 +180,15 @@ export default class Session
 
     SessionsDb.find().recordSession(this);
 
+    this.resources = new Resources(this);
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.plugins,
       this.options.upstreamProxyUrl,
+      this.resources,
     );
     this.mitmRequestSession.respondWithHttpErrorStacks =
       this.mode === 'development' && this.options.showBrowserInteractions === true;
-    this.resources = new Resources(this, this.mitmRequestSession.browserRequestMatcher);
     this.websocketMessages = new WebsocketMessages(this.db);
     this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
@@ -529,19 +530,12 @@ export default class Session
   }
 
   private onMitmRequest(event: IRequestSessionRequestEvent): void {
-    // don't know the tab id at this point
-    this.resources.record(null, event, false);
+    this.resources.onMitmRequest(event);
   }
 
   private onMitmResponse(event: IRequestSessionResponseEvent): void {
-    const tabId = this.resources.getBrowserRequestTabId(event.browserRequestId);
-    let tab = this.tabsById.get(tabId);
-    if (!tab && !tabId) {
-      // if we can't place it, just use the first active tab
-      tab = [...this.tabsById.values()].find(x => !x.isClosing);
-    }
-
-    const resource = this.resources.record(tab?.id ?? tabId, event, true);
+    const resource = this.resources.onMitmResponse(event, this.getLastActiveTab());
+    const tab = this.tabsById.get(resource.tabId);
     if (!event.didBlockResource) {
       tab?.emit('resource', resource);
     }

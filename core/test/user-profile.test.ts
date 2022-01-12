@@ -7,6 +7,7 @@ import { createPromise } from '@ulixee/commons/lib/utils';
 import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -71,7 +72,7 @@ describe('UserProfile cookie tests', () => {
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
     await tab3.waitForLoad('PaintingStable');
     expect(cookie).toBe('Is Set');
-  });
+  }, 20e3);
 
   it('should track cookies from other domains', async () => {
     let profile: IUserProfile;
@@ -344,6 +345,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       },
     ]);
     await tab.waitForLocation('change');
+    await tab.waitForLoad(LoadStatus.DomContentLoaded);
 
     const localContent = await tab.execJsPath([
       'document',

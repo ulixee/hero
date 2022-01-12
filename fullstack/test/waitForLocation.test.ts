@@ -75,14 +75,17 @@ describe('basic waitForLocation change detections', () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/page1`);
+    await hero.waitForPaintingStable();
     const startlink = hero.document.querySelector('a');
     await hero.interact({ click: startlink, waitForElementVisible: startlink });
     await hero.waitForLocation('change');
+    await hero.waitForPaintingStable();
     expect(await hero.url).toBe(`${koaServer.baseUrl}/page3`);
 
     const nextlink = hero.document.querySelector('a');
     await hero.interact({ click: nextlink, waitForElementVisible: nextlink });
     await hero.waitForLocation('change');
+    await hero.waitForPaintingStable();
     expect(await hero.url).toBe(`${koaServer.baseUrl}/finish`);
 
     await hero.close();
@@ -253,6 +256,7 @@ describe('basic waitForLocation change detections', () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/postback`);
+    await hero.waitForPaintingStable();
     await hero.click(hero.activeTab.document.querySelector('input'));
 
     await expect(hero.waitForLocation('reload')).resolves.toBeTruthy();

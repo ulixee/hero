@@ -330,7 +330,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       }
       if (!navigation.finalUrl || !navigation.statusChanges.has(LoadStatus.HttpResponded)) continue;
 
-      // if we have an in-page nav, return the first non "inPage" url. Otherwise, use if DomContentLoaded was triggered
+      // if we have an in-page nav, return the first non "inPage" url. Otherwise, use if we loaded html
       if (hasInPageNav || navigation.statusChanges.has(LoadStatus.DomContentLoaded)) {
         return navigation;
       }

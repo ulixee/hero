@@ -176,7 +176,7 @@ export default abstract class BaseIpcHandler {
 
   private onChildProcessStderr(message: string): void {
     if (this.isClosing) return;
-    this.logger.info(`${this.handlerName}.stderr: ${message}`);
+    this.logger.error(`${this.handlerName}.stderr: ${message}`);
   }
 
   private spawnChild(): void {

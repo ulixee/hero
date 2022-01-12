@@ -61,6 +61,7 @@ describe('GlobalPool tests', () => {
 
     await Promise.all([tab1.session.close(), tab2.session.close(), tab3.session.close()]);
     expect(GlobalPool.activeSessionCount).toBe(0);
+    await Core.shutdown();
   }, 15e3);
 
   it('should emit events when all session tabs are closed', async () => {

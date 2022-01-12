@@ -103,10 +103,6 @@ export default class FrameNavigationsObserver {
     return promise;
   }
 
-  public waitForReady(): Promise<INavigation> {
-    return this.waitForLoad(LoadStatus.HttpResponded);
-  }
-
   public async waitForNavigationResourceId(): Promise<number> {
     const top = this.navigations.top;
 

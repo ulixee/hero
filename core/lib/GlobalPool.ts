@@ -90,6 +90,10 @@ export default class GlobalPool {
       closePromises.push(puppetBrowser.close().catch(err => err));
     }
     MitmProxy.close();
+    if (this.mitmStartPromise) {
+      this.mitmStartPromise.then(x => x.close()).catch(() => null);
+      this.mitmStartPromise = null;
+    }
     if (this.mitmServer) {
       this.mitmServer.close();
       this.mitmServer = null;

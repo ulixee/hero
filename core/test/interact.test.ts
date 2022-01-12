@@ -11,7 +11,7 @@ import {
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus, LocationStatus } from '@ulixee/hero-interfaces/Location';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -123,6 +123,7 @@ describe('basic interaction tests', () => {
     const { tab } = await createSession({ humanEmulatorId });
 
     await tab.goto(`${koaServer.baseUrl}/input`);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
     await tab.interact([
       {
@@ -185,6 +186,7 @@ describe('basic interaction tests', () => {
     });
 
     await tab.goto(`${koaServer.baseUrl}/click-option`);
+    await tab.waitForLoad(LoadStatus.DomContentLoaded);
     await expect(
       tab.interact([
         {
@@ -239,6 +241,7 @@ describe('basic interaction tests', () => {
       },
     });
     await tab.goto(`${koaServer.baseUrl}/longpage`);
+    await tab.waitForLoad('DomContentLoaded');
 
     const click = async (selector: string) => {
       await tab.interact([
@@ -455,6 +458,7 @@ describe('basic interaction tests', () => {
     const interactor = tab.mainFrameEnvironment.interactor;
     const reloadSpy = jest.spyOn(interactor, 'reloadJsPath');
     await tab.goto(`${koaServer.baseUrl}/replace-node`);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     const ul = await tab.execJsPath([
       'document',

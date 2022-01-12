@@ -14,18 +14,29 @@ afterEach(Helpers.afterEach);
 
 test('loads http2 resources', async () => {
   const server = await Helpers.runHttp2Server((req, res) => {
+    if (req.url === '/img.png') {
+      // NOTE: chrome will still request this even though it's pushed
+      return res.destroy();
+    }
+    res.stream.pushStream(
+      {
+        ':path': '/img.png',
+        ':method': 'GET',
+      },
+      (err, pushStream) => {
+        pushStream.respond({
+          ':status': 200,
+          'content-type': 'image/png',
+          'content-length': Buffer.byteLength(Helpers.getLogo()),
+        });
+        pushStream.end(Helpers.getLogo());
+      },
+    );
     res.stream.respond({
       ':status': 200,
       'content-type': 'text/html',
     });
-    res.stream.pushStream({ ':path': '/img.png' }, (err, pushStream) => {
-      pushStream.respond({
-        ':status': 200,
-        'content-type': 'image/png',
-      });
-      pushStream.end(Helpers.getLogo());
-    });
-    res.end(`<html><body><img src="/img.png"/></body></html>`);
+    res.stream.end(`<html><body><img src="/img.png"/></body></html>`);
   });
 
   const meta = await connection.createSession();

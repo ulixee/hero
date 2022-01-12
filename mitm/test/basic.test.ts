@@ -2,10 +2,9 @@ import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
 import { Helpers } from '@ulixee/hero-testing';
 import * as HttpProxyAgent from 'http-proxy-agent';
-import { URL } from 'url';
+import * as Url from 'url';
 import { AddressInfo } from 'net';
 import * as WebSocket from 'ws';
-import * as Url from 'url';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
@@ -18,6 +17,7 @@ import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 import { parseRawHeaders } from '../lib/Utils';
+import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
 
 const { log } = Log(module);
 const browserEmulatorId = BrowserEmulator.id;
@@ -347,21 +347,13 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = createSession(mitmServer);
+    const session = createSession(mitmServer, null, {
+      determineResourceType(resource: IHttpResourceLoadDetails) {
+        resource.resourceType = 'Document';
+      },
+      cancelPending() {},
+    });
     session.plugins.beforeHttpRequest = jest.fn();
-    session.browserRequestMatcher.onBrowserRequestedResource(
-      {
-        browserRequestId: '25.123',
-        url: new URL(`${httpServer.url}page1`),
-        method: 'GET',
-        resourceType: 'Document',
-        hasUserGesture: true,
-        isUserNavigation: true,
-        requestHeaders: {},
-        documentUrl: `${httpServer.url}page1`,
-      } as IHttpResourceLoadDetails,
-      1,
-    );
     const onresponse = jest.fn();
     const onError = jest.fn();
     session.on('response', onresponse);
@@ -391,9 +383,18 @@ describe('basic MitM tests', () => {
   });
 });
 
-function createSession(mitmProxy: MitmServer, upstreamProxyUrl: string = null) {
+function createSession(
+  mitmProxy: MitmServer,
+  upstreamProxyUrl: string = null,
+  browserMatcher?: IBrowserRequestMatcher,
+) {
   const plugins = new CorePlugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
-  const session = new RequestSession(`${(sessionCounter += 1)}`, plugins, upstreamProxyUrl);
+  const session = new RequestSession(
+    `${(sessionCounter += 1)}`,
+    plugins,
+    upstreamProxyUrl,
+    browserMatcher,
+  );
   mitmProxy.registerSession(session, false);
   Helpers.needsClosing.push(session);
 
