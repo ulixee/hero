@@ -625,11 +625,6 @@ class PageEventsRecorder {
     if (action === DomActionType.added) {
       this.nodeIdToParentNodeId[serial.id] = serial.parentNodeId;
 
-      // don't include this if it's hero id
-      if (this.doNotTrackElementsById.has(serial.id)) {
-        return;
-      }
-
       if (this.doNotTrackElementsById.has(serial.previousSiblingId)) {
         // get previous node that's tracked
         let previousNode: ChildNode = this.doNotTrackElementsById.get(serial.previousSiblingId);
@@ -640,6 +635,10 @@ class PageEventsRecorder {
         } while (previousNode && this.doNotTrackElementsById.has(nodeId));
         serial.previousSiblingId = nodeId;
       }
+    }
+    // don't include this if it's hero id
+    if (this.doNotTrackElementsById.has(serial.id)) {
+      return;
     }
     this.domChanges.push([action, serial, timestamp, idx()]);
   }
