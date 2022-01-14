@@ -195,6 +195,7 @@ export default class Session
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
+      this.loadFrozenTab,
       this.close,
       this.flush,
       this.exportUserProfile,
@@ -267,6 +268,57 @@ export default class Session
     const result = await detachedState.openInNewTab(
       this.viewport,
       `Frozen Tab at Command ${detachedState.detachedAtCommandId}`,
+    );
+
+    this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
+    this.registerDetachedTab(result.detachedTab);
+
+    return result;
+  }
+
+  public async loadFrozenTab(
+    sessionId: string,
+    label: string,
+    atCommandId: number,
+    sourceTabId = 1,
+  ): Promise<{
+    detachedTab: Tab;
+    prefetchedJsPaths: IJsPathResult[];
+  }> {
+    const sessionDb = SessionDb.getCached(sessionId, false);
+    if (!sessionDb) {
+      throw new Error('This session database could not be found');
+    }
+    const mainFrameIds = sessionDb.frames.mainFrameIds();
+    const navigations = sessionDb.frameNavigations.getAllNavigations();
+    let lastLoadedNavigation = navigations[0];
+    for (const navigation of navigations) {
+      if (navigation.startCommandId > atCommandId) break;
+      if (navigation.tabId !== sourceTabId) continue;
+
+      if (mainFrameIds.has(navigation.frameId) && navigation.statusChanges.has('HttpResponded')) {
+        lastLoadedNavigation = navigation;
+      }
+    }
+
+    const domChanges = sessionDb.domChanges.getFrameChanges(
+      lastLoadedNavigation.frameId,
+      lastLoadedNavigation.startCommandId - 1,
+    );
+
+    const detachedState = new DetachedTabState(
+      sessionDb,
+      sourceTabId,
+      mainFrameIds,
+      this,
+      atCommandId,
+      lastLoadedNavigation,
+      domChanges,
+      `frozen-at-${atCommandId}`,
+    );
+    const result = await detachedState.openInNewTab(
+      this.viewport,
+      `Frozen Tab: ${label ?? 'at ' + atCommandId}`,
     );
 
     this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);

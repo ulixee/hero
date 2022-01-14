@@ -141,6 +141,29 @@ export default class CoreSession implements IJsPathEventTarget {
     };
   }
 
+  // @experimental
+  public async loadFrozenTab(
+    sessionId: string,
+    name: string,
+    atCommandId: number,
+    tabId = 1,
+  ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
+    const { detachedTab, prefetchedJsPaths } = await this.commandQueue.runOutOfBand<{
+      detachedTab: ISessionMeta;
+      prefetchedJsPaths: IJsPathResult[];
+    }>('Session.loadFrozenTab', sessionId, name, atCommandId, tabId);
+    const coreTab = new CoreTab(
+      { ...detachedTab, sessionName: this.sessionName },
+      this.connectionToCore,
+      this,
+    );
+    this.frozenTabsById.set(detachedTab.tabId, coreTab);
+    return {
+      coreTab,
+      prefetchedJsPaths,
+    };
+  }
+
   public async close(force = false): Promise<void> {
     await this.shutdownPromise;
     if (this.isClosing) return;
