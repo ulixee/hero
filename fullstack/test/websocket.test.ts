@@ -6,7 +6,7 @@ import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { AddressInfo } from 'net';
-import Hero, { Core } from "../index";
+import Hero, { Core } from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -50,12 +50,14 @@ describe('Websocket tests', () => {
   </body>
   <script>
     const ws = new WebSocket('ws://localhost:${(koaServer.server.address() as AddressInfo).port}');
+    let hasMessage = false;
     ws.onmessage = msg => {
+      hasMessage = true;
       ws.send('Echo ' + msg.data);
     };
     let hasRun = false;
     document.addEventListener('mousemove', () => {
-      if (hasRun) return;
+      if (hasRun || !hasMessage) return;
       hasRun = true;
       ws.send('Final message');
     })

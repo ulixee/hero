@@ -286,7 +286,10 @@ export default class FrameNavigationsObserver {
       return existing.resolvable.promise;
     }
 
-    const resolvable = new Resolvable<INavigation>(timeoutMs ?? 60e3);
+    const resolvable = new Resolvable<INavigation>(
+      timeoutMs ?? 60e3,
+      `Timeout waiting for navigation "${status}"`,
+    );
     this.statusTriggers.push({
       status,
       startCommandId,

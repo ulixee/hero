@@ -1,9 +1,7 @@
 import INavigation from '@ulixee/hero-interfaces/INavigation';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
-import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import DomChangesTable, {
   IDomChangeRecord,
   IDomRecording,
@@ -13,13 +11,14 @@ import Session from './Session';
 import Tab from './Tab';
 import SessionsDb from '../dbs/SessionsDb';
 import { IJsPathHistory } from './JsPath';
+import SessionDb from '../dbs/SessionDb';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 
 export default class DetachedTabState {
   public get url(): string {
     return this.initialPageNavigation.finalUrl;
   }
-
-  public detachedAtCommandId: number;
 
   public get domChangeRange(): { indexRange: [number, number]; timestampRange: [number, number] } {
     if (!this.paintEvents?.length) {
@@ -44,49 +43,68 @@ export default class DetachedTabState {
   }
 
   private readonly domRecording: IDomRecording;
-  private readonly initialPageNavigation: INavigation;
-  private session: Session;
 
   constructor(
-    readonly sourceTab: Tab,
-    initialPageNavigation: INavigation,
+    readonly sessionDb: SessionDb,
+    readonly sourceTabId: number,
+    readonly sourceMainFrameIds: Set<number>,
+    readonly activeSession: Session,
+    readonly detachedAtCommandId: number,
+    private readonly initialPageNavigation: INavigation,
     domChangeRecords: IDomChangeRecord[],
     readonly callsite: string,
     readonly key?: string,
   ) {
-    const session = sourceTab.session;
-    this.detachedAtCommandId = session.commands.lastId;
-    this.session = session;
-    this.initialPageNavigation = initialPageNavigation;
-    this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTab);
-
-    const db = sourceTab.session.db;
+    this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTabId, sessionDb);
 
     this.domRecording = DomChangesTable.toDomRecording(
       domChangeRecords,
-      new Set([sourceTab.mainFrameId]),
-      db.frames.frameDomNodePathsById,
+      sourceMainFrameIds,
+      sessionDb.frames.frameDomNodePathsById,
       true,
     );
 
-    this.mirrorPage = new MirrorPage(this.mirrorNetwork, this.domRecording, false);
+    this.mirrorPage = new MirrorPage(
+      this.mirrorNetwork,
+      this.domRecording,
+      activeSession.options.showBrowserInteractions,
+      true,
+    );
   }
 
-  public async openInNewTab(context: IPuppetContext, viewport: IViewport): Promise<Tab> {
-    await this.mirrorPage.open(context, this.session.id, viewport);
-    const newTab = Tab.create(this.sourceTab.session, this.mirrorPage.page, true, this.sourceTab);
+  public async openInNewTab(
+    viewport: IViewport,
+    label?: string,
+  ): Promise<{ detachedTab: Tab; prefetchedJsPaths: IJsPathResult[] }> {
+    await this.mirrorPage.open(
+      this.activeSession.browserContext,
+      this.sessionDb.sessionId,
+      viewport,
+      this.onNewPuppetPage.bind(this),
+    );
+    const newTab = Tab.create(this.activeSession, this.mirrorPage.page, true, this.sourceTabId);
     const navigation = newTab.navigations.onNavigationRequested(
       'goto',
       this.url,
       this.detachedAtCommandId,
       null,
     );
-    this.mirrorPage.on('goto', ({ loaderId }) =>
+    this.mirrorPage.once('goto', ({ loaderId }) =>
       newTab.navigations.assignLoaderId(navigation, loaderId),
     );
-    await this.mirrorPage.load();
+    const jsPath = newTab.mainFrameEnvironment.jsPath;
+    newTab.once('close', () => {
+      if (jsPath.hasNewExecJsPathHistory) {
+        this.saveHistory(jsPath.execHistory);
+      }
+    });
+    await this.mirrorPage.load(undefined, label);
     await newTab.isReady;
-    return newTab;
+
+    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(
+      this.getJsPathHistory(),
+    );
+    return { detachedTab: newTab, prefetchedJsPaths: prefetches };
   }
 
   public toJSON(): any {
@@ -98,12 +116,12 @@ export default class DetachedTabState {
   }
 
   public getJsPathHistory(): IJsPathHistory[] {
-    const { scriptInstanceMeta } = this.sourceTab.session.options;
+    const { scriptInstanceMeta } = this.activeSession.options;
     return SessionsDb.find().findDetachedJsPathCalls(scriptInstanceMeta, this.callsite, this.key);
   }
 
   public saveHistory(history: IJsPathHistory[]): void {
-    const { scriptInstanceMeta } = this.sourceTab.session.options;
+    const { scriptInstanceMeta } = this.activeSession.options;
     SessionsDb.find().recordDetachedJsPathCalls(
       scriptInstanceMeta,
       history,
@@ -112,19 +130,22 @@ export default class DetachedTabState {
     );
   }
 
-  private static createMirrorNetwork(sourceTab: Tab): MirrorNetwork {
-    const db = sourceTab.session.db;
-    const resources = sourceTab.session.resources.getForTab(sourceTab.id).map(x => {
-      return <IResourceSummary>{
-        url: x.request.url,
-        method: x.request.method,
-        id: x.id,
-        tabId: x.tabId,
-        statusCode: x.response?.statusCode,
-        type: x.type,
-        redirectedToUrl: x.isRedirect ? x.response.url : undefined,
-      };
-    });
+  private async onNewPuppetPage(page: IPuppetPage): Promise<void> {
+    const corePlugins = this.activeSession.plugins?.corePlugins.filter(x => x.onNewPuppetPage);
+
+    if (!corePlugins?.length) return;
+    const sessionSummary = {
+      id: this.activeSession.id,
+      options: this.activeSession.options,
+    };
+
+    await Promise.all(corePlugins.map(x => x.onNewPuppetPage(page, sessionSummary)));
+  }
+
+  private static createMirrorNetwork(sourceTabId: number, db: SessionDb): MirrorNetwork {
+    const resources = db.resources
+      .filter({ hasResponse: true, isGetOrDocument: true })
+      .filter(x => x.tabId === sourceTabId);
 
     const mirrorNetwork = new MirrorNetwork({
       headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],

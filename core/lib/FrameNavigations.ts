@@ -37,12 +37,12 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 
   public history: INavigation[] = [];
+  public initiatedUserAction: { startCommandId: number; reason: NavigationReason };
 
   public logger: IBoundLog;
 
   private readonly historyByLoaderId: { [loaderId: string]: INavigation } = {};
   private readonly historyById: Record<number, INavigation> = {};
-
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
   constructor(
@@ -130,24 +130,32 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       resourceIdResolvable: createPromise(),
       browserRequestId,
     };
-    nextTop.resourceIdResolvable.promise.then(x => (nextTop.resourceId = x)).catch(() => null);
+    nextTop.resourceIdResolvable.promise
+      .then(this.resolveResourceId.bind(this, nextTop))
+      .catch(() => null);
+    this.history.push(nextTop);
+    this.historyById[nextTop.id] = nextTop;
     if (loaderId) this.historyByLoaderId[loaderId] = nextTop;
 
     this.checkStoredNavigationReason(nextTop, url);
+    if (this.initiatedUserAction) {
+      nextTop.navigationReason = this.initiatedUserAction.reason;
+      nextTop.startCommandId = this.initiatedUserAction.startCommandId;
+      this.initiatedUserAction = null;
+    }
 
-    const currentTop = this.top;
     let shouldPublishLocationChange = false;
     // if in-page, set the state to match current top
     if (reason === 'inPage') {
-      if (currentTop) {
-        if (url === currentTop.finalUrl) return;
-
-        for (const state of currentTop.statusChanges.keys()) {
+      if (this.top?.finalUrl === url) return;
+      const lastHttpResponse = this.lastHttpNavigation;
+      if (lastHttpResponse) {
+        for (const state of lastHttpResponse.statusChanges.keys()) {
           if (isPageLoadedStatus(state)) {
             nextTop.statusChanges.set(state, Date.now());
           }
         }
-        nextTop.resourceIdResolvable.resolve(currentTop.resourceIdResolvable.promise);
+        nextTop.resourceIdResolvable.resolve(lastHttpResponse.resourceIdResolvable.promise);
       } else {
         nextTop.statusChanges.set(LoadStatus.AllContentLoaded, nextTop.initiatedTime);
         nextTop.statusChanges.set(ContentPaint, nextTop.initiatedTime);
@@ -158,8 +166,6 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     } else {
       this.lastHttpNavigation = nextTop;
     }
-    this.history.push(nextTop);
-    this.historyById[nextTop.id] = nextTop;
 
     this.emit('navigation-requested', nextTop);
     this.model.insert(nextTop);
@@ -306,16 +312,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
   }
 
-  public assignLoaderId(navigation: INavigation, loaderId: string, url?: string): void {
+  public assignLoaderId(navigation: INavigation, loaderId: string): void {
     if (!loaderId) return;
     this.historyByLoaderId[loaderId] ??= navigation;
     navigation.loaderId = loaderId;
-    if (
-      url &&
-      (navigation.navigationReason === 'goBack' || navigation.navigationReason === 'goForward')
-    ) {
-      navigation.requestedUrl = url;
-    }
     this.model.insert(navigation);
   }
 
@@ -402,6 +402,11 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
 
     this.recordStatusChange(navigation, newStatus, statusChangeDate);
+  }
+
+  private resolveResourceId(navigation: INavigation, resourceId: number): void {
+    navigation.resourceId = resourceId;
+    this.model.insert(navigation);
   }
 
   private recordStatusChange(

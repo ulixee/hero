@@ -67,7 +67,7 @@
     "json2md": "^1.7.0",
     "lerna": "^4.0.0",
     "lint-staged": "^10.5.2",
-    "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
+    "noderdom-detached": "https://github.com/ulixee/noderdom-detached.git#dist",
     "prettier": "^2.2.1",
     "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",

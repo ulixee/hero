@@ -243,6 +243,21 @@ export default class Hero extends AwaitedEventTarget<{
     await tab.close();
   }
 
+  // @experimental
+  public loadFrozenTabs(
+    sessionId: string,
+    tabNameToCommandId: { [name: string]: number },
+  ): { [name: string]: FrozenTab } {
+    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
+
+    const result: { [name: string]: FrozenTab } = {};
+    for (const [name, commandId] of Object.entries(tabNameToCommandId)) {
+      const coreFrozenTab = coreSession.then(x => x.loadFrozenTab(sessionId, name, commandId));
+      result[name] = new FrozenTab(this, coreFrozenTab);
+    }
+    return result;
+  }
+
   public detach(tab: Tab, key?: string): FrozenTab {
     const callSitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
 

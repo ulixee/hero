@@ -37,6 +37,7 @@ import Commands from './Commands';
 import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
+import DetachedTabState from './DetachedTabState';
 
 const { log } = Log(module);
 
@@ -96,6 +97,7 @@ export default class Session
   public readonly db: SessionDb;
 
   public tabsById = new Map<number, Tab>();
+  public detachedTabsById = new Map<number, Tab>();
 
   public get isClosing(): boolean {
     return this._isClosing;
@@ -138,7 +140,6 @@ export default class Session
   private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
   private isResettingState = false;
-  private detachedTabsById = new Map<number, Tab>();
   private readonly logSubscriptionId: number;
 
   constructor(readonly options: ISessionCreateOptions) {
@@ -194,6 +195,7 @@ export default class Session
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
+      this.loadFrozenTab,
       this.close,
       this.flush,
       this.exportUserProfile,
@@ -263,27 +265,66 @@ export default class Session
 
     const detachedState = await sourceTab.createDetachedState(callsite, key);
 
-    const newTab = await detachedState.openInNewTab(this.browserContext, this.viewport);
-
-    this.recordTab(
-      newTab.id,
-      newTab.puppetPage.id,
-      newTab.puppetPage.devtoolsSession.id,
-      sourceTab.id,
-      detachedState.detachedAtCommandId,
+    const result = await detachedState.openInNewTab(
+      this.viewport,
+      `Frozen Tab at Command ${detachedState.detachedAtCommandId}`,
     );
-    this.detachedTabsById.set(newTab.id, newTab);
-    newTab.on('close', () => {
-      if (newTab.mainFrameEnvironment.jsPath.hasNewExecJsPathHistory) {
-        detachedState.saveHistory(newTab.mainFrameEnvironment.jsPath.execHistory);
+
+    this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
+    this.registerDetachedTab(result.detachedTab);
+
+    return result;
+  }
+
+  public async loadFrozenTab(
+    sessionId: string,
+    label: string,
+    atCommandId: number,
+    sourceTabId = 1,
+  ): Promise<{
+    detachedTab: Tab;
+    prefetchedJsPaths: IJsPathResult[];
+  }> {
+    const sessionDb = SessionDb.getCached(sessionId, false);
+    if (!sessionDb) {
+      throw new Error('This session database could not be found');
+    }
+    const mainFrameIds = sessionDb.frames.mainFrameIds();
+    const navigations = sessionDb.frameNavigations.getAllNavigations();
+    let lastLoadedNavigation = navigations[0];
+    for (const navigation of navigations) {
+      if (navigation.startCommandId > atCommandId) break;
+      if (navigation.tabId !== sourceTabId) continue;
+
+      if (mainFrameIds.has(navigation.frameId) && navigation.statusChanges.has('HttpResponded')) {
+        lastLoadedNavigation = navigation;
       }
+    }
 
-      this.detachedTabsById.delete(newTab.id);
-    });
+    const domChanges = sessionDb.domChanges.getFrameChanges(
+      lastLoadedNavigation.frameId,
+      lastLoadedNavigation.startCommandId - 1,
+    );
 
-    const jsPathCalls = detachedState.getJsPathHistory();
-    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPathCalls);
-    return { detachedTab: newTab, prefetchedJsPaths: prefetches };
+    const detachedState = new DetachedTabState(
+      sessionDb,
+      sourceTabId,
+      mainFrameIds,
+      this,
+      atCommandId,
+      lastLoadedNavigation,
+      domChanges,
+      `frozen-at-${atCommandId}`,
+    );
+    const result = await detachedState.openInNewTab(
+      this.viewport,
+      `Frozen Tab: ${label ?? 'at ' + atCommandId}`,
+    );
+
+    this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
+    this.registerDetachedTab(result.detachedTab);
+
+    return result;
   }
 
   public getMitmProxy(): { address: string; password?: string } {
@@ -349,8 +390,8 @@ export default class Session
 
     const first = this.tabsById.size === 0;
     const tab = Tab.create(this, page);
-    this.recordTab(tab.id, page.id, page.devtoolsSession.id);
-    this.registerTab(tab, page);
+    this.recordTab(tab);
+    this.registerTab(tab);
     await tab.isReady;
     if (first) this.db.session.updateConfiguration(this.id, this.meta);
     return tab;
@@ -583,12 +624,12 @@ export default class Session
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ): Promise<Tab> {
-    const tab = Tab.create(this, page, false, parentTab, {
+    const tab = Tab.create(this, page, false, parentTab?.id, {
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoader.id,
     });
-    this.recordTab(tab.id, page.id, page.devtoolsSession.id, parentTab.id);
-    this.registerTab(tab, page);
+    this.recordTab(tab, parentTab.id);
+    this.registerTab(tab);
 
     await tab.isReady;
 
@@ -596,7 +637,7 @@ export default class Session
     return tab;
   }
 
-  private registerTab(tab: Tab, page: IPuppetPage): Tab {
+  private registerTab(tab: Tab): Tab {
     const id = tab.id;
     this.tabsById.set(id, tab);
     tab.on('close', () => {
@@ -605,9 +646,15 @@ export default class Session
         this.emit('all-tabs-closed');
       }
     });
-    page.popupInitializeFn = this.onNewTab.bind(this, tab);
+    tab.puppetPage.popupInitializeFn = this.onNewTab.bind(this, tab);
     this.emit('tab-created', { tab });
     return tab;
+  }
+
+  private registerDetachedTab(tab: Tab): void {
+    const id = tab.id;
+    this.detachedTabsById.set(id, tab);
+    tab.once('close', () => this.detachedTabsById.delete(id));
   }
 
   private async newPage(): Promise<IPuppetPage> {
@@ -623,17 +670,11 @@ export default class Session
     }
   }
 
-  private recordTab(
-    tabId: number,
-    pageId: string,
-    devtoolsSessionId: string,
-    parentTabId?: number,
-    detachedAtCommandId?: number,
-  ): void {
+  private recordTab(tab: Tab, parentTabId?: number, detachedAtCommandId?: number): void {
     this.db.tabs.insert(
-      tabId,
-      pageId,
-      devtoolsSessionId,
+      tab.id,
+      tab.puppetPage.id,
+      tab.puppetPage.devtoolsSession.id,
       this.viewport,
       parentTabId,
       detachedAtCommandId,

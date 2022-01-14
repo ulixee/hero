@@ -177,7 +177,8 @@ describe('basic Navigation tests', () => {
     expect(text.value).toBe('First Load');
 
     const reloadResource = await tab.reload();
-    await tab.waitForLoad(LocationStatus.PaintingStable);
+    const navigation = await tab.waitForLoad(LocationStatus.PaintingStable);
+    expect(navigation.navigationReason).toBe('reload');
     const text2 = await tab.execJsPath(['document', 'body', 'textContent']);
     expect(text2.value).toBe('Second Load');
     expect(reloadResource.id).not.toBe(gotoResource.id);
@@ -198,6 +199,7 @@ describe('basic Navigation tests', () => {
     expect(await tab.getUrl()).toBe(`${koaServer.baseUrl}/`);
 
     await tab.goto(`${koaServer.baseUrl}/backAndForth`);
+    await tab.waitForLoad('PaintingStable');
     expect(await tab.getUrl()).toBe(`${koaServer.baseUrl}/backAndForth`);
 
     const pages = tab.navigations;
@@ -205,10 +207,14 @@ describe('basic Navigation tests', () => {
     expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/backAndForth`);
 
     await tab.goBack();
+    expect(pages.top.navigationReason).toBe('goBack');
+    expect(pages.top.statusChanges.has('ContentPaint')).toBe(true);
     expect(pages.history).toHaveLength(3);
     expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/`);
 
     await tab.goForward();
+    expect(pages.top.navigationReason).toBe('goForward');
+    expect(pages.top.statusChanges.has('ContentPaint')).toBe(true);
     expect(pages.history).toHaveLength(4);
     expect(
       pages.top.statusChanges.has(LoadStatus.AllContentLoaded) ||
@@ -320,6 +326,42 @@ describe('basic Navigation tests', () => {
 
     const pages = tab.navigations;
     expect(pages.history).toHaveLength(2);
+  });
+
+  it('handles an in-page navigation back', async () => {
+    const startingUrl = `${koaServer.baseUrl}/inpage-back`;
+    const navigateToUrl = `${koaServer.baseUrl}/inpage-back#location2`;
+    const { tab } = await createSession();
+
+    koaServer.get('/inpage-back', ctx => {
+      ctx.body = `<body>
+<a href='#location2'>Clicker</a>
+
+<div id="location2">
+    <h2>Destination</h2>
+</div>
+
+</body>`;
+    });
+
+    await tab.goto(startingUrl);
+
+    await tab.waitForLoad(LocationStatus.PaintingStable);
+    await tab.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    await tab.waitForLocation(LocationTrigger.change);
+    await tab.waitForLoad('DomContentLoaded');
+    expect(tab.url).toBe(navigateToUrl);
+    await tab.goBack();
+    expect(tab.url).toBe(startingUrl);
+    expect(tab.navigations.top.navigationReason).toBe('goBack');
+    expect(tab.navigations.history).toHaveLength(3);
+    expect(tab.navigations.top.statusChanges.has('DomContentLoaded')).toBe(true);
   });
 
   it('handles an in-page navigation change that happens before page load', async () => {

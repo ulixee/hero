@@ -429,58 +429,36 @@ export default class Tab
   }
 
   public async goBack(options?: { timeoutMs?: number }): Promise<string> {
-    const navigation = this.navigations.onNavigationRequested(
-      'goBack',
-      null,
-      this.lastCommandId,
-      null,
-    );
-    const backUrl = await this.puppetPage.goBack();
-    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id, backUrl);
-
+    this.navigations.initiatedUserAction = { reason: 'goBack', startCommandId: this.lastCommandId };
+    await this.puppetPage.goBack();
     await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, options);
     return this.url;
   }
 
   public async goForward(options?: { timeoutMs?: number }): Promise<string> {
-    const navigation = this.navigations.onNavigationRequested(
-      'goForward',
-      null,
-      this.lastCommandId,
-      null,
-    );
-    const url = await this.puppetPage.goForward();
-    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoader.id, url);
+    this.navigations.initiatedUserAction = {
+      reason: 'goForward',
+      startCommandId: this.lastCommandId,
+    };
+    await this.puppetPage.goForward();
     await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, options);
     return this.url;
   }
 
   public async reload(options?: { timeoutMs?: number }): Promise<IResourceMeta> {
-    const navigation = this.navigations.onNavigationRequested(
-      'reload',
-      this.url,
-      this.lastCommandId,
-      null,
-    );
+    this.navigations.initiatedUserAction = { reason: 'reload', startCommandId: this.lastCommandId };
 
     const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
     const timeoutMessage = `Timeout waiting for "tab.reload()"`;
 
-    let loaderId = this.puppetPage.mainFrame.activeLoader.id;
+    const loaderId = this.puppetPage.mainFrame.activeLoader.id;
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
     if (this.puppetPage.mainFrame.activeLoader.id === loaderId) {
-      const frameNavigated = await timer.waitForPromise(
+      await timer.waitForPromise(
         this.puppetPage.mainFrame.waitOn('frame-navigated', null, options?.timeoutMs),
         timeoutMessage,
       );
-      loaderId = frameNavigated.loaderId;
     }
-
-    this.navigations.assignLoaderId(
-      navigation,
-      loaderId ?? this.puppetPage.mainFrame.activeLoader?.id,
-    );
-
     const resource = await timer.waitForPromise(
       this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
@@ -685,7 +663,17 @@ export default class Tab
           : [],
       domChanges: domChanges.length,
     });
-    return new DetachedTabState(this, lastLoadedNavigation, domChanges, callsite, key);
+    return new DetachedTabState(
+      this.session.db,
+      this.id,
+      new Set([lastLoadedNavigation.frameId]),
+      this.session,
+      this.session.commands.lastId,
+      lastLoadedNavigation,
+      domChanges,
+      callsite,
+      key,
+    );
   }
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1126,12 +1114,12 @@ export default class Tab
     session: Session,
     puppetPage: IPuppetPage,
     isDetached?: boolean,
-    parentTab?: Tab,
+    parentTabId?: number,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, isDetached, parentTab?.id, openParams);
+    const tab = new Tab(session, puppetPage, isDetached, parentTabId, openParams);
     tab.logger.info('Tab.created', {
-      parentTab: parentTab?.id,
+      parentTab: parentTabId,
       openParams,
     });
     return tab;
