@@ -70,7 +70,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   public async loadTick(tick: ITick): Promise<void> {
     await this.isReady;
     const tab = this.activeTab;
-    if (!tab.isOpen) await tab.open(this.loadIntoContext.browserContext);
+    await this.openTab(tab);
 
     await tab.loadTick(tick);
   }

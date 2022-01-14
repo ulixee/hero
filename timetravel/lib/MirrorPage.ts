@@ -54,7 +54,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.isReady = ready.promise;
     try {
       this.page = await context.newPage({ runPageScripts: false });
-      this.page.on('close', this.close.bind(this));
+      this.page.once('close', this.close.bind(this));
       if (this.debugLogging) {
         this.page.on('console', console => {
           log.info('MirrorPage.console', {
@@ -158,7 +158,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     await this.injectPaintEvents();
   }
 
-  public async load(paintIndexRange?: [number, number]): Promise<void> {
+  public async load(paintIndexRange?: [number, number], overlayLabel?: string): Promise<void> {
     await this.isReady;
     paintIndexRange ??= [0, this.domRecording.paintEvents.length - 1];
     let [startIndex] = paintIndexRange;
@@ -190,18 +190,24 @@ export default class MirrorPage extends TypedEventEmitter<{
           sessionId: this.sessionId,
         });
       }
-      const showOverlay = isLoadingDocument && this.showBrowserInteractions;
+
+      const showOverlay = (overlayLabel || isLoadingDocument) && this.showBrowserInteractions;
 
       this.lastLoadedPaintIndex = endIndex;
-      if (showOverlay) await this.evaluate(`window.showReplayOverlay();`);
+      if (showOverlay) await this.evaluate(`window.overlay();`);
 
       await this.evaluate(`window.setPaintIndexRange(${startIndex}, ${endIndex});`);
 
-      if (showOverlay)
+      if (showOverlay) {
+        const options: { hide?: boolean; notify?: string } = {
+          notify: overlayLabel,
+          hide: !overlayLabel,
+        };
         await this.evaluate(`(() => {
-      window.hideReplayOverlay();
+      window.overlay(${JSON.stringify(options)});
       window.repositionInteractElements();
       })()`);
+      }
     }
   }
 

@@ -51,7 +51,7 @@ export default class Commands {
     if (this.nextCommandMeta) {
       const { commandId, sendDate, startDate, callsite } = this.nextCommandMeta;
       this.nextCommandMeta = null;
-      commandMeta.id = commandId;
+      if (commandId) commandMeta.id = commandId;
       commandMeta.clientSendDate = sendDate?.getTime();
       commandMeta.clientStartDate = startDate?.getTime();
       commandMeta.callsite = callsite;

@@ -100,7 +100,7 @@ export class BrowserContext
     if (!page) {
       const pageAttachedPromise = new Resolvable<Page>(
         60e3,
-        'Error creating page. Timed out waiting to attach',
+        'Error creating page. Timed-out waiting to attach',
       );
       this.waitForPageAttachedById.set(targetId, pageAttachedPromise);
       page = await pageAttachedPromise.promise;

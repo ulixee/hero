@@ -179,6 +179,7 @@ export default class SessionDb {
   }
 
   public static getCached(sessionId: string, fileMustExist = false): SessionDb {
+    if (sessionId.endsWith('.db')) sessionId = sessionId.split('.db').shift();
     if (!this.byId.get(sessionId)?.db?.open) {
       this.byId.set(
         sessionId,
@@ -193,6 +194,7 @@ export default class SessionDb {
 
   public static find(scriptArgs: ISessionFindArgs): ISessionFindResult {
     let { sessionId } = scriptArgs;
+    if (sessionId?.endsWith('.db')) sessionId = sessionId.split('.db').shift();
 
     // NOTE: don't close db - it's from a shared cache
     const sessionsDb = SessionsDb.find();

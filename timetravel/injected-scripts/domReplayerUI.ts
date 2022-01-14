@@ -4,13 +4,13 @@ import {} from '@ulixee/hero-interfaces/IDomChangeEvent';
 declare global {
   interface Window {
     showReplayStatus(text: string);
-    showReplayOverlay();
-    hideReplayOverlay();
+    overlay(options?: { notify?: string; hide?: boolean });
     reattachUI();
   }
 }
 
 let overlayNode: HTMLElement;
+let overlayNotification: HTMLElement;
 let overlayContainer: HTMLElement;
 let overlayShadow: ShadowRoot;
 
@@ -51,14 +51,18 @@ window.showReplayStatus = function showReplayStatus(text: string) {
   }
 };
 
-window.hideReplayOverlay = function hideReplayOverlay() {
-  overlayNode.classList.add('hide');
-};
-
-window.showReplayOverlay = function showReplayOverlay() {
+window.overlay = function overlay(options?: { hide?: boolean; notify?: string }) {
+  if (options?.hide === true) {
+    overlayNode.classList.add('hide');
+    return;
+  }
   if (overlayNode) {
     window.reattachUI();
     overlayNode.classList.remove('hide');
+    if (options?.notify) {
+      overlayNode.classList.add('notify');
+      overlayNotification.textContent = options.notify;
+    }
     return;
   }
 
@@ -67,6 +71,10 @@ window.showReplayOverlay = function showReplayOverlay() {
 
   overlayNode = document.createElement('hero-mask');
   overlayNode.textContent = ' ';
+
+  overlayNotification = document.createElement('hero-notification');
+  overlayNotification.textContent = ' ';
+  overlayNode.appendChild(overlayNotification);
 
   const spinner = document.createElement('hero-spinner');
   for (let i = 0; i < 12; i += 1) {
@@ -88,11 +96,39 @@ window.showReplayOverlay = function showReplayOverlay() {
     opacity: 1;
     z-index: 2147483647;
   }
+  
+  hero-mask.notify {
+    background-color: #eeeeee50;
+    pointer-events: none;
+    cursor: default;
+  }
+  
   hero-mask.hide {
     opacity: 0;
     transition-duration: 100ms;
     cursor: default;
     pointer-events: none;
+  }
+  
+  hero-mask hero-notification {
+    display:block;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    background: rgb(250, 244, 255);
+    width: 300px;
+    box-shadow: 3px 4px 5px #ddd;
+    margin: 15px auto;
+    pointer-events:auto;
+    border-radius: 10px;
+    height: 50px;
+    vertical-align: middle;
+    line-height: 50px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+  
+  hero-mask.notify hero-spinner {
+    display:none;
   }
 
   hero-spinner {

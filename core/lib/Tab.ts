@@ -663,7 +663,17 @@ export default class Tab
           : [],
       domChanges: domChanges.length,
     });
-    return new DetachedTabState(this, lastLoadedNavigation, domChanges, callsite, key);
+    return new DetachedTabState(
+      this.session.db,
+      this.id,
+      new Set([lastLoadedNavigation.frameId]),
+      this.session,
+      this.session.commands.lastId,
+      lastLoadedNavigation,
+      domChanges,
+      callsite,
+      key,
+    );
   }
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1104,12 +1114,12 @@ export default class Tab
     session: Session,
     puppetPage: IPuppetPage,
     isDetached?: boolean,
-    parentTab?: Tab,
+    parentTabId?: number,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, isDetached, parentTab?.id, openParams);
+    const tab = new Tab(session, puppetPage, isDetached, parentTabId, openParams);
     tab.logger.info('Tab.created', {
-      parentTab: parentTab?.id,
+      parentTab: parentTabId,
       openParams,
     });
     return tab;

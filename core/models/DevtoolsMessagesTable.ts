@@ -107,6 +107,10 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
         return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
       }
 
+      if (key === 'body' && method === 'Fetch.fulfillRequest') {
+        return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
+      }
+
       if ((key === 'headers' || key === 'postData') && params.request) {
         // clean out post data (we have these in resources table)
         return 'HERO_REMOVED_FOR_DB';
