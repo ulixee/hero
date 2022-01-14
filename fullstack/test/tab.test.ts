@@ -155,6 +155,7 @@ describe('Multi-tab scenarios', () => {
     expect(await newTab.tabId).not.toBe(await hero.activeTab.tabId);
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/newTab`);
     await hero.focusTab(newTab);
+    await newTab.waitForLoad('DomContentLoaded');
     const { document } = newTab;
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
