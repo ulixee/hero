@@ -6,7 +6,7 @@ declare global {
   interface Window {
     loadPaintEvents(paintEvents: IFrontendDomChangeEvent[][]);
     applyDomChanges(changes: IFrontendDomChangeEvent[]);
-    setPaintIndexRange(startIndex: number, endIndex: number);
+    setPaintIndex(index: number);
     repositionInteractElements();
     debugLogs: any[];
     isMainFrame: boolean;
@@ -21,7 +21,10 @@ class DomReplayer {
   private paintEvents: IFrontendDomChangeEvent[][] = [];
   private loadedIndex = -1;
 
-  private pendingDelegatedEventsByChildNodeId: { [nodeId: number]: IFrontendDomChangeEvent[] } = {};
+  private pendingDelegatedEventsByChildNodeId: {
+    [nodeId: number]: { changes: IFrontendDomChangeEvent[]; isReverse: boolean };
+  } = {};
+
   private pendingDomChanges: IFrontendDomChangeEvent[] = [];
   private frameContentWindows = new WeakMap<Window, { isReady: boolean; frameNodeId: number }>();
 
@@ -40,23 +43,39 @@ class DomReplayer {
 
   public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
     this.pendingDomChanges.length = 0;
-    this.paintEvents = newPaintEvents;
-    this.loadedIndex = -1;
+    for (let i = 0; i < newPaintEvents.length; i += 1) {
+      const paint = newPaintEvents[i] || [];
+      if (!this.paintEvents[i] || paint.length !== this.paintEvents[i].length) {
+        this.paintEvents[i] = paint;
+      }
+    }
     debugLog('Loaded PaintEvents', newPaintEvents);
   }
 
-  public setPaintIndexRange(startIndex: number, endIndex: number): void {
-    if (endIndex === this.loadedIndex) return;
-    debugLog('Setting paint index range', startIndex, endIndex, document.readyState);
+  public setPaintIndex(index: number): void {
+    if (index === this.loadedIndex) return;
+    debugLog('Setting paint index', index, this.loadedIndex, document.readyState);
 
-    for (let i = startIndex; i <= endIndex; i += 1) {
-      this.applyDomChanges(this.paintEvents[i]);
+    if (this.loadedIndex > index) {
+      this.pendingDomChanges.length = 0;
+      // go backwards
+      for (let i = this.loadedIndex; i > index; i -= 1) {
+        if (!this.paintEvents[i]) continue;
+        const paints = [...this.paintEvents[i]].reverse();
+        this.applyDomChanges(paints, true);
+      }
+    } else {
+      for (let i = this.loadedIndex + 1; i <= index; i += 1) {
+        if (!this.paintEvents[i]) continue;
+        this.applyDomChanges(this.paintEvents[i]);
+      }
     }
 
-    this.loadedIndex = endIndex;
+    this.loadedIndex = index;
+    if (window.repositionInteractElements) window.repositionInteractElements();
   }
 
-  private applyDomChanges(changeEvents: IFrontendDomChangeEvent[]): void {
+  private applyDomChanges(changeEvents: IFrontendDomChangeEvent[], isReverse = false): void {
     this.pendingDomChanges.push(...changeEvents);
     if (document.readyState !== 'complete') {
       document.addEventListener('DOMContentLoaded', () => this.applyDomChanges([]), { once: true });
@@ -71,9 +90,9 @@ class DomReplayer {
       try {
         const frameIdPath = changeEvent.frameIdPath;
         if (frameIdPath && window.selfFrameIdPath !== frameIdPath) {
-          this.delegateToChildFrame(changeEvent);
+          this.delegateToChildFrame(changeEvent, isReverse);
         } else {
-          window.DomActions.replayDomEvent(changeEvent);
+          window.DomActions.replayDomEvent(changeEvent, isReverse);
         }
       } catch (err) {
         debugLog('ERROR applying change', changeEvent, err);
@@ -82,7 +101,7 @@ class DomReplayer {
     this.pendingDomChanges.length = 0;
   }
 
-  private delegateToChildFrame(event: IFrontendDomChangeEvent) {
+  private delegateToChildFrame(event: IFrontendDomChangeEvent, isReverse: boolean) {
     const nodeId = event.frameIdPath
       .replace(window.selfFrameIdPath, '') // replace current path
       .split('_') // get nodeIds
@@ -92,8 +111,9 @@ class DomReplayer {
     const frameNodeId = Number(nodeId);
 
     // queue for pending events
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId] ??= [];
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId].push(event);
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId] ??= { isReverse, changes: [] };
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId].changes.push(event);
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId].isReverse = isReverse;
 
     this.sendPendingEvents(frameNodeId);
   }
@@ -115,7 +135,8 @@ class DomReplayer {
     const events = this.pendingDelegatedEventsByChildNodeId[frameNodeId];
     if (!events) return;
 
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId] = [];
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId].changes = [];
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId].isReverse = false;
 
     frame.contentWindow.postMessage(
       { recipientFrameIdPath: `${window.selfFrameIdPath}_${frameNodeId}`, events, action: 'dom' },
@@ -145,7 +166,7 @@ class DomReplayer {
     const replayer = new DomReplayer();
     (window as any).domReplayer = replayer;
     window.loadPaintEvents = replayer.loadPaintEvents.bind(replayer);
-    window.setPaintIndexRange = replayer.setPaintIndexRange.bind(replayer);
+    window.setPaintIndex = replayer.setPaintIndex.bind(replayer);
     window.applyDomChanges = replayer.applyDomChanges.bind(replayer);
 
     window.addEventListener('message', ev => {
@@ -157,7 +178,7 @@ class DomReplayer {
         window.selfFrameIdPath = ev.data.recipientFrameIdPath;
       }
       if (ev.data.action === 'dom') {
-        replayer.applyDomChanges(ev.data.events);
+        replayer.applyDomChanges(ev.data.events.changes, ev.data.events.isReverse);
       }
     });
 

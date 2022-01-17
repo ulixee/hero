@@ -123,6 +123,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public async showLoadStatus(metadata: ITimelineMetadata): Promise<void> {
+    if (!this.activeTab) return;
     const timelineOffsetPercent = this.activeTab.currentTimelineOffsetPct;
     if (!metadata || timelineOffsetPercent === 100) return;
 
@@ -146,6 +147,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   public async showStatusText(text: string): Promise<void> {
     await this.isReady;
     const tab = this.activeTab;
+    if (!tab) return;
     await this.openTab(tab);
     await tab.showStatusText(text);
   }

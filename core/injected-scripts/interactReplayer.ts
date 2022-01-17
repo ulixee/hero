@@ -313,8 +313,10 @@ function updateScroll(scrollEvent: IFrontendScrollEvent) {
 }
 
 function repositionInteractElements() {
+  createReplayItems();
   if (lastHighlightNodes)
     highlightNodes({ frameIdPath: window.selfFrameIdPath, nodeIds: lastHighlightNodes });
+
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 }
 window.repositionInteractElements = repositionInteractElements;

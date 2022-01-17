@@ -181,20 +181,9 @@ export default class TabPlaybackController {
     this.currentTimelineOffsetPct = specificTimelineOffset ?? newTick.timelineOffsetPercent;
 
     const newPaintIndex = newTick.paintEventIndex;
-    if (newPaintIndex === -1 && newTick.documentUrl) {
+    if (newPaintIndex !== this.paintEventsLoadedIdx) {
       this.paintEventsLoadedIdx = newPaintIndex;
-      await mirrorPage.navigate(newTick.documentUrl);
-    } else if (newPaintIndex !== this.paintEventsLoadedIdx) {
-      const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
-
-      let startIndex = newTick.documentLoadPaintIndex;
-      // is document loaded and moving forward? yes - no need to reload old ticks
-      if (!isBackwards && this.paintEventsLoadedIdx > newTick.documentLoadPaintIndex) {
-        startIndex = this.paintEventsLoadedIdx + 1;
-      }
-
-      this.paintEventsLoadedIdx = newPaintIndex;
-      await mirrorPage.load([startIndex, newPaintIndex]);
+      await mirrorPage.load(newPaintIndex);
     }
 
     const mouseEvent = this.tabDetails.mouse[newTick.mouseEventIndex];

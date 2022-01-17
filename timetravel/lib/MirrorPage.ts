@@ -27,7 +27,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   private sessionId: string;
-  private lastLoadedPaintIndex = -1;
+  private loadedDocument: IDocument;
 
   constructor(
     public network: MirrorNetwork,
@@ -55,10 +55,10 @@ export default class MirrorPage extends TypedEventEmitter<{
     try {
       this.page = await context.newPage({ runPageScripts: false });
       this.page.once('close', this.close.bind(this));
-      if (this.debugLogging) {
-        this.page.on('console', console => {
-          log.info('MirrorPage.console', {
-            ...console,
+      if (this.debugLogging || true) {
+        this.page.on('console', msg => {
+          console.log('MirrorPage.console', {
+            ...msg,
             sessionId: this.sessionId,
           });
         });
@@ -96,7 +96,7 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
     this.domRecording = domRecording;
-    if (this.page) await this.injectPaintEvents();
+    if (this.loadedDocument) await this.injectPaintEvents(this.loadedDocument);
   }
 
   public async addDomRecordingUpdates(domRecording: IDomRecording): Promise<void> {
@@ -139,75 +139,67 @@ export default class MirrorPage extends TypedEventEmitter<{
       }
       iteratedPaintIndex += 1;
     }
-    if (!this.page) return;
-    await this.injectPaintEvents();
+    if (this.loadedDocument) await this.injectPaintEvents(this.loadedDocument);
   }
 
-  public async navigate(url: string): Promise<void> {
+  public async navigate(document: IDocument): Promise<void> {
     await this.isReady;
     if (this.debugLogging) {
       log.info('MirrorPage.goto', {
-        url,
+        document,
         sessionId: this.sessionId,
       });
     }
     const page = this.page;
-    const loader = await page.navigate(url);
-    this.emit('goto', { url, loaderId: loader.loaderId });
+    const loader = await page.navigate(document.url);
+    this.emit('goto', { url: document.url, loaderId: loader.loaderId });
     await page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
-    await this.injectPaintEvents();
+    await this.injectPaintEvents(document);
   }
 
-  public async load(paintIndexRange?: [number, number], overlayLabel?: string): Promise<void> {
+  public async load(newPaintIndex?: number, overlayLabel?: string): Promise<void> {
     await this.isReady;
-    paintIndexRange ??= [0, this.domRecording.paintEvents.length - 1];
-    let [startIndex] = paintIndexRange;
-    const endIndex = paintIndexRange[1];
+    newPaintIndex ??= this.domRecording.paintEvents.length - 1;
 
     let loadingDocument: IDocument;
     for (const document of this.domRecording.documents) {
       if (!document.isMainframe) continue;
-      if (document.paintEventIndex >= startIndex && document.paintEventIndex <= endIndex) {
+      if (document.paintEventIndex <= newPaintIndex) {
         loadingDocument = document;
-        if (document.paintEventIndex > startIndex) startIndex = document.paintEventIndex;
       }
       this.network.registerDoctype(document.url, document.doctype);
     }
 
     const page = this.page;
     let isLoadingDocument = false;
-    if (
-      loadingDocument &&
-      (loadingDocument.url !== page.mainFrame.url || endIndex < this.lastLoadedPaintIndex)
-    ) {
+    if (loadingDocument && loadingDocument.url !== page.mainFrame.url) {
       isLoadingDocument = true;
-      await this.navigate(loadingDocument.url);
+      await this.navigate(loadingDocument);
     }
-    if (startIndex >= 0) {
+    if (newPaintIndex >= 0) {
       if (this.debugLogging) {
         log.info('MirrorPage.loadPaintEvents', {
-          paintIndexRange,
+          newPaintIndex,
           sessionId: this.sessionId,
         });
       }
 
       const showOverlay = (overlayLabel || isLoadingDocument) && this.showBrowserInteractions;
 
-      this.lastLoadedPaintIndex = endIndex;
-      if (showOverlay) await this.evaluate(`window.overlay();`);
+      if (showOverlay) await this.evaluate('window.overlay();');
 
-      await this.evaluate(`window.setPaintIndexRange(${startIndex}, ${endIndex});`);
+      const script: string[] = [];
+      script.push(`window.setPaintIndex(${newPaintIndex});`);
 
       if (showOverlay) {
         const options: { hide?: boolean; notify?: string } = {
           notify: overlayLabel,
           hide: !overlayLabel,
         };
-        await this.evaluate(`(() => {
-      window.overlay(${JSON.stringify(options)});
-      window.repositionInteractElements();
-      })()`);
+        script.push(`window.overlay(${JSON.stringify(options)});`);
+        script.push(`window.repositionInteractElements()`);
       }
+      await this.evaluate(`(()=>{ ${script.join('\n')} })()`);
     }
   }
 
@@ -234,6 +226,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       await this.page.close();
     }
     this.page = null;
+    this.loadedDocument = null;
     this.network.close();
     this.emit('close');
   }
@@ -263,7 +256,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     return result;
   }
 
-  private async injectPaintEvents(): Promise<void> {
+  private async injectPaintEvents(document: IDocument): Promise<void> {
     const columns = [
       'action',
       'nodeId',
@@ -285,11 +278,14 @@ export default class MirrorPage extends TypedEventEmitter<{
 
     const events: IFrontendDomChangeEvent[][] = [];
     const { paintEvents, domNodePathByFrameId } = this.domRecording;
+    this.loadedDocument = document;
 
-    for (const event of paintEvents) {
+    for (let idx = 0; idx < paintEvents.length; idx += 1) {
       const changes = [];
       events.push(changes);
-      for (const change of event.changeEvents) {
+      if (idx < document.paintEventIndex) continue;
+
+      for (const change of paintEvents[idx].changeEvents) {
         if (change.tagName && tagNames[change.tagName] === undefined) {
           tagCounter += 1;
           tagNamesById[tagCounter] = change.tagName;
