@@ -14,6 +14,7 @@ import { IJsPathHistory } from './JsPath';
 import SessionDb from '../dbs/SessionDb';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 
 export default class DetachedTabState {
   public get url(): string {
@@ -52,7 +53,7 @@ export default class DetachedTabState {
     readonly detachedAtCommandId: number,
     private readonly initialPageNavigation: INavigation,
     domChangeRecords: IDomChangeRecord[],
-    readonly callsite: string,
+    readonly callsitePath: string,
     readonly key?: string,
   ) {
     this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTabId, sessionDb);
@@ -74,10 +75,11 @@ export default class DetachedTabState {
 
   public async openInNewTab(
     viewport: IViewport,
+    context?: IPuppetContext,
     label?: string,
   ): Promise<{ detachedTab: Tab; prefetchedJsPaths: IJsPathResult[] }> {
     await this.mirrorPage.open(
-      this.activeSession.browserContext,
+      context ?? this.activeSession.browserContext,
       this.sessionDb.sessionId,
       viewport,
       this.onNewPuppetPage.bind(this),
@@ -117,7 +119,11 @@ export default class DetachedTabState {
 
   public getJsPathHistory(): IJsPathHistory[] {
     const { scriptInstanceMeta } = this.activeSession.options;
-    return SessionsDb.find().findDetachedJsPathCalls(scriptInstanceMeta, this.callsite, this.key);
+    return SessionsDb.find().findDetachedJsPathCalls(
+      scriptInstanceMeta,
+      this.callsitePath,
+      this.key,
+    );
   }
 
   public saveHistory(history: IJsPathHistory[]): void {
@@ -125,7 +131,7 @@ export default class DetachedTabState {
     SessionsDb.find().recordDetachedJsPathCalls(
       scriptInstanceMeta,
       history,
-      this.callsite,
+      this.callsitePath,
       this.key,
     );
   }

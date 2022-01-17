@@ -40,6 +40,7 @@ import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import { IFragment } from '../models/FragmentsTable';
 
 const { log } = Log(module);
 
@@ -108,6 +109,7 @@ export default class FrameEnvironment
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
   private lastDomChangeNavigationId: number;
+  private lastDomChangeIndex = 0;
   private isTrackingMouse = false;
 
   private readonly installedDomAssertions = new Set<string>();
@@ -143,6 +145,7 @@ export default class FrameEnvironment
     process.nextTick(() => this.listen());
     this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
+      this.createFragment,
       this.execJsPath,
       this.fetch,
       this.getChildFrameEnvironment,
@@ -251,6 +254,23 @@ export default class FrameEnvironment
 
   public meta(): IFrameMeta {
     return this.toJSON();
+  }
+
+  public async createFragment(name: string, jsPath: IJsPath): Promise<IFragment> {
+    const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
+    await this.flushPageEventsRecorder();
+    const navigation = this.navigations.lastHttpNavigation;
+    const fragment: IFragment = {
+      name,
+      nodePointerId: nodePointer.id,
+      nodeType: nodePointer.type,
+      nodePreview: nodePointer.preview,
+      frameNavigationId: navigation.id,
+      commandId: this.session.commands.lastId,
+      domChangeEventIndex: this.lastDomChangeIndex,
+    };
+    this.session.db.fragments.insert(fragment);
+    return fragment;
   }
 
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
@@ -566,8 +586,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     const db = this.session.db;
 
     for (const domChange of domChanges) {
-      lastCommand = commands.getCommandForTimestamp(lastCommand, domChange[2]);
-      if (domChange[0] === DomActionType.newDocument || domChange[0] === DomActionType.location) {
+      const [action, nodeData, timestamp, index] = domChange;
+      lastCommand = commands.getCommandForTimestamp(lastCommand, timestamp);
+      if (index > this.lastDomChangeIndex) this.lastDomChangeIndex = index;
+
+      if (action === DomActionType.newDocument || action === DomActionType.location) {
         const url = domChange[1].textContent;
         navigation = this.navigations.findHistory(x => x.finalUrl === url);
 
@@ -577,11 +600,14 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         ) {
           this.lastDomChangeNavigationId = navigation.id;
         }
+        if (index < this.lastDomChangeIndex) {
+          this.lastDomChangeIndex = index;
+        }
       }
 
       // if this is a doctype, set into the navigation
-      if (navigation && domChange[0] === DomActionType.added && domChange[1].nodeType === 10) {
-        navigation.doctype = domChange[1].textContent;
+      if (navigation && action === DomActionType.added && nodeData.nodeType === 10) {
+        navigation.doctype = nodeData.textContent;
         db.frameNavigations.insert(navigation);
       }
 

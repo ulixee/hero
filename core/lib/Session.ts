@@ -38,6 +38,7 @@ import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import DetachedTabState from './DetachedTabState';
+import INodePointer from 'awaited-dom/base/INodePointer';
 
 const { log } = Log(module);
 
@@ -196,6 +197,7 @@ export default class Session
       this.configure,
       this.detachTab,
       this.loadFrozenTab,
+      this.loadAllFragments,
       this.close,
       this.flush,
       this.exportUserProfile,
@@ -267,6 +269,7 @@ export default class Session
 
     const result = await detachedState.openInNewTab(
       this.viewport,
+      this.browserContext,
       `Frozen Tab at Command ${detachedState.detachedAtCommandId}`,
     );
 
@@ -276,11 +279,46 @@ export default class Session
     return result;
   }
 
+  public async loadAllFragments(fromSessionId: string): Promise<
+    {
+      name: string;
+      nodePointer: INodePointer;
+      detachedTab: Tab;
+      prefetchedJsPaths: IJsPathResult[];
+    }[]
+  > {
+    await this.db.flush();
+    const fragments = this.db.fragments.all();
+    return await Promise.all(
+      fragments.map(async fragment => {
+        const { name, frameNavigationId, domChangeEventIndex } = fragment;
+        const { detachedTab, prefetchedJsPaths } = await this.loadFrozenTab(
+          fromSessionId,
+          name,
+          frameNavigationId,
+          domChangeEventIndex,
+        );
+        const nodePointer: INodePointer = {
+          id: fragment.nodePointerId,
+          type: fragment.nodeType,
+          preview: fragment.nodePreview,
+        };
+        detachedTab.mainFrameEnvironment.jsPath.setFragmentNode(nodePointer);
+        return {
+          name,
+          nodePointer,
+          detachedTab,
+          prefetchedJsPaths,
+        };
+      }),
+    );
+  }
+
   public async loadFrozenTab(
     sessionId: string,
-    label: string,
-    atCommandId: number,
-    sourceTabId = 1,
+    name: string,
+    frameNavigationId: number,
+    domChangeEventIndex: number,
   ): Promise<{
     detachedTab: Tab;
     prefetchedJsPaths: IJsPathResult[];
@@ -290,38 +328,31 @@ export default class Session
       throw new Error('This session database could not be found');
     }
     const mainFrameIds = sessionDb.frames.mainFrameIds();
-    const navigations = sessionDb.frameNavigations.getAllNavigations();
-    let lastLoadedNavigation = navigations[0];
-    for (const navigation of navigations) {
-      if (navigation.startCommandId > atCommandId) break;
-      if (navigation.tabId !== sourceTabId) continue;
+    const navigation = sessionDb.frameNavigations.get(frameNavigationId);
 
-      if (mainFrameIds.has(navigation.frameId) && navigation.statusChanges.has('HttpResponded')) {
-        lastLoadedNavigation = navigation;
-      }
-    }
-
-    const domChanges = sessionDb.domChanges.getFrameChanges(
-      lastLoadedNavigation.frameId,
-      lastLoadedNavigation.startCommandId - 1,
+    const domChanges = sessionDb.domChanges.getDomChangesForNavigation(
+      navigation.id,
+      domChangeEventIndex,
     );
+    const atCommandId = domChanges[domChanges.length - 1].commandId;
 
     const detachedState = new DetachedTabState(
       sessionDb,
-      sourceTabId,
+      navigation.tabId,
       mainFrameIds,
       this,
       atCommandId,
-      lastLoadedNavigation,
+      navigation,
       domChanges,
-      `frozen-at-${atCommandId}`,
+      name, // name is our lookup key
     );
     const result = await detachedState.openInNewTab(
       this.viewport,
-      `Frozen Tab: ${label ?? 'at ' + atCommandId}`,
+      this.browserContext,
+      `Frozen Tab: ${name ?? 'at ' + atCommandId}`,
     );
 
-    this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
+    this.recordTab(result.detachedTab, navigation.tabId, atCommandId);
     this.registerDetachedTab(result.detachedTab);
 
     return result;

@@ -82,6 +82,10 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
+  public async createFragment(name: string, jsPath: IJsPath): Promise<INodePointer> {
+    return await this.commandQueue.run('FrameEnvironment.createFragment', name, jsPath);
+  }
+
   public async getUrl(): Promise<string> {
     return await this.commandQueue.run('FrameEnvironment.getUrl');
   }

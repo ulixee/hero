@@ -65,6 +65,7 @@ import ConnectionManager from './ConnectionManager';
 import './DomExtender';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
+import Fragment from './Fragment';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -79,8 +80,6 @@ export type IStateOptions = Omit<ISessionCreateOptions, 'externalIds' | 'session
 
 export interface IState {
   connection: ConnectionManager;
-  isClosing: boolean;
-  options: IStateOptions;
   clientPlugins: IClientPlugin[];
 }
 
@@ -114,10 +113,14 @@ export default class Hero extends AwaitedEventTarget<{
   protected static options: IHeroDefaults = { ...DefaultOptions };
   private static emitter = new EventEmitter();
 
+  readonly #connectManagerIsReady = createPromise();
+  readonly #fragmentsByName = new Map<string, Fragment>();
+  readonly #options: IStateOptions;
+  #isClosing = false;
+
   constructor(options: IHeroCreateOptions = {}) {
-    const connectionManagerIsReady = createPromise();
     super(async () => {
-      await connectionManagerIsReady.promise;
+      await this.#connectManagerIsReady.promise;
       return {
         target: getState(this).connection.getConnectedCoreSessionOrReject(),
       };
@@ -133,7 +136,7 @@ export default class Hero extends AwaitedEventTarget<{
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
 
-    options = {
+    this.#options = {
       ...options,
       mode: options.mode ?? scriptInstance.mode,
       sessionName,
@@ -142,16 +145,14 @@ export default class Hero extends AwaitedEventTarget<{
       corePluginPaths: [],
     } as IStateOptions;
 
-    const connection = new ConnectionManager(this, options);
+    const connection = new ConnectionManager(this, this.#options);
 
     setState(this, {
       connection,
-      isClosing: false,
-      options,
       clientPlugins: [],
     });
 
-    connectionManagerIsReady.resolve();
+    this.#connectManagerIsReady.resolve();
   }
 
   public get activeTab(): Tab {
@@ -192,7 +193,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get sessionName(): Promise<string> {
-    return Promise.resolve(getState(this).options.sessionName);
+    return Promise.resolve(this.#options.sessionName);
   }
 
   public get meta(): Promise<IHeroMeta> {
@@ -227,9 +228,9 @@ export default class Hero extends AwaitedEventTarget<{
   // METHODS
 
   public async close(): Promise<void> {
-    const { isClosing, connection } = getState(this);
-    if (isClosing) return;
-    setState(this, { isClosing: true });
+    const { connection } = getState(this);
+    if (this.#isClosing) return;
+    this.#isClosing = true;
 
     try {
       return await connection.close();
@@ -243,19 +244,25 @@ export default class Hero extends AwaitedEventTarget<{
     await tab.close();
   }
 
-  // @experimental
-  public loadFrozenTabs(
-    sessionId: string,
-    tabNameToCommandId: { [name: string]: number },
-  ): { [name: string]: FrozenTab } {
-    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
+  public getFragment<T extends ISuperElement>(name: string): T {
+    return this.#fragmentsByName.get(name).element as T;
+  }
 
-    const result: { [name: string]: FrozenTab } = {};
-    for (const [name, commandId] of Object.entries(tabNameToCommandId)) {
-      const coreFrozenTab = coreSession.then(x => x.loadFrozenTab(sessionId, name, commandId));
-      result[name] = new FrozenTab(this, coreFrozenTab);
-    }
-    return result;
+  public async importFragments(sessionId: string): Promise<Fragment[]> {
+    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    const fragments = await coreSession.loadFragments(sessionId);
+    return fragments.map(x => {
+      const frozenTab = new FrozenTab(
+        this,
+        Promise.resolve({
+          coreTab: x.coreTab,
+          prefetchedJsPaths: x.prefetchedJsPaths,
+        }),
+      );
+      const fragment = new Fragment(frozenTab, x.name, x.nodePointer);
+      this.#fragmentsByName.set(fragment.name, fragment);
+      return fragment;
+    });
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {
@@ -340,7 +347,7 @@ export default class Hero extends AwaitedEventTarget<{
   // PLUGINS
 
   public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): void {
-    const { clientPlugins, options, connection } = getState(this);
+    const { clientPlugins, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
     if (connection.hasConnected) {
@@ -354,7 +361,7 @@ export default class Hero extends AwaitedEventTarget<{
       const CorePlugins = filterPlugins(Plugins, PluginTypes.CorePlugin);
       const ClientPlugins = filterPlugins<IClientPluginClass>(Plugins, PluginTypes.ClientPlugin);
       if (CorePlugins.length) {
-        options.corePluginPaths.push(PluginObject);
+        this.#options.corePluginPaths.push(PluginObject);
       }
       ClientPlugins.forEach(ClientPlugin => (ClientPluginsById[ClientPlugin.id] = ClientPlugin));
     } else {
@@ -372,7 +379,7 @@ export default class Hero extends AwaitedEventTarget<{
         clientPlugin.onHero(this, connection.sendToActiveTab);
       }
 
-      options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
+      this.#options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     });
   }
 
