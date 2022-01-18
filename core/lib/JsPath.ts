@@ -77,7 +77,13 @@ export class JsPath {
       }
     }
 
-    // add a node pointer call onto the end if needed
+    return this.getNodePointer(jsPath, containerOffset);
+  }
+
+  public getNodePointer<T>(
+    jsPath: IJsPath,
+    containerOffset: IPoint = { x: 0, y: 0 },
+  ): Promise<IExecJsPathResult<T>> {
     const fnCall = this.getJsPathMethod(jsPath);
     if (fnCall !== getClientRectFnName && fnCall !== getNodePointerFnName) {
       jsPath = [...jsPath, [getNodePointerFnName]];
@@ -161,6 +167,13 @@ export class JsPath {
       this.recordExecResult(jsPath, result, false);
     }
     return results;
+  }
+
+  public setFragmentNode(nodePointer: INodePointer): void {
+    this.nodeIdToHistoryLocation.set(nodePointer.id, { sourceIndex: 0, isFromIterable: false });
+    this.execHistory.push({
+      jsPath: [nodePointer.id, [getNodePointerFnName]],
+    });
   }
 
   private async runJsPath<T>(

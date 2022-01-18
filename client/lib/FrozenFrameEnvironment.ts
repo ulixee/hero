@@ -29,7 +29,7 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
 import * as AwaitedHandler from './SetupAwaitedHandler';
 
-const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
+export const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }

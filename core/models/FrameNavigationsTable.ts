@@ -46,6 +46,10 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     return [...this.allNavigationsById.values()];
   }
 
+  public get(id: number): INavigation {
+    return this.allNavigationsById.get(id) ?? FrameNavigationsTable.toNavigation(this.getById(id));
+  }
+
   public insert(navigation: INavigation): void {
     this.allNavigationsById.set(navigation.id, navigation);
     const record = [
@@ -74,6 +78,12 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     return this.db
       .prepare(`select * from ${this.tableName} order by initiatedTime desc limit 1`)
       .get() as IFrameNavigationRecord;
+  }
+
+  public getById(id: number): IFrameNavigationRecord {
+    return this.db
+      .prepare(`select * from ${this.tableName} where id=?`)
+      .get(id) as IFrameNavigationRecord;
   }
 
   public getMostRecentTabNavigations(

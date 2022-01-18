@@ -30,15 +30,14 @@ interface IBaseExtendNode {
   $isClickable: Promise<boolean>;
   $clearValue(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
+  $extractLater(name: string): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
 }
 
 interface IBaseExtendNodeList {
-  $map<T = any>(
-    iteratorFn: (node: ISuperNode, index: number) => Promise<T>
-  ): Promise<T[]>;
+  $map<T = any>(iteratorFn: (node: ISuperNode, index: number) => Promise<T>): Promise<T[]>;
   $reduce<T = any>(
     iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
     initial: T,
@@ -65,6 +64,11 @@ const NodeExtensionFns: Partial<IBaseExtendNode> = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
+  },
+  async $extractLater(name: string): Promise<void> {
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    await coreFrame.createFragment(name, awaitedPath.toJSON());
   },
   async $type(...typeInteractions: ITypeInteraction[]): Promise<void> {
     const coreFrame = await getCoreFrame(this);
@@ -142,14 +146,17 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     }
     return newArray;
   },
-  async $reduce<T = any>(iteratorFn: (initial: T, node: ISuperNode) => Promise<T>, initial: T): Promise<T> {
+  async $reduce<T = any>(
+    iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
+    initial: T,
+  ): Promise<T> {
     const nodes = await this;
     for (const node of nodes) {
       initial = await iteratorFn(initial, node);
     }
     return initial;
-  }
-}
+  },
+};
 
 for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
   for (const [key, value] of Object.entries(NodeExtensionFns)) {

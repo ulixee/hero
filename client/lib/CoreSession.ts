@@ -16,6 +16,7 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import INodePointer from 'awaited-dom/base/INodePointer';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -141,27 +142,36 @@ export default class CoreSession implements IJsPathEventTarget {
     };
   }
 
-  // @experimental
-  public async loadFrozenTab(
-    sessionId: string,
-    name: string,
-    atCommandId: number,
-    tabId = 1,
-  ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
-    const { detachedTab, prefetchedJsPaths } = await this.commandQueue.runOutOfBand<{
-      detachedTab: ISessionMeta;
+  public async loadFragments(sessionId: string): Promise<
+    {
+      name: string;
+      nodePointer: INodePointer;
+      coreTab: CoreTab;
       prefetchedJsPaths: IJsPathResult[];
-    }>('Session.loadFrozenTab', sessionId, name, atCommandId, tabId);
-    const coreTab = new CoreTab(
-      { ...detachedTab, sessionName: this.sessionName },
-      this.connectionToCore,
-      this,
-    );
-    this.frozenTabsById.set(detachedTab.tabId, coreTab);
-    return {
-      coreTab,
-      prefetchedJsPaths,
-    };
+    }[]
+  > {
+    const fragments = await this.commandQueue.run<
+      {
+        name: string;
+        nodePointer: INodePointer;
+        detachedTab: ISessionMeta;
+        prefetchedJsPaths: IJsPathResult[];
+      }[]
+    >('Session.loadAllFragments', sessionId);
+    return fragments.map(fragment => {
+      const coreTab = new CoreTab(
+        { ...fragment.detachedTab, sessionName: this.sessionName },
+        this.connectionToCore,
+        this,
+      );
+      this.frozenTabsById.set(fragment.detachedTab.tabId, coreTab);
+      return {
+        name: fragment.name,
+        nodePointer: fragment.nodePointer,
+        coreTab,
+        prefetchedJsPaths: fragment.prefetchedJsPaths,
+      };
+    });
   }
 
   public async close(force = false): Promise<void> {

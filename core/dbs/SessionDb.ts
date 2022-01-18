@@ -24,6 +24,7 @@ import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
 import StorageChangesTable from '../models/StorageChangesTable';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
+import FragmentsTable from '../models/FragmentsTable';
 
 const { log } = Log(module);
 
@@ -48,6 +49,7 @@ export default class SessionDb {
   public readonly resourceStates: ResourceStatesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
+  public readonly fragments: FragmentsTable;
   public readonly pageLogs: PageLogsTable;
   public readonly sessionLogs: SessionLogsTable;
   public readonly session: SessionTable;
@@ -87,6 +89,7 @@ export default class SessionDb {
     this.resourceStates = new ResourceStatesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
+    this.fragments = new FragmentsTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
     this.session = new SessionTable(this.db);
     this.mouseEvents = new MouseEventsTable(this.db);
@@ -108,6 +111,7 @@ export default class SessionDb {
       this.resourceStates,
       this.websocketMessages,
       this.domChanges,
+      this.fragments,
       this.pageLogs,
       this.session,
       this.mouseEvents,

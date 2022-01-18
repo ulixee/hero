@@ -116,7 +116,6 @@ export default class Tab
     return this.frameEnvironmentsByPuppetId.get(this.puppetPage.mainFrame.id);
   }
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
