@@ -60,9 +60,7 @@ export default class Resource {
   }
 
   public get buffer(): Promise<Buffer> {
-    const id = getState(this).resource.id;
-    const coreTab = getState(this).coreTab;
-    return coreTab.then(x => x.getResourceProperty<Buffer>(id, 'buffer'));
+    return this.response.buffer;
   }
 
   public get text(): Promise<string> {
@@ -71,6 +69,12 @@ export default class Resource {
 
   public get json(): Promise<any> {
     return this.text.then(JSON.parse);
+  }
+
+  public $extractLater(name: string): Promise<void> {
+    const id = getState(this).resource.id;
+    const coreTab = getState(this).coreTab;
+    return coreTab.then(x => x.collectResource(name, id));
   }
 
   public [Util.inspect.custom](): any {
@@ -152,8 +156,8 @@ export function createResource(coreTab: Promise<CoreTab>, resourceMeta: IResourc
     return createWebsocketResource(resourceMeta, coreTab);
   }
   const resource = new Resource();
-  const request = createResourceRequest(coreTab, resourceMeta.id);
-  const response = createResourceResponse(coreTab, resourceMeta.id);
+  const request = createResourceRequest(coreTab, resourceMeta);
+  const response = createResourceResponse(coreTab, resourceMeta);
   setState(resource, { coreTab, resource: resourceMeta, request, response });
   return resource;
 }

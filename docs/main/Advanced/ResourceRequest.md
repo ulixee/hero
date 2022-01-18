@@ -10,28 +10,28 @@ Instances of this class are associated with a resource returned from `window.wai
 
 Retrieve the actual headers sent to the server (order and casing is preserved)
 
-#### **Returns** `Promise<{ [name: string]: string }>`
+#### **Returns** `{ [name: string]: string }`
 
 ### url
 
 The requested url.
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### timestamp
 
 ISO formatted date string.
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### method
 
 Http method. Possible values: `GET, POST, PUT, DELETE`.
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### postData
 
 Data sent to perform this request (if http post)
 
-#### **Returns** `Promise<string>`
+#### **Returns** `Promise<Buffer>`

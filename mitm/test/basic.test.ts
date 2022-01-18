@@ -227,8 +227,8 @@ describe('basic MitM tests', () => {
     expect(session.requestedUrls).toHaveLength(1);
 
     const resource = await resourcePromise;
-    expect(resource.request.postData).toBeTruthy();
-    expect(resource.request.postData.toString()).toBe(
+    expect(resource.postData).toBeTruthy();
+    expect(resource.postData.toString()).toBe(
       JSON.stringify({ gotData: true, isCompressed: 'no' }),
     );
 
@@ -270,7 +270,7 @@ describe('basic MitM tests', () => {
 
     const resource = await resourcePromise;
     expect(session.requestedUrls).toHaveLength(1);
-    expect(resource.request.postData.toString()).toBe(
+    expect(resource.postData.toString()).toBe(
       JSON.stringify({ largeBuffer: largeBuffer.toString('hex') }),
     );
 

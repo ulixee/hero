@@ -87,6 +87,75 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     return this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
   }
 
+  public getMeta(id: number, includeBody: boolean): IResourceMeta {
+    const columns: (keyof IResourcesRecord)[] = [
+      'id',
+      'frameId',
+      'tabId',
+      'type',
+      'requestMethod',
+      'requestUrl',
+      'requestHeaders',
+      'requestTrailers',
+      'requestTimestamp',
+      'documentUrl',
+      'redirectedToUrl',
+      'receivedAtCommandId',
+      'seenAtCommandId',
+      'responseUrl',
+      'responseHeaders',
+      'responseTrailers',
+      'responseTimestamp',
+      'browserLoadedTimestamp',
+      'browserLoadFailure',
+      'browserServedFromCache',
+      'statusCode',
+      'statusMessage',
+    ];
+    if (includeBody) {
+      columns.push('responseData', 'requestPostData');
+    }
+    const record: IResourcesRecord = this.db
+      .prepare(
+        `select ${columns.toString()}
+        from ${this.tableName} where id=?`,
+      )
+      .get(id);
+
+    return {
+      id: record.id,
+      frameId: record.frameId,
+      tabId: record.tabId,
+      url: record.responseUrl ?? record.requestUrl,
+      type: record.type,
+      documentUrl: record.documentUrl,
+      isRedirect: !!record.redirectedToUrl,
+      receivedAtCommandId: record.receivedAtCommandId,
+      seenAtCommandId: record.seenAtCommandId,
+      request: {
+        url: record.requestUrl,
+        method: record.requestMethod,
+        headers: record.requestHeaders ? JSON.parse(record.requestHeaders) : null,
+        timestamp: record.requestTimestamp,
+        trailers: record.requestTrailers ? JSON.parse(record.requestTrailers) : null,
+        postData: 'requestPostData' in record ? Buffer.from(record.requestPostData ?? []) : null,
+      },
+      response: {
+        url: record.responseUrl,
+        browserLoadedTime: record.browserLoadedTimestamp,
+        browserLoadFailure: record.browserLoadFailure,
+        browserServedFromCache: record.browserServedFromCache,
+        headers: record.responseHeaders ? JSON.parse(record.responseHeaders) : null,
+        trailers: record.responseTrailers ? JSON.parse(record.responseTrailers) : null,
+        timestamp: record.responseTimestamp,
+        statusCode: record.statusCode,
+        statusMessage: record.statusMessage,
+        remoteAddress: null,
+        body: 'responseData' in record ? Buffer.from(record.responseData ?? []) : null,
+      },
+    };
+  }
+
   public save(record: IResourcesRecord): void {
     return this.queuePendingInsert([
       record.id,
@@ -132,6 +201,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   public insert(
     tabId: number,
     meta: IResourceMeta,
+    postData: Buffer,
     body: Buffer,
     extras: {
       socketId: number;
@@ -172,7 +242,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       JSON.stringify(meta.request.headers ?? {}),
       JSON.stringify(meta.request.trailers ?? {}),
       meta.request.timestamp,
-      meta.request.postData,
+      postData,
       extras.redirectedToUrl,
       meta.response?.statusCode,
       meta.response?.statusMessage,
@@ -253,6 +323,20 @@ from ${this.tableName} where ${useResourceBody}`,
       .get(resourceId);
     if (!record) return null;
     return record;
+  }
+
+  public getResourcePostDataById(resourceId: number): Buffer | null {
+    const pendingRecords = this.findPendingRecords(x => x[0] === resourceId);
+
+    let record = pendingRecords.find(x => !!x.requestPostData);
+
+    if (!record) {
+      record = this.db
+        .prepare(`select requestPostData from ${this.tableName} where id=? limit 1`)
+        .get(resourceId);
+    }
+
+    return record?.requestPostData ? Buffer.from(record.requestPostData) : null;
   }
 
   public async getResourceBodyById(resourceId: number, decompress = true): Promise<Buffer> {

@@ -40,7 +40,7 @@ import {
 } from '@ulixee/hero-interfaces/IInteractions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Resource from './Resource';
+import Resource, { createResource } from './Resource';
 import Interactor from './Interactor';
 import IInteractions, {
   Command,
@@ -246,6 +246,21 @@ export default class Hero extends AwaitedEventTarget<{
 
   public getFragment<T extends ISuperElement>(name: string): T {
     return this.#fragmentsByName.get(name).element as T;
+  }
+
+  public async getCollectedResources(
+    sessionId: string,
+  ): Promise<{ name: string; resource: Resource }[]> {
+    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    const resources = await coreSession.getCollectedResources(sessionId);
+
+    const coreTab = getCoreTab(this.activeTab);
+    const results: { name: string; resource: Resource }[] = [];
+    for (const collectedResource of resources) {
+      const resource = createResource(coreTab, collectedResource.resource);
+      results.push({ resource, name: collectedResource.name });
+    }
+    return results;
   }
 
   public async importFragments(sessionId: string): Promise<Fragment[]> {

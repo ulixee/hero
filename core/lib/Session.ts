@@ -39,6 +39,8 @@ import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import DetachedTabState from './DetachedTabState';
 import INodePointer from 'awaited-dom/base/INodePointer';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
 const { log } = Log(module);
 
@@ -196,8 +198,8 @@ export default class Session
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
-      this.loadFrozenTab,
       this.loadAllFragments,
+      this.getCollectedResources,
       this.close,
       this.flush,
       this.exportUserProfile,
@@ -262,6 +264,7 @@ export default class Session
   ): Promise<{
     detachedTab: Tab;
     prefetchedJsPaths: IJsPathResult[];
+    detachedState: DetachedTabState;
   }> {
     const sourceTab = this.getTab(sourceTabId);
 
@@ -276,7 +279,36 @@ export default class Session
     this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
     this.registerDetachedTab(result.detachedTab);
 
-    return result;
+    return { ...result, detachedState };
+  }
+
+  public getCollectedResources(
+    fromSessionId: string,
+  ): Promise<{ name: string; resource: IResourceMeta }[]> {
+    let db = this.db;
+    if (fromSessionId === this.id) {
+      db.flush();
+    } else {
+      db = SessionDb.getCached(fromSessionId);
+    }
+    const resources = db.collectedResources.all().map(x => {
+      const resource = db.resources.getMeta(x.resourceId, true);
+      if (resource.type === 'Websocket') {
+        const messages = db.websocketMessages.getMessages(resource.id);
+        (resource as any).messages = messages.map(
+          message =>
+            <IWebsocketMessage>{
+              message: message.isBinary ? message.message : message.message.toString(),
+              source: message.isFromServer ? 'server' : 'client',
+            },
+        );
+      }
+      return {
+        name: x.name,
+        resource,
+      };
+    });
+    return Promise.resolve(resources);
   }
 
   public async loadAllFragments(fromSessionId: string): Promise<
@@ -293,7 +325,7 @@ export default class Session
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const fragments = db.fragments.all();
+    const fragments = db.collectedFragments.all();
     return await Promise.all(
       fragments.map(async fragment => {
         const { name, frameNavigationId, domChangeEventIndex } = fragment;
@@ -764,8 +796,7 @@ ${data}`,
     options.viewport = record.viewport;
 
     options.geolocation ??= record.createSessionOptions?.geolocation;
-    options.userProfile ??= record.createSessionOptions?.userProfile;
-    options.userProfile ??= {};
+    options.userProfile ??= record.createSessionOptions?.userProfile ?? {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
     options.browserEmulatorId = record.browserEmulatorId;
     options.humanEmulatorId = record.humanEmulatorId;

@@ -23,7 +23,7 @@ export default class MirrorContext {
         deviceProfile: options?.userProfile?.deviceProfile,
         getSessionSummary() {
           return {
-            id: this.sessionId,
+            id: sessionId,
             options,
           };
         },

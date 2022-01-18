@@ -157,61 +157,16 @@ function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithRes
     }
 
     const { id, parentTabId } = parsedResult.detachedTab;
-    const { domChangeRange, url } = parsedResult.detachedState;
+    const { domChangeRange, frameNavigationId, url } = parsedResult.detachedState;
 
-    const parentTabDetails = state.tabsById[parentTabId];
     const tabDetails = state.tabsById[id];
 
-    const [startTimestamp, endTimestamp] = domChangeRange.timestampRange;
-    const [startIndex, endIndex] = domChangeRange.indexRange;
-
-    const paintTick: ITick = {
-      eventType: 'paint',
-      eventTypeIndex: 0,
-      commandId: -1,
-      timestamp: tabDetails.tab.createdTime + 1,
-      isMajor: false,
-      timelineOffsetPercent: 1,
-      isNewDocumentTick: true,
-      paintEventIndex: 0,
-      documentUrl: url,
-      documentLoadPaintIndex: 0,
+    tabDetails.detachedPaintEvents = {
+      ...domChangeRange,
+      frameNavigationId,
+      url,
+      sourceTabId: parentTabId,
     };
-
-    tabDetails.ticks.unshift(paintTick);
-
-    const consolidatedPaintEvent: IPaintEvent = {
-      changeEvents: [],
-      commandId: command.id,
-      timestamp: paintTick.timestamp,
-    };
-    tabDetails.paintEvents.push(consolidatedPaintEvent);
-
-    const frameIds = new Set<number>();
-    for (const paintEvent of parentTabDetails.paintEvents) {
-      const { timestamp } = paintEvent;
-      if (timestamp > endTimestamp) break;
-      if (timestamp < startTimestamp) continue;
-
-      for (const change of paintEvent.changeEvents) {
-        let includeChange = true;
-
-        if (timestamp === startTimestamp && change.eventIndex < startIndex) {
-          includeChange = false;
-        }
-
-        if (timestamp === endTimestamp && change.eventIndex > endIndex) {
-          includeChange = false;
-        }
-
-        if (includeChange) {
-          frameIds.add(change.frameId);
-          consolidatedPaintEvent.changeEvents.push(change);
-        }
-      }
-    }
-    const documents = parentTabDetails.documents.filter(x => frameIds.has(x.frameId));
-    tabDetails.documents.push(...documents);
   }
 }
 
@@ -367,6 +322,13 @@ export interface ITabDetails {
   scroll?: IScrollRecord[];
   commands?: ICommandWithResult[];
   paintEvents?: IPaintEvent[];
+  detachedPaintEvents?: {
+    sourceTabId: number;
+    url: string;
+    frameNavigationId: number;
+    indexRange: [number, number];
+    timestampRange: [number, number];
+  };
   documents: IDocument[];
 }
 

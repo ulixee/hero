@@ -15,6 +15,10 @@ export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessag
     ]);
   }
 
+  public getMessages(resourceId: number): IWebsocketMessageRecord[] {
+    return this.db.prepare(`select * from ${this.tableName} where resourceId=?`).all(resourceId);
+  }
+
   public insert(lastCommandId: number, resourceMessage: IWebsocketResourceMessage): void {
     return this.queuePendingInsert([
       resourceMessage.messageId,

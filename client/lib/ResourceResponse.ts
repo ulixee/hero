@@ -5,12 +5,14 @@ import IResourceResponse from '@ulixee/hero-interfaces/IResourceResponse';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 
 const { getState, setState } = StateMachine<ResourceResponse, IState>();
 
 interface IState {
   coreTab: Promise<CoreTab>;
-  resourceId: number;
+  resourceId?: number;
+  response: IResourceResponse;
 }
 
 const propertyKeys: (keyof ResourceResponse)[] = [
@@ -28,42 +30,44 @@ const propertyKeys: (keyof ResourceResponse)[] = [
 ];
 
 export default class ResourceResponse {
-  public get browserServedFromCache(): Promise<
-    null | IHttpResourceLoadDetails['browserServedFromCache']
-  > {
-    return getResponseProperty(this, 'browserServedFromCache');
+  public get browserServedFromCache(): null | IHttpResourceLoadDetails['browserServedFromCache'] {
+    return getState(this).response?.browserServedFromCache;
   }
 
-  public get browserLoadFailure(): Promise<string> {
-    return getResponseProperty(this, 'browserLoadFailure');
+  public get browserLoadFailure(): string {
+    return getState(this).response?.browserLoadFailure;
   }
 
-  public get headers(): Promise<IResourceHeaders> {
-    return getResponseProperty(this, 'headers');
+  public get headers(): IResourceHeaders {
+    return getState(this).response?.headers;
   }
 
-  public get url(): Promise<string> {
-    return getResponseProperty(this, 'url');
+  public get url(): string {
+    return getState(this).response?.url;
   }
 
-  public get timestamp(): Promise<Date> {
-    return getResponseProperty(this, 'timestamp').then(x => (x ? new Date(x as number) : null));
+  public get timestamp(): Date {
+    const timestamp = getState(this).response?.timestamp;
+    return timestamp ? new Date(timestamp) : null;
   }
 
-  public get remoteAddress(): Promise<string> {
-    return getResponseProperty(this, 'remoteAddress');
+  public get remoteAddress(): string {
+    return getState(this).response?.remoteAddress;
   }
 
-  public get statusCode(): Promise<number> {
-    return getResponseProperty(this, 'statusCode');
+  public get statusCode(): number {
+    return getState(this).response?.statusCode;
   }
 
-  public get statusMessage(): Promise<string> {
-    return getResponseProperty(this, 'statusMessage');
+  public get statusMessage(): string {
+    return getState(this).response?.statusMessage;
   }
 
   public get buffer(): Promise<Buffer> {
-    return getResponseProperty(this, 'buffer');
+    const state = getState(this);
+    if (state.response?.body) return Promise.resolve(state.response.body);
+    const id = state.resourceId;
+    return state.coreTab.then(x => x.getResourceProperty(id, `response.body`));
   }
 
   public get text(): Promise<string> {
@@ -81,18 +85,9 @@ export default class ResourceResponse {
 
 export function createResourceResponse(
   coreTab: Promise<CoreTab>,
-  resourceId?: number,
+  resourceMeta?: IResourceMeta,
 ): ResourceResponse {
   const response = new ResourceResponse();
-  setState(response, { coreTab, resourceId });
+  setState(response, { coreTab, response: resourceMeta.response, resourceId: resourceMeta.id });
   return response;
-}
-
-function getResponseProperty<T>(
-  container: ResourceResponse,
-  name: keyof IResourceResponse | 'buffer',
-): Promise<T> {
-  const state = getState(container);
-  const id = state.resourceId;
-  return state.coreTab.then(x => x.getResourceProperty<T>(id, `response.${name}`));
 }

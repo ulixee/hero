@@ -244,6 +244,7 @@ export interface IRequestSessionRequestEvent {
   id: number;
   url: URL;
   request: IResourceRequest;
+  postData: Buffer;
   documentUrl: string;
   serverAlpn: string;
   protocol: string;

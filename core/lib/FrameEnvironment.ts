@@ -40,7 +40,7 @@ import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { IFragment } from '../models/FragmentsTable';
+import { ICollectedFragment } from '../models/CollectedFragmentsTable';
 
 const { log } = Log(module);
 
@@ -256,11 +256,11 @@ export default class FrameEnvironment
     return this.toJSON();
   }
 
-  public async createFragment(name: string, jsPath: IJsPath): Promise<IFragment> {
+  public async createFragment(name: string, jsPath: IJsPath): Promise<ICollectedFragment> {
     const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
     const navigation = this.navigations.lastHttpNavigation;
-    const fragment: IFragment = {
+    const fragment: ICollectedFragment = {
       name,
       nodePointerId: nodePointer.id,
       nodeType: nodePointer.type,
@@ -269,7 +269,7 @@ export default class FrameEnvironment
       commandId: this.session.commands.lastId,
       domChangeEventIndex: this.lastDomChangeIndex,
     };
-    this.session.db.fragments.insert(fragment);
+    this.session.db.collectedFragments.insert(fragment);
     return fragment;
   }
 

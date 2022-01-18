@@ -21,6 +21,16 @@ export default class WebsocketMessages {
     });
   }
 
+  public getMessages(resourceId: number): IWebsocketMessage[] {
+    const messages: IWebsocketMessage[] = [];
+    for (const message of this.websocketMessages) {
+      if (message.resourceId === resourceId) {
+        messages.push(message);
+      }
+    }
+    return messages;
+  }
+
   public listen(resourceId: number, listenerFn: (message: IWebsocketMessage) => any): void {
     if (!this.websocketListeners[resourceId]) {
       this.websocketListeners[resourceId] = [];

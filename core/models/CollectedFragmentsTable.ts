@@ -1,12 +1,12 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
-export default class FragmentsTable extends SqliteTable<IFragment> {
+export default class CollectedFragmentsTable extends SqliteTable<ICollectedFragment> {
   private names = new Set<string>();
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
-      'Fragments',
+      'CollectedFragments',
       [
         ['name', 'TEXT', 'NOT NULL PRIMARY KEY'],
         ['commandId', 'INTEGER'],
@@ -20,10 +20,10 @@ export default class FragmentsTable extends SqliteTable<IFragment> {
     );
   }
 
-  public insert(fragment: IFragment): void {
+  public insert(fragment: ICollectedFragment): void {
     if (this.names.has(fragment.name))
       throw new Error(
-        `The provided fragment name (${fragment.name}) must be unique for a session.`,
+        `The collected fragment name (${fragment.name}) must be unique for a session.`,
       );
     this.queuePendingInsert([
       fragment.name,
@@ -37,7 +37,7 @@ export default class FragmentsTable extends SqliteTable<IFragment> {
   }
 }
 
-export interface IFragment {
+export interface ICollectedFragment {
   name: string;
   commandId: number;
   frameNavigationId: number;

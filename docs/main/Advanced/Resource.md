@@ -45,7 +45,7 @@ Was this request redirected
 
 #### **Returns** `boolean`
 
-### data
+### buffer
 
 Load the underlying buffer returned by this network response.
 
@@ -53,13 +53,13 @@ Load the underlying buffer returned by this network response.
 
 ## Methods
 
-### text<em>()</em>
+### text
 
 Convert the returned resource body to a string.
 
 #### **Returns** `Promise<string>`
 
-### json<em>()</em>
+### json
 
 Convert the returned resource body into json.
 

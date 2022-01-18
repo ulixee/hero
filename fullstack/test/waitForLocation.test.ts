@@ -171,9 +171,7 @@ describe('basic waitForLocation change detections', () => {
     await hero.goto(`${koaServer.baseUrl}/change-form`);
     await hero.interact({ click: hero.document.querySelector('input') });
     const result = await hero.waitForLocation('change');
-    await expect(result.response.url).resolves.toBe(
-      `${koaServer.baseUrl}/change-inpage?submit=value`,
-    );
+    expect(result.response.url).toBe(`${koaServer.baseUrl}/change-inpage?submit=value`);
     imagePromise.resolve(null);
     await hero.waitForPaintingStable();
     await expect(hero.url).resolves.toBe(`${koaServer.baseUrl}/change-inpage/1`);
