@@ -287,8 +287,13 @@ export default class Session
       prefetchedJsPaths: IJsPathResult[];
     }[]
   > {
-    await this.db.flush();
-    const fragments = this.db.fragments.all();
+    let db = this.db;
+    if (fromSessionId === this.id) {
+      db.flush();
+    } else {
+      db = SessionDb.getCached(fromSessionId);
+    }
+    const fragments = db.fragments.all();
     return await Promise.all(
       fragments.map(async fragment => {
         const { name, frameNavigationId, domChangeEventIndex } = fragment;

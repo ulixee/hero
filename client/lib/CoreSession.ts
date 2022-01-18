@@ -158,6 +158,7 @@ export default class CoreSession implements IJsPathEventTarget {
         prefetchedJsPaths: IJsPathResult[];
       }[]
     >('Session.loadAllFragments', sessionId);
+    if (!fragments) return [];
     return fragments.map(fragment => {
       const coreTab = new CoreTab(
         { ...fragment.detachedTab, sessionName: this.sessionName },
