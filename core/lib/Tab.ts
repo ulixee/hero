@@ -989,6 +989,7 @@ export default class Tab
       message: event.message,
       isFromServer: event.isFromServer,
       lastCommandId: this.lastCommandId,
+      timestamp: event.timestamp,
     });
   }
 

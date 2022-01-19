@@ -66,6 +66,7 @@ import './DomExtender';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import Fragment from './Fragment';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -250,15 +251,34 @@ export default class Hero extends AwaitedEventTarget<{
 
   public async getCollectedResources(
     sessionId: string,
-  ): Promise<{ name: string; resource: Resource }[]> {
+  ): Promise<{ name: string; resource: ICollectedResource }[]> {
     const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
     const resources = await coreSession.getCollectedResources(sessionId);
 
-    const coreTab = getCoreTab(this.activeTab);
-    const results: { name: string; resource: Resource }[] = [];
-    for (const collectedResource of resources) {
-      const resource = createResource(coreTab, collectedResource.resource);
-      results.push({ resource, name: collectedResource.name });
+    const results: { name: string; resource: ICollectedResource }[] = [];
+    for (const collected of resources) {
+      const resource = collected.resource as ICollectedResource;
+      const buffer = resource.response?.body;
+      delete resource.response?.body;
+
+      const text = (): string => buffer?.toString();
+      const json = (): any => (buffer ? JSON.parse(buffer.toString()) : null);
+
+      resource.buffer = buffer;
+
+      if (resource.response) {
+        Object.defineProperties(resource.response, {
+          buffer: { get: () => buffer },
+          json: { get: json },
+          text: { get: text },
+        });
+      }
+      Object.defineProperties(resource, {
+        buffer: { get: () => buffer },
+        json: { get: json },
+        text: { get: text },
+      });
+      results.push({ resource, name: collected.name });
     }
     return results;
   }

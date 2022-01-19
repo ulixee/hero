@@ -56,6 +56,7 @@ export default class WebsocketMessages {
     isFromServer: boolean;
     message: string | Buffer;
     lastCommandId: number;
+    timestamp: number;
   }): IWebsocketResourceMessage | undefined {
     if (!event.resourceId) {
       this.logger.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
@@ -64,13 +65,14 @@ export default class WebsocketMessages {
       return;
     }
 
-    const { resourceId, isFromServer, message } = event;
+    const { resourceId, isFromServer, message, timestamp } = event;
 
     const resourceMessage = {
       resourceId,
       message,
       messageId: (this.websocketMessageIdCounter += 1),
       source: isFromServer ? 'server' : 'client',
+      timestamp,
     } as IWebsocketResourceMessage;
 
     this.websocketMessages.push(resourceMessage);
