@@ -502,23 +502,22 @@ export default class MitmProxy {
     }
   }
 
-  private static async getCertificate(host: string): Promise<{ cert: string; key: string }> {
+  private static async getCertificate(host: string): Promise<{ cert: Buffer; key: Buffer }> {
     const { networkDb, certificateGenerator } = this;
 
     if (!certificateGenerator) return null;
 
     await certificateGenerator.waitForConnected;
-    const key = await certificateGenerator.getPrivateKey();
     const existing = networkDb.certificates.get(host);
     if (existing) {
       return {
-        key,
+        key: existing.key,
         cert: existing.pem,
       };
     }
     // if it doesn't exist, generate now
-    const { expireDate, cert } = await certificateGenerator.generateCerts(host);
-    networkDb.certificates.insert({ host, pem: cert, expireDate });
+    const { expireDate, cert, key } = await certificateGenerator.generateCerts(host);
+    networkDb.certificates.insert({ host, pem: cert, expireDate, key });
     return { key, cert };
   }
 
