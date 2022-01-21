@@ -7,6 +7,12 @@ import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/Resou
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import Fetch = Protocol.Fetch;
 
+interface IMirrorNetworkConfig {
+  headersFilter?: (string | RegExp)[];
+  ignoreJavascriptRequests?: boolean;
+  useResourcesOnce?: boolean;
+}
+
 export default class MirrorNetwork {
   public resourceLookup: { [method_url: string]: IResourceSummary[] } = {};
   public headersFilter: (string | RegExp)[];
@@ -18,11 +24,7 @@ export default class MirrorNetwork {
     id: number,
   ) => Promise<ISessionResourceDetails> | ISessionResourceDetails;
 
-  constructor(config?: {
-    headersFilter?: (string | RegExp)[];
-    ignoreJavascriptRequests?: boolean;
-    useResourcesOnce?: boolean;
-  }) {
+  constructor(config?: IMirrorNetworkConfig) {
     this.headersFilter = config?.headersFilter ?? [];
     this.ignoreJavascriptRequests = config?.ignoreJavascriptRequests ?? false;
     this.useResourcesOnce = config?.useResourcesOnce ?? false;
@@ -66,11 +68,16 @@ export default class MirrorNetwork {
     const resource = await this.loadResourceDetails(match.id);
     const { headers, contentEncoding, isJavascript } = this.getMockHeaders(resource);
 
-    if (this.ignoreJavascriptRequests && (isJavascript || request.resourceType === 'Script')) {
+    if (
+      this.ignoreJavascriptRequests &&
+      (request.resourceType === 'Script' ||
+        matches[0].contentType.includes('json') ||
+        matches[0].contentType.includes('javascript'))
+    ) {
       return {
         requestId: request.requestId,
         responseCode: 200,
-        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+        responseHeaders: [{ name: 'Content-Type', value: matches[0].contentType }],
         body: '',
       };
     }
@@ -158,11 +165,19 @@ export default class MirrorNetwork {
   public static createFromSessionDb(
     db: SessionDb,
     tabId?: number,
-    resourceFilters?: { hasResponse?: boolean; isGetOrDocument?: boolean },
+    resourceFilters: { hasResponse?: boolean; isGetOrDocument?: boolean } = {
+      hasResponse: true,
+      isGetOrDocument: true,
+    },
+    config?: IMirrorNetworkConfig,
   ): MirrorNetwork {
-    const network = new MirrorNetwork();
+    const network = new MirrorNetwork(config);
 
-    const resources = db.resources.filter(resourceFilters ?? {});
+    const resources = db.resources.filter(resourceFilters ?? {}).filter(x => {
+      if (tabId) return x.tabId === tabId;
+      return true;
+    });
+
     network.loadResources(resources, MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, db));
     return network;
   }

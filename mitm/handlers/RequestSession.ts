@@ -18,6 +18,8 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
 import ResourceState from '../interfaces/ResourceState';
 import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
+import { SecureContextOptions } from 'tls';
+import { MitmProxy } from '../index';
 
 const { log } = Log(module);
 
@@ -27,17 +29,16 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   } = {};
 
   public isClosing = false;
-  public blockedResources: {
-    types: IResourceType[];
-    urls: string[];
+  public interceptorHandlers: {
+    types?: IResourceType[];
+    urls?: string[];
     handlerFn?: (
+      url: URL,
+      type: IResourceType,
       request: http.IncomingMessage | http2.Http2ServerRequest,
       response: http.ServerResponse | http2.Http2ServerResponse,
-    ) => boolean;
-  } = {
-    types: [],
-    urls: [],
-  };
+    ) => boolean | Promise<boolean>;
+  }[] = [];
 
   public requestAgent: MitmRequestAgent;
   public requestedUrls: {
@@ -140,24 +141,32 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     setImmediate(() => this.emit('close'));
   }
 
-  public shouldBlockRequest(url: string): boolean {
-    if (!this.blockedResources?.urls) {
-      return false;
-    }
-    for (const blockedUrlFragment of this.blockedResources.urls) {
-      if (url.includes(blockedUrlFragment) || url.match(blockedUrlFragment)) {
-        return true;
+  public shouldInterceptRequest(url: string): boolean {
+    for (const handler of this.interceptorHandlers) {
+      if (!handler.urls) continue;
+      for (const blockedUrlFragment of handler.urls) {
+        if (url.includes(blockedUrlFragment) || url.match(blockedUrlFragment)) {
+          return true;
+        }
       }
     }
     return false;
   }
 
-  // function to override for
-  public blockHandler(
+  public async didHandleInterceptResponse(
+    ctx: IMitmRequestContext,
     request: http.IncomingMessage | http2.Http2ServerRequest,
     response: http.ServerResponse | http2.Http2ServerResponse,
-  ): boolean {
-    if (this.blockedResources?.handlerFn) return this.blockedResources.handlerFn(request, response);
+  ): Promise<boolean> {
+    const url = ctx.url.href;
+    for (const handler of this.interceptorHandlers) {
+      const isMatch =
+        handler.types?.includes(ctx.resourceType) ||
+        handler.urls?.some(x => url.includes(x) || url.match(x));
+      if (isMatch && (await handler.handlerFn(ctx.url, ctx.resourceType, request, response))) {
+        return true;
+      }
+    }
     return false;
   }
 
@@ -250,7 +259,7 @@ export interface IRequestSessionRequestEvent {
   protocol: string;
   socketId: number;
   isHttp2Push: boolean;
-  didBlockResource: boolean;
+  wasIntercepted: boolean;
   originalHeaders: IResourceHeaders;
   localAddress: string;
 }

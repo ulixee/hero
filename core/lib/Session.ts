@@ -645,7 +645,7 @@ export default class Session
   private onMitmResponse(event: IRequestSessionResponseEvent): void {
     const resource = this.resources.onMitmResponse(event, this.getLastActiveTab());
     const tab = this.tabsById.get(resource.tabId);
-    if (!event.didBlockResource) {
+    if (!event.wasIntercepted) {
       tab?.emit('resource', resource);
     }
     tab?.checkForResolvedNavigation(event.browserRequestId, resource);

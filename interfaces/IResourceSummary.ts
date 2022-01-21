@@ -11,4 +11,5 @@ export default interface IResourceSummary {
   redirectedToUrl?: string;
   timestamp?: number;
   hasResponse: boolean;
+  contentType: string;
 }

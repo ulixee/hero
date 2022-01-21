@@ -304,12 +304,13 @@ export default class MitmProxy {
       let isHttp2 = true;
       try {
         const requestSession = this.sessionById[sessionId];
-        if (requestSession.bypassAllWithEmptyResponse) {
-          isHttp2 = false;
-        } else if (
-          !requestSession.shouldBlockRequest(`https://${hostname}:${port}`) &&
-          !requestSession.shouldBlockRequest(`https://${hostname}`)
+        if (
+          requestSession.bypassAllWithEmptyResponse ||
+          requestSession.shouldInterceptRequest(`https://${hostname}:${port}`) ||
+          requestSession.shouldInterceptRequest(`https://${hostname}`)
         ) {
+          isHttp2 = false;
+        } else {
           const hero = requestSession.requestAgent;
           isHttp2 = await hero.isHostAlpnH2(hostname, port);
         }

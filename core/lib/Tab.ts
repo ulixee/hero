@@ -219,34 +219,40 @@ export default class Tab
 
   public async setBlockedResourceTypes(
     blockedResourceTypes: IBlockedResourceType[],
+    blockedUrls?: string[],
   ): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
-    const blockedResources = mitmSession.blockedResources.types;
+
+    let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
+    if (!interceptor) {
+      mitmSession.interceptorHandlers.push({ types: [] });
+      interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
+    }
     let enableJs = true;
 
     if (blockedResourceTypes.includes('None')) {
-      blockedResources.length = 0;
+      interceptor.types.length = 0;
     } else if (blockedResourceTypes.includes('All')) {
-      blockedResources.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
+      interceptor.types.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
       enableJs = false;
     } else if (blockedResourceTypes.includes('BlockAssets')) {
-      blockedResources.push('Image', 'Stylesheet', 'Script');
+      interceptor.types.push('Image', 'Stylesheet', 'Script');
     } else {
       if (blockedResourceTypes.includes('BlockImages')) {
-        blockedResources.push('Image');
+        interceptor.types.push('Image');
       }
       if (blockedResourceTypes.includes('BlockCssResources')) {
-        blockedResources.push('Stylesheet');
+        interceptor.types.push('Stylesheet');
       }
       if (blockedResourceTypes.includes('BlockJsResources')) {
-        blockedResources.push('Script');
+        interceptor.types.push('Script');
       }
       if (blockedResourceTypes.includes('JsRuntime')) {
         enableJs = false;
       }
     }
     await this.puppetPage.setJavaScriptEnabled(enableJs);
-    mitmSession.blockedResources.urls = [];
+    interceptor.urls = blockedUrls;
   }
 
   public async close(): Promise<void> {
@@ -291,20 +297,19 @@ export default class Tab
 
   public async setOrigin(origin: string): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
-    const originalBlocker = mitmSession.blockedResources;
-    mitmSession.blockedResources = {
-      types: [],
+    const originalBlocker = mitmSession.interceptorHandlers;
+    mitmSession.interceptorHandlers.unshift({
       urls: [origin],
-      handlerFn(request, response) {
+      handlerFn(url, type, request, response) {
         response.end(`<html lang="en"><body>Empty</body></html>`);
         return true;
       },
-    };
+    });
     try {
       await this.puppetPage.navigate(origin);
     } finally {
       // restore originals
-      mitmSession.blockedResources = originalBlocker;
+      mitmSession.interceptorHandlers = originalBlocker;
     }
   }
 

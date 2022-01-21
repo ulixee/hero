@@ -39,7 +39,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['dnsResolvedIp', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
-        ['didUserScriptBlockResource', 'INTEGER'],
+        ['responseIntercepted', 'INTEGER'],
         ['requestOriginalHeaders', 'TEXT'],
         ['responseOriginalHeaders', 'TEXT'],
         ['httpError', 'TEXT'],
@@ -185,7 +185,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       record.dnsResolvedIp,
       record.isHttp2Push ? 1 : 0,
       record.usedArtificialCache ? 1 : 0,
-      record.didUserScriptBlockResource ? 1 : 0,
+      record.responseIntercepted ? 1 : 0,
       record.requestOriginalHeaders,
       record.responseOriginalHeaders,
       record.httpError,
@@ -211,7 +211,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       protocol: string;
       dnsResolvedIp?: string;
       wasCached?: boolean;
-      didBlockResource: boolean;
+      wasIntercepted: boolean;
       browserRequestId?: string;
       isHttp2Push: boolean;
       browserBlockedReason?: string;
@@ -255,7 +255,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.dnsResolvedIp,
       extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
-      extras.didBlockResource ? 1 : 0,
+      extras.wasIntercepted ? 1 : 0,
       JSON.stringify(extras.originalHeaders ?? {}),
       JSON.stringify(extras.responseOriginalHeaders ?? {}),
       errorString,
@@ -299,7 +299,7 @@ from ${this.tableName} where ${useResourceBody}`,
 
     return records
       .filter(resource => {
-        if ((hasResponse && !resource.responseHeaders) || resource.responseHeaders === '{}')
+        if (hasResponse && (!resource.responseHeaders || resource.responseHeaders === '{}'))
           return false;
         if (isGetOrDocument && resource.requestMethod !== 'GET') {
           // if this is a POST of a document, allow it
@@ -357,6 +357,11 @@ from ${this.tableName} where ${useResourceBody}`,
   }
 
   public static toResourceSummary(record: IResourcesRecord): IResourceSummary {
+    const headers =
+      typeof record.responseHeaders === 'string'
+        ? JSON.parse(record.responseHeaders ?? '{}')
+        : record.responseHeaders;
+
     return {
       id: record.id,
       frameId: record.frameId,
@@ -368,6 +373,7 @@ from ${this.tableName} where ${useResourceBody}`,
       redirectedToUrl: record.redirectedToUrl,
       timestamp: record.browserLoadedTimestamp ?? record.responseTimestamp,
       hasResponse: !!record.responseHeaders,
+      contentType: headers['Content-Type'] ?? headers['content-type'],
     };
   }
 
@@ -411,7 +417,7 @@ export interface IResourcesRecord {
   responseData?: Buffer;
   dnsResolvedIp?: string;
   usedArtificialCache: boolean;
-  didUserScriptBlockResource: boolean;
+  responseIntercepted: boolean;
   isHttp2Push: boolean;
   requestOriginalHeaders: string;
   responseOriginalHeaders: string;

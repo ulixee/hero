@@ -56,7 +56,19 @@ export default class DetachedTabState {
     readonly callsitePath: string,
     readonly key?: string,
   ) {
-    this.mirrorNetwork = DetachedTabState.createMirrorNetwork(sourceTabId, sessionDb);
+    this.mirrorNetwork = MirrorNetwork.createFromSessionDb(
+      this.sessionDb,
+      this.sourceTabId,
+      {
+        hasResponse: true,
+        isGetOrDocument: true,
+      },
+      {
+        headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],
+        useResourcesOnce: true,
+        ignoreJavascriptRequests: true,
+      },
+    );
 
     this.domRecording = DomChangesTable.toDomRecording(
       domChangeRecords,
@@ -147,24 +159,5 @@ export default class DetachedTabState {
     };
 
     await Promise.all(corePlugins.map(x => x.onNewPuppetPage(page, sessionSummary)));
-  }
-
-  private static createMirrorNetwork(sourceTabId: number, db: SessionDb): MirrorNetwork {
-    const resources = db.resources
-      .filter({ hasResponse: true, isGetOrDocument: true })
-      .filter(x => x.tabId === sourceTabId);
-
-    const mirrorNetwork = new MirrorNetwork({
-      headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],
-      useResourcesOnce: true,
-      ignoreJavascriptRequests: true,
-    });
-
-    mirrorNetwork.loadResources(
-      resources,
-      MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, db),
-    );
-
-    return mirrorNetwork;
   }
 }
