@@ -72,7 +72,8 @@ export default class MirrorNetwork {
       this.ignoreJavascriptRequests &&
       (request.resourceType === 'Script' ||
         matches[0].contentType.includes('json') ||
-        matches[0].contentType.includes('javascript'))
+        matches[0].contentType.includes('javascript') ||
+        isJavascript)
     ) {
       return {
         requestId: request.requestId,
@@ -133,7 +134,7 @@ export default class MirrorNetwork {
       const name = key.toLowerCase();
 
       for (const entry of this.headersFilter) {
-        if (key.match(entry)) continue;
+        if (name.match(entry)) continue;
       }
 
       if (name === 'content-encoding') {

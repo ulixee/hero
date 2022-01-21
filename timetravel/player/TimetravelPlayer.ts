@@ -40,7 +40,11 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     return false;
   }
 
-  private mirrorNetwork = new MirrorNetwork();
+  private mirrorNetwork = new MirrorNetwork({
+    ignoreJavascriptRequests: true,
+    headersFilter: ['set-cookie'],
+  });
+
   private tabsById = new Map<number, TabPlaybackController>();
   private readonly sessionOptions: ISessionCreateOptions;
   private isReady: Promise<void>;
