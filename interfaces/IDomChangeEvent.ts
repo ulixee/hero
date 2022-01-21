@@ -32,5 +32,10 @@ export interface IFrontendDomChangeEvent extends Omit<INodeData, 'id'> {
   nodeId: number;
   eventIndex: number;
   action: DomActionType;
+  previousPreviousSiblingId?: number;
+  previousParentNodeId?: number;
+  previousTextContent?: string;
+  previousAttributes?: { [key: string]: string };
+  previousProperties?: { [key: string]: string | boolean | number | string[] };
   frameIdPath?: string;
 }

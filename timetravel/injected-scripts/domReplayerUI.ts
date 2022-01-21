@@ -23,7 +23,7 @@ window.reattachUI = function reattachUI() {
 };
 
 window.showReplayStatus = function showReplayStatus(text: string) {
-  if (document.body.children.length === 0) {
+  if (document?.body && document.body.children.length === 0) {
     statusNode = document.createElement('hero-status');
     const styleElement = document.createElement('style');
     styleElement.textContent = `
@@ -111,7 +111,7 @@ window.overlay = function overlay(options?: { hide?: boolean; notify?: string })
   }
   
   hero-mask hero-notification {
-    display:block;
+    display:none;
     font-size: 18px;
     font-weight: bold;
     text-align: center;
@@ -125,6 +125,9 @@ window.overlay = function overlay(options?: { hide?: boolean; notify?: string })
     vertical-align: middle;
     line-height: 50px;
     border: 1px solid rgba(0, 0, 0, 0.3);
+  }
+  hero-mask.notify hero-notification {
+    display:block;
   }
   
   hero-mask.notify hero-spinner {

@@ -25,23 +25,30 @@ class DomActions {
     change: IFrontendDomChangeEvent,
   ) => void)[] = [];
 
-  public static replayDomEvent(event: IFrontendDomChangeEvent): void {
-    const { action } = event;
+  public static replayDomEvent(event: IFrontendDomChangeEvent, isReverse = false): void {
+    let { action } = event;
     if (action === DomActionType.newDocument) return this.onNewDocument(event);
     if (action === DomActionType.location) return this.onLocation(event);
 
-    if (this.isPreservedElement(event)) return;
+    if (isReverse) {
+      if (action === DomActionType.added) action = DomActionType.removed;
+      else if (action === DomActionType.removed) action = DomActionType.added;
+    }
+
+    if (this.isPreservedElement(event, isReverse)) return;
 
     let node: Node;
     let parentNode: Node;
     try {
-      parentNode = this.getNode(event.parentNodeId);
-      node = this.deserializeNode(event, parentNode as Element);
+      parentNode = this.getNode(isReverse ? event.previousParentNodeId : event.parentNodeId);
+      node = this.deserializeNode(event, parentNode as Element, isReverse);
 
-      if (action === DomActionType.added) this.onNodeAdded(node, parentNode, event);
-      if (action === DomActionType.removed) this.onNodeRemoved(node, parentNode, event);
-      if (action === DomActionType.attribute) this.setNodeAttributes(node as Element, event);
-      if (action === DomActionType.property) this.setNodeProperties(node as Element, event);
+      if (action === DomActionType.added) this.onNodeAdded(node, parentNode, event, isReverse);
+      if (action === DomActionType.removed) this.onNodeRemoved(node, parentNode, event, isReverse);
+      if (action === DomActionType.attribute)
+        this.setNodeAttributes(node as Element, event, isReverse);
+      if (action === DomActionType.property)
+        this.setNodeProperties(node as Element, event, isReverse);
       if (action === DomActionType.text) node.textContent = event.textContent;
       if (node instanceof HTMLIFrameElement || node instanceof HTMLFrameElement) {
         this.onFrameModified(node, event);
@@ -67,8 +74,8 @@ class DomActions {
     }
   }
 
-  private static isPreservedElement(event: IFrontendDomChangeEvent): boolean {
-    const { action, nodeId, nodeType } = event;
+  private static isPreservedElement(event: IFrontendDomChangeEvent, isReverse: boolean): boolean {
+    const { nodeId, nodeType } = event;
 
     if (nodeId && nodeType === document.DOCUMENT_NODE) {
       NodeTracker.restore(nodeId, document);
@@ -93,6 +100,12 @@ class DomActions {
       return true;
     }
 
+    let action = event.action;
+    if (isReverse) {
+      if (action === DomActionType.removed) action = DomActionType.added;
+      else if (action === DomActionType.added) action = DomActionType.removed;
+    }
+
     NodeTracker.restore(nodeId, elem);
     if (action === DomActionType.removed) {
       elem.innerHTML = '';
@@ -111,39 +124,79 @@ class DomActions {
       }
     }
     if (event.attributes) {
-      this.setNodeAttributes(elem, event);
+      this.setNodeAttributes(elem, event, isReverse);
     }
     if (event.properties) {
-      this.setNodeProperties(elem, event);
+      this.setNodeProperties(elem, event, isReverse);
     }
     return true;
   }
 
-  private static onNodeAdded(node: Node, parentNode: Node, event: IFrontendDomChangeEvent) {
+  private static onNodeAdded(
+    node: Node,
+    parentNode: Node,
+    event: IFrontendDomChangeEvent,
+    isReverse: boolean,
+  ) {
+    if (!isReverse) this.trackPreviousState(node, event);
+
     if (!parentNode) {
       debugLog('WARN: parent node id not found', event);
       return;
     }
 
-    if (!event.previousSiblingId) {
+    const previousSiblingId = isReverse ? event.previousPreviousSiblingId : event.previousSiblingId;
+
+    if (!previousSiblingId) {
       (parentNode as Element).prepend(node);
     } else {
-      const previous = this.getNode(event.previousSiblingId);
+      const previous = this.getNode(previousSiblingId);
       if (previous) {
         const next = previous.nextSibling;
 
-        if (next) parentNode.insertBefore(node, next);
-        else parentNode.appendChild(node);
+        parentNode.insertBefore(node, next ?? null);
       }
     }
   }
 
-  private static onNodeRemoved(node: Node, parentNode: Node, event: IFrontendDomChangeEvent) {
+  private static trackPreviousState(node: Node, event: IFrontendDomChangeEvent) {
+    if (node.isConnected) {
+      event.previousParentNodeId = node.parentNode ? NodeTracker.getNodeId(node.parentNode) : null;
+      event.previousPreviousSiblingId = node.previousSibling
+        ? NodeTracker.getNodeId(node.previousSibling)
+        : null;
+    }
+  }
+
+  private static onNodeRemoved(
+    node: Node,
+    parentNode: Node,
+    event: IFrontendDomChangeEvent,
+    isReverse: boolean,
+  ) {
+    if (!isReverse) this.trackPreviousState(node, event);
+
+    if (!parentNode && isReverse) {
+      node.parentNode.removeChild(node);
+      return;
+    }
     if (!parentNode) {
       debugLog('WARN: parent node id not found', event);
       return;
     }
+
     if (parentNode.contains(node)) parentNode.removeChild(node);
+    if (isReverse && parentNode) {
+      if (!event.previousPreviousSiblingId) {
+        (parentNode as Element).prepend(node);
+      } else {
+        const previousNode = NodeTracker.getWatchedNodeWithId(
+          event.previousPreviousSiblingId,
+          false,
+        );
+        parentNode.insertBefore(node, previousNode?.nextSibling ?? null);
+      }
+    }
   }
 
   private static onNewDocument(event: IFrontendDomChangeEvent) {
@@ -171,15 +224,26 @@ class DomActions {
     window.history.replaceState({}, 'TimeTravel', event.textContent);
   }
 
-  private static setNodeAttributes(node: Element, data: IFrontendDomChangeEvent) {
-    const attributes = data.attributes;
+  private static setNodeAttributes(
+    node: Element,
+    data: IFrontendDomChangeEvent,
+    usePrevious = false,
+  ) {
+    const attributes = usePrevious ? data.previousAttributes : data.attributes;
     if (!attributes) return;
 
     const namespaces = data.attributeNamespaces;
 
+    const loadPrevious = !usePrevious && !data.previousAttributes;
+    if (loadPrevious) data.previousAttributes ??= {};
+
     for (const [name, value] of Object.entries(attributes)) {
       const ns = namespaces ? namespaces[name] : null;
       try {
+        if (loadPrevious)
+          data.previousAttributes[name] = ns
+            ? node.getAttributeNS(ns, name)
+            : node.getAttribute(name);
         if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML' || !ns) {
           if (value === null) node.removeAttribute(name);
           else node.setAttribute(name, value as any);
@@ -198,17 +262,28 @@ class DomActions {
     }
   }
 
-  private static setNodeProperties(node: Element, data: IFrontendDomChangeEvent) {
-    const properties = data.properties;
+  private static setNodeProperties(
+    node: Element,
+    data: IFrontendDomChangeEvent,
+    usePrevious = false,
+  ) {
+    const properties = usePrevious ? data.previousProperties : data.properties;
     if (!properties) return;
+    const getPrevious = !usePrevious && !data.previousProperties;
+    data.previousProperties ??= {};
+
     for (const [name, value] of Object.entries(properties)) {
       if (name === 'sheet.cssRules') {
         const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
         const newRules = value as string[];
+
+        if (getPrevious) data.previousProperties[name] = [];
         let i = 0;
         for (i = 0; i < sheet.cssRules.length; i += 1) {
           const newRule = newRules[i];
-          if (newRule !== sheet.cssRules[i].cssText) {
+          const currentRule = sheet.cssRules[i].cssText;
+          if (getPrevious) (data.previousProperties[name] as string[]).push(currentRule);
+          if (newRule !== currentRule) {
             sheet.deleteRule(i);
             if (newRule) sheet.insertRule(newRule, i);
           }
@@ -217,16 +292,22 @@ class DomActions {
           sheet.insertRule(newRules[i], i);
         }
       } else {
+        if (getPrevious) data.previousProperties[name] = node[name];
         node[name] = value;
       }
     }
   }
 
-  private static deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
+  private static deserializeNode(
+    data: IFrontendDomChangeEvent,
+    parent: Element,
+    isReverse: boolean,
+  ): Node {
     if (data === null) return null;
 
     let node = this.getNode(data.nodeId);
     if (node) {
+      if (isReverse) return node;
       this.setNodeProperties(node as Element, data);
       this.setNodeAttributes(node as Element, data);
       if (data.textContent) node.textContent = data.textContent;
@@ -236,8 +317,12 @@ class DomActions {
     const SHADOW_NODE_TYPE = 40;
     if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
       // NOTE: we just make all shadows open in replay
-      node = parent.attachShadow({ mode: 'open' });
-      NodeTracker.restore(data.nodeId, node);
+      if (isReverse) {
+        node = parent.shadowRoot;
+      } else {
+        node = parent.attachShadow({ mode: 'open' });
+        NodeTracker.restore(data.nodeId, node);
+      }
       return node;
     }
 

@@ -130,8 +130,6 @@ export default class TimelineRecorder extends TypedEventEmitter<{
   private recordTab(tab: Tab): void {
     tab
       .recordScreen({
-        includeWhiteScreens: true,
-        includeDuplicates: true,
         jpegQuality: 75,
         format: 'jpeg',
         imageSize: {

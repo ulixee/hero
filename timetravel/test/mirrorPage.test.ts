@@ -49,6 +49,7 @@ describe('MirrorPage tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     tab.session.options.showBrowserInteractions = true;
     await InjectedScripts.installInteractionScript(tab.puppetPage);
     await tab.goto(`${koaServer.baseUrl}/domrecording`);
@@ -59,10 +60,12 @@ describe('MirrorPage tests', () => {
     const sourceHtml = await tab.puppetPage.mainFrame.html();
 
     await mirrorPage.load();
+    {
+      const mirrorHtml = await mirrorPage.page.mainFrame.html();
+      expect(mirrorHtml).toBe(sourceHtml);
+    }
 
-    const mirrorHtml = await mirrorPage.page.mainFrame.html();
-    expect(mirrorHtml).toBe(sourceHtml);
-
+    const htmlAtSteps: { html: string; index: number }[] = [];
     let lastCommandId = tab.lastCommandId;
     async function compareTabsAfterEvaluate(evaluateScript: string) {
       await tab.getJsValue(evaluateScript);
@@ -77,6 +80,10 @@ describe('MirrorPage tests', () => {
       await mirrorPage.load();
 
       const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
+      htmlAtSteps.push({
+        html: sourceHtmlNext,
+        index: mirrorPage.domRecording.paintEvents.length - 1,
+      });
       const mirrorHtmlNext = await mirrorPage.page.mainFrame.html();
       // mirror page should not know about the hero-replay nodes
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
@@ -123,6 +130,13 @@ describe('MirrorPage tests', () => {
       const ul2 = document.querySelector('#ul2');
       ul2.append(child, child2, child3);
     `);
+
+    htmlAtSteps.reverse();
+    for (const { index, html } of htmlAtSteps) {
+      await mirrorPage.load(index);
+      const mirrorHtml = await mirrorPage.page.mainFrame.html();
+      expect(mirrorHtml).toBe(html);
+    }
   });
 
   it('should support multiple tabs', async () => {
@@ -159,6 +173,7 @@ describe('MirrorPage tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/dr-tab1`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -222,6 +237,7 @@ describe('MirrorPage tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/data-attr`);
     await tab.waitForLoad('DomContentLoaded');
     const mirrorPage = await createMirrorPage(tab);
