@@ -17,6 +17,7 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import INodePointer from 'awaited-dom/base/INodePointer';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -140,6 +141,12 @@ export default class CoreSession implements IJsPathEventTarget {
       coreTab,
       prefetchedJsPaths,
     };
+  }
+
+  public async getCollectedResources(
+    sessionId: string,
+  ): Promise<{ name: string; resource: IResourceMeta }[]> {
+    return await this.commandQueue.run('Session.getCollectedResources', sessionId);
   }
 
   public async loadFragments(sessionId: string): Promise<

@@ -22,6 +22,7 @@ export interface IPuppetNetworkEvents {
     browserRequestId: string;
     message: string | Buffer;
     isFromServer: boolean;
+    timestamp: number;
   };
   'websocket-handshake': {
     browserRequestId: string;

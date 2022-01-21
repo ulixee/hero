@@ -282,7 +282,7 @@ export default class Resources {
   ): IResourceMeta {
     const request = event.request;
     const resource = this.resourceEventToMeta(tabId, request);
-    this.model.insert(tabId, resource, null, request, error);
+    this.model.insert(tabId, resource, null, request.postData, request, error);
 
     if (!this.resourcesById.has(resource.id)) {
       this.resourcesById.set(resource.id, resource);
@@ -324,7 +324,13 @@ export default class Resources {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     const resourceResponseEvent = resourceEvent as IRequestSessionResponseEvent;
 
-    this.model.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
+    this.model.insert(
+      tabId,
+      resource,
+      resourceResponseEvent.postData,
+      resourceResponseEvent.body,
+      resourceEvent,
+    );
 
     if (isResponse) {
       this.resourcesById.set(resource.id, resource);
@@ -355,7 +361,14 @@ export default class Resources {
 
       if (!resource) {
         this.resourcesById.set(convertedMeta.id, convertedMeta);
-        this.model.insert(tabId, convertedMeta, null, resourceFailedEvent, error);
+        this.model.insert(
+          tabId,
+          convertedMeta,
+          resourceFailedEvent.postData,
+          null,
+          resourceFailedEvent,
+          error,
+        );
         return convertedMeta;
       }
 

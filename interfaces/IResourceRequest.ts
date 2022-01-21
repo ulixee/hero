@@ -6,5 +6,5 @@ export default interface IResourceRequest {
   headers: IResourceHeaders;
   trailers?: IResourceHeaders;
   method: string;
-  postData: Buffer;
+  postData?: Buffer;
 }

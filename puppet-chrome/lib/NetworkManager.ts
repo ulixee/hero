@@ -586,6 +586,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       message,
       browserRequestId,
       isFromServer,
+      timestamp: this.monotonicTimeToUnix(event.timestamp),
     });
   }
 }

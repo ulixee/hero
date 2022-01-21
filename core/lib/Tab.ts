@@ -45,6 +45,7 @@ import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import { disableMitm } from './GlobalPool';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
 const { log } = Log(module);
 
@@ -162,6 +163,7 @@ export default class Tab
       this.reload,
       this.assert,
       this.takeScreenshot,
+      this.collectResource,
       this.waitForFileChooser,
       this.waitForMillis,
       this.waitForNewTab,
@@ -306,27 +308,24 @@ export default class Tab
     }
   }
 
-  public async getResourceProperty<T = string | number | Buffer>(
-    resourceId: number,
-    propertyPath: string,
-  ): Promise<T> {
-    if (propertyPath === 'buffer' || propertyPath === 'response.buffer') {
-      return (await this.session.db.resources.getResourceBodyById(resourceId, true)) as any;
-    }
-
+  public collectResource(name: string, resourceId: number): Promise<void> {
     const resource = this.session.resources.get(resourceId);
+    if (!resource) throw new Error('Unknown resource collected');
+    this.session.db.collectedResources.insert(this.id, resourceId, name);
+    return Promise.resolve();
+  }
 
-    const pathParts = propertyPath.split('.');
-
-    let propertyParent: any = resource;
-    if (pathParts.length > 1) {
-      const parentProp = pathParts.shift();
-      if (parentProp === 'request' || parentProp === 'response') {
-        propertyParent = propertyParent[parentProp];
-      }
+  public async getResourceProperty(
+    resourceId: number,
+    propertyPath: 'response.body' | 'messages' | 'request.postData',
+  ): Promise<Buffer | IWebsocketMessage[]> {
+    if (propertyPath === 'response.body') {
+      return await this.session.db.resources.getResourceBodyById(resourceId, true);
+    } else if (propertyPath === 'request.postData') {
+      return this.session.db.resources.getResourcePostDataById(resourceId);
+    } else if (propertyPath === 'messages') {
+      return this.session.websocketMessages.getMessages(resourceId);
     }
-    const property = pathParts.shift();
-    return propertyParent[property];
   }
 
   public findResource(filter: IResourceFilterProperties): IResourceMeta {
@@ -990,6 +989,7 @@ export default class Tab
       message: event.message,
       isFromServer: event.isFromServer,
       lastCommandId: this.lastCommandId,
+      timestamp: event.timestamp,
     });
   }
 

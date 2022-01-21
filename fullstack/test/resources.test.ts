@@ -115,4 +115,39 @@ describe('basic resource tests', () => {
     await hero.close();
     await waitError;
   });
+
+  it('collects resources for extraction', async () => {
+    const hero = new Hero();
+    const sessionId1 = await hero.sessionId;
+    Helpers.needsClosing.push(hero);
+    {
+      await hero.goto(`${koaServer.baseUrl}/resources-test`);
+      await hero.waitForPaintingStable();
+      const elem = hero.document.querySelector('a');
+      await hero.click(elem);
+
+      const resources = await hero.waitForResource({ type: 'Fetch' });
+      expect(resources).toHaveLength(1);
+      await resources[0].$extractLater('xhr');
+
+      const collected = await hero.getCollectedResources(sessionId1);
+      expect(collected).toHaveLength(1);
+      expect(collected[0].resource.response.json).toEqual({ hi: 'there' });
+      await hero.close();
+    }
+
+    // Test that we can load a previous session too
+    {
+      const hero2 = new Hero();
+      Helpers.needsClosing.push(hero2);
+
+      await hero2.goto(`${koaServer.baseUrl}`);
+      await hero2.waitForPaintingStable();
+      const collected2 = await hero2.getCollectedResources(sessionId1);
+      expect(collected2).toHaveLength(1);
+      expect(collected2[0].resource.url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
+      // should prefetch the body
+      expect(collected2[0].resource.response.buffer).toBeTruthy();
+    }
+  });
 });

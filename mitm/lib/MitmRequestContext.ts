@@ -158,15 +158,14 @@ export default class MitmRequestContext {
   }
 
   public static toEmittedResource(ctx: IMitmRequestContext): IRequestSessionResponseEvent {
-    const request = {
+    const request: IResourceRequest = {
       url: ctx.url?.href,
       headers: ctx.requestHeaders,
       method: ctx.method,
-      postData: ctx.requestPostData,
       timestamp: ctx.requestTime,
-    } as IResourceRequest;
+    };
 
-    const response = {
+    const response: IResourceResponse = {
       url: ctx.responseUrl,
       statusCode: ctx.originalStatus ?? ctx.status,
       statusMessage: ctx.statusMessage,
@@ -177,7 +176,7 @@ export default class MitmRequestContext {
       browserLoadFailure: ctx.browserLoadFailure,
       browserLoadedTime: ctx.browserLoadedTime,
       remoteAddress: ctx.remoteAddress,
-    } as IResourceResponse;
+    };
 
     return {
       id: ctx.id,
@@ -186,6 +185,7 @@ export default class MitmRequestContext {
       frameId: ctx.browserFrameId,
       request,
       response,
+      postData: ctx.requestPostData,
       documentUrl: ctx.documentUrl,
       redirectedToUrl: ctx.redirectedToUrl,
       wasCached: ctx.cacheHandler?.didProposeCachedResource ?? false,

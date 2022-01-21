@@ -112,6 +112,7 @@ export default class DetachedTabState {
   public toJSON(): any {
     return {
       domChangeRange: this.domChangeRange,
+      frameNavigationId: this.initialPageNavigation.id,
       url: this.url,
       detachedAtCommandId: this.detachedAtCommandId,
     };

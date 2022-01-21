@@ -10,37 +10,37 @@ Instances of this class are associated with a resource returned from `window.wai
 
 Will have a value if http response was served from a browser cache.
 
-#### **Returns** `Promise<null | 'service-worker' | 'disk' | 'prefetch' | 'memory'>`
+#### **Returns** `null | 'service-worker' | 'disk' | 'prefetch' | 'memory'`
 
 ### browserLoadFailure
 
 Will have a value if an http error occurred loading this request.
 
-#### **Returns** `Promise<string | null>`
+#### **Returns** `string | null`
 
 ### headers
 
 Retrieve the actual headers returned to the client (order and casing is preserved)
 
-#### **Returns** `Promise<{ [name: string]: string }>`
+#### **Returns** `{ [name: string]: string }`
 
 ### url
 
 The response url (if redirected).
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### timestamp
 
 ISO formatted date string.
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### remoteAddress
 
 IPv4/6 and port of remote socket. `192.168.172.2:5001`
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
 ### statusCode
 
@@ -48,15 +48,15 @@ Http response status code.
 
 NOTE: this value might be null if no HTTP response occurred, or an error occurred.
 
-#### **Returns** `Promise<number>`
+#### **Returns** `number`
 
 ### statusText
 
 Http response status message.
 
-#### **Returns** `Promise<string>`
+#### **Returns** `string`
 
-### data
+### buffer
 
 Load the underlying buffer returned by this network response.
 

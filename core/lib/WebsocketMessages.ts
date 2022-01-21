@@ -21,6 +21,16 @@ export default class WebsocketMessages {
     });
   }
 
+  public getMessages(resourceId: number): IWebsocketMessage[] {
+    const messages: IWebsocketMessage[] = [];
+    for (const message of this.websocketMessages) {
+      if (message.resourceId === resourceId) {
+        messages.push(message);
+      }
+    }
+    return messages;
+  }
+
   public listen(resourceId: number, listenerFn: (message: IWebsocketMessage) => any): void {
     if (!this.websocketListeners[resourceId]) {
       this.websocketListeners[resourceId] = [];
@@ -46,6 +56,7 @@ export default class WebsocketMessages {
     isFromServer: boolean;
     message: string | Buffer;
     lastCommandId: number;
+    timestamp: number;
   }): IWebsocketResourceMessage | undefined {
     if (!event.resourceId) {
       this.logger.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
@@ -54,13 +65,14 @@ export default class WebsocketMessages {
       return;
     }
 
-    const { resourceId, isFromServer, message } = event;
+    const { resourceId, isFromServer, message, timestamp } = event;
 
     const resourceMessage = {
       resourceId,
       message,
       messageId: (this.websocketMessageIdCounter += 1),
       source: isFromServer ? 'server' : 'client',
+      timestamp,
     } as IWebsocketResourceMessage;
 
     this.websocketMessages.push(resourceMessage);
