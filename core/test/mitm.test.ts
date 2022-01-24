@@ -3,11 +3,9 @@ import MitmRequestContext from '@ulixee/hero-mitm/lib/MitmRequestContext';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { URL } from 'url';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import GlobalPool from '../lib/GlobalPool';
 import Core, { Session } from '../index';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 
 const mocks = {
   MitmRequestContext: {

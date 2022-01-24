@@ -17,7 +17,7 @@ let overlayShadow: ShadowRoot;
 let statusNode: HTMLElement;
 
 window.reattachUI = function reattachUI() {
-  if (overlayContainer && !overlayContainer.isConnected) {
+  if (overlayContainer && !overlayContainer.isConnected && document.body) {
     document.body.appendChild(overlayContainer);
   }
 };

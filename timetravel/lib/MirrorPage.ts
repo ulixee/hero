@@ -6,17 +6,27 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import InjectedScripts, { CorePageInjectedScript } from '@ulixee/hero-core/lib/InjectedScripts';
 import { IMouseEventRecord } from '@ulixee/hero-core/models/MouseEventsTable';
 import { IScrollRecord } from '@ulixee/hero-core/models/ScrollEventsTable';
-import { IDocument, IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
+import DomChangesTable, {
+  IDocument,
+  IDomChangeRecord,
+  IDomRecording,
+  IPaintEvent,
+} from '@ulixee/hero-core/models/DomChangesTable';
 import Log from '@ulixee/commons/lib/Logger';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import * as fs from 'fs';
 import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import MirrorNetwork from './MirrorNetwork';
+import { Tab } from '@ulixee/hero-core';
+import { IPuppetFrame } from '@ulixee/hero-interfaces/IPuppetFrame';
+import Queue from '@ulixee/commons/lib/Queue';
+import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
 
 const { log } = Log(module);
 
 export default class MirrorPage extends TypedEventEmitter<{
   close: void;
+  open: void;
   goto: { url: string; loaderId: string };
 }> {
   public page: IPuppetPage;
@@ -27,18 +37,21 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   private sessionId: string;
+  private pendingDomChanges: IDomChangeRecord[] = [];
   private loadedDocument: IDocument;
+  private paintEventByTimestamp: { [timestamp: number]: IPaintEvent } = {};
+  private isLoadedDocumentDirty = false;
+  private subscribeToTab: Tab;
+  private loadQueue = new Queue(null, 1);
 
   constructor(
     public network: MirrorNetwork,
     public domRecording: IDomRecording,
-    private showBrowserInteractions: boolean = false,
-    private debugLogging: boolean = false,
+    private showBrowserInteractions = false,
+    private debugLogging = true,
   ) {
     super();
-    for (const document of domRecording.documents ?? []) {
-      if (document.doctype) this.network.registerDoctype(document.url, document.doctype);
-    }
+    this.onPageEvents = this.onPageEvents.bind(this);
   }
 
   public async open(
@@ -55,9 +68,9 @@ export default class MirrorPage extends TypedEventEmitter<{
     try {
       this.page = await context.newPage({ runPageScripts: false });
       this.page.once('close', this.close.bind(this));
-      if (this.debugLogging || true) {
+      if (this.debugLogging) {
         this.page.on('console', msg => {
-          console.log('MirrorPage.console', {
+          log.info('MirrorPage.console', {
             ...msg,
             sessionId: this.sessionId,
           });
@@ -91,116 +104,115 @@ export default class MirrorPage extends TypedEventEmitter<{
       await Promise.all(promises);
     } finally {
       ready.resolve();
+      this.emit('open');
     }
   }
 
   public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
     this.domRecording = domRecording;
-    if (this.loadedDocument) await this.injectPaintEvents(this.loadedDocument);
+    this.paintEventByTimestamp = {};
+    for (const paint of this.domRecording.paintEvents) {
+      this.paintEventByTimestamp[paint.timestamp] = paint;
+    }
+    if (this.loadedDocument) {
+      this.isLoadedDocumentDirty = true;
+      await this.injectPaintEvents(this.loadedDocument);
+    }
   }
 
-  public async addDomRecordingUpdates(domRecording: IDomRecording): Promise<void> {
-    this.domRecording.domNodePathByFrameId = domRecording.domNodePathByFrameId;
-
-    for (const document of domRecording.documents) {
-      if (document.paintEventIndex >= this.domRecording.paintEvents.length) {
-        this.domRecording.documents.push(document);
-      }
-    }
-
-    const { paintEvents } = this.domRecording;
-
-    const paintByTimestamp: { [timestamp: number]: IPaintEvent } = {};
-    for (const paint of paintEvents) {
-      paintByTimestamp[paint.timestamp] = paint;
-    }
-
-    let iteratedPaintIndex = 0;
-    for (const paint of domRecording.paintEvents) {
-      const existing = paintByTimestamp[paint.timestamp];
-
-      let paintIndex: number;
-      if (!existing) {
-        paintEvents.push(paint);
-        paintIndex = paintEvents.length - 1;
-      } else {
-        paintIndex = paintEvents.indexOf(existing);
-        existing.changeEvents.push(...paint.changeEvents);
-        existing.changeEvents.sort((a, b) => {
-          if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
-          return a.frameId - b.frameId;
-        });
-      }
-      // update paint indices
-      for (const document of domRecording.documents) {
-        if (iteratedPaintIndex === document.paintEventIndex) {
-          document.paintEventIndex = paintIndex;
-        }
-      }
-      iteratedPaintIndex += 1;
-    }
-    if (this.loadedDocument) await this.injectPaintEvents(this.loadedDocument);
+  public getPaintIndex(timestamp: number): number {
+    this.processPendingDomChanges();
+    const paint = this.paintEventByTimestamp[timestamp];
+    if (!paint) return -1;
+    return this.domRecording.paintEvents.indexOf(paint);
   }
 
-  public async navigate(document: IDocument): Promise<void> {
-    await this.isReady;
-    if (this.debugLogging) {
-      log.info('MirrorPage.goto', {
-        document,
-        sessionId: this.sessionId,
-      });
-    }
-    const page = this.page;
-    const loader = await page.navigate(document.url);
-    this.emit('goto', { url: document.url, loaderId: loader.loaderId });
-    await page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
-    await this.injectPaintEvents(document);
+  public subscribe(tab: Tab): void {
+    if (this.subscribeToTab) throw new Error('This MirrorPage is already subscribed to a tab');
+
+    // NOTE: domNodePathByFrameId and mainFrameIds are live objects
+    this.domRecording.domNodePathByFrameId = tab.session.db.frames.frameDomNodePathsById;
+    this.domRecording.mainFrameIds = tab.session.db.frames.mainFrameIds(tab.tabId);
+
+    tab.on('page-events', this.onPageEvents);
+    this.subscribeToTab = tab;
   }
 
   public async load(newPaintIndex?: number, overlayLabel?: string): Promise<void> {
     await this.isReady;
-    newPaintIndex ??= this.domRecording.paintEvents.length - 1;
-
-    let loadingDocument: IDocument;
-    for (const document of this.domRecording.documents) {
-      if (!document.isMainframe) continue;
-      if (document.paintEventIndex <= newPaintIndex) {
-        loadingDocument = document;
+    // only allow 1 load at a time
+    await this.loadQueue.run(async () => {
+      if (this.subscribeToTab && !newPaintIndex) {
+        await this.subscribeToTab.flushDomChanges();
       }
-      this.network.registerDoctype(document.url, document.doctype);
-    }
+      this.processPendingDomChanges();
+      newPaintIndex ??= this.domRecording.paintEvents.length - 1;
 
-    const page = this.page;
-    let isLoadingDocument = false;
-    if (loadingDocument && loadingDocument.url !== page.mainFrame.url) {
-      isLoadingDocument = true;
-      await this.navigate(loadingDocument);
-    }
-    if (newPaintIndex >= 0) {
-      if (this.debugLogging) {
-        log.info('MirrorPage.loadPaintEvents', {
-          newPaintIndex,
-          sessionId: this.sessionId,
-        });
+      let activeDocumentTimestamp = Date.now();
+      if (newPaintIndex < 0) {
+        if (this.domRecording.documents.length) {
+          activeDocumentTimestamp = this.domRecording.documents[0]?.paintStartTimestamp;
+        }
+      } else {
+        activeDocumentTimestamp = this.domRecording.paintEvents[newPaintIndex].timestamp;
+      }
+      let loadingDocument: IDocument;
+      for (const document of this.domRecording.documents) {
+        if (!document.isMainframe) continue;
+        if (document.paintStartTimestamp <= activeDocumentTimestamp) {
+          loadingDocument = document;
+        }
+        this.network.registerDoctype(document.url, document.doctype);
       }
 
-      const showOverlay = (overlayLabel || isLoadingDocument) && this.showBrowserInteractions;
+      const page = this.page;
 
-      if (showOverlay) await this.evaluate('window.overlay();');
+      let isLoadingDocument = false;
+      if (loadingDocument && (loadingDocument.url !== page.mainFrame.url || newPaintIndex === -1)) {
+        isLoadingDocument = true;
 
-      const script: string[] = [];
-      script.push(`window.setPaintIndex(${newPaintIndex});`);
+        if (this.debugLogging) {
+          log.info('MirrorPage.navigate', {
+            newPaintIndex,
+            url: loadingDocument.url,
+            sessionId: this.sessionId,
+          });
+        }
+        const loader = await this.page.navigate(loadingDocument.url);
 
-      if (showOverlay) {
-        const options: { hide?: boolean; notify?: string } = {
-          notify: overlayLabel,
-          hide: !overlayLabel,
-        };
-        script.push(`window.overlay(${JSON.stringify(options)});`);
-        script.push(`window.repositionInteractElements()`);
+        this.emit('goto', { url: loadingDocument.url, loaderId: loader.loaderId });
+        await page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
+        this.loadedDocument = loadingDocument;
+        this.isLoadedDocumentDirty = true;
       }
-      await this.evaluate(`(()=>{ ${script.join('\n')} })()`);
-    }
+
+      if (this.isLoadedDocumentDirty && this.loadedDocument) {
+        await this.injectPaintEvents(this.loadedDocument);
+      }
+
+      if (newPaintIndex >= 0) {
+        if (this.debugLogging) {
+          log.info('MirrorPage.loadPaintEvents', {
+            newPaintIndex,
+            sessionId: this.sessionId,
+          });
+        }
+
+        const showOverlay = (overlayLabel || isLoadingDocument) && this.showBrowserInteractions;
+
+        if (showOverlay) await this.evaluate('window.overlay();');
+
+        await this.evaluate(`window.setPaintIndex(${newPaintIndex});`);
+
+        if (showOverlay) {
+          const options = {
+            notify: overlayLabel,
+            hide: !overlayLabel,
+          };
+          await this.evaluate(`window.overlay(${JSON.stringify(options)});`);
+        }
+      }
+    });
   }
 
   public async showInteractions(
@@ -222,13 +234,32 @@ export default class MirrorPage extends TypedEventEmitter<{
   public async close(): Promise<void> {
     if (this.isReady === null) return;
     this.isReady = null;
+    this.loadQueue.stop();
     if (this.page && !this.page.isClosed) {
-      await this.page.close();
+      await this.page.close({ skipBeforeunload: true });
+    }
+    if (this.subscribeToTab) {
+      this.subscribeToTab.off('page-events', this.onPageEvents);
+      this.subscribeToTab = null;
     }
     this.page = null;
     this.loadedDocument = null;
     this.network.close();
     this.emit('close');
+  }
+
+  public async getNodeOuterHtml(nodeId: number, frameDomNodeId?: number): Promise<string> {
+    await this.isReady;
+    const frame = await this.getFrameWithDomNodeId(frameDomNodeId);
+    return await frame.evaluate(
+      `(() => {
+     const node = NodeTracker.getWatchedNodeWithId(${nodeId});
+     if (node) return node.outerHTML;
+     return null;
+   })()`,
+      true,
+      { retriesWaitingForLoad: 2 },
+    );
   }
 
   public async getHtml(): Promise<string> {
@@ -244,6 +275,91 @@ export default class MirrorPage extends TypedEventEmitter<{
     );
   }
 
+  private async getFrameWithDomNodeId(frameDomNodeId: number): Promise<IPuppetFrame> {
+    if (!frameDomNodeId) return this.page.mainFrame;
+    for (const frame of this.page.frames) {
+      // don't check main frame
+      if (!frame.parentId) continue;
+
+      try {
+        const nodeId = await frame.getFrameElementNodeId();
+        const frameNodeId = await frame.evaluateOnNode<number>(
+          nodeId,
+          'NodeTracker.watchNode(this)',
+        );
+        if (frameNodeId === frameDomNodeId) {
+          return frame;
+        }
+      } catch (error) {
+        this.logger.warn('Error matching frame nodeId to environment', { error });
+        // just keep looking?
+      }
+    }
+  }
+
+  private processPendingDomChanges(): void {
+    if (!this.pendingDomChanges.length) return;
+
+    const domChangeRecords = [...this.pendingDomChanges];
+    this.pendingDomChanges.length = 0;
+    const domRecording = DomChangesTable.toDomRecording(
+      domChangeRecords,
+      this.domRecording.mainFrameIds,
+      this.domRecording.domNodePathByFrameId,
+    );
+
+    const nextDocument = this.loadedDocument
+      ? this.domRecording.documents.find(
+          x => x.isMainframe && x.paintStartTimestamp > this.loadedDocument.paintStartTimestamp,
+        )
+      : null;
+
+    let needsPaintSort = false;
+    for (const paint of domRecording.paintEvents) {
+      const existing = this.paintEventByTimestamp[paint.timestamp];
+
+      if (this.loadedDocument && paint.timestamp > this.loadedDocument.paintStartTimestamp) {
+        if (!nextDocument) {
+          this.isLoadedDocumentDirty = true;
+        } else if (paint.timestamp < nextDocument.paintStartTimestamp) {
+          this.isLoadedDocumentDirty = true;
+        }
+      }
+
+      if (!existing) {
+        if (
+          paint.timestamp <
+          this.domRecording.paintEvents[this.domRecording.paintEvents.length - 1]?.timestamp
+        ) {
+          needsPaintSort = true;
+        }
+        this.domRecording.paintEvents.push(paint);
+        this.paintEventByTimestamp[paint.timestamp] = paint;
+      } else {
+        existing.changeEvents.push(...paint.changeEvents);
+        existing.changeEvents.sort((a, b) => {
+          if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
+          return a.frameId - b.frameId;
+        });
+      }
+    }
+    if (needsPaintSort) {
+      this.domRecording.paintEvents.sort((a, b) => a.timestamp - b.timestamp);
+    }
+
+    for (const document of domRecording.documents) {
+      document.paintEventIndex = this.domRecording.paintEvents.indexOf(
+        this.paintEventByTimestamp[document.paintStartTimestamp],
+      );
+      this.domRecording.documents.push(document);
+    }
+  }
+
+  private onPageEvents(event: ITabEventParams['page-events']): void {
+    const { domChanges } = event.records;
+    this.pendingDomChanges.push(...domChanges);
+  }
+
   private async evaluate<T>(expression: string): Promise<T> {
     await this.isReady;
     return await this.page.mainFrame.evaluate(expression, true, { retriesWaitingForLoad: 2 });
@@ -256,7 +372,24 @@ export default class MirrorPage extends TypedEventEmitter<{
     return result;
   }
 
+  private isLoadedDocument(document: IDocument): boolean {
+    if (!this.loadedDocument) return false;
+    if (this.loadedDocument === document) return true;
+    return (
+      this.loadedDocument.paintStartTimestamp === document.paintStartTimestamp &&
+      this.loadedDocument.url === document.url
+    );
+  }
+
   private async injectPaintEvents(document: IDocument): Promise<void> {
+    if (!document.isMainframe) throw new Error('Must inject PaintEvents from Mainframe');
+    if (this.isLoadedDocument(document) && !this.isLoadedDocumentDirty) {
+      return;
+    }
+
+    this.loadedDocument = document;
+    this.isLoadedDocumentDirty = false;
+
     const columns = [
       'action',
       'nodeId',
@@ -272,20 +405,26 @@ export default class MirrorPage extends TypedEventEmitter<{
       'frameId',
     ] as const;
 
+    const nextDocument = this.domRecording.documents.find(
+      x => x.isMainframe && x.paintStartTimestamp > document.paintStartTimestamp,
+    );
+
     const tagNames: { [tagName: string]: number } = {};
     const tagNamesById: { [tagId: number]: string } = {};
     let tagCounter = 0;
 
     const events: IFrontendDomChangeEvent[][] = [];
     const { paintEvents, domNodePathByFrameId } = this.domRecording;
-    this.loadedDocument = document;
-
     for (let idx = 0; idx < paintEvents.length; idx += 1) {
       const changes = [];
       events.push(changes);
-      if (idx < document.paintEventIndex) continue;
 
-      for (const change of paintEvents[idx].changeEvents) {
+      const paintEvent = paintEvents[idx];
+      if (!paintEvent || !paintEvent.changeEvents.length) continue;
+      if (paintEvent.timestamp < document.paintStartTimestamp) continue;
+      if (nextDocument && paintEvent.timestamp >= nextDocument.paintStartTimestamp) continue;
+
+      for (const change of paintEvent.changeEvents) {
         if (change.tagName && tagNames[change.tagName] === undefined) {
           tagCounter += 1;
           tagNamesById[tagCounter] = change.tagName;
@@ -308,7 +447,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     const records = ${JSON.stringify(events).replace(/,null/g, ',')};
     const tagNamesById = ${JSON.stringify(tagNamesById)};
     const domNodePathsByFrameId = ${JSON.stringify(domNodePathByFrameId ?? {})};
-    window.records = { records,tagNamesById, domNodePathsByFrameId};
+    
     const paintEvents = [];
     for (const event of records) {
       const changeEvents = [];

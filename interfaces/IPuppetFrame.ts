@@ -19,7 +19,7 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
     loaderId?: string,
     timeoutMs?: number,
   ): Promise<void>;
-  waitForLoader(loaderId?: string, timeoutMs?: number): Promise<Error | undefined>;
+  waitForLoader(loaderId?: string, timeoutMs?: number): Promise<void>;
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
   getFrameElementNodeId(): Promise<string>;
   evaluate<T>(

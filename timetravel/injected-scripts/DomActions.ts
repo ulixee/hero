@@ -90,7 +90,11 @@ class DomActions {
     let tagName = event.tagName;
     if (!tagName) {
       const existing = this.getNode(nodeId);
-      if (existing) tagName = (existing as Element).tagName;
+      // if we're reversing, we can end up with the existing node as the nodeId
+      if (existing) {
+        if (existing === document || existing === document.doctype) return true;
+        tagName = (existing as Element).tagName;
+      }
     }
     if (!preserveElements.has(tagName)) return false;
 

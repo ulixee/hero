@@ -18,8 +18,6 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
 import ResourceState from '../interfaces/ResourceState';
 import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
-import { SecureContextOptions } from 'tls';
-import { MitmProxy } from '../index';
 
 const { log } = Log(module);
 

@@ -16,8 +16,8 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import INodePointer from 'awaited-dom/base/INodePointer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -143,43 +143,15 @@ export default class CoreSession implements IJsPathEventTarget {
     };
   }
 
-  public async getCollectedResources(
-    sessionId: string,
-  ): Promise<{ name: string; resource: IResourceMeta }[]> {
-    return await this.commandQueue.run('Session.getCollectedResources', sessionId);
+  public async getCollectedResources(sessionId: string, name: string): Promise<IResourceMeta[]> {
+    return await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
   }
 
-  public async loadFragments(sessionId: string): Promise<
-    {
-      name: string;
-      nodePointer: INodePointer;
-      coreTab: CoreTab;
-      prefetchedJsPaths: IJsPathResult[];
-    }[]
-  > {
-    const fragments = await this.commandQueue.run<
-      {
-        name: string;
-        nodePointer: INodePointer;
-        detachedTab: ISessionMeta;
-        prefetchedJsPaths: IJsPathResult[];
-      }[]
-    >('Session.loadAllFragments', sessionId);
-    if (!fragments) return [];
-    return fragments.map(fragment => {
-      const coreTab = new CoreTab(
-        { ...fragment.detachedTab, sessionName: this.sessionName },
-        this.connectionToCore,
-        this,
-      );
-      this.frozenTabsById.set(fragment.detachedTab.tabId, coreTab);
-      return {
-        name: fragment.name,
-        nodePointer: fragment.nodePointer,
-        coreTab,
-        prefetchedJsPaths: fragment.prefetchedJsPaths,
-      };
-    });
+  public async getCollectedFragments(
+    sessionId: string,
+    name: string,
+  ): Promise<ICollectedFragment[]> {
+    return await this.commandQueue.run('Session.getCollectedFragments', sessionId, name);
   }
 
   public async close(force = false): Promise<void> {

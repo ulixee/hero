@@ -13,7 +13,6 @@ import SessionsDb from '../dbs/SessionsDb';
 import { IJsPathHistory } from './JsPath';
 import SessionDb from '../dbs/SessionDb';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 
 export default class DetachedTabState {
@@ -56,19 +55,13 @@ export default class DetachedTabState {
     readonly callsitePath: string,
     readonly key?: string,
   ) {
-    this.mirrorNetwork = MirrorNetwork.createFromSessionDb(
-      this.sessionDb,
-      this.sourceTabId,
-      {
-        hasResponse: true,
-        isGetOrDocument: true,
-      },
-      {
-        headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],
-        useResourcesOnce: true,
-        ignoreJavascriptRequests: true,
-      },
-    );
+    this.mirrorNetwork = MirrorNetwork.createFromSessionDb(this.sessionDb, this.sourceTabId, {
+      hasResponse: true,
+      isGetOrDocument: true,
+      useResourcesOnce: true,
+      ignoreJavascriptRequests: true,
+      headersFilter: ['data', /^x-*/, 'set-cookie', 'alt-svc', 'server'],
+    });
 
     this.domRecording = DomChangesTable.toDomRecording(
       domChangeRecords,
@@ -86,16 +79,11 @@ export default class DetachedTabState {
   }
 
   public async openInNewTab(
+    context: IPuppetContext,
     viewport: IViewport,
-    context?: IPuppetContext,
     label?: string,
   ): Promise<{ detachedTab: Tab; prefetchedJsPaths: IJsPathResult[] }> {
-    await this.mirrorPage.open(
-      context ?? this.activeSession.browserContext,
-      this.sessionDb.sessionId,
-      viewport,
-      this.onNewPuppetPage.bind(this),
-    );
+    await this.mirrorPage.open(context, this.sessionDb.sessionId, viewport);
     const newTab = Tab.create(this.activeSession, this.mirrorPage.page, true, this.sourceTabId);
     const navigation = newTab.navigations.onNavigationRequested(
       'goto',
@@ -147,17 +135,5 @@ export default class DetachedTabState {
       this.callsitePath,
       this.key,
     );
-  }
-
-  private async onNewPuppetPage(page: IPuppetPage): Promise<void> {
-    const corePlugins = this.activeSession.plugins?.corePlugins.filter(x => x.onNewPuppetPage);
-
-    if (!corePlugins?.length) return;
-    const sessionSummary = {
-      id: this.activeSession.id,
-      options: this.activeSession.options,
-    };
-
-    await Promise.all(corePlugins.map(x => x.onNewPuppetPage(page, sessionSummary)));
   }
 }

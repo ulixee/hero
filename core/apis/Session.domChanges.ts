@@ -1,5 +1,5 @@
 import SessionDb from '../dbs/SessionDb';
-import DomChangesTable, { IDomChangeRecord } from '../models/DomChangesTable';
+import { IDomChangeRecord } from '../models/DomChangesTable';
 import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionDomChangesApi(
@@ -14,7 +14,6 @@ export default function sessionDomChangesApi(
   };
 
   for (const change of changes) {
-    DomChangesTable.inflateRecord(change);
     result.domChangesByTabId[change.tabId] ??= [];
     result.domChangesByTabId[change.tabId].push(change);
   }

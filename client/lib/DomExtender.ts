@@ -1,5 +1,18 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
+import {
+  ISuperElement,
+  ISuperNode,
+  ISuperHTMLElement,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+} from 'awaited-dom/base/interfaces/super';
+import {
+  IElement,
+  INode,
+  IHTMLElement,
+  INodeList,
+  IHTMLCollection,
+} from 'awaited-dom/base/interfaces/official';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
@@ -30,7 +43,7 @@ interface IBaseExtendNode {
   $isClickable: Promise<boolean>;
   $clearValue(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
-  $extractLater(name: string): Promise<void>;
+  $collect(name: string): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
@@ -42,6 +55,7 @@ interface IBaseExtendNodeList {
     iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
     initial: T,
   ): Promise<T>;
+  $collect(name: string): Promise<void>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -60,15 +74,15 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-const NodeExtensionFns: Partial<IBaseExtendNode> = {
+const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible'> = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
   },
-  async $extractLater(name: string): Promise<void> {
+  async $collect(name: string): Promise<void> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    await coreFrame.createFragment(name, awaitedPath.toJSON());
+    await coreFrame.collectFragment(name, awaitedPath.toJSON());
   },
   async $type(...typeInteractions: ITypeInteraction[]): Promise<void> {
     const coreFrame = await getCoreFrame(this);
@@ -156,34 +170,46 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     }
     return initial;
   },
+  async $collect(name: string): Promise<void> {
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    await coreFrame.collectFragment(name, awaitedPath.toJSON());
+  },
 };
 
-for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
-  for (const [key, value] of Object.entries(NodeExtensionFns)) {
-    void Object.defineProperty(Item.prototype, key, {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value,
-    });
-  }
-  for (const [key, get] of Object.entries(NodeExtensionGetters)) {
-    void Object.defineProperty(Item.prototype, key, {
-      enumerable: false,
-      configurable: false,
-      get,
-    });
+export function extendNodes(
+  functions: { [propertyName: string]: (...args: any[]) => any },
+  getters?: { [name: string]: () => any },
+): void {
+  for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
+    for (const [key, value] of Object.entries(functions)) {
+      void Object.defineProperty(Item.prototype, key, {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value,
+      });
+    }
+    for (const [key, get] of Object.entries(getters)) {
+      void Object.defineProperty(Item.prototype, key, {
+        enumerable: false,
+        configurable: false,
+        get,
+      });
+    }
   }
 }
 
-for (const Item of [SuperNodeList, SuperHTMLCollection, NodeList, HTMLCollection]) {
-  for (const [key, value] of Object.entries(NodeListExtensionFns)) {
-    void Object.defineProperty(Item.prototype, key, {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value,
-    });
+export function extendNodeLists(functions: { [name: string]: any }): void {
+  for (const Item of [SuperNodeList, SuperHTMLCollection, NodeList, HTMLCollection]) {
+    for (const [key, value] of Object.entries(functions)) {
+      void Object.defineProperty(Item.prototype, key, {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value,
+      });
+    }
   }
 }
 
@@ -191,3 +217,20 @@ async function getCoreFrame(element: ISuperElement): Promise<CoreFrameEnvironmen
   const { awaitedOptions } = awaitedPathState.getState(element);
   return await awaitedOptions.coreFrame;
 }
+
+extendNodes(NodeExtensionFns, NodeExtensionGetters);
+extendNodeLists(NodeListExtensionFns);
+
+export {
+  awaitedPathState,
+  ISuperElement,
+  ISuperNode,
+  ISuperHTMLElement,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+  IElement,
+  INode,
+  IHTMLElement,
+  INodeList,
+  IHTMLCollection,
+};

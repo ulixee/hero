@@ -30,7 +30,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   goBack(): Promise<string>;
   goForward(): Promise<string>;
   reload(): Promise<void>;
-  close(): Promise<void>;
+  close(options?: { timeoutMs?: number; skipBeforeunload?: boolean }): Promise<void>;
   bringToFront(): Promise<void>;
   screenshot(options: IScreenshotOptions): Promise<Buffer>;
   startScreenRecording(options: IScreenRecordingOptions): Promise<void>;

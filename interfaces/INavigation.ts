@@ -3,6 +3,7 @@ import { ILoadStatus } from './Location';
 
 export default interface INavigation {
   id: number;
+  documentNavigationId: number;
   frameId: number;
   tabId: number;
   resourceId: number;

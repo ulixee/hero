@@ -15,6 +15,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       'FrameNavigations',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['documentNavigationId', 'INTEGER'],
         ['frameId', 'INTEGER'],
         ['tabId', 'INTEGER'],
         ['resourceId', 'INTEGER'],
@@ -54,6 +55,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     this.allNavigationsById.set(navigation.id, navigation);
     const record = [
       navigation.id,
+      navigation.documentNavigationId,
       navigation.frameId,
       navigation.tabId,
       navigation.resourceId,
@@ -122,6 +124,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
 
 export interface IFrameNavigationRecord {
   id: number;
+  documentNavigationId: number;
   frameId: number;
   tabId: number;
   doctype: string;

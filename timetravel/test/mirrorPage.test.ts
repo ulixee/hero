@@ -27,7 +27,14 @@ afterEach(Helpers.afterEach);
 describe('MirrorPage tests', () => {
   it('can build from dom recordings', async () => {
     koaServer.get('/domrecording', ctx => {
-      ctx.body = `<body>
+      ctx.body = `<!DOCTYPE html>
+<!--[if lt IE 7]> <html lang="en-us" class="lt-ie11 lt-ie10 lt-ie9 lt-ie8 lt-ie7 lots"> <![endif]-->
+<!--[if IE 7]> <html lang="en-us" class="lt-ie11 lt-ie10 lt-ie9 lt-ie8 lots"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="page html context lots" lang="en-us">
+<!--<![endif]-->
+<head><title>Dom Recording</title></head>
+<body>
 <div>
     <h1>This is the starting point</h1>
     <ul>
@@ -61,22 +68,13 @@ describe('MirrorPage tests', () => {
 
     await mirrorPage.load();
     {
-      const mirrorHtml = await mirrorPage.page.mainFrame.html();
+      const mirrorHtml = await mirrorPage.getHtml();
       expect(mirrorHtml).toBe(sourceHtml);
     }
 
     const htmlAtSteps: { html: string; index: number }[] = [];
-    let lastCommandId = tab.lastCommandId;
     async function compareTabsAfterEvaluate(evaluateScript: string) {
       await tab.getJsValue(evaluateScript);
-      const pageChangesByFrame = await tab.getDomChanges(tab.mainFrameId, lastCommandId);
-      lastCommandId = tab.lastCommandId;
-      const domRecordingUpdates = DomChangesTable.toDomRecording(
-        pageChangesByFrame,
-        new Set([tab.mainFrameId]),
-        tab.session.db.frames.frameDomNodePathsById,
-      );
-      await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
       await mirrorPage.load();
 
       const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
@@ -84,12 +82,18 @@ describe('MirrorPage tests', () => {
         html: sourceHtmlNext,
         index: mirrorPage.domRecording.paintEvents.length - 1,
       });
-      const mirrorHtmlNext = await mirrorPage.page.mainFrame.html();
+      const mirrorHtmlNext = await mirrorPage.getHtml();
       // mirror page should not know about the hero-replay nodes
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
 
-    // 1. Append list
+    // Append list
+    await compareTabsAfterEvaluate(`
+        document.body.classList.add('test1');
+        document.head.classList.add('head1');
+    `);
+
+    // Append list
     await compareTabsAfterEvaluate(`
         child.textContent = 'Another one ' + parent.children.length;
         parent.append(child, child2, child3);
@@ -186,14 +190,6 @@ describe('MirrorPage tests', () => {
     {
       const changes = await tab.getDomChanges();
       expect(changes).toHaveLength(21);
-
-      const domRecordingUpdates = DomChangesTable.toDomRecording(
-        changes,
-        new Set([tab.mainFrameId]),
-        tab.session.db.frames.frameDomNodePathsById,
-      );
-      await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
-      await mirrorPage.load();
     }
 
     const mirrorHtml = await mirrorPage.page.mainFrame.html();
@@ -258,12 +254,6 @@ describe('MirrorPage tests', () => {
 
     const changes = await tab.getDomChanges(tab.mainFrameId, lastCommandId);
     expect(changes.length).toBe(2);
-    const domRecordingUpdates = DomChangesTable.toDomRecording(
-      changes,
-      new Set([tab.mainFrameId]),
-      tab.session.db.frames.frameDomNodePathsById,
-    );
-    await mirrorPage.addDomRecordingUpdates(domRecordingUpdates);
     await mirrorPage.load();
 
     const mirrorHtml2 = await mirrorPage.page.mainFrame.html();
@@ -275,14 +265,19 @@ describe('MirrorPage tests', () => {
 async function createMirrorPage(tab: Tab, isDebug = false): Promise<MirrorPage> {
   const mirrorContext = await MirrorContext.createFromSessionDb(tab.session.id, false);
   Helpers.needsClosing.push(mirrorContext);
-  const mainPageChanges = await tab.getDomChanges();
   const domRecording = DomChangesTable.toDomRecording(
-    mainPageChanges,
+    tab.session.db.domChanges.all(),
     new Set([tab.mainFrameId]),
     tab.session.db.frames.frameDomNodePathsById,
   );
 
-  const mirrorPage = new MirrorPage(new MirrorNetwork(), domRecording, false, isDebug);
+  const mirrorPage = new MirrorPage(
+    new MirrorNetwork({ loadResourceDetails: () => null }),
+    domRecording,
+    false,
+    isDebug,
+  );
+  await mirrorPage.subscribe(tab);
   await mirrorPage.open(mirrorContext, tab.sessionId);
   Helpers.needsClosing.push(mirrorPage);
   return mirrorPage;

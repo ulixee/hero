@@ -80,7 +80,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     return coreTab.then(x => x.getResourceProperty(resource.id, 'messages'));
   }
 
-  public $extractLater(name: string): Promise<void> {
+  public $collect(name: string): Promise<void> {
     const id = getState(this).resource.id;
     const coreTab = getState(this).coreTab;
     return coreTab.then(x => x.collectResource(name, id));

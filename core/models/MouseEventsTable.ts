@@ -20,7 +20,12 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, mouseEvent: IMouseEvent): void {
+  public insert(
+    tabId: number,
+    frameId: number,
+    commandId: number,
+    mouseEvent: IMouseEvent,
+  ): IMouseEventRecord {
     const [
       event,
       pageX,
@@ -47,6 +52,20 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       timestamp,
     ];
     this.queuePendingInsert(record);
+    return {
+      tabId,
+      frameId,
+      event,
+      commandId,
+      pageX,
+      pageY,
+      offsetX,
+      offsetY,
+      buttons,
+      targetNodeId,
+      relatedTargetNodeId,
+      timestamp,
+    };
   }
 }
 

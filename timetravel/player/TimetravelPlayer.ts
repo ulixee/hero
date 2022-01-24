@@ -43,6 +43,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   private mirrorNetwork = new MirrorNetwork({
     ignoreJavascriptRequests: true,
     headersFilter: ['set-cookie'],
+    loadResourceDetails: this.getResourceDetails.bind(this),
   });
 
   private tabsById = new Map<number, TabPlaybackController>();
@@ -183,7 +184,6 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
 
   private async openTab(tab: TabPlaybackController): Promise<void> {
     if (tab.isOpen) return;
-    this.emit('open');
     await tab.open(this.loadIntoContext.browserContext, this.activePlugins.bind(this));
   }
 
@@ -240,6 +240,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
         this.sessionId,
         this.debugLogging,
       );
+      tab.mirrorPage.on('open', this.onTabOpen.bind(this));
       tab.mirrorPage.on('close', this.checkAllPagesClosed.bind(this));
       this.tabsById.set(tabDetails.tab.id, tab);
 
@@ -251,7 +252,11 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       args: { sessionId: this.sessionId, omitWithoutResponse: true, omitNonHttpGet: true },
     });
 
-    this.mirrorNetwork.loadResources(resourcesResult.resources, this.getResourceDetails.bind(this));
+    this.mirrorNetwork.setResources(resourcesResult.resources);
+  }
+
+  private onTabOpen(): void {
+    this.emit('open');
   }
 
   private async getResourceDetails(resourceId: number): Promise<ISessionResourceDetails> {

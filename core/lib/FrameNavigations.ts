@@ -28,7 +28,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 
   // last navigation not loaded in-page
-  public lastHttpNavigation: INavigation;
+  public lastHttpNavigationRequest: INavigation;
 
   public get currentUrl(): string {
     const top = this.top;
@@ -118,6 +118,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   ): INavigation {
     const nextTop = <INavigation>{
       id: (this.model.idCounter += 1),
+      documentNavigationId: this.lastHttpNavigationRequest?.id,
       tabId: this.tabId,
       requestedUrl: url,
       finalUrl: null,
@@ -148,7 +149,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     // if in-page, set the state to match current top
     if (reason === 'inPage') {
       if (this.top?.finalUrl === url) return;
-      const lastHttpResponse = this.lastHttpNavigation;
+      const lastHttpResponse = this.lastHttpNavigationRequest;
       if (lastHttpResponse) {
         for (const state of lastHttpResponse.statusChanges.keys()) {
           if (isPageLoadedStatus(state)) {
@@ -164,7 +165,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       shouldPublishLocationChange = true;
       nextTop.finalUrl = url;
     } else {
-      this.lastHttpNavigation = nextTop;
+      this.lastHttpNavigationRequest = nextTop;
     }
 
     this.emit('navigation-requested', nextTop);
@@ -243,7 +244,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     requestedUrl: string,
     finalUrl: string,
   ): boolean {
-    const top = this.lastHttpNavigation;
+    const top = this.lastHttpNavigationRequest;
     if (!top || top.resourceIdResolvable.isResolved) return false;
 
     // hash won't be in the http request
@@ -266,7 +267,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       error,
       currentUrl: this.currentUrl,
     });
-    const top = this.lastHttpNavigation;
+    const top = this.lastHttpNavigationRequest;
 
     if (!top || top.resourceIdResolvable.isResolved) return;
 

@@ -169,13 +169,6 @@ export class JsPath {
     return results;
   }
 
-  public setFragmentNode(nodePointer: INodePointer): void {
-    this.nodeIdToHistoryLocation.set(nodePointer.id, { sourceIndex: 0, isFromIterable: false });
-    this.execHistory.push({
-      jsPath: [nodePointer.id, [getNodePointerFnName]],
-    });
-  }
-
   private async runJsPath<T>(
     fnName: string,
     jsPath: IJsPath,

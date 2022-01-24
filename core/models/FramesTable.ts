@@ -12,6 +12,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   #idCounter = 0;
   #mainFrameIds = new Set<number>();
   #tabIdByFrameId = new Map<number, number>();
+  #mainFrameIdByTabId = new Map<number, Set<number>>();
 
   constructor(readonly db: SqliteDatabase) {
     super(
@@ -53,9 +54,9 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       this.all();
     }
     if (tabId) {
-      return new Set([...this.#mainFrameIds].filter(x => this.#tabIdByFrameId.get(x) === tabId));
+      return this.#mainFrameIdByTabId.get(tabId);
     }
-    return new Set(this.#mainFrameIds);
+    return this.#mainFrameIds;
   }
 
   public all(): IFrameRecord[] {
@@ -70,6 +71,10 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
     if (!frame.parentId) {
       this.frameDomNodePathsById[frame.id] = 'main';
       this.#mainFrameIds.add(frame.id);
+      if (!this.#mainFrameIdByTabId.has(frame.tabId)) {
+        this.#mainFrameIdByTabId.set(frame.tabId, new Set());
+      }
+      this.#mainFrameIdByTabId.get(frame.tabId).add(frame.id);
     }
     this.#tabIdByFrameId.set(frame.id, frame.tabId);
     if (frame.domNodeId) {

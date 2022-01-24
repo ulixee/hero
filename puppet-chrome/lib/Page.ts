@@ -368,12 +368,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return worker.isReady;
   }
 
-  async close(timeoutMs = 5e3): Promise<void> {
+  async close(options?: { timeoutMs?: number; skipBeforeunload?: boolean }): Promise<void> {
     if (this.isClosing || this.closePromise.isResolved) return this.closePromise.promise;
     this.isClosing = true;
     const parentLogId = this.logger.stats('Page.Closing');
+    options ??= {};
+    const timeoutMs = options.timeoutMs ?? 30e3;
     try {
-      if (this.devtoolsSession.isConnected() && !this.isClosed) {
+      if (this.devtoolsSession.isConnected() && !this.isClosed && !options.skipBeforeunload) {
         const timeout = setTimeout(() => this.didClose(), timeoutMs);
         // trigger beforeUnload
         try {

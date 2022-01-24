@@ -128,11 +128,11 @@ describe('basic resource tests', () => {
 
       const resources = await hero.waitForResource({ type: 'Fetch' });
       expect(resources).toHaveLength(1);
-      await resources[0].$extractLater('xhr');
+      await resources[0].$collect('xhr');
 
-      const collected = await hero.getCollectedResources(sessionId1);
+      const collected = await hero.getCollectedResources(sessionId1, 'xhr');
       expect(collected).toHaveLength(1);
-      expect(collected[0].resource.response.json).toEqual({ hi: 'there' });
+      expect(collected[0].response.json).toEqual({ hi: 'there' });
       await hero.close();
     }
 
@@ -143,11 +143,11 @@ describe('basic resource tests', () => {
 
       await hero2.goto(`${koaServer.baseUrl}`);
       await hero2.waitForPaintingStable();
-      const collected2 = await hero2.getCollectedResources(sessionId1);
+      const collected2 = await hero2.getCollectedResources(sessionId1, 'xhr');
       expect(collected2).toHaveLength(1);
-      expect(collected2[0].resource.url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
+      expect(collected2[0].url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
       // should prefetch the body
-      expect(collected2[0].resource.response.buffer).toBeTruthy();
+      expect(collected2[0].response.buffer).toBeTruthy();
     }
   });
 });

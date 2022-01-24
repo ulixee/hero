@@ -186,6 +186,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     event ??= 'load';
     timeoutMs ??= 30e3;
     await this.waitForLoader(loaderId, timeoutMs);
+
     const loader = this.navigationLoadersById[loaderId ?? this.activeLoaderId];
     if (loader.lifecycle[event]) return;
     await this.waitOn(
@@ -329,7 +330,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     loader?.onStoppedLoading();
   }
 
-  public async waitForLoader(loaderId?: string, timeoutMs?: number): Promise<Error | null> {
+  public async waitForLoader(loaderId?: string, timeoutMs?: number): Promise<void> {
     if (!loaderId) {
       loaderId = this.activeLoaderId;
       if (loaderId === this.defaultLoaderId) {
@@ -340,7 +341,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     }
 
     const hasLoaderError = await this.navigationLoadersById[loaderId]?.navigationResolver;
-    if (hasLoaderError instanceof Error) return hasLoaderError;
+    if (hasLoaderError instanceof Error) throw hasLoaderError;
 
     if (!this.getActiveContextId(false)) {
       await this.waitForDefaultContext();

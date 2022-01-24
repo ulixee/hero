@@ -22,6 +22,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
@@ -38,7 +39,6 @@ import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import DetachedTabState from './DetachedTabState';
-import INodePointer from 'awaited-dom/base/INodePointer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
@@ -198,7 +198,7 @@ export default class Session
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
-      this.loadAllFragments,
+      this.getCollectedFragments,
       this.getCollectedResources,
       this.close,
       this.flush,
@@ -269,29 +269,31 @@ export default class Session
     const sourceTab = this.getTab(sourceTabId);
 
     const detachedState = await sourceTab.createDetachedState(callsite, key);
+    const browserContext = await GlobalPool.getUtilityContext();
 
-    const result = await detachedState.openInNewTab(
+    const { detachedTab, prefetchedJsPaths } = await detachedState.openInNewTab(
+      browserContext,
       this.viewport,
-      this.browserContext,
       `Frozen Tab at Command ${detachedState.detachedAtCommandId}`,
     );
 
-    this.recordTab(result.detachedTab, sourceTabId, detachedState.detachedAtCommandId);
-    this.registerDetachedTab(result.detachedTab);
+    this.recordTab(detachedTab, sourceTabId, detachedState.detachedAtCommandId);
 
-    return { ...result, detachedState };
+    const id = detachedTab.id;
+    this.detachedTabsById.set(id, detachedTab);
+    detachedTab.once('close', () => this.detachedTabsById.delete(id));
+
+    return { detachedTab, prefetchedJsPaths, detachedState };
   }
 
-  public getCollectedResources(
-    fromSessionId: string,
-  ): Promise<{ name: string; resource: IResourceMeta }[]> {
+  public getCollectedResources(fromSessionId: string, name: string): Promise<IResourceMeta[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const resources = db.collectedResources.all().map(x => {
+    const resources = db.collectedResources.getByName(name).map(x => {
       const resource = db.resources.getMeta(x.resourceId, true);
       if (resource.type === 'Websocket') {
         const messages = db.websocketMessages.getMessages(resource.id);
@@ -303,96 +305,25 @@ export default class Session
             },
         );
       }
-      return {
-        name: x.name,
-        resource,
-      };
+      return resource;
     });
     return Promise.resolve(resources);
   }
 
-  public async loadAllFragments(fromSessionId: string): Promise<
-    {
-      name: string;
-      nodePointer: INodePointer;
-      detachedTab: Tab;
-      prefetchedJsPaths: IJsPathResult[];
-    }[]
-  > {
+  public async getCollectedFragments(
+    fromSessionId: string,
+    name: string,
+  ): Promise<ICollectedFragment[]> {
     let db = this.db;
-    if (fromSessionId === this.id) {
-      db.flush();
+    if (!fromSessionId || fromSessionId === this.id) {
+      for (const tab of this.tabsById.values()) {
+        await tab.pendingCollects();
+      }
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const fragments = db.collectedFragments.all();
-    return await Promise.all(
-      fragments.map(async fragment => {
-        const { name, frameNavigationId, domChangeEventIndex } = fragment;
-        const { detachedTab, prefetchedJsPaths } = await this.loadFrozenTab(
-          fromSessionId,
-          name,
-          frameNavigationId,
-          domChangeEventIndex,
-        );
-        const nodePointer: INodePointer = {
-          id: fragment.nodePointerId,
-          type: fragment.nodeType,
-          preview: fragment.nodePreview,
-        };
-        detachedTab.mainFrameEnvironment.jsPath.setFragmentNode(nodePointer);
-        return {
-          name,
-          nodePointer,
-          detachedTab,
-          prefetchedJsPaths,
-        };
-      }),
-    );
-  }
-
-  public async loadFrozenTab(
-    sessionId: string,
-    name: string,
-    frameNavigationId: number,
-    domChangeEventIndex: number,
-  ): Promise<{
-    detachedTab: Tab;
-    prefetchedJsPaths: IJsPathResult[];
-  }> {
-    const sessionDb = SessionDb.getCached(sessionId, false);
-    if (!sessionDb) {
-      throw new Error('This session database could not be found');
-    }
-    const mainFrameIds = sessionDb.frames.mainFrameIds();
-    const navigation = sessionDb.frameNavigations.get(frameNavigationId);
-
-    const domChanges = sessionDb.domChanges.getDomChangesForNavigation(
-      navigation.id,
-      domChangeEventIndex,
-    );
-    const atCommandId = domChanges[domChanges.length - 1].commandId;
-
-    const detachedState = new DetachedTabState(
-      sessionDb,
-      navigation.tabId,
-      mainFrameIds,
-      this,
-      atCommandId,
-      navigation,
-      domChanges,
-      name, // name is our lookup key
-    );
-    const result = await detachedState.openInNewTab(
-      this.viewport,
-      this.browserContext,
-      `Frozen Tab: ${name ?? 'at ' + atCommandId}`,
-    );
-
-    this.recordTab(result.detachedTab, navigation.tabId, atCommandId);
-    this.registerDetachedTab(result.detachedTab);
-
-    return result;
+    db.flush();
+    return db.collectedFragments.getByName(name);
   }
 
   public getMitmProxy(): { address: string; password?: string } {
@@ -717,12 +648,6 @@ export default class Session
     tab.puppetPage.popupInitializeFn = this.onNewTab.bind(this, tab);
     this.emit('tab-created', { tab });
     return tab;
-  }
-
-  private registerDetachedTab(tab: Tab): void {
-    const id = tab.id;
-    this.detachedTabsById.set(id, tab);
-    tab.once('close', () => this.detachedTabsById.delete(id));
   }
 
   private async newPage(): Promise<IPuppetPage> {

@@ -1,9 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Hero, { ConnectionToCore } from '../index';
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
-const sendRequestSpy = jest.spyOn(ConnectionToCore.prototype, 'sendRequest');
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
 });
@@ -24,68 +23,42 @@ describe('basic Fragment tests', () => {
     });
     const hero = await openBrowser(`/fragment-basic`);
     const test1Element = await hero.document.querySelector('.test1');
-    await test1Element.$extractLater('a');
-    await test1Element.nextElementSibling.$extractLater('b');
+    await test1Element.$collect('a');
+    await test1Element.nextElementSibling.$collect('b');
 
-    await hero.importFragments(await hero.sessionId);
+    const fragmentsA = await hero.getCollectedFragments(await hero.sessionId, 'a');
+    expect(fragmentsA).toHaveLength(1);
+    expect(fragmentsA[0].outerHTML).toBe('<div class="test1">test 1</div>');
 
-    expect(hero.getFragment('a')).toBeTruthy();
-    await expect(hero.getFragment('a').innerText).resolves.toBe('test 1');
-
-    expect(hero.getFragment('b')).toBeTruthy();
-    await expect(hero.getFragment('b').childElementCount).resolves.toBe(1);
-    await expect(hero.getFragment('b').querySelectorAll('li').length).resolves.toBe(1);
+    const fragmentsB = await hero.getCollectedFragments(await hero.sessionId, 'b');
+    expect(fragmentsB[0].outerHTML).toBe(`<div class="test2">
+            <ul><li>Test 2</li></ul>
+          </div>`);
   });
 
-  it('can prefetch fragment commands', async () => {
-    koaServer.get('/fragment-learn', ctx => {
+  it('can save fragment children', async () => {
+    koaServer.get('/fragment-list', ctx => {
       ctx.body = `
         <body>
-          <div class="test1">test 1</div>
-          <div class="test2" ready="true">test 2</div>
+          
+            <ul>
+              <li class="valid">Test 1</li>
+              <li class="invalid">Test 2</li>
+              <li class="invalid">Test 3</li>
+              <li class="valid">Test 4</li>
+              <li class="valid">Test 5</li>
+            </ul>
         </body>
       `;
     });
-    {
-      // run 1
-      const hero = await openBrowser(`/fragment-learn`);
-      const test1Element = await hero.document.querySelector('.test1');
-      await test1Element.$extractLater('test1');
-      await test1Element.nextElementSibling.$extractLater('test2');
+    const hero = await openBrowser(`/fragment-list`);
+    await hero.document.querySelectorAll('.valid').$collect('valid');
 
-      sendRequestSpy.mockClear();
-      await hero.importFragments(await hero.sessionId);
-
-      expect(hero.getFragment('test1')).toBeTruthy();
-      await expect(hero.getFragment('test1').innerText).resolves.toBe('test 1');
-      await expect(hero.getFragment('test1').hasAttribute('ready')).resolves.toBe(false);
-
-      expect(hero.getFragment('test2')).toBeTruthy();
-      await expect(hero.getFragment('test2').innerText).resolves.toBe('test 2');
-      await expect(hero.getFragment('test2').hasAttribute('ready')).resolves.toBe(true);
-      expect(sendRequestSpy).toHaveBeenCalledTimes(5);
-      // need to close to record jspaths
-      await hero.close();
-    }
-    {
-      // run 1
-      const hero = await openBrowser(`/fragment-learn`);
-      const test1Element = await hero.document.querySelector('.test1');
-      await test1Element.$extractLater('test1');
-      await test1Element.nextElementSibling.$extractLater('test2');
-
-      sendRequestSpy.mockClear();
-      await hero.importFragments(await hero.sessionId);
-
-      expect(hero.getFragment('test1')).toBeTruthy();
-      await expect(hero.getFragment('test1').innerText).resolves.toBe('test 1');
-      await expect(hero.getFragment('test1').hasAttribute('ready')).resolves.toBe(false);
-
-      expect(hero.getFragment('test2')).toBeTruthy();
-      await expect(hero.getFragment('test2').innerText).resolves.toBe('test 2');
-      await expect(hero.getFragment('test2').hasAttribute('ready')).resolves.toBe(true);
-      expect(sendRequestSpy).toHaveBeenCalledTimes(1);
-    }
+    const valid = await hero.getCollectedFragments(await hero.sessionId, 'valid');
+    expect(valid).toHaveLength(3);
+    expect(valid[0].outerHTML).toBe('<li class="valid">Test 1</li>');
+    expect(valid[1].outerHTML).toBe('<li class="valid">Test 4</li>');
+    expect(valid[2].outerHTML).toBe('<li class="valid">Test 5</li>');
   });
 });
 
