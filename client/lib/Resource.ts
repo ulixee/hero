@@ -71,7 +71,7 @@ export default class Resource {
     return this.text.then(JSON.parse);
   }
 
-  public $extractLater(name: string): Promise<void> {
+  public $collect(name: string): Promise<void> {
     const id = getState(this).resource.id;
     const coreTab = getState(this).coreTab;
     return coreTab.then(x => x.collectResource(name, id));

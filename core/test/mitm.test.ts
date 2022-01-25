@@ -63,11 +63,10 @@ test('should send preflight requests', async () => {
 
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
-  session.mitmRequestSession.blockedResources.urls = [
-    'http://dataliberationfoundation.org/postback',
-  ];
-  session.mitmRequestSession.blockedResources.handlerFn = (request, response) => {
-    response.end(`<html lang="en">
+  session.mitmRequestSession.interceptorHandlers.push({
+    urls: ['http://dataliberationfoundation.org/postback'],
+    handlerFn(url, type, request, response) {
+      response.end(`<html lang="en">
 <body>
 <script type="text/javascript">
 const xhr = new XMLHttpRequest();
@@ -79,8 +78,9 @@ xhr.send('<person><name>DLF</name></person>');
 </body>
 </html>
     `);
-    return true;
-  };
+      return true;
+    },
+  });
   const tab = await session.createTab();
   await tab.goto(`http://dataliberationfoundation.org/postback`);
   await expect(corsPromise).resolves.toBeTruthy();
@@ -292,18 +292,20 @@ test('should proxy iframe requests', async () => {
 
   const session = tab.session;
 
-  session.mitmRequestSession.blockedResources.urls = [
-    'https://dataliberationfoundation.org/iframe',
-    'https://dataliberationfoundation.org/test.css',
-    'https://dataliberationfoundation.org/dlfSite.png',
-  ];
-  session.mitmRequestSession.blockedResources.handlerFn = (request, response) => {
-    response.end(`<html lang="en">
+  session.mitmRequestSession.interceptorHandlers.push({
+    urls: [
+      'https://dataliberationfoundation.org/iframe',
+      'https://dataliberationfoundation.org/test.css',
+      'https://dataliberationfoundation.org/dlfSite.png',
+    ],
+    handlerFn(url, type, request, response) {
+      response.end(`<html lang="en">
 <head><link rel="stylesheet" type="text/css" href="/test.css"/></head>
 <body><img alt="none" src="/dlfSite.png"/></body>
 </html>`);
-    return true;
-  };
+      return true;
+    },
+  });
   koa.get('/iframe-test', async ctx => {
     ctx.body = `<html lang="en">
 <body>

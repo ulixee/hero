@@ -8,7 +8,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
-      ['frameNavigationId', 'INTEGER'],
+      ['documentNavigationId', 'INTEGER'],
       ['eventIndex', 'INTEGER'],
       ['action', 'INTEGER'],
       ['nodeId', 'INTEGER'],
@@ -31,10 +31,10 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   public insert(
     tabId: number,
     frameId: number,
-    navigationId: number,
+    documentNavigationId: number,
     commandId: number,
     change: IDomChangeEvent,
-  ): void {
+  ): IDomChangeRecord {
     const [action, nodeData, timestamp, eventIndex] = change;
 
     const count = this.countByTimestamp.get(timestamp) ?? 0;
@@ -42,7 +42,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
 
     const record = [
       frameId,
-      navigationId,
+      documentNavigationId,
       eventIndex,
       action,
       nodeData.id,
@@ -60,14 +60,35 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       timestamp,
     ];
     this.queuePendingInsert(record);
+    return {
+      frameId,
+      documentNavigationId,
+      eventIndex,
+      action,
+      nodeId: nodeData.id,
+      nodeType: nodeData.nodeType,
+      tagName: nodeData.tagName,
+      previousSiblingId: nodeData.previousSiblingId,
+      parentNodeId: nodeData.parentNodeId,
+      textContent: nodeData.textContent,
+      attributes: nodeData.attributes,
+      attributeNamespaces: nodeData.attributeNamespaces,
+      properties: nodeData.properties,
+      namespaceUri: nodeData.namespaceUri,
+      commandId,
+      tabId,
+      timestamp,
+    };
   }
 
   public all(): IDomChangeRecord[] {
     this.countByTimestamp.clear();
-    const records = super.all();
-    for (const record of records) {
+    const records: IDomChangeRecord[] = [];
+    const pending = this.findPendingRecords(Boolean);
+    for (const record of super.all().concat(pending)) {
       const count = this.countByTimestamp.get(record.timestamp) ?? 0;
       this.countByTimestamp.set(record.timestamp, count + 1);
+      records.push(DomChangesTable.inflateRecord(record));
     }
     return records;
   }
@@ -80,19 +101,10 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     return query.all(frameId, afterCommandId ?? 0).map(DomChangesTable.inflateRecord);
   }
 
-  public getDomChangesForNavigation(
-    frameNavigationId: number,
-    upToEventIndex: number,
-  ): IDomChangeRecord[] {
-    const query = this.db.prepare(
-      `select * from ${this.tableName} where frameNavigationId =? and eventIndex <= ?`,
-    );
-
-    return query.all(frameNavigationId, upToEventIndex).map(DomChangesTable.inflateRecord);
-  }
-
   public getChangesSinceNavigation(navigationId: number): IDomChangeRecord[] {
-    const query = this.db.prepare(`select * from ${this.tableName} where frameNavigationId >= ?`);
+    const query = this.db.prepare(
+      `select * from ${this.tableName} where documentNavigationId >= ?`,
+    );
 
     return query.all(navigationId).map(DomChangesTable.inflateRecord);
   }
@@ -145,6 +157,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
           paintEventIndex: paintEventsByTimestamp[timestamp]
             ? paintEvents.indexOf(paintEventsByTimestamp[timestamp])
             : paintEvents.length,
+          paintStartTimestamp: timestamp,
           doctype,
           isMainframe,
           frameId,
@@ -195,6 +208,7 @@ export interface IDomRecording {
 
 export interface IDocument {
   isMainframe: boolean;
+  paintStartTimestamp: number;
   paintEventIndex: number;
   frameId: number;
   url: string;
@@ -205,7 +219,7 @@ export interface IDomChangeRecord {
   commandId: number;
   tabId: number;
   frameId: number;
-  frameNavigationId: number;
+  documentNavigationId: number;
   nodeId: number;
   timestamp: number;
   eventIndex: number;

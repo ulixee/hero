@@ -7,7 +7,9 @@ import { createPromise } from '@ulixee/commons/lib/utils';
 import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
+import { URL } from 'url';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -81,10 +83,10 @@ describe('UserProfile cookie tests', () => {
       const tab = Session.getTab(meta);
       const session = tab.session;
       Helpers.needsClosing.push(session);
-      session.mitmRequestSession.blockedResources = {
+      session.mitmRequestSession.interceptorHandlers.push({
         urls: ['https://dataliberationfoundation.org/*'],
         types: [],
-        handlerFn(request, response) {
+        handlerFn(url: URL, type: IResourceType, request, response) {
           response.setHeader('Set-Cookie', [
             'cross1=1; SameSite=None; Secure; HttpOnly',
             'cross2=2; SameSite=None; Secure; HttpOnly',
@@ -92,7 +94,7 @@ describe('UserProfile cookie tests', () => {
           response.end(`<html><p>frame body</p></html>`);
           return true;
         },
-      };
+      });
       koaServer.get('/cross-cookie', ctx => {
         ctx.cookies.set('cookietest', 'mainsite');
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie"/></body>`;
@@ -121,15 +123,15 @@ describe('UserProfile cookie tests', () => {
       const dlfCookies = createPromise<string>();
       const sameCookies = createPromise<string>();
 
-      session.mitmRequestSession.blockedResources = {
+      session.mitmRequestSession.interceptorHandlers.push({
         urls: ['https://dataliberationfoundation.org/*'],
         types: [],
-        handlerFn: (request, response) => {
+        handlerFn(url: URL, type: IResourceType, request, response) {
           dlfCookies.resolve(request.headers.cookie);
           response.end(`<html><p>frame body</p></html>`);
           return true;
         },
-      };
+      });
       koaServer.get('/cross-cookie2', ctx => {
         sameCookies.resolve(ctx.cookies.get('cookietest'));
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
@@ -364,10 +366,10 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       const tab = Session.getTab(meta);
       const session = tab.session;
       Helpers.needsClosing.push(session);
-      session.mitmRequestSession.blockedResources = {
+      session.mitmRequestSession.interceptorHandlers.push({
         urls: ['http://dataliberationfoundation.org/*'],
         types: [],
-        handlerFn: (request, response) => {
+        handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html><body><p>frame body</p>
 <script>
 localStorage.setItem('cross', '1');
@@ -376,7 +378,7 @@ localStorage.setItem('cross', '1');
 </html>`);
           return true;
         },
-      };
+      });
 
       koaServer.get('/cross-storage', ctx => {
         ctx.body = `<body>
@@ -404,10 +406,10 @@ localStorage.setItem('cross', '1');
       const session = tab.session;
       Helpers.needsClosing.push(session);
 
-      session.mitmRequestSession.blockedResources = {
+      session.mitmRequestSession.interceptorHandlers.push({
         urls: ['http://dataliberationfoundation.org/*'],
         types: [],
-        handlerFn: (request, response) => {
+        handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html>
 <body>
 <script>
@@ -417,7 +419,7 @@ window.parent.postMessage({message: localStorage.getItem('cross')}, "${koaServer
 </html>`);
           return true;
         },
-      };
+      });
       koaServer.get('/cross-storage2', ctx => {
         ctx.body = `<body>
 <div id="local"></div>

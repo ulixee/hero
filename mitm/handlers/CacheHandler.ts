@@ -74,7 +74,7 @@ export default class CacheHandler {
     if (
       ctx.method === 'GET' &&
       !this.didProposeCachedResource &&
-      !ctx.didBlockResource &&
+      !ctx.didInterceptResource &&
       this.data.length
     ) {
       const resHeaders = ctx.responseHeaders;

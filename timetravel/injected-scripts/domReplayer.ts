@@ -54,7 +54,11 @@ class DomReplayer {
 
   public setPaintIndex(index: number): void {
     if (index === this.loadedIndex) return;
-    debugLog('Setting paint index', index, this.loadedIndex, document.readyState);
+    debugLog('Setting paint index', {
+      newIndex: index,
+      currentIndex: this.loadedIndex,
+      readyState: document.readyState,
+    });
 
     if (this.loadedIndex > index) {
       this.pendingDomChanges.length = 0;

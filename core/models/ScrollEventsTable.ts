@@ -19,10 +19,11 @@ export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
     frameId: number,
     commandId: number,
     scrollEvent: IScrollEvent,
-  ): void {
+  ): IScrollRecord {
     const [scrollX, scrollY, timestamp] = scrollEvent;
     const record = [tabId, frameId, scrollX, scrollY, commandId, timestamp];
     this.queuePendingInsert(record);
+    return { tabId, frameId, scrollX, scrollY, commandId, timestamp };
   }
 }
 

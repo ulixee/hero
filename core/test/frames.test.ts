@@ -61,17 +61,16 @@ test('should allow query selectors in cross-domain frames', async () => {
       `;
   });
 
-  session.mitmRequestSession.blockedResources = {
+  session.mitmRequestSession.interceptorHandlers.push({
     urls: ['http://framesy.org/page'],
-    types: [],
-    handlerFn: (request, response) => {
+    handlerFn(url, type, request, response) {
       response.end(`<html lang="en"><body>
 <h1>Framesy Page</h1>
 <div>This is content inside the frame</div>
 </body></html>`);
       return true;
     },
-  };
+  });
 
   await tab.goto(`${koaServer.baseUrl}/iframePage`);
   await tab.waitForLoad('DomContentLoaded');

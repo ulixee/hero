@@ -12,7 +12,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
 
   private pendingCertsById = new Map<number, Resolvable<{ cert: string; expireDate: number }>>();
 
-  private privateKey: string;
+  private privateKey: Buffer;
   private waitForInit = new Resolvable<void>();
   private hasWaitForInitListeners = false;
 
@@ -26,12 +26,9 @@ export default class CertificateGenerator extends BaseIpcHandler {
     super({ ...options, mode: 'certs' });
   }
 
-  public async getPrivateKey(): Promise<string> {
-    await this.waitForInit;
-    return this.privateKey;
-  }
-
-  public async generateCerts(host: string): Promise<{ cert: string; expireDate: number }> {
+  public async generateCerts(
+    host: string,
+  ): Promise<{ cert: Buffer; expireDate: number; key: Buffer }> {
     await this.waitForConnected;
     certRequestId += 1;
     const id = certRequestId;
@@ -40,6 +37,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
     this.pendingCertsById.set(id, resolvable);
 
     try {
+      await this.waitForInit;
       await this.sendIpcMessage({ id, host });
     } catch (error) {
       if (this.isClosing) return;
@@ -47,8 +45,8 @@ export default class CertificateGenerator extends BaseIpcHandler {
     }
 
     this.hasWaitForInitListeners = true;
-    await this.waitForInit;
-    return await resolvable.promise;
+    const { cert, expireDate } = await resolvable.promise;
+    return { cert: Buffer.from(cert), expireDate, key: this.privateKey };
   }
 
   protected onMessage(rawMessage: string): void {
@@ -65,7 +63,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
     }
 
     if (message.status === 'init') {
-      this.privateKey = message.privateKey;
+      this.privateKey = Buffer.from(message.privateKey);
       this.waitForInit.resolve();
       return;
     }

@@ -11,9 +11,10 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import DevtoolsPreferences from './DevtoolsPreferences';
-import CorePlugins from './CorePlugins';
 import Core from '../index';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import CorePlugins from './CorePlugins';
 
 const { log } = Log(module);
 export const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
@@ -37,6 +38,7 @@ export default class GlobalPool {
   }>();
 
   private static isClosing = false;
+  private static utilityBrowserContext: Promise<IPuppetContext>;
   private static defaultLaunchArgs: IPuppetLaunchArgs;
   private static _activeSessionCount = 0;
   private static puppets: Puppet[] = [];
@@ -46,6 +48,19 @@ export default class GlobalPool {
     options: ISessionCreateOptions;
     promise: IResolvablePromise<Session>;
   }[] = [];
+
+  public static getUtilityContext(): Promise<IPuppetContext> {
+    if (this.utilityBrowserContext) return this.utilityBrowserContext;
+
+    const corePlugins = new CorePlugins({}, log);
+
+    this.utilityBrowserContext = this.getPuppet(corePlugins, corePlugins.browserEngine, {
+      showBrowser: false,
+      enableMitm: false,
+    }).then(puppet => puppet.newContext(corePlugins, log, null, true));
+
+    return this.utilityBrowserContext;
+  }
 
   public static async start(): Promise<void> {
     this.isClosing = false;
@@ -85,6 +100,9 @@ export default class GlobalPool {
     }
     this.waitingForAvailability.length = 0;
     const closePromises: Promise<any>[] = [];
+
+    closePromises.push(this.utilityBrowserContext?.then(x => x.close()).catch(err => err));
+
     while (this.puppets.length) {
       const puppetBrowser = this.puppets.shift();
       closePromises.push(puppetBrowser.close().catch(err => err));
@@ -109,9 +127,12 @@ export default class GlobalPool {
       });
   }
 
-  public static async getPuppet(plugins: CorePlugins): Promise<Puppet> {
-    const args = this.getPuppetLaunchArgs();
-    const browserEngine = plugins.browserEngine;
+  public static async getPuppet(
+    plugins: ICorePlugins,
+    browserEngine: IBrowserEngine,
+    launchArgs?: IPuppetLaunchArgs,
+  ): Promise<Puppet> {
+    const args = launchArgs ?? this.getPuppetLaunchArgs();
     const puppet = new Puppet(browserEngine, args);
     await plugins.onBrowserLaunchConfiguration(browserEngine.launchArguments);
 
@@ -151,7 +172,7 @@ export default class GlobalPool {
       const session = new Session(options);
       this.events.emit('session-created', { session });
 
-      const puppet = await this.getPuppet(session.plugins);
+      const puppet = await this.getPuppet(session.plugins, session.browserEngine);
 
       if (disableMitm !== true) {
         await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);

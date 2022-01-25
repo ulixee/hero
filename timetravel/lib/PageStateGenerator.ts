@@ -344,8 +344,9 @@ export default class PageStateGenerator {
     const networkInterceptor = MirrorNetwork.createFromSessionDb(session.db, session.tabId, {
       hasResponse: true,
       isGetOrDocument: true,
+      ignoreJavascriptRequests: true,
+      useResourcesOnce: true,
     });
-    networkInterceptor.useResourcesOnce = true;
 
     session.mirrorPage = new MirrorPage(networkInterceptor, session.domRecording, false);
 

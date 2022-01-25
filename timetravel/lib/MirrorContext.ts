@@ -33,7 +33,7 @@ export default class MirrorContext {
     plugins.browserEngine.isHeaded = options.showBrowser;
     plugins.configure(options);
 
-    const puppet = await GlobalPool.getPuppet(plugins);
+    const puppet = await GlobalPool.getPuppet(plugins, plugins.browserEngine);
     return await puppet.newContext(plugins, log);
   }
 }

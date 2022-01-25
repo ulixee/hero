@@ -4,7 +4,7 @@ import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from '../lib/MitmRequestContext';
-import BlockHandler from './BlockHandler';
+import InterceptorHandler from './InterceptorHandler';
 import HeadersHandler from './HeadersHandler';
 import ResourceState from '../interfaces/ResourceState';
 import RequestSession from './RequestSession';
@@ -48,10 +48,10 @@ export default class Http2PushPromiseHandler {
     const sessionId = this.session.sessionId;
     const serverPushStream = this.context.serverToProxyResponse as http2.ClientHttp2Stream;
 
-    if (BlockHandler.shouldBlockRequest(pushContext)) {
+    if (await InterceptorHandler.shouldIntercept(pushContext)) {
       await pushContext.browserHasRequested;
       session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
-      pushContext.setState(ResourceState.Blocked);
+      pushContext.setState(ResourceState.Intercepted);
       return serverPushStream.close(http2.constants.NGHTTP2_CANCEL);
     }
 

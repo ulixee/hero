@@ -23,6 +23,7 @@ import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
@@ -40,12 +41,19 @@ import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import PageStateListener from './PageStateListener';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
+import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
-import { disableMitm } from './GlobalPool';
+import GlobalPool, { disableMitm } from './GlobalPool';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
+import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import { IMouseEventRecord } from '../models/MouseEventsTable';
+import { IScrollRecord } from '../models/ScrollEventsTable';
+import { IFocusRecord } from '../models/FocusEventsTable';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 
 const { log } = Log(module);
 
@@ -64,6 +72,10 @@ export default class Tab
   public isDetached = false;
 
   protected readonly logger: IBoundLog;
+  private readonly mirrorPage: MirrorPage;
+  private readonly mirrorNetwork: MirrorNetwork;
+
+  private collectedFragmentsPendingHTML = new Set<Resolvable<ICollectedFragment>>();
 
   private readonly commandRecorder: CommandRecorder;
   private readonly createdAtCommandId: number;
@@ -151,6 +163,20 @@ export default class Tab
         windowOpenParams.loaderId,
       );
     }
+
+    this.mirrorNetwork = new MirrorNetwork({
+      ignoreJavascriptRequests: true,
+      headersFilter: ['set-cookie'],
+      loadResourceDetails: MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, this.session.db),
+    });
+    this.mirrorPage = new MirrorPage(this.mirrorNetwork, {
+      paintEvents: [],
+      mainFrameIds: new Set([this.mainFrameId]),
+      documents: [],
+      domNodePathByFrameId: this.session.db.frames.frameDomNodePathsById,
+    });
+    this.mirrorPage.subscribe(this);
+
     this.listen();
     this.isReady = this.waitForReady();
     this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
@@ -219,34 +245,40 @@ export default class Tab
 
   public async setBlockedResourceTypes(
     blockedResourceTypes: IBlockedResourceType[],
+    blockedUrls?: string[],
   ): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
-    const blockedResources = mitmSession.blockedResources.types;
+
+    let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
+    if (!interceptor) {
+      mitmSession.interceptorHandlers.push({ types: [] });
+      interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
+    }
     let enableJs = true;
 
     if (blockedResourceTypes.includes('None')) {
-      blockedResources.length = 0;
+      interceptor.types.length = 0;
     } else if (blockedResourceTypes.includes('All')) {
-      blockedResources.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
+      interceptor.types.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
       enableJs = false;
     } else if (blockedResourceTypes.includes('BlockAssets')) {
-      blockedResources.push('Image', 'Stylesheet', 'Script');
+      interceptor.types.push('Image', 'Stylesheet', 'Script');
     } else {
       if (blockedResourceTypes.includes('BlockImages')) {
-        blockedResources.push('Image');
+        interceptor.types.push('Image');
       }
       if (blockedResourceTypes.includes('BlockCssResources')) {
-        blockedResources.push('Stylesheet');
+        interceptor.types.push('Stylesheet');
       }
       if (blockedResourceTypes.includes('BlockJsResources')) {
-        blockedResources.push('Script');
+        interceptor.types.push('Script');
       }
       if (blockedResourceTypes.includes('JsRuntime')) {
         enableJs = false;
       }
     }
     await this.puppetPage.setJavaScriptEnabled(enableJs);
-    mitmSession.blockedResources.urls = [];
+    interceptor.urls = blockedUrls;
   }
 
   public async close(): Promise<void> {
@@ -254,6 +286,16 @@ export default class Tab
     this.isClosing = true;
     const parentLogId = this.logger.stats('Tab.Closing');
     const errors: Error[] = [];
+
+    await this.pendingCollects();
+    try {
+      this.mirrorNetwork?.close();
+      await this.mirrorPage?.close();
+    } catch (error) {
+      if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
+        errors.push(error);
+      }
+    }
 
     try {
       await this.puppetPage.domStorageTracker.finalFlush(5e3);
@@ -291,20 +333,19 @@ export default class Tab
 
   public async setOrigin(origin: string): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
-    const originalBlocker = mitmSession.blockedResources;
-    mitmSession.blockedResources = {
-      types: [],
+    const originalBlocker = mitmSession.interceptorHandlers;
+    mitmSession.interceptorHandlers.unshift({
       urls: [origin],
-      handlerFn(request, response) {
+      handlerFn(url, type, request, response) {
         response.end(`<html lang="en"><body>Empty</body></html>`);
         return true;
       },
-    };
+    });
     try {
       await this.puppetPage.navigate(origin);
     } finally {
       // restore originals
-      mitmSession.blockedResources = originalBlocker;
+      mitmSession.interceptorHandlers = originalBlocker;
     }
   }
 
@@ -466,6 +507,71 @@ export default class Tab
 
   public async focus(): Promise<void> {
     await this.puppetPage.bringToFront();
+  }
+
+  public pendingCollects(): Promise<any> {
+    return Promise.all(this.collectedFragmentsPendingHTML);
+  }
+
+  public onResource(x: ITabEventParams['resource']): void {
+    if (!x) return;
+
+    const resourceSummary: IResourceSummary = {
+      id: x.id,
+      frameId: x.frameId,
+      tabId: x.tabId,
+      url: x.url,
+      method: x.request.method,
+      type: x.type,
+      statusCode: x.response.statusCode,
+      redirectedToUrl: x.isRedirect ? x.response.url : null,
+      timestamp: x.response.timestamp,
+      hasResponse: x.response.headers && Object.keys(x.response.headers).length > 0,
+      contentType: x.response.headers
+        ? ((x.response.headers['content-type'] ?? x.response.headers['Content-Type']) as string)
+        : null,
+    };
+
+    this.mirrorNetwork.addResource(resourceSummary);
+  }
+
+  public onFragmentRequested(fragment: ICollectedFragment): Promise<void> {
+    const resolvable = new Resolvable<ICollectedFragment>();
+    const resolveExisting = Promise.all(this.collectedFragmentsPendingHTML);
+    this.collectedFragmentsPendingHTML.add(resolvable);
+
+    this.session.db.collectedFragments.insert(fragment);
+
+    return resolveExisting
+      .then(() => this.getFragmentHtml(fragment))
+      .then(resolvable.resolve)
+      .catch(resolvable.resolve)
+      .finally(() => this.collectedFragmentsPendingHTML.delete(resolvable));
+  }
+
+  public async getFragmentHtml(fragment: ICollectedFragment): Promise<ICollectedFragment> {
+    await this.flushDomChanges();
+    const paintIndex = this.mirrorPage.getPaintIndex(fragment.domChangesTimestamp);
+    try {
+      await this.mirrorPage.open(
+        await GlobalPool.getUtilityContext(),
+        this.sessionId,
+        this.session.viewport,
+      );
+      await this.mirrorPage.load(paintIndex);
+      const frameDomNodeId = this.frameEnvironmentsById.get(fragment.frameId).domNodeId;
+      fragment.outerHTML = await this.mirrorPage.getNodeOuterHtml(
+        fragment.nodePointerId,
+        frameDomNodeId,
+      );
+    } catch (error) {
+      this.logger.warn('Tab.getFragmentHtml: ERROR', {
+        fragment,
+        error,
+      });
+    }
+    this.session.db.collectedFragments.updateHtml(fragment);
+    return fragment;
   }
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
@@ -783,6 +889,7 @@ export default class Tab
 
   private listen(): void {
     const page = this.puppetPage;
+    this.on('resource', this.onResource.bind(this));
 
     this.close = this.close.bind(this);
     page.once('close', this.close);
@@ -876,7 +983,7 @@ export default class Tab
     }
     resource.hasUserGesture ||= navigations.didGotoUrl(url);
 
-    session.resources.onBrowserWillRequest(this.id, frame.id, resource);
+    const pendingRequest = session.resources.onBrowserWillRequest(this.id, frame.id, resource);
 
     if (isDocumentNavigation && !event.resource.browserCanceled) {
       navigations.onHttpRequested(
@@ -886,6 +993,21 @@ export default class Tab
         resource.browserRequestId,
         event.loaderId,
       );
+    }
+    if (this.mirrorNetwork) {
+      this.mirrorNetwork.addRequestedResource({
+        id: pendingRequest.mitmResourceId,
+        frameId: pendingRequest.frameId,
+        tabId: pendingRequest.tabId,
+        url: pendingRequest.url,
+        method: pendingRequest.method,
+        type: pendingRequest.resourceType,
+        statusCode: resource.status,
+        redirectedToUrl: resource.redirectedToUrl,
+        timestamp: pendingRequest.requestTime,
+        hasResponse: false,
+        contentType: null,
+      });
     }
   }
 
@@ -1129,6 +1251,15 @@ export interface ITabEventParams {
   'child-tab-created': Tab;
   close: null;
   dialog: IPuppetDialog;
+  'page-events': {
+    frame: FrameEnvironment;
+    records: {
+      domChanges: IDomChangeRecord[];
+      focusEvents: IFocusRecord[];
+      mouseEvents: IMouseEventRecord[];
+      scrollEvents: IScrollRecord[];
+    };
+  };
   'wait-for-pagestate': { listener: PageStateListener };
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;

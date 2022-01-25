@@ -4,6 +4,8 @@ import * as http from 'http';
 import { ITestHttpServer } from '@ulixee/hero-testing/helpers';
 import Core, { GlobalPool } from '../index';
 import Session from '../lib/Session';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import { IBrowserEmulator } from '@ulixee/hero-interfaces/ICorePlugin';
 
 let httpServer: ITestHttpServer<http.Server>;
 
@@ -133,17 +135,22 @@ describe('GlobalPool tests', () => {
     const puppet1 = puppets[0];
     expect(allBrowsersClosedEvent).toBeCalledTimes(0);
 
+    const browserEngine: IBrowserEngine = {
+      ...puppet1.browserEngine,
+      launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
+    };
     // @ts-ignore
-    const puppet2 = await GlobalPool.getPuppet({
-      browserEngine: {
-        ...puppet1.browserEngine,
-        launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
+    const puppet2 = await GlobalPool.getPuppet(
+      {
+        browserEmulator: { id: 'basic' } as IBrowserEmulator,
+        onBrowserLaunchConfiguration(): Promise<void> {
+          return Promise.resolve();
+        },
+        humanEmulator: { id: 'basic' },
+        use() {},
       },
-      onBrowserLaunchConfiguration(): Promise<void> {
-        return Promise.resolve();
-      },
-      humanEmulator: { id: 'basic' },
-    });
+      browserEngine,
+    );
 
     expect(puppets).toHaveLength(2);
     expect(allBrowsersClosedEvent).toBeCalledTimes(0);

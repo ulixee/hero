@@ -7,10 +7,11 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
-      'CertificatesV2',
+      'CertificatesV3',
       [
         ['host', 'TEXT', 'NOT NULL PRIMARY KEY'],
-        ['pem', 'TEXT'],
+        ['key', 'BLOB'],
+        ['pem', 'BLOB'],
         ['expireDate', 'INTEGER'],
       ],
       true,
@@ -19,9 +20,9 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   }
 
   public insert(record: ICertificateRecord): void {
-    const { host, pem, expireDate } = record;
+    const { host, key, pem, expireDate } = record;
     this.pemByHost.set(host, record);
-    this.queuePendingInsert([host, pem, expireDate]);
+    this.queuePendingInsert([host, key, pem, expireDate]);
   }
 
   public get(host: string): ICertificateRecord {
@@ -43,6 +44,7 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
 
 export interface ICertificateRecord {
   host: string;
-  pem: string;
+  key: Buffer;
+  pem: Buffer;
   expireDate: number;
 }

@@ -40,7 +40,7 @@ import {
 } from '@ulixee/hero-interfaces/IInteractions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Resource, { createResource } from './Resource';
+import Resource from './Resource';
 import Interactor from './Interactor';
 import IInteractions, {
   Command,
@@ -65,8 +65,8 @@ import ConnectionManager from './ConnectionManager';
 import './DomExtender';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
-import Fragment from './Fragment';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -115,7 +115,6 @@ export default class Hero extends AwaitedEventTarget<{
   private static emitter = new EventEmitter();
 
   readonly #connectManagerIsReady = createPromise();
-  readonly #fragmentsByName = new Map<string, Fragment>();
   readonly #options: IStateOptions;
   #isClosing = false;
 
@@ -245,59 +244,39 @@ export default class Hero extends AwaitedEventTarget<{
     await tab.close();
   }
 
-  public getFragment<T extends ISuperElement>(name: string): T {
-    return this.#fragmentsByName.get(name).element as T;
-  }
-
   public async getCollectedResources(
     sessionId: string,
-  ): Promise<{ name: string; resource: ICollectedResource }[]> {
+    name: string,
+  ): Promise<ICollectedResource[]> {
     const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
-    const resources = await coreSession.getCollectedResources(sessionId);
+    const resources = await coreSession.getCollectedResources(sessionId, name);
 
-    const results: { name: string; resource: ICollectedResource }[] = [];
-    for (const collected of resources) {
-      const resource = collected.resource as ICollectedResource;
+    const results: ICollectedResource[] = [];
+    for (const resource of resources) {
       const buffer = resource.response?.body;
       delete resource.response?.body;
 
-      const text = (): string => buffer?.toString();
-      const json = (): any => (buffer ? JSON.parse(buffer.toString()) : null);
-
-      resource.buffer = buffer;
+      const properties: PropertyDescriptorMap = {
+        buffer: { get: () => buffer, enumerable: true },
+        json: { get: () => (buffer ? JSON.parse(buffer.toString()) : null), enumerable: true },
+        text: { get: () => buffer?.toString(), enumerable: true },
+      };
 
       if (resource.response) {
-        Object.defineProperties(resource.response, {
-          buffer: { get: () => buffer },
-          json: { get: json },
-          text: { get: text },
-        });
+        Object.defineProperties(resource.response, properties);
       }
-      Object.defineProperties(resource, {
-        buffer: { get: () => buffer },
-        json: { get: json },
-        text: { get: text },
-      });
-      results.push({ resource, name: collected.name });
+      Object.defineProperties(resource, properties);
+      results.push(resource as ICollectedResource);
     }
     return results;
   }
 
-  public async importFragments(sessionId: string): Promise<Fragment[]> {
+  public async getCollectedFragments(
+    sessionId: string,
+    name: string,
+  ): Promise<ICollectedFragment[]> {
     const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
-    const fragments = await coreSession.loadFragments(sessionId);
-    return fragments.map(x => {
-      const frozenTab = new FrozenTab(
-        this,
-        Promise.resolve({
-          coreTab: x.coreTab,
-          prefetchedJsPaths: x.prefetchedJsPaths,
-        }),
-      );
-      const fragment = new Fragment(frozenTab, x.name, x.nodePointer);
-      this.#fragmentsByName.set(fragment.name, fragment);
-      return fragment;
-    });
+    return await coreSession.getCollectedFragments(sessionId, name);
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {

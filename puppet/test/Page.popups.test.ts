@@ -61,7 +61,7 @@ describe('Page.popups', () => {
   describe('Popup tests', () => {
     it('should focus popups by default', async () => {
       await page.goto(server.emptyPage);
-      const [popup] = await Promise.all<IPuppetPage, any>([
+      const [popup] = await Promise.all([
         page.waitForPopup(),
         page.evaluate(`(() => {
         window.open('${server.emptyPage}');

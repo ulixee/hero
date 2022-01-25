@@ -182,10 +182,6 @@ export default class SessionDb {
     }
   }
 
-  public unsubscribeToChanges(): void {
-    for (const table of this.tables) table.unsubscribe();
-  }
-
   public static getCached(sessionId: string, fileMustExist = false): SessionDb {
     if (sessionId.endsWith('.db')) sessionId = sessionId.split('.db').shift();
     if (!this.byId.get(sessionId)?.db?.open) {

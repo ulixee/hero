@@ -2,13 +2,12 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class CollectedResourcesTable extends SqliteTable<ICollectedResourcesRecord> {
-  private names = new Set<string>();
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
       'CollectedResources',
       [
-        ['name', 'TEXT', 'NOT NULL PRIMARY KEY'],
+        ['name', 'TEXT'],
         ['resourceId', 'INTEGER'],
         ['tabId', 'INTEGER'],
       ],
@@ -16,9 +15,11 @@ export default class CollectedResourcesTable extends SqliteTable<ICollectedResou
     );
   }
 
+  public getByName(name: string): ICollectedResourcesRecord[] {
+    return this.db.prepare(`select * from ${this.tableName} where name=:name`).all({ name });
+  }
+
   public insert(tabId: number, resourceId: number, name: string): void {
-    if (this.names.has(name))
-      throw new Error(`The collected resource name (${name}) must be unique for a session.`);
     return this.queuePendingInsert([name, resourceId, tabId]);
   }
 }

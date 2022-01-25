@@ -26,9 +26,10 @@ import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
-import Tab from './Tab';
+import Tab, { ITabEventParams } from './Tab';
 import Interactor from './Interactor';
 import CommandRecorder from './CommandRecorder';
 import FrameNavigations from './FrameNavigations';
@@ -40,7 +41,6 @@ import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { ICollectedFragment } from '../models/CollectedFragmentsTable';
 
 const { log } = Log(module);
 
@@ -86,7 +86,6 @@ export default class FrameEnvironment
   }
 
   public readonly navigationsObserver: TabNavigationObserver;
-
   public readonly navigations: FrameNavigations;
 
   public readonly id: number;
@@ -108,8 +107,8 @@ export default class FrameEnvironment
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
-  private lastDomChangeNavigationId: number;
-  private lastDomChangeIndex = 0;
+  private lastDomChangeDocumentNavigationId: number;
+  private lastDomChangeTimestamp = 0;
   private isTrackingMouse = false;
 
   private readonly installedDomAssertions = new Set<string>();
@@ -145,7 +144,7 @@ export default class FrameEnvironment
     process.nextTick(() => this.listen());
     this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
-      this.createFragment,
+      this.collectFragment,
       this.execJsPath,
       this.fetch,
       this.getChildFrameEnvironment,
@@ -256,21 +255,56 @@ export default class FrameEnvironment
     return this.toJSON();
   }
 
-  public async createFragment(name: string, jsPath: IJsPath): Promise<ICollectedFragment> {
+  public async collectFragment(
+    name: string,
+    jsPath: IJsPath,
+    waitForFragment = false,
+  ): Promise<ICollectedFragment[]> {
     const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
-    const navigation = this.navigations.lastHttpNavigation;
-    const fragment: ICollectedFragment = {
-      name,
-      nodePointerId: nodePointer.id,
-      nodeType: nodePointer.type,
-      nodePreview: nodePointer.preview,
-      frameNavigationId: navigation.id,
-      commandId: this.session.commands.lastId,
-      domChangeEventIndex: this.lastDomChangeIndex,
-    };
-    this.session.db.collectedFragments.insert(fragment);
-    return fragment;
+    const navigation = this.navigations.lastHttpNavigationRequest;
+    const commandId = this.session.commands.lastId;
+    const domChangesTimestamp = this.lastDomChangeTimestamp;
+
+    const fragments: ICollectedFragment[] = [];
+
+    if (nodePointer.iterableItems && nodePointer.iterableIsState) {
+      for (const item of nodePointer.iterableItems as INodePointer[]) {
+        fragments.push({
+          name,
+          nodePointerId: item.id,
+          frameId: this.id,
+          tabId: this.tab.id,
+          nodeType: item.type,
+          nodePreview: item.preview,
+          frameNavigationId: navigation.id,
+          commandId,
+          domChangesTimestamp,
+        });
+      }
+    } else {
+      fragments.push({
+        name,
+        nodePointerId: nodePointer.id,
+        frameId: this.id,
+        tabId: this.tab.id,
+        nodeType: nodePointer.type,
+        nodePreview: nodePointer.preview,
+        frameNavigationId: navigation.id,
+        commandId,
+        domChangesTimestamp,
+      });
+    }
+
+    const promises: Promise<any>[] = [];
+    for (const fragment of fragments) {
+      const fragmentHtmlPromise = this.tab.onFragmentRequested(fragment);
+      if (waitForFragment) {
+        promises.push(fragmentHtmlPromise);
+      }
+    }
+    await Promise.all(promises);
+    return fragments;
   }
 
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
@@ -582,52 +616,66 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     let lastCommand = commands.last;
     if (!lastCommand) return; // nothing to store yet
 
-    let navigation = this.navigations.get(this.lastDomChangeNavigationId);
+    let documentNavigation = this.navigations.get(this.lastDomChangeDocumentNavigationId);
     const db = this.session.db;
 
+    const records: ITabEventParams['page-events']['records'] = {
+      mouseEvents: [],
+      focusEvents: [],
+      scrollEvents: [],
+      domChanges: [],
+    };
     for (const domChange of domChanges) {
-      const [action, nodeData, timestamp, index] = domChange;
+      const [action, nodeData, timestamp] = domChange;
       lastCommand = commands.getCommandForTimestamp(lastCommand, timestamp);
-      if (index > this.lastDomChangeIndex) this.lastDomChangeIndex = index;
+      if (timestamp > this.lastDomChangeTimestamp) this.lastDomChangeTimestamp = timestamp;
 
-      if (action === DomActionType.newDocument || action === DomActionType.location) {
+      if (action === DomActionType.newDocument) {
         const url = domChange[1].textContent;
-        navigation = this.navigations.findHistory(x => x.finalUrl === url);
+        documentNavigation = this.navigations.findHistory(x => x.finalUrl === url);
 
         if (
-          navigation &&
-          (!this.lastDomChangeNavigationId || this.lastDomChangeNavigationId < navigation.id)
+          documentNavigation &&
+          documentNavigation.id > (this.lastDomChangeDocumentNavigationId ?? 0)
         ) {
-          this.lastDomChangeNavigationId = navigation.id;
-        }
-        if (index < this.lastDomChangeIndex) {
-          this.lastDomChangeIndex = index;
+          this.lastDomChangeDocumentNavigationId = documentNavigation.id;
         }
       }
 
       // if this is a doctype, set into the navigation
-      if (navigation && action === DomActionType.added && nodeData.nodeType === 10) {
-        navigation.doctype = nodeData.textContent;
-        db.frameNavigations.insert(navigation);
+      if (documentNavigation && action === DomActionType.added && nodeData.nodeType === 10) {
+        documentNavigation.doctype = nodeData.textContent;
+        db.frameNavigations.insert(documentNavigation);
       }
 
-      db.domChanges.insert(tabId, frameId, navigation?.id, lastCommand.id, domChange);
+      const record = db.domChanges.insert(
+        tabId,
+        frameId,
+        documentNavigation?.id,
+        lastCommand.id,
+        domChange,
+      );
+      records.domChanges.push(record);
     }
 
     for (const mouseEvent of mouseEvents) {
       lastCommand = commands.getCommandForTimestamp(lastCommand, mouseEvent[8]);
-      db.mouseEvents.insert(tabId, frameId, lastCommand.id, mouseEvent);
+      const record = db.mouseEvents.insert(tabId, frameId, lastCommand.id, mouseEvent);
+      records.mouseEvents.push(record);
     }
 
     for (const focusEvent of focusEvents) {
       lastCommand = commands.getCommandForTimestamp(lastCommand, focusEvent[3]);
-      db.focusEvents.insert(tabId, frameId, lastCommand.id, focusEvent);
+      const record = db.focusEvents.insert(tabId, frameId, lastCommand.id, focusEvent);
+      records.focusEvents.push(record);
     }
 
     for (const scrollEvent of scrollEvents) {
       lastCommand = commands.getCommandForTimestamp(lastCommand, scrollEvent[2]);
-      db.scrollEvents.insert(tabId, frameId, lastCommand.id, scrollEvent);
+      const record = db.scrollEvents.insert(tabId, frameId, lastCommand.id, scrollEvent);
+      records.scrollEvents.push(record);
     }
+    this.tab.emit('page-events', { records, frame: this });
     return true;
   }
 

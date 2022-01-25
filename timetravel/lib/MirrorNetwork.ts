@@ -2,30 +2,40 @@ import { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import Fetch = Protocol.Fetch;
 
+interface IMirrorNetworkConfig {
+  headersFilter?: (string | RegExp)[];
+  ignoreJavascriptRequests?: boolean;
+  useResourcesOnce?: boolean;
+  loadResourceDetails: (id: number) => Promise<ISessionResourceDetails> | ISessionResourceDetails;
+}
+
 export default class MirrorNetwork {
-  public resourceLookup: { [method_url: string]: IResourceSummary[] } = {};
+  public resourceLookup: {
+    [method_url: string]: (IResourceSummary & { responsePromise?: Resolvable<IResourceSummary> })[];
+  } = {};
+
   public headersFilter: (string | RegExp)[];
   public ignoreJavascriptRequests: boolean;
   public useResourcesOnce: boolean;
+
+  public waitForPendingResources = new Set<Promise<any>>();
 
   private readonly doctypesByUrl: { [url: string]: string } = {};
   private loadResourceDetails: (
     id: number,
   ) => Promise<ISessionResourceDetails> | ISessionResourceDetails;
 
-  constructor(config?: {
-    headersFilter?: (string | RegExp)[];
-    ignoreJavascriptRequests?: boolean;
-    useResourcesOnce?: boolean;
-  }) {
-    this.headersFilter = config?.headersFilter ?? [];
-    this.ignoreJavascriptRequests = config?.ignoreJavascriptRequests ?? false;
-    this.useResourcesOnce = config?.useResourcesOnce ?? false;
+  constructor(config: IMirrorNetworkConfig) {
+    this.headersFilter = config.headersFilter ?? [];
+    this.ignoreJavascriptRequests = config.ignoreJavascriptRequests ?? false;
+    this.useResourcesOnce = config.useResourcesOnce ?? false;
+    this.loadResourceDetails = config.loadResourceDetails;
     bindFunctions(this);
   }
 
@@ -35,6 +45,7 @@ export default class MirrorNetwork {
 
   public close(): void {
     this.resourceLookup = {};
+    this.loadResourceDetails = null;
   }
 
   public async mirrorNetworkRequests(
@@ -51,7 +62,8 @@ export default class MirrorNetwork {
       };
     }
 
-    const matches = this.resourceLookup[`${method}_${url}`];
+    const key = `${method}_${url}`;
+    const matches = this.resourceLookup[key];
     if (!matches?.length) {
       return {
         requestId: request.requestId,
@@ -59,22 +71,41 @@ export default class MirrorNetwork {
         body: Buffer.from(`Not Found`).toString('base64'),
       };
     }
-    const match = matches[0];
+
+    let match = matches[0];
+    if (!match.hasResponse && match.responsePromise) {
+      const responsePromise = match.responsePromise.promise;
+      this.waitForPendingResources.add(responsePromise);
+      match = await responsePromise;
+      this.waitForPendingResources.delete(responsePromise);
+    }
     if (this.useResourcesOnce) {
       matches.shift();
     }
-    const resource = await this.loadResourceDetails(match.id);
-    const { headers, contentEncoding, isJavascript } = this.getMockHeaders(resource);
-
-    if (this.ignoreJavascriptRequests && (isJavascript || request.resourceType === 'Script')) {
+    if (
+      this.ignoreJavascriptRequests &&
+      (request.resourceType === 'Script' ||
+        matches[0].contentType.includes('json') ||
+        matches[0].contentType.includes('javascript'))
+    ) {
       return {
         requestId: request.requestId,
         responseCode: 200,
-        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+        responseHeaders: [{ name: 'Content-Type', value: matches[0].contentType }],
         body: '',
       };
     }
 
+    const resource = await this.loadResourceDetails(match.id);
+    const { headers, contentEncoding, isJavascript } = this.getMockHeaders(resource);
+    if (this.ignoreJavascriptRequests && isJavascript) {
+      return {
+        requestId: request.requestId,
+        responseCode: 200,
+        responseHeaders: [{ name: 'Content-Type', value: matches[0].contentType }],
+        body: '',
+      };
+    }
     let body = resource.body;
 
     // Chrome Devtools has an upstream issue that gzipped responses don't work, so we have to do it.. :(
@@ -94,21 +125,38 @@ export default class MirrorNetwork {
     };
   }
 
-  public loadResources(
-    resources: (IResourceSummary | IResourcesRecord)[],
-    loadResourceDetails: (id: number) => Promise<ISessionResourceDetails> | ISessionResourceDetails,
-  ): void {
+  public addRequestedResource(resource: IResourceSummary): void {
+    const key = `${resource.method}_${resource.url}`;
+    if (this.resourceLookup[key]?.length) return;
+
+    (resource as any).responsePromise = new Resolvable();
+    this.resourceLookup[key] = [resource];
+  }
+
+  public addResource(resource: IResourceSummary): void {
+    const key = `${resource.method}_${resource.url}`;
+    if (!this.resourceLookup[key]?.length) {
+      this.resourceLookup[key] = [resource];
+    } else {
+      const pendingResolutionIdx = this.resourceLookup[key].findIndex(
+        x => !!x.responsePromise && x.hasResponse === false,
+      );
+      if (pendingResolutionIdx >= 0) {
+        this.resourceLookup[key][pendingResolutionIdx].responsePromise.resolve(resource);
+        this.resourceLookup[key][pendingResolutionIdx] = resource;
+      } else this.resourceLookup[key].push(resource);
+    }
+  }
+
+  public setResources(resources: (IResourceSummary | IResourcesRecord)[]): void {
     this.resourceLookup = {};
     for (let resource of resources) {
       if (!(resource as IResourceSummary).method) {
         resource = ResourcesTable.toResourceSummary(resource as IResourcesRecord);
       }
       resource = resource as IResourceSummary;
-      const key = `${resource.method}_${resource.url}`;
-      this.resourceLookup[key] ??= [];
-      this.resourceLookup[key].push(resource);
+      this.addResource(resource);
     }
-    this.loadResourceDetails = loadResourceDetails;
   }
 
   private getMockHeaders(resource: ISessionResourceDetails): {
@@ -126,7 +174,7 @@ export default class MirrorNetwork {
       const name = key.toLowerCase();
 
       for (const entry of this.headersFilter) {
-        if (key.match(entry)) continue;
+        if (name.match(entry)) continue;
       }
 
       if (name === 'content-encoding') {
@@ -158,12 +206,22 @@ export default class MirrorNetwork {
   public static createFromSessionDb(
     db: SessionDb,
     tabId?: number,
-    resourceFilters?: { hasResponse?: boolean; isGetOrDocument?: boolean },
+    options: {
+      hasResponse?: boolean;
+      isGetOrDocument?: boolean;
+    } & Partial<IMirrorNetworkConfig> = {
+      hasResponse: true,
+      isGetOrDocument: true,
+    },
   ): MirrorNetwork {
-    const network = new MirrorNetwork();
+    options.loadResourceDetails ??= MirrorNetwork.loadResourceFromDb.bind(this, db);
+    const network = new MirrorNetwork(options as IMirrorNetworkConfig);
 
-    const resources = db.resources.filter(resourceFilters ?? {});
-    network.loadResources(resources, MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, db));
+    const resources = db.resources.filter(options).filter(x => {
+      if (tabId) return x.tabId === tabId;
+      return true;
+    });
+    network.setResources(resources);
     return network;
   }
 

@@ -1,6 +1,6 @@
 enum ResourceState {
   ClientToProxyRequest = 'ClientToProxyRequest',
-  BlockHandler = 'BlockHandler',
+  InterceptHandler = 'InterceptHandler',
   DetermineResourceType = 'DetermineResourceType',
   EmulationWillSendResponse = 'EmulationWillSendResponse',
   CheckCacheOnRequest = 'CheckCacheOnRequest',
@@ -19,7 +19,7 @@ enum ResourceState {
   End = 'End',
   SessionClosed = 'SessionClosed',
   PrematurelyClosed = 'PrematurelyClosed',
-  Blocked = 'Blocked',
+  Intercepted = 'Intercepted',
   Error = 'Error',
 }
 export default ResourceState;

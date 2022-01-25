@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as http2 from 'http2';
 import { ClientHttp2Stream } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import BlockHandler from './BlockHandler';
+import InterceptorHandler from './InterceptorHandler';
 import HeadersHandler from './HeadersHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import HttpResponseCache from '../lib/HttpResponseCache';
@@ -43,8 +43,8 @@ export default abstract class BaseHttpHandler {
       // need to determine resource type before blocking
       await HeadersHandler.determineResourceType(context);
 
-      if (BlockHandler.shouldBlockRequest(context)) {
-        context.setState(ResourceState.Blocked);
+      if (await InterceptorHandler.shouldIntercept(context)) {
+        context.setState(ResourceState.Intercepted);
         log.info(`Http.RequestBlocked`, {
           sessionId: session.sessionId,
           url: context.url.href,
