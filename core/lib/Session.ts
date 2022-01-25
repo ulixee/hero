@@ -293,8 +293,8 @@ export default class Session
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const resources = db.collectedResources.getByName(name).map(x => {
-      const resource = db.resources.getMeta(x.resourceId, true);
+    const resources = db.collectedResources.getByName(name).map(async x => {
+      const resource = await db.resources.getMeta(x.resourceId, true);
       if (resource.type === 'Websocket') {
         const messages = db.websocketMessages.getMessages(resource.id);
         (resource as any).messages = messages.map(
@@ -307,7 +307,7 @@ export default class Session
       }
       return resource;
     });
-    return Promise.resolve(resources);
+    return Promise.all(resources);
   }
 
   public async getCollectedFragments(

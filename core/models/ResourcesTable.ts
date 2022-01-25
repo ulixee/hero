@@ -87,7 +87,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     return this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
   }
 
-  public getMeta(id: number, includeBody: boolean): IResourceMeta {
+  public async getMeta(id: number, includeBody: boolean): Promise<IResourceMeta> {
     const columns: (keyof IResourcesRecord)[] = [
       'id',
       'frameId',
@@ -113,7 +113,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       'statusMessage',
     ];
     if (includeBody) {
-      columns.push('responseData', 'requestPostData');
+      columns.push('responseData', 'requestPostData', 'responseEncoding');
     }
     const record: IResourcesRecord = this.db
       .prepare(
@@ -121,6 +121,11 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         from ${this.tableName} where id=?`,
       )
       .get(id);
+
+    const body =
+      'responseData' in record
+        ? await decodeBuffer(record.responseData, record.responseEncoding)
+        : null;
 
     return {
       id: record.id,
@@ -151,7 +156,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         statusCode: record.statusCode,
         statusMessage: record.statusMessage,
         remoteAddress: null,
-        body: 'responseData' in record ? Buffer.from(record.responseData ?? []) : null,
+        body,
       },
     };
   }
