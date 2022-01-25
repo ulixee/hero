@@ -6,7 +6,6 @@ import Dialog from '@ulixee/hero/lib/Dialog';
 import HTMLIFrameElement from 'awaited-dom/impl/official-klasses/HTMLIFrameElement';
 import HTMLHeadingElement from 'awaited-dom/impl/official-klasses/HTMLHeadingElement';
 import Hero from '../index';
-import { Session } from '@ulixee/hero-core/index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
