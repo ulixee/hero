@@ -36,7 +36,6 @@ import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import PageState from './PageState';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 
 const awaitedPathState = StateMachine<
   any,
@@ -208,12 +207,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return await this.mainFrameEnvironment.getComputedVisibility(node);
   }
 
-  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
-    return this.mainFrameEnvironment.magicSelector(selectorOrOptions);
+  public querySelector(selector: string): ISuperNode {
+    return this.mainFrameEnvironment.querySelector(selector);
   }
 
-  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
-    return this.mainFrameEnvironment.magicSelectorAll(selectorOrOptions);
+  public querySelectorAll(selector: string): ISuperNodeList {
+    return this.mainFrameEnvironment.querySelectorAll(selector);
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

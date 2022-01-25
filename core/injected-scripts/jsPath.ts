@@ -1,7 +1,6 @@
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import type INodePointer from 'awaited-dom/base/INodePointer';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import { IJsPathError } from '@ulixee/hero-interfaces/IJsPathError';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
@@ -235,7 +234,6 @@ class ObjectAtPath {
 
   private _obstructedByElement: Element;
   private lookupStep: IPathStep;
-  private lookupStepMagicSelectorMatches: number[];
   private lookupStepIndex = 0;
   private nodePointer: INodePointer;
 
@@ -422,60 +420,6 @@ class ObjectAtPath {
     return this;
   }
 
-  public magicSelector(options: IMagicSelectorOptions): Node {
-    const { querySelectors, minMatchingSelectors } = options;
-    const results: number[] = [];
-    this.lookupStepMagicSelectorMatches = results;
-    const candidates = new Map<Node, number>();
-    for (const selector of querySelectors) {
-      try {
-        const result = document.querySelectorAll(selector);
-        results.push(result.length);
-        if (result.length === 1) {
-          const node = result[0];
-          const count = (candidates.get(node) ?? 0) + 1;
-          candidates.set(node, count);
-          if (count >= minMatchingSelectors) {
-            return node;
-          }
-        }
-      } catch (err) {
-        results.push(-1);
-      }
-    }
-    return null;
-  }
-
-  public magicSelectorAll(options: IMagicSelectorOptions): NodeList {
-    const { querySelectors, minMatchingSelectors } = options;
-    const results: number[] = [];
-    this.lookupStepMagicSelectorMatches = results;
-    const countByStringifiedNodeIds = new Map<string, number>();
-    for (const selector of querySelectors) {
-      try {
-        const result = document.querySelectorAll(selector);
-        results.push(result.length);
-        const nodeIds: number[] = [];
-        for (const node of result) {
-          const nodeId = NodeTracker.watchNode(node);
-          nodeIds.push(nodeId);
-        }
-
-        const stringifiedIds = nodeIds.toString();
-        const count = (countByStringifiedNodeIds.get(stringifiedIds) ?? 0) + 1;
-        countByStringifiedNodeIds.set(stringifiedIds, count);
-        if (count >= minMatchingSelectors) {
-          return result;
-        }
-      } catch (err) {
-        results.push(-1);
-      }
-    }
-
-    // create an empty node list if we didn't match anything
-    return new DocumentFragment().childNodes;
-  }
-
   public toReturnError(error: Error): IExecJsPathResult {
     const pathError = <IJsPathError>{
       error: String(error),
@@ -484,9 +428,6 @@ class ObjectAtPath {
         index: this.lookupStepIndex,
       },
     };
-    if (this.lookupStepMagicSelectorMatches) {
-      pathError.pathState.magicSelectorMatches = this.lookupStepMagicSelectorMatches;
-    }
     return {
       value: null,
       pathError,

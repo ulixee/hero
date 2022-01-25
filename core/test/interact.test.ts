@@ -7,9 +7,7 @@ import ConnectionToClient from '../connections/ConnectionToClient';
 import {
   getClientRectFnName,
   getNodePointerFnName,
-  runMagicSelectorFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import { LoadStatus, LocationStatus } from '@ulixee/hero-interfaces/Location';
 
@@ -144,20 +142,6 @@ describe('basic interaction tests', () => {
         {
           command: InteractionCommand.click,
           mousePosition: ['document', ['querySelector', 'not-there']],
-        },
-      ]),
-    ).rejects.toThrow('element does not exist');
-
-    await expect(
-      tab.interact([
-        {
-          command: InteractionCommand.click,
-          mousePosition: [
-            [
-              runMagicSelectorFnName,
-              { querySelectors: ['.not-there'], minMatchingSelectors: 1 } as IMagicSelectorOptions,
-            ],
-          ],
         },
       ]),
     ).rejects.toThrow('element does not exist');

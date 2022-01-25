@@ -280,30 +280,16 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interface
   - hasDimensions `boolean`. The node has width and height.
   - isUnobstructedByOtherElements `boolean`. The node is not hidden or obscured > 50% by another element.
   
-### tab.magicSelector*(stringOrOptions)* {#magic-selector}
+### tab.querySelector*(stringOrOptions)* {#query-selector}
 
-The magic selector is a drop-in replacement for document.querySelector, but it allows a pattern to be provided which can verify your selected elements match multiple queries.
-
-#### **Arguments**:
-- stringOrOptions `string` or `object`. Optional. When not provided and using Superhero, the MagicSelector designer is activated.
-  - `string`. When a string, it will match the given selector string
-  - `object`. When an object, the following properties are options:
-    - minMatchingSelectors `number`. The minimum number of selectors in the provided list that must match.
-    - querySelectors `string[]`. The list of query selectors to match from.
+This is a shortcut for document.querySelector.
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 
-### tab.magicSelectorAll*(stringOrOptions)* {#magic-selector-all}
+### tab.querySelectorAll*(stringOrOptions)* {#query-selector-all}
 
-The magicSelectorAll function is a drop-in replacement for document.querySelectorAll, but it allows a pattern to be provided which can verify your selected elements match multiple queries. For this function, the full returned list of matching nodes must be the same for it to be considered a "match".
-
-#### **Arguments**:
-- stringOrOptions `string` or `object`. Optional. When not provided and using Superhero, the MagicSelector designer is activated.
-  - `string`. When a string, it will match the given selector string
-  - `object`. When an object, the following properties are options:
-    - minMatchingSelectors `number`. The minimum number of selectors in the provided list that must match.
-    - querySelectors `string[]`. The list of query selectors to match from.
+This is a shortcut for document.querySelectorAll.
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given patterns. Returns an empty list if a resultset is not found that satisfies the constraints.
 

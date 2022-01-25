@@ -45,7 +45,6 @@ import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import GlobalPool, { disableMitm } from './GlobalPool';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
@@ -1264,8 +1263,6 @@ export interface ITabEventParams {
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;
   'websocket-message': IWebsocketResourceMessage;
-  'magic-selector': { options: IMagicSelectorOptions; frame: FrameEnvironment };
-  'magic-selector-all': { options: IMagicSelectorOptions; frame: FrameEnvironment };
 }
 
 export function stringToRegex(str: string): RegExp {

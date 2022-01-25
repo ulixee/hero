@@ -37,11 +37,6 @@ import { createInstanceWithNodePointer, getAwaitedPathAsMethodArg } from './Setu
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { IState as ITabState } from './Tab';
 import Resource, { createResource } from './Resource';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
-import {
-  runMagicSelectorFnName,
-  runMagicSelectorAllFnName,
-} from '@ulixee/hero-interfaces/jsPathFnNames';
 import { IMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
@@ -217,14 +212,14 @@ export default class FrameEnvironment {
     return coreFrame.getJsValue<T>(path);
   }
 
-  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
-    const awaitedPath = new AwaitedPath(null, [runMagicSelectorFnName, selectorOrOptions]);
+  public querySelector(selector: string): ISuperNode {
+    const awaitedPath = new AwaitedPath(null, 'document', ['querySelector', selector]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNode(awaitedPath, awaitedOptions);
   }
 
-  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
-    const awaitedPath = new AwaitedPath(null, [runMagicSelectorAllFnName, selectorOrOptions]);
+  public querySelectorAll(selector: string): ISuperNodeList {
+    const awaitedPath = new AwaitedPath(null, 'document', ['querySelectorAll', selector]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: getState(this).coreFrame };
     return createSuperNodeList(awaitedPath, awaitedOptions);
   }

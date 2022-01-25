@@ -514,8 +514,8 @@ describe('basic Document tests', () => {
   }, 130e3);
 });
 
-describe('Magic Selectors', () => {
-  it('can run magic selectors', async () => {
+describe('tab.querySelector', () => {
+  it('should be able to select single element', async () => {
     koaServer.get('/magic', ctx => {
       ctx.body = `
         <body>
@@ -527,32 +527,11 @@ describe('Magic Selectors', () => {
     });
     const hero = await openBrowser(`/magic`);
 
-    const innerDiv = hero.magicSelector({
-      minMatchingSelectors: 2,
-      querySelectors: ['.outer > .inner', 'div', '.inner'],
-    });
+    const innerDiv = hero.querySelector('.outer > .inner');
     await expect(innerDiv.innerText).resolves.toBe('X');
     await expect(innerDiv.getAttribute('class')).resolves.toBe('inner');
 
-    await expect(hero.magicSelector('.inner').textContent).resolves.toBe('X');
-    await hero.close();
-  });
-
-  it('should not resolve when multiple elements match', async () => {
-    koaServer.get('/magic2', ctx => {
-      ctx.body = `
-        <body>
-         <div class="outer">
-            <div class="inner">X</div>
-            <div class="inner">Y</div>
-          </div>
-        </body>
-      `;
-    });
-    const hero = await openBrowser(`/magic2`);
-
-    await expect(hero.magicSelector('.inner').innerText).rejects.toThrow();
-    await expect(hero.magicSelector('.inner')).resolves.toBe(null);
+    await expect(hero.querySelector('.inner').textContent).resolves.toBe('X');
     await hero.close();
   });
 
@@ -569,53 +548,8 @@ describe('Magic Selectors', () => {
     });
     const hero = await openBrowser(`/magicall`);
 
-    await expect(hero.magicSelectorAll('.inner').length).resolves.toBe(2);
-    await expect(
-      hero.magicSelectorAll({
-        minMatchingSelectors: 2,
-        querySelectors: ['.inner', '.outer .inner', 'div', '.outer > div'],
-      }).length,
-    ).resolves.toBe(2);
-    await hero.close();
-  });
-
-  it("should have an empty list if the items don't match", async () => {
-    koaServer.get('/magicall2', ctx => {
-      ctx.body = `
-        <body>
-         <div class="outer">
-            <div class="inner a">X</div>
-            <div class="inner b">Y</div>
-          </div>
-        </body>
-      `;
-    });
-    const hero = await openBrowser(`/magicall2`);
-
-    const results = hero.magicSelectorAll({
-      minMatchingSelectors: 2,
-      querySelectors: ['.inner', '.outer .a', 'div'],
-    });
-    expect(await results.length).toBe(0);
-    for (const result of await results) {
-      expect(result).not.toBeTruthy();
-    }
-  });
-
-  it('should emit an event with an empty options object', async () => {
-    koaServer.get('/empty', ctx => {
-      ctx.body = `<body></body>`;
-    });
-    const hero = await openBrowser(`/empty`);
-    const session = Session.get(await hero.sessionId);
-    const tab = session.getLastActiveTab();
-
-    const fn = jest.fn();
-    tab.once('magic-selector', fn);
-
-    await expect(hero.magicSelector()).resolves.toBe(null);
-    expect(fn).toHaveBeenCalledTimes(1);
-    expect(fn.mock.calls[0][0].options).toEqual({ minMatchingSelectors: 1, querySelectors: [] });
+    await expect(hero.querySelectorAll('.inner').length).resolves.toBe(2);
+    await expect(hero.querySelectorAll('.outer > div').length).resolves.toBe(2);
     await hero.close();
   });
 });
