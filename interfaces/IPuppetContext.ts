@@ -30,6 +30,7 @@ export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContex
 
 export interface IPuppetPageOptions {
   runPageScripts: boolean;
+  enableDomStorageTracker?: boolean;
   triggerPopupOnPageId?: string;
 }
 

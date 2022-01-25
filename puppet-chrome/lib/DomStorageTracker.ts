@@ -41,14 +41,17 @@ export class DomStorageTracker
   private readonly indexedDBContentUpdatingOrigins = new Set<string>();
 
   private trackedOrigins = new Set<string>();
+  private isEnabled = false;
 
   constructor(
     page: Page,
     storageByOrigin: IDomStorage,
     networkManager: NetworkManager,
     logger: IBoundLog,
+    isEnabled: boolean,
   ) {
     super();
+    this.isEnabled = isEnabled;
     this.page = page;
     this.devtoolsSession = page.devtoolsSession;
     this.networkManager = networkManager;
@@ -79,6 +82,7 @@ export class DomStorageTracker
   }
 
   public initialize(): Promise<void> {
+    if (!this.isEnabled) return Promise.resolve();
     return Promise.all([
       this.devtoolsSession.send('DOMStorage.enable'),
       this.devtoolsSession.send('IndexedDB.enable'),

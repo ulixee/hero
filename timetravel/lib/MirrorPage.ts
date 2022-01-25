@@ -66,7 +66,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     const ready = new Resolvable<void>();
     this.isReady = ready.promise;
     try {
-      this.page = await context.newPage({ runPageScripts: false });
+      this.page = await context.newPage({ runPageScripts: false, enableDomStorageTracker: false });
       this.page.once('close', this.close.bind(this));
       if (this.debugLogging) {
         this.page.on('console', msg => {

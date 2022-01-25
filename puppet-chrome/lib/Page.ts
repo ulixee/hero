@@ -44,6 +44,7 @@ import Size = Protocol.SystemInfo.Size;
 import Rect = Protocol.DOM.Rect;
 import SetDeviceMetricsOverrideRequest = Protocol.Emulation.SetDeviceMetricsOverrideRequest;
 import Viewport = Protocol.Page.Viewport;
+import { IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -94,6 +95,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     browserContext: BrowserContext,
     logger: IBoundLog,
     opener: Page | null,
+    pageOptions?: IPuppetPageOptions,
   ) {
     super();
 
@@ -117,6 +119,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       browserContext.domStorage,
       this.networkManager,
       this.logger,
+      pageOptions?.enableDomStorageTracker ?? true,
     );
     this.framesManager = new FramesManager(
       devtoolsSession,
@@ -175,8 +178,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return await this.networkManager.setNetworkInterceptor(networkRequestsFn, true);
   }
 
-  addNewDocumentScript(script: string, isolatedEnvironment: boolean): Promise<void> {
+  addNewDocumentScript(
+    script: string,
+    isolatedEnvironment: boolean,
+  ): Promise<{ identifier: string }> {
     return this.framesManager.addNewDocumentScript(script, isolatedEnvironment);
+  }
+
+  removeDocumentScript(identifier: string): Promise<void> {
+    return this.devtoolsSession.send('Page.removeScriptToEvaluateOnNewDocument', { identifier });
   }
 
   addPageCallback(
