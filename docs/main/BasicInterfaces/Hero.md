@@ -533,13 +533,13 @@ Alias for [Tab.goto](/docs/basic-interfaces/tab#goto)
 
 Alias for [Tab.getComputedVisibility](/docs/basic-interfaces/tab#get-computed-visibility)
 
-### hero.magicSelector*(stringOrOptions)* {#magic-selector}
+### hero.querySelector*(stringOrOptions)* {#query-selector}
 
-Alias for [Tab.magicSelector](/docs/basic-interfaces/tab#magic-selector)
+Alias for [Tab.querySelector](/docs/basic-interfaces/tab#query-selector)
 
-### hero.magicSelectorAll*(stringOrOptions)* {#magic-selector-all}
+### hero.querySelectorAll*(stringOrOptions)* {#query-selector-all}
 
-Alias for [Tab.magicSelectorAll](/docs/basic-interfaces/tab#magic-selector-all)
+Alias for [Tab.querySelectorAll](/docs/basic-interfaces/tab#query-selector-all)
 
 ### hero.reload*(timeoutMs?)* {#reload}
 

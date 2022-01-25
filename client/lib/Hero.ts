@@ -64,7 +64,6 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import ConnectionManager from './ConnectionManager';
 import './DomExtender';
 import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 
@@ -436,12 +435,12 @@ export default class Hero extends AwaitedEventTarget<{
     return await this.getComputedVisibility(element as any).then(x => x.isVisible);
   }
 
-  public magicSelector(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNode {
-    return this.activeTab.magicSelector(selectorOrOptions);
+  public querySelector(selector: string): ISuperNode {
+    return this.activeTab.querySelector(selector);
   }
 
-  public magicSelectorAll(selectorOrOptions?: string | IMagicSelectorOptions): ISuperNodeList {
-    return this.activeTab.magicSelectorAll(selectorOrOptions);
+  public querySelectorAll(selector: string): ISuperNodeList {
+    return this.activeTab.querySelectorAll(selector);
   }
 
   public takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

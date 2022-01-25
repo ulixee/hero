@@ -16,10 +16,7 @@ import {
   getClientRectFnName,
   getComputedVisibilityFnName,
   getNodePointerFnName,
-  runMagicSelectorAllFnName,
-  runMagicSelectorFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
-import IMagicSelectorOptions from '@ulixee/hero-interfaces/IMagicSelectorOptions';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 
@@ -53,7 +50,6 @@ export class JsPath {
   }
 
   public exec<T>(jsPath: IJsPath, containerOffset: IPoint): Promise<IExecJsPathResult<T>> {
-    if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
     return this.runJsPath<T>(`exec`, jsPath, containerOffset);
   }
 
@@ -109,8 +105,6 @@ export class JsPath {
     options: IWaitForElementOptions,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
-    if (this.isMagicSelectorPath(jsPath)) this.emitMagicSelector(jsPath[0] as any);
-
     return this.runJsPath<INodeVisibility>(
       `waitForElement`,
       jsPath,
@@ -278,30 +272,6 @@ export class JsPath {
         }
       }
     }
-  }
-
-  private emitMagicSelector(
-    jsPath: [query: string, selectorOrOptions: string | IMagicSelectorOptions],
-  ): void {
-    const [query, selectorOrOptions] = jsPath;
-    let options = (selectorOrOptions as IMagicSelectorOptions) ?? {
-      querySelectors: [],
-      minMatchingSelectors: 1,
-    };
-    if (selectorOrOptions && typeof selectorOrOptions === 'string') {
-      options = { minMatchingSelectors: 1, querySelectors: [selectorOrOptions] };
-    }
-
-    const event = query === runMagicSelectorAllFnName ? 'magic-selector-all' : 'magic-selector';
-    this.frameEnvironment.tab.emit(event, { options, frame: this.frameEnvironment });
-    jsPath[1] = options;
-  }
-
-  private isMagicSelectorPath(jsPath: IJsPath): boolean {
-    return (
-      Array.isArray(jsPath[0]) &&
-      (jsPath[0][0] === runMagicSelectorFnName || jsPath[0][0] === runMagicSelectorAllFnName)
-    );
   }
 
   private getJsPathMethod(jsPath: IJsPath): string {
