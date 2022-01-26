@@ -9,6 +9,7 @@ declare global {
     blockClickAndSubmit: boolean;
     debugLogs: any[];
     debugToConsole: boolean;
+    showMouseInteractions: boolean;
     repositionInteractElements();
     replayInteractions(
       resultNodeIds?: IHighlightedNodes,
@@ -38,7 +39,7 @@ export interface IFrontendScrollEvent
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
 let replayNode: HTMLElement;
-let shouldTrackMouse = false;
+window.showMouseInteractions = false;
 
 let replayShadow: ShadowRoot;
 let lastHighlightNodes: number[] = [];
@@ -48,7 +49,7 @@ window.setInteractionDisplay = function setInteractionDisplay(
   hideMouse: boolean,
   hideOverlays: boolean,
 ) {
-  shouldTrackMouse = trackMouse;
+  window.showMouseInteractions = trackMouse;
   if (hideMouse) clearMouse();
   if (hideOverlays === true) {
     highlightElements.forEach(x => x.remove());
@@ -122,7 +123,7 @@ function delegateInteractToSubframe(event: { frameIdPath: string }, action: stri
   }
 
   if (!frame?.contentWindow) {
-    debugLog('Interaction frame?.contentWindow not found', frame);
+    debugLog('Interaction frame?.contentWindow not found', frame, event);
     return;
   }
   frame.contentWindow.postMessage({ event, action }, '*');
@@ -219,7 +220,7 @@ function clearMouse() {
 }
 
 function updateMouse(mouseEvent: IFrontendMouseEvent) {
-  if (!mouseEvent || !shouldTrackMouse) return;
+  if (!mouseEvent || !window.showMouseInteractions) return;
   if (mouseEvent.frameIdPath !== window.selfFrameIdPath) {
     clearMouse();
     delegateInteractToSubframe(mouseEvent, 'mouse');
@@ -234,7 +235,7 @@ function updateMouse(mouseEvent: IFrontendMouseEvent) {
 
     let pageY = mouseEvent.pageY;
 
-    if (mouseEvent.targetNodeId && targetNode) {
+    if (mouseEvent.targetNodeId && targetNode && targetNode.isConnected) {
       const pageOffsetsYKey = pageY - (pageY % offsetBlock);
       // try last two offset zones
       const pageOffsetsAtHeight =
@@ -260,7 +261,6 @@ function updateMouse(mouseEvent: IFrontendMouseEvent) {
         }
       }
     }
-
     mouse.style.left = `${mouseEvent.pageX}px`;
     mouse.style.top = `${pageY}px`;
     mouse.style.display = 'block';
@@ -339,14 +339,6 @@ function createReplayItems() {
 
   replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
-  // commandGrowl = document.createElement('hero-command');
-  // const label = document.createElement('command-label');
-  // label.textContent = 'Command';
-  // commandText = document.createElement('command-text');
-  // commandGrowl.append(label, commandText);
-  // commandGrowl.classList.add('fade');
-  // replayShadow.appendChild(commandGrowl);
-
   showMoreUp = document.createElement('hero-overflow');
   showMoreUp.style.top = '0';
   showMoreUp.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
@@ -383,41 +375,6 @@ function createReplayItems() {
     border:1px solid #3498db;
     padding:5px;
     pointer-events: none;
-  }
-
-  hero-command {
-    z-index: 2147483647;
-    display: flex;
-    justify-content: center;
-    box-sizing: border-box;
-    margin: 0 !important;
-    bottom: 0;
-    height: fit-content;
-    width: 100%;
-    position: fixed;
-    pointer-events: none;
-    opacity: 0.9;
-    background: #eee;
-    border-top: 2px solid rgba(0,0,0,.15);
-    box-shadow: 0 -2px 9px rgb(0 0 0 / 10%);
-    transition: opacity .2s;
-    vertical-align: middle;
-  }
-
-  hero-command command-text, hero-command command-label {
-    display: flex;
-    box-sizing: border-box;
-    font-size: 14px;
-    line-height: 30px;
-    color: black;
-  }
-  hero-command command-label {
-    font-weight: bold;
-    margin-right: 8px;
-  }
-
-  hero-command.fade {
-    opacity: 0;
   }
 
   hero-mouse-pointer {

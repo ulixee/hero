@@ -630,15 +630,25 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       lastCommand = commands.getCommandForTimestamp(lastCommand, timestamp);
       if (timestamp > this.lastDomChangeTimestamp) this.lastDomChangeTimestamp = timestamp;
 
-      if (action === DomActionType.newDocument) {
+      if (action === DomActionType.newDocument || action === DomActionType.location) {
         const url = domChange[1].textContent;
         documentNavigation = this.navigations.findHistory(x => x.finalUrl === url);
 
-        if (
-          documentNavigation &&
-          documentNavigation.id > (this.lastDomChangeDocumentNavigationId ?? 0)
-        ) {
-          this.lastDomChangeDocumentNavigationId = documentNavigation.id;
+        if (documentNavigation) {
+          if (action === DomActionType.location && documentNavigation.initiatedTime < timestamp) {
+            documentNavigation.initiatedTime = timestamp;
+            // if we already have dom content loaded, update to the new timestamp
+            if (documentNavigation.statusChanges.has('DomContentLoaded')) {
+              documentNavigation.statusChanges.set('DomContentLoaded', timestamp);
+              documentNavigation.statusChanges.set('AllContentLoaded', timestamp);
+            }
+          }
+          if (
+            action === DomActionType.newDocument &&
+            documentNavigation.id > (this.lastDomChangeDocumentNavigationId ?? 0)
+          ) {
+            this.lastDomChangeDocumentNavigationId = documentNavigation.id;
+          }
         }
       }
 

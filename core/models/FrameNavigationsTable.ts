@@ -106,14 +106,16 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     recreateResolvable = false,
   ): INavigation {
     const entry = record as any as INavigation;
-    entry.statusChanges = new Map<NavigationStatus, number>([
+    const entries = [
       [LoadStatus.HttpRequested, record.httpRequestedTime],
       [LoadStatus.HttpResponded, record.httpRespondedTime],
       [LoadStatus.HttpRedirected, record.httpRedirectedTime],
       [LoadStatus.DomContentLoaded, record.domContentLoadedTime],
       [LoadStatus.AllContentLoaded, record.loadTime],
-      [LoadStatus.PaintingStable, record.contentPaintedTime],
-    ]);
+      [ContentPaint, record.contentPaintedTime],
+    ].filter(x => !!x[1]);
+
+    entry.statusChanges = new Map<NavigationStatus, number>(entries as any);
     if (recreateResolvable) {
       entry.resourceIdResolvable = new Resolvable();
       if (entry.resourceId) entry.resourceIdResolvable.resolve(entry.resourceId);

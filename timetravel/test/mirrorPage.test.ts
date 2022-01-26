@@ -80,6 +80,7 @@ describe('MirrorPage tests', () => {
       const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
       htmlAtSteps.push({
         html: sourceHtmlNext,
+        // @ts-ignore
         index: mirrorPage.domRecording.paintEvents.length - 1,
       });
       const mirrorHtmlNext = await mirrorPage.getHtml();

@@ -295,6 +295,7 @@ class PageEventsRecorder {
       this.location = currentLocation;
       const timestamp = changeUnixTime || Date.now();
       this.pushChange(DomActionType.location, { id: -1, textContent: currentLocation }, timestamp);
+      this.trackScroll(window.scrollX, window.scrollY);
     }
   }
 

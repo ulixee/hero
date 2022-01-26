@@ -178,7 +178,9 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   ): Promise<void> {
     if (this.timelineRange && this.timelineRange.toString() === timelineOffsetRange.toString())
       return;
-    this.timelineRange = [...timelineOffsetRange];
+    if (timelineOffsetRange) {
+      this.timelineRange = [...timelineOffsetRange];
+    }
     await this.load();
   }
 
