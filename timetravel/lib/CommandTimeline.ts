@@ -47,6 +47,7 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
       : this.firstCompletedNavigation?.statusChanges.get(LoadStatus.HttpRequested);
     const timelineEnd = timelineSubslice ? timelineSubslice[1] : null;
 
+    let isClosed = false;
     for (let i = 0; i < commandsFromAllRuns.length; i += 1) {
       const command = { ...commandsFromAllRuns[i] } as T & ICommandTimelineOffset;
       command.commandGapMs = 0;
@@ -112,7 +113,9 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
         this.addNavigation(command.startNavigationId);
         this.addNavigation(command.endNavigationId);
         this.commands.push(command);
+        if (command.name === 'close') isClosed = true;
       }
+      if (isClosed) break;
     }
 
     if (timelineEnd && this.endTime < timelineEnd) {
@@ -129,7 +132,7 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   }
 
   public getTimelineOffsetForTimestamp(timestamp: number): number {
-    if (!timestamp) return -1;
+    if (!timestamp || timestamp > this.endTime) return -1;
 
     for (const command of this.commands) {
       if (
@@ -161,9 +164,9 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
           relativeStartMs: x.relativeStartMs,
           commandGapMs: x.commandGapMs,
           runtimeMs: x.runtimeMs,
-        }
-      })
-    }
+        };
+      }),
+    };
   }
 
   private getTimelineOffsetForRuntimeMillis(timelineOffsetMs: number): number {

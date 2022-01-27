@@ -532,10 +532,11 @@ export default class Session
     const result = { didKeepAlive: false, message: null };
     result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
     result.didKeepAlive = true;
-    this.emit('kept-alive', result);
     for (const tab of this.tabsById.values()) {
       await tab.flushDomChanges();
     }
+    // run after command completes
+    setImmediate(() => this.emit('kept-alive', result));
     return result;
   }
 

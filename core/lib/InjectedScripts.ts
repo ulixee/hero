@@ -83,12 +83,14 @@ export default class InjectedScripts {
     ]);
   }
 
-  public static installInteractionScript(puppetPage: IPuppetPage): Promise<void> {
+  public static installInteractionScript(puppetPage: IPuppetPage): Promise<{ identifier: string }> {
     return puppetPage.addNewDocumentScript(showInteractionScript, true);
   }
 
-  public static async installDomStorageRestore(puppetPage: IPuppetPage): Promise<void> {
-    await puppetPage.addNewDocumentScript(
+  public static async installDomStorageRestore(
+    puppetPage: IPuppetPage,
+  ): Promise<{ identifier: string }> {
+    return await puppetPage.addNewDocumentScript(
       `(function restoreDomStorage() {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};

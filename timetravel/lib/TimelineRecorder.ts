@@ -33,10 +33,11 @@ export default class TimelineRecorder extends TypedEventEmitter<{
 
   public stop(): void {
     if (!this.heroSession) return;
+    this.heroSession.db.screenshots.unsubscribe();
     this.heroSession.off('tab-created', this.onTabCreated);
     this.heroSession.off('kept-alive', this.onHeroSessionPaused);
     this.heroSession.off('resumed', this.onHeroSessionResumed);
-    this.heroSession.on('will-close', this.onHeroSessionWillClose);
+    this.heroSession.off('will-close', this.onHeroSessionWillClose);
     this.stopRecording();
     this.dontExtendSessionPastTime();
   }

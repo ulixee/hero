@@ -1,9 +1,16 @@
 import { assert } from '@ulixee/commons/lib/utils';
-import IPuppetContext, { IPuppetContextEvents, IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+  IPuppetPageOptions,
+} from '@ulixee/hero-interfaces/IPuppetContext';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import { addTypedEventListener, removeEventListeners, TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import {
+  addTypedEventListener,
+  removeEventListeners,
+  TypedEventEmitter,
+} from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -13,7 +20,10 @@ import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { IDevtoolsEventMessage, IDevtoolsResponseMessage } from '@ulixee/hero-interfaces/IDevtoolsSession';
+import {
+  IDevtoolsEventMessage,
+  IDevtoolsResponseMessage,
+} from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';
@@ -143,7 +153,14 @@ export class BrowserContext
       opener = this.pagesById.values().next().value;
     }
 
-    const page = new Page(devtoolsSession, targetInfo.targetId, this, this.logger, opener);
+    const page = new Page(
+      devtoolsSession,
+      targetInfo.targetId,
+      this,
+      this.logger,
+      opener,
+      pageOptions,
+    );
     this.pagesById.set(page.targetId, page);
     this.waitForPageAttachedById.get(page.targetId)?.resolve(page);
     await page.isReady;

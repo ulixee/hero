@@ -28,7 +28,7 @@ class DomActions {
   public static replayDomEvent(event: IFrontendDomChangeEvent, isReverse = false): void {
     let { action } = event;
     if (action === DomActionType.newDocument) return this.onNewDocument(event);
-    if (action === DomActionType.location) return this.onLocation(event);
+    if (action === DomActionType.location) return this.onLocation(event, isReverse);
 
     if (isReverse) {
       if (action === DomActionType.added) action = DomActionType.removed;
@@ -223,9 +223,13 @@ class DomActions {
     window.scrollTo({ top: 0 });
   }
 
-  private static onLocation(event: IFrontendDomChangeEvent) {
+  private static onLocation(event: IFrontendDomChangeEvent, usePrevious = false) {
     debugLog('Location: href=%s', event.textContent);
-    window.history.replaceState({}, 'TimeTravel', event.textContent);
+    if (!usePrevious) {
+      event.previousLocation = window.location.href;
+    }
+    const url = usePrevious ? event.previousLocation : event.textContent;
+    window.history.replaceState({}, 'TimeTravel', url);
   }
 
   private static setNodeAttributes(

@@ -50,7 +50,11 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
 
   evaluate<T>(expression: string): Promise<T>;
-  addNewDocumentScript(script: string, isolateFromWebPageEnvironment: boolean): Promise<void>;
+  addNewDocumentScript(
+    script: string,
+    isolateFromWebPageEnvironment: boolean,
+  ): Promise<{ identifier: string }>;
+  removeDocumentScript(identifier: string): Promise<void>;
   addPageCallback(
     name: string,
     onCallback?: (payload: any, frameId: string) => any,

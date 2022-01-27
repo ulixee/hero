@@ -36,6 +36,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     return this.page?.id;
   }
 
+  private domRecording: IDomRecording;
   private sessionId: string;
   private pendingDomChanges: IDomChangeRecord[] = [];
   private loadedDocument: IDocument;
@@ -46,11 +47,12 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   constructor(
     public network: MirrorNetwork,
-    public domRecording: IDomRecording,
+    domRecording: IDomRecording,
     private showBrowserInteractions = false,
     private debugLogging = true,
   ) {
     super();
+    this.setDomRecording(domRecording);
     this.onPageEvents = this.onPageEvents.bind(this);
   }
 
@@ -66,7 +68,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     const ready = new Resolvable<void>();
     this.isReady = ready.promise;
     try {
-      this.page = await context.newPage({ runPageScripts: false });
+      this.page = await context.newPage({ runPageScripts: false, enableDomStorageTracker: false });
       this.page.once('close', this.close.bind(this));
       if (this.debugLogging) {
         this.page.on('console', msg => {
@@ -109,11 +111,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
-    this.domRecording = domRecording;
-    this.paintEventByTimestamp = {};
-    for (const paint of this.domRecording.paintEvents) {
-      this.paintEventByTimestamp[paint.timestamp] = paint;
-    }
+    this.setDomRecording(domRecording);
     if (this.loadedDocument) {
       this.isLoadedDocumentDirty = true;
       await this.injectPaintEvents(this.loadedDocument);
@@ -148,27 +146,13 @@ export default class MirrorPage extends TypedEventEmitter<{
       this.processPendingDomChanges();
       newPaintIndex ??= this.domRecording.paintEvents.length - 1;
 
-      let activeDocumentTimestamp = Date.now();
-      if (newPaintIndex < 0) {
-        if (this.domRecording.documents.length) {
-          activeDocumentTimestamp = this.domRecording.documents[0]?.paintStartTimestamp;
-        }
-      } else {
-        activeDocumentTimestamp = this.domRecording.paintEvents[newPaintIndex].timestamp;
-      }
-      let loadingDocument: IDocument;
-      for (const document of this.domRecording.documents) {
-        if (!document.isMainframe) continue;
-        if (document.paintStartTimestamp <= activeDocumentTimestamp) {
-          loadingDocument = document;
-        }
-        this.network.registerDoctype(document.url, document.doctype);
-      }
-
-      const page = this.page;
+      const loadingDocument = this.getActiveDocument(newPaintIndex);
 
       let isLoadingDocument = false;
-      if (loadingDocument && (loadingDocument.url !== page.mainFrame.url || newPaintIndex === -1)) {
+      if (
+        loadingDocument &&
+        (loadingDocument.url !== this.page.mainFrame.url || newPaintIndex === -1)
+      ) {
         isLoadingDocument = true;
 
         if (this.debugLogging) {
@@ -181,7 +165,7 @@ export default class MirrorPage extends TypedEventEmitter<{
         const loader = await this.page.navigate(loadingDocument.url);
 
         this.emit('goto', { url: loadingDocument.url, loaderId: loader.loaderId });
-        await page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
+        await this.page.mainFrame.waitForLifecycleEvent('DOMContentLoaded', loader.loaderId);
         this.loadedDocument = loadingDocument;
         this.isLoadedDocumentDirty = true;
       }
@@ -297,6 +281,36 @@ export default class MirrorPage extends TypedEventEmitter<{
     }
   }
 
+  private getActiveDocument(newPaintIndex: number): IDocument {
+    let activeDocumentTimestamp = Date.now();
+    if (newPaintIndex < 0) {
+      if (this.domRecording.documents.length) {
+        activeDocumentTimestamp = this.domRecording.documents[0]?.paintStartTimestamp;
+      }
+    } else {
+      activeDocumentTimestamp = this.domRecording.paintEvents[newPaintIndex].timestamp;
+    }
+    let loadingDocument: IDocument;
+    for (const document of this.domRecording.documents) {
+      if (!document.isMainframe) continue;
+      if (document.paintStartTimestamp <= activeDocumentTimestamp) {
+        loadingDocument = document;
+      }
+    }
+    return loadingDocument;
+  }
+
+  private setDomRecording(domRecording: IDomRecording): void {
+    this.domRecording = domRecording;
+    this.paintEventByTimestamp = {};
+    for (const paint of this.domRecording.paintEvents) {
+      this.paintEventByTimestamp[paint.timestamp] = paint;
+    }
+    for (const document of this.domRecording.documents) {
+      this.network.registerDoctype(document.url, document.doctype);
+    }
+  }
+
   private processPendingDomChanges(): void {
     if (!this.pendingDomChanges.length) return;
 
@@ -315,24 +329,19 @@ export default class MirrorPage extends TypedEventEmitter<{
       : null;
 
     let needsPaintSort = false;
+    const lastPaint = this.domRecording.paintEvents[this.domRecording.paintEvents.length - 1];
     for (const paint of domRecording.paintEvents) {
       const existing = this.paintEventByTimestamp[paint.timestamp];
 
       if (this.loadedDocument && paint.timestamp > this.loadedDocument.paintStartTimestamp) {
-        if (!nextDocument) {
-          this.isLoadedDocumentDirty = true;
-        } else if (paint.timestamp < nextDocument.paintStartTimestamp) {
+        if (!nextDocument || paint.timestamp < nextDocument.paintStartTimestamp) {
           this.isLoadedDocumentDirty = true;
         }
       }
 
       if (!existing) {
-        if (
-          paint.timestamp <
-          this.domRecording.paintEvents[this.domRecording.paintEvents.length - 1]?.timestamp
-        ) {
-          needsPaintSort = true;
-        }
+        needsPaintSort ||= paint.timestamp < lastPaint?.timestamp;
+
         this.domRecording.paintEvents.push(paint);
         this.paintEventByTimestamp[paint.timestamp] = paint;
       } else {
@@ -352,6 +361,7 @@ export default class MirrorPage extends TypedEventEmitter<{
         this.paintEventByTimestamp[document.paintStartTimestamp],
       );
       this.domRecording.documents.push(document);
+      this.network.registerDoctype(document.url, document.doctype);
     }
   }
 
@@ -443,6 +453,8 @@ export default class MirrorPage extends TypedEventEmitter<{
       `(function replayEvents(){
     const exports = {};
     window.isMainFrame = true;
+    window.selfFrameIdPath = 'main';
+    window.showMouseInteractions = true;
 
     const records = ${JSON.stringify(events).replace(/,null/g, ',')};
     const tagNamesById = ${JSON.stringify(tagNamesById)};

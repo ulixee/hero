@@ -147,17 +147,24 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     );
   }
 
-  public async addNewDocumentScript(script: string, installInIsolatedScope = true): Promise<void> {
-    await this.devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: script,
-      worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
-    });
+  public async addNewDocumentScript(
+    script: string,
+    installInIsolatedScope = true,
+  ): Promise<{ identifier: string }> {
+    const installedScript = await this.devtoolsSession.send(
+      'Page.addScriptToEvaluateOnNewDocument',
+      {
+        source: script,
+        worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
+      },
+    );
 
     // sometimes we get a new anchor link that already has an initiated frame. If that's the case, newDocumentScripts won't trigger.
     // NOTE: we DON'T want this to trigger for internal pages (':', 'about:blank')
     if (this.main.url?.startsWith('http')) {
       await this.main.evaluate(script, installInIsolatedScope, { retriesWaitingForLoad: 1 });
     }
+    return installedScript;
   }
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
