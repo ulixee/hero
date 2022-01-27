@@ -37,6 +37,7 @@ describe('basic Core tests', () => {
   it('shuts down if connect set to be not persistent and Core.start not called', async () => {
     shutdownSpy.mockClear();
 
+    Core.autoShutdownMillis = 10;
     const connection = Core.addConnection();
     await connection.connect({ isPersistent: false });
     Helpers.onClose(() => connection.disconnect());
@@ -52,11 +53,13 @@ describe('basic Core tests', () => {
     expect(connectionCloseSpy).toHaveBeenCalled();
     await Core.shutdown();
     expect(GlobalPool.activeSessionCount).toBe(0);
+    Core.autoShutdownMillis = 30e3;
   });
 
   it('will not shutdown if start called and there are no open connections', async () => {
     shutdownSpy.mockClear();
     await Core.start();
+    Core.autoShutdownMillis = 10;
 
     const connection = Core.addConnection();
     await connection.connect();
@@ -66,10 +69,12 @@ describe('basic Core tests', () => {
     await Session.get(sessionId).close();
 
     await connection.disconnect();
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     expect(shutdownSpy).toHaveBeenCalledTimes(0);
     expect(connectionCloseSpy).toHaveBeenCalledTimes(1);
     await Core.shutdown();
     expect(GlobalPool.activeSessionCount).toBe(0);
+    Core.autoShutdownMillis = 30e3;
   });
 });

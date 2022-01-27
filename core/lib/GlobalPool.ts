@@ -101,7 +101,9 @@ export default class GlobalPool {
     this.waitingForAvailability.length = 0;
     const closePromises: Promise<any>[] = [];
 
-    closePromises.push(this.utilityBrowserContext?.then(x => x.close()).catch(err => err));
+    const browserContext = this.utilityBrowserContext;
+    this.utilityBrowserContext = null;
+    closePromises.push(browserContext?.then(x => x.close()).catch(err => err));
 
     while (this.puppets.length) {
       const puppetBrowser = this.puppets.shift();

@@ -563,13 +563,13 @@ export default class Tab
         fragment.nodePointerId,
         frameDomNodeId,
       );
+      this.session.db.collectedFragments.updateHtml(fragment);
     } catch (error) {
       this.logger.warn('Tab.getFragmentHtml: ERROR', {
         fragment,
         error,
       });
     }
-    this.session.db.collectedFragments.updateHtml(fragment);
     return fragment;
   }
 

@@ -5,7 +5,11 @@ import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions
 import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { IBrowserEmulatorClass, ICorePluginClass, IHumanEmulatorClass } from '@ulixee/hero-interfaces/ICorePlugin';
+import {
+  IBrowserEmulatorClass,
+  ICorePluginClass,
+  IHumanEmulatorClass,
+} from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
 import DefaultHumanEmulator from '@ulixee/default-human-emulator';
@@ -43,8 +47,11 @@ export default class Core {
 
   public static allowDynamicPluginLoading = true;
   public static isClosing: Promise<void>;
+  public static autoShutdownMillis = 5e3;
+
   private static wasManuallyStarted = false;
   private static isStarting = false;
+  private static autoShutdownTimer: NodeJS.Timer;
 
   public static addConnection(): ConnectionToClient {
     const connection = new ConnectionToClient();
@@ -116,6 +123,7 @@ export default class Core {
 
   public static async shutdown(): Promise<void> {
     if (this.isClosing) return this.isClosing;
+    clearTimeout(this.autoShutdownTimer);
 
     const isClosing = new Resolvable<void>();
     this.isClosing = isClosing.promise;
@@ -154,12 +162,17 @@ export default class Core {
   }
 
   private static checkForAutoShutdown(): void {
-    if (
-      this.wasManuallyStarted ||
-      this.connections.some(x => x.isActive()) ||
-      Session.hasKeepAliveSessions()
-    )
-      return;
+    if (!this.shouldAutoShutdown()) return;
+
+    clearTimeout(this.autoShutdownTimer);
+    this.autoShutdownTimer = setTimeout(
+      () => this.tryAutoShutdown(),
+      this.autoShutdownMillis,
+    ).unref();
+  }
+
+  private static tryAutoShutdown(): void {
+    if (!this.shouldAutoShutdown()) return;
 
     this.shutdown().catch(error => {
       log.error('Core.autoShutdown', {
@@ -167,6 +180,14 @@ export default class Core {
         sessionId: null,
       });
     });
+  }
+
+  private static shouldAutoShutdown(): boolean {
+    return !(
+      this.wasManuallyStarted ||
+      this.connections.some(x => x.isActive()) ||
+      Session.hasKeepAliveSessions()
+    );
   }
 
   public static get dataDir(): string {
