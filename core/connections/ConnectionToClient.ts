@@ -16,7 +16,6 @@ import Core from '../index';
 import FrameEnvironment from '../lib/FrameEnvironment';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
-import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
 

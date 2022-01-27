@@ -3,11 +3,9 @@ import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import ConnectionToCore from '@ulixee/hero/connections/ConnectionToCore';
 import IHeroCreateOptions from '@ulixee/hero/interfaces/IHeroCreateOptions';
 import ConnectionToLocalCore from './ConnectionToLocalCore';
-import startCore from './startCore';
 
 export default class Hero extends DefaultHero {
   constructor(options: IHeroCreateOptions = {}) {
-    startCore();
     super(options);
   }
 

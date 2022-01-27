@@ -4,7 +4,6 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import Hero, { IState, IStateOptions } from './Hero';
-import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 const { getState } = StateMachine<Hero, IState>();
 
