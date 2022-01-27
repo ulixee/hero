@@ -41,6 +41,7 @@ import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventL
 import DetachedTabState from './DetachedTabState';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -53,6 +54,7 @@ export default class Session
     'kept-alive': { message: string };
     'tab-created': { tab: Tab };
     'all-tabs-closed': void;
+    output: { changes: IOutputChangeRecord[] };
   }>
   implements ICommandableTarget, IRemoteEventListener
 {
@@ -207,6 +209,7 @@ export default class Session
       this.getHeroMeta,
       this.addRemoteEventListener,
       this.removeRemoteEventListener,
+      this.recordOutput,
     ]);
   }
 
@@ -518,6 +521,14 @@ export default class Session
   public removeRemoteEventListener(listenerId: string): Promise<any> {
     const details = this.commands.getRemoteEventListener(listenerId);
     this.awaitedEventEmitter.off(details.type as any, details.listenFn);
+    return Promise.resolve();
+  }
+
+  public recordOutput(...changes: IOutputChangeRecord[]): Promise<void> {
+    for (const change of changes) {
+      this.db.output.insert(change);
+    }
+    this.emit('output', { changes });
     return Promise.resolve();
   }
 

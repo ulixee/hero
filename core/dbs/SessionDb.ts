@@ -26,6 +26,7 @@ import StorageChangesTable from '../models/StorageChangesTable';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
 import CollectedFragmentsTable from '../models/CollectedFragmentsTable';
 import CollectedResourcesTable from '../models/CollectedResourcesTable';
+import OutputTable from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -63,6 +64,7 @@ export default class SessionDb {
   public readonly devtoolsMessages: DevtoolsMessagesTable;
   public readonly awaitedEvents: AwaitedEventsTable;
   public readonly tabs: TabsTable;
+  public readonly output: OutputTable;
   public readonly sessionId: string;
 
   public keepAlive = false;
@@ -103,6 +105,7 @@ export default class SessionDb {
     this.storageChanges = new StorageChangesTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
     this.awaitedEvents = new AwaitedEventsTable(this.db);
+    this.output = new OutputTable(this.db);
 
     this.tables.push(
       this.commands,
@@ -126,6 +129,7 @@ export default class SessionDb {
       this.screenshots,
       this.storageChanges,
       this.awaitedEvents,
+      this.output,
     );
 
     if (!readonly) {

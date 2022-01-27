@@ -75,8 +75,8 @@ export const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
-export type IStateOptions = Omit<ISessionCreateOptions, 'externalIds' | 'sessionId'> &
-  Pick<IHeroCreateOptions, 'connectionToCore' | 'externalIds' | 'sessionId'>;
+export type IStateOptions = Omit<ISessionCreateOptions, 'sessionId'> &
+  Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;
 
 export interface IState {
   connection: ConnectionManager;
@@ -115,7 +115,7 @@ export default class Hero extends AwaitedEventTarget<{
 
   readonly #connectManagerIsReady = createPromise();
   readonly #options: IStateOptions;
-  #isClosing = false;
+  #isClosingPromise: Promise<void>;
 
   constructor(options: IHeroCreateOptions = {}) {
     super(async () => {
@@ -226,17 +226,19 @@ export default class Hero extends AwaitedEventTarget<{
 
   // METHODS
 
-  public async close(): Promise<void> {
-    const { connection } = getState(this);
-    if (this.#isClosing) return;
-    this.#isClosing = true;
+  public async recordOutput(changesToRecord): Promise<void> {
+    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    coreSession.recordOutput(changesToRecord);
+  }
 
-    try {
-      return await connection.close();
-    } catch (error) {
-      if (error instanceof DisconnectedFromCoreError) return;
-      throw error;
-    }
+  public close(): Promise<void> {
+    const { connection } = getState(this);
+    return this.#isClosingPromise ??= new Promise((resolve, reject) => {
+      connection.close().then(() => resolve()).catch(error => {
+        if (error instanceof DisconnectedFromCoreError) return resolve();
+        reject(error);
+      });
+    });
   }
 
   public async closeTab(tab: Tab): Promise<void> {
@@ -244,9 +246,10 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async getCollectedResources(
-    sessionId: string,
+    sessionIdPromise: Promise<string>,
     name: string,
   ): Promise<ICollectedResource[]> {
+    const sessionId = await sessionIdPromise;
     const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
     const resources = await coreSession.getCollectedResources(sessionId, name);
 
@@ -271,9 +274,10 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async getCollectedFragments(
-    sessionId: string,
+    sessionIdPromise: Promise<string>,
     name: string,
   ): Promise<ICollectedFragment[]> {
+    const sessionId = await sessionIdPromise;
     const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
     return await coreSession.getCollectedFragments(sessionId, name);
   }
@@ -363,7 +367,7 @@ export default class Hero extends AwaitedEventTarget<{
     const { clientPlugins, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
-    if (connection.hasConnected) {
+    if (connection.hasConnectedCoreSession) {
       throw new Error(
         'You must call .use before any Hero "await" calls (ie, before the Agent connects to Core).',
       );
@@ -388,7 +392,7 @@ export default class Hero extends AwaitedEventTarget<{
     Object.values(ClientPluginsById).forEach(ClientPlugin => {
       const clientPlugin = new ClientPlugin();
       clientPlugins.push(clientPlugin);
-      if (connection.hasConnected && clientPlugin.onHero) {
+      if (connection.hasConnectedCoreSession && clientPlugin.onHero) {
         clientPlugin.onHero(this, connection.sendToActiveTab);
       }
 

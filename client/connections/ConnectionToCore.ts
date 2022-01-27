@@ -181,16 +181,11 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
 
   public async createSession(
-    options: Omit<ISessionCreateOptions, 'externalIds' | 'sessionId'> &
-      Pick<IHeroCreateOptions, 'externalIds' | 'sessionId'>,
+    options: Omit<ISessionCreateOptions, 'sessionId'> &
+      Pick<IHeroCreateOptions, 'sessionId'>,
   ): Promise<CoreSession> {
     try {
       if (options.sessionId) options.sessionId = await options.sessionId;
-      if (options.externalIds) {
-        for (const [key, value] of Object.entries(options.externalIds)) {
-          options.externalIds[key] = await value;
-        }
-      }
 
       let restoreMode: CoreCommandQueue['mode'];
       if (this.commandQueue.mode !== options.mode) {

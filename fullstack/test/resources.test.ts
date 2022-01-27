@@ -117,23 +117,22 @@ describe('basic resource tests', () => {
   });
 
   it('collects resources for extraction', async () => {
-    const hero = new Hero();
-    const sessionId1 = await hero.sessionId;
-    Helpers.needsClosing.push(hero);
+    const hero1 = new Hero();
+    Helpers.needsClosing.push(hero1);
     {
-      await hero.goto(`${koaServer.baseUrl}/resources-test`);
-      await hero.waitForPaintingStable();
-      const elem = hero.document.querySelector('a');
-      await hero.click(elem);
+      await hero1.goto(`${koaServer.baseUrl}/resources-test`);
+      await hero1.waitForPaintingStable();
+      const elem = hero1.document.querySelector('a');
+      await hero1.click(elem);
 
-      const resources = await hero.waitForResource({ type: 'Fetch' });
+      const resources = await hero1.waitForResource({ type: 'Fetch' });
       expect(resources).toHaveLength(1);
       await resources[0].$collect('xhr');
 
-      const collected = await hero.getCollectedResources(sessionId1, 'xhr');
+      const collected = await hero1.getCollectedResources(hero1.sessionId, 'xhr');
       expect(collected).toHaveLength(1);
       expect(collected[0].response.json).toEqual({ hi: 'there' });
-      await hero.close();
+      await hero1.close();
     }
 
     // Test that we can load a previous session too
@@ -143,7 +142,7 @@ describe('basic resource tests', () => {
 
       await hero2.goto(`${koaServer.baseUrl}`);
       await hero2.waitForPaintingStable();
-      const collected2 = await hero2.getCollectedResources(sessionId1, 'xhr');
+      const collected2 = await hero2.getCollectedResources(hero1.sessionId, 'xhr');
       expect(collected2).toHaveLength(1);
       expect(collected2[0].url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
       // should prefetch the body

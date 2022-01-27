@@ -9,12 +9,13 @@ const { getState } = StateMachine<Hero, IState>();
 
 export default class ConnectionManager {
   readonly #connectionToCore: ConnectionToCore;
-  readonly #didCreateConnection: boolean = false;
+  readonly #didAutoCreateConnection: boolean = false;
   readonly #coreSession: Promise<CoreSession | Error>;
   #activeTab: Tab;
   #tabs: Tab[] = [];
+  #isClosingPromise: Promise<void>;
 
-  public hasConnected = false;
+  public hasConnectedCoreSession = false;
 
   public get activeTab(): Tab {
     this.getConnectedCoreSessionOrReject().catch(() => null);
@@ -42,7 +43,7 @@ export default class ConnectionManager {
     );
 
     if (this.#connectionToCore !== connectionToCore) {
-      this.#didCreateConnection = true;
+      this.#didAutoCreateConnection = true;
     }
     this.sendToActiveTab = this.sendToActiveTab.bind(this);
 
@@ -63,15 +64,21 @@ export default class ConnectionManager {
     return this.#tabs;
   }
 
-  public async close(): Promise<void> {
-    if (!this.hasConnected) return;
-    const sessionOrError = await this.#coreSession;
-    if (sessionOrError instanceof CoreSession) {
-      await sessionOrError.close();
-    }
-    if (this.#didCreateConnection) {
-      await this.#connectionToCore.disconnect();
-    }
+  public close(): Promise<void> {
+    return this.#isClosingPromise ??= new Promise(async (resolve, reject) => {
+      try {
+        const sessionOrError = await this.#coreSession;
+        if (sessionOrError instanceof CoreSession) {
+          await sessionOrError.close();
+        }
+        if (this.#didAutoCreateConnection) {
+          await this.#connectionToCore.disconnect();
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   public closeTab(tab: Tab): void {
@@ -87,13 +94,13 @@ export default class ConnectionManager {
   }
 
   public getConnectedCoreSessionOrReject(): Promise<CoreSession> {
-    if (this.hasConnected) {
+    if (this.hasConnectedCoreSession) {
       return this.#coreSession.then(coreSession => {
         if (coreSession instanceof CoreSession) return coreSession;
         throw coreSession;
       });
     }
-    this.hasConnected = true;
+    this.hasConnectedCoreSession = true;
 
     const { clientPlugins } = getState(this.hero);
 
