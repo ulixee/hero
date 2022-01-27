@@ -1,9 +1,9 @@
 import {
   IAssertionAndResult,
   IAssertionCounts,
-} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+} from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 
-export default class PageStateAssertions {
+export default class DomStateAssertions {
   private assertsBySessionId: { [sessionId: string]: IFrameAssertions } = {};
 
   public iterateSessionAssertionsByFrameId(
@@ -15,7 +15,7 @@ export default class PageStateAssertions {
   }
 
   public sessionAssertionsCount(sessionId: string): IAssertionCounts {
-    return PageStateAssertions.countAssertions(this.assertsBySessionId[sessionId]);
+    return DomStateAssertions.countAssertions(this.assertsBySessionId[sessionId]);
   }
 
   public getSessionAssertionWithQuery(
@@ -40,7 +40,7 @@ export default class PageStateAssertions {
     this.assertsBySessionId[sessionId] ??= {};
     this.assertsBySessionId[sessionId][frameId] ??= {};
     const assertion = assert as IAssertionAndResult;
-    assertion.key ??= PageStateAssertions.generateKey(assertion.type, assertion.args);
+    assertion.key ??= DomStateAssertions.generateKey(assertion.type, assertion.args);
     this.assertsBySessionId[sessionId][frameId][assertion.key] = assertion;
   }
 
@@ -85,7 +85,7 @@ export default class PageStateAssertions {
       for (const [frameId, sharedAssertions] of Object.entries(state)) {
         for (const key of Object.keys(sharedAssertions)) {
           const sessionFrameAssertions = sessionAssertionsByFrameId[frameId];
-          
+
           if (!sessionFrameAssertions) {
             delete state[frameId];
           } else if (!sessionFrameAssertions[key]) {

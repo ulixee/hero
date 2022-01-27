@@ -34,8 +34,9 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
-import PageState from './PageState';
-import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
+import DomStateHandler from './DomStateHandler';
+import DomState from './DomState';
+import IDomState from '@ulixee/hero-interfaces/IDomState';
 
 const awaitedPathState = StateMachine<
   any,
@@ -235,15 +236,23 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return await this.mainFrameEnvironment.waitForLoad(status, options);
   }
 
-  public async waitForPageState<T extends IPageStateDefinitions>(
-    states?: T,
+  public async waitForState(
+    state: IDomState | DomState,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
-  ): Promise<keyof T> {
+  ): Promise<boolean> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
     const coreTab = await getCoreTab(this);
-    const pageState = new PageState(this, coreTab, states, callSitePath);
-    return await pageState.waitFor(options.timeoutMs);
+    const handler = new DomStateHandler(state, coreTab, callSitePath);
+    return await handler.waitFor(options.timeoutMs);
+  }
+
+  public async ensureState(state: IDomState | DomState): Promise<boolean> {
+    const callSitePath = scriptInstance.getScriptCallSite();
+
+    const coreTab = await getCoreTab(this);
+    const handler = new DomStateHandler(state, coreTab, callSitePath);
+    return await handler.check();
   }
 
   public waitForResource(

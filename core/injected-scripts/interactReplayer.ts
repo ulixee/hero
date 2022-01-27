@@ -325,8 +325,9 @@ window.repositionInteractElements = repositionInteractElements;
 
 let isInitialized = false;
 function createReplayItems() {
-  if (replayNode && !replayNode.isConnected) {
-    document.body.appendChild(replayNode);
+  if (replayNode) {
+    if (!replayNode.isConnected && document.body) document.body.appendChild(replayNode);
+    return;
   }
   if (isInitialized) return;
   isInitialized = true;
@@ -432,5 +433,5 @@ function createReplayItems() {
 
   document.addEventListener('scroll', () => checkOverflows());
   window.addEventListener('resize', repositionInteractElements);
-  document.body.appendChild(replayNode);
+  if (document.body) document.body.appendChild(replayNode);
 }

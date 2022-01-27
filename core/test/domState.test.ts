@@ -13,7 +13,7 @@ afterEach(Helpers.afterEach);
 
 test('can wait for page state events', async () => {
   const { tab } = await createSession();
-  koaServer.get('/pageState1', ctx => {
+  koaServer.get('/domState1', ctx => {
     ctx.body = `
   <body>
     <h1>Title 1</h1>
@@ -29,13 +29,13 @@ test('can wait for page state events', async () => {
       `;
   });
 
-  await tab.goto(`${koaServer.baseUrl}/pageState1`);
+  await tab.goto(`${koaServer.baseUrl}/domState1`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
   // @ts-ignore
-  const listener = await tab.addPageStateListener('1', {
+  const listener = await tab.addDomStateListener('1', {
     callsite: 'callsite',
-    states: ['states'],
+    name: 'state',
     commands: {
       url: [1, 'FrameEnvironment.getUrl', []],
       paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
@@ -64,7 +64,7 @@ test('can wait for page state events', async () => {
   listener.stop();
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(1);
   expect(callbackFn.mock.calls[callbackFn.mock.calls.length - 1][0]).toEqual({
-    url: `${koaServer.baseUrl}/pageState1`,
+    url: `${koaServer.baseUrl}/domState1`,
     paintStable: true,
     h1Text: { value: 'Title 1' },
     divText: { value: 'hi' },
@@ -74,7 +74,7 @@ test('can wait for page state events', async () => {
 
 test('can continue to get events as dom changes', async () => {
   const { tab } = await createSession();
-  koaServer.get('/pageState2', ctx => {
+  koaServer.get('/domState2', ctx => {
     ctx.body = `
   <body>
     <h1>Title 1</h1>
@@ -90,13 +90,13 @@ test('can continue to get events as dom changes', async () => {
       `;
   });
 
-  await tab.goto(`${koaServer.baseUrl}/pageState2`);
+  await tab.goto(`${koaServer.baseUrl}/domState2`);
   const callbackFn = jest.fn();
   const hasDiv = new Resolvable<void>();
   // @ts-ignore
-  const listener = await tab.addPageStateListener('2', {
+  const listener = await tab.addDomStateListener('2', {
     callsite: 'callsite',
-    states: ['states'],
+    name: 'state',
     commands: {
       url: [1, 'FrameEnvironment.getUrl', []],
       paintStable: [1, 'FrameEnvironment.isPaintingStable', []],
@@ -120,7 +120,7 @@ test('can continue to get events as dom changes', async () => {
   listener.stop();
   expect(callbackFn.mock.calls.length).toBeGreaterThanOrEqual(2);
   const lastCall = callbackFn.mock.calls.slice(-1).shift()[0];
-  expect(lastCall.url).toBe(`${koaServer.baseUrl}/pageState2`);
+  expect(lastCall.url).toBe(`${koaServer.baseUrl}/domState2`);
   expect(lastCall.paintStable).toBe(true);
   expect(lastCall.divs.value).toBeGreaterThanOrEqual(5);
 });

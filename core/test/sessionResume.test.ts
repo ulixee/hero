@@ -8,7 +8,7 @@ import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import Interactor from '../lib/Interactor';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
+import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;
@@ -123,7 +123,6 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionAddon`);
 
-
       simulateScriptSendingCommandMeta(session, 2);
       await tab.interact([
         { command: 'move', mousePosition: ['document', ['querySelector', 'h1']] },
@@ -201,10 +200,11 @@ describe('sessionResume tests when resume location is currentLocation', () => {
 
       simulateScriptSendingCommandMeta(session, 3);
       // DIFFERENT DIV! should diverge
-      await expect(tab.interact([
-        { command: 'move', mousePosition: ['document', ['querySelector', '#div3']] }, // changed order
-      ])).rejects.toThrowError('Your script has changed');
-
+      await expect(
+        tab.interact([
+          { command: 'move', mousePosition: ['document', ['querySelector', '#div3']] }, // changed order
+        ]),
+      ).rejects.toThrowError('Your script has changed');
 
       // should not have run any interactions in this step
       expect(playInteractionSpy).toHaveBeenCalledTimes(4);
@@ -238,13 +238,13 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       simulateScriptSendingCommandMeta(session, 2);
       const hasDiv = new Resolvable<void>();
       const result = await tab.addRemoteEventListener(
-        'page-state',
-        (listenerId: string, status: IPageStateResult) => {
+        'dom-state',
+        (listenerId: string, status: IDomStateResult) => {
           if (result.listenerId === listenerId) {
             if (status.divText?.value === 'div 1' && status.paintStable === true) hasDiv.resolve();
           }
         },
-        ['page-state', 1],
+        ['dom-state', 1],
         {
           callsite: 'callsite',
           states: ['states'],
@@ -283,13 +283,13 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       simulateScriptSendingCommandMeta(session, 2);
       const hasDiv = new Resolvable<void>();
       const result = await tab.addRemoteEventListener(
-        'page-state',
-        (listenerId: string, status: IPageStateResult) => {
+        'dom-state',
+        (listenerId: string, status: IDomStateResult) => {
           if (result.listenerId === listenerId) {
             if (status.divText?.value === 'div 1' && status.paintStable === true) hasDiv.resolve();
           }
         },
-        ['page-state', 1],
+        ['dom-state', 1],
         {
           callsite: 'callsite',
           states: ['states'],

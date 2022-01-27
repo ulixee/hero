@@ -8,32 +8,27 @@ import DomChangesTable, {
 } from '@ulixee/hero-core/models/DomChangesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import IResourceFilterProperties from '@ulixee/hero-core/interfaces/IResourceFilterProperties';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
 import MirrorNetwork from './MirrorNetwork';
 import MirrorContext from './MirrorContext';
-import PageStateAssertions, { IFrameAssertions } from './PageStateAssertions';
+import DomStateAssertions, { IFrameAssertions } from './DomStateAssertions';
 import XPathGenerator from './XPathGenerator';
-import { nanoid } from 'nanoid';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 const { log } = Log(module);
 
-export default class PageStateGenerator {
+export default class DomStateGenerator {
   public browserContext: Promise<IPuppetContext>;
-  public sessionsById = new Map<string, IPageStateSession>();
-  public sessionAssertions = new PageStateAssertions();
+  public sessionsById = new Map<string, IDomStateSession>();
+  public sessionAssertions = new DomStateAssertions();
 
-  public get states(): string[] {
-    return [...this.statesByName.keys()];
-  }
-
-  public statesByName = new Map<string, IPageStateByName>();
-  public unresolvedSessionIds = new Set<string>();
+  public assertsByFrameId?: IFrameAssertions;
+  public startingAssertsByFrameId?: IFrameAssertions;
 
   private pendingEvaluate: Resolvable<void>;
   private isEvaluating = false;
@@ -59,12 +54,6 @@ export default class PageStateGenerator {
     });
   }
 
-  public getStateForSessionId(sessionId: string): string {
-    for (const [state, details] of this.statesByName) {
-      if (details.sessionIds.has(sessionId)) return state;
-    }
-  }
-
   public async close(): Promise<void> {
     if (this.browserContext) {
       const browserContext = this.browserContext;
@@ -78,46 +67,12 @@ export default class PageStateGenerator {
     }
   }
 
-  public addState(name: string, ...addSessionIds: string[]): void {
-    if (!this.statesByName.has(name)) {
-      this.statesByName.set(name, {
-        sessionIds: new Set<string>(),
-        assertsByFrameId: {},
-        id: nanoid(),
-      });
-    }
-    for (const id of addSessionIds) {
-      this.unresolvedSessionIds.delete(id);
-      for (const [stateName, { sessionIds }] of this.statesByName) {
-        if (stateName === name) sessionIds.add(id);
-        else sessionIds.delete(id);
-      }
-    }
-  }
-
-  public deleteState(name: string): void {
-    const existing = this.statesByName.get(name);
-    this.statesByName.delete(name);
-    for (const id of existing.sessionIds) {
-      this.unresolvedSessionIds.add(id);
-    }
-  }
-
-  public import(stateName: string, savedState: IPageStateGeneratorAssertionBatch): void {
-    if (!this.statesByName.has(stateName)) {
-      this.statesByName.set(stateName, {
-        sessionIds: new Set<string>(),
-        assertsByFrameId: {},
-        id: savedState.id,
-      });
-    }
-    this.addState(stateName, ...savedState.sessions.map(x => x.sessionId));
-    const state = this.statesByName.get(stateName);
-    state.startingAssertsByFrameId = {};
-    const startingAssertions = state.startingAssertsByFrameId;
+  public import(savedState: IDomStateGeneratorAssertionBatch): void {
+    this.startingAssertsByFrameId = {};
+    const startingAssertions = this.startingAssertsByFrameId;
     for (const [frameId, type, args, comparison, result] of savedState.assertions) {
       startingAssertions[frameId] ??= {};
-      const key = PageStateAssertions.generateKey(type, args);
+      const key = DomStateAssertions.generateKey(type, args);
       startingAssertions[frameId][key] = {
         key,
         type,
@@ -142,18 +97,13 @@ export default class PageStateGenerator {
     }
   }
 
-  public export(
-    stateName: string,
-    minValidAssertionPercent = 80,
-  ): IPageStateGeneratorAssertionBatch {
-    const exported = <IPageStateGeneratorAssertionBatch>{
-      id: this.statesByName.get(stateName).id,
+  public export(minValidAssertionPercent = 80): IDomStateGeneratorAssertionBatch {
+    const exported = <IDomStateGeneratorAssertionBatch>{
+      id: this.id,
       sessions: [],
       assertions: [],
     };
-    const state = this.statesByName.get(stateName);
-    for (const sessionId of state.sessionIds) {
-      const session = this.sessionsById.get(sessionId);
+    for (const session of this.sessionsById.values()) {
       exported.sessions.push({
         sessionId: session.sessionId,
         dbLocation: session.dbLocation,
@@ -162,7 +112,7 @@ export default class PageStateGenerator {
         tabId: session.tabId,
       });
     }
-    for (const [frameId, assertions] of Object.entries(state.assertsByFrameId)) {
+    for (const [frameId, assertions] of Object.entries(this.assertsByFrameId)) {
       for (const assertion of Object.values(assertions)) {
         exported.assertions.push([
           Number(frameId),
@@ -277,19 +227,12 @@ export default class PageStateGenerator {
 
     await this.checkResultsInPage();
 
-    const states = [...this.statesByName.values()];
-    // 1. Only keep assert results common to all sessions in a state
-    for (const state of states) {
-      // only use loaded sessions
-      const validSessionIds = [...state.sessionIds].filter(x => !!this.sessionsById.get(x)?.db);
-      state.assertsByFrameId = this.sessionAssertions.getCommonSessionAssertions(
-        validSessionIds,
-        state.startingAssertsByFrameId,
-      );
-    }
-
-    // 2. Only keep "unique" assertions per state
-    PageStateAssertions.removeAssertsSharedBetweenStates(states.map(x => x.assertsByFrameId));
+    // only use loaded sessions
+    const validSessionIds = [...this.sessionsById.values()].filter(x => x.db).map(x => x.sessionId);
+    this.assertsByFrameId = this.sessionAssertions.getCommonSessionAssertions(
+      validSessionIds,
+      this.startingAssertsByFrameId,
+    );
   }
 
   private async checkResultsInPage(): Promise<void> {
@@ -334,7 +277,7 @@ export default class PageStateGenerator {
     }
   }
 
-  private async createMirrorPageIfNeeded(session: IPageStateSession): Promise<void> {
+  private async createMirrorPageIfNeeded(session: IDomStateSession): Promise<void> {
     if (session.mirrorPage?.isReady) {
       await session.mirrorPage.replaceDomRecording(session.domRecording);
       await session.mirrorPage.isReady;
@@ -429,7 +372,7 @@ export default class PageStateGenerator {
 
   private processDomChanges(
     dom: DomRebuilder,
-    session: IPageStateSession,
+    session: IDomStateSession,
     changes: IDomChangeRecord[],
   ): void {
     const sessionId = session.sessionId;
@@ -533,7 +476,7 @@ export default class PageStateGenerator {
     });
   }
 
-  private findLastNavigation(session: IPageStateSession): IFrameNavigationRecord {
+  private findLastNavigation(session: IDomStateSession): IFrameNavigationRecord {
     let lastNavigation: IFrameNavigationRecord;
     const { tabId, db, loadingRange, sessionId } = session;
     const [, endTime] = loadingRange;
@@ -562,7 +505,7 @@ export default class PageStateGenerator {
   }
 }
 
-export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBatch {
+export interface IDomStateGeneratorAssertionBatch extends IDomStateAssertionBatch {
   sessions: {
     sessionId: string;
     dbLocation: string; // could be on another machine
@@ -572,7 +515,7 @@ export interface IPageStateGeneratorAssertionBatch extends IPageStateAssertionBa
   }[];
 }
 
-export interface IPageStateSession {
+export interface IDomStateSession {
   db: SessionDb;
   dbLocation: string;
   sessionId: string;
@@ -583,11 +526,4 @@ export interface IPageStateSession {
   tabId: number;
   timelineRange: [start: number, end: number];
   loadingRange: [start: number, end: number];
-}
-
-interface IPageStateByName {
-  sessionIds: Set<string>;
-  id: string;
-  assertsByFrameId?: IFrameAssertions;
-  startingAssertsByFrameId?: IFrameAssertions;
 }
