@@ -2002,6 +2002,14 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
+"@ulixee/commons@1.5.9":
+  version "1.5.9"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-1.5.9.tgz#baf512c59057138f466c339c98a01855111f7a4e"
+  integrity sha512-YQBLnELOEXebagcyHHudMfymuJaLj7jo6EURxspxiviz+NVMG0xTwO3nglIOwtCPLaS1zjArxp8lbKzGkJXLKQ==
+  dependencies:
+    https-proxy-agent "^5.0.0"
+    source-map-js "^1.0.1"
+
 JSONStream@^1.0.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"

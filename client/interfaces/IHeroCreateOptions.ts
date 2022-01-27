@@ -6,11 +6,10 @@ export default interface IHeroCreateOptions
   extends Partial<
     Omit<
       ISessionCreateOptions,
-      'scriptInstanceMeta' | 'sessionName' | 'dependencyMap' | 'externalIds' | 'sessionId'
+      'scriptInstanceMeta' | 'sessionName' | 'dependencyMap' | 'sessionId'
     >
   > {
   name?: string;
   sessionId?: string | Promise<string>;
-  externalIds?: { [id: string]: Promise<number | string> | number | string };
   connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
 }

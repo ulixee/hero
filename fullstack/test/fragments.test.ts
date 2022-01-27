@@ -26,11 +26,11 @@ describe('basic Fragment tests', () => {
     await test1Element.$collect('a');
     await test1Element.nextElementSibling.$collect('b');
 
-    const fragmentsA = await hero.getCollectedFragments(await hero.sessionId, 'a');
+    const fragmentsA = await hero.getCollectedFragments(hero.sessionId, 'a');
     expect(fragmentsA).toHaveLength(1);
     expect(fragmentsA[0].outerHTML).toBe('<div class="test1">test 1</div>');
 
-    const fragmentsB = await hero.getCollectedFragments(await hero.sessionId, 'b');
+    const fragmentsB = await hero.getCollectedFragments(hero.sessionId, 'b');
     expect(fragmentsB[0].outerHTML).toBe(`<div class="test2">
             <ul><li>Test 2</li></ul>
           </div>`);
@@ -54,7 +54,7 @@ describe('basic Fragment tests', () => {
     const hero = await openBrowser(`/fragment-list`);
     await hero.document.querySelectorAll('.valid').$collect('valid');
 
-    const valid = await hero.getCollectedFragments(await hero.sessionId, 'valid');
+    const valid = await hero.getCollectedFragments(hero.sessionId, 'valid');
     expect(valid).toHaveLength(3);
     expect(valid[0].outerHTML).toBe('<li class="valid">Test 1</li>');
     expect(valid[1].outerHTML).toBe('<li class="valid">Test 4</li>');

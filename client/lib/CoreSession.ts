@@ -97,6 +97,15 @@ export default class CoreSession implements IJsPathEventTarget {
     return this.commandQueue.run('Session.getHeroMeta');
   }
 
+  public recordOutput(
+    changes: { type: string; value: any; path: string; timestamp: Date }[],
+  ): void {
+    for (const change of changes as any[]) {
+      change.lastCommandId = this.lastCommandId;
+    }
+    this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
+  }
+
   public async configure(options?: Partial<IConfigureSessionOptions>): Promise<void> {
     await this.commandQueue.run('Session.configure', options);
   }
