@@ -1,5 +1,4 @@
 import * as Util from 'util';
-import { EventEmitter } from 'events';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
@@ -63,9 +62,10 @@ import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import ConnectionManager from './ConnectionManager';
 import './DomExtender';
-import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import IDomState from '@ulixee/hero-interfaces/IDomState';
+import DomState from './DomState';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -101,17 +101,12 @@ const propertyKeys: (keyof Hero)[] = [
   'Request',
 ];
 
-type IClassEvents = {
-  new: (heroInstance: Hero, heroCreateOptions: IHeroCreateOptions) => void;
-};
-
 export default class Hero extends AwaitedEventTarget<{
   close: () => void;
   command: (name: string, commandId: number, args: any[]) => void;
 }> {
   public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
-  private static emitter = new EventEmitter();
 
   readonly #connectManagerIsReady = createPromise();
   readonly #options: IStateOptions;
@@ -126,7 +121,6 @@ export default class Hero extends AwaitedEventTarget<{
     });
 
     bindFunctions(this);
-    (this.constructor as typeof Hero).emitter.emit('new', this, options);
 
     options.blockedResourceTypes =
       options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;
@@ -481,12 +475,17 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.waitForMillis(millis);
   }
 
-  public async waitForPageState<T extends IPageStateDefinitions>(
-    states?: T,
+  public async waitForState(
+    state: IDomState | DomState,
     options?: Pick<IWaitForOptions, 'timeoutMs'>,
-  ): Promise<keyof T> {
-    return await this.activeTab.waitForPageState(states, options);
+  ): Promise<boolean> {
+    return await this.activeTab.waitForState(state, options);
   }
+
+  public async ensureState(state: IDomState | DomState): Promise<boolean> {
+    return await this.activeTab.ensureState(state);
+  }
+
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async then<TResult1 = Hero, TResult2 = never>(
@@ -515,39 +514,6 @@ export default class Hero extends AwaitedEventTarget<{
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
-  }
-
-  // CLASS EVENT EMITTER ///////////////////////////////////////////////////////////////////////////////////////////////
-
-  public static addListener<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: IClassEvents[K],
-  ): void {
-    this.emitter.addListener(eventType, listenerFn);
-  }
-
-  public static removeListener<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: IClassEvents[K],
-  ): void {
-    this.emitter.removeListener(eventType, listenerFn);
-  }
-
-  public static once<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: IClassEvents[K],
-  ): void {
-    this.emitter.once(eventType, listenerFn);
-  }
-
-  // aliases
-
-  public static on<K extends keyof IClassEvents>(eventType: K, listenerFn: IClassEvents[K]): void {
-    this.addListener(eventType, listenerFn);
-  }
-
-  public static off<K extends keyof IClassEvents>(eventType: K, listenerFn: IClassEvents[K]): void {
-    this.removeListener(eventType, listenerFn);
   }
 }
 

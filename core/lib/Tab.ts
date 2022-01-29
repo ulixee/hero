@@ -27,7 +27,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
-import IPageStateListenArgs from '@ulixee/hero-interfaces/IPageStateListenArgs';
+import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -39,7 +39,7 @@ import { IDomChangeRecord } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
-import PageStateListener from './PageStateListener';
+import DomStateListener from './DomStateListener';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import ScreenshotsTable from '../models/ScreenshotsTable';
@@ -84,8 +84,8 @@ export default class Tab
     atCommandId: number;
   };
 
-  private readonly pageStateListeners: {
-    [pageStateId: string]: PageStateListener;
+  private readonly domStateListenersByJsPathId: {
+    [domStateJsPathId: string]: DomStateListener;
   } = {};
 
   private onFrameCreatedResourceEventsByFrameId: {
@@ -781,12 +781,12 @@ export default class Tab
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public async assert(batchId: string, pageStateIdJsPath: IJsPath): Promise<boolean> {
-    const pageStateListener = this.pageStateListeners[JSON.stringify(pageStateIdJsPath)];
-    return await pageStateListener.runBatchAssert(batchId);
+  public async assert(batchId: string, domStateIdJsPath: IJsPath): Promise<boolean> {
+    const domStateListener = this.domStateListenersByJsPathId[JSON.stringify(domStateIdJsPath)];
+    return await domStateListener.runBatchAssert(batchId);
   }
 
-  public async addRemoteEventListener(
+  public addRemoteEventListener(
     type: string,
     emitFn: IRemoteEmitFn,
     jsPath?: IJsPath,
@@ -806,9 +806,9 @@ export default class Tab
         );
       }
 
-      if (type === 'page-state') {
+      if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
-        const listener = await this.addPageStateListener(id, options);
+        const listener = this.addDomStateListener(id, options);
         listener.on('updated', details.listenFn);
       }
     } else {
@@ -829,9 +829,9 @@ export default class Tab
         this.session.websocketMessages.unlisten(Number(resourceId), listenFn);
       }
 
-      if (type === 'page-state') {
+      if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
-        const listener = this.pageStateListeners[id];
+        const listener = this.domStateListenersByJsPathId[id];
         if (listener) listener.stop(options);
       }
     } else {
@@ -854,27 +854,12 @@ export default class Tab
     } as ISessionMeta; // must adhere to session meta spec
   }
 
-  private async addPageStateListener(
-    id: string,
-    options: IPageStateListenArgs,
-  ): Promise<PageStateListener> {
-    const listener = new PageStateListener(id, options, this);
-    this.pageStateListeners[id] = listener;
-    listener.on('resolved', () => delete this.pageStateListeners[id]);
+  private addDomStateListener(id: string, options: IDomStateListenArgs): DomStateListener {
+    const listener = new DomStateListener(id, options, this);
+    this.domStateListenersByJsPathId[id] = listener;
+    listener.once('resolved', () => delete this.domStateListenersByJsPathId[id]);
 
-    const error = await listener.isLoaded;
-    if (error) throw error;
-
-    this.emit('wait-for-pagestate', { listener });
-
-    if (!listener.states.length) {
-      const cancelError = new CanceledPromiseError('No states provided to waitForPageState');
-      listener.stop({
-        state: null,
-        error: cancelError,
-      });
-      throw cancelError;
-    }
+    this.emit('wait-for-domstate', { listener });
 
     return listener;
   }
@@ -1259,7 +1244,7 @@ export interface ITabEventParams {
       scrollEvents: IScrollRecord[];
     };
   };
-  'wait-for-pagestate': { listener: PageStateListener };
+  'wait-for-domstate': { listener: DomStateListener };
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;
   'websocket-message': IWebsocketResourceMessage;

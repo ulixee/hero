@@ -1,4 +1,4 @@
-export default interface IPageStateAssertionBatch {
+export default interface IDomStateAssertionBatch {
   id: string;
   minValidAssertions: number;
   assertions: [

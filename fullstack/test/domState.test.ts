@@ -1,0 +1,147 @@
+import { Helpers } from '@ulixee/hero-testing';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import Hero from '../index';
+import DomState from '@ulixee/hero/lib/DomState';
+
+let koaServer: ITestKoaServer;
+beforeAll(async () => {
+  koaServer = await Helpers.runKoaServer();
+});
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
+
+test('can wait for a url', async () => {
+  const hero = await openBrowser('/');
+  koaServer.get('/waitForDomState1', ctx => {
+    ctx.body = `<body><h1>Hi</h1></body>`;
+  });
+
+  await hero.goto(`${koaServer.baseUrl}/waitForDomState1`);
+  const state1 = hero.activeTab.waitForState({
+    name: 'state1',
+    allTrue({ assert }) {
+      assert(hero.url, url => url.includes('waitForDomState'));
+    },
+  });
+  await expect(state1).resolves.toBe(true);
+
+  const state2 = hero.activeTab.ensureState({
+    name: 'state2',
+    allTrue({ assert }) {
+      assert(hero.url, url => url.includes('page2'));
+    },
+  });
+  await expect(state2).resolves.toBe(false);
+});
+
+test('can wait for a domElement', async () => {
+  const hero = await openBrowser('/');
+  koaServer.get('/waitForDomState2', ctx => {
+    ctx.body = `<body><h1>Hi</h1>
+<script>
+let count = 0;
+setInterval(() => {
+  count += 1;
+  const div = document.createElement('div');
+  div.textContent = 'hi'  + count;
+  document.body.append(div)
+}, 100)
+</script>
+</body>`;
+  });
+
+  await hero.goto(`${koaServer.baseUrl}/waitForDomState2`);
+  const domState = {
+    allTrue({ assert }) {
+      assert(hero.document.querySelectorAll('div').length, x => x >= 4);
+    },
+  };
+  await expect(hero.activeTab.waitForState(domState)).resolves.toBe(true);
+  await expect(hero.activeTab.ensureState(domState)).resolves.toBe(true);
+});
+
+test('can test for page state across redirects', async () => {
+  koaServer.get('/waitForDomStateRedirect1', ctx => {
+    ctx.body = `<body>
+      <a href="/waitForDomStateRedirect2">Click Me</a>
+    </body>`;
+  });
+  koaServer.get('/waitForDomStateRedirect2', ctx => {
+    ctx.redirect('/waitForDomStateRedirect3');
+  });
+
+  koaServer.get('/waitForDomStateRedirect3', ctx => {
+    ctx.body = `<head>
+        <title>HTML Meta Tag</title>
+        <meta http-equiv = "refresh" content = "0; url = ${koaServer.baseUrl}/waitForDomStateRedirect4" />
+     </head>
+     <body>
+        <p>This page won't be here long.</p>
+     </body>`;
+  });
+
+  koaServer.get('/waitForDomStateRedirect4', ctx => {
+    ctx.redirect('/waitForDomStateRedirectLast');
+  });
+  koaServer.get('/waitForDomStateRedirectLast', ctx => {
+    ctx.body = `<body><h1 data-final="true">Hi</h1></body>`;
+  });
+  const hero = await openBrowser('/waitForDomStateRedirect1');
+
+  await hero.click(hero.document.querySelector('a'));
+
+  const state = new DomState({
+    allTrue({ assert }) {
+      assert(hero.url, x => x.startsWith(koaServer.baseUrl));
+      assert(hero.isPaintingStable);
+      assert(hero.document.querySelector('h1').dataset, x => x.final === 'true');
+    },
+  });
+  await expect(hero.activeTab.waitForState(state)).resolves.toBe(true);
+  await expect(hero.activeTab.ensureState(state)).resolves.toBe(true);
+});
+
+test('surfaces errors in assertions', async () => {
+  koaServer.get('/waitForDomStateError', ctx => {
+    ctx.body = `<body><h1>Hi</h1></body>`;
+  });
+  const hero = await openBrowser('/waitForDomStateError');
+  const domState = {
+    allTrue({ assert }) {
+      // @ts-ignore
+      assert(hero.document.querySelector('h1').getAttribute('id'), x => test.includes(x));
+    },
+  };
+
+  await expect(hero.activeTab.waitForState(domState)).rejects.toThrowError(
+    'test.includes is not a function',
+  );
+
+  await expect(hero.activeTab.ensureState(domState)).rejects.toThrowError(
+    'test.includes is not a function',
+  );
+});
+
+test('surfaces errors in query selectors that are invalid (vs simply not there)', async () => {
+  koaServer.get('/waitForDomStateSelectorError', ctx => {
+    ctx.body = `<body><h1>Hi</h1></body>`;
+  });
+  const hero = await openBrowser('/waitForDomStateSelectorError');
+
+  const state = new DomState({
+    allTrue({ assert }) {
+      // @ts-ignore
+      assert(hero.document.querySelector('h1[id@1]').getAttribute('id'), '1');
+    },
+  });
+
+  await expect(hero.activeTab.waitForState(state)).rejects.toThrowError('not a valid selector');
+});
+
+async function openBrowser(path: string) {
+  const hero = new Hero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}${path}`);
+  await hero.waitForPaintingStable();
+  return hero;
+}

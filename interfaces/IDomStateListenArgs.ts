@@ -1,7 +1,8 @@
-export default interface IPageStateListenArgs {
+export default interface IDomStateListenArgs {
   commands: { [id: string]: IRawCommand };
   callsite: string;
-  states: string[];
+  name?: string;
+  url?: string | RegExp;
 }
 
 export type IRawCommand = [frameId: number, command: string, args: any[]];

@@ -25,7 +25,7 @@ import IPoint from '@ulixee/hero-interfaces/IPoint';
 import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -447,7 +447,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public async runDomAssertions(
     id: string,
-    assertions: IPageStateAssertionBatch['assertions'],
+    assertions: IDomStateAssertionBatch['assertions'],
   ): Promise<number> {
     if (!this.installedDomAssertions.has(id)) {
       await this.runIsolatedFn('HERO.DomAssertions.install', id, assertions);
@@ -602,7 +602,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     });
 
     for (const [event, url, timestamp] of loadEvents) {
-      const incomingStatus = pageStateToLoadStatus[event];
+      const incomingStatus = domStateToLoadStatus[event];
       // only record the content paint
       if (incomingStatus === ContentPaint) {
         this.navigations.onLoadStatusChanged(incomingStatus, url, null, timestamp);
@@ -871,7 +871,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 }
 
-const pageStateToLoadStatus = {
+const domStateToLoadStatus = {
   LargestContentfulPaint: ContentPaint,
   DOMContentLoaded: LoadStatus.DomContentLoaded,
   load: LoadStatus.AllContentLoaded,

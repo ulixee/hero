@@ -1,47 +1,49 @@
-import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
-import IPageStateListenArgs from '@ulixee/hero-interfaces/IPageStateListenArgs';
+import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
+import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import IPageStateAssertionBatch from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import { createHash } from 'crypto';
 import Tab from './Tab';
 import CommandRunner from './CommandRunner';
 import Log from '@ulixee/commons/lib/Logger';
-import PageStateCodeBlock from '@ulixee/hero-timetravel/lib/PageStateCodeBlock';
 
 const { log } = Log(module);
 
-export interface IPageStateEvents {
-  resolved: { state: string; error?: Error };
-  updated: IPageStateResult;
+export interface IDomStateEvents {
+  resolved: { didMatch: boolean; error?: Error };
+  updated: IDomStateResult;
 }
 
 interface IBatchAssertion {
-  domAssertionsByFrameId: Map<number, IPageStateAssertionBatch['assertions']>;
-  assertions: IPageStateAssertionBatch['assertions'];
+  domAssertionsByFrameId: Map<number, IDomStateAssertionBatch['assertions']>;
+  assertions: IDomStateAssertionBatch['assertions'];
   minValidAssertions: number;
   totalAssertions: number;
-  state: string;
 }
 
 type IBatchAssertCommandArgs = [
   batchId: string,
-  pageStateIdJsPath: IJsPath,
-  assertions: IPageStateAssertionBatch['assertions'],
+  domStateIdJsPath: IJsPath,
+  assertions: IDomStateAssertionBatch['assertions'],
   minValidAssertions: number,
-  state: string,
+  name: string,
 ];
 
-export default class PageStateListener extends TypedEventEmitter<IPageStateEvents> {
+export default class DomStateListener extends TypedEventEmitter<IDomStateEvents> {
   public readonly id: string = 'default';
-  public readonly states: string[];
+  public readonly name: string;
+  public readonly url: string | RegExp;
   public readonly startTime: number;
   public readonly startingCommandId: number;
   public readonly commandStartTime: number;
-  public readonly isLoaded: Promise<void | Error>;
 
-  public readonly rawBatchAssertionsById = new Map<string, IPageStateAssertionBatch>();
+  public get hasCommands(): boolean {
+    return this.commandFnsById.size > 0;
+  }
+
+  public readonly rawBatchAssertionsById = new Map<string, IDomStateAssertionBatch>();
 
   private batchAssertionsById = new Map<string, IBatchAssertion>();
   private commandFnsById = new Map<string, () => Promise<any>>();
@@ -49,12 +51,12 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   private lastResults: any;
   private isStopping = false;
   private isCheckingState = false;
-  private runAgain = false;
+  private runAgainTime = 0;
   private watchedFrameIds = new Set<number>();
 
   constructor(
     public readonly jsPathId: string,
-    private readonly options: IPageStateListenArgs,
+    private readonly options: IDomStateListenArgs,
     private readonly tab: Tab,
   ) {
     super();
@@ -62,7 +64,8 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     if (options.callsite) {
       this.id = createHash('md5').update(`${options.callsite}`).digest('hex');
     }
-    this.states = options.states;
+    this.name = options.name;
+    this.url = options.url;
 
     this.logger = log.createChild(module, {
       sessionId: tab.sessionId,
@@ -79,17 +82,17 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
 
     tab.once('close', this.stop);
-    this.isLoaded = this.bindFrameEvents().catch(err => err);
+    this.bindFrameEvents();
     this.checkInterval = setInterval(this.checkState, 2e3).unref();
   }
 
-  public stop(result?: { state: string; error?: Error }): void {
+  public stop(result?: { didMatch: boolean; error?: Error }): void {
     clearTimeout(this.checkInterval);
     if (this.isStopping) return;
     this.isStopping = true;
     this.removeAllListeners('state');
     this.emit('resolved', {
-      state: result?.state,
+      didMatch: result?.didMatch ?? false,
       error: result?.error,
     });
 
@@ -99,10 +102,6 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       frame.off('paint', this.checkState);
       frame.navigations.off('status-change', this.checkState);
     }
-  }
-
-  public stateThatImportedBatchAssertion(id: string): string {
-    return this.batchAssertionsById.get(id).state;
   }
 
   public async runBatchAssert(batchId: string): Promise<boolean> {
@@ -156,42 +155,34 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     return validAssertions >= minValidAssertions;
   }
 
-  public addAssertionBatch(state: string, batch: IPageStateAssertionBatch): string {
-    if (!this.states.includes(state)) this.states.push(state);
-    let fullId = batch.id;
+  public addAssertionBatch(batch: IDomStateAssertionBatch): string {
+    let batchId = batch.id;
     for (const id of this.batchAssertionsById.keys()) {
       if (id.endsWith(batch.id + '.json')) {
-        fullId = id;
+        batchId = id;
         break;
       }
     }
     const args: IBatchAssertCommandArgs = [
-      fullId,
+      batchId,
       JSON.parse(this.jsPathId),
       batch.assertions,
       batch.minValidAssertions,
-      state,
+      this.name,
     ];
-    this.trackCommand(fullId, this.tab.mainFrameId, 'Tab.assert', args);
-    this.loadBatchAssert(args);
-    return fullId;
-  }
-
-  private loadBatchAssert(args: IBatchAssertCommandArgs): void {
-    const [batchId, , assertions, minValidAssertions, state] = args;
+    this.trackCommand(batchId, this.tab.mainFrameId, 'Tab.assert', args);
     this.batchAssertionsById.set(batchId, {
       assertions: [],
       domAssertionsByFrameId: new Map(),
-      totalAssertions: assertions.length,
-      minValidAssertions: minValidAssertions ?? assertions.length,
-      state,
+      totalAssertions: batch.assertions.length,
+      minValidAssertions: batch.minValidAssertions ?? batch.assertions.length,
     });
 
     const entry = this.batchAssertionsById.get(batchId);
 
     const { domAssertionsByFrameId } = entry;
     let domAssertionCount = 0;
-    for (const assertion of assertions) {
+    for (const assertion of batch.assertions) {
       const [frameId, type] = assertion;
       if (type === 'xpath' || type === 'jspath') {
         if (!domAssertionsByFrameId.has(frameId)) domAssertionsByFrameId.set(frameId, []);
@@ -211,35 +202,16 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
     this.logger.stats('Loading BatchAssert', {
       batchId,
-      minValidAssertions,
-      state,
+      minValidAssertions: batch.minValidAssertions,
       domAssertionCount,
       otherAssertions: entry.assertions,
     });
+    return batchId;
   }
 
-  private async loadGeneratedBatchAssertions(args: IBatchAssertCommandArgs): Promise<void> {
-    const [batchId] = args;
-    if (!batchId.startsWith('@')) return;
-
-    const assertionsBatch = await PageStateCodeBlock.loadAssertionBatch(
-      batchId,
-      this.tab.session.options.scriptInstanceMeta,
-    );
-    if (assertionsBatch) {
-      args[2] = assertionsBatch.assertions;
-      args[3] = assertionsBatch.minValidAssertions;
-
-      this.rawBatchAssertionsById.set(batchId, assertionsBatch);
-    }
-  }
-
-  private async bindFrameEvents(): Promise<void> {
+  private bindFrameEvents(): void {
     for (const [id, rawCommand] of Object.entries(this.options.commands)) {
       const [frameId, command, args] = rawCommand;
-      if (command === 'Tab.assert') {
-        await this.loadGeneratedBatchAssertions(args as any);
-      }
       this.trackCommand(id, frameId, command, args);
     }
 
@@ -248,10 +220,6 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
 
   private trackCommand(id: string, frameId: number, command: string, args: any[]): void {
     const frame = this.tab.getFrameEnvironment(frameId);
-
-    if (command === 'Tab.assert') {
-      this.loadBatchAssert(args as any);
-    }
 
     const commandRunner = new CommandRunner(command, args, {
       FrameEnvironment: frame,
@@ -269,7 +237,7 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
     }
   }
 
-  private publishResult(results: IPageStateResult): void {
+  private publishResult(results: IDomStateResult): void {
     if (this.shouldStop()) return;
 
     const stringifiedResults = JSON.stringify(results);
@@ -282,15 +250,15 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
   private async checkState(): Promise<void> {
     if (this.shouldStop()) return;
     if (this.isCheckingState) {
-      this.runAgain = true;
+      this.runAgainTime = Date.now();
       return;
     }
 
     try {
       this.isCheckingState = true;
-      this.runAgain = false;
+      this.runAgainTime = 0;
 
-      const results: IPageStateResult = {};
+      const results: IDomStateResult = {};
 
       const promises = [...this.commandFnsById].map(async ([id, runCommandFn]) => {
         results[id] = await runCommandFn().catch(err => err);
@@ -300,7 +268,8 @@ export default class PageStateListener extends TypedEventEmitter<IPageStateEvent
       this.publishResult(results);
     } finally {
       this.isCheckingState = false;
-      if (this.runAgain) process.nextTick(this.checkState);
+      if (this.runAgainTime > 0)
+        setTimeout(this.checkState, Date.now() - this.runAgainTime).unref();
     }
   }
 

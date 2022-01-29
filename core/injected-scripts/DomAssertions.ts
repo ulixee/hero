@@ -1,14 +1,14 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import IPageStateAssertionBatch, {
+import IDomStateAssertionBatch, {
   IAssertionAndResult,
-} from '@ulixee/hero-interfaces/IPageStateAssertionBatch';
+} from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 
 declare let JsPath: any;
 
 class DomAssertions {
-  private static assertionBatchesById: Record<string, IPageStateAssertionBatch['assertions']> = {};
+  private static assertionBatchesById: Record<string, IDomStateAssertionBatch['assertions']> = {};
 
-  public static install(id: string, assertions: IPageStateAssertionBatch['assertions']): void {
+  public static install(id: string, assertions: IDomStateAssertionBatch['assertions']): void {
     this.assertionBatchesById[id] = assertions;
   }
 
