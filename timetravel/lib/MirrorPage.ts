@@ -220,7 +220,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.isReady = null;
     this.loadQueue.stop();
     if (this.page && !this.page.isClosed) {
-      await this.page.close({ skipBeforeunload: true });
+      await this.page.close();
     }
     if (this.subscribeToTab) {
       this.subscribeToTab.off('page-events', this.onPageEvents);

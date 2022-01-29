@@ -131,7 +131,7 @@ export default class DomStateHandler {
   }
 
   private async isAssertionValid<T>(
-    state: Promise<T>,
+    state: Promise<T> | PromiseLike<T>,
     assertion: T | ((value: T) => boolean),
   ): Promise<boolean> {
     try {
@@ -164,7 +164,7 @@ export default class DomStateHandler {
 
     this.domState.allTrue({
       assert(statePromise, assertion) {
-        assertionSets.push([statePromise.catch(err => err), assertion]);
+        assertionSets.push([Promise.resolve(statePromise).catch(err => err), assertion]);
       },
     });
 

@@ -150,6 +150,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public async showStatusText(text: string): Promise<void> {
+    if (this.isReady === null) return;
     await this.isReady;
     const tab = this.activeTab;
     if (!tab) return;

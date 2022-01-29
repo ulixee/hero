@@ -61,7 +61,12 @@ export default class ScriptInstance {
       const { filename } = callSite;
       if (!filename) continue;
 
-      if (filename.startsWith(HeroLibPath) || filename.startsWith(AwaitedDomPath)) continue;
+      if (
+        filename.startsWith('node:internal') ||
+        filename.startsWith(HeroLibPath) ||
+        filename.startsWith(AwaitedDomPath)
+      )
+        continue;
       if (filename.endsWith(this.entrypoint)) {
         lastIndexOfEntrypoint = stackLines.length;
       }

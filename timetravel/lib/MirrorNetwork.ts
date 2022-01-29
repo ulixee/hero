@@ -7,6 +7,7 @@ import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import Fetch = Protocol.Fetch;
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 interface IMirrorNetworkConfig {
   headersFilter?: (string | RegExp)[];
@@ -79,9 +80,11 @@ export default class MirrorNetwork {
       match = await responsePromise;
       this.waitForPendingResources.delete(responsePromise);
     }
+
     if (this.useResourcesOnce) {
       matches.shift();
     }
+
     if (
       this.ignoreJavascriptRequests &&
       (request.resourceType === 'Script' ||
@@ -119,7 +122,7 @@ export default class MirrorNetwork {
     }
     return {
       requestId: request.requestId,
-      body: body.toString('base64'),
+      body: body?.toString('base64') ?? '',
       responseHeaders: headers,
       responseCode: resource.statusCode,
     };
@@ -149,6 +152,12 @@ export default class MirrorNetwork {
   }
 
   public setResources(resources: (IResourceSummary | IResourcesRecord)[]): void {
+    for (const resourceSet of Object.values(this.resourceLookup)) {
+      for (const resource of resourceSet) {
+        if (resource.responsePromise && !resource.responsePromise.isResolved)
+          resource.responsePromise.reject(new CanceledPromiseError('Replacing resources'));
+      }
+    }
     this.resourceLookup = {};
     for (let resource of resources) {
       if (!(resource as IResourceSummary).method) {

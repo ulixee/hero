@@ -5,10 +5,13 @@ export default interface IDomState {
 }
 
 export type IStateAndAssertion<T> = [
-  statePromise: Promise<T>,
+  statePromise: Promise<T> | PromiseLike<T>,
   assertionFnOrValue?: ((state: T) => boolean) | T,
 ];
 
 export interface IDomStateAssertions {
-  assert<T>(statePromise: Promise<T>, assertionFnOrValue?: ((state: T) => boolean) | T): void;
+  assert<T>(
+    statePromise: Promise<T> | PromiseLike<T>,
+    assertionFnOrValue?: ((state: T) => boolean) | T,
+  ): void;
 }
