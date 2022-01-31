@@ -18,6 +18,12 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { createDialog } from './Dialog';
 import CoreSession from './CoreSession';
 import ICommandCounter from '../interfaces/ICommandCounter';
+import IFlowHandler from '../interfaces/IFlowHandler';
+import DomStateHandler from './DomStateHandler';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import DomState from './DomState';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import IDomState from '@ulixee/hero-interfaces/IDomState';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -30,6 +36,7 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public frameEnvironmentsById = new Map<number, CoreFrameEnvironment>();
   protected readonly meta: ISessionMeta & { sessionName: string };
+  private readonly flowHandlers: IFlowHandler[] = [];
   private readonly connection: ConnectionToCore;
   private readonly mainFrameId: number;
   private readonly coreSession: CoreSession;
@@ -55,6 +62,7 @@ export default class CoreTab implements IJsPathEventTarget {
       connection,
       coreSession as ICommandCounter,
     );
+    this.commandQueue.registerCommandRetryHandlerFn(this.shouldRetryFlowHandler.bind(this));
     this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
     this.frameEnvironmentsById.set(
@@ -67,6 +75,56 @@ export default class CoreTab implements IJsPathEventTarget {
       resource: createResource.bind(null, resolvedThis),
       dialog: createDialog.bind(null, resolvedThis),
     });
+  }
+
+  public async registerFlowHandler(
+    state: IDomState | DomState,
+    handlerFn: (error?: Error) => Promise<any>,
+    callSitePath: ISourceCodeLocation[],
+  ): Promise<void> {
+    const id = this.flowHandlers.length + 1;
+    this.flowHandlers.push({ id, state, callSitePath, handlerFn });
+    await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', state.name, id, callSitePath);
+  }
+
+  public async shouldRetryFlowHandler(
+    command: CoreCommandQueue['internalState']['lastCommand'],
+    error: Error,
+  ): Promise<boolean> {
+    if (error instanceof CanceledPromiseError) return false;
+    if (
+      command.command === 'FrameEnvironment.execJsPath' ||
+      command.command === 'FrameEnvironment.interact'
+    ) {
+      return await this.checkFlowHandlers();
+    }
+    return false;
+  }
+
+  public async checkFlowHandlers(): Promise<boolean> {
+    const matchingStates: IFlowHandler[] = [];
+    await Promise.all(
+      this.flowHandlers.map(async flowHandler => {
+        const handler = new DomStateHandler(flowHandler.state, this, flowHandler.callSitePath);
+        try {
+          if (await handler.check()) {
+            matchingStates.push(flowHandler);
+          }
+        } catch (err) {
+          await flowHandler.handlerFn(err);
+        }
+      }),
+    );
+    if (!matchingStates.length) return false;
+
+    try {
+      const flowHandler = matchingStates[0];
+      this.commandQueue.setCommandMetadata({ activeFlowHandlerId: flowHandler.id });
+      await flowHandler.handlerFn();
+      return true;
+    } finally {
+      this.commandQueue.setCommandMetadata({});
+    }
   }
 
   public async getCoreFrameEnvironments(): Promise<CoreFrameEnvironment[]> {

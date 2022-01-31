@@ -23,9 +23,9 @@ test('can wait for a url', async () => {
       assert(hero.url, url => url.includes('waitForDomState'));
     },
   });
-  await expect(state1).resolves.toBe(true);
+  await expect(state1).resolves.toBeUndefined();
 
-  const state2 = hero.activeTab.ensureState({
+  const state2 = hero.activeTab.checkState({
     name: 'state2',
     allTrue({ assert }) {
       assert(hero.url, url => url.includes('page2'));
@@ -56,8 +56,8 @@ setInterval(() => {
       assert(hero.document.querySelectorAll('div').length, x => x >= 4);
     },
   };
-  await expect(hero.activeTab.waitForState(domState)).resolves.toBe(true);
-  await expect(hero.activeTab.ensureState(domState)).resolves.toBe(true);
+  await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined();
+  await expect(hero.activeTab.checkState(domState)).resolves.toBe(true);
 });
 
 test('can test for page state across redirects', async () => {
@@ -92,13 +92,13 @@ test('can test for page state across redirects', async () => {
 
   const state = new DomState({
     allTrue({ assert }) {
-      assert(hero.url, x => x.startsWith(koaServer.baseUrl));
+      assert(hero.url, x => x.includes('waitForDomStateRedirectLast'));
       assert(hero.isPaintingStable);
       assert(hero.document.querySelector('h1').dataset, x => x.final === 'true');
     },
   });
-  await expect(hero.activeTab.waitForState(state)).resolves.toBe(true);
-  await expect(hero.activeTab.ensureState(state)).resolves.toBe(true);
+  await expect(hero.activeTab.waitForState(state)).resolves.toBeUndefined();
+  await expect(hero.activeTab.checkState(state)).resolves.toBe(true);
 });
 
 test('surfaces errors in assertions', async () => {
@@ -117,7 +117,7 @@ test('surfaces errors in assertions', async () => {
     'test.includes is not a function',
   );
 
-  await expect(hero.activeTab.ensureState(domState)).rejects.toThrowError(
+  await expect(hero.activeTab.checkState(domState)).rejects.toThrowError(
     'test.includes is not a function',
   );
 });

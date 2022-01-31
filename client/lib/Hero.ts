@@ -1,8 +1,7 @@
 import * as Util from 'util';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import { bindFunctions, createPromise, getCallSite } from '@ulixee/commons/lib/utils';
+import { bindFunctions, getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
@@ -51,21 +50,20 @@ import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
-import { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
+import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
-import FrameEnvironment, {
-  getCoreFrameEnvironment,
-  getCoreFrameEnvironmentForPosition,
-} from './FrameEnvironment';
+import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnvironment';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import ConnectionManager from './ConnectionManager';
 import './DomExtender';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
+import ConnectionToCore from '../connections/ConnectionToCore';
+import CoreSession from './CoreSession';
+import InternalProperties from './InternalProperties';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -73,15 +71,8 @@ export const DefaultOptions = {
 };
 export const scriptInstance = new ScriptInstance();
 
-const { getState, setState } = StateMachine<Hero, IState>();
-
-export type IStateOptions = Omit<ISessionCreateOptions, 'sessionId'> &
+export type ISessionOptions = Omit<ISessionCreateOptions, 'sessionId'> &
   Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;
-
-export interface IState {
-  connection: ConnectionManager;
-  clientPlugins: IClientPlugin[];
-}
 
 const propertyKeys: (keyof Hero)[] = [
   'document',
@@ -108,26 +99,29 @@ export default class Hero extends AwaitedEventTarget<{
   public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
 
-  readonly #connectManagerIsReady = createPromise();
-  readonly #options: IStateOptions;
+  readonly #options: ISessionOptions;
+  readonly #clientPlugins: IClientPlugin[] = [];
+  readonly #connectionToCore: ConnectionToCore;
+  readonly #didAutoCreateConnection: boolean = false;
+  #coreSession: Promise<CoreSession | Error>;
+  #tabs: Tab[];
+  #activeTab: Tab;
   #isClosingPromise: Promise<void>;
 
-  constructor(options: IHeroCreateOptions = {}) {
-    super(async () => {
-      await this.#connectManagerIsReady.promise;
+  constructor(createOptions: IHeroCreateOptions = {}) {
+    super(() => {
       return {
-        target: getState(this).connection.getConnectedCoreSessionOrReject(),
+        target: this.#getCoreSessionOrReject(),
       };
     });
 
     bindFunctions(this);
 
-    options.blockedResourceTypes =
-      options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;
-    options.userProfile = options.userProfile || Hero.options.defaultUserProfile;
+    const { name, connectionToCore, ...options } = createOptions;
+    options.blockedResourceTypes ??= Hero.options.defaultBlockedResourceTypes;
+    options.userProfile ??= Hero.options.defaultUserProfile;
 
-    const sessionName = scriptInstance.generateSessionName(options.name);
-    delete options.name;
+    const sessionName = scriptInstance.generateSessionName(name);
 
     this.#options = {
       ...options,
@@ -136,20 +130,23 @@ export default class Hero extends AwaitedEventTarget<{
       scriptInstanceMeta: scriptInstance.meta,
       dependencyMap: {},
       corePluginPaths: [],
-    } as IStateOptions;
+    } as ISessionOptions;
 
-    const connection = new ConnectionManager(this, this.#options);
+    this.#connectionToCore = ConnectionFactory.createConnection(
+      connectionToCore ?? { isPersistent: false },
+      (this.constructor as any).createConnectionToCore,
+    );
 
-    setState(this, {
-      connection,
-      clientPlugins: [],
+    this.#didAutoCreateConnection = this.#connectionToCore !== connectionToCore;
+
+    InternalProperties.set(this, {
+      clientPlugins: this.#clientPlugins,
     });
-
-    this.#connectManagerIsReady.resolve();
   }
 
   public get activeTab(): Tab {
-    return getState(this).connection.activeTab;
+    this.#getCoreSessionOrReject().catch(() => null);
+    return this.#activeTab;
   }
 
   public get document(): SuperDocument {
@@ -181,7 +178,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get sessionId(): Promise<string> {
-    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = this.#getCoreSessionOrReject();
     return coreSession.then(x => x.sessionId);
   }
 
@@ -190,7 +187,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get meta(): Promise<IHeroMeta> {
-    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = this.#getCoreSessionOrReject();
     return coreSession.then(x => x.getHeroMeta());
   }
 
@@ -203,7 +200,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get tabs(): Promise<Tab[]> {
-    return getState(this).connection.refreshedTabs();
+    return this.#refreshedTabs();
   }
 
   public get url(): Promise<string> {
@@ -211,7 +208,10 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get coreHost(): Promise<string> {
-    return getState(this).connection.host;
+    return this.#connectionToCore?.hostOrError.then(x => {
+      if (x instanceof Error) throw x;
+      return x;
+    });
   }
 
   public get Request(): typeof Request {
@@ -221,22 +221,35 @@ export default class Hero extends AwaitedEventTarget<{
   // METHODS
 
   public async recordOutput(changesToRecord): Promise<void> {
-    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = await this.#getCoreSessionOrReject();
     coreSession.recordOutput(changesToRecord);
   }
 
   public close(): Promise<void> {
-    const { connection } = getState(this);
-    return this.#isClosingPromise ??= new Promise((resolve, reject) => {
-      connection.close().then(() => resolve()).catch(error => {
-        if (error instanceof DisconnectedFromCoreError) return resolve();
-        reject(error);
-      });
-    });
+    return (this.#isClosingPromise ??= new Promise(async (resolve, reject) => {
+      try {
+        const sessionOrError = await this.#coreSession;
+        if (sessionOrError instanceof CoreSession) {
+          await sessionOrError.close();
+        }
+        if (this.#didAutoCreateConnection) {
+          await this.#connectionToCore.disconnect();
+        }
+      } catch (error) {
+        if (!(error instanceof DisconnectedFromCoreError)) return reject(error);
+      }
+      resolve();
+    }));
   }
 
   public async closeTab(tab: Tab): Promise<void> {
-    await tab.close();
+    const tabIdx = this.#tabs.indexOf(tab);
+    this.#tabs.splice(tabIdx, 1);
+    if (this.#tabs.length) {
+      this.#activeTab = this.#tabs[0];
+    }
+    const coreTab = await getCoreTab(tab);
+    await coreTab.close();
   }
 
   public async getCollectedResources(
@@ -244,7 +257,7 @@ export default class Hero extends AwaitedEventTarget<{
     name: string,
   ): Promise<ICollectedResource[]> {
     const sessionId = await sessionIdPromise;
-    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = await this.#getCoreSessionOrReject();
     const resources = await coreSession.getCollectedResources(sessionId, name);
 
     const results: ICollectedResource[] = [];
@@ -272,7 +285,7 @@ export default class Hero extends AwaitedEventTarget<{
     name: string,
   ): Promise<ICollectedFragment[]> {
     const sessionId = await sessionIdPromise;
-    const coreSession = await getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = await this.#getCoreSessionOrReject();
     return await coreSession.getCollectedFragments(sessionId, name);
   }
 
@@ -280,7 +293,7 @@ export default class Hero extends AwaitedEventTarget<{
     const callSitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
 
     const coreTab = getCoreTab(tab);
-    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
+    const coreSession = this.#getCoreSessionOrReject();
 
     const detachedTab = coreSession.then(async session =>
       session.detachTab(await coreTab, callSitePath, key),
@@ -290,14 +303,16 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async focusTab(tab: Tab): Promise<void> {
-    await tab.focus();
+    const coreTab = await getCoreTab(tab);
+    await coreTab.focusTab();
+    this.#activeTab = tab;
   }
 
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {
     const coreTab = await getCoreTab(this.activeTab);
     const newCoreTab = coreTab.waitForNewTab(options);
     const tab = createTab(this, newCoreTab);
-    getState(this).connection.addTab(tab);
+    this.#tabs.push(tab);
     return tab;
   }
 
@@ -310,7 +325,7 @@ export default class Hero extends AwaitedEventTarget<{
     },
   ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
     let interaction: IInteraction = { click: mousePosition };
     if (!isMousePositionXY(mousePosition)) {
       interaction = {
@@ -332,18 +347,18 @@ export default class Hero extends AwaitedEventTarget<{
   public async interact(...interactions: IInteractions): Promise<void> {
     if (!interactions.length) return;
     let coreFrame = await getCoreFrameForInteractions(interactions);
-    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
     await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePositionXY | ISuperElement): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    const coreFrame = await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
     await Interactor.run(
       coreFrame,
       typeInteractions.map(t => ({ type: t })),
@@ -358,10 +373,9 @@ export default class Hero extends AwaitedEventTarget<{
   // PLUGINS
 
   public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): void {
-    const { clientPlugins, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
-    if (connection.hasConnectedCoreSession) {
+    if (this.#coreSession) {
       throw new Error(
         'You must call .use before any Hero "await" calls (ie, before the Agent connects to Core).',
       );
@@ -383,15 +397,14 @@ export default class Hero extends AwaitedEventTarget<{
       ClientPlugins.forEach(ClientPlugin => (ClientPluginsById[ClientPlugin.id] = ClientPlugin));
     }
 
-    Object.values(ClientPluginsById).forEach(ClientPlugin => {
+    for (const ClientPlugin of Object.values(ClientPluginsById)) {
       const clientPlugin = new ClientPlugin();
-      clientPlugins.push(clientPlugin);
-      if (connection.hasConnectedCoreSession && clientPlugin.onHero) {
-        clientPlugin.onHero(this, connection.sendToActiveTab);
-      }
-
+      this.#clientPlugins.push(clientPlugin);
       this.#options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
-    });
+    }
+    if (this.#coreSession) {
+      this.#initializeClientPlugins(Object.values(ClientPluginsById));
+    }
   }
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
@@ -478,12 +491,23 @@ export default class Hero extends AwaitedEventTarget<{
   public async waitForState(
     state: IDomState | DomState,
     options?: Pick<IWaitForOptions, 'timeoutMs'>,
-  ): Promise<boolean> {
+  ): Promise<void> {
     return await this.activeTab.waitForState(state, options);
   }
 
-  public async ensureState(state: IDomState | DomState): Promise<boolean> {
-    return await this.activeTab.ensureState(state);
+  public async checkState(state: IDomState | DomState): Promise<boolean> {
+    return await this.activeTab.checkState(state);
+  }
+
+  public async registerFlowHandler(
+    state: IDomState | DomState,
+    handlerCallbackFn: (error?: Error) => Promise<any>,
+  ): Promise<void> {
+    return await this.activeTab.registerFlowHandler(state, handlerCallbackFn);
+  }
+
+  public async checkFlowHandlers(): Promise<void> {
+    return await this.activeTab.checkFlowHandlers();
   }
 
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +521,7 @@ export default class Hero extends AwaitedEventTarget<{
   ): Promise<TResult1 | TResult2> {
     try {
       this.then = null;
-      await getState(this).connection.getConnectedCoreSessionOrReject();
+      await this.#getCoreSessionOrReject();
       return onfulfilled(this);
     } catch (err) {
       if (onrejected) return onrejected(err);
@@ -514,6 +538,59 @@ export default class Hero extends AwaitedEventTarget<{
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
+  }
+
+  #getCoreSessionOrReject(): Promise<CoreSession> {
+    if (!this.#coreSession) {
+      this.#coreSession = this.#connectionToCore
+        .createSession(this.#options)
+        .then(session => {
+          if (session instanceof CoreSession) this.#initializeClientPlugins(this.#clientPlugins);
+          return session;
+        })
+        .catch(err => err);
+
+      const coreTab = this.#coreSession
+        .then(x => {
+          if (x instanceof Error) throw x;
+          return x.firstTab;
+        })
+        .catch(err => err);
+
+      this.#activeTab = createTab(this, coreTab);
+      this.#tabs = [this.#activeTab];
+    }
+
+    return this.#coreSession.then(coreSession => {
+      if (coreSession instanceof CoreSession) return coreSession;
+      throw coreSession;
+    });
+  }
+
+  #initializeClientPlugins(plugins: IClientPlugin[]): void {
+    for (const clientPlugin of plugins) {
+      if (clientPlugin.onHero) clientPlugin.onHero(this, this.#sendToActiveTab.bind(this));
+    }
+  }
+
+  async #sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
+    const coreSession = (await this.#coreSession) as CoreSession;
+    const coreTab = coreSession.tabsById.get(await this.#activeTab.tabId);
+    return coreTab.commandQueue.run('Tab.runPluginCommand', toPluginId, args);
+  }
+
+  async #refreshedTabs(): Promise<Tab[]> {
+    const session = await this.#getCoreSessionOrReject();
+    const coreTabs = await session.getTabs();
+    const tabIds = await Promise.all(this.#tabs.map(x => x.tabId));
+    for (const coreTab of coreTabs) {
+      const hasTab = tabIds.includes(coreTab.tabId);
+      if (!hasTab) {
+        const tab = createTab(this, Promise.resolve(coreTab));
+        this.#tabs.push(tab);
+      }
+    }
+    return this.#tabs;
   }
 }
 

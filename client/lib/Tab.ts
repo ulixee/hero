@@ -28,7 +28,7 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Hero, { IState as IHeroState, scriptInstance } from './Hero';
+import Hero, { scriptInstance } from './Hero';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -37,20 +37,12 @@ import FileChooser from './FileChooser';
 import DomStateHandler from './DomStateHandler';
 import DomState from './DomState';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
+import InternalProperties from './InternalProperties';
 
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
 >();
-const { getState, setState } = StateMachine<Tab, IState>();
-const heroState = StateMachine<Hero, IHeroState>();
-
-export interface IState {
-  hero: Hero;
-  coreTab: Promise<CoreTab>;
-  mainFrameEnvironment: FrameEnvironment;
-  frameEnvironments: FrameEnvironment[];
-}
 
 interface IEventType {
   resource: (resource: Resource | WebsocketResource) => void;
@@ -74,37 +66,42 @@ const propertyKeys: (keyof Tab)[] = [
 ];
 
 export default class Tab extends AwaitedEventTarget<IEventType> {
+  #hero: Hero;
+  #mainFrameEnvironment: FrameEnvironment;
+  #frameEnvironments: FrameEnvironment[];
+  #coreTab: Promise<CoreTab>;
+
   constructor(hero: Hero, coreTab: Promise<CoreTab>) {
     super(() => {
       return { target: coreTab };
     });
-    const mainFrameEnvironment = new FrameEnvironment(
+    this.#hero = hero;
+    this.#mainFrameEnvironment = new FrameEnvironment(
       hero,
       this,
       coreTab.then(x => x.mainFrameEnvironment),
     );
-    setState(this, {
-      hero,
+    this.#frameEnvironments = [this.#mainFrameEnvironment];
+    this.#coreTab = coreTab;
+    InternalProperties.set(this, {
       coreTab,
-      mainFrameEnvironment,
-      frameEnvironments: [mainFrameEnvironment],
     });
 
     async function sendToTab(pluginId: string, ...args: any[]): Promise<any> {
       return (await coreTab).commandQueue.run('Tab.runPluginCommand', pluginId, args);
     }
 
-    for (const clientPlugin of heroState.getState(hero).clientPlugins) {
+    for (const clientPlugin of InternalProperties.get(hero).clientPlugins) {
       if (clientPlugin.onTab) clientPlugin.onTab(hero, this, sendToTab);
     }
   }
 
   public get tabId(): Promise<number> {
-    return getCoreTab(this).then(x => x.tabId);
+    return this.#coreTab.then(x => x.tabId);
   }
 
   public get lastCommandId(): Promise<number> {
-    return getCoreTab(this).then(x => x.commandQueue.lastCommandId);
+    return this.#coreTab.then(x => x.commandQueue.lastCommandId);
   }
 
   public get url(): Promise<string> {
@@ -124,7 +121,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public get mainFrameEnvironment(): FrameEnvironment {
-    return getState(this).mainFrameEnvironment;
+    return this.#mainFrameEnvironment;
   }
 
   public get cookieStorage(): CookieStorage {
@@ -132,7 +129,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public get frameEnvironments(): Promise<FrameEnvironment[]> {
-    return getRefreshedFrameEnvironments(this);
+    return this.#getRefreshedFrameEnvironments();
   }
 
   public get document(): SuperDocument {
@@ -165,8 +162,8 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     const frameMeta = await elementCoreFrame.getChildFrameEnvironment(awaitedPath.toJSON());
     if (!frameMeta) return null;
 
-    const coreTab = await getCoreTab(this);
-    return await getOrCreateFrameEnvironment(this, coreTab.getCoreFrameForMeta(frameMeta));
+    const coreTab = await this.#coreTab;
+    return await this.#getOrCreateFrameEnvironment(coreTab.getCoreFrameForMeta(frameMeta));
   }
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
@@ -174,23 +171,23 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
   }
 
   public async goBack(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     return coreTab.goBack(options);
   }
 
   public async goForward(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     return coreTab.goForward(options);
   }
 
   public async reload(options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     const resource = await coreTab.reload(options);
     return createResource(Promise.resolve(coreTab), resource);
   }
@@ -217,12 +214,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     return coreTab.takeScreenshot(options);
   }
 
   public async waitForFileChooser(options?: IWaitForOptions): Promise<FileChooser> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     const prompt = await coreTab.waitForFileChooser(options);
     const coreFrame = coreTab.frameEnvironmentsById.get(prompt.frameId);
     return new FileChooser(Promise.resolve(coreFrame), prompt);
@@ -239,20 +236,35 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForState(
     state: IDomState | DomState,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
-  ): Promise<boolean> {
+  ): Promise<void> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     const handler = new DomStateHandler(state, coreTab, callSitePath);
-    return await handler.waitFor(options.timeoutMs);
+    await handler.waitFor(options.timeoutMs);
   }
 
-  public async ensureState(state: IDomState | DomState): Promise<boolean> {
+  public async checkState(state: IDomState | DomState): Promise<boolean> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     const handler = new DomStateHandler(state, coreTab, callSitePath);
     return await handler.check();
+  }
+
+  public async registerFlowHandler(
+    state: IDomState | DomState,
+    handlerFn: (error?: Error) => Promise<any>,
+  ): Promise<void> {
+    const callSitePath = scriptInstance.getScriptCallSite();
+
+    const coreTab = await this.#coreTab;
+    await coreTab.registerFlowHandler(state, handlerFn, callSitePath);
+  }
+
+  public async checkFlowHandlers(): Promise<void> {
+    const coreTab = await this.#coreTab;
+    await coreTab.checkFlowHandlers();
   }
 
   public waitForResource(
@@ -277,21 +289,16 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async waitForMillis(millis: number): Promise<void> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     await coreTab.waitForMillis(millis);
   }
 
   public focus(): Promise<void> {
-    const { hero, coreTab } = getState(this);
-    heroState.getState(hero).connection.activeTab = this;
-    return coreTab.then(x => x.focusTab());
+    return this.#hero.focusTab(this);
   }
 
-  public close(): Promise<void> {
-    const { hero, coreTab } = getState(this);
-    const { connection } = heroState.getState(hero);
-    connection.closeTab(this);
-    return coreTab.then(x => x.close());
+  public async close(): Promise<void> {
+    await this.#hero.closeTab(this);
   }
 
   public toJSON(): any {
@@ -304,48 +311,42 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
   }
-}
 
-async function getOrCreateFrameEnvironment(
-  tab: Tab,
-  coreFrame: CoreFrameEnvironment,
-): Promise<FrameEnvironment> {
-  const state = getState(tab);
-  const { frameEnvironments } = state;
+  async #getOrCreateFrameEnvironment(coreFrame: CoreFrameEnvironment): Promise<FrameEnvironment> {
+    const frameEnvironments = this.#frameEnvironments;
 
-  for (const frameEnvironment of frameEnvironments) {
-    const frameId = await frameEnvironment.frameId;
-    if (frameId === coreFrame.frameId) return frameEnvironment;
-  }
-  const frameEnvironment = new FrameEnvironment(state.hero, tab, Promise.resolve(coreFrame));
-  frameEnvironments.push(frameEnvironment);
-  return frameEnvironment;
-}
-
-async function getRefreshedFrameEnvironments(tab: Tab): Promise<FrameEnvironment[]> {
-  const state = getState(tab);
-  const { frameEnvironments } = state;
-  const coreTab = await state.coreTab;
-  const coreFrames = await coreTab.getCoreFrameEnvironments();
-
-  const newFrameIds = coreFrames.map(x => x.frameId);
-
-  for (const frameEnvironment of frameEnvironments) {
-    const id = await frameEnvironment.frameId;
-    // remove frames that are gone
-    if (!newFrameIds.includes(id)) {
-      const idx = frameEnvironments.indexOf(frameEnvironment);
-      frameEnvironments.splice(idx, 1);
+    for (const frameEnvironment of frameEnvironments) {
+      const frameId = await frameEnvironment.frameId;
+      if (frameId === coreFrame.frameId) return frameEnvironment;
     }
+    const frameEnvironment = new FrameEnvironment(this.#hero, this, Promise.resolve(coreFrame));
+    frameEnvironments.push(frameEnvironment);
+    return frameEnvironment;
   }
 
-  await Promise.all(coreFrames.map(x => getOrCreateFrameEnvironment(tab, x)));
+  async #getRefreshedFrameEnvironments(): Promise<FrameEnvironment[]> {
+    const coreTab = await this.#coreTab;
+    const coreFrames = await coreTab.getCoreFrameEnvironments();
 
-  return frameEnvironments;
+    const newFrameIds = coreFrames.map(x => x.frameId);
+
+    for (const frameEnvironment of this.#frameEnvironments) {
+      const id = await frameEnvironment.frameId;
+      // remove frames that are gone
+      if (!newFrameIds.includes(id)) {
+        const idx = this.#frameEnvironments.indexOf(frameEnvironment);
+        this.#frameEnvironments.splice(idx, 1);
+      }
+    }
+
+    await Promise.all(coreFrames.map(x => this.#getOrCreateFrameEnvironment(x)));
+
+    return this.#frameEnvironments;
+  }
 }
 
 export function getCoreTab(tab: Tab): Promise<CoreTab> {
-  return getState(tab).coreTab.then(x => {
+  return InternalProperties.get(tab).coreTab.then(x => {
     if (x instanceof Error) throw x;
     return x;
   });

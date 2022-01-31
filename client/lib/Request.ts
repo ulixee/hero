@@ -4,12 +4,11 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
+import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 
-interface IState {
+interface IState extends IAwaitedOptions {
   awaitedPath: AwaitedPath;
   nodePointer: INodePointer;
-  remoteInitializerPromise: Promise<void>;
-  coreFrame: Promise<CoreFrameEnvironment>;
 }
 
 const { getState, setState } = StateMachine<FetchRequest, IState>();

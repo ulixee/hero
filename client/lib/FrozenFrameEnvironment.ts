@@ -4,12 +4,10 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import {
   createCSSStyleDeclaration,
   createResponse,
-  createStorage,
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
@@ -23,58 +21,60 @@ import {
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
-import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Hero from './Hero';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
 import * as AwaitedHandler from './SetupAwaitedHandler';
+import InternalProperties from './InternalProperties';
 
-export const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
-const awaitedPathState = StateMachine<
+const stateMachine = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
 >();
-
-export interface IState {
-  hero: Hero;
-  tab: FrozenTab;
-  coreFrame: Promise<CoreFrameEnvironment>;
-  prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
-}
 
 const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
   'frameId',
   'url',
   'name',
   'parentFrameId',
-  'cookieStorage',
-  'localStorage',
-  'sessionStorage',
   'document',
   'Request',
 ];
 
 export default class FrozenFrameEnvironment {
+  #hero: Hero;
+  #tab: FrozenTab;
+  #prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
+  #coreFrame: Promise<CoreFrameEnvironment>;
+
   constructor(
     hero: Hero,
     tab: FrozenTab,
     coreFrame: Promise<CoreFrameEnvironment>,
     prefetchedJsPaths: Promise<IJsPathResult[]>,
   ) {
-    setState(this, {
-      hero,
-      tab,
-      coreFrame,
-      prefetchedJsPaths: prefetchedJsPaths.then(x => {
-        const resultMap = new Map<string, IJsPathResult>();
-        for (let i = 0; i < x.length; i += 1) {
-          const result = x[i];
-          result.index = i;
-          resultMap.set(JSON.stringify(result.jsPath), result);
-        }
-        return resultMap;
-      }),
+    this.#hero = hero;
+    this.#tab = tab;
+    this.#coreFrame = coreFrame;
+    this.#prefetchedJsPaths = prefetchedJsPaths.then(x => {
+      const resultMap = new Map<string, IJsPathResult>();
+      for (let i = 0; i < x.length; i += 1) {
+        const result = x[i];
+        result.index = i;
+        resultMap.set(JSON.stringify(result.jsPath), result);
+      }
+      return resultMap;
     });
+    InternalProperties.set(this, { coreFrame });
+  }
+
+  get #awaitedOptions(): IAwaitedOptions & {
+    prefetchedJsPaths?: Promise<Map<string, IJsPathResult>>;
+  } {
+    return {
+      coreFrame: this.#coreFrame,
+      prefetchedJsPaths: this.#prefetchedJsPaths,
+    };
   }
 
   public get isMainFrame(): Promise<boolean> {
@@ -82,60 +82,39 @@ export default class FrozenFrameEnvironment {
   }
 
   public get frameId(): Promise<number> {
-    return getCoreFrameEnvironment(this).then(x => x.frameId);
+    return this.#coreFrame.then(x => x.frameId);
   }
 
   public get url(): Promise<string> {
-    return getCoreFrameEnvironment(this).then(x => x.getUrl());
+    return this.#coreFrame.then(x => x.getUrl());
   }
 
   public get name(): Promise<string> {
-    return getCoreFrameEnvironment(this)
-      .then(x => x.getFrameMeta())
-      .then(x => x.name);
+    return this.#coreFrame.then(x => x.getFrameMeta()).then(x => x.name);
   }
 
   public get parentFrameId(): Promise<number | null> {
-    return getCoreFrameEnvironment(this)
-      .then(x => x.getFrameMeta())
-      .then(x => x.parentFrameId);
-  }
-
-  public get cookieStorage(): CookieStorage {
-    return createCookieStorage(getCoreFrameEnvironment(this));
+    return this.#coreFrame.then(x => x.getFrameMeta()).then(x => x.parentFrameId);
   }
 
   public get document(): SuperDocument {
     const awaitedPath = new AwaitedPath(null, 'document');
-    const awaitedOptions = { ...getState(this) };
-    return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
-  }
-
-  public get localStorage(): Storage {
-    const awaitedPath = new AwaitedPath(null, 'localStorage');
-    const awaitedOptions = { ...getState(this) };
-    return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
-  }
-
-  public get sessionStorage(): Storage {
-    const awaitedPath = new AwaitedPath(null, 'sessionStorage');
-    const awaitedOptions = { ...getState(this) };
-    return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
+    return createSuperDocument<IAwaitedOptions>(awaitedPath, this.#awaitedOptions) as SuperDocument;
   }
 
   public get Request(): typeof Request {
-    return RequestGenerator(getCoreFrameEnvironment(this));
+    return RequestGenerator(this.#coreFrame);
   }
 
   // METHODS
 
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     const requestInput = await getRequestIdOrUrl(request);
-    const coreFrame = await getCoreFrameEnvironment(this);
+    const coreFrame = await this.#coreFrame;
     const nodePointer = await coreFrame.fetch(requestInput, init);
 
     const awaitedPath = new AwaitedPath(null).withNodeId(null, nodePointer.id);
-    return createResponse(awaitedPath, { ...getState(this) });
+    return createResponse(awaitedPath, this.#awaitedOptions);
   }
 
   public async getComputedStyle(
@@ -143,7 +122,7 @@ export default class FrozenFrameEnvironment {
     pseudoElement?: string,
   ): Promise<CSSStyleDeclaration & { [style: string]: string }> {
     const { awaitedPath, coreFrame, awaitedOptions } = await AwaitedHandler.getAwaitedState(
-      awaitedPathState,
+      stateMachine,
       element,
     );
     const newPath = awaitedPath.addMethod(element, getComputedStyleFnName, pseudoElement);
@@ -154,7 +133,7 @@ export default class FrozenFrameEnvironment {
     );
     const declaration = createCSSStyleDeclaration<IAwaitedOptions>(newPath, awaitedOptions);
     const attributes = AwaitedHandler.cleanResult(
-      awaitedPathState,
+      stateMachine,
       declaration,
       result,
       new Error().stack,
@@ -166,7 +145,7 @@ export default class FrozenFrameEnvironment {
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
     if (!node) return { isVisible: false, nodeExists: false, isClickable: false };
     return await AwaitedHandler.delegate.runMethod<INodeVisibility, INodeIsolate>(
-      awaitedPathState,
+      stateMachine,
       node,
       getComputedVisibilityFnName,
       [],
@@ -179,7 +158,7 @@ export default class FrozenFrameEnvironment {
   }
 
   public async getJsValue<T>(path: string): Promise<T> {
-    const coreFrame = await getCoreFrameEnvironment(this);
+    const coreFrame = await this.#coreFrame;
     return coreFrame.getJsValue<T>(path);
   }
 
@@ -193,14 +172,4 @@ export default class FrozenFrameEnvironment {
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
   }
-}
-
-export function getFrameState(object: any): IState {
-  return getState(object);
-}
-
-export function getCoreFrameEnvironment(
-  frameEnvironment: FrozenFrameEnvironment,
-): Promise<CoreFrameEnvironment> {
-  return getState(frameEnvironment).coreFrame;
 }

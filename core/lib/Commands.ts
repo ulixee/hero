@@ -24,7 +24,15 @@ export default class Commands {
 
   public requiresScriptRestart = false;
 
-  public nextCommandMeta: { commandId: number; startDate: Date; sendDate: Date; callsite?: string };
+  public nextCommandMeta: {
+    commandId: number;
+    startDate: Date;
+    sendDate: Date;
+    callsite?: string;
+    retryNumber?: number;
+    activeFlowHandlerId?: number;
+  };
+
   private eventLogByRun = new Map<number, IEventRecord[]>();
   private listenersById = new Map<string, IRemoteListenerDetails>();
   private listenerIdCounter = 0;
@@ -43,18 +51,22 @@ export default class Commands {
       tabId,
       frameId,
       name: commandName,
+      retryNumber: 0,
       args: args.length ? TypeSerializer.stringify(args) : undefined,
       run: this.resumeCounter,
       startNavigationId,
     } as ICommandMeta;
 
     if (this.nextCommandMeta) {
-      const { commandId, sendDate, startDate, callsite } = this.nextCommandMeta;
+      const { commandId, sendDate, startDate, callsite, retryNumber, activeFlowHandlerId } =
+        this.nextCommandMeta;
       this.nextCommandMeta = null;
       if (commandId) commandMeta.id = commandId;
       commandMeta.clientSendDate = sendDate?.getTime();
       commandMeta.clientStartDate = startDate?.getTime();
       commandMeta.callsite = callsite;
+      commandMeta.retryNumber = retryNumber;
+      commandMeta.activeFlowHandlerId = activeFlowHandlerId;
     }
     return commandMeta;
   }

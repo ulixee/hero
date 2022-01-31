@@ -1,11 +1,4 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
 import CoreTab from './CoreTab';
-
-const { getState, setState } = StateMachine<Dialog, IState>();
-
-interface IState {
-  coreTab: Promise<CoreTab>;
-}
 
 export default class Dialog {
   url: string;
@@ -14,15 +7,23 @@ export default class Dialog {
   hasBrowserHandler: boolean;
   defaultPrompt?: string;
 
+  #coreTab: Promise<CoreTab>;
+
+  constructor(coreTab: Promise<CoreTab>, data: Omit<Dialog, 'dismiss'>) {
+    this.#coreTab = coreTab;
+    this.url = data.url;
+    this.message = data.message;
+    this.type = data.type;
+    this.hasBrowserHandler = data.hasBrowserHandler;
+    this.defaultPrompt = data.defaultPrompt;
+  }
+
   async dismiss(accept: boolean, promptText?: string): Promise<void> {
-    const coreTab = await getState(this).coreTab;
+    const coreTab = await this.#coreTab;
     return coreTab.dismissDialog(accept, promptText);
   }
 }
 
 export function createDialog(coreTab: Promise<CoreTab>, data: Omit<Dialog, 'dismiss'>): Dialog {
-  const dialog = new Dialog();
-  Object.assign(dialog, data);
-  setState(dialog, { coreTab });
-  return dialog;
+  return new Dialog(coreTab, data);
 }

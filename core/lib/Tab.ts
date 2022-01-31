@@ -53,6 +53,7 @@ import { IMouseEventRecord } from '../models/MouseEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
 const { log } = Log(module);
 
@@ -189,6 +190,7 @@ export default class Tab
       this.assert,
       this.takeScreenshot,
       this.collectResource,
+      this.registerFlowHandler,
       this.waitForFileChooser,
       this.waitForMillis,
       this.waitForNewTab,
@@ -779,6 +781,20 @@ export default class Tab
     );
   }
 
+  public registerFlowHandler(
+    name: string,
+    id: number,
+    callsitePath: ISourceCodeLocation,
+  ): Promise<void> {
+    this.session.db.flowHandlers.insert({
+      name,
+      id,
+      tabId: this.id,
+      callsite: JSON.stringify(callsitePath),
+    });
+    return Promise.resolve();
+  }
+
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async assert(batchId: string, domStateIdJsPath: IJsPath): Promise<boolean> {
@@ -792,7 +808,7 @@ export default class Tab
     jsPath?: IJsPath,
     options?: any,
   ): Promise<{ listenerId: string }> {
-    const details = this.session.commands.observeRemoteEvents(type, emitFn, jsPath, this.id);
+    const listener = this.session.commands.observeRemoteEvents(type, emitFn, jsPath, this.id);
 
     if (jsPath) {
       if (type === 'message') {
@@ -802,24 +818,24 @@ export default class Tab
         }
         // need to give client time to register function sending events
         process.nextTick(() =>
-          this.session.websocketMessages.listen(Number(resourceId), details.listenFn),
+          this.session.websocketMessages.listen(Number(resourceId), listener.listenFn),
         );
       }
 
       if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
-        const listener = this.addDomStateListener(id, options);
-        listener.on('updated', details.listenFn);
+        const domStateListener = this.addDomStateListener(id, options);
+        domStateListener.on('updated', listener.listenFn);
       }
     } else {
-      this.on(type as any, details.listenFn);
+      this.on(type as any, listener.listenFn);
     }
-    return Promise.resolve({ listenerId: details.id });
+    return Promise.resolve({ listenerId: listener.id });
   }
 
   public removeRemoteEventListener(listenerId: string, options?: any): Promise<any> {
-    const details = this.session.commands.getRemoteEventListener(listenerId);
-    const { listenFn, type, jsPath } = details;
+    const listener = this.session.commands.getRemoteEventListener(listenerId);
+    const { listenFn, type, jsPath } = listener;
     if (jsPath) {
       if (type === 'message') {
         const [domain, resourceId] = jsPath;
@@ -831,8 +847,7 @@ export default class Tab
 
       if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
-        const listener = this.domStateListenersByJsPathId[id];
-        if (listener) listener.stop(options);
+        this.domStateListenersByJsPathId[id]?.stop(options);
       }
     } else {
       this.off(type as any, listenFn);

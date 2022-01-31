@@ -1,16 +1,16 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { IState } from '@ulixee/hero/lib/Hero';
 import Hero from '../index';
-import StateMachine from 'awaited-dom/base/StateMachine';
 import CoreSession from '@ulixee/hero/lib/CoreSession';
-import IAwaitedOptions from '@ulixee/hero/interfaces/IAwaitedOptions';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
 import Core from '@ulixee/hero-core/index';
 import ConnectionToLocalCore from '../lib/ConnectionToLocalCore';
+import InternalProperties from '@ulixee/hero/lib/InternalProperties';
 
 let koaServer: ITestKoaServer;
+const coreSessionDetachSpy = jest.spyOn(CoreSession.prototype, 'detachTab');
+
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
 });
@@ -71,6 +71,7 @@ describe('basic Detach tests', () => {
   });
 
   it('can handle jsPaths when element not present', async () => {
+    coreSessionDetachSpy.mockClear();
     let run = 0;
     koaServer.get('/detach-notthere', ctx => {
       run += 1;
@@ -141,6 +142,7 @@ describe('basic Detach tests', () => {
     await connection.connect();
     const sendRequest = connection.sendRequest.bind(connection);
     const sendRequestSpy = jest.spyOn(connection, 'sendRequest');
+    coreSessionDetachSpy.mockClear();
 
     {
       const hero = await new Hero({ connectionToCore: connection });
@@ -209,8 +211,7 @@ describe('basic Detach tests', () => {
 
       const frameSpy = jest.spyOn(FrameEnvironment.prototype, 'recordDetachedJsPath');
 
-      const frameState = StateMachine<any, IAwaitedOptions>();
-      const coreFrame = await frameState.getState(frozenTab.mainFrameEnvironment).coreFrame;
+      const coreFrame = await InternalProperties.get(frozenTab.mainFrameEnvironment).coreFrame;
       for (let i = 0; i < 1001; i += 1) {
         coreFrame.recordDetachedJsPath(1, new Date(), new Date());
       }
@@ -243,13 +244,8 @@ async function openBrowser(path: string) {
   return hero;
 }
 
-const { getState } = StateMachine<any, IState>();
-async function mockDetach(agent: Partial<Hero>, callsitePath = 'path1') {
-  const coreSession = await getState(agent).connection.getConnectedCoreSessionOrReject();
-  const origDetach = coreSession.detachTab;
-
-  const interceptDetach = jest.spyOn(CoreSession.prototype, 'detachTab');
-  interceptDetach.mockImplementationOnce((tab, callSitePath: string, key?: string) => {
-    return origDetach.call(coreSession, tab, callsitePath, key);
+async function mockDetach(hero: Partial<Hero>, callsitePath = 'path1') {
+  coreSessionDetachSpy.mockImplementationOnce(function (tab, _: string, key?: string) {
+    return this.detachTab(tab, callsitePath, key);
   });
 }

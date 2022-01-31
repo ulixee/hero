@@ -4,6 +4,7 @@ export default interface ICommandMeta {
   frameId: number;
   name: string;
   wasPrefetched?: boolean;
+  retryNumber: number;
   args?: string;
   clientStartDate?: number;
   clientSendDate?: number;
@@ -16,4 +17,5 @@ export default interface ICommandMeta {
   reusedCommandFromRun?: number;
   startNavigationId?: number;
   endNavigationId?: number;
+  activeFlowHandlerId?: number;
 }
