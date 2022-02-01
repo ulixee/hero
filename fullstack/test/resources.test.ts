@@ -102,6 +102,20 @@ describe('basic resource tests', () => {
     }
   });
 
+  it('can find resources', async () => {
+    const exampleUrl = `${koaServer.baseUrl}/resources-test`;
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(exampleUrl);
+    await hero.waitForPaintingStable();
+    const elem = hero.document.querySelector('a');
+    await hero.click(elem);
+
+    await hero.waitForResource({ url: '/ajax?counter' });
+    await expect(hero.findResource({ url: '/ajax?counter=0' })).resolves.toBeTruthy();
+  });
+
   it('cancels a pending resource on hero close', async () => {
     const exampleUrl = `${koaServer.baseUrl}/resources-test`;
     const hero = new Hero();

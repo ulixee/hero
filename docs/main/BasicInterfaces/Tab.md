@@ -170,6 +170,23 @@ Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corr
 
 Alias for [FrameEnvironment.getFrameEnvironment](/docs/basic-interfaces/frame-environment#get-frame-environment)
 
+### tab.findResource*(filter, options)* {#find-resource}
+
+Find a specific image, stylesheet, script, websocket or other resource that has been received. This function will return the most recently received resource first.
+
+#### **Arguments**:
+
+- filter `object` Match on "all" of the provided filters:
+  - url `string | RegExp` A string or regex to match a url.
+  - type [`ResourceType`](/docs/advanced/resource#type) A resource type to filter by.
+  - httpResource `object`
+    - statusCode `number` Http status code to filter by.
+    - method `string` Http request method to filter by.
+- options `object` Accepts any of the following:
+  - sinceCommandId `number`. A `commandId` from which to look for resources. Defaults to the last Http Navigation performed on the tab.
+
+#### **Returns**: [`Promise<Resource>`](/docs/advanced/resource)
+
 ### tab.focus*()* {#focus}
 
 Make this tab the `activeTab` within a browser, which directs many Hero methods to this tab.

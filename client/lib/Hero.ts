@@ -64,6 +64,7 @@ import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import InternalProperties from './InternalProperties';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -250,6 +251,13 @@ export default class Hero extends AwaitedEventTarget<{
     }
     const coreTab = await getCoreTab(tab);
     await coreTab.close();
+  }
+
+  public async findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<Resource> {
+    return await this.activeTab.findResource(filter, options);
   }
 
   public async getCollectedResources(

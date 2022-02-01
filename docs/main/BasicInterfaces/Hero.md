@@ -65,7 +65,7 @@ const Hero = require('@ulixee/hero');
 (async () => {
   // connection established here
   const hero = await new Hero({
-    userAgent: '~ mac 13.1 & chrome > 14'
+    userAgent: '~ mac 13.1 & chrome > 14',
   });
 })();
 ```
@@ -146,9 +146,9 @@ NOTE: if using the default hero, this object will be populated with command line
 
 ### hero.isAllContentLoaded {#is-all-content-loaded}
 
-`True` if the "load" event has triggered on the active tab. 
+`True` if the "load" event has triggered on the active tab.
 
-NOTE: this event does not fire in some circumstances (such as a long-loading asset). You frequently just want to know if the page has loaded for a user (see [isPaintingStable](#is-painting-stable)). 
+NOTE: this event does not fire in some circumstances (such as a long-loading asset). You frequently just want to know if the page has loaded for a user (see [isPaintingStable](#is-painting-stable)).
 
 Wait for this event to trigger with [Tab.waitForLoad(AllContentLoaded)](/docs/basic-interfaces/tab#wait-for-load).
 
@@ -159,7 +159,7 @@ Alias for [Tab.isAllContentLoaded](/docs/basic-interfaces/tab#is-all-content-loa
 ### hero.isDomContentLoaded {#is-dom-content-loaded}
 
 `True` if the "DOMContentLoaded" event has triggered on the active tab.
- 
+
 Wait for this event to trigger with [Tab.waitForLoad(DomContentLoaded)](/docs/basic-interfaces/tab#wait-for-load)
 
 #### **Type**: `Promise<boolean>`
@@ -168,7 +168,7 @@ Alias for [Tab.isDomContentLoaded](/docs/basic-interfaces/tab#is-dom-content-loa
 
 ### hero.isPaintingStable {#is-painting-stable}
 
-`True` if the page has loaded the main content above the fold. Works on javascript-rendered pages. 
+`True` if the page has loaded the main content above the fold. Works on javascript-rendered pages.
 
 Wait for this event to trigger with [Hero.waitForPaintingStable()](#wait-for-painting-stable)
 
@@ -231,13 +231,14 @@ const Hero = require('@ulixee/hero');
   const document = hero.document;
 
   for (const link of await document.querySelectorAll('a')) {
-    hero.output.push({ // will display in Replay UI.
+    hero.output.push({
+      // will display in Replay UI.
       text: await link.textContent,
       href: await link.href,
     });
   }
-   
-  console.log(hero.output);  
+
+  console.log(hero.output);
   await hero.close();
 })();
 ```
@@ -429,11 +430,11 @@ Refer to the [Interactions page](/docs/basic-interfaces/interactions) for detail
 
 ### hero.use*(plugin)*
 
-Add a plugin to the current instance. This must be called before any other hero methods. 
+Add a plugin to the current instance. This must be called before any other hero methods.
 
 #### **Arguments**:
 
-- plugin `ClientPlugin` | `array` | `object` | `string` 
+- plugin `ClientPlugin` | `array` | `object` | `string`
 
 #### **Returns**: `this` The same Hero instance (for optional chaining)
 
@@ -451,6 +452,7 @@ hero.use('@ulixee/tattle-plugin');
 The following three examples all work:
 
 Use an already-imported plugin:
+
 ```javascript
 import Hero from '@ulixee/hero';
 import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
@@ -460,6 +462,7 @@ hero.use(ExecuteJsPlugin);
 ```
 
 Use an NPM package name (if it's publicly available):
+
 ```javascript
 import Hero from '@ulixee/hero';
 
@@ -468,6 +471,7 @@ hero.use('@ulixee/execute-js-plugin');
 ```
 
 Use an absolute path to file that exports one or more plugins:
+
 ```javascript
 import Hero from '@ulixee/hero';
 
@@ -504,6 +508,10 @@ Hero instances have aliases to all top-level Tab methods. They will be routed to
 ### hero.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
 Alias for [Tab.fetch()](/docs/basic-interfaces/tab#fetch)
+
+### hero.findResource*(filter, options)* {#find-resource}
+
+Alias for [Tab.findResource()](/docs/basic-interfaces/tab#find-resource)
 
 ### hero.getFrameEnvironment*(frameElement)* {#get-frame-environment}
 

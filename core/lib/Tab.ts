@@ -27,11 +27,11 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
-import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
@@ -182,6 +182,7 @@ export default class Tab
     this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
       this.focus,
       this.dismissDialog,
+      this.findResource,
       this.getFrameEnvironments,
       this.goto,
       this.goBack,
@@ -370,17 +371,23 @@ export default class Tab
     }
   }
 
-  public findResource(filter: IResourceFilterProperties): IResourceMeta {
+  public findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<IResourceMeta> {
     // escape query string ? so it can run as regex
     if (typeof filter.url === 'string') {
       filter.url = stringToRegex(filter.url);
     }
-    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
-      if (this.isResourceFilterMatch(resourceMeta, filter)) {
-        return resourceMeta;
+    const sinceCommandId =
+      options?.sinceCommandId ?? this.navigations.lastHttpNavigationRequest?.startCommandId;
+    // find latest resource
+    for (const resourceMeta of this.session.resources.getForTab(this.id).reverse()) {
+      if (this.isResourceFilterMatch(resourceMeta, filter, sinceCommandId)) {
+        return Promise.resolve(resourceMeta);
       }
     }
-    return null;
+    return Promise.resolve(null);
   }
 
   public findStorageChange(

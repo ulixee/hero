@@ -60,9 +60,9 @@ export class JsPath {
     if (typeof jsPath[0] === 'number') {
       const paths = this.getJsPathHistoryForNode(jsPath[0]);
       for (const path of paths) {
-        const result = await this.runJsPath<any>('exec', path.jsPath, containerOffset);
+        const result = await this.getNodePointer(path.jsPath, containerOffset);
         const nodeId = result.nodePointer?.id;
-        if (nodeId !== path.nodeId) {
+        if (nodeId && nodeId !== path.nodeId) {
           this.logger.info('JsPath.nodeRedirectFound', {
             sourceNodeId: path.nodeId,
             newNodeId: nodeId,

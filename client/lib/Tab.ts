@@ -21,6 +21,7 @@ import {
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
@@ -149,6 +150,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   // METHODS
+
+  public findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<Resource> {
+    return Resource.findLatest(this, filter, options);
+  }
 
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     return await this.mainFrameEnvironment.fetch(request, init);

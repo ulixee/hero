@@ -24,6 +24,7 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import DomState from './DomState';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -169,6 +170,13 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async goForward(options: { timeoutMs?: number }): Promise<string> {
     return await this.commandQueue.run('Tab.goForward', options);
+  }
+
+  public async findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId?: number },
+  ): Promise<IResourceMeta> {
+    return await this.commandQueue.run('Tab.findResource', filter, options);
   }
 
   public async reload(options: { timeoutMs?: number }): Promise<IResourceMeta> {

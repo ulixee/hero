@@ -9,7 +9,7 @@ import DomChangesTable, {
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
-import IResourceFilterProperties from '@ulixee/hero-core/interfaces/IResourceFilterProperties';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
