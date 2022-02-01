@@ -1,9 +1,7 @@
 import * as Util from 'util';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
@@ -11,57 +9,38 @@ import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import CoreTab from './CoreTab';
-import Resource, { createResource } from './Resource';
-import CookieStorage from './CookieStorage';
 import Hero from './Hero';
 import FrozenFrameEnvironment from './FrozenFrameEnvironment';
 
-const { getState, setState } = StateMachine<FrozenTab, IState>();
-
-export interface IState {
-  hero: Hero;
-  coreTab: Promise<CoreTab>;
-  mainFrameEnvironment: FrozenFrameEnvironment;
-  frameEnvironments: FrozenFrameEnvironment[];
-}
-
 const propertyKeys: (keyof FrozenTab)[] = [
-  'lastCommandId',
   'tabId',
   'url',
-  'cookieStorage',
-  'localStorage',
-  'sessionStorage',
   'document',
   'mainFrameEnvironment',
   'Request',
 ];
 
 export default class FrozenTab {
+  #hero: Hero;
+  #coreTab: Promise<CoreTab>;
+  #mainFrameEnvironment: FrozenFrameEnvironment;
+
   constructor(
     hero: Hero,
     tabAndJsPathsPromise: Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }>,
   ) {
-    const mainFrameEnvironment = new FrozenFrameEnvironment(
+    this.#mainFrameEnvironment = new FrozenFrameEnvironment(
       hero,
       this,
       tabAndJsPathsPromise.then(x => x.coreTab).then(x => x.mainFrameEnvironment),
       tabAndJsPathsPromise.then(x => x.prefetchedJsPaths),
     );
-    setState(this, {
-      hero,
-      coreTab: tabAndJsPathsPromise.then(x => x.coreTab),
-      mainFrameEnvironment,
-      frameEnvironments: [mainFrameEnvironment],
-    });
+    this.#hero = hero;
+    this.#coreTab = tabAndJsPathsPromise.then(x => x.coreTab);
   }
 
   public get tabId(): Promise<number> {
-    return getCoreTab(this).then(x => x.tabId);
-  }
-
-  public get lastCommandId(): Promise<number> {
-    return getCoreTab(this).then(x => x.commandQueue.lastCommandId);
+    return this.#coreTab.then(x => x.tabId);
   }
 
   public get url(): Promise<string> {
@@ -69,23 +48,11 @@ export default class FrozenTab {
   }
 
   public get mainFrameEnvironment(): FrozenFrameEnvironment {
-    return getState(this).mainFrameEnvironment;
-  }
-
-  public get cookieStorage(): CookieStorage {
-    return this.mainFrameEnvironment.cookieStorage;
+    return this.#mainFrameEnvironment;
   }
 
   public get document(): SuperDocument {
     return this.mainFrameEnvironment.document;
-  }
-
-  public get localStorage(): Storage {
-    return this.mainFrameEnvironment.localStorage;
-  }
-
-  public get sessionStorage(): Storage {
-    return this.mainFrameEnvironment.sessionStorage;
   }
 
   public get Request(): typeof Request {
@@ -105,28 +72,6 @@ export default class FrozenTab {
     return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
-  public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await getCoreTab(this);
-    const resource = await coreTab.goto(href, options);
-    return createResource(Promise.resolve(coreTab), resource);
-  }
-
-  public async goBack(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await getCoreTab(this);
-    return coreTab.goBack(options);
-  }
-
-  public async goForward(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await getCoreTab(this);
-    return coreTab.goForward(options);
-  }
-
-  public async reload(options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await getCoreTab(this);
-    const resource = await coreTab.reload(options);
-    return createResource(Promise.resolve(coreTab), resource);
-  }
-
   public async getJsValue<T>(path: string): Promise<T> {
     return await this.mainFrameEnvironment.getJsValue(path);
   }
@@ -141,12 +86,12 @@ export default class FrozenTab {
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
-    const coreTab = await getCoreTab(this);
+    const coreTab = await this.#coreTab;
     return coreTab.takeScreenshot(options);
   }
 
   public close(): Promise<void> {
-    return getCoreTab(this).then(x => x.close());
+    return this.#coreTab.then(x => x.close());
   }
 
   public toJSON(): any {
@@ -159,8 +104,4 @@ export default class FrozenTab {
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
   }
-}
-
-export function getCoreTab(tab: FrozenTab): Promise<CoreTab> {
-  return getState(tab).coreTab;
 }

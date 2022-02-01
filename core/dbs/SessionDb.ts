@@ -27,6 +27,7 @@ import AwaitedEventsTable from '../models/AwaitedEventsTable';
 import CollectedFragmentsTable from '../models/CollectedFragmentsTable';
 import CollectedResourcesTable from '../models/CollectedResourcesTable';
 import OutputTable from '../models/OutputTable';
+import FlowHandlersTable from '../models/FlowHandlersTable';
 
 const { log } = Log(module);
 
@@ -53,6 +54,7 @@ export default class SessionDb {
   public readonly domChanges: DomChangesTable;
   public readonly collectedFragments: CollectedFragmentsTable;
   public readonly collectedResources: CollectedResourcesTable;
+  public readonly flowHandlers: FlowHandlersTable;
   public readonly pageLogs: PageLogsTable;
   public readonly sessionLogs: SessionLogsTable;
   public readonly session: SessionTable;
@@ -95,6 +97,7 @@ export default class SessionDb {
     this.domChanges = new DomChangesTable(this.db);
     this.collectedFragments = new CollectedFragmentsTable(this.db);
     this.collectedResources = new CollectedResourcesTable(this.db);
+    this.flowHandlers = new FlowHandlersTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
     this.session = new SessionTable(this.db);
     this.mouseEvents = new MouseEventsTable(this.db);
@@ -119,6 +122,7 @@ export default class SessionDb {
       this.domChanges,
       this.collectedFragments,
       this.collectedResources,
+      this.flowHandlers,
       this.pageLogs,
       this.session,
       this.mouseEvents,

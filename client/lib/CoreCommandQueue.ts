@@ -7,8 +7,11 @@ import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { scriptInstance } from './Hero';
+import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 export default class CoreCommandQueue {
+  public static maxCommandRetries = 3;
+
   public mode: ISessionCreateOptions['mode'];
   public get lastCommandId(): number {
     return this.commandCounter?.lastCommandId;
@@ -26,10 +29,17 @@ export default class CoreCommandQueue {
     queue: Queue;
     commandsToRecord: ICoreRequestPayload['recordCommands'];
     interceptFn?: (meta: ISessionMeta, command: string, ...args: any[]) => any;
+    interceptQueue?: Queue;
     lastCommand?: Pick<
       ICoreRequestPayload,
       'command' | 'commandId' | 'args' | 'callsite' | 'meta' | 'startDate'
     >;
+    commandRetryHandlerFns: ((
+      command: CoreCommandQueue['internalState']['lastCommand'],
+      error: Error,
+    ) => Promise<boolean>)[];
+    commandMetadata?: Record<string, any>;
+    isRetrying: boolean;
   };
 
   private readonly commandCounter?: ICommandCounter;
@@ -67,13 +77,35 @@ export default class CoreCommandQueue {
     this.internalState = internalState ?? {
       queue: new Queue('CORE COMMANDS', 1),
       commandsToRecord: [],
+      commandRetryHandlerFns: [],
+      isRetrying: false,
     };
   }
 
-  public intercept(
-    interceptFn: (meta: ISessionMeta, command: string, ...args: any[]) => any,
+  public setCommandMetadata(metadata: Record<string, any>): void {
+    this.internalState.commandMetadata = metadata;
+  }
+
+  public registerCommandRetryHandlerFn(
+    handlerFn: CoreCommandQueue['internalState']['commandRetryHandlerFns'][0],
   ): void {
-    this.internalState.interceptFn = interceptFn;
+    this.internalState.commandRetryHandlerFns.push(handlerFn);
+  }
+
+  public async intercept<T>(
+    interceptCommandFn: (meta: ISessionMeta, command: string, ...args: any[]) => any,
+    runFn: () => Promise<T>,
+  ): Promise<T> {
+    this.internalState.interceptQueue ??= new Queue();
+
+    return await this.internalState.interceptQueue.run(async () => {
+      this.internalState.interceptFn = interceptCommandFn;
+      try {
+        return await runFn();
+      } finally {
+        this.internalState.interceptFn = undefined;
+      }
+    });
   }
 
   public record(command: { command: string; args: any[]; commandId?: number }): void {
@@ -145,35 +177,39 @@ export default class CoreCommandQueue {
       return Promise.resolve(result as T);
     }
 
-    const startDate = new Date();
     const commandId = this.nextCommandId;
+
+    const commandPayload = {
+      command,
+      args,
+      startDate: new Date(),
+      commandId,
+      callsite,
+      ...(this.internalState.commandMetadata ?? {}),
+    };
 
     return this.internalQueue
       .run<T>(async () => {
         const recordCommands = [...this.internalState.commandsToRecord];
         this.internalState.commandsToRecord.length = 0;
+
         this.internalState.lastCommand = {
           meta: this.meta,
-          command,
-          args,
-          startDate,
-          commandId,
-          callsite,
+          ...commandPayload,
         };
 
         this.commandCounter?.emitter.emit('command', command, commandId, args);
 
-        return await this.sendRequest<T>({
-          command,
-          args,
-          startDate,
-          commandId,
-          recordCommands,
-          callsite,
-        });
+        return await this.sendRequest<T>({ ...commandPayload, recordCommands });
       })
       .catch(error => {
-        error.stack += `${this.sessionMarker}`;
+        if (error instanceof DisconnectedFromCoreError) throw error;
+        return this.retryCommand<T>(commandPayload, error);
+      })
+      .catch(error => {
+        if (!error.stack.includes(this.sessionMarker)) {
+          error.stack += `${this.sessionMarker}`;
+        }
         throw error;
       });
   }
@@ -212,5 +248,44 @@ export default class CoreCommandQueue {
     if (response) {
       return response.data;
     }
+  }
+
+  private async retryCommand<T>(
+    commandPayload: CoreCommandQueue['internalState']['lastCommand'],
+    error: Error,
+  ): Promise<T> {
+    // don't retry within an existing "retry" run
+    if (this.internalState.isRetrying) throw error;
+
+    // perform retries out of the "queue" so we don't get stuck
+    let lastError = error;
+    for (let count = 1; count < CoreCommandQueue.maxCommandRetries; count += 1) {
+      const shouldRetry = await this.shouldRetryCommand(commandPayload, lastError);
+      if (!shouldRetry) break;
+
+      try {
+        return await this.sendRequest<T>({ ...commandPayload, retryNumber: count });
+      } catch (nestedError) {
+        lastError = nestedError;
+      }
+    }
+    throw lastError;
+  }
+
+  private async shouldRetryCommand(
+    command: CoreCommandQueue['internalState']['lastCommand'],
+    error: Error,
+  ): Promise<boolean> {
+    for (const handler of this.internalState.commandRetryHandlerFns) {
+      this.internalState.isRetrying = true;
+      try {
+        if (await handler(command, error)) {
+          return true;
+        }
+      } finally {
+        this.internalState.isRetrying = false;
+      }
+    }
+    return false;
   }
 }

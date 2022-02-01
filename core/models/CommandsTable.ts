@@ -11,8 +11,10 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['run', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['retryNumber', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
+        ['activeFlowHandlerId', 'INTEGER'],
         ['name', 'TEXT'],
         ['wasPrefetched', 'INTEGER'],
         ['args', 'TEXT'],
@@ -36,8 +38,10 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     this.queuePendingInsert([
       commandMeta.id,
       commandMeta.run,
+      commandMeta.retryNumber ?? 0,
       commandMeta.tabId,
       commandMeta.frameId,
+      commandMeta.activeFlowHandlerId,
       commandMeta.name,
       commandMeta.wasPrefetched ? 1 : 0,
       commandMeta.args,

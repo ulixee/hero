@@ -1,5 +1,4 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import StateMachine from 'awaited-dom/base/StateMachine';
 import IResourceType from '@ulixee/hero-interfaces/IResourceType';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
@@ -12,15 +11,6 @@ import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Tab, { getCoreTab } from './Tab';
-
-const { getState, setState } = StateMachine<Resource, IState>();
-
-interface IState {
-  resource: IResourceMeta;
-  request: ResourceRequest;
-  response: ResourceResponse;
-  coreTab: Promise<CoreTab>;
-}
 
 const propertyKeys: (keyof Resource)[] = [
   'url',
@@ -35,28 +25,32 @@ const propertyKeys: (keyof Resource)[] = [
 ];
 
 export default class Resource {
-  public get request(): ResourceRequest {
-    return getState(this).request;
-  }
+  #coreTab: Promise<CoreTab>;
+  #resourceMeta: IResourceMeta;
+  readonly request: ResourceRequest;
+  readonly response: ResourceResponse;
 
-  public get response(): ResourceResponse {
-    return getState(this).response;
+  constructor(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta) {
+    this.#coreTab = coreTab;
+    this.#resourceMeta = resourceMeta;
+    this.request = createResourceRequest(coreTab, resourceMeta);
+    this.response = createResourceResponse(coreTab, resourceMeta);
   }
 
   public get url(): string {
-    return getState(this).resource.url;
+    return this.#resourceMeta.url;
   }
 
   public get documentUrl(): string {
-    return getState(this).resource.documentUrl;
+    return this.#resourceMeta.documentUrl;
   }
 
   public get type(): IResourceType {
-    return getState(this).resource.type;
+    return this.#resourceMeta.type;
   }
 
   public get isRedirect(): boolean {
-    return getState(this).resource.isRedirect ?? false;
+    return this.#resourceMeta.isRedirect ?? false;
   }
 
   public get buffer(): Promise<Buffer> {
@@ -72,8 +66,8 @@ export default class Resource {
   }
 
   public $collect(name: string): Promise<void> {
-    const id = getState(this).resource.id;
-    const coreTab = getState(this).coreTab;
+    const id = this.#resourceMeta.id;
+    const coreTab = this.#coreTab;
     return coreTab.then(x => x.collectResource(name, id));
   }
 
@@ -153,11 +147,7 @@ export default class Resource {
 
 export function createResource(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta): Resource {
   if (resourceMeta.type === 'Websocket') {
-    return createWebsocketResource(resourceMeta, coreTab);
+    return createWebsocketResource(resourceMeta, coreTab) as any;
   }
-  const resource = new Resource();
-  const request = createResourceRequest(coreTab, resourceMeta);
-  const response = createResourceResponse(coreTab, resourceMeta);
-  setState(resource, { coreTab, resource: resourceMeta, request, response });
-  return resource;
+  return new Resource(coreTab, resourceMeta);
 }

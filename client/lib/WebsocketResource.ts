@@ -1,5 +1,4 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
@@ -9,16 +8,6 @@ import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
-
-const { getState, setState } = StateMachine<WebsocketResource, IState>();
-
-interface IState {
-  resource: IResourceMeta;
-  request: ResourceRequest;
-  response: ResourceResponse;
-  coreTab: Promise<CoreTab>;
-  awaitedPath: AwaitedPath;
-}
 
 interface IEventType {
   message: (message: IWebsocketMessage) => void;
@@ -37,30 +26,32 @@ const propertyKeys: (keyof WebsocketResource)[] = [
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
 export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
-  constructor() {
+  #coreTab: Promise<CoreTab>;
+  #resourceMeta: IResourceMeta;
+  #awaitedPath: AwaitedPath;
+  readonly request: ResourceRequest;
+  readonly response: ResourceResponse;
+
+  constructor(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta) {
     super(() => {
-      const state = getState(this);
       return {
-        target: state.coreTab,
-        jsPath: state.awaitedPath.toJSON(),
+        target: this.#coreTab,
+        jsPath: this.#awaitedPath.toJSON(),
       };
     });
-  }
-
-  public get request(): ResourceRequest {
-    return getState(this).request;
-  }
-
-  public get response(): ResourceResponse {
-    return getState(this).response;
+    this.request = createResourceRequest(coreTab, resourceMeta);
+    this.response = createResourceResponse(coreTab, resourceMeta);
+    this.#awaitedPath = new AwaitedPath(null, 'resources', String(resourceMeta.id));
+    this.#coreTab = coreTab;
+    this.#resourceMeta = resourceMeta;
   }
 
   public get url(): string {
-    return getState(this).resource.url;
+    return this.#resourceMeta.url;
   }
 
   public get documentUrl(): string {
-    return getState(this).resource.documentUrl;
+    return this.#resourceMeta.documentUrl;
   }
 
   public get type(): IResourceType {
@@ -68,22 +59,20 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
   }
 
   public get isRedirect(): boolean {
-    return getState(this).resource.isRedirect ?? false;
+    return this.#resourceMeta.isRedirect ?? false;
   }
 
   public get messages(): Promise<IWebsocketMessage[]> {
-    const resource = getState(this).resource;
+    const resource = this.#resourceMeta;
     if ('messages' in resource) {
       return Promise.resolve((resource as any).messages as IWebsocketMessage[]);
     }
-    const coreTab = getState(this).coreTab;
-    return coreTab.then(x => x.getResourceProperty(resource.id, 'messages'));
+    return this.#coreTab.then(x => x.getResourceProperty(resource.id, 'messages'));
   }
 
   public $collect(name: string): Promise<void> {
-    const id = getState(this).resource.id;
-    const coreTab = getState(this).coreTab;
-    return coreTab.then(x => x.collectResource(name, id));
+    const id = this.#resourceMeta.id;
+    return this.#coreTab.then(x => x.collectResource(name, id));
   }
 
   public get buffer(): Promise<Buffer> {
@@ -107,10 +96,5 @@ export function createWebsocketResource(
   resourceMeta: IResourceMeta,
   coreTab: Promise<CoreTab>,
 ): WebsocketResource {
-  const resource = new WebsocketResource();
-  const request = createResourceRequest(coreTab, resourceMeta);
-  const response = createResourceResponse(coreTab, resourceMeta);
-  const awaitedPath = new AwaitedPath(null, 'resources', String(resourceMeta.id));
-  setState(resource, { coreTab, resource: resourceMeta, request, response, awaitedPath });
-  return resource;
+  return new WebsocketResource(coreTab, resourceMeta);
 }

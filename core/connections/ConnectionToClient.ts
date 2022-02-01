@@ -37,8 +37,18 @@ export default class ConnectionToClient
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const { commandId, startDate, sendDate, messageId, command, meta, recordCommands, callsite } =
-      payload;
+    const {
+      commandId,
+      startDate,
+      sendDate,
+      messageId,
+      command,
+      meta,
+      recordCommands,
+      callsite,
+      retryNumber,
+      activeFlowHandlerId,
+    } = payload;
     const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
 
     // json converts args to null which breaks undefined argument handlers
@@ -53,6 +63,8 @@ export default class ConnectionToClient
         startDate,
         sendDate,
         callsite,
+        retryNumber,
+        activeFlowHandlerId,
       });
 
       // make sure to get tab metadata
@@ -198,7 +210,14 @@ export default class ConnectionToClient
     command: string,
     args: any[],
     meta: ISessionMeta,
-    commandMeta: { commandId: number; startDate: Date; sendDate: Date; callsite?: string },
+    commandMeta: {
+      commandId: number;
+      startDate: Date;
+      sendDate: Date;
+      callsite?: string;
+      retryNumber?: number;
+      activeFlowHandlerId?: number;
+    },
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);
     const tab = Session.getTab(meta);

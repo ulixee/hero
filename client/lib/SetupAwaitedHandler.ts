@@ -99,8 +99,8 @@ export async function getAwaitedState<TClass>(
   coreFrame: CoreFrameEnvironment;
   awaitedOptions: IAwaitedOptions;
 }> {
-  await awaitRemoteInitializer(instance);
   const state = stateHandler.getState(instance);
+  await awaitRemoteInitializer(state);
   const awaitedPath = state.awaitedPath as AwaitedPath;
   const awaitedOptions = state.awaitedOptions as IAwaitedOptions;
   const awaitedCoreFrame = await awaitedOptions.coreFrame;
@@ -193,7 +193,7 @@ export function cleanResult<T, TClass>(
   return result.value;
 }
 
-async function awaitRemoteInitializer(state: any): Promise<void> {
+async function awaitRemoteInitializer(state: IAwaitedOptions): Promise<void> {
   if (state?.remoteInitializerPromise) {
     await state.remoteInitializerPromise;
   }

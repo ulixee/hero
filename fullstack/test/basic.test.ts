@@ -51,7 +51,7 @@ describe('basic Full Client tests', () => {
     Helpers.needsClosing.push(hero);
 
     const resources: Resource[] = [];
-    await hero.activeTab.on('resource', event => resources.push(event));
+    await hero.activeTab.on('resource', event => resources.push(event as any));
     await hero.goto(`${koaServer.baseUrl}/block`);
     await hero.waitForPaintingStable();
     await new Promise(setImmediate);

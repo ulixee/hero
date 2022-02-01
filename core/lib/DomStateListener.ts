@@ -61,9 +61,12 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
   ) {
     super();
     bindFunctions(this);
+
+    const key = [options.name, options.url].filter(Boolean);
     if (options.callsite) {
-      this.id = createHash('md5').update(`${options.callsite}`).digest('hex');
+      key.push(createHash('md5').update(`${options.callsite}`).digest('hex'));
     }
+    this.id = key.join('-');
     this.name = options.name;
     this.url = options.url;
 

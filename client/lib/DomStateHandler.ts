@@ -30,6 +30,7 @@ export default class DomStateHandler {
   #commandIdCounter = 0;
   #onMatchFn: (error: Error, didMatch?: boolean) => any;
   #isSubscribed = false;
+  #onlyRunCallbackOnMatch = false;
 
   constructor(readonly domState: IDomState, coreTab: CoreTab, callSitePath: ISourceCodeLocation[]) {
     this.#coreTab = coreTab;
@@ -42,7 +43,10 @@ export default class DomStateHandler {
     await this.clear(false, cancelPromise);
   }
 
-  async register(onMatchFn: (error: Error, didMatch?: boolean) => any): Promise<void> {
+  async register(
+    onMatchFn: (error: Error, didMatch?: boolean) => any,
+    onlyRunCallbackOnMatch = false,
+  ): Promise<void> {
     // first do a dry run of the assertions to gather all our raw commands to subscribe to
     await this.collectAssertionCommands();
     const listenArgs: IDomStateListenArgs = {
@@ -52,6 +56,7 @@ export default class DomStateHandler {
       url: this.domState.url,
     };
 
+    this.#onlyRunCallbackOnMatch = onlyRunCallbackOnMatch;
     this.#onMatchFn = onMatchFn;
     await this.#coreTab.addEventListener(
       this.#jsPath,
@@ -109,24 +114,27 @@ export default class DomStateHandler {
     let error: Error;
     try {
       // intercept commands with "pushed" state when commands "run"
-      this.#coreTab.commandQueue.intercept((meta: ISessionMeta, command, ...args) => {
-        const id = this.getCommandId(meta.frameId, command, args);
-        return stateResult[id];
-      });
-
-      const assertionSets = await this.createAssertionSets();
-      didResolve = true;
-      for (const [state, assertion] of assertionSets) {
-        if (!(await this.isAssertionValid(state, assertion))) {
-          didResolve = false;
-          break;
-        }
-      }
-
-      this.#coreTab.commandQueue.intercept(undefined);
+      didResolve = await this.#coreTab.commandQueue.intercept(
+        (meta: ISessionMeta, command, ...args) => {
+          const id = this.getCommandId(meta.frameId, command, args);
+          return stateResult[id];
+        },
+        async () => {
+          const assertionSets = await this.createAssertionSets();
+          for (const [state, assertion] of assertionSets) {
+            if (!(await this.isAssertionValid(state, assertion))) {
+              return false;
+            }
+          }
+          return true;
+        },
+      );
     } catch (err) {
       error = err;
     }
+
+    if (didResolve === false && this.#onlyRunCallbackOnMatch) return;
+
     await this.#onMatchFn(error, didResolve);
   }
 
@@ -179,29 +187,10 @@ export default class DomStateHandler {
   private async collectAssertionCommands(): Promise<void> {
     // run first pass where we just collect all the commands
     // we're going to get periodic updates that we're going to intercept as mock results
-    const runCommands: Promise<any>[] = [];
+    let result: any;
 
-    const result = this.domState.allTrue({
-      assert: (statePromise, assert) => {
-        const captureCommand = this.captureCommands([statePromise, assert]).catch(() => null);
-        runCommands.push(captureCommand);
-      },
-    });
-
-    if (isPromise(result)) {
-      throw new Error(
-        `DomState (${
-          this.domState.name ?? 'no name'
-        }) allTrue({ assert }) returns a Promise. Each state function must have synchronous assertions.`,
-      );
-    }
-
-    await Promise.all(runCommands);
-  }
-
-  private async captureCommands(assert: IStateAndAssertion<any>): Promise<void> {
-    try {
-      this.#coreTab.commandQueue.intercept((meta, command, ...args) => {
+    await this.#coreTab.commandQueue.intercept(
+      (meta, command, ...args) => {
         const record = [meta.frameId, command, args] as IRawCommand;
         // see if already logged
         const serialized = JSON.stringify(record);
@@ -211,12 +200,25 @@ export default class DomStateHandler {
         const id = `${this.#commandIdCounter}-${command}`;
         this.#rawCommandsById[id] = record;
         this.#idBySerializedCommand.set(serialized, id);
-      });
+      },
+      async () => {
+        const runCommands: Promise<any>[] = [];
+        // trigger a run so we can see commands that get triggered
+        result = this.domState.allTrue({
+          assert: statePromise => {
+            runCommands.push(Promise.resolve(statePromise).catch(() => null));
+          },
+        });
+        await Promise.all(runCommands);
+      },
+    );
 
-      // trigger a run so we can see commands that get triggered
-      await assert[0];
-    } finally {
-      this.#coreTab.commandQueue.intercept(undefined);
+    if (isPromise(result)) {
+      throw new Error(
+        `DomState (${
+          this.domState.name ?? 'no name'
+        }) allTrue({ assert }) returns a Promise. Each state function must have synchronous assertions.`,
+      );
     }
   }
 

@@ -8,6 +8,8 @@ export default interface ICoreRequestPayload {
   callsite?: string;
   startDate: Date;
   sendDate: Date;
+  retryNumber?: number;
+  activeFlowHandlerId?: number;
   args: any[];
   recordCommands?: Omit<ICoreRequestPayload, 'meta' | 'messageId' | 'sendDate'>[];
 }

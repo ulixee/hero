@@ -1,21 +1,20 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
-const { getState, setState } = StateMachine<CookieStorage, IState>();
-
-interface IState {
-  coreFrame: Promise<CoreFrameEnvironment>;
-}
-
 export default class CookieStorage {
+  #coreFrame: Promise<CoreFrameEnvironment>;
+
+  constructor(coreFrame: Promise<CoreFrameEnvironment>) {
+    this.#coreFrame = coreFrame;
+  }
+
   public get length(): Promise<number> {
     return this.getItems().then(x => x.length);
   }
 
   public async getItems(): Promise<ICookie[]> {
-    const coreFrame = await getCoreFrame(this);
+    const coreFrame = await this.#coreFrame;
     return await coreFrame.getCookies();
   }
 
@@ -25,7 +24,7 @@ export default class CookieStorage {
   }
 
   public async clear(): Promise<void> {
-    const coreFrame = await getCoreFrame(this);
+    const coreFrame = await this.#coreFrame;
     const cookies = await this.getItems();
     for (const cookie of cookies) {
       await coreFrame.removeCookie(cookie.name);
@@ -38,22 +37,16 @@ export default class CookieStorage {
   }
 
   public async setItem(key: string, value: string, options?: ISetCookieOptions): Promise<boolean> {
-    const coreFrame = await getCoreFrame(this);
+    const coreFrame = await this.#coreFrame;
     return coreFrame.setCookie(key, value, options);
   }
 
   public async removeItem(name: string): Promise<boolean> {
-    const coreFrame = await getCoreFrame(this);
+    const coreFrame = await this.#coreFrame;
     return coreFrame.removeCookie(name);
   }
 }
 
-function getCoreFrame(cookieStorage: CookieStorage): Promise<CoreFrameEnvironment> {
-  return getState(cookieStorage).coreFrame;
-}
-
 export function createCookieStorage(coreFrame: Promise<CoreFrameEnvironment>): CookieStorage {
-  const cookieStorage = new CookieStorage();
-  setState(cookieStorage, { coreFrame });
-  return cookieStorage;
+  return new CookieStorage(coreFrame);
 }
