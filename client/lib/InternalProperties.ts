@@ -2,7 +2,6 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import Hero from './Hero';
 import CoreTab from './CoreTab';
 import Tab from './Tab';
-import CoreSession from './CoreSession';
 import IClientPlugin from '@ulixee/hero-interfaces/IClientPlugin';
 import FrameEnvironment from './FrameEnvironment';
 import FrozenFrameEnvironment from './FrozenFrameEnvironment';
@@ -11,11 +10,11 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 const { getState, setState } = StateMachine();
 
 interface ITabState {
-  coreTab: Promise<CoreTab>;
+  coreTabPromise: Promise<CoreTab>;
 }
 
 interface IFrameState {
-  coreFrame: Promise<CoreFrameEnvironment>;
+  coreFramePromise: Promise<CoreFrameEnvironment>;
 }
 
 interface IHeroState {

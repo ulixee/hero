@@ -63,19 +63,19 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
 export default class FrameEnvironment {
   #hero: Hero;
   #tab: Tab;
-  #coreFrame: Promise<CoreFrameEnvironment>;
+  #coreFramePromise: Promise<CoreFrameEnvironment>;
 
-  constructor(hero: Hero, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
+  constructor(hero: Hero, tab: Tab, coreFramePromise: Promise<CoreFrameEnvironment>) {
     this.#hero = hero;
     this.#tab = tab;
-    this.#coreFrame = coreFrame;
+    this.#coreFramePromise = coreFramePromise;
 
     InternalProperties.set(this, {
-      coreFrame,
+      coreFramePromise,
     });
 
     async function sendToFrameEnvironment(pluginId: string, ...args: any[]): Promise<any> {
-      return (await coreFrame).commandQueue.run(
+      return (await coreFramePromise).commandQueue.run(
         'FrameEnvironment.runPluginCommand',
         pluginId,
         args,
@@ -93,7 +93,7 @@ export default class FrameEnvironment {
   }
 
   public get frameId(): Promise<number> {
-    return this.#coreFrame.then(x => x.frameId);
+    return this.#coreFramePromise.then(x => x.frameId);
   }
 
   public get children(): Promise<FrameEnvironment[]> {
@@ -112,64 +112,64 @@ export default class FrameEnvironment {
   }
 
   public get url(): Promise<string> {
-    return this.#coreFrame.then(x => x.getUrl());
+    return this.#coreFramePromise.then(x => x.getUrl());
   }
 
   public get isPaintingStable(): Promise<boolean> {
-    return this.#coreFrame.then(x => x.isPaintingStable());
+    return this.#coreFramePromise.then(x => x.isPaintingStable());
   }
 
   public get isDomContentLoaded(): Promise<boolean> {
-    return this.#coreFrame.then(x => x.isDomContentLoaded());
+    return this.#coreFramePromise.then(x => x.isDomContentLoaded());
   }
 
   public get isAllContentLoaded(): Promise<boolean> {
-    return this.#coreFrame.then(x => x.isAllContentLoaded());
+    return this.#coreFramePromise.then(x => x.isAllContentLoaded());
   }
 
   public get name(): Promise<string> {
-    return this.#coreFrame.then(x => x.getFrameMeta()).then(x => x.name);
+    return this.#coreFramePromise.then(x => x.getFrameMeta()).then(x => x.name);
   }
 
   public get parentFrameId(): Promise<number | null> {
-    return this.#coreFrame.then(x => x.parentFrameId);
+    return this.#coreFramePromise.then(x => x.parentFrameId);
   }
 
   public get cookieStorage(): CookieStorage {
-    return createCookieStorage(this.#coreFrame);
+    return createCookieStorage(this.#coreFramePromise);
   }
 
   public get document(): SuperDocument {
     const awaitedPath = new AwaitedPath(null, 'document');
-    const awaitedOptions = { coreFrame: this.#coreFrame };
+    const awaitedOptions = { coreFrame: this.#coreFramePromise };
     return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
   }
 
   public get localStorage(): Storage {
     const awaitedPath = new AwaitedPath(null, 'localStorage');
-    const awaitedOptions = { coreFrame: this.#coreFrame };
+    const awaitedOptions = { coreFrame: this.#coreFramePromise };
     return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
   }
 
   public get sessionStorage(): Storage {
     const awaitedPath = new AwaitedPath(null, 'sessionStorage');
-    const awaitedOptions = { coreFrame: this.#coreFrame };
+    const awaitedOptions = { coreFrame: this.#coreFramePromise };
     return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
   }
 
   public get Request(): typeof Request {
-    return RequestGenerator(this.#coreFrame);
+    return RequestGenerator(this.#coreFramePromise);
   }
 
   // METHODS
 
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     const requestInput = await getRequestIdOrUrl(request);
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     const nodePointer = await coreFrame.fetch(requestInput, init);
 
     const awaitedPath = new AwaitedPath(null).withNodeId(null, nodePointer.id);
-    return createResponse(awaitedPath, { coreFrame: this.#coreFrame });
+    return createResponse(awaitedPath, { coreFrame: this.#coreFramePromise });
   }
 
   public async getFrameEnvironment(
@@ -193,7 +193,7 @@ export default class FrameEnvironment {
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
     if (!node) return { isVisible: false, nodeExists: false, isClickable: false };
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     return await coreFrame.getComputedVisibility(node);
   }
 
@@ -203,29 +203,29 @@ export default class FrameEnvironment {
   }
 
   public async getJsValue<T>(path: string): Promise<T> {
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     return coreFrame.getJsValue<T>(path);
   }
 
   public querySelector(selector: string): ISuperNode {
     const awaitedPath = new AwaitedPath(null, 'document', ['querySelector', selector]);
-    const awaitedOptions: IAwaitedOptions = { coreFrame: this.#coreFrame };
+    const awaitedOptions: IAwaitedOptions = { coreFrame: this.#coreFramePromise };
     return createSuperNode(awaitedPath, awaitedOptions);
   }
 
   public querySelectorAll(selector: string): ISuperNodeList {
     const awaitedPath = new AwaitedPath(null, 'document', ['querySelectorAll', selector]);
-    const awaitedOptions: IAwaitedOptions = { coreFrame: this.#coreFrame };
+    const awaitedOptions: IAwaitedOptions = { coreFrame: this.#coreFramePromise };
     return createSuperNodeList(awaitedPath, awaitedOptions);
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     await coreFrame.waitForLoad(LocationStatus.PaintingStable, options);
   }
 
   public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     await coreFrame.waitForLoad(status, options);
   }
 
@@ -235,7 +235,7 @@ export default class FrameEnvironment {
   ): Promise<ISuperElement | null> {
     if (!element) throw new Error('Element being waited for is null');
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(element);
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), options);
     if (!nodePointer) return null;
     return createInstanceWithNodePointer(
@@ -250,7 +250,7 @@ export default class FrameEnvironment {
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
   ): Promise<Resource> {
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     const resourceMeta = await coreFrame.waitForLocation(trigger, options);
     const coreTab = getCoreTab(this.#tab);
     return createResource(coreTab, resourceMeta);

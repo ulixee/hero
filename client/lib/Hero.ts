@@ -103,7 +103,7 @@ export default class Hero extends AwaitedEventTarget<{
   readonly #clientPlugins: IClientPlugin[] = [];
   readonly #connectionToCore: ConnectionToCore;
   readonly #didAutoCreateConnection: boolean = false;
-  #coreSession: Promise<CoreSession | Error>;
+  #coreSessionPromise: Promise<CoreSession | Error>;
   #tabs: Tab[];
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
@@ -228,7 +228,7 @@ export default class Hero extends AwaitedEventTarget<{
   public close(): Promise<void> {
     return (this.#isClosingPromise ??= new Promise(async (resolve, reject) => {
       try {
-        const sessionOrError = await this.#coreSession;
+        const sessionOrError = await this.#coreSessionPromise;
         if (sessionOrError instanceof CoreSession) {
           await sessionOrError.close();
         }
@@ -325,7 +325,8 @@ export default class Hero extends AwaitedEventTarget<{
     },
   ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+      .coreFramePromise;
     let interaction: IInteraction = { click: mousePosition };
     if (!isMousePositionXY(mousePosition)) {
       interaction = {
@@ -347,18 +348,21 @@ export default class Hero extends AwaitedEventTarget<{
   public async interact(...interactions: IInteractions): Promise<void> {
     if (!interactions.length) return;
     let coreFrame = await getCoreFrameForInteractions(interactions);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+      .coreFramePromise;
     await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePositionXY | ISuperElement): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
+    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+      .coreFramePromise;
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
-    const coreFrame = await InternalProperties.get(this.activeTab.mainFrameEnvironment).coreFrame;
+    const coreFrame = await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+      .coreFramePromise;
     await Interactor.run(
       coreFrame,
       typeInteractions.map(t => ({ type: t })),
@@ -375,7 +379,7 @@ export default class Hero extends AwaitedEventTarget<{
   public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): void {
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
-    if (this.#coreSession) {
+    if (this.#coreSessionPromise) {
       throw new Error(
         'You must call .use before any Hero "await" calls (ie, before the Agent connects to Core).',
       );
@@ -397,13 +401,15 @@ export default class Hero extends AwaitedEventTarget<{
       ClientPlugins.forEach(ClientPlugin => (ClientPluginsById[ClientPlugin.id] = ClientPlugin));
     }
 
+    const clientPlugins: IClientPlugin[] = [];
     for (const ClientPlugin of Object.values(ClientPluginsById)) {
       const clientPlugin = new ClientPlugin();
       this.#clientPlugins.push(clientPlugin);
+      clientPlugins.push(clientPlugin);
       this.#options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     }
-    if (this.#coreSession) {
-      this.#initializeClientPlugins(Object.values(ClientPluginsById));
+    if (this.#coreSessionPromise) {
+      this.#initializeClientPlugins(clientPlugins);
     }
   }
 
@@ -541,8 +547,8 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   #getCoreSessionOrReject(): Promise<CoreSession> {
-    if (!this.#coreSession) {
-      this.#coreSession = this.#connectionToCore
+    if (!this.#coreSessionPromise) {
+      this.#coreSessionPromise = this.#connectionToCore
         .createSession(this.#options)
         .then(session => {
           if (session instanceof CoreSession) this.#initializeClientPlugins(this.#clientPlugins);
@@ -550,7 +556,7 @@ export default class Hero extends AwaitedEventTarget<{
         })
         .catch(err => err);
 
-      const coreTab = this.#coreSession
+      const coreTab = this.#coreSessionPromise
         .then(x => {
           if (x instanceof Error) throw x;
           return x.firstTab;
@@ -561,7 +567,7 @@ export default class Hero extends AwaitedEventTarget<{
       this.#tabs = [this.#activeTab];
     }
 
-    return this.#coreSession.then(coreSession => {
+    return this.#coreSessionPromise.then(coreSession => {
       if (coreSession instanceof CoreSession) return coreSession;
       throw coreSession;
     });
@@ -574,7 +580,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   async #sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
-    const coreSession = (await this.#coreSession) as CoreSession;
+    const coreSession = (await this.#coreSessionPromise) as CoreSession;
     const coreTab = coreSession.tabsById.get(await this.#activeTab.tabId);
     return coreTab.commandQueue.run('Tab.runPluginCommand', toPluginId, args);
   }

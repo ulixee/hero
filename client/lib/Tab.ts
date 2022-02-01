@@ -69,26 +69,26 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   #hero: Hero;
   #mainFrameEnvironment: FrameEnvironment;
   #frameEnvironments: FrameEnvironment[];
-  #coreTab: Promise<CoreTab>;
+  #coreTabPromise: Promise<CoreTab>;
 
-  constructor(hero: Hero, coreTab: Promise<CoreTab>) {
+  constructor(hero: Hero, coreTabPromise: Promise<CoreTab>) {
     super(() => {
-      return { target: coreTab };
+      return { target: coreTabPromise };
     });
     this.#hero = hero;
     this.#mainFrameEnvironment = new FrameEnvironment(
       hero,
       this,
-      coreTab.then(x => x.mainFrameEnvironment),
+      coreTabPromise.then(x => x.mainFrameEnvironment),
     );
     this.#frameEnvironments = [this.#mainFrameEnvironment];
-    this.#coreTab = coreTab;
+    this.#coreTabPromise = coreTabPromise;
     InternalProperties.set(this, {
-      coreTab,
+      coreTabPromise,
     });
 
     async function sendToTab(pluginId: string, ...args: any[]): Promise<any> {
-      return (await coreTab).commandQueue.run('Tab.runPluginCommand', pluginId, args);
+      return (await coreTabPromise).commandQueue.run('Tab.runPluginCommand', pluginId, args);
     }
 
     for (const clientPlugin of InternalProperties.get(hero).clientPlugins) {
@@ -97,11 +97,11 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public get tabId(): Promise<number> {
-    return this.#coreTab.then(x => x.tabId);
+    return this.#coreTabPromise.then(x => x.tabId);
   }
 
   public get lastCommandId(): Promise<number> {
-    return this.#coreTab.then(x => x.commandQueue.lastCommandId);
+    return this.#coreTabPromise.then(x => x.commandQueue.lastCommandId);
   }
 
   public get url(): Promise<string> {
@@ -162,7 +162,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     const frameMeta = await elementCoreFrame.getChildFrameEnvironment(awaitedPath.toJSON());
     if (!frameMeta) return null;
 
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     return await this.#getOrCreateFrameEnvironment(coreTab.getCoreFrameForMeta(frameMeta));
   }
 
@@ -171,23 +171,23 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
   }
 
   public async goBack(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     return coreTab.goBack(options);
   }
 
   public async goForward(options?: { timeoutMs?: number }): Promise<string> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     return coreTab.goForward(options);
   }
 
   public async reload(options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const resource = await coreTab.reload(options);
     return createResource(Promise.resolve(coreTab), resource);
   }
@@ -214,12 +214,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     return coreTab.takeScreenshot(options);
   }
 
   public async waitForFileChooser(options?: IWaitForOptions): Promise<FileChooser> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const prompt = await coreTab.waitForFileChooser(options);
     const coreFrame = coreTab.frameEnvironmentsById.get(prompt.frameId);
     return new FileChooser(Promise.resolve(coreFrame), prompt);
@@ -239,7 +239,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   ): Promise<void> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const handler = new DomStateHandler(state, coreTab, callSitePath);
     await handler.waitFor(options.timeoutMs);
   }
@@ -247,7 +247,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async checkState(state: IDomState | DomState): Promise<boolean> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const handler = new DomStateHandler(state, coreTab, callSitePath);
     return await handler.check();
   }
@@ -258,12 +258,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   ): Promise<void> {
     const callSitePath = scriptInstance.getScriptCallSite();
 
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     await coreTab.registerFlowHandler(state, handlerFn, callSitePath);
   }
 
   public async checkFlowHandlers(): Promise<void> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     await coreTab.checkFlowHandlers();
   }
 
@@ -289,7 +289,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async waitForMillis(millis: number): Promise<void> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     await coreTab.waitForMillis(millis);
   }
 
@@ -325,7 +325,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   async #getRefreshedFrameEnvironments(): Promise<FrameEnvironment[]> {
-    const coreTab = await this.#coreTab;
+    const coreTab = await this.#coreTabPromise;
     const coreFrames = await coreTab.getCoreFrameEnvironments();
 
     const newFrameIds = coreFrames.map(x => x.frameId);
@@ -346,7 +346,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 }
 
 export function getCoreTab(tab: Tab): Promise<CoreTab> {
-  return InternalProperties.get(tab).coreTab.then(x => {
+  return InternalProperties.get(tab).coreTabPromise.then(x => {
     if (x instanceof Error) throw x;
     return x;
   });

@@ -211,7 +211,8 @@ describe('basic Detach tests', () => {
 
       const frameSpy = jest.spyOn(FrameEnvironment.prototype, 'recordDetachedJsPath');
 
-      const coreFrame = await InternalProperties.get(frozenTab.mainFrameEnvironment).coreFrame;
+      const coreFrame = await InternalProperties.get(frozenTab.mainFrameEnvironment)
+        .coreFramePromise;
       for (let i = 0; i < 1001; i += 1) {
         coreFrame.recordDetachedJsPath(1, new Date(), new Date());
       }

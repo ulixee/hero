@@ -44,19 +44,19 @@ const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
 export default class FrozenFrameEnvironment {
   #hero: Hero;
   #tab: FrozenTab;
-  #prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
-  #coreFrame: Promise<CoreFrameEnvironment>;
+  #prefetchedJsPathsPromise: Promise<Map<string, IJsPathResult>>;
+  #coreFramePromise: Promise<CoreFrameEnvironment>;
 
   constructor(
     hero: Hero,
     tab: FrozenTab,
-    coreFrame: Promise<CoreFrameEnvironment>,
-    prefetchedJsPaths: Promise<IJsPathResult[]>,
+    coreFramePromise: Promise<CoreFrameEnvironment>,
+    prefetchedJsPathsPromise: Promise<IJsPathResult[]>,
   ) {
     this.#hero = hero;
     this.#tab = tab;
-    this.#coreFrame = coreFrame;
-    this.#prefetchedJsPaths = prefetchedJsPaths.then(x => {
+    this.#coreFramePromise = coreFramePromise;
+    this.#prefetchedJsPathsPromise = prefetchedJsPathsPromise.then(x => {
       const resultMap = new Map<string, IJsPathResult>();
       for (let i = 0; i < x.length; i += 1) {
         const result = x[i];
@@ -65,15 +65,15 @@ export default class FrozenFrameEnvironment {
       }
       return resultMap;
     });
-    InternalProperties.set(this, { coreFrame });
+    InternalProperties.set(this, { coreFramePromise });
   }
 
   get #awaitedOptions(): IAwaitedOptions & {
     prefetchedJsPaths?: Promise<Map<string, IJsPathResult>>;
   } {
     return {
-      coreFrame: this.#coreFrame,
-      prefetchedJsPaths: this.#prefetchedJsPaths,
+      coreFrame: this.#coreFramePromise,
+      prefetchedJsPaths: this.#prefetchedJsPathsPromise,
     };
   }
 
@@ -82,19 +82,19 @@ export default class FrozenFrameEnvironment {
   }
 
   public get frameId(): Promise<number> {
-    return this.#coreFrame.then(x => x.frameId);
+    return this.#coreFramePromise.then(x => x.frameId);
   }
 
   public get url(): Promise<string> {
-    return this.#coreFrame.then(x => x.getUrl());
+    return this.#coreFramePromise.then(x => x.getUrl());
   }
 
   public get name(): Promise<string> {
-    return this.#coreFrame.then(x => x.getFrameMeta()).then(x => x.name);
+    return this.#coreFramePromise.then(x => x.getFrameMeta()).then(x => x.name);
   }
 
   public get parentFrameId(): Promise<number | null> {
-    return this.#coreFrame.then(x => x.getFrameMeta()).then(x => x.parentFrameId);
+    return this.#coreFramePromise.then(x => x.getFrameMeta()).then(x => x.parentFrameId);
   }
 
   public get document(): SuperDocument {
@@ -103,14 +103,14 @@ export default class FrozenFrameEnvironment {
   }
 
   public get Request(): typeof Request {
-    return RequestGenerator(this.#coreFrame);
+    return RequestGenerator(this.#coreFramePromise);
   }
 
   // METHODS
 
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     const requestInput = await getRequestIdOrUrl(request);
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     const nodePointer = await coreFrame.fetch(requestInput, init);
 
     const awaitedPath = new AwaitedPath(null).withNodeId(null, nodePointer.id);
@@ -158,7 +158,7 @@ export default class FrozenFrameEnvironment {
   }
 
   public async getJsValue<T>(path: string): Promise<T> {
-    const coreFrame = await this.#coreFrame;
+    const coreFrame = await this.#coreFramePromise;
     return coreFrame.getJsValue<T>(path);
   }
 
