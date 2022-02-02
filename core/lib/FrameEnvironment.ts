@@ -7,14 +7,12 @@ import { URL } from 'url';
 import * as Fs from 'fs';
 import Timer from '@ulixee/commons/lib/Timer';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IPuppetFrame, IPuppetFrameEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
@@ -159,7 +157,6 @@ export default class FrameEnvironment
       this.setCookie,
       this.setFileInputFiles,
       this.runPluginCommand,
-      this.waitForElement,
       this.waitForLoad,
       this.waitForLocation,
       this.addRemoteEventListener,
@@ -484,10 +481,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }
 
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
-    return this.waitForDom(jsPath, options);
-  }
-
   public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
     await this.isReady;
     return this.navigationsObserver.waitForLoad(status, options);
@@ -512,58 +505,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public async waitForNavigationLoader(timeoutMs?: number): Promise<void> {
     await this.puppetFrame.waitForLoader(undefined, timeoutMs);
-  }
-
-  // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which
-  // can break waitForLocation
-  public async waitForDom(
-    jsPath: IJsPath,
-    options?: IWaitForElementOptions,
-  ): Promise<INodePointer> {
-    const timeoutMs = options?.timeoutMs ?? 30e3;
-    const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
-    const timeoutMessage = `Timeout waiting for element to be visible`;
-
-    const timer = new Timer(timeoutMs, this.waitTimeouts);
-    await timer.waitForPromise(
-      this.waitForNavigationLoader(),
-      'Timeout waiting for page to be ready',
-    );
-    options ??= {};
-
-    try {
-      while (!timer.isResolved()) {
-        try {
-          const containerOffset = await this.getContainerOffset();
-          const promise = this.jsPath.waitForElement(
-            jsPath,
-            containerOffset,
-            options,
-            timeoutPerTry,
-          );
-
-          const result = await timer.waitForPromise(promise, timeoutMessage);
-          const isNodeVisible = result.value;
-          if (!isNodeVisible) continue;
-
-          let isValid = isNodeVisible.nodeExists;
-
-          if (options.waitForVisible) isValid = isNodeVisible.isVisible === true;
-          else if (options.waitForHidden) isValid = isNodeVisible.isVisible === false;
-
-          if (isValid) return result.nodePointer;
-        } catch (err) {
-          if (String(err).includes('not a valid selector')) throw err;
-          // don't log during loop
-        }
-
-        timer.throwIfExpired(timeoutMessage);
-      }
-    } finally {
-      timer.clear();
-    }
-
-    throw new TimeoutError(timeoutMessage);
   }
 
   public async flushPageEventsRecorder(): Promise<boolean> {

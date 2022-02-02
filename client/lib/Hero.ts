@@ -64,6 +64,7 @@ import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import InternalProperties from './InternalProperties';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -252,6 +253,13 @@ export default class Hero extends AwaitedEventTarget<{
     await coreTab.close();
   }
 
+  public async findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<Resource> {
+    return await this.activeTab.findResource(filter, options);
+  }
+
   public async getCollectedResources(
     sessionIdPromise: Promise<string>,
     name: string,
@@ -290,13 +298,13 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {
-    const callSitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
+    const callsitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
 
     const coreTab = getCoreTab(tab);
     const coreSession = this.#getCoreSessionOrReject();
 
     const detachedTab = coreSession.then(async session =>
-      session.detachTab(await coreTab, callSitePath, key),
+      session.detachTab(await coreTab, callsitePath, key),
     );
 
     return new FrozenTab(this, detachedTab);

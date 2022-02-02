@@ -33,7 +33,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Hero from './Hero';
-import { createInstanceWithNodePointer, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
+import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { getCoreTab } from './Tab';
 import Resource, { createResource } from './Resource';
@@ -233,17 +233,8 @@ export default class FrameEnvironment {
     element: ISuperElement,
     options?: IWaitForElementOptions,
   ): Promise<ISuperElement | null> {
-    if (!element) throw new Error('Element being waited for is null');
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(element);
     const coreFrame = await this.#coreFramePromise;
-    const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), options);
-    if (!nodePointer) return null;
-    return createInstanceWithNodePointer(
-      awaitedPathState,
-      awaitedPath,
-      awaitedOptions,
-      nodePointer,
-    );
+    return await coreFrame.waitForElement(element, options);
   }
 
   public async waitForLocation(

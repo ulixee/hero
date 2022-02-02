@@ -11,6 +11,7 @@ import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Tab, { getCoreTab } from './Tab';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 
 const propertyKeys: (keyof Resource)[] = [
   'url',
@@ -73,6 +74,19 @@ export default class Resource {
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
+  }
+
+  public static async findLatest(
+    tab: Tab,
+    filter: IResourceFilterProperties,
+    options: { sinceCommandId: number },
+  ): Promise<Resource> {
+    const coreTab = await getCoreTab(tab);
+    const resourceMeta = await coreTab.findResource(filter, options);
+    if (resourceMeta) {
+      return createResource(Promise.resolve(coreTab), resourceMeta);
+    }
+    return null;
   }
 
   public static async waitFor(

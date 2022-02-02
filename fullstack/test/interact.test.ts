@@ -94,33 +94,6 @@ describe('basic Interact tests', () => {
     await hero1.close();
   }, 20e3);
 
-  it('should be able to combine a waitForElementVisible and a click', async () => {
-    koaServer.get('/waitTest', ctx => {
-      ctx.body = `
-        <body>
-          <a href="/finish">Click Me</a>
-           <script>
-            setTimeout(() => {
-              document.querySelector('a').classList.add('ready');
-            }, 200);
-          </script>
-        </body>
-      `;
-    });
-    koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const hero = new Hero();
-    Helpers.needsClosing.push(hero);
-    await hero.goto(`${koaServer.baseUrl}/waitTest`);
-    await hero.waitForPaintingStable();
-    const readyLink = hero.document.querySelector('a.ready');
-    await hero.interact({ click: readyLink, waitForElementVisible: readyLink });
-    await hero.waitForLocation('change');
-    const finalUrl = await hero.url;
-    expect(finalUrl).toBe(`${koaServer.baseUrl}/finish`);
-
-    await hero.close();
-  });
-
   it('should be able to type various combinations of characters', async () => {
     koaServer.get('/keys', ctx => {
       ctx.body = `

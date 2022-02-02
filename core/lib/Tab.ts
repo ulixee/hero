@@ -16,7 +16,6 @@ import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IInteractionGroups, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
-import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
@@ -24,14 +23,13 @@ import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
-import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
@@ -182,6 +180,7 @@ export default class Tab
     this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
       this.focus,
       this.dismissDialog,
+      this.findResource,
       this.getFrameEnvironments,
       this.goto,
       this.goBack,
@@ -370,17 +369,23 @@ export default class Tab
     }
   }
 
-  public findResource(filter: IResourceFilterProperties): IResourceMeta {
+  public findResource(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<IResourceMeta> {
     // escape query string ? so it can run as regex
     if (typeof filter.url === 'string') {
       filter.url = stringToRegex(filter.url);
     }
-    for (const resourceMeta of this.session.resources.getForTab(this.id)) {
-      if (this.isResourceFilterMatch(resourceMeta, filter)) {
-        return resourceMeta;
+    const sinceCommandId =
+      options?.sinceCommandId ?? this.navigations.lastHttpNavigationRequest?.startCommandId;
+    // find latest resource
+    for (const resourceMeta of this.session.resources.getForTab(this.id).reverse()) {
+      if (this.isResourceFilterMatch(resourceMeta, filter, sinceCommandId)) {
+        return Promise.resolve(resourceMeta);
       }
     }
-    return null;
+    return Promise.resolve(null);
   }
 
   public findStorageChange(
@@ -417,10 +422,6 @@ export default class Tab
 
   public getUrl(): Promise<string> {
     return this.mainFrameEnvironment.getUrl();
-  }
-
-  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<INodePointer> {
-    return this.mainFrameEnvironment.waitForElement(jsPath, options);
   }
 
   public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
@@ -735,6 +736,16 @@ export default class Tab
     }
   }
 
+  public addDomStateListener(id: string, options: IDomStateListenArgs): DomStateListener {
+    const listener = new DomStateListener(id, options, this);
+    this.domStateListenersByJsPathId[id] = listener;
+    listener.once('resolved', () => delete this.domStateListenersByJsPathId[id]);
+
+    this.emit('wait-for-domstate', { listener });
+
+    return listener;
+  }
+
   public async flushDomChanges(): Promise<void> {
     for (const frame of this.frameEnvironmentsById.values()) {
       await frame.flushPageEventsRecorder();
@@ -867,16 +878,6 @@ export default class Tab
       createdAtCommandId: this.createdAtCommandId,
       isDetached: this.isDetached,
     } as ISessionMeta; // must adhere to session meta spec
-  }
-
-  private addDomStateListener(id: string, options: IDomStateListenArgs): DomStateListener {
-    const listener = new DomStateListener(id, options, this);
-    this.domStateListenersByJsPathId[id] = listener;
-    listener.once('resolved', () => delete this.domStateListenersByJsPathId[id]);
-
-    this.emit('wait-for-domstate', { listener });
-
-    return listener;
   }
 
   private async waitForReady(): Promise<void> {

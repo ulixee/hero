@@ -26,8 +26,6 @@ import { isAwaitedNode } from './SetupAwaitedHandler';
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
 const COMMAND_POS: { [k: string]: number } = {
-  waitForNode: 0,
-  waitForElementVisible: 1,
   waitForMillis: 2,
   click: 3,
   doubleclick: 4,
@@ -217,18 +215,6 @@ function convertInteractionToInteractionGroup(interaction: IInteraction): IInter
         return iGroup.push({ command, keyboardCommands });
       }
 
-      case Command.waitForNode: {
-        const command = CoreCommand.waitForNode;
-        const { awaitedPath } = getState(value);
-        const jsPath = awaitedPath.toJSON();
-        return iGroup.push({ command, delayNode: jsPath });
-      }
-      case Command.waitForElementVisible: {
-        const command = CoreCommand.waitForElementVisible;
-        const { awaitedPath } = getState(value);
-        const jsPath = awaitedPath.toJSON();
-        return iGroup.push({ command, delayElement: jsPath });
-      }
       case Command.waitForMillis: {
         const command = CoreCommand.waitForMillis;
         return iGroup.push({ command, delayMillis: value });

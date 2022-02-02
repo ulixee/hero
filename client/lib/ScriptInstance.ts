@@ -51,14 +51,14 @@ export default class ScriptInstance {
     return name;
   }
 
-  public getScriptCallSite(getCallSiteRegardlessOfMode = false): ISourceCodeLocation[] {
+  public getScriptCallsite(getCallSiteRegardlessOfMode = false): ISourceCodeLocation[] {
     if (!getCallSiteRegardlessOfMode && this.mode === 'production') return;
     const stack = getCallSite(module.filename);
 
     let stackLines: ISourceCodeLocation[] = [];
     let lastIndexOfEntrypoint = -1;
-    for (const callSite of stack) {
-      const { filename } = callSite;
+    for (const callsite of stack) {
+      const { filename } = callsite;
       if (!filename) continue;
 
       if (
@@ -71,7 +71,7 @@ export default class ScriptInstance {
         lastIndexOfEntrypoint = stackLines.length;
       }
 
-      stackLines.push(callSite);
+      stackLines.push(callsite);
     }
 
     if (lastIndexOfEntrypoint >= 0) stackLines = stackLines.slice(0, lastIndexOfEntrypoint + 1);

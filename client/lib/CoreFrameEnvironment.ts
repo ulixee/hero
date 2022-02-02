@@ -14,10 +14,13 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import { delegate as AwaitedHandler } from './SetupAwaitedHandler';
+import { createInstanceWithNodePointer, delegate as AwaitedHandler } from './SetupAwaitedHandler';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import { INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import CoreTab from './CoreTab';
+import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 
 const awaitedPathState = StateMachine<
   any,
@@ -30,14 +33,16 @@ export default class CoreFrameEnvironment {
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
   public parentFrameId: number;
+  public coreTab: CoreTab;
 
   constructor(
+    coreTab: CoreTab,
     meta: ISessionMeta & { sessionName: string },
-    parentFrameId: number,
-    commandQueue: CoreCommandQueue,
+    parentFrameId?: number,
   ) {
     const { tabId, sessionId, frameId, sessionName } = meta;
     this.tabId = tabId;
+    this.coreTab = coreTab;
     this.sessionId = sessionId;
     this.frameId = frameId;
     this.parentFrameId = parentFrameId;
@@ -47,7 +52,7 @@ export default class CoreFrameEnvironment {
       sessionName,
       frameId,
     };
-    this.commandQueue = commandQueue.createSharedQueue(queueMeta);
+    this.commandQueue = coreTab.commandQueue.createSharedQueue(queueMeta);
   }
 
   public async getFrameMeta(): Promise<IFrameMeta> {
@@ -110,6 +115,10 @@ export default class CoreFrameEnvironment {
     return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
   }
 
+  public async getNodePointer(node: INodeIsolate): Promise<INodePointer> {
+    return await AwaitedHandler.createNodePointer(awaitedPathState, node);
+  }
+
   public async getCookies(): Promise<ICookie[]> {
     return await this.commandQueue.run('FrameEnvironment.getCookies');
   }
@@ -134,13 +143,46 @@ export default class CoreFrameEnvironment {
   }
 
   public async waitForElement(
-    jsPath: IJsPath,
-    opts: IWaitForElementOptions,
-  ): Promise<INodePointer> {
-    return await this.commandQueue.run<INodePointer>(
-      'FrameEnvironment.waitForElement',
-      jsPath,
-      opts,
+    element: ISuperElement,
+    options: IWaitForElementOptions,
+  ): Promise<ISuperElement> {
+    if (!element) throw new Error('Element being waited for is null');
+    const { waitForVisible, waitForHidden, waitForClickable, timeoutMs } = options ?? {};
+    try {
+      await this.coreTab.waitForState(
+        {
+          allTrue({ assert }) {
+            if (waitForVisible) assert(element.$isVisible);
+            else if (waitForClickable) assert(element.$isClickable);
+            else if (waitForHidden) assert(element.$isVisible, false);
+            else assert(element.$exists);
+          },
+        },
+        { timeoutMs },
+      );
+    } catch (error) {
+      if (error instanceof TimeoutError) {
+        const state = waitForHidden
+          ? 'be hidden'
+          : waitForClickable
+          ? 'be clickable'
+          : waitForVisible
+          ? 'be visible'
+          : 'exist';
+        throw new TimeoutError(`Timeout waiting for element to ${state}`);
+      }
+      throw error;
+    }
+
+    const nodePointer = await this.getNodePointer(element);
+    if (!nodePointer) return null;
+    const { awaitedOptions, awaitedPath } = awaitedPathState.getState(element);
+
+    return createInstanceWithNodePointer(
+      awaitedPathState,
+      awaitedPath,
+      awaitedOptions,
+      nodePointer,
     );
   }
 

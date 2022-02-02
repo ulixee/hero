@@ -200,7 +200,10 @@ describe('domStateGenerator', () => {
       await tab.goto(`${koaServer.baseUrl}/storage?state=cookieValue`);
       await tab.waitForLoad(LoadStatus.PaintingStable);
       await tab.getJsValue(`storage()`);
-      await tab.waitForElement(['document', ['querySelector', '.db-ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', '.db-ready']],
+        tab.mainFrameEnvironment,
+      );
       await tab.flushDomChanges();
       await session.close();
 
@@ -300,7 +303,10 @@ describe('domStateGenerator', () => {
       const startTime = Date.now();
 
       await tab.waitForLoad(LoadStatus.PaintingStable);
-      await tab.waitForElement(['document', ['querySelector', '#ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', '#ready']],
+        tab.mainFrameEnvironment,
+      );
 
       await session.close();
       domStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);

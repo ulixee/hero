@@ -165,61 +165,6 @@ class JsPath {
     }
     return results;
   }
-
-  public static async waitForElement(
-    jsPath: IJsPath,
-    containerOffset: IPoint,
-    options: {
-      waitForVisible: boolean;
-      waitForHidden: boolean;
-      waitForClickable: boolean;
-    },
-    timeoutMillis: number,
-  ): Promise<IExecJsPathResult<INodeVisibility>> {
-    const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
-    const { waitForVisible, waitForHidden, waitForClickable } = options;
-    try {
-      const end = new Date();
-      end.setTime(end.getTime() + (timeoutMillis || 0));
-
-      while (new Date() < end) {
-        try {
-          if (!objectAtPath.objectAtPath) objectAtPath.lookup();
-
-          const visibility = objectAtPath.getComputedVisibility();
-
-          let isElementValid = visibility.nodeExists;
-          if (waitForVisible) {
-            isElementValid = visibility.isVisible === true;
-          } else if (waitForHidden) {
-            isElementValid = visibility.isVisible === false;
-          } else if (waitForClickable) {
-            isElementValid = visibility.isClickable === true;
-          }
-
-          if (isElementValid) {
-            return {
-              nodePointer: objectAtPath.extractNodePointer(),
-              value: visibility,
-            };
-          }
-        } catch (err) {
-          if (String(err).includes('not a valid selector')) throw err;
-          // can also happen if lookup path doesn't exist yet... in which case we want to keep trying
-        }
-        // eslint-disable-next-line promise/param-names
-        await new Promise(resolve1 => setTimeout(resolve1, 20));
-        await new Promise(requestAnimationFrame);
-      }
-
-      return {
-        nodePointer: objectAtPath.extractNodePointer(),
-        value: objectAtPath.getComputedVisibility(),
-      };
-    } catch (error) {
-      return objectAtPath.toReturnError(error);
-    }
-  }
 }
 
 // / Object At Path Class //////

@@ -18,7 +18,6 @@ import {
   getNodePointerFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
-import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 
 const { log } = Log(module);
 
@@ -60,9 +59,9 @@ export class JsPath {
     if (typeof jsPath[0] === 'number') {
       const paths = this.getJsPathHistoryForNode(jsPath[0]);
       for (const path of paths) {
-        const result = await this.runJsPath<any>('exec', path.jsPath, containerOffset);
+        const result = await this.getNodePointer(path.jsPath, containerOffset);
         const nodeId = result.nodePointer?.id;
-        if (nodeId !== path.nodeId) {
+        if (nodeId && nodeId !== path.nodeId) {
           this.logger.info('JsPath.nodeRedirectFound', {
             sourceNodeId: path.nodeId,
             newNodeId: nodeId,
@@ -97,21 +96,6 @@ export class JsPath {
       }
       jsPath[0] = id;
     }
-  }
-
-  public waitForElement(
-    jsPath: IJsPath,
-    containerOffset: IPoint,
-    options: IWaitForElementOptions,
-    timeoutMillis: number,
-  ): Promise<IExecJsPathResult<INodeVisibility>> {
-    return this.runJsPath<INodeVisibility>(
-      `waitForElement`,
-      jsPath,
-      containerOffset,
-      options as any,
-      timeoutMillis,
-    );
   }
 
   public simulateOptionClick(jsPath: IJsPath): Promise<IExecJsPathResult<boolean>> {

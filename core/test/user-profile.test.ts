@@ -443,7 +443,10 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
       ]);
       expect(localContent.value).toBe('2');
 
-      await tab.waitForElement(['document', ['querySelector', '#cross.ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', '#cross.ready']],
+        tab.mainFrameEnvironment,
+      );
       const crossContent = await tab.execJsPath([
         'document',
         ['querySelector', '#cross'],
@@ -482,7 +485,10 @@ describe('UserProfile IndexedDb tests', () => {
       Helpers.needsClosing.push(tab.session);
       await tab.goto(`${koaServer.baseUrl}/dbfail`);
       await tab.waitForLoad('PaintingStable');
-      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', 'body.ready']],
+        tab.mainFrameEnvironment,
+      );
 
       await expect(tab.session.exportUserProfile()).resolves.toBeTruthy();
     }
@@ -581,7 +587,10 @@ describe('UserProfile IndexedDb tests', () => {
       Helpers.needsClosing.push(tab.session);
       await tab.goto(`${koaServer.baseUrl}/db`);
       await tab.waitForLoad('PaintingStable');
-      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', 'body.ready']],
+        tab.mainFrameEnvironment,
+      );
 
       profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
@@ -607,7 +616,10 @@ describe('UserProfile IndexedDb tests', () => {
 
       await tab.goto(`${koaServer.baseUrl}/dbrestore`);
       await tab.waitForLoad('PaintingStable');
-      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
+      await Helpers.waitForElement(
+        ['document', ['querySelector', 'body.ready']],
+        tab.mainFrameEnvironment,
+      );
 
       const recordsJson = await tab.execJsPath<string>([
         'document',

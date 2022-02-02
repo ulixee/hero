@@ -76,14 +76,14 @@ describe('basic waitForLocation change detections', () => {
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/page1`);
     await hero.waitForPaintingStable();
-    const startlink = hero.document.querySelector('a');
-    await hero.interact({ click: startlink, waitForElementVisible: startlink });
+    const startlink = await hero.document.querySelector('a').$waitForVisible();
+    await hero.interact({ click: startlink });
     await hero.waitForLocation('change');
     await hero.waitForPaintingStable();
     expect(await hero.url).toBe(`${koaServer.baseUrl}/page3`);
 
-    const nextlink = hero.document.querySelector('a');
-    await hero.interact({ click: nextlink, waitForElementVisible: nextlink });
+    const nextlink = await hero.document.querySelector('a').$waitForVisible();
+    await hero.interact({ click: nextlink });
     await hero.waitForLocation('change');
     await hero.waitForPaintingStable();
     expect(await hero.url).toBe(`${koaServer.baseUrl}/finish`);
@@ -117,14 +117,14 @@ describe('basic waitForLocation change detections', () => {
     await hero.goto(startUrl);
     const firstUrl = await hero.url;
     await hero.waitForPaintingStable();
-    const readyLink = hero.document.querySelector('a');
-    await hero.interact({ click: readyLink, waitForElementVisible: readyLink });
+    const readyLink = await hero.document.querySelector('a').$waitForVisible();
+    await hero.interact({ click: readyLink });
     await hero.waitForLocation('change');
     const secondUrl = await hero.url;
     await hero.waitForPaintingStable();
 
-    const readyLink2 = hero.document.querySelector('a');
-    await hero.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
+    const readyLink2 = await hero.document.querySelector('a').$waitForVisible();
+    await hero.interact({ click: readyLink2 });
     await hero.waitForLocation('change');
     await hero.waitForPaintingStable();
     const lastUrl = await hero.url;

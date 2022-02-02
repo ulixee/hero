@@ -29,7 +29,7 @@ describe('basic Document tests', () => {
     const links = await hero.document.querySelectorAll('a');
 
     for (const link of links) {
-      await hero.interact({ click: link, waitForElementVisible: link });
+      await hero.interact({ click: link });
       await hero.waitForLocation('change');
     }
     const finalUrl = await hero.url;

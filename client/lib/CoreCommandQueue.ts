@@ -148,6 +148,7 @@ export default class CoreCommandQueue {
       args,
       commandId: this.nextCommandId,
       startDate: new Date(),
+      callsite: this.getCallsite(),
     });
   }
 
@@ -164,10 +165,6 @@ export default class CoreCommandQueue {
       }
     }
 
-    let callsite: string;
-    if (this.mode !== 'production') {
-      callsite = JSON.stringify(scriptInstance.getScriptCallSite());
-    }
     if (this.internalState.interceptFn) {
       const result = this.internalState.interceptFn(this.meta, command, ...args);
       if (result && result instanceof Error) {
@@ -176,7 +173,7 @@ export default class CoreCommandQueue {
       }
       return Promise.resolve(result as T);
     }
-
+    const callsite = this.getCallsite();
     const commandId = this.nextCommandId;
 
     const commandPayload = {
@@ -231,6 +228,12 @@ export default class CoreCommandQueue {
       this.commandCounter,
       this.internalState,
     );
+  }
+
+  private getCallsite(): string {
+    if (this.mode !== 'production') {
+      return JSON.stringify(scriptInstance.getScriptCallsite());
+    }
   }
 
   private async sendRequest<T>(

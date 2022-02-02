@@ -363,9 +363,9 @@ from ${this.tableName} where ${useResourceBody}`,
 
   public static toResourceSummary(record: IResourcesRecord): IResourceSummary {
     const headers =
-      typeof record.responseHeaders === 'string'
+      (typeof record.responseHeaders === 'string'
         ? JSON.parse(record.responseHeaders ?? '{}')
-        : record.responseHeaders;
+        : record.responseHeaders) ?? {};
 
     return {
       id: record.id,

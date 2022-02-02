@@ -3,7 +3,7 @@ import {
   IElementInteractVerification,
   IMousePositionXY,
 } from '@ulixee/hero-interfaces/IInteractions';
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 
 export type IInteraction = ICommand | ICommandDetailed;
 type IInteractions = IInteraction[];
@@ -39,8 +39,6 @@ export enum Command {
   keyUp = 'keyUp',
   type = 'type',
 
-  waitForNode = 'waitForNode',
-  waitForElementVisible = 'waitForElementVisible',
   waitForMillis = 'waitForMillis',
 }
 
@@ -71,8 +69,6 @@ export interface ICommandDetailed {
   [Command.keyUp]?: IKeyboardKeyCode;
   [Command.keyDown]?: IKeyboardKeyCode;
 
-  [Command.waitForNode]?: ISuperNode;
-  [Command.waitForElementVisible]?: ISuperElement;
   [Command.waitForMillis]?: number;
 }
 
