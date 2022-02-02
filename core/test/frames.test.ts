@@ -33,7 +33,7 @@ test('can wait for sub-frames to load', async () => {
       `;
   });
   await tab.goto(`${koaServer.baseUrl}/main`);
-  await tab.waitForElement(['document', ['querySelector', 'iframe']]);
+  await Helpers.waitForElement(['document', ['querySelector', 'iframe']], tab.mainFrameEnvironment);
 
   const frames = await tab.getFrameEnvironments();
   expect(frames).toHaveLength(2);

@@ -41,8 +41,6 @@ export enum InteractionCommand {
 
   type = 'type',
 
-  waitForNode = 'waitForNode',
-  waitForElementVisible = 'waitForElementVisible',
   waitForMillis = 'waitForMillis',
 }
 

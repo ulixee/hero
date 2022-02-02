@@ -1,5 +1,6 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
@@ -45,7 +46,11 @@ export default class CoreEventHeap {
     jsPath: IJsPath | null,
     type: string,
     listenerFn: (...args: any[]) => void,
-    options?,
+    options?: any,
+    source?: {
+      callsite: ISourceCodeLocation[];
+      retryNumber: number;
+    },
   ): Promise<void> {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
@@ -56,9 +61,8 @@ export default class CoreEventHeap {
       startDate: new Date(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
-      callsite: this.shouldIncludeCallSite()
-        ? JSON.stringify(scriptInstance.getScriptCallSite())
-        : null,
+      callsite: JSON.stringify(source?.callsite ?? scriptInstance.getScriptCallsite()),
+      retryNumber: source?.retryNumber,
     });
 
     this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
@@ -88,6 +92,10 @@ export default class CoreEventHeap {
     type: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
+    source?: {
+      callsite: ISourceCodeLocation[];
+      retryNumber: number;
+    },
   ): void {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);
@@ -100,9 +108,8 @@ export default class CoreEventHeap {
         startDate: new Date(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
-        callsite: this.shouldIncludeCallSite()
-          ? JSON.stringify(scriptInstance.getScriptCallSite())
-          : null,
+        callsite: JSON.stringify(source?.callsite ?? scriptInstance.getScriptCallsite()),
+        retryNumber: source?.retryNumber,
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });

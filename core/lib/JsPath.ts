@@ -18,7 +18,6 @@ import {
   getNodePointerFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
-import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 
 const { log } = Log(module);
 
@@ -97,21 +96,6 @@ export class JsPath {
       }
       jsPath[0] = id;
     }
-  }
-
-  public waitForElement(
-    jsPath: IJsPath,
-    containerOffset: IPoint,
-    options: IWaitForElementOptions,
-    timeoutMillis: number,
-  ): Promise<IExecJsPathResult<INodeVisibility>> {
-    return this.runJsPath<INodeVisibility>(
-      `waitForElement`,
-      jsPath,
-      containerOffset,
-      options as any,
-      timeoutMillis,
-    );
   }
 
   public simulateOptionClick(jsPath: IJsPath): Promise<IExecJsPathResult<boolean>> {

@@ -339,14 +339,6 @@ export default class Interactor implements IInteractionsHelper {
         break;
       }
 
-      case InteractionCommand.waitForNode: {
-        await this.frameEnvironment.waitForDom(interaction.delayNode);
-        break;
-      }
-      case InteractionCommand.waitForElementVisible: {
-        await this.frameEnvironment.waitForDom(interaction.delayElement, { waitForVisible: true });
-        break;
-      }
       case InteractionCommand.waitForMillis: {
         await waitFor(interaction.delayMillis, resolvable);
         break;

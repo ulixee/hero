@@ -53,8 +53,10 @@ function addMe() {
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
-
-    await tab.waitForElement(['document', ['querySelector', 'a#link2']]);
+    await Helpers.waitForElement(
+      ['document', ['querySelector', 'a#link2']],
+      tab.mainFrameEnvironment,
+    );
 
     const changes = await tab.getDomChanges(tab.mainFrameId, commandId);
     expect(changes).toHaveLength(2);
@@ -86,7 +88,7 @@ function removeMe() {
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test2`);
     const loadCommand = tab.lastCommandId;
 
-    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
@@ -132,7 +134,7 @@ function sort() {
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test3`);
     const loadCommand = tab.lastCommandId;
 
-    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
@@ -177,7 +179,7 @@ function sort() {
     expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test4`);
     const loadCommand = tab.lastCommandId;
 
-    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
@@ -268,7 +270,7 @@ function clickIt() {
     await tab.goto(`${koaServer.baseUrl}/cssom`);
     await tab.waitForLoad('DomContentLoaded');
 
-    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
@@ -317,7 +319,7 @@ customElements.define('image-list', class extends HTMLElement {
     await tab.goto(`${koaServer.baseUrl}/test5`);
     await tab.waitForLoad('DomContentLoaded');
 
-    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);

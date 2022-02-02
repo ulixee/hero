@@ -24,6 +24,9 @@ import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
 import { Helpers } from './index';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
+import type { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
+import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -381,6 +384,36 @@ export function httpGetWithSocket(
     request.on('error', err => {
       if (isResolved) return;
       reject(err);
+    });
+  });
+}
+
+let domListenerId = 1;
+export async function waitForElement(jsPath: IJsPath, frame: FrameEnvironment): Promise<void> {
+  const listener = frame.tab.addDomStateListener(`${(domListenerId += 1)}`, {
+    url: null,
+    name: null,
+    callsite: `callsite:${domListenerId}`,
+    commands: {
+      visibility: [
+        frame.id,
+        'FrameEnvironment.execJsPath',
+        [[...jsPath, [getComputedVisibilityFnName]]],
+      ],
+    },
+  });
+  return new Promise(resolve => {
+    const timeout = setTimeout(() => {
+      listener.stop({ didMatch: false });
+      resolve();
+    }, 30e3);
+    listener.on('updated', event => {
+      const { visibility } = event;
+      if (visibility.value?.nodeExists) {
+        resolve();
+        listener.stop({ didMatch: true });
+        clearTimeout(timeout);
+      }
     });
   });
 }

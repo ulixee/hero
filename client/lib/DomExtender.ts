@@ -1,17 +1,17 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
 import {
   ISuperElement,
-  ISuperNode,
-  ISuperHTMLElement,
-  ISuperNodeList,
   ISuperHTMLCollection,
+  ISuperHTMLElement,
+  ISuperNode,
+  ISuperNodeList,
 } from 'awaited-dom/base/interfaces/super';
 import {
   IElement,
-  INode,
-  IHTMLElement,
-  INodeList,
   IHTMLCollection,
+  IHTMLElement,
+  INode,
+  INodeList,
 } from 'awaited-dom/base/interfaces/official';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
@@ -27,7 +27,6 @@ import { IElementInteractVerification } from '@ulixee/hero-interfaces/IInteracti
 import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
 import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
 import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import { createInstanceWithNodePointer } from './SetupAwaitedHandler';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -40,11 +39,14 @@ const awaitedPathState = StateMachine<
 
 interface IBaseExtendNode {
   $isVisible: Promise<boolean>;
+  $exists: Promise<boolean>;
   $isClickable: Promise<boolean>;
   $clearValue(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
   $collect(name: string): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
+  $waitForExists(options?: { timeoutMs?: number }): Promise<ISuperElement>;
+  $waitForClickable(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
 }
@@ -74,7 +76,7 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible'> = {
+const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists'> = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
@@ -93,36 +95,36 @@ const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible'> = {
     );
   },
   async $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const { awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
 
-    const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), {
+    return await coreFrame.waitForElement(this, {
       waitForVisible: true,
       ...options,
     });
-    if (!nodePointer) return null;
-    return createInstanceWithNodePointer(
-      awaitedPathState,
-      awaitedPath,
-      awaitedOptions,
-      nodePointer,
-    );
   },
-  async $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+  async $waitForClickable(options?: { timeoutMs?: number }): Promise<ISuperElement> {
+    const { awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
 
-    const nodePointer = await coreFrame.waitForElement(awaitedPath.toJSON(), {
+    return await coreFrame.waitForElement(this, {
+      waitForClickable: true,
+      ...options,
+    });
+  },
+  async $waitForExists(options?: { timeoutMs?: number }): Promise<ISuperElement> {
+    const { awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+
+    return await coreFrame.waitForElement(this, options);
+  },
+  async $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement> {
+    const { awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    return await coreFrame.waitForElement(this, {
       waitForHidden: true,
       ...options,
     });
-    if (!nodePointer) return null;
-    return createInstanceWithNodePointer(
-      awaitedPathState,
-      awaitedPath,
-      awaitedOptions,
-      nodePointer,
-    );
   },
   async $clearValue(): Promise<void> {
     const { awaitedOptions } = awaitedPathState.getState(this);
@@ -141,6 +143,11 @@ const NodeExtensionGetters = {
     const coreFrame = await getCoreFrame(this);
     const visibility = await coreFrame.getComputedVisibility(this);
     return visibility.isClickable;
+  },
+  async $exists(): Promise<boolean> {
+    const coreFrame = await getCoreFrame(this);
+    const visibility = await coreFrame.getComputedVisibility(this);
+    return visibility.nodeExists;
   },
   async $isVisible(): Promise<boolean> {
     const coreFrame = await getCoreFrame(this);

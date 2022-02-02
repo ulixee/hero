@@ -6,5 +6,5 @@ export default interface IFlowHandler {
   id?: number;
   state: IDomState | DomState;
   handlerFn: (error?: Error) => Promise<any>;
-  callSitePath: ISourceCodeLocation[];
+  callsitePath: ISourceCodeLocation[];
 }

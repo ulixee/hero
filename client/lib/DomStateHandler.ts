@@ -31,10 +31,11 @@ export default class DomStateHandler {
   #onMatchFn: (error: Error, didMatch?: boolean) => any;
   #isSubscribed = false;
   #onlyRunCallbackOnMatch = false;
+  #retryNumber = 0;
 
-  constructor(readonly domState: IDomState, coreTab: CoreTab, callSitePath: ISourceCodeLocation[]) {
+  constructor(readonly domState: IDomState, coreTab: CoreTab, callsitePath: ISourceCodeLocation[]) {
     this.#coreTab = coreTab;
-    this.#callsite = callSitePath;
+    this.#callsite = callsitePath;
     bindFunctions(this);
   }
 
@@ -63,6 +64,10 @@ export default class DomStateHandler {
       'dom-state',
       this.onStateChanged,
       listenArgs,
+      {
+        retryNumber: this.#retryNumber,
+        callsite: this.#callsite,
+      },
     );
     this.#isSubscribed = true;
   }
@@ -70,13 +75,23 @@ export default class DomStateHandler {
   async clear(result: boolean, error?: Error): Promise<void> {
     if (!this.#isSubscribed) return;
     this.#isSubscribed = false;
-    await this.#coreTab.removeEventListener(this.#jsPath, 'dom-state', this.onStateChanged, {
-      didMatch: result,
-      error,
-    });
+    await this.#coreTab.removeEventListener(
+      this.#jsPath,
+      'dom-state',
+      this.onStateChanged,
+      {
+        didMatch: result,
+        error,
+      },
+      {
+        retryNumber: this.#retryNumber,
+        callsite: this.#callsite,
+      },
+    );
   }
 
-  async check(): Promise<boolean> {
+  async check(isRetry = false): Promise<boolean> {
+    if (isRetry) this.#retryNumber += 1;
     return await this.waitFor(30e3, true);
   }
 

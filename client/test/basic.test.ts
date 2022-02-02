@@ -95,10 +95,10 @@ describe('basic Hero tests', () => {
 
 describe('ScriptInstance tests', () => {
   it('should be able to properly get a script location', () => {
-    expect(scriptInstance.getScriptCallSite()).toHaveLength(1);
+    expect(scriptInstance.getScriptCallsite()).toHaveLength(1);
 
     (function testNested() {
-      expect(scriptInstance.getScriptCallSite()).toHaveLength(2);
+      expect(scriptInstance.getScriptCallsite()).toHaveLength(2);
     })();
   });
 });

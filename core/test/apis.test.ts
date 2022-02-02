@@ -43,7 +43,10 @@ describe('basic Apis tests', () => {
     await tab.goto(`${koaServer.baseUrl}/api-test`);
     await tab.waitForLoad('DomContentLoaded');
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
-    await tab.waitForElement(['document', ['querySelector', 'a#link2']]);
+    await Helpers.waitForElement(
+      ['document', ['querySelector', 'a#link2']],
+      tab.mainFrameEnvironment,
+    );
     await tab.session.close();
     await Core.shutdown();
   });
@@ -88,8 +91,8 @@ describe('basic Apis tests', () => {
       args: { sessionId },
     });
     expect(result.tabDetails).toHaveLength(1);
-    expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(5);
-    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(5);
+    expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(4);
+    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(4);
     expect(result.tabDetails[0].ticks.filter(x => x.isNewDocumentTick)).toHaveLength(1);
     // only should be returned if asked for
     expect(result.tabDetails[0].mouse).not.toBeTruthy();
@@ -109,7 +112,7 @@ describe('basic Apis tests', () => {
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].paintEvents.length).toBeGreaterThanOrEqual(1);
-    expect(result.tabDetails[0].commands).toHaveLength(5);
+    expect(result.tabDetails[0].commands).toHaveLength(4);
     expect(result.tabDetails[0].mouse.length).toBeGreaterThanOrEqual(1);
   });
 });

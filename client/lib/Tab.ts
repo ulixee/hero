@@ -35,7 +35,6 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
-import DomStateHandler from './DomStateHandler';
 import DomState from './DomState';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import InternalProperties from './InternalProperties';
@@ -245,29 +244,24 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     state: IDomState | DomState,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<void> {
-    const callSitePath = scriptInstance.getScriptCallSite();
-
     const coreTab = await this.#coreTabPromise;
-    const handler = new DomStateHandler(state, coreTab, callSitePath);
-    await handler.waitFor(options.timeoutMs);
+    return coreTab.waitForState(state, options);
   }
 
   public async checkState(state: IDomState | DomState): Promise<boolean> {
-    const callSitePath = scriptInstance.getScriptCallSite();
-
+    const callsitePath = scriptInstance.getScriptCallsite();
     const coreTab = await this.#coreTabPromise;
-    const handler = new DomStateHandler(state, coreTab, callSitePath);
-    return await handler.check();
+    return coreTab.checkState(state, callsitePath);
   }
 
   public async registerFlowHandler(
     state: IDomState | DomState,
     handlerFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
-    const callSitePath = scriptInstance.getScriptCallSite();
+    const callsitePath = scriptInstance.getScriptCallsite();
 
     const coreTab = await this.#coreTabPromise;
-    await coreTab.registerFlowHandler(state, handlerFn, callSitePath);
+    await coreTab.registerFlowHandler(state, handlerFn, callsitePath);
   }
 
   public async checkFlowHandlers(): Promise<void> {
@@ -285,7 +279,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForElement(
     element: ISuperElement,
     options?: IWaitForElementOptions,
-  ): Promise<ISuperElement | null> {
+  ): Promise<ISuperElement> {
     return await this.mainFrameEnvironment.waitForElement(element, options);
   }
 

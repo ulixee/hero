@@ -25,6 +25,7 @@ import DomState from './DomState';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import { scriptInstance } from './Hero';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -66,10 +67,7 @@ export default class CoreTab implements IJsPathEventTarget {
     this.commandQueue.registerCommandRetryHandlerFn(this.shouldRetryFlowHandler.bind(this));
     this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
-    this.frameEnvironmentsById.set(
-      frameId,
-      new CoreFrameEnvironment(meta, null, this.commandQueue),
-    );
+    this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(this, meta, null));
 
     const resolvedThis = Promise.resolve(this);
     this.eventHeap.registerEventInterceptors({
@@ -78,14 +76,42 @@ export default class CoreTab implements IJsPathEventTarget {
     });
   }
 
+  public async waitForState(
+    state: IDomState | DomState,
+    options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
+  ): Promise<void> {
+    const callsitePath = scriptInstance.getScriptCallsite();
+    const handler = new DomStateHandler(state, this, callsitePath);
+    try {
+      await handler.waitFor(options.timeoutMs);
+    } catch (error) {
+      for (let i = 0; i < CoreCommandQueue.maxCommandRetries; i += 1) {
+        const keepGoing = await this.checkFlowHandlers();
+        if (!keepGoing) break;
+        const didPass = await handler.check(true);
+        if (didPass) return;
+      }
+
+      throw error;
+    }
+  }
+
+  public async checkState(
+    state: IDomState | DomState,
+    callsitePath: ISourceCodeLocation[],
+  ): Promise<boolean> {
+    const handler = new DomStateHandler(state, this, callsitePath);
+    return await handler.check();
+  }
+
   public async registerFlowHandler(
     state: IDomState | DomState,
     handlerFn: (error?: Error) => Promise<any>,
-    callSitePath: ISourceCodeLocation[],
+    callsitePath: ISourceCodeLocation[],
   ): Promise<void> {
     const id = this.flowHandlers.length + 1;
-    this.flowHandlers.push({ id, state, callSitePath, handlerFn });
-    await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', state.name, id, callSitePath);
+    this.flowHandlers.push({ id, state, callsitePath, handlerFn });
+    await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', state.name, id, callsitePath);
   }
 
   public async shouldRetryFlowHandler(
@@ -106,7 +132,7 @@ export default class CoreTab implements IJsPathEventTarget {
     const matchingStates: IFlowHandler[] = [];
     await Promise.all(
       this.flowHandlers.map(async flowHandler => {
-        const handler = new DomStateHandler(flowHandler.state, this, flowHandler.callSitePath);
+        const handler = new DomStateHandler(flowHandler.state, this, flowHandler.callsitePath);
         try {
           if (await handler.check()) {
             matchingStates.push(flowHandler);
@@ -142,7 +168,7 @@ export default class CoreTab implements IJsPathEventTarget {
       meta.frameId = frameMeta.id;
       this.frameEnvironmentsById.set(
         frameMeta.id,
-        new CoreFrameEnvironment(meta, frameMeta.parentFrameId, this.commandQueue),
+        new CoreFrameEnvironment(this, meta, frameMeta.parentFrameId),
       );
     }
     return this.frameEnvironmentsById.get(frameMeta.id);
@@ -230,8 +256,12 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
+    source?: {
+      callsite: ISourceCodeLocation[];
+      retryNumber: number;
+    },
   ): Promise<void> {
-    await this.eventHeap.addListener(jsPath, eventType, listenerFn, options);
+    await this.eventHeap.addListener(jsPath, eventType, listenerFn, options, source);
   }
 
   public async removeEventListener(
@@ -239,8 +269,12 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
+    source?: {
+      callsite: ISourceCodeLocation[];
+      retryNumber: number;
+    },
   ): Promise<void> {
-    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options);
+    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options, source);
   }
 
   public async flush(): Promise<void> {
