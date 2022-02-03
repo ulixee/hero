@@ -1,18 +1,6 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import {
-  ISuperElement,
-  ISuperHTMLCollection,
-  ISuperHTMLElement,
-  ISuperNode,
-  ISuperNodeList,
-} from 'awaited-dom/base/interfaces/super';
-import {
-  IElement,
-  IHTMLCollection,
-  IHTMLElement,
-  INode,
-  INodeList,
-} from 'awaited-dom/base/interfaces/official';
+import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
+import type {} from 'awaited-dom/base/interfaces/official';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
