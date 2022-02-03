@@ -151,7 +151,7 @@ export default class CoreFrameEnvironment {
     try {
       await this.coreTab.waitForState(
         {
-          allTrue({ assert }) {
+          all(assert) {
             if (waitForVisible) assert(element.$isVisible);
             else if (waitForClickable) assert(element.$isClickable);
             else if (waitForHidden) assert(element.$isVisible, false);

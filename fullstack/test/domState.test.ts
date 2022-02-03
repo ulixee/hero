@@ -19,15 +19,15 @@ test('can wait for a url', async () => {
   await hero.goto(`${koaServer.baseUrl}/waitForDomState1`);
   const state1 = hero.activeTab.waitForState({
     name: 'state1',
-    allTrue({ assert }) {
+    all(assert) {
       assert(hero.url, url => url.includes('waitForDomState'));
     },
   });
   await expect(state1).resolves.toBeUndefined();
 
-  const state2 = hero.activeTab.checkState({
+  const state2 = hero.activeTab.validateState({
     name: 'state2',
-    allTrue({ assert }) {
+    all(assert ) {
       assert(hero.url, url => url.includes('page2'));
     },
   });
@@ -52,12 +52,12 @@ setInterval(() => {
 
   await hero.goto(`${koaServer.baseUrl}/waitForDomState2`);
   const domState = {
-    allTrue({ assert }) {
+    all(assert) {
       assert(hero.document.querySelectorAll('div').length, x => x >= 4);
     },
   };
   await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined();
-  await expect(hero.activeTab.checkState(domState)).resolves.toBe(true);
+  await expect(hero.activeTab.validateState(domState)).resolves.toBe(true);
 });
 
 test('can test for page state across redirects', async () => {
@@ -91,14 +91,14 @@ test('can test for page state across redirects', async () => {
   await hero.click(hero.document.querySelector('a'));
 
   const state = new DomState({
-    allTrue({ assert }) {
+    all(assert) {
       assert(hero.url, x => x.includes('waitForDomStateRedirectLast'));
       assert(hero.isPaintingStable);
       assert(hero.document.querySelector('h1').dataset, x => x.final === 'true');
     },
   });
   await expect(hero.activeTab.waitForState(state)).resolves.toBeUndefined();
-  await expect(hero.activeTab.checkState(state)).resolves.toBe(true);
+  await expect(hero.activeTab.validateState(state)).resolves.toBe(true);
 });
 
 test('surfaces errors in assertions', async () => {
@@ -107,7 +107,7 @@ test('surfaces errors in assertions', async () => {
   });
   const hero = await openBrowser('/waitForDomStateError');
   const domState = {
-    allTrue({ assert }) {
+    all(assert) {
       // @ts-ignore
       assert(hero.document.querySelector('h1').getAttribute('id'), x => test.includes(x));
     },
@@ -117,7 +117,7 @@ test('surfaces errors in assertions', async () => {
     'test.includes is not a function',
   );
 
-  await expect(hero.activeTab.checkState(domState)).rejects.toThrowError(
+  await expect(hero.activeTab.validateState(domState)).rejects.toThrowError(
     'test.includes is not a function',
   );
 });
@@ -129,7 +129,7 @@ test('surfaces errors in query selectors that are invalid (vs simply not there)'
   const hero = await openBrowser('/waitForDomStateSelectorError');
 
   const state = new DomState({
-    allTrue({ assert }) {
+    all(assert) {
       // @ts-ignore
       assert(hero.document.querySelector('h1[id@1]').getAttribute('id'), '1');
     },

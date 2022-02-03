@@ -23,7 +23,7 @@ import DomStateHandler from './DomStateHandler';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import DomState from './DomState';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
-import IDomState from '@ulixee/hero-interfaces/IDomState';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { scriptInstance } from './Hero';
 
@@ -77,16 +77,19 @@ export default class CoreTab implements IJsPathEventTarget {
   }
 
   public async waitForState(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<void> {
     const callsitePath = scriptInstance.getScriptCallsite();
+    if (typeof state === 'function') {
+      state = { all: state };
+    }
     const handler = new DomStateHandler(state, this, callsitePath);
     try {
       await handler.waitFor(options.timeoutMs);
     } catch (error) {
       for (let i = 0; i < CoreCommandQueue.maxCommandRetries; i += 1) {
-        const keepGoing = await this.checkFlowHandlers();
+        const keepGoing = await this.triggerFlowHandlers();
         if (!keepGoing) break;
         const didPass = await handler.check(true);
         if (didPass) return;
@@ -96,20 +99,26 @@ export default class CoreTab implements IJsPathEventTarget {
     }
   }
 
-  public async checkState(
-    state: IDomState | DomState,
+  public async validateState(
+    state: IDomState | DomState | IDomStateAllFn,
     callsitePath: ISourceCodeLocation[],
   ): Promise<boolean> {
+    if (typeof state === 'function') {
+      state = { all: state };
+    }
     const handler = new DomStateHandler(state, this, callsitePath);
     return await handler.check();
   }
 
   public async registerFlowHandler(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     handlerFn: (error?: Error) => Promise<any>,
     callsitePath: ISourceCodeLocation[],
   ): Promise<void> {
     const id = this.flowHandlers.length + 1;
+    if (typeof state === 'function') {
+      state = { all: state };
+    }
     this.flowHandlers.push({ id, state, callsitePath, handlerFn });
     await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', state.name, id, callsitePath);
   }
@@ -123,12 +132,12 @@ export default class CoreTab implements IJsPathEventTarget {
       command.command === 'FrameEnvironment.execJsPath' ||
       command.command === 'FrameEnvironment.interact'
     ) {
-      return await this.checkFlowHandlers();
+      return await this.triggerFlowHandlers();
     }
     return false;
   }
 
-  public async checkFlowHandlers(): Promise<boolean> {
+  public async triggerFlowHandlers(): Promise<boolean> {
     const matchingStates: IFlowHandler[] = [];
     await Promise.all(
       this.flowHandlers.map(async flowHandler => {

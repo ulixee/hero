@@ -31,16 +31,14 @@ test('will trigger a flow handler when an error occurs', async () => {
   const spy = jest.fn();
 
   await hero.registerFlowHandler(
-    {
-      allTrue({ assert }) {
-        assert(hero.querySelector('.ready').$isVisible, false);
-      },
+    assert => {
+      assert(hero.querySelector('.ready').$isVisible, false);
     },
     async error => {
       spy();
       expect(error).not.toBeTruthy();
       await hero.querySelector('.make-ready').$click();
-    },
+    }
   );
 
   expect(spy).not.toHaveBeenCalled();
@@ -65,7 +63,7 @@ test('bubbles up handler errors to the line of code that triggers the handlers',
 
   await hero.registerFlowHandler(
     {
-      allTrue({ assert }) {
+      all(assert) {
         assert(hero.querySelector('.ready').$isVisible, false);
       },
     },
@@ -110,7 +108,7 @@ test('checks multiple handlers', async () => {
 
   await hero.registerFlowHandler(
     {
-      allTrue({ assert }) {
+      all(assert) {
         assert(hero.querySelector('.popup').$isVisible);
       },
     },
@@ -123,7 +121,7 @@ test('checks multiple handlers', async () => {
   const linkSpy = jest.fn();
   await hero.registerFlowHandler(
     {
-      allTrue({ assert }) {
+      all(assert) {
         assert(hero.querySelector('.wanted').$isVisible, false);
       },
     },

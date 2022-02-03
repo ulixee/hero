@@ -86,7 +86,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
 
     tab.once('close', this.stop);
     this.bindFrameEvents();
-    this.checkInterval = setInterval(this.checkState, 2e3).unref();
+    this.checkInterval = setInterval(this.validateState, 2e3).unref();
   }
 
   public stop(result?: { didMatch: boolean; error?: Error }): void {
@@ -102,8 +102,8 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
     for (const frameId of this.watchedFrameIds) {
       const frame = this.tab.getFrameEnvironment(frameId);
       if (!frame) continue;
-      frame.off('paint', this.checkState);
-      frame.navigations.off('status-change', this.checkState);
+      frame.off('paint', this.validateState);
+      frame.navigations.off('status-change', this.validateState);
     }
   }
 
@@ -218,7 +218,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
       this.trackCommand(id, frameId, command, args);
     }
 
-    setImmediate(this.checkState);
+    setImmediate(this.validateState);
   }
 
   private trackCommand(id: string, frameId: number, command: string, args: any[]): void {
@@ -235,8 +235,8 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
     if (!this.watchedFrameIds.has(frame.id)) {
       this.watchedFrameIds.add(frame.id);
 
-      frame.on('paint', this.checkState);
-      frame.navigations.on('status-change', this.checkState);
+      frame.on('paint', this.validateState);
+      frame.navigations.on('status-change', this.validateState);
     }
   }
 
@@ -250,7 +250,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
     this.lastResults = stringifiedResults;
   }
 
-  private async checkState(): Promise<void> {
+  private async validateState(): Promise<void> {
     if (this.shouldStop()) return;
     if (this.isCheckingState) {
       this.runAgainTime = Date.now();
@@ -272,7 +272,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
     } finally {
       this.isCheckingState = false;
       if (this.runAgainTime > 0)
-        setTimeout(this.checkState, Date.now() - this.runAgainTime).unref();
+        setTimeout(this.validateState, Date.now() - this.runAgainTime).unref();
     }
   }
 

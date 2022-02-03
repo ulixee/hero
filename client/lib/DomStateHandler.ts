@@ -185,11 +185,11 @@ export default class DomStateHandler {
   private async createAssertionSets(): Promise<IStateAndAssertion<any>[]> {
     const assertionSets: IStateAndAssertion<any>[] = [];
 
-    this.domState.allTrue({
-      assert(statePromise, assertion) {
+    this.domState.all(
+      function assert(statePromise, assertion) {
         assertionSets.push([Promise.resolve(statePromise).catch(err => err), assertion]);
-      },
-    });
+      }
+    );
 
     // wait for all to complete
     for (const assertion of assertionSets) {
@@ -219,11 +219,11 @@ export default class DomStateHandler {
       async () => {
         const runCommands: Promise<any>[] = [];
         // trigger a run so we can see commands that get triggered
-        result = this.domState.allTrue({
-          assert: statePromise => {
+        result = this.domState.all(
+          function assert(statePromise) {
             runCommands.push(Promise.resolve(statePromise).catch(() => null));
-          },
-        });
+          }
+        );
         await Promise.all(runCommands);
       },
     );
@@ -232,7 +232,7 @@ export default class DomStateHandler {
       throw new Error(
         `DomState (${
           this.domState.name ?? 'no name'
-        }) allTrue({ assert }) returns a Promise. Each state function must have synchronous assertions.`,
+        }) all(assert) returns a Promise. Each state function must have synchronous assertions.`,
       );
     }
   }
