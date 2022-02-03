@@ -468,6 +468,14 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.querySelectorAll(selector);
   }
 
+  public xpathSelector(xpath: string, orderedNodeResults = false): ISuperNode {
+    return this.activeTab.xpathSelector(xpath, orderedNodeResults);
+  }
+
+  public xpathSelectorAll(xpath: string, orderedNodeResults = false): Promise<ISuperNode[]> {
+    return this.activeTab.xpathSelectorAll(xpath, orderedNodeResults);
+  }
+
   public takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
     return this.activeTab.takeScreenshot(options);
   }

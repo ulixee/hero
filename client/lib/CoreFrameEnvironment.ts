@@ -1,4 +1,4 @@
-import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
+import { IInteractionGroups, isMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
@@ -8,16 +8,23 @@ import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
-import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import {
+  getComputedVisibilityFnName,
+  isFocusedFnName,
+} from '@ulixee/hero-interfaces/jsPathFnNames';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import { createInstanceWithNodePointer, delegate as AwaitedHandler } from './SetupAwaitedHandler';
+import {
+  convertJsPathArgs,
+  createInstanceWithNodePointer,
+  delegate as AwaitedHandler,
+} from './SetupAwaitedHandler';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import { INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CoreTab from './CoreTab';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
@@ -108,11 +115,22 @@ export default class CoreFrameEnvironment {
   }
 
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
+    for (const interactionGroup of interactionGroups) {
+      for (const interactionStep of interactionGroup) {
+        if (interactionStep.mousePosition && !isMousePositionXY(interactionStep.mousePosition)) {
+          convertJsPathArgs(interactionStep.mousePosition);
+        }
+      }
+    }
     await this.commandQueue.run('FrameEnvironment.interact', ...interactionGroups);
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
     return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
+  }
+
+  public async isFocused(element: IElementIsolate): Promise<boolean> {
+    return await AwaitedHandler.runMethod(awaitedPathState, element, isFocusedFnName, []);
   }
 
   public async getNodePointer(node: INodeIsolate): Promise<INodePointer> {

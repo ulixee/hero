@@ -1,6 +1,7 @@
 import PuppetChrome from '@ulixee/hero-puppet-chrome';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IPuppetLauncher from '@ulixee/hero-interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -103,6 +104,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
     proxy?: IProxyConnectionOptions,
     isIncognito = true,
   ): Promise<IPuppetContext> {
+    if (!this.isReady) throw new CanceledPromiseError('This Puppet has been shut down');
     await this.isReady.promise;
     if (!this.browser) {
       throw new Error('This Puppet instance has not had start() called on it');
