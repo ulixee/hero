@@ -9,7 +9,7 @@ import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
-import { Hero, FrameEnvironment, Tab } from './lib/extendables';
+import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
 import ConnectionToRemoteCoreServer from './connections/ConnectionToRemoteCoreServer';
 import ConnectionToCore from './connections/ConnectionToCore';
 
@@ -27,6 +27,8 @@ export {
   Node,
   FrameEnvironment,
   Tab,
+  Resource,
+  WebsocketResource,
   XPathResult,
   LocationStatus,
   LocationTrigger,
