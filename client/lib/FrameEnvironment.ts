@@ -5,6 +5,7 @@ import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/inte
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
+import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import {
@@ -217,6 +218,34 @@ export default class FrameEnvironment {
     const awaitedPath = new AwaitedPath(null, 'document', ['querySelectorAll', selector]);
     const awaitedOptions: IAwaitedOptions = { coreFrame: this.#coreFramePromise };
     return createSuperNodeList(awaitedPath, awaitedOptions);
+  }
+
+  public xpathSelector(xpath: string, orderedNodeResults = false): ISuperNode {
+    return this.document.evaluate(
+      xpath,
+      this.document,
+      null,
+      orderedNodeResults
+        ? XPathResult.FIRST_ORDERED_NODE_TYPE
+        : XPathResult.ANY_UNORDERED_NODE_TYPE,
+    ).singleNodeValue;
+  }
+
+  public async xpathSelectorAll(xpath: string, orderedNodeResults = false): Promise<ISuperNode[]> {
+    const results = await this.document.evaluate(
+      xpath,
+      this.document,
+      null,
+      orderedNodeResults
+        ? XPathResult.ORDERED_NODE_ITERATOR_TYPE
+        : XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+    );
+    const nodes: ISuperNode[] = [];
+    let node: ISuperNode;
+    while ((node = await results.iterateNext())) {
+      nodes.push(node);
+    }
+    return nodes;
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {

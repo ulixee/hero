@@ -31,6 +31,9 @@ import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Interactor from './Interactor';
+import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
+import { createSuperNode } from 'awaited-dom/impl/create';
+import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 
 const awaitedPathState = StateMachine<
   any,
@@ -41,6 +44,7 @@ interface IBaseExtendNode {
   $isVisible: Promise<boolean>;
   $exists: Promise<boolean>;
   $isClickable: Promise<boolean>;
+  $hasFocus: Promise<boolean>;
   $clearValue(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
   $collect(name: string): Promise<void>;
@@ -49,6 +53,7 @@ interface IBaseExtendNode {
   $waitForClickable(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
+  $xpathSelector(selector: string): ISuperNode;
 }
 
 interface IBaseExtendNodeList {
@@ -76,7 +81,10 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists'> = {
+const NodeExtensionFns: Omit<
+  IBaseExtendNode,
+  '$isClickable' | '$isVisible' | '$exists' | '$hasFocus'
+> = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
@@ -136,6 +144,23 @@ const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$
       { keyPress: KeyboardKey.Backspace },
     ]);
   },
+  $xpathSelector(selector: string, orderedNodeResults = false): ISuperNode {
+    const { awaitedOptions, awaitedPath } = awaitedPathState.getState(this);
+    const newPath = new AwaitedPath(
+      null,
+      'document',
+      [
+        'evaluate',
+        getAwaitedPathAsMethodArg(awaitedPath),
+        null,
+        orderedNodeResults
+          ? XPathResult.FIRST_ORDERED_NODE_TYPE
+          : XPathResult.ANY_UNORDERED_NODE_TYPE,
+      ],
+      'singleNodeValue',
+    );
+    return createSuperNode(newPath, awaitedOptions);
+  },
 };
 
 const NodeExtensionGetters = {
@@ -153,6 +178,10 @@ const NodeExtensionGetters = {
     const coreFrame = await getCoreFrame(this);
     const visibility = await coreFrame.getComputedVisibility(this);
     return visibility.isVisible;
+  },
+  async $hasFocus(): Promise<boolean> {
+    const coreFrame = await getCoreFrame(this);
+    return coreFrame.isFocused(this);
   },
 };
 

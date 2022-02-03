@@ -220,6 +220,14 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return this.mainFrameEnvironment.querySelectorAll(selector);
   }
 
+  public xpathSelector(xpath: string, orderedNodeResults = false): ISuperNode {
+    return this.mainFrameEnvironment.xpathSelector(xpath, orderedNodeResults);
+  }
+
+  public xpathSelectorAll(xpath: string, orderedNodeResults = false): Promise<ISuperNode[]> {
+    return this.mainFrameEnvironment.xpathSelectorAll(xpath, orderedNodeResults);
+  }
+
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
     const coreTab = await this.#coreTabPromise;
     return coreTab.takeScreenshot(options);
