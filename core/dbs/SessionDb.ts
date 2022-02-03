@@ -24,7 +24,8 @@ import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
 import StorageChangesTable from '../models/StorageChangesTable';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
-import CollectedFragmentsTable from '../models/CollectedFragmentsTable';
+import CollectedElementsTable from '../models/CollectedElementsTable';
+import CollectedSnippetsTable from '../models/CollectedSnippetsTable';
 import CollectedResourcesTable from '../models/CollectedResourcesTable';
 import OutputTable from '../models/OutputTable';
 import FlowHandlersTable from '../models/FlowHandlersTable';
@@ -52,8 +53,9 @@ export default class SessionDb {
   public readonly resourceStates: ResourceStatesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
-  public readonly collectedFragments: CollectedFragmentsTable;
+  public readonly collectedElements: CollectedElementsTable;
   public readonly collectedResources: CollectedResourcesTable;
+  public readonly collectedSnippets: CollectedSnippetsTable;
   public readonly flowHandlers: FlowHandlersTable;
   public readonly pageLogs: PageLogsTable;
   public readonly sessionLogs: SessionLogsTable;
@@ -95,8 +97,9 @@ export default class SessionDb {
     this.resourceStates = new ResourceStatesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
-    this.collectedFragments = new CollectedFragmentsTable(this.db);
+    this.collectedElements = new CollectedElementsTable(this.db);
     this.collectedResources = new CollectedResourcesTable(this.db);
+    this.collectedSnippets = new CollectedSnippetsTable(this.db);
     this.flowHandlers = new FlowHandlersTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
     this.session = new SessionTable(this.db);
@@ -120,8 +123,9 @@ export default class SessionDb {
       this.resourceStates,
       this.websocketMessages,
       this.domChanges,
-      this.collectedFragments,
+      this.collectedElements,
       this.collectedResources,
+      this.collectedSnippets,
       this.flowHandlers,
       this.pageLogs,
       this.session,

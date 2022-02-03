@@ -24,7 +24,7 @@ import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
-import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
 import Tab, { ITabEventParams } from './Tab';
@@ -142,7 +142,7 @@ export default class FrameEnvironment
     process.nextTick(() => this.listen());
     this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
-      this.collectFragment,
+      this.collectElement,
       this.execJsPath,
       this.fetch,
       this.getChildFrameEnvironment,
@@ -252,22 +252,22 @@ export default class FrameEnvironment
     return this.toJSON();
   }
 
-  public async collectFragment(
+  public async collectElement(
     name: string,
     jsPath: IJsPath,
-    waitForFragment = false,
-  ): Promise<ICollectedFragment[]> {
+    waitForElement = false,
+  ): Promise<ICollectedElement[]> {
     const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
     const navigation = this.navigations.lastHttpNavigationRequest;
     const commandId = this.session.commands.lastId;
     const domChangesTimestamp = this.lastDomChangeTimestamp;
 
-    const fragments: ICollectedFragment[] = [];
+    const elements: ICollectedElement[] = [];
 
     if (nodePointer.iterableItems && nodePointer.iterableIsState) {
       for (const item of nodePointer.iterableItems as INodePointer[]) {
-        fragments.push({
+        elements.push({
           name,
           nodePointerId: item.id,
           frameId: this.id,
@@ -280,7 +280,7 @@ export default class FrameEnvironment
         });
       }
     } else {
-      fragments.push({
+      elements.push({
         name,
         nodePointerId: nodePointer.id,
         frameId: this.id,
@@ -294,14 +294,14 @@ export default class FrameEnvironment
     }
 
     const promises: Promise<any>[] = [];
-    for (const fragment of fragments) {
-      const fragmentHtmlPromise = this.tab.onFragmentRequested(fragment);
-      if (waitForFragment) {
-        promises.push(fragmentHtmlPromise);
+    for (const element of elements) {
+      const elementHtmlPromise = this.tab.onElementRequested(element);
+      if (waitForElement) {
+        promises.push(elementHtmlPromise);
       }
     }
     await Promise.all(promises);
-    return fragments;
+    return elements;
   }
 
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {

@@ -1,6 +1,22 @@
 // setup must go first
 import './lib/SetupAwaitedHandler';
-import type { ISuperDocument, ISuperElement, ISuperNode, ISuperNodeList, ISuperHTMLCollection, ISuperText, ISuperStyleSheet, ISuperHTMLElement } from "awaited-dom/base/interfaces/super";
+import type {
+  ISuperDocument,
+  ISuperElement,
+  ISuperNode,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+  ISuperText,
+  ISuperStyleSheet,
+  ISuperHTMLElement,
+} from 'awaited-dom/base/interfaces/super';
+import {
+  IElement,
+  IHTMLCollection,
+  IHTMLElement,
+  INode,
+  INodeList,
+} from 'awaited-dom/base/interfaces/official';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import IResourceType, { ResourceType } from '@ulixee/hero-interfaces/IResourceType';
@@ -34,12 +50,17 @@ export {
   LocationTrigger,
   IHeroCreateOptions,
   IConnectionToCoreOptions,
-  ISuperDocument,
   ISuperElement,
   ISuperNode,
+  ISuperHTMLElement,
   ISuperNodeList,
   ISuperHTMLCollection,
-  ISuperText,
   ISuperStyleSheet,
-  ISuperHTMLElement,
+  ISuperDocument,
+  ISuperText,
+  IElement,
+  INode,
+  IHTMLElement,
+  INodeList,
+  IHTMLCollection,
 };

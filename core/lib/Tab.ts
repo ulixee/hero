@@ -39,7 +39,7 @@ import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import DomStateListener from './DomStateListener';
 import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
-import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
@@ -73,7 +73,7 @@ export default class Tab
   private readonly mirrorPage: MirrorPage;
   private readonly mirrorNetwork: MirrorNetwork;
 
-  private collectedFragmentsPendingHTML = new Set<Resolvable<ICollectedFragment>>();
+  private collectedElementsPendingHTML = new Set<Resolvable<ICollectedElement>>();
 
   private readonly commandRecorder: CommandRecorder;
   private readonly createdAtCommandId: number;
@@ -512,7 +512,7 @@ export default class Tab
   }
 
   public pendingCollects(): Promise<any> {
-    return Promise.all(this.collectedFragmentsPendingHTML);
+    return Promise.all(this.collectedElementsPendingHTML);
   }
 
   public onResource(x: ITabEventParams['resource']): void {
@@ -537,23 +537,23 @@ export default class Tab
     this.mirrorNetwork.addResource(resourceSummary);
   }
 
-  public onFragmentRequested(fragment: ICollectedFragment): Promise<void> {
-    const resolvable = new Resolvable<ICollectedFragment>();
-    const resolveExisting = Promise.all(this.collectedFragmentsPendingHTML);
-    this.collectedFragmentsPendingHTML.add(resolvable);
+  public onElementRequested(collectedElement: ICollectedElement): Promise<void> {
+    const resolvable = new Resolvable<ICollectedElement>();
+    const resolveExisting = Promise.all(this.collectedElementsPendingHTML);
+    this.collectedElementsPendingHTML.add(resolvable);
 
-    this.session.db.collectedFragments.insert(fragment);
+    this.session.db.collectedElements.insert(collectedElement);
 
     return resolveExisting
-      .then(() => this.getFragmentHtml(fragment))
+      .then(() => this.getElementHtml(collectedElement))
       .then(resolvable.resolve)
       .catch(resolvable.resolve)
-      .finally(() => this.collectedFragmentsPendingHTML.delete(resolvable));
+      .finally(() => this.collectedElementsPendingHTML.delete(resolvable));
   }
 
-  public async getFragmentHtml(fragment: ICollectedFragment): Promise<ICollectedFragment> {
+  public async getElementHtml(collectedElement: ICollectedElement): Promise<ICollectedElement> {
     await this.flushDomChanges();
-    const paintIndex = this.mirrorPage.getPaintIndex(fragment.domChangesTimestamp);
+    const paintIndex = this.mirrorPage.getPaintIndex(collectedElement.domChangesTimestamp);
     try {
       await this.mirrorPage.open(
         await GlobalPool.getUtilityContext(),
@@ -561,19 +561,19 @@ export default class Tab
         this.session.viewport,
       );
       await this.mirrorPage.load(paintIndex);
-      const frameDomNodeId = this.frameEnvironmentsById.get(fragment.frameId).domNodeId;
-      fragment.outerHTML = await this.mirrorPage.getNodeOuterHtml(
-        fragment.nodePointerId,
+      const frameDomNodeId = this.frameEnvironmentsById.get(collectedElement.frameId).domNodeId;
+      collectedElement.outerHTML = await this.mirrorPage.getNodeOuterHtml(
+        collectedElement.nodePointerId,
         frameDomNodeId,
       );
-      this.session.db.collectedFragments.updateHtml(fragment);
+      this.session.db.collectedElements.updateHtml(collectedElement);
     } catch (error) {
-      this.logger.warn('Tab.getFragmentHtml: ERROR', {
-        fragment,
+      this.logger.warn('Tab.getElementHtml: ERROR', {
+        Element: collectedElement,
         error,
       });
     }
-    return fragment;
+    return collectedElement;
   }
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {

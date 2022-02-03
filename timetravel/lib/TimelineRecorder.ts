@@ -128,7 +128,8 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     this.recordTab(tab);
   }
 
-  private recordTab(tab: Tab): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private recordTab(_: Tab): void {
     // tab
     //   .recordScreen({
     //     jpegQuality: 75,

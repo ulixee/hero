@@ -39,12 +39,16 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { getCoreTab } from './Tab';
 import Resource, { createResource } from './Resource';
 import { IMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
-import InternalProperties from './InternalProperties';
+import { InternalPropertiesSymbol } from './InternalProperties';
 
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions; nodePointer?: INodePointer }
 >();
+
+interface ISharedInternalProperties {
+  coreFramePromise: Promise<CoreFrameEnvironment>;
+}
 
 const propertyKeys: (keyof FrameEnvironment)[] = [
   'frameId',
@@ -66,14 +70,16 @@ export default class FrameEnvironment {
   #tab: Tab;
   #coreFramePromise: Promise<CoreFrameEnvironment>;
 
+  get [InternalPropertiesSymbol](): ISharedInternalProperties {
+    return {
+      coreFramePromise: this.#coreFramePromise
+    };
+  }
+
   constructor(hero: Hero, tab: Tab, coreFramePromise: Promise<CoreFrameEnvironment>) {
     this.#hero = hero;
     this.#tab = tab;
     this.#coreFramePromise = coreFramePromise;
-
-    InternalProperties.set(this, {
-      coreFramePromise,
-    });
 
     async function sendToFrameEnvironment(pluginId: string, ...args: any[]): Promise<any> {
       return (await coreFramePromise).commandQueue.run(
@@ -83,7 +89,7 @@ export default class FrameEnvironment {
       );
     }
 
-    for (const clientPlugin of InternalProperties.get(hero).clientPlugins) {
+    for (const clientPlugin of hero[InternalPropertiesSymbol].clientPlugins) {
       if (clientPlugin.onFrameEnvironment)
         clientPlugin.onFrameEnvironment(hero, this, sendToFrameEnvironment);
     }

@@ -1,4 +1,4 @@
-export default interface ICollectedFragment {
+export default interface ICollectedElement {
   id?: number;
   name: string;
   frameId: number;

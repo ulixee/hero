@@ -6,7 +6,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
 import Core from '@ulixee/hero-core/index';
 import ConnectionToLocalCore from '../lib/ConnectionToLocalCore';
-import InternalProperties from '@ulixee/hero/lib/InternalProperties';
+import { InternalPropertiesSymbol } from '@ulixee/hero/lib/InternalProperties';
 
 let koaServer: ITestKoaServer;
 const coreSessionDetachSpy = jest.spyOn(CoreSession.prototype, 'detachTab');
@@ -211,7 +211,7 @@ describe('basic Detach tests', () => {
 
       const frameSpy = jest.spyOn(FrameEnvironment.prototype, 'recordDetachedJsPath');
 
-      const coreFrame = await InternalProperties.get(frozenTab.mainFrameEnvironment)
+      const coreFrame = await frozenTab.mainFrameEnvironment[InternalPropertiesSymbol]
         .coreFramePromise;
       for (let i = 0; i < 1001; i += 1) {
         coreFrame.recordDetachedJsPath(1, new Date(), new Date());

@@ -58,15 +58,14 @@ import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import './DomExtender';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
-import InternalProperties from './InternalProperties';
+import { InternalPropertiesSymbol } from './InternalProperties';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import CoreTab from './CoreTab';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -95,6 +94,11 @@ const propertyKeys: (keyof Hero)[] = [
   'Request',
 ];
 
+interface ISharedInternalProperties {
+  clientPlugins: IClientPlugin[];
+  coreSessionPromise: Promise<CoreSession>
+}
+
 export default class Hero extends AwaitedEventTarget<{
   close: () => void;
   command: (name: string, commandId: number, args: any[]) => void;
@@ -111,12 +115,11 @@ export default class Hero extends AwaitedEventTarget<{
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
 
-  get [Symbol.for('@ulixee/internalState')](): {
-    coreSessionPromise: Promise<CoreSession>;
-  } {
+  get [InternalPropertiesSymbol](): ISharedInternalProperties {
     return {
+      clientPlugins: this.#clientPlugins,
       coreSessionPromise: this.#getCoreSessionOrReject(),
-    }
+    };
   }
 
   constructor(createOptions: IHeroCreateOptions = {}) {
@@ -149,10 +152,6 @@ export default class Hero extends AwaitedEventTarget<{
     );
 
     this.#didAutoCreateConnection = this.#connectionToCore !== connectionToCore;
-
-    InternalProperties.set(this, {
-      clientPlugins: this.#clientPlugins,
-    });
   }
 
   public get activeTab(): Tab {
@@ -270,6 +269,20 @@ export default class Hero extends AwaitedEventTarget<{
     return await this.activeTab.findResource(filter, options);
   }
 
+  public async collectSnippet(name: string, value: any): Promise<void> {
+    const coreSession = await this.#getCoreSessionOrReject();
+    await coreSession.collectSnippet(name, value);
+  }
+
+  public async getCollectedSnippets(
+    sessionIdPromise: Promise<string>,
+    name: string,
+  ): Promise<ICollectedSnippet[]> {
+    const sessionId = await sessionIdPromise;
+    const coreSession = await this.#getCoreSessionOrReject();
+    return await coreSession.getCollectedSnippets(sessionId, name);
+  }
+
   public async getCollectedResources(
     sessionIdPromise: Promise<string>,
     name: string,
@@ -298,13 +311,13 @@ export default class Hero extends AwaitedEventTarget<{
     return results;
   }
 
-  public async getCollectedFragments(
+  public async getCollectedElements(
     sessionIdPromise: Promise<string>,
     name: string,
-  ): Promise<ICollectedFragment[]> {
+  ): Promise<ICollectedElement[]> {
     const sessionId = await sessionIdPromise;
     const coreSession = await this.#getCoreSessionOrReject();
-    return await coreSession.getCollectedFragments(sessionId, name);
+    return await coreSession.getCollectedElements(sessionId, name);
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {
@@ -343,7 +356,7 @@ export default class Hero extends AwaitedEventTarget<{
     },
   ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
       .coreFramePromise;
     let interaction: IInteraction = { click: mousePosition };
     if (!isMousePositionXY(mousePosition)) {
@@ -366,20 +379,20 @@ export default class Hero extends AwaitedEventTarget<{
   public async interact(...interactions: IInteractions): Promise<void> {
     if (!interactions.length) return;
     let coreFrame = await getCoreFrameForInteractions(interactions);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
       .coreFramePromise;
     await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePositionXY | ISuperElement): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
       .coreFramePromise;
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
-    const coreFrame = await InternalProperties.get(this.activeTab.mainFrameEnvironment)
+    const coreFrame = await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
       .coreFramePromise;
     await Interactor.run(
       coreFrame,

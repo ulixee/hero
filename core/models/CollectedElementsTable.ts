@@ -1,0 +1,63 @@
+import { Database as SqliteDatabase } from 'better-sqlite3';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+
+export default class CollectedElementsTable extends SqliteTable<
+  ICollectedElement & { id?: number }
+> {
+  private idCounter = 0;
+  constructor(readonly db: SqliteDatabase) {
+    super(
+      db,
+      'CollectedElements',
+      [
+        ['id', 'INTEGER', 'PRIMARY KEY'],
+        ['name', 'TEXT'],
+        ['tabId', 'INTEGER'],
+        ['frameId', 'INTEGER'],
+        ['frameNavigationId', 'INTEGER'],
+        ['commandId', 'INTEGER'],
+        ['domChangesTimestamp', 'INTEGER'],
+        ['nodePointerId', 'INTEGER'],
+        ['nodeType', 'TEXT'],
+        ['nodePreview', 'TEXT'],
+        ['outerHTML', 'TEXT'],
+      ],
+      true,
+    );
+    this.defaultSortOrder = 'id';
+  }
+
+  public insert(collectedElement: ICollectedElement): void {
+    this.idCounter += 1;
+    collectedElement.id = this.idCounter;
+    this.queuePendingInsert([
+      collectedElement.id,
+      collectedElement.name,
+      collectedElement.tabId,
+      collectedElement.frameId,
+      collectedElement.frameNavigationId,
+      collectedElement.commandId,
+      collectedElement.domChangesTimestamp,
+      collectedElement.nodePointerId,
+      collectedElement.nodeType,
+      collectedElement.nodePreview,
+      null,
+    ]);
+  }
+
+  public getByName(name: string): ICollectedElement[] {
+    return this.db
+      .prepare(`select * from ${this.tableName} where name=:name order by id asc`)
+      .all({ name });
+  }
+
+  public updateHtml(element: ICollectedElement): void {
+    const pending = this.pendingInserts.find(x => x[0] === element.id);
+    if (pending) {
+      pending[7] = element.outerHTML;
+      return;
+    }
+    this.db.prepare(`update ${this.tableName} set outerHTML=:outerHTML where id=:id`).run(element);
+  }
+}

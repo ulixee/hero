@@ -22,7 +22,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
-import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
@@ -42,6 +42,7 @@ import DetachedTabState from './DetachedTabState';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
+import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 
 const { log } = Log(module);
 
@@ -200,7 +201,9 @@ export default class Session
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
-      this.getCollectedFragments,
+      this.collectSnippet,
+      this.getCollectedSnippets,
+      this.getCollectedElements,
       this.getCollectedResources,
       this.close,
       this.flush,
@@ -289,6 +292,21 @@ export default class Session
     return { detachedTab, prefetchedJsPaths, detachedState };
   }
 
+  public collectSnippet(name: string, value: any): Promise<void> {
+    this.db.collectedSnippets.insert(name, value);
+    return Promise.resolve();
+  }
+
+  public getCollectedSnippets(fromSessionId: string, name: string): Promise<ICollectedSnippet[]> {
+    let db = this.db;
+    if (fromSessionId === this.id) {
+      db.flush();
+    } else {
+      db = SessionDb.getCached(fromSessionId);
+    }
+    return Promise.resolve(db.collectedSnippets.getByName(name));
+  }
+
   public getCollectedResources(fromSessionId: string, name: string): Promise<IResourceMeta[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
@@ -313,10 +331,10 @@ export default class Session
     return Promise.all(resources);
   }
 
-  public async getCollectedFragments(
+  public async getCollectedElements(
     fromSessionId: string,
     name: string,
-  ): Promise<ICollectedFragment[]> {
+  ): Promise<ICollectedElement[]> {
     let db = this.db;
     if (!fromSessionId || fromSessionId === this.id) {
       for (const tab of this.tabsById.values()) {
@@ -326,7 +344,7 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     db.flush();
-    return db.collectedFragments.getByName(name);
+    return db.collectedElements.getByName(name);
   }
 
   public getMitmProxy(): { address: string; password?: string } {
