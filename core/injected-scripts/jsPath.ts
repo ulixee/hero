@@ -365,6 +365,10 @@ class ObjectAtPath {
     return this;
   }
 
+  public isFocused(): boolean {
+    return this.closestElement === document.activeElement;
+  }
+
   public toReturnError(error: Error): IExecJsPathResult {
     const pathError = <IJsPathError>{
       error: String(error),
