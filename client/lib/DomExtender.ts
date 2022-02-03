@@ -67,7 +67,7 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-type INodeExtensionFns = Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists', '$hasFocus'>;
+type INodeExtensionFns = Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists' | '$hasFocus'>;
 const NodeExtensionFns: INodeExtensionFns = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
