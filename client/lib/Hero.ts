@@ -59,7 +59,7 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import './DomExtender';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
-import IDomState from '@ulixee/hero-interfaces/IDomState';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
@@ -503,25 +503,25 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async waitForState(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     options?: Pick<IWaitForOptions, 'timeoutMs'>,
   ): Promise<void> {
     return await this.activeTab.waitForState(state, options);
   }
 
-  public async checkState(state: IDomState | DomState): Promise<boolean> {
-    return await this.activeTab.checkState(state);
+  public async validateState(state: IDomState | DomState | IDomStateAllFn): Promise<boolean> {
+    return await this.activeTab.validateState(state);
   }
 
   public async registerFlowHandler(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     handlerCallbackFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
     return await this.activeTab.registerFlowHandler(state, handlerCallbackFn);
   }
 
-  public async checkFlowHandlers(): Promise<void> {
-    return await this.activeTab.checkFlowHandlers();
+  public async triggerFlowHandlers(): Promise<void> {
+    return await this.activeTab.triggerFlowHandlers();
   }
 
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////

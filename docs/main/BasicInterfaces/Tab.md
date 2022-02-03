@@ -375,7 +375,7 @@ await activeTab.waitForElement(elem, {
 });
 ```
 
-### tab.waitForState*(states, options)* {#wait-for-state}
+### tab.waitForState*(state, options)* {#wait-for-state}
 
 Wait for a state to be loaded based on a series of conditions. This feature allows you to detect when many different conditions all resolve to true.
 
@@ -388,7 +388,7 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
 ```
  await hero.waitForState({
   name: 'ulixeeLoaded',
-  allTrue({ assert }) {
+  all(assert) {
     assert(hero.url, url => url === 'https://ulixee.org'); // once the url is resolved, it will be checked against https://ulixee.org
     assert(hero.isPaintingStable); // the default function evaluates if the result is true
   }
@@ -398,7 +398,7 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
  
  await hero.waitForState({
   name: 'dlfLoaded',
-  allTrue({ assert }) {
+  all(assert) {
     assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
     assert(hero.isPaintingStable);
     assert(hero.document.querySelector('h1').textContent, text => text === "It's Time to Open the Data Economy");
@@ -408,10 +408,10 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
 
 #### **Arguments**:
 
-- states `object`
+- state `object`
   - name? `string`. Optional name of the state
   - url? `string` | `Regexp`. Optional url to run this state on (useful for running in a loop)
-  - allTrue `({ assert: IPageStateAssert }) => void`. A synchronous function that will be true if all assertions evaluate to true. 
+  - all `(assert: IPageStateAssert) => void`. A synchronous function that will be true if all assertions evaluate to true. 
     - assert `function(statePromise: Promise<T>, assertionValueOrCallbackFn: (result: T) => boolean): void`. A function that takes a Promise as a first parameter, and a callback that will be checked when new state is available. 
       - statePromise `PromiseLike<T>` A Hero Promise that issues a command against this tab (url, isPaintingStable, domElement, isVisible, etc).
       - assertionValueOrCallbackFn `value: T | function(state: T): boolean`. A function that will receive updated state as it becomes available. You should synchronously evaluate to true/false. If this parameter is a non-function, it will be compared for equality.

@@ -36,7 +36,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
-import IDomState from '@ulixee/hero-interfaces/IDomState';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import InternalProperties from './InternalProperties';
 
 const awaitedPathState = StateMachine<
@@ -241,21 +241,21 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async waitForState(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<void> {
     const coreTab = await this.#coreTabPromise;
     return coreTab.waitForState(state, options);
   }
 
-  public async checkState(state: IDomState | DomState): Promise<boolean> {
+  public async validateState(state: IDomState | DomState | IDomStateAllFn): Promise<boolean> {
     const callsitePath = scriptInstance.getScriptCallsite();
     const coreTab = await this.#coreTabPromise;
-    return coreTab.checkState(state, callsitePath);
+    return coreTab.validateState(state, callsitePath);
   }
 
   public async registerFlowHandler(
-    state: IDomState | DomState,
+    state: IDomState | DomState | IDomStateAllFn,
     handlerFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
     const callsitePath = scriptInstance.getScriptCallsite();
@@ -264,9 +264,9 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     await coreTab.registerFlowHandler(state, handlerFn, callsitePath);
   }
 
-  public async checkFlowHandlers(): Promise<void> {
+  public async triggerFlowHandlers(): Promise<void> {
     const coreTab = await this.#coreTabPromise;
-    await coreTab.checkFlowHandlers();
+    await coreTab.triggerFlowHandlers();
   }
 
   public waitForResource(

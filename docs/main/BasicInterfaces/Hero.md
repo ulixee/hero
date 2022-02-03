@@ -573,7 +573,7 @@ Alias for [Tab.waitForLocation](/docs/basic-interfaces/tab#wait-for-location)
 
 Alias for [Tab.waitForMillis](/docs/basic-interfaces/tab#wait-for-millis)
 
-### hero.waitForState*(states, options)* {#wait-for-state}
+### hero.waitForState*(state, options)* {#wait-for-state}
 
 Alias for [Tab.waitForState](/docs/basic-interfaces/tab#wait-for-state)
 
