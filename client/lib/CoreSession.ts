@@ -49,6 +49,7 @@ export default class CoreSession implements IJsPathEventTarget {
   private cliPrompt: ReadLine;
   private isClosing = false;
   private shutdownPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
+  private extractorPromises: Promise<void>[] = [];
 
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
@@ -150,6 +151,14 @@ export default class CoreSession implements IJsPathEventTarget {
       coreTab,
       prefetchedJsPaths,
     };
+  }
+
+  public addExtractorPromises(promise: Promise<void>): void {
+    this.extractorPromises.push(promise);
+  }
+
+  public getExtractorPromises(): Promise<void>[] {
+    return [...this.extractorPromises];
   }
 
   public async getCollectedResources(sessionId: string, name: string): Promise<IResourceMeta[]> {

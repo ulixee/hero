@@ -65,6 +65,8 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import InternalProperties from './InternalProperties';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import CoreTab from './CoreTab';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -108,6 +110,14 @@ export default class Hero extends AwaitedEventTarget<{
   #tabs: Tab[];
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
+
+  get [Symbol.for('@ulixee/internalState')](): {
+    coreSessionPromise: Promise<CoreSession>;
+  } {
+    return {
+      coreSessionPromise: this.#getCoreSessionOrReject(),
+    }
+  }
 
   constructor(createOptions: IHeroCreateOptions = {}) {
     super(() => {
