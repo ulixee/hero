@@ -43,7 +43,6 @@ interface IBaseExtendNode {
   $isClickable: Promise<boolean>;
   $clearValue(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
-  $collect(name: string): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
   $waitForExists(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForClickable(options?: { timeoutMs?: number }): Promise<ISuperElement>;
@@ -57,7 +56,6 @@ interface IBaseExtendNodeList {
     iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
     initial: T,
   ): Promise<T>;
-  $collect(name: string): Promise<void>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -76,15 +74,11 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists'> = {
+type INodeExtensionFns = Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists'>;
+const NodeExtensionFns: INodeExtensionFns = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
     await Interactor.run(coreFrame, [{ click: { element: this, verification } }]);
-  },
-  async $collect(name: string): Promise<void> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
-    const coreFrame = await awaitedOptions.coreFrame;
-    await coreFrame.collectFragment(name, awaitedPath.toJSON());
   },
   async $type(...typeInteractions: ITypeInteraction[]): Promise<void> {
     const coreFrame = await getCoreFrame(this);
@@ -138,7 +132,8 @@ const NodeExtensionFns: Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$
   },
 };
 
-const NodeExtensionGetters = {
+type INodeExtensionGetters = { [name: string]: () => any };
+const NodeExtensionGetters: INodeExtensionGetters = {
   async $isClickable(): Promise<boolean> {
     const coreFrame = await getCoreFrame(this);
     const visibility = await coreFrame.getComputedVisibility(this);
@@ -177,17 +172,9 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     }
     return initial;
   },
-  async $collect(name: string): Promise<void> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
-    const coreFrame = await awaitedOptions.coreFrame;
-    await coreFrame.collectFragment(name, awaitedPath.toJSON());
-  },
 };
 
-export function extendNodes(
-  functions: { [propertyName: string]: (...args: any[]) => any },
-  getters?: { [name: string]: () => any },
-): void {
+export function extendNodes<IFunctions, IGetters>(functions: IFunctions, getters?: IGetters): void {
   for (const Item of [SuperElement, SuperNode, SuperHTMLElement, Element, Node, HTMLElement]) {
     for (const [key, value] of Object.entries(functions)) {
       void Object.defineProperty(Item.prototype, key, {
@@ -225,19 +212,9 @@ async function getCoreFrame(element: ISuperElement): Promise<CoreFrameEnvironmen
   return await awaitedOptions.coreFrame;
 }
 
-extendNodes(NodeExtensionFns, NodeExtensionGetters);
+extendNodes<INodeExtensionFns, INodeExtensionGetters>(NodeExtensionFns, NodeExtensionGetters);
 extendNodeLists(NodeListExtensionFns);
 
 export {
   awaitedPathState,
-  ISuperElement,
-  ISuperNode,
-  ISuperHTMLElement,
-  ISuperNodeList,
-  ISuperHTMLCollection,
-  IElement,
-  INode,
-  IHTMLElement,
-  INodeList,
-  IHTMLCollection,
 };

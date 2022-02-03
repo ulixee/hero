@@ -129,15 +129,15 @@ export default class TimelineRecorder extends TypedEventEmitter<{
   }
 
   private recordTab(tab: Tab): void {
-    tab
-      .recordScreen({
-        jpegQuality: 75,
-        format: 'jpeg',
-        imageSize: {
-          height: 200,
-        },
-      })
-      .catch(console.error);
+    // tab
+    //   .recordScreen({
+    //     jpegQuality: 75,
+    //     format: 'jpeg',
+    //     imageSize: {
+    //       height: 200,
+    //     },
+    //   })
+    //   .catch(console.error);
   }
 
   private onStatusChange(status: IFrameNavigationEvents['status-change']): void {

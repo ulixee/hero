@@ -26,16 +26,26 @@ const propertyKeys: (keyof Resource)[] = [
 ];
 
 export default class Resource {
-  #coreTab: Promise<CoreTab>;
-  #resourceMeta: IResourceMeta;
+  readonly #coreTabPromise: Promise<CoreTab>;
+  readonly #resourceMeta: IResourceMeta;
   readonly request: ResourceRequest;
   readonly response: ResourceResponse;
 
-  constructor(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta) {
-    this.#coreTab = coreTab;
+  get [Symbol.for('@ulixee/internalState')](): {
+    coreTabPromise: Promise<CoreTab>;
+    resourceMeta: IResourceMeta;
+  } {
+    return {
+      coreTabPromise: this.#coreTabPromise,
+      resourceMeta: this.#resourceMeta,
+    }
+  }
+
+  constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
+    this.#coreTabPromise = coreTabPromise;
     this.#resourceMeta = resourceMeta;
-    this.request = createResourceRequest(coreTab, resourceMeta);
-    this.response = createResourceResponse(coreTab, resourceMeta);
+    this.request = createResourceRequest(coreTabPromise, resourceMeta);
+    this.response = createResourceResponse(coreTabPromise, resourceMeta);
   }
 
   public get url(): string {
@@ -64,12 +74,6 @@ export default class Resource {
 
   public get json(): Promise<any> {
     return this.text.then(JSON.parse);
-  }
-
-  public $collect(name: string): Promise<void> {
-    const id = this.#resourceMeta.id;
-    const coreTab = this.#coreTab;
-    return coreTab.then(x => x.collectResource(name, id));
   }
 
   public [Util.inspect.custom](): any {

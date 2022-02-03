@@ -26,23 +26,33 @@ const propertyKeys: (keyof WebsocketResource)[] = [
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
 export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
-  #coreTab: Promise<CoreTab>;
-  #resourceMeta: IResourceMeta;
   #awaitedPath: AwaitedPath;
+  readonly #coreTabPromise: Promise<CoreTab>;
+  readonly #resourceMeta: IResourceMeta;
   readonly request: ResourceRequest;
   readonly response: ResourceResponse;
 
-  constructor(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta) {
+  get [Symbol.for('@ulixee/internalState')](): {
+    coreTabPromise: Promise<CoreTab>;
+    resourceMeta: IResourceMeta;
+  } {
+    return {
+      coreTabPromise: this.#coreTabPromise,
+      resourceMeta: this.#resourceMeta,
+    }
+  }
+
+  constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
     super(() => {
       return {
-        target: this.#coreTab,
+        target: this.#coreTabPromise,
         jsPath: this.#awaitedPath.toJSON(),
       };
     });
-    this.request = createResourceRequest(coreTab, resourceMeta);
-    this.response = createResourceResponse(coreTab, resourceMeta);
+    this.request = createResourceRequest(coreTabPromise, resourceMeta);
+    this.response = createResourceResponse(coreTabPromise, resourceMeta);
     this.#awaitedPath = new AwaitedPath(null, 'resources', String(resourceMeta.id));
-    this.#coreTab = coreTab;
+    this.#coreTabPromise = coreTabPromise;
     this.#resourceMeta = resourceMeta;
   }
 
@@ -67,12 +77,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     if ('messages' in resource) {
       return Promise.resolve((resource as any).messages as IWebsocketMessage[]);
     }
-    return this.#coreTab.then(x => x.getResourceProperty(resource.id, 'messages'));
-  }
-
-  public $collect(name: string): Promise<void> {
-    const id = this.#resourceMeta.id;
-    return this.#coreTab.then(x => x.collectResource(name, id));
+    return this.#coreTabPromise.then(x => x.getResourceProperty(resource.id, 'messages'));
   }
 
   public get buffer(): Promise<Buffer> {
