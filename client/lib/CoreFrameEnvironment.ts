@@ -94,8 +94,8 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
-  public async collectFragment(name: string, jsPath: IJsPath): Promise<void> {
-    await this.commandQueue.run('FrameEnvironment.collectFragment', name, jsPath);
+  public async collectElement(name: string, jsPath: IJsPath): Promise<void> {
+    await this.commandQueue.run('FrameEnvironment.collectElement', name, jsPath);
   }
 
   public async getUrl(): Promise<string> {

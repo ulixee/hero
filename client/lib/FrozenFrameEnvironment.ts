@@ -25,7 +25,7 @@ import Hero from './Hero';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
 import * as AwaitedHandler from './SetupAwaitedHandler';
-import InternalProperties from './InternalProperties';
+import { InternalPropertiesSymbol } from './InternalProperties';
 
 const stateMachine = StateMachine<
   any,
@@ -47,6 +47,12 @@ export default class FrozenFrameEnvironment {
   #prefetchedJsPathsPromise: Promise<Map<string, IJsPathResult>>;
   #coreFramePromise: Promise<CoreFrameEnvironment>;
 
+  get [InternalPropertiesSymbol](): { coreFramePromise: Promise<CoreFrameEnvironment> } {
+    return {
+      coreFramePromise: this.#coreFramePromise,
+    };
+  }
+
   constructor(
     hero: Hero,
     tab: FrozenTab,
@@ -65,7 +71,6 @@ export default class FrozenFrameEnvironment {
       }
       return resultMap;
     });
-    InternalProperties.set(this, { coreFramePromise });
   }
 
   get #awaitedOptions(): IAwaitedOptions & {

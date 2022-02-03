@@ -37,12 +37,16 @@ import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
-import InternalProperties from './InternalProperties';
+import { InternalPropertiesSymbol } from './InternalProperties';
 
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
 >();
+
+interface ISharedInternalProperties {
+  coreTabPromise: Promise<CoreTab>;
+}
 
 interface IEventType {
   resource: (resource: Resource | WebsocketResource) => void;
@@ -71,6 +75,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   #frameEnvironments: FrameEnvironment[];
   #coreTabPromise: Promise<CoreTab>;
 
+  get [InternalPropertiesSymbol](): ISharedInternalProperties {
+    return {
+      coreTabPromise: this.#coreTabPromise
+    };
+  }
+
   constructor(hero: Hero, coreTabPromise: Promise<CoreTab>) {
     super(() => {
       return { target: coreTabPromise };
@@ -83,15 +93,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     );
     this.#frameEnvironments = [this.#mainFrameEnvironment];
     this.#coreTabPromise = coreTabPromise;
-    InternalProperties.set(this, {
-      coreTabPromise,
-    });
 
     async function sendToTab(pluginId: string, ...args: any[]): Promise<any> {
       return (await coreTabPromise).commandQueue.run('Tab.runPluginCommand', pluginId, args);
     }
 
-    for (const clientPlugin of InternalProperties.get(hero).clientPlugins) {
+    for (const clientPlugin of hero[InternalPropertiesSymbol].clientPlugins) {
       if (clientPlugin.onTab) clientPlugin.onTab(hero, this, sendToTab);
     }
   }
@@ -356,7 +363,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 }
 
 export function getCoreTab(tab: Tab): Promise<CoreTab> {
-  return InternalProperties.get(tab).coreTabPromise.then(x => {
+  return tab[InternalPropertiesSymbol].coreTabPromise.then(x => {
     if (x instanceof Error) throw x;
     return x;
   });

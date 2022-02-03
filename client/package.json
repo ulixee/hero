@@ -3,8 +3,11 @@
   "version": "1.5.4",
   "description": "The client interface for Hero",
   "exports": {
-    "import": "./index.mjs",
-    "require": "./index.cjs"
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    },
+    "./lib/DomExtender": "./lib/DomExtender.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.9",

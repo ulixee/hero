@@ -17,7 +17,8 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import ICollectedFragment from '@ulixee/hero-interfaces/ICollectedFragment';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -161,15 +162,20 @@ export default class CoreSession implements IJsPathEventTarget {
     return [...this.extractorPromises];
   }
 
+  public async collectSnippet(name: string, value: any): Promise<void> {
+    await this.commandQueue.run('Session.collectSnippet', name, value);
+  }
+
+  public async getCollectedSnippets(sessionId: string, name: string): Promise<ICollectedSnippet[]> {
+    return await this.commandQueue.run('Session.getCollectedSnippets', sessionId, name);
+  }
+
   public async getCollectedResources(sessionId: string, name: string): Promise<IResourceMeta[]> {
     return await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
   }
 
-  public async getCollectedFragments(
-    sessionId: string,
-    name: string,
-  ): Promise<ICollectedFragment[]> {
-    return await this.commandQueue.run('Session.getCollectedFragments', sessionId, name);
+  public async getCollectedElements(sessionId: string, name: string): Promise<ICollectedElement[]> {
+    return await this.commandQueue.run('Session.getCollectedElements', sessionId, name);
   }
 
   public async close(force = false): Promise<void> {
