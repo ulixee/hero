@@ -2,6 +2,7 @@ import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import Log from '@ulixee/commons/lib/Logger';
 import { MitmProxy } from '@ulixee/hero-mitm';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import Puppet from '@ulixee/hero-puppet';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -37,7 +38,7 @@ export default class GlobalPool {
     'all-browsers-closed': void;
   }>();
 
-  private static isClosing = false;
+  private static isClosing: Resolvable<void>;
   private static utilityBrowserContext: Promise<IPuppetContext>;
   private static defaultLaunchArgs: IPuppetLaunchArgs;
   private static _activeSessionCount = 0;
@@ -63,7 +64,8 @@ export default class GlobalPool {
   }
 
   public static async start(): Promise<void> {
-    this.isClosing = false;
+    if (this.isClosing) await this.isClosing;
+    this.isClosing = null;
     log.info('StartingGlobalPool', {
       sessionId: null,
     });
@@ -87,46 +89,49 @@ export default class GlobalPool {
   }
 
   public static close(): Promise<void> {
-    if (this.isClosing) return Promise.resolve();
-    this.isClosing = true;
-    const logId = log.stats('GlobalPool.Closing', {
-      sessionId: null,
-      puppets: this.puppets.length,
-      waitingForAvailability: this.waitingForAvailability.length,
-    });
-
-    for (const { promise } of this.waitingForAvailability) {
-      promise.reject(new CanceledPromiseError('Puppet pool shutting down'));
-    }
-    this.waitingForAvailability.length = 0;
-    const closePromises: Promise<any>[] = [];
-
-    const browserContext = this.utilityBrowserContext;
-    this.utilityBrowserContext = null;
-    closePromises.push(browserContext?.then(x => x.close()).catch(err => err));
-
-    while (this.puppets.length) {
-      const puppetBrowser = this.puppets.shift();
-      closePromises.push(puppetBrowser.close().catch(err => err));
-    }
-    MitmProxy.close();
-    if (this.mitmStartPromise) {
-      this.mitmStartPromise.then(x => x.close()).catch(() => null);
-      this.mitmStartPromise = null;
-    }
-    if (this.mitmServer) {
-      this.mitmServer.close();
-      this.mitmServer = null;
-    }
-    SessionsDb.shutdown();
-    return Promise.all(closePromises)
-      .then(() => {
-        log.stats('GlobalPool.Closed', { parentLogId: logId, sessionId: null });
-        return null;
-      })
-      .catch(error => {
-        log.error('Error in GlobalPoolShutdown', { parentLogId: logId, sessionId: null, error });
+    if (this.isClosing) return this.isClosing.promise;
+    this.isClosing = new Resolvable<void>();
+    try {
+      const logId = log.stats('GlobalPool.Closing', {
+        sessionId: null,
+        puppets: this.puppets.length,
+        waitingForAvailability: this.waitingForAvailability.length,
       });
+      for (const { promise } of this.waitingForAvailability) {
+        promise.reject(new CanceledPromiseError('Puppet pool shutting down'));
+      }
+      this.waitingForAvailability.length = 0;
+      const closePromises: Promise<any>[] = [];
+
+      const browserContext = this.utilityBrowserContext;
+      this.utilityBrowserContext = null;
+      closePromises.push(browserContext?.then(x => x.close()).catch(err => err));
+
+      while (this.puppets.length) {
+        const puppetBrowser = this.puppets.shift();
+        closePromises.push(puppetBrowser.close().catch(err => err));
+      }
+      MitmProxy.close();
+      if (this.mitmStartPromise) {
+        this.mitmStartPromise.then(x => x.close()).catch(() => null);
+        this.mitmStartPromise = null;
+      }
+      if (this.mitmServer) {
+        this.mitmServer.close();
+        this.mitmServer = null;
+      }
+      SessionsDb.shutdown();
+      return Promise.all(closePromises)
+        .then(() => {
+          log.stats('GlobalPool.Closed', { parentLogId: logId, sessionId: null });
+          return null;
+        })
+        .catch(error => {
+          log.error('Error in GlobalPoolShutdown', { parentLogId: logId, sessionId: null, error });
+        });
+    } finally {
+      this.isClosing.resolve();
+    }
   }
 
   public static async getPuppet(
