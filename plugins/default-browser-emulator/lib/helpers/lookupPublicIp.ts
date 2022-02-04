@@ -10,7 +10,14 @@ export default async function lookupPublicIp(
   agent?: IHttpSocketAgent,
   proxyUrl?: string,
 ): Promise<string> {
+  if (!ipLookupServiceUrl.startsWith('http')) ipLookupServiceUrl = `https://${ipLookupServiceUrl}`;
+  if (proxyUrl && proxyUrl.startsWith('http')) {
+    // require https for lookup services over http proxies
+    ipLookupServiceUrl.replace('http://', 'https://');
+  }
   const lookupService = parse(ipLookupServiceUrl);
+  const port = lookupService.port ?? lookupService.protocol === 'https:' ? 443 : 80;
+
 
   const requestOptions: http.RequestOptions = {
     method: 'GET',
@@ -19,7 +26,7 @@ export default async function lookupPublicIp(
   if (agent) {
     socketWrapper = await agent.createSocketConnection({
       host: lookupService.host,
-      port: String(lookupService.port),
+      port: String(port),
       servername: lookupService.host,
       keepAlive: false,
       isSsl: ipLookupServiceUrl.startsWith('https'),
@@ -72,13 +79,12 @@ function parse(requestUrl: string): RequestOptions {
 }
 
 export const IpLookupServices = {
-  ipify: 'http://api.ipify.org',
-  icanhazip: 'http://icanhazip.com', // warn: using cloudflare as of 11/19/21
-  aws: 'http://checkip.amazonaws.com',
-  dyndns: 'http://checkip.dyndns.org',
-  identMe: 'http://ident.me',
-  ifconfigMe: 'http://ifconfig.me/ip',
-  ipecho: 'http://ipecho.net/plain',
-  ipinfo: 'http://ipinfo.io/ip',
-  opendns: 'https://diagnostic.opendns.com/myip',
+  ipify: 'api.ipify.org',
+  icanhazip: 'icanhazip.com', // warn: using cloudflare as of 11/19/21
+  aws: 'checkip.amazonaws.com',
+  identMe: 'ident.me',
+  ifconfigMe: 'ifconfig.me/ip',
+  ipecho: 'ipecho.net/plain',
+  ipinfo: 'ipinfo.io/ip',
+  opendns: 'diagnostic.opendns.com/myip',
 };
