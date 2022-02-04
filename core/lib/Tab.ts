@@ -562,9 +562,9 @@ export default class Tab
         this.sessionId,
         this.session.viewport,
       );
-      await this.mirrorPage.load(paintIndex);
       const frameDomNodeId = this.frameEnvironmentsById.get(collectedElement.frameId).domNodeId;
       collectedElement.outerHTML = await this.mirrorPage.getNodeOuterHtml(
+        paintIndex,
         collectedElement.nodePointerId,
         frameDomNodeId,
       );

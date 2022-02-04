@@ -111,11 +111,13 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
-    this.setDomRecording(domRecording);
-    if (this.loadedDocument) {
-      this.isLoadedDocumentDirty = true;
-      await this.injectPaintEvents(this.loadedDocument);
-    }
+    await this.loadQueue.run(async () => {
+      this.setDomRecording(domRecording);
+      if (this.loadedDocument) {
+        this.isLoadedDocumentDirty = true;
+        await this.injectPaintEvents(this.loadedDocument);
+      }
+    });
   }
 
   public getPaintIndex(timestamp: number): number {
@@ -136,10 +138,14 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.subscribeToTab = tab;
   }
 
-  public async load(newPaintIndex?: number, overlayLabel?: string): Promise<void> {
+  public async load<T = void>(
+    newPaintIndex?: number,
+    overlayLabel?: string,
+    afterLoadedCb?: () => Promise<T>,
+  ): Promise<T> {
     await this.isReady;
     // only allow 1 load at a time
-    await this.loadQueue.run(async () => {
+    return await this.loadQueue.run<T>(async () => {
       if (this.subscribeToTab && !newPaintIndex) {
         await this.subscribeToTab.flushDomChanges();
       }
@@ -196,6 +202,7 @@ export default class MirrorPage extends TypedEventEmitter<{
           await this.evaluate(`window.overlay(${JSON.stringify(options)});`);
         }
       }
+      if (afterLoadedCb) return await afterLoadedCb();
     });
   }
 
@@ -232,18 +239,23 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.emit('close');
   }
 
-  public async getNodeOuterHtml(nodeId: number, frameDomNodeId?: number): Promise<string> {
-    await this.isReady;
-    const frame = await this.getFrameWithDomNodeId(frameDomNodeId);
-    return await frame.evaluate(
-      `(() => {
+  public async getNodeOuterHtml(
+    paintIndex: number,
+    nodeId: number,
+    frameDomNodeId?: number,
+  ): Promise<string> {
+    return await this.load<string>(paintIndex, null, async () => {
+      const frame = await this.getFrameWithDomNodeId(frameDomNodeId);
+      return await frame.evaluate(
+        `(() => {
      const node = NodeTracker.getWatchedNodeWithId(${nodeId});
      if (node) return node.outerHTML;
      return null;
    })()`,
-      true,
-      { retriesWaitingForLoad: 2 },
-    );
+        true,
+        { retriesWaitingForLoad: 2 },
+      );
+    });
   }
 
   public async getHtml(): Promise<string> {
