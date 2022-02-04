@@ -24,6 +24,7 @@ export default class MirrorNetwork {
   public headersFilter: (string | RegExp)[];
   public ignoreJavascriptRequests: boolean;
   public useResourcesOnce: boolean;
+  public resourceFilter: { hasResponse?: boolean; isGetOrDocument?: boolean };
 
   public waitForPendingResources = new Set<Promise<any>>();
 
@@ -141,13 +142,23 @@ export default class MirrorNetwork {
     if (!this.resourceLookup[key]?.length) {
       this.resourceLookup[key] = [resource];
     } else {
+      if (this.resourceFilter) {
+        if (this.resourceFilter.hasResponse && !resource.hasResponse) return;
+        if (
+          this.resourceFilter.isGetOrDocument &&
+          !(resource.type === 'Document' || resource.method === 'GET')
+        )
+          return;
+      }
       const pendingResolutionIdx = this.resourceLookup[key].findIndex(
-        x => !!x.responsePromise && x.hasResponse === false,
+        x => !!x.responsePromise && !x.responsePromise.isResolved,
       );
       if (pendingResolutionIdx >= 0) {
         this.resourceLookup[key][pendingResolutionIdx].responsePromise.resolve(resource);
         this.resourceLookup[key][pendingResolutionIdx] = resource;
-      } else this.resourceLookup[key].push(resource);
+      } else {
+        this.resourceLookup[key].push(resource);
+      }
     }
   }
 
@@ -230,6 +241,7 @@ export default class MirrorNetwork {
       if (tabId) return x.tabId === tabId;
       return true;
     });
+    network.resourceFilter = options;
     network.setResources(resources);
     return network;
   }

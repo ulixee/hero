@@ -531,7 +531,7 @@ export default class Tab
       hasResponse: x.response.headers && Object.keys(x.response.headers).length > 0,
       contentType: x.response.headers
         ? ((x.response.headers['content-type'] ?? x.response.headers['Content-Type']) as string)
-        : null,
+        : '',
     };
 
     this.mirrorNetwork.addResource(resourceSummary);
@@ -1008,7 +1008,7 @@ export default class Tab
         redirectedToUrl: resource.redirectedToUrl,
         timestamp: pendingRequest.requestTime,
         hasResponse: false,
-        contentType: null,
+        contentType: '',
       });
     }
   }

@@ -604,8 +604,9 @@ export default class Session
   }
 
   private onMitmResponse(event: IRequestSessionResponseEvent): void {
-    const resource = this.resources.onMitmResponse(event, this.getLastActiveTab());
-    const tab = this.tabsById.get(resource.tabId);
+    const defaultTab = this.getLastActiveTab();
+    const resource = this.resources.onMitmResponse(event, defaultTab);
+    const tab = this.tabsById.get(resource.tabId) ?? defaultTab;
     if (!event.wasIntercepted) {
       tab?.emit('resource', resource);
     }
