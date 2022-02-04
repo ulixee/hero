@@ -122,6 +122,20 @@ test('surfaces errors in assertions', async () => {
   );
 });
 
+test('can wait for resources', async () => {
+  koaServer.get('/waitForDomStateResource', ctx => {
+    ctx.body = `<body><h1>Hi</h1></body>`;
+  });
+  const hero = await openBrowser('/waitForDomStateResource');
+  const domState = {
+    all(assert) {
+      assert(hero.findResource({ httpRequest: { statusCode: 200 } }));
+    },
+  };
+
+  await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined()
+});
+
 test('surfaces errors in query selectors that are invalid (vs simply not there)', async () => {
   koaServer.get('/waitForDomStateSelectorError', ctx => {
     ctx.body = `<body><h1>Hi</h1></body>`;
