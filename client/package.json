@@ -7,7 +7,8 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
-    "./lib/DomExtender": "./lib/DomExtender.js"
+    "./lib/DomExtender": "./lib/DomExtender.js",
+    "./lib/InternalProperties": "./lib/InternalProperties.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.9",

@@ -14,20 +14,21 @@ import {
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import CoreCommandQueue from './CoreCommandQueue';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import StateMachine from 'awaited-dom/base/StateMachine';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import CoreCommandQueue from './CoreCommandQueue';
+import CoreTab from './CoreTab';
 import {
   convertJsPathArgs,
   createInstanceWithNodePointer,
   delegate as AwaitedHandler,
 } from './SetupAwaitedHandler';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
-import CoreTab from './CoreTab';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 
 const awaitedPathState = StateMachine<
   any,
@@ -94,8 +95,8 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
-  public async collectElement(name: string, jsPath: IJsPath): Promise<void> {
-    await this.commandQueue.run('FrameEnvironment.collectElement', name, jsPath);
+  public async collectElement(name: string, jsPath: IJsPath, waitForElement = false): Promise<ICollectedElement[]> {
+    return await this.commandQueue.run('FrameEnvironment.collectElement', name, jsPath, waitForElement);
   }
 
   public async getUrl(): Promise<string> {

@@ -56,16 +56,13 @@ import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnv
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import './DomExtender';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol } from './InternalProperties';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -230,11 +227,6 @@ export default class Hero extends AwaitedEventTarget<{
 
   // METHODS
 
-  public async recordOutput(changesToRecord): Promise<void> {
-    const coreSession = await this.#getCoreSessionOrReject();
-    coreSession.recordOutput(changesToRecord);
-  }
-
   public close(): Promise<void> {
     return (this.#isClosingPromise ??= new Promise(async (resolve, reject) => {
       try {
@@ -267,57 +259,6 @@ export default class Hero extends AwaitedEventTarget<{
     options?: { sinceCommandId: number },
   ): Promise<Resource> {
     return await this.activeTab.findResource(filter, options);
-  }
-
-  public async collectSnippet(name: string, value: any): Promise<void> {
-    const coreSession = await this.#getCoreSessionOrReject();
-    await coreSession.collectSnippet(name, value);
-  }
-
-  public async getCollectedSnippets(
-    sessionIdPromise: Promise<string>,
-    name: string,
-  ): Promise<ICollectedSnippet[]> {
-    const sessionId = await sessionIdPromise;
-    const coreSession = await this.#getCoreSessionOrReject();
-    return await coreSession.getCollectedSnippets(sessionId, name);
-  }
-
-  public async getCollectedResources(
-    sessionIdPromise: Promise<string>,
-    name: string,
-  ): Promise<ICollectedResource[]> {
-    const sessionId = await sessionIdPromise;
-    const coreSession = await this.#getCoreSessionOrReject();
-    const resources = await coreSession.getCollectedResources(sessionId, name);
-
-    const results: ICollectedResource[] = [];
-    for (const resource of resources) {
-      const buffer = resource.response?.body;
-      delete resource.response?.body;
-
-      const properties: PropertyDescriptorMap = {
-        buffer: { get: () => buffer, enumerable: true },
-        json: { get: () => (buffer ? JSON.parse(buffer.toString()) : null), enumerable: true },
-        text: { get: () => buffer?.toString(), enumerable: true },
-      };
-
-      if (resource.response) {
-        Object.defineProperties(resource.response, properties);
-      }
-      Object.defineProperties(resource, properties);
-      results.push(resource as ICollectedResource);
-    }
-    return results;
-  }
-
-  public async getCollectedElements(
-    sessionIdPromise: Promise<string>,
-    name: string,
-  ): Promise<ICollectedElement[]> {
-    const sessionId = await sessionIdPromise;
-    const coreSession = await this.#getCoreSessionOrReject();
-    return await coreSession.getCollectedElements(sessionId, name);
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {

@@ -8,6 +8,7 @@ import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
+import { InternalPropertiesSymbol } from './InternalProperties';
 
 interface IEventType {
   message: (message: IWebsocketMessage) => void;
@@ -32,7 +33,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
   readonly request: ResourceRequest;
   readonly response: ResourceResponse;
 
-  get [Symbol.for('@ulixee/internalState')](): {
+  get [InternalPropertiesSymbol](): {
     coreTabPromise: Promise<CoreTab>;
     resourceMeta: IResourceMeta;
   } {

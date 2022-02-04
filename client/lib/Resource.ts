@@ -4,14 +4,15 @@ import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
+import { InternalPropertiesSymbol } from './InternalProperties';
 import Tab, { getCoreTab } from './Tab';
-import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 
 const propertyKeys: (keyof Resource)[] = [
   'url',
@@ -31,7 +32,7 @@ export default class Resource {
   readonly request: ResourceRequest;
   readonly response: ResourceResponse;
 
-  get [Symbol.for('@ulixee/internalState')](): {
+  get [InternalPropertiesSymbol](): {
     coreTabPromise: Promise<CoreTab>;
     resourceMeta: IResourceMeta;
   } {

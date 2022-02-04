@@ -537,18 +537,20 @@ export default class Tab
     this.mirrorNetwork.addResource(resourceSummary);
   }
 
-  public onElementRequested(collectedElement: ICollectedElement): Promise<void> {
+  public async onElementRequested(collectedElement: ICollectedElement): Promise<ICollectedElement> {
     const resolvable = new Resolvable<ICollectedElement>();
     const resolveExisting = Promise.all(this.collectedElementsPendingHTML);
     this.collectedElementsPendingHTML.add(resolvable);
 
     this.session.db.collectedElements.insert(collectedElement);
 
-    return resolveExisting
+    await resolveExisting
       .then(() => this.getElementHtml(collectedElement))
       .then(resolvable.resolve)
       .catch(resolvable.resolve)
       .finally(() => this.collectedElementsPendingHTML.delete(resolvable));
+
+    return resolvable;
   }
 
   public async getElementHtml(collectedElement: ICollectedElement): Promise<ICollectedElement> {
