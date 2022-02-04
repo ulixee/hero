@@ -264,7 +264,6 @@ export default class FrameEnvironment
     const domChangesTimestamp = this.lastDomChangeTimestamp;
 
     const elements: ICollectedElement[] = [];
-
     if (nodePointer.iterableItems && nodePointer.iterableIsState) {
       for (const item of nodePointer.iterableItems as INodePointer[]) {
         elements.push({
@@ -279,7 +278,7 @@ export default class FrameEnvironment
           domChangesTimestamp,
         });
       }
-    } else {
+    } else if (!nodePointer.iterableItems) {
       elements.push({
         name,
         nodePointerId: nodePointer.id,
@@ -300,8 +299,7 @@ export default class FrameEnvironment
         promises.push(elementHtmlPromise);
       }
     }
-    await Promise.all(promises);
-    return elements;
+    return waitForElement ? await Promise.all(promises) : elements;
   }
 
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {

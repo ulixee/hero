@@ -32,6 +32,7 @@ export default class CoreTab implements IJsPathEventTarget {
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
+  public readonly coreSession: CoreSession;
   public get mainFrameEnvironment(): CoreFrameEnvironment {
     return this.frameEnvironmentsById.get(this.mainFrameId);
   }
@@ -41,7 +42,6 @@ export default class CoreTab implements IJsPathEventTarget {
   private readonly flowHandlers: IFlowHandler[] = [];
   private readonly connection: ConnectionToCore;
   private readonly mainFrameId: number;
-  private readonly coreSession: CoreSession;
 
   constructor(
     meta: ISessionMeta & { sessionName: string },
