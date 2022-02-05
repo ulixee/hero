@@ -52,6 +52,7 @@ export default class Core {
   private static wasManuallyStarted = false;
   private static isStarting = false;
   private static autoShutdownTimer: NodeJS.Timer;
+  private static didRegisterSignals = false;
 
   public static addConnection(): ConnectionToClient {
     const connection = new ConnectionToClient();
@@ -203,6 +204,8 @@ export default class Core {
   }
 
   private static registerSignals(): void {
+    if (this.didRegisterSignals) return;
+    this.didRegisterSignals = true;
     ShutdownHandler.register(() => this.shutdown());
 
     if (process.env.NODE_ENV !== 'test') {

@@ -38,7 +38,7 @@ test('will trigger a flow handler when an error occurs', async () => {
       spy();
       expect(error).not.toBeTruthy();
       await hero.querySelector('.make-ready').$click();
-    }
+    },
   );
 
   expect(spy).not.toHaveBeenCalled();
@@ -48,6 +48,35 @@ test('will trigger a flow handler when an error occurs', async () => {
   const session = Session.get(await hero.sessionId);
   const commands = session.commands.history;
   expect(commands.filter(x => x.activeFlowHandlerId !== undefined)).toHaveLength(1);
+});
+
+test('can handle multiple simultaneous handlers', async () => {
+  koaServer.get('/simulflow', ctx => {
+    ctx.body = `<body><h1>Hi</h1><div id="test" style="display: none"></div></body>`;
+  });
+  const hero = await openBrowser('/simulflow');
+
+  await hero.registerFlowHandler(
+    assert => assert(hero.querySelector('#test').$isVisible),
+    () => Promise.resolve(),
+  );
+  await hero.registerFlowHandler(
+    assert => assert(hero.url, 'https://test.com'),
+    () => Promise.resolve(),
+  );
+  await hero.registerFlowHandler(
+    assert => {
+      assert(hero.querySelector('h3').$exists);
+      assert(hero.url, 'https://test2.com');
+    },
+    () => Promise.resolve(),
+  );
+  await hero.registerFlowHandler(
+    assert => assert(hero.findResource({ httpRequest: { statusCode: 403 } })),
+    () => Promise.resolve(),
+  );
+
+  await expect(hero.activeTab.triggerFlowHandlers()).resolves.toBe(undefined);
 });
 
 test('bubbles up handler errors to the line of code that triggers the handlers', async () => {

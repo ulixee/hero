@@ -93,7 +93,7 @@ const propertyKeys: (keyof Hero)[] = [
 
 interface ISharedInternalProperties {
   clientPlugins: IClientPlugin[];
-  coreSessionPromise: Promise<CoreSession>
+  coreSessionPromise: Promise<CoreSession>;
 }
 
 export default class Hero extends AwaitedEventTarget<{
@@ -113,9 +113,12 @@ export default class Hero extends AwaitedEventTarget<{
   #isClosingPromise: Promise<void>;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
+    const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
     return {
       clientPlugins: this.#clientPlugins,
-      coreSessionPromise: this.#getCoreSessionOrReject(),
+      get coreSessionPromise() {
+        return coreSessionPromise();
+      },
     };
   }
 

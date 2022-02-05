@@ -1,5 +1,6 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
@@ -65,26 +66,18 @@ export default class CoreEventHeap {
       retryNumber: source?.retryNumber,
     });
 
-    this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
-    await this.pendingRegistrations;
-    const response = await subscriptionPromise;
-    const { listenerId } = response.data;
-    let wrapped = listenerFn;
-    if (this.eventInterceptors.has(type)) {
-      const interceptorFns = this.eventInterceptors.get(type);
-      wrapped = (...args: any[]) => {
-        let processedArgs = args;
-        for (const fn of interceptorFns) {
-          let result = fn(...processedArgs);
-          if (!Array.isArray(result)) result = [result];
-          processedArgs = result;
-        }
-        listenerFn(...processedArgs);
-      };
-    }
+    const registered = new Resolvable<void>();
+    this.pendingRegistrations = this.pendingRegistrations.then(() => registered.promise);
+    try {
+      const response = await subscriptionPromise;
+      const { listenerId } = response.data;
 
-    this.listenerFnById.set(listenerId, wrapped);
-    this.listenerIdByHandle.set(handle, listenerId);
+      const wrapped = this.wrapHandler(type, listenerFn);
+      this.listenerFnById.set(listenerId, wrapped);
+      this.listenerIdByHandle.set(handle, listenerId);
+    } finally {
+      registered.resolve();
+    }
   }
 
   public removeListener(
@@ -119,7 +112,11 @@ export default class CoreEventHeap {
   }
 
   public incomingEvent(meta: ISessionMeta, listenerId: string, eventArgs: any[]): void {
-    this.pendingRegistrations
+    let waitForPending = Promise.resolve()
+    if (!this.listenerFnById.has(listenerId)) {
+      waitForPending = this.pendingRegistrations;
+    }
+    waitForPending
       .then(() => {
         const listenerFn = this.listenerFnById.get(listenerId);
         if (listenerFn) listenerFn(...eventArgs);
@@ -143,5 +140,22 @@ export default class CoreEventHeap {
     parts.push(type);
     parts.push(listenerFn.toString());
     return parts.join(':');
+  }
+
+  private wrapHandler(
+    type: string,
+    listenerFn: (...args: any[]) => void,
+  ): (...args: any[]) => void {
+    if (!this.eventInterceptors.has(type)) return listenerFn;
+    const interceptorFns = this.eventInterceptors.get(type);
+    return (...args: any[]): void => {
+      let processedArgs = args;
+      for (const fn of interceptorFns) {
+        let result = fn(...processedArgs);
+        if (!Array.isArray(result)) result = [result];
+        processedArgs = result;
+      }
+      listenerFn(...processedArgs);
+    };
   }
 }

@@ -99,6 +99,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
       error: result?.error,
     });
 
+    this.tab.off('close', this.stop);
     for (const frameId of this.watchedFrameIds) {
       const frame = this.tab.getFrameEnvironment(frameId);
       if (!frame) continue;
