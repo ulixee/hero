@@ -7,6 +7,7 @@ import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 export default interface ICoreSession {
   sessionId: string;
   collectSnippet(name: string, value: any): Promise<void>;
+  getCollectedAssetNames(sessionId: string): Promise<{ resources: string[]; elements: string[]; snippets: string[] }>;
   getCollectedSnippets(sessionId: string, name: string): Promise<ICollectedSnippet[]>;
   getCollectedElements(sessionId: string, name: string): Promise<ICollectedElement[]>;
   getCollectedResources(sessionId: string, name: string): Promise<ICollectedResource[]>;

@@ -159,6 +159,12 @@ export default class CoreSession implements IJsPathEventTarget {
     await this.commandQueue.run('Session.collectSnippet', name, value);
   }
 
+  public async getCollectedAssetNames(
+    sessionId: string,
+  ): Promise<{ resources: string[]; elements: string[]; snippets: string[] }> {
+    return await this.commandQueue.run('Session.getCollectedAssetNames', sessionId);
+  }
+
   public async getCollectedSnippets(sessionId: string, name: string): Promise<ICollectedSnippet[]> {
     return await this.commandQueue.run('Session.getCollectedSnippets', sessionId, name);
   }
@@ -167,8 +173,15 @@ export default class CoreSession implements IJsPathEventTarget {
     return await this.commandQueue.run('Session.getCollectedElements', sessionId, name);
   }
 
-  public async getCollectedResources(sessionId: string, name: string): Promise<ICollectedResource[]> {
-    const resources: IResourceMeta[] = await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
+  public async getCollectedResources(
+    sessionId: string,
+    name: string,
+  ): Promise<ICollectedResource[]> {
+    const resources: IResourceMeta[] = await this.commandQueue.run(
+      'Session.getCollectedResources',
+      sessionId,
+      name,
+    );
     const results: ICollectedResource[] = [];
     for (const resource of resources) {
       const buffer = resource.response?.body;
