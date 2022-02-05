@@ -52,6 +52,11 @@ export default class CollectedElementsTable extends SqliteTable<
       .all({ name });
   }
 
+  public allNames(): string[] {
+    const names = this.db.prepare(`select name from ${this.tableName}`).all();
+    return [...new Set(names.map(x => x.name))];
+  }
+
   public updateHtml(element: ICollectedElement): void {
     const pending = this.pendingInserts.find(x => x[0] === element.id);
     if (pending) {

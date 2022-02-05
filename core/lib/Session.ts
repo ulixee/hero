@@ -205,6 +205,7 @@ export default class Session
       this.getCollectedSnippets,
       this.getCollectedElements,
       this.getCollectedResources,
+      this.getCollectedAssetNames,
       this.close,
       this.flush,
       this.exportUserProfile,
@@ -295,6 +296,33 @@ export default class Session
   public collectSnippet(name: string, value: any): Promise<void> {
     this.db.collectedSnippets.insert(name, value);
     return Promise.resolve();
+  }
+
+  public getCollectedAssetNames(
+    fromSessionId: string,
+  ): Promise<{ resources: string[]; elements: string[]; snippets: string[] }> {
+    let db = this.db;
+    if (fromSessionId === this.id) {
+      db.flush();
+    } else {
+      db = SessionDb.getCached(fromSessionId);
+    }
+    const snippets = new Set<string>();
+    for (const snippet of db.collectedSnippets.all()) {
+      snippets.add(snippet.name);
+    }
+    const resources = new Set<string>();
+    for (const resource of db.collectedResources.all()) {
+      resources.add(resource.name);
+    }
+
+    const elementNames = db.collectedElements.allNames();
+
+    return Promise.resolve({
+      snippets: [...snippets],
+      resources: [...resources],
+      elements: [...elementNames],
+    });
   }
 
   public getCollectedSnippets(fromSessionId: string, name: string): Promise<ICollectedSnippet[]> {
