@@ -157,7 +157,9 @@ export default class MirrorPage extends TypedEventEmitter<{
       let isLoadingDocument = false;
       if (
         loadingDocument &&
-        (loadingDocument.url !== this.page.mainFrame.url || newPaintIndex === -1)
+        (loadingDocument.url !== this.page.mainFrame.url ||
+          newPaintIndex === -1 ||
+          loadingDocument.paintStartTimestamp !== this.loadedDocument?.paintStartTimestamp)
       ) {
         isLoadingDocument = true;
 
