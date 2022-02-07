@@ -153,6 +153,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     try {
       if (!proxyToClientResponse.headersSent) {
+        proxyToClientResponse.sendDate = false;
         proxyToClientResponse.writeHead(status);
         const errorText = this.context.requestSession.respondWithHttpErrorStacks ? error.stack : '';
         proxyToClientResponse.end(errorText);

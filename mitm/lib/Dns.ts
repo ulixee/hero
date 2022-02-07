@@ -18,8 +18,7 @@ export class Dns {
 
   public async lookupIp(host: string, retries = 3): Promise<string> {
     if (this.requestSession.upstreamProxyUrl) return host;
-    if (!this.dnsSettings.dnsOverTlsConnection || host === 'localhost' || net.isIP(host))
-      return host;
+    if (host === 'localhost' || net.isIP(host)) return host;
 
     try {
       // get cached (or in process resolver)
@@ -34,9 +33,11 @@ export class Dns {
     // if not found in cache, perform dns lookup
     let lookupError: Error;
     try {
-      const dnsEntry = await this.lookupDnsEntry(host);
-      const ip = this.nextIp(dnsEntry);
-      if (ip) return ip;
+      if (this.dnsSettings.dnsOverTlsConnection) {
+        const dnsEntry = await this.lookupDnsEntry(host);
+        const ip = this.nextIp(dnsEntry);
+        if (ip) return ip;
+      }
     } catch (error) {
       lookupError = error;
     }
