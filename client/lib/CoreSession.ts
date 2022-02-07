@@ -21,6 +21,7 @@ import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import { IOutputChangeToRecord } from '../interfaces/ICoreSession';
+import Hero from './Hero';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -31,6 +32,7 @@ export default class CoreSession implements IJsPathEventTarget {
   public eventHeap: CoreEventHeap;
   public emitter = new EventEmitter();
   public readonly mode: ISessionCreateOptions['mode'];
+  public readonly hero: Hero;
 
   public get lastCommandId(): number {
     return this.commandId;
@@ -56,6 +58,7 @@ export default class CoreSession implements IJsPathEventTarget {
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
     connectionToCore: ConnectionToCore,
+    hero: Hero,
     mode: ISessionCreateOptions['mode'],
   ) {
     this.mode = mode;
@@ -66,6 +69,7 @@ export default class CoreSession implements IJsPathEventTarget {
       sessionId,
     };
     this.connectionToCore = connectionToCore;
+    this.hero = hero;
     loggerSessionIdNames.set(sessionId, sessionName);
     this.commandQueue = new CoreCommandQueue(
       { sessionId, sessionName },

@@ -75,7 +75,7 @@ const NodeExtensionFns: INodeExtensionFns = {
   },
   async $type(...typeInteractions: ITypeInteraction[]): Promise<void> {
     const coreFrame = await getCoreFrame(this);
-    await this.$click();
+    await this.focus();
     await Interactor.run(
       coreFrame,
       typeInteractions.map(t => ({ type: t })),

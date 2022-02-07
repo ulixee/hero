@@ -18,7 +18,7 @@ import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 import { IHeroCreateOptions } from '../index';
-import { scriptInstance } from '../lib/Hero';
+import Hero, { scriptInstance } from '../lib/Hero';
 
 const { log } = Log(module);
 
@@ -181,8 +181,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
 
   public async createSession(
-    options: Omit<ISessionCreateOptions, 'sessionId'> &
-      Pick<IHeroCreateOptions, 'sessionId'>,
+    options: Omit<ISessionCreateOptions, 'sessionId'> & Pick<IHeroCreateOptions, 'sessionId'>,
+    hero: Hero,
   ): Promise<CoreSession> {
     try {
       if (options.sessionId) options.sessionId = await options.sessionId;
@@ -196,13 +196,14 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       if (restoreMode) {
         this.commandQueue.mode = restoreMode;
       }
-      const session = new CoreSession(
+      const coreSession = new CoreSession(
         { ...sessionMeta, sessionName: options.sessionName },
         this,
+        hero,
         options.mode,
       );
-      this.coreSessions.track(session);
-      return session;
+      this.coreSessions.track(coreSession);
+      return coreSession;
     } catch (error) {
       if (error instanceof DisconnectedFromCoreError && this.isDisconnecting) return null;
       throw error;
