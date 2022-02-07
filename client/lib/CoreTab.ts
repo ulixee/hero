@@ -84,7 +84,7 @@ export default class CoreTab implements IJsPathEventTarget {
     if (typeof state === 'function') {
       state = { all: state };
     }
-    const handler = new DomStateHandler(state, this, callsitePath);
+    const handler = new DomStateHandler(state, null, this, callsitePath);
     try {
       await handler.waitFor(options.timeoutMs);
     } catch (error) {
@@ -106,11 +106,12 @@ export default class CoreTab implements IJsPathEventTarget {
     if (typeof state === 'function') {
       state = { all: state };
     }
-    const handler = new DomStateHandler(state, this, callsitePath);
+    const handler = new DomStateHandler(state, null, this, callsitePath);
     return await handler.check();
   }
 
   public async registerFlowHandler(
+    name: string,
     state: IDomState | DomState | IDomStateAllFn,
     handlerFn: (error?: Error) => Promise<any>,
     callsitePath: ISourceCodeLocation[],
@@ -119,8 +120,8 @@ export default class CoreTab implements IJsPathEventTarget {
     if (typeof state === 'function') {
       state = { all: state };
     }
-    this.flowHandlers.push({ id, state, callsitePath, handlerFn });
-    await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', state.name, id, callsitePath);
+    this.flowHandlers.push({ id, name, state, callsitePath, handlerFn });
+    await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', name, id, callsitePath);
   }
 
   public async shouldRetryFlowHandler(
@@ -141,7 +142,7 @@ export default class CoreTab implements IJsPathEventTarget {
     const matchingStates: IFlowHandler[] = [];
     await Promise.all(
       this.flowHandlers.map(async flowHandler => {
-        const handler = new DomStateHandler(flowHandler.state, this, flowHandler.callsitePath);
+        const handler = new DomStateHandler(flowHandler.state, null, this, flowHandler.callsitePath);
         try {
           if (await handler.check()) {
             matchingStates.push(flowHandler);

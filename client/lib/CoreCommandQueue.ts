@@ -143,10 +143,12 @@ export default class CoreCommandQueue {
   }
 
   public async runOutOfBand<T>(command: string, ...args: any[]): Promise<T> {
+    const commandId = this.nextCommandId;
+    this.commandCounter?.emitter.emit('command', command, commandId, args);
     return await this.sendRequest({
       command,
       args,
-      commandId: this.nextCommandId,
+      commandId,
       startDate: new Date(),
       callsite: this.getCallsite(),
       ...(this.internalState.commandMetadata ?? {}),

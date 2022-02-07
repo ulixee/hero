@@ -270,13 +270,14 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async registerFlowHandler(
+    name: string,
     state: IDomState | DomState | IDomStateAllFn,
     handlerFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
     const callsitePath = scriptInstance.getScriptCallsite();
 
     const coreTab = await this.#coreTabPromise;
-    await coreTab.registerFlowHandler(state, handlerFn, callsitePath);
+    await coreTab.registerFlowHandler(name, state, handlerFn, callsitePath);
   }
 
   public async triggerFlowHandlers(): Promise<void> {

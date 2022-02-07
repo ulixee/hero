@@ -489,10 +489,11 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public async registerFlowHandler(
+    name: string,
     state: IDomState | DomState | IDomStateAllFn,
     handlerCallbackFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
-    return await this.activeTab.registerFlowHandler(state, handlerCallbackFn);
+    return await this.activeTab.registerFlowHandler(name, state, handlerCallbackFn);
   }
 
   public async triggerFlowHandlers(): Promise<void> {

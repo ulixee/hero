@@ -18,7 +18,6 @@ test('can wait for a url', async () => {
 
   await hero.goto(`${koaServer.baseUrl}/waitForDomState1`);
   const state1 = hero.activeTab.waitForState({
-    name: 'state1',
     all(assert) {
       assert(hero.url, url => url.includes('waitForDomState'));
     },
@@ -26,7 +25,6 @@ test('can wait for a url', async () => {
   await expect(state1).resolves.toBeUndefined();
 
   const state2 = hero.activeTab.validateState({
-    name: 'state2',
     all(assert ) {
       assert(hero.url, url => url.includes('page2'));
     },

@@ -33,7 +33,12 @@ export default class DomStateHandler {
   #onlyRunCallbackOnMatch = false;
   #retryNumber = 0;
 
-  constructor(readonly domState: IDomState, coreTab: CoreTab, callsitePath: ISourceCodeLocation[]) {
+  constructor(
+    readonly domState: IDomState,
+    readonly name: string,
+    coreTab: CoreTab,
+    callsitePath: ISourceCodeLocation[],
+  ) {
     this.#coreTab = coreTab;
     this.#callsite = callsitePath;
     bindFunctions(this);
@@ -53,7 +58,7 @@ export default class DomStateHandler {
     const listenArgs: IDomStateListenArgs = {
       commands: this.#rawCommandsById,
       callsite: JSON.stringify(this.#callsite),
-      name: this.domState.name,
+      name: this.name,
       url: this.domState.url,
     };
 
@@ -185,11 +190,9 @@ export default class DomStateHandler {
   private async createAssertionSets(): Promise<IStateAndAssertion<any>[]> {
     const assertionSets: IStateAndAssertion<any>[] = [];
 
-    this.domState.all(
-      function assert(statePromise, assertion) {
-        assertionSets.push([Promise.resolve(statePromise).catch(err => err), assertion]);
-      }
-    );
+    this.domState.all(function assert(statePromise, assertion) {
+      assertionSets.push([Promise.resolve(statePromise).catch(err => err), assertion]);
+    });
 
     // wait for all to complete
     for (const assertion of assertionSets) {
@@ -219,11 +222,9 @@ export default class DomStateHandler {
       async () => {
         const runCommands: Promise<any>[] = [];
         // trigger a run so we can see commands that get triggered
-        result = this.domState.all(
-          function assert(statePromise) {
-            runCommands.push(Promise.resolve(statePromise).catch(() => null));
-          }
-        );
+        result = this.domState.all(function assert(statePromise) {
+          runCommands.push(Promise.resolve(statePromise).catch(() => null));
+        });
         await Promise.all(runCommands);
       },
     );
@@ -231,7 +232,7 @@ export default class DomStateHandler {
     if (isPromise(result)) {
       throw new Error(
         `DomState (${
-          this.domState.name ?? 'no name'
+          this.name ?? 'no name'
         }) all(assert) returns a Promise. Each state function must have synchronous assertions.`,
       );
     }
