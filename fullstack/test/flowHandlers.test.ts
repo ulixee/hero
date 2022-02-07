@@ -30,7 +30,7 @@ test('will trigger a flow handler when an error occurs', async () => {
 
   const spy = jest.fn();
 
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     assert => {
       assert(hero.querySelector('.ready').$isVisible, false);
     },
@@ -56,22 +56,22 @@ test('can handle multiple simultaneous handlers', async () => {
   });
   const hero = await openBrowser('/simulflow');
 
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     assert => assert(hero.querySelector('#test').$isVisible),
     () => Promise.resolve(),
   );
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow2',
     assert => assert(hero.url, 'https://test.com'),
     () => Promise.resolve(),
   );
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow3',
     assert => {
       assert(hero.querySelector('h3').$exists);
       assert(hero.url, 'https://test2.com');
     },
     () => Promise.resolve(),
   );
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     assert => assert(hero.findResource({ httpRequest: { statusCode: 403 } })),
     () => Promise.resolve(),
   );
@@ -90,7 +90,7 @@ test('bubbles up handler errors to the line of code that triggers the handlers',
 
   const spy = jest.fn();
 
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     {
       all(assert) {
         assert(hero.querySelector('.ready').$isVisible, false);
@@ -135,7 +135,7 @@ test('checks multiple handlers', async () => {
 
   const popupSpy = jest.fn();
 
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     {
       all(assert) {
         assert(hero.querySelector('.popup').$isVisible);
@@ -148,7 +148,7 @@ test('checks multiple handlers', async () => {
   );
 
   const linkSpy = jest.fn();
-  await hero.registerFlowHandler(
+  await hero.registerFlowHandler('flow',
     {
       all(assert) {
         assert(hero.querySelector('.wanted').$isVisible, false);

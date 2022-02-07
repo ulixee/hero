@@ -1,5 +1,4 @@
 export default interface IDomState {
-  name?: string;
   url?: string | RegExp;
   all: IDomStateAllFn;
 }
