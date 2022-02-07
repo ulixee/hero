@@ -7,7 +7,6 @@ import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as readline from 'readline';
 import { ReadLine } from 'readline';
-import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
@@ -263,7 +262,7 @@ export default class CoreSession implements IJsPathEventTarget {
     for (const tab of this.frozenTabsById.values()) {
       await tab.flush();
     }
-    return await this.commandQueue.run('Session.close', force);
+    return await this.commandQueue.runOutOfBand('Session.close', force);
   }
 
   private closeCliPrompt(): void {
@@ -289,7 +288,6 @@ export default class CoreSession implements IJsPathEventTarget {
       `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`,
     );
 
-    ShutdownHandler.register(() => this.close(true));
     process.stdin.on('keypress', async (chunk, key) => {
       if (
         key.name?.toLowerCase() === 'q' ||

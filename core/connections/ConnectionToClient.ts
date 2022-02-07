@@ -138,7 +138,7 @@ export default class ConnectionToClient
     const closeAll: Promise<any>[] = [];
     for (const id of this.sessionIdToRemoteEvents.keys()) {
       const session = Session.get(id);
-      if (session) closeAll.push(session.close().catch(err => err));
+      if (session) closeAll.push(session.close(true).catch(err => err));
     }
     await Promise.all(closeAll);
     this.isPersistent = false;

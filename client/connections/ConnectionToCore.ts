@@ -29,7 +29,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   public readonly commandQueue: CoreCommandQueue;
   public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
-  public isDisconnecting = false;
+  public isDisconnecting: Promise<void>;
   public isConnectionTerminated = false;
 
   protected resolvedHost: string;
@@ -226,35 +226,39 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     fatalError?: Error,
     beforeClose?: () => Promise<any>,
   ): Promise<void> {
-    if (this.isDisconnecting) return;
-    this.isDisconnecting = true;
-    const logid = log.stats('ConnectionToCore.Disconnecting', {
-      host: this.hostOrError,
-      sessionId: null,
-    });
+    if (this.isDisconnecting) return this.isDisconnecting;
+    const resolvable = new Resolvable<void>();
+    this.isDisconnecting = resolvable.promise;
 
-    const hasSessions = this.coreSessions?.size > 0;
-    this.cancelPendingRequests();
+    try {
+      const logid = log.stats('ConnectionToCore.Disconnecting', {
+        host: this.hostOrError,
+        sessionId: null,
+      });
+      const hasSessions = this.coreSessions?.size > 0;
+      this.cancelPendingRequests();
 
-    if (this.connectPromise) {
-      if (!this.connectPromise.isResolved) {
-        const result =
-          hasSessions && !this.didAutoConnect
-            ? new DisconnectedFromCoreError(this.resolvedHost)
-            : null;
-        this.connectPromise.resolve(result);
-      } else if (beforeClose) {
-        await beforeClose();
+      if (this.connectPromise) {
+        if (!this.connectPromise.isResolved) {
+          const result =
+            hasSessions && !this.didAutoConnect
+              ? new DisconnectedFromCoreError(this.resolvedHost)
+              : null;
+          this.connectPromise.resolve(result);
+        } else if (beforeClose) {
+          await beforeClose();
+        }
       }
+      await this.destroyConnection();
+      log.stats('ConnectionToCore.Disconnected', {
+        parentLogId: logid,
+        host: this.hostOrError,
+        sessionId: null,
+      });
+      this.emit('disconnected');
+    } finally {
+      resolvable.resolve();
     }
-    await this.destroyConnection();
-    log.stats('ConnectionToCore.Disconnected', {
-      parentLogId: logid,
-      host: this.hostOrError,
-      sessionId: null,
-    });
-
-    this.emit('disconnected');
   }
 
   protected async internalSendRequestAndWait(

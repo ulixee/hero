@@ -1,4 +1,5 @@
 import Log from '@ulixee/commons/lib/Logger';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
 import ConnectionToRemoteCoreServer from './ConnectionToRemoteCoreServer';
@@ -41,6 +42,7 @@ export default class ConnectionFactory {
     };
 
     connection.connect(true).then(onError).catch(onError);
+    ShutdownHandler.register(() => connection.disconnect());
 
     return connection;
   }

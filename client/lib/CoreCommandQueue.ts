@@ -149,6 +149,7 @@ export default class CoreCommandQueue {
       commandId: this.nextCommandId,
       startDate: new Date(),
       callsite: this.getCallsite(),
+      ...(this.internalState.commandMetadata ?? {}),
     });
   }
 
