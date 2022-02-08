@@ -97,6 +97,34 @@ describe('basic collect Element tests', () => {
       expect(valid[0].outerHTML).toBe(`<li>Text ${i}</li>`);
     }
   });
+
+  test('can collect elements on a second tab', async () => {
+    const [hero, coreSession] = await openBrowser('/');
+    koaServer.get('/collectTab', ctx => {
+      ctx.body = `<body><h1>Hi</h1>
+<a target="_blank" href="/collectTab2">Click Me</a>
+</body>`;
+    });
+
+    koaServer.get('/collectTab2', ctx => {
+      ctx.body = `<body><h2>Here</h2>
+<ul>
+<li class="item">1</li>
+<li class="item">2</li>
+<li class="item">3</li>
+</ul>
+</body>`;
+    });
+
+    await hero.goto(`${koaServer.baseUrl}/collectTab`);
+    await hero.querySelector('a').$click();
+    const newTab = await hero.waitForNewTab();
+    await newTab.focus();
+    await newTab.waitForLoad('DomContentLoaded')
+
+    await collectElement(hero.document.querySelectorAll('.item'), 'items');
+    await expect(coreSession.getCollectedElements(null, 'items')).resolves.toHaveLength(3);
+  });
 });
 
 async function openBrowser(path: string): Promise<[Hero, CoreSession]> {

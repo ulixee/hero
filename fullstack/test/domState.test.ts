@@ -58,7 +58,43 @@ setInterval(() => {
   await expect(hero.activeTab.validateState(domState)).resolves.toBe(true);
 });
 
-test('can test for page state across redirects', async () => {
+
+test('can wait for a domElement on a second tab', async () => {
+  const hero = await openBrowser('/');
+  koaServer.get('/waitForDomStateTabs', ctx => {
+    ctx.body = `<body><h1>Hi</h1>
+<a target="_blank" href="/waitForDomStateTab2">Click Me</a>
+</body>`;
+  });
+
+  koaServer.get('/waitForDomStateTab2', ctx => {
+    ctx.body = `<body><h2>Here</h2>
+<div id="wait-for-me" style="display: none">Not here yet</div>
+<script>
+setTimeout(() => {
+  document.querySelector('#wait-for-me').style.display = 'block';
+}, 100)
+</script>
+</body>`;
+  });
+
+  await hero.goto(`${koaServer.baseUrl}/waitForDomStateTabs`);
+  await hero.querySelector('a').$click();
+  const newTab = await hero.waitForNewTab();
+  await newTab.focus();
+
+  const domState = {
+    all(assert) {
+      assert(hero.url, x => x.includes('/waitForDomStateTab2'))
+      assert(hero.querySelector('h2').$isVisible);
+      assert(hero.querySelector('#wait-for-me').$isVisible);
+    },
+  };
+  await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined();
+  await expect(hero.activeTab.validateState(domState)).resolves.toBe(true);
+});
+
+test('can test for state across redirects', async () => {
   koaServer.get('/waitForDomStateRedirect1', ctx => {
     ctx.body = `<body>
       <a href="/waitForDomStateRedirect2">Click Me</a>

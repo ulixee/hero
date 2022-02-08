@@ -115,13 +115,14 @@ export default class CoreSession implements IJsPathEventTarget {
     return [...this.tabsById.values()];
   }
 
-  public addTab(tabMeta: ISessionMeta): void {
+  public addTab(tabMeta: ISessionMeta): CoreTab {
     if (!this.tabsById.has(tabMeta.tabId)) {
       this.tabsById.set(
         tabMeta.tabId,
         new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connectionToCore, this),
       );
     }
+    return this.tabsById.get(tabMeta.tabId);
   }
 
   public removeTab(tab: CoreTab): void {

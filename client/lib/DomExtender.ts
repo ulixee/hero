@@ -130,6 +130,7 @@ const NodeExtensionFns: INodeExtensionFns = {
       'document',
       [
         'evaluate',
+        selector,
         getAwaitedPathAsMethodArg(awaitedPath),
         null,
         orderedNodeResults
