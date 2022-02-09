@@ -1,9 +1,10 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
-import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import Hero, { Core, LocationStatus } from '../index';
+import Hero, { Core, InteractionCommand, LocationStatus } from '../index';
+import Session from '@ulixee/hero-core/lib/Session';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -215,5 +216,74 @@ describe('basic Interact tests', () => {
     expect(await frameEnv.getJsValue('lastClicked')).toBe('clickedit');
 
     await hero.close();
+  });
+
+  it('should be able to click elements when iterating in a list', async () => {
+    // test putting next to an image that will only space after it loads
+    koaServer.get('/replace-list', ctx => {
+      ctx.body = `
+      <body>
+          <div id="app" style="height: 2700px">&nbsp;</div>
+          <div id="outer">
+            <div class="inner">
+              <ul id="test">
+                <li class="class1">Li 1</li>
+                <li class="class1">Li 2</li>
+                <li class="class1">Li 3</li>
+              </ul>
+            </div>
+            <div class="inner">
+              <ul id="test">
+                <li class="class1">Li 3</li>
+                <li class="class1">Li 4</li>
+                <li class="class1">Li 5</li>
+              </ul>
+            </div>
+          </div>
+        <script>
+          
+          let hasrun = false;
+          document.querySelector('#app').addEventListener('mouseleave', () => {
+             if (hasrun) return;
+             hasrun = true;
+             
+             document.querySelector('#outer').innerHTML = \`<div class="inner">
+              <ul id="test">
+                <li class="class1">Li 1</li>
+                <li class="class1">Li 2</li>
+                <li class="class1">Li 3</li>
+              </ul>
+            </div>
+            <div class="inner">
+              <ul id="test">
+                <li class="class1">Li 3</li>
+                <li class="class1">Li 4</li>
+                <li class="class1">Li 5</li>
+              </ul>
+            </div>\`;
+          });
+        </script>
+      </body>
+    `;
+    });
+
+    const hero = new Hero();
+    const sessionId = await hero.sessionId;
+    const tabId = await hero.activeTab.tabId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const interactor = tab.mainFrameEnvironment.interactor;
+    const reloadSpy = jest.spyOn(interactor, 'reloadJsPath');
+    await tab.goto(`${koaServer.baseUrl}/replace-list`);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
+
+
+    for (const result of await hero.querySelectorAll('#outer .inner')) {
+      for (const inner of await result.querySelectorAll('ul')) {
+        await inner.dataset;
+        await inner.querySelector('li').$click();
+      }
+    }
+    expect(reloadSpy).toHaveBeenCalledTimes(2);
+
   });
 });

@@ -4,10 +4,7 @@ import HumanEmulator from '@ulixee/default-human-emulator';
 import { createSession, getLogo, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
-import {
-  getClientRectFnName,
-  getNodePointerFnName,
-} from '@ulixee/hero-interfaces/jsPathFnNames';
+import { getClientRectFnName, getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 import { LoadStatus, LocationStatus } from '@ulixee/hero-interfaces/Location';
 

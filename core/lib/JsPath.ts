@@ -21,6 +21,13 @@ import IElementRect from '@ulixee/hero-interfaces/IElementRect';
 
 const { log } = Log(module);
 
+interface IJsPathSource {
+  execHistoryIdx: number;
+  parentNodeId?: number;
+  isFromIterable: boolean;
+  jsPath: IJsPath;
+}
+
 export class JsPath {
   public hasNewExecJsPathHistory = false;
   public readonly execHistory: IJsPathHistory[] = [];
@@ -31,10 +38,7 @@ export class JsPath {
   private readonly clientRectByNodePointerId = new Map<number, IElementRect>();
   private readonly nodeIdRedirectToNewNodeId: { [nodeId: number]: number } = {};
 
-  private nodeIdToHistoryLocation = new Map<
-    number,
-    { sourceIndex: number; isFromIterable: boolean }
-  >();
+  private nodeIdToJsPathSource = new Map<number, IJsPathSource>();
 
   constructor(frameEnvironment: FrameEnvironment) {
     this.frameEnvironment = frameEnvironment;
@@ -173,21 +177,18 @@ export class JsPath {
 
   private getJsPathHistoryForNode(nodeId: number): {
     nodeId: number;
-    redirectedNodeId?: number;
     jsPath: IJsPath;
   }[] {
-    const originalPath = this.nodeIdToHistoryLocation.get(nodeId);
-    let sourceIndex = originalPath.sourceIndex;
-    const paths: ReturnType<JsPath['getJsPathHistoryForNode']> = [];
+    const paths: {
+      nodeId: number;
+      jsPath: IJsPath;
+    }[] = [];
 
-    let parentNodeId = nodeId;
-    while (sourceIndex !== undefined) {
-      const sourcePath = this.execHistory[sourceIndex];
-      if (typeof parentNodeId === 'number') {
-        paths.unshift({ nodeId: parentNodeId, jsPath: sourcePath.jsPath });
-      }
-      sourceIndex = sourcePath.sourceIndex;
-      if (sourceIndex) parentNodeId = sourcePath.jsPath[0] as number;
+    let sourcePath: IJsPathSource;
+    while ((sourcePath = this.nodeIdToJsPathSource.get(nodeId))) {
+      paths.unshift({ nodeId, jsPath: sourcePath.jsPath });
+      nodeId = sourcePath.parentNodeId;
+      if (!nodeId) break;
     }
     return paths;
   }
@@ -197,7 +198,7 @@ export class JsPath {
     result: IExecJsPathResult<any>,
     isLiveQuery = true,
   ): void {
-    let sourceIndex: number;
+    let execHistoryIdx: number;
     if (isLiveQuery) this.hasNewExecJsPathHistory = true;
 
     if (result.nodePointer && isLiveQuery) {
@@ -215,43 +216,53 @@ export class JsPath {
     if (typeof jsPath[0] === 'number') {
       const id = jsPath[0];
 
-      const queryIndex = this.nodeIdToHistoryLocation.get(id);
+      const queryIndex = this.nodeIdToJsPathSource.get(id);
       if (queryIndex === undefined) return;
       const operator = queryIndex.isFromIterable ? '*.' : '.';
       const operatorPath = [operator, ...jsPath.slice(1)];
-      const key = `${JSON.stringify(operatorPath)}_${queryIndex.sourceIndex}`;
+      const key = `${JSON.stringify(operatorPath)}_${queryIndex.execHistoryIdx}`;
 
-      sourceIndex = this.execHistoryIndexByKey[key];
-      if (sourceIndex === undefined) {
+      execHistoryIdx = this.execHistoryIndexByKey[key];
+      if (execHistoryIdx === undefined) {
         this.execHistory.push({
           jsPath: operatorPath,
-          sourceIndex: queryIndex.sourceIndex,
+          sourceIndex: queryIndex.execHistoryIdx,
         });
-        sourceIndex = this.execHistory.length - 1;
-        this.execHistoryIndexByKey[key] = sourceIndex;
+        execHistoryIdx = this.execHistory.length - 1;
+        this.execHistoryIndexByKey[key] = execHistoryIdx;
       }
     } else {
       this.execHistory.push({
         jsPath,
       });
-      sourceIndex = this.execHistory.length - 1;
+      execHistoryIdx = this.execHistory.length - 1;
     }
 
     if (result.nodePointer) {
       const { id, iterableItems, iterableIsState } = result.nodePointer;
+      const parentNodeId = typeof jsPath[0] === 'number' ? jsPath[0] : undefined;
+      const cleanJsPath = [...jsPath];
+      const method = this.getJsPathMethod(cleanJsPath);
+      if (method && method.startsWith('__')) cleanJsPath.pop();
 
-      const queryIndex = this.nodeIdToHistoryLocation.get(id);
+      const queryIndex = this.nodeIdToJsPathSource.get(id);
       if (!queryIndex) {
-        this.nodeIdToHistoryLocation.set(id, {
+        this.nodeIdToJsPathSource.set(id, {
           isFromIterable: false,
-          sourceIndex,
+          execHistoryIdx,
+          parentNodeId,
+          jsPath: cleanJsPath,
         });
       }
       if (iterableIsState) {
-        for (const nodePointer of iterableItems as INodePointer[]) {
-          this.nodeIdToHistoryLocation.set(nodePointer.id, {
+        for (let i = 0; i < iterableItems.length; i += 1) {
+          const nodePointer = iterableItems[i] as INodePointer;
+          if (this.nodeIdToJsPathSource.has(nodePointer.id)) continue;
+          this.nodeIdToJsPathSource.set(nodePointer.id, {
             isFromIterable: true,
-            sourceIndex,
+            execHistoryIdx,
+            jsPath: [...cleanJsPath, String(i)],
+            parentNodeId,
           });
         }
       }
