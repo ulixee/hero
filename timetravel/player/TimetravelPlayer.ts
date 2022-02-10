@@ -18,7 +18,7 @@ const { log } = Log(module);
 export default class TimetravelPlayer extends TypedEventEmitter<{
   'all-tabs-closed': void;
   'timetravel-to-end': void;
-  'new-tick-command': void;
+  'new-tick-command': { commandId: number };
   open: void;
 }> {
   public get activeCommandId(): number {
@@ -121,7 +121,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       this.emit('timetravel-to-end');
     }
     if (tab.currentTick?.commandId !== startTick?.commandId) {
-      this.emit('new-tick-command');
+      this.emit('new-tick-command', { commandId: tab.currentTick?.commandId });
     }
     if (statusMetadata) await this.showLoadStatus(statusMetadata);
     return tab;

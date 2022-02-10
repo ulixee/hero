@@ -5,8 +5,14 @@ import { IEventRecord } from '../models/AwaitedEventsTable';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
-export default class Commands {
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+
+export default class Commands extends TypedEventEmitter<{
+  start: ICommandMeta;
+  finish: ICommandMeta;
+}> {
   public readonly history: ICommandMeta[] = [];
   public resumeCounter = 0;
   public get last(): ICommandMeta | undefined {
@@ -28,7 +34,7 @@ export default class Commands {
     commandId: number;
     startDate: Date;
     sendDate: Date;
-    callsite?: string;
+    callsite?: ISourceCodeLocation[];
     retryNumber?: number;
     activeFlowHandlerId?: number;
   };
@@ -37,7 +43,9 @@ export default class Commands {
   private listenersById = new Map<string, IRemoteListenerDetails>();
   private listenerIdCounter = 0;
 
-  constructor(readonly db: SessionDb) {}
+  constructor(readonly db: SessionDb) {
+    super()
+  }
 
   public create(
     tabId: number,
@@ -75,6 +83,7 @@ export default class Commands {
     commandMeta.runStartDate = startDate;
     this.history.push(commandMeta);
     this.db.commands.insert(commandMeta);
+    this.emit('start', commandMeta)
   }
 
   public onFinished(commandMeta: ICommandMeta, result: any, endNavigationId: number): void {
@@ -82,6 +91,7 @@ export default class Commands {
     commandMeta.result = result;
     commandMeta.endNavigationId = endNavigationId;
     this.db.commands.insert(commandMeta);
+    this.emit('finish', commandMeta)
   }
 
   public getCommandForTimestamp(lastCommand: ICommandMeta, timestamp: number): ICommandMeta {
