@@ -212,9 +212,17 @@ export default class CoreCommandQueue {
           error.stack += `${this.sessionMarker}`;
         }
         if (callsite?.length) {
-          error.stack = `\n\n${callsite
-            .map(x => SourceLoader.getSource(x)?.code)
-            .join('\n -> ')}\n\n\n${error.stack}`;
+          const lastLine = callsite[callsite.length - 1];
+          if (lastLine) {
+            try {
+              const code = SourceLoader.getSource(lastLine)?.code;
+              if (code) {
+                error.stack = `\n\n  --->  ${code.trim()}\n\n\n${error.stack}`;
+              }
+            } catch (_) {
+              // drown if we can't read the source code
+            }
+          }
         }
         throw error;
       });
