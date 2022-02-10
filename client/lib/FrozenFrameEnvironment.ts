@@ -25,7 +25,7 @@ import Hero from './Hero';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
 import * as AwaitedHandler from './SetupAwaitedHandler';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol } from './internal';
 
 const stateMachine = StateMachine<
   any,

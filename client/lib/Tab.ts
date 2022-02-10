@@ -29,7 +29,7 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Hero, { scriptInstance } from './Hero';
+import Hero  from './Hero';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -37,7 +37,7 @@ import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol,scriptInstance } from './internal';
 
 const awaitedPathState = StateMachine<
   any,

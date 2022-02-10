@@ -5,7 +5,7 @@ import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation'
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import { scriptInstance } from './Hero';
+import { scriptInstance } from './internal';
 
 const { log } = Log(module);
 
@@ -62,7 +62,7 @@ export default class CoreEventHeap {
       startDate: new Date(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
-      callsite: JSON.stringify(source?.callsite ?? scriptInstance.getScriptCallsite()),
+      callsite: source?.callsite ?? scriptInstance.getScriptCallsite(),
       retryNumber: source?.retryNumber,
     });
 
@@ -101,7 +101,7 @@ export default class CoreEventHeap {
         startDate: new Date(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
-        callsite: JSON.stringify(source?.callsite ?? scriptInstance.getScriptCallsite()),
+        callsite: source?.callsite ?? scriptInstance.getScriptCallsite(),
         retryNumber: source?.retryNumber,
       })
       .catch(error => {

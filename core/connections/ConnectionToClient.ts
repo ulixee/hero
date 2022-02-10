@@ -16,6 +16,7 @@ import Core from '../index';
 import FrameEnvironment from '../lib/FrameEnvironment';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
 const { log } = Log(module);
 
@@ -214,7 +215,7 @@ export default class ConnectionToClient
       commandId: number;
       startDate: Date;
       sendDate: Date;
-      callsite?: string;
+      callsite?: ISourceCodeLocation[];
       retryNumber?: number;
       activeFlowHandlerId?: number;
     },

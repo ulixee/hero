@@ -8,7 +8,7 @@
       "require": "./index.cjs"
     },
     "./lib/DomExtender": "./lib/DomExtender.js",
-    "./lib/InternalProperties": "./lib/InternalProperties.js"
+    "./lib/internal": "./lib/internal.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.9",

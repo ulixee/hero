@@ -47,7 +47,6 @@ import IInteractions, {
 } from '../interfaces/IInteractions';
 import Tab, { createTab, getCoreTab } from './Tab';
 import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
-import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
@@ -60,7 +59,7 @@ import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import './DomExtender';
 
@@ -68,7 +67,6 @@ export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
   defaultUserProfile: {},
 };
-export const scriptInstance = new ScriptInstance();
 
 export type ISessionOptions = Omit<ISessionCreateOptions, 'sessionId'> &
   Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;

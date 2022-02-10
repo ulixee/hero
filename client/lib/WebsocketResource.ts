@@ -8,7 +8,7 @@ import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol } from './internal';
 
 interface IEventType {
   message: (message: IWebsocketMessage) => void;

@@ -1,7 +1,6 @@
 import cjsImport from './index.js';
 
 const {
-  Hero,
   ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
@@ -18,18 +17,24 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
-  ISuperDocument,
+  IHeroCreateOptions,
+  IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,
+  ISuperHTMLElement,
   ISuperNodeList,
   ISuperHTMLCollection,
-  ISuperText,
   ISuperStyleSheet,
-  ISuperHTMLElement,
+  ISuperDocument,
+  ISuperText,
+  IElement,
+  INode,
+  IHTMLElement,
+  INodeList,
+  IHTMLCollection,
 } = cjsImport;
 
 export {
-  Hero,
   ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
@@ -46,14 +51,21 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
-  ISuperDocument,
+  IHeroCreateOptions,
+  IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,
+  ISuperHTMLElement,
   ISuperNodeList,
   ISuperHTMLCollection,
-  ISuperText,
   ISuperStyleSheet,
-  ISuperHTMLElement,
+  ISuperDocument,
+  ISuperText,
+  IElement,
+  INode,
+  IHTMLElement,
+  INodeList,
+  IHTMLCollection,
 };
 
 export default cjsImport.default;

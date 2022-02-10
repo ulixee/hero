@@ -18,7 +18,8 @@ import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 import { IHeroCreateOptions } from '../index';
-import Hero, { scriptInstance } from '../lib/Hero';
+import Hero from '../lib/Hero';
+import { scriptInstance } from '../lib/internal';
 
 const { log } = Log(module);
 

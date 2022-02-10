@@ -11,7 +11,7 @@ import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol } from './internal';
 import Tab, { getCoreTab } from './Tab';
 
 const propertyKeys: (keyof Resource)[] = [

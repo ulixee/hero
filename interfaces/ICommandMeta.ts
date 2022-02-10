@@ -1,3 +1,5 @@
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+
 export default interface ICommandMeta {
   id: number;
   tabId: number;
@@ -13,7 +15,7 @@ export default interface ICommandMeta {
   result?: any;
   resultType?: string;
   run: number;
-  callsite?: string;
+  callsite?: ISourceCodeLocation[];
   reusedCommandFromRun?: number;
   startNavigationId?: number;
   endNavigationId?: number;

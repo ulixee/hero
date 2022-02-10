@@ -1,11 +1,12 @@
 import ISessionMeta from './ISessionMeta';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
 export default interface ICoreRequestPayload {
   messageId: string;
   meta?: ISessionMeta;
   command: string;
   commandId?: number;
-  callsite?: string;
+  callsite?: ISourceCodeLocation[];
   startDate: Date;
   sendDate: Date;
   retryNumber?: number;

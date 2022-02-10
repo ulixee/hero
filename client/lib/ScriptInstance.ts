@@ -8,6 +8,7 @@ const AwaitedDomPath = require.resolve('awaited-dom/package.json').replace('pack
 const HeroLibPath = require.resolve('./Hero').replace(/\/Hero\.(?:ts|js)/, '');
 
 export default class ScriptInstance {
+  public readonly ignoreModulePaths = ['node:internal', AwaitedDomPath, HeroLibPath];
   public readonly id: string = nanoid();
   public readonly entrypoint = require.main?.filename ?? process.argv[1];
   public readonly startDate = Date.now();
@@ -51,8 +52,7 @@ export default class ScriptInstance {
     return name;
   }
 
-  public getScriptCallsite(getCallSiteRegardlessOfMode = false): ISourceCodeLocation[] {
-    if (!getCallSiteRegardlessOfMode && this.mode === 'production') return;
+  public getScriptCallsite(): ISourceCodeLocation[] {
     const stack = getCallSite(module.filename);
 
     let stackLines: ISourceCodeLocation[] = [];
@@ -61,12 +61,9 @@ export default class ScriptInstance {
       const { filename } = callsite;
       if (!filename) continue;
 
-      if (
-        filename.startsWith('node:internal') ||
-        filename.startsWith(HeroLibPath) ||
-        filename.startsWith(AwaitedDomPath)
-      )
-        continue;
+      if (this.ignoreModulePaths.find(x => filename.startsWith(x))) {
+        continue
+      }
       if (filename.endsWith(this.entrypoint)) {
         lastIndexOfEntrypoint = stackLines.length;
       }

@@ -1,12 +1,14 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import SourceLoader from '@ulixee/commons/lib/SourceLoader';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import Queue from '@ulixee/commons/lib/Queue';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import { scriptInstance } from './Hero';
+import { scriptInstance } from './internal';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 export default class CoreCommandQueue {
@@ -150,7 +152,7 @@ export default class CoreCommandQueue {
       args,
       commandId,
       startDate: new Date(),
-      callsite: this.getCallsite(),
+      callsite: scriptInstance.getScriptCallsite(),
       ...(this.internalState.commandMetadata ?? {}),
     });
   }
@@ -176,7 +178,7 @@ export default class CoreCommandQueue {
       }
       return Promise.resolve(result as T);
     }
-    const callsite = this.getCallsite();
+    const callsite = scriptInstance.getScriptCallsite();
     const commandId = this.nextCommandId;
 
     const commandPayload = {
@@ -210,6 +212,11 @@ export default class CoreCommandQueue {
         if (!error.stack.includes(this.sessionMarker)) {
           error.stack += `${this.sessionMarker}`;
         }
+        if (callsite?.length) {
+          error.stack = `\n\n${callsite
+            .map(x => SourceLoader.getSource(x)?.code)
+            .join('\n -> ')}\n\n\n${error.stack}`;
+        }
         throw error;
       });
   }
@@ -231,12 +238,6 @@ export default class CoreCommandQueue {
       this.commandCounter,
       this.internalState,
     );
-  }
-
-  private getCallsite(): string {
-    if (this.mode !== 'production') {
-      return JSON.stringify(scriptInstance.getScriptCallsite());
-    }
   }
 
   private async sendRequest<T>(

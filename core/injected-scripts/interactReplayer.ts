@@ -273,6 +273,7 @@ function updateMouse(mouseEvent: IFrontendMouseEvent) {
 }
 
 function getElementAbsolutePosition(element: HTMLElement) {
+  if (!(element instanceof Element)) return { top: 0, left: 0 };
   const offsetElement = getOffsetElement(element);
   if (!elementAbsolutes.has(offsetElement)) {
     const rect = offsetElement.getBoundingClientRect();
@@ -284,7 +285,7 @@ function getElementAbsolutePosition(element: HTMLElement) {
 }
 
 function getOffsetElement(element: HTMLElement) {
-  while (element.tagName !== 'BODY') {
+  while (element.tagName !== 'BODY' && element instanceof Element) {
     if (!elementDisplayCache.has(element)) {
       elementDisplayCache.set(element, getComputedStyle(element).display);
     }

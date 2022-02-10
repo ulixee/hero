@@ -52,7 +52,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       TypeSerializer.stringify(commandMeta.result),
       commandMeta.resultType,
       commandMeta.reusedCommandFromRun,
-      commandMeta.callsite,
+      commandMeta.callsite ? JSON.stringify(commandMeta.callsite) : undefined,
     ]);
   }
 }

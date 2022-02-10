@@ -6,7 +6,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
 import Core from '@ulixee/hero-core/index';
 import ConnectionToLocalCore from '../lib/ConnectionToLocalCore';
-import { InternalPropertiesSymbol } from '@ulixee/hero/lib/InternalProperties';
+import { InternalPropertiesSymbol } from '@ulixee/hero/lib/internal';
 
 let koaServer: ITestKoaServer;
 const coreSessionDetachSpy = jest.spyOn(CoreSession.prototype, 'detachTab');

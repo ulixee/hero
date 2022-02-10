@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero from '../index';
-import { InternalPropertiesSymbol } from '@ulixee/hero/lib/InternalProperties';
+import { InternalPropertiesSymbol } from '@ulixee/hero/lib/internal';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {

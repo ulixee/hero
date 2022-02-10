@@ -39,7 +39,7 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { getCoreTab } from './Tab';
 import Resource, { createResource } from './Resource';
 import { IMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
-import { InternalPropertiesSymbol } from './InternalProperties';
+import { InternalPropertiesSymbol } from './internal';
 
 const awaitedPathState = StateMachine<
   any,

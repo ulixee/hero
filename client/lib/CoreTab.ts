@@ -25,7 +25,7 @@ import DomState from './DomState';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import { scriptInstance } from './Hero';
+import { scriptInstance } from './internal';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -142,7 +142,12 @@ export default class CoreTab implements IJsPathEventTarget {
     const matchingStates: IFlowHandler[] = [];
     await Promise.all(
       this.flowHandlers.map(async flowHandler => {
-        const handler = new DomStateHandler(flowHandler.state, null, this, flowHandler.callsitePath);
+        const handler = new DomStateHandler(
+          flowHandler.state,
+          null,
+          this,
+          flowHandler.callsitePath,
+        );
         try {
           if (await handler.check()) {
             matchingStates.push(flowHandler);

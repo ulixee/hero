@@ -3,7 +3,13 @@ import { IFrameNavigationEvents } from '@ulixee/hero-core/lib/FrameNavigations';
 import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import {
+  addTypedEventListeners,
+  removeEventListeners,
+  TypedEventEmitter,
+  addTypedEventListener,
+} from '@ulixee/commons/lib/eventUtils';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 
@@ -12,32 +18,29 @@ export default class TimelineRecorder extends TypedEventEmitter<{
 }> {
   public recordScreenUntilTime = 0;
   public recordScreenUntilLoad = false;
-  private isPaused = false;
   private closeTimer: IResolvablePromise;
+  private readonly registeredEvents: IRegisteredEventListener[];
 
   constructor(readonly heroSession: Session) {
     super();
     bindFunctions(this);
 
-    heroSession.on('tab-created', this.onTabCreated);
-    heroSession.on('kept-alive', this.onHeroSessionPaused);
-    heroSession.on('resumed', this.onHeroSessionResumed);
-    heroSession.on('will-close', this.onHeroSessionWillClose);
-
-    heroSession.db.screenshots.subscribe(() => this.emit('updated'));
-    heroSession.once('closed', () => {
-      heroSession.off('tab-created', this.onTabCreated);
-      heroSession.db.screenshots.unsubscribe();
-    });
+    this.registeredEvents = addTypedEventListeners(heroSession, [
+      ['tab-created', this.onTabCreated],
+      ['kept-alive', this.onHeroSessionPaused],
+      ['will-close', this.onHeroSessionWillClose],
+      [
+        'closed',
+        () => {
+          heroSession.off('tab-created', this.onTabCreated);
+        },
+      ],
+    ]);
   }
 
   public stop(): void {
     if (!this.heroSession) return;
-    this.heroSession.db.screenshots.unsubscribe();
-    this.heroSession.off('tab-created', this.onTabCreated);
-    this.heroSession.off('kept-alive', this.onHeroSessionPaused);
-    this.heroSession.off('resumed', this.onHeroSessionResumed);
-    this.heroSession.off('will-close', this.onHeroSessionWillClose);
+    removeEventListeners(this.registeredEvents);
     this.stopRecording();
     this.dontExtendSessionPastTime();
   }
@@ -72,15 +75,6 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     if (image) return image.toString('base64');
   }
 
-  private onHeroSessionResumed(): void {
-    this.isPaused = false;
-    if (!this.heroSession) return;
-
-    for (const tab of this.heroSession.tabsById.values()) {
-      this.recordTab(tab);
-    }
-  }
-
   private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
     if (!this.recordScreenUntilTime && !this.recordScreenUntilLoad) return;
 
@@ -112,33 +106,18 @@ export default class TimelineRecorder extends TypedEventEmitter<{
   }
 
   private onHeroSessionPaused(): void {
-    this.isPaused = true;
     if (!this.heroSession) return;
     this.stopRecording();
   }
 
   private onTabCreated(event: { tab: Tab }): void {
     const tab = event.tab;
-    tab.navigations.on('status-change', this.onStatusChange);
-    tab.once('close', () => {
-      tab.navigations.off('status-change', this.onStatusChange);
-    });
-    if (this.isPaused) return;
-
-    this.recordTab(tab);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private recordTab(_: Tab): void {
-    // tab
-    //   .recordScreen({
-    //     jpegQuality: 75,
-    //     format: 'jpeg',
-    //     imageSize: {
-    //       height: 200,
-    //     },
-    //   })
-    //   .catch(console.error);
+    this.registeredEvents.push(
+      addTypedEventListener(tab.navigations, 'status-change', this.onStatusChange),
+      addTypedEventListener(tab, 'close', () => {
+        tab.navigations.off('status-change', this.onStatusChange);
+      }),
+    );
   }
 
   private onStatusChange(status: IFrameNavigationEvents['status-change']): void {

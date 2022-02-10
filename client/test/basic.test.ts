@@ -3,7 +3,7 @@ import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { Helpers } from '@ulixee/hero-testing';
 import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
-import { scriptInstance } from '../lib/Hero';
+import { scriptInstance } from '../lib/internal';
 
 afterAll(Helpers.afterAll);
 

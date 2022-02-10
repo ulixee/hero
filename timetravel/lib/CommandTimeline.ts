@@ -1,4 +1,5 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import { SourceMapSupport } from '@ulixee/commons/lib/SourceMapSupport';
 import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
@@ -164,6 +165,7 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
           relativeStartMs: x.relativeStartMs,
           commandGapMs: x.commandGapMs,
           runtimeMs: x.runtimeMs,
+          callsite: x.callsite.map(SourceMapSupport.getOriginalSourcePosition),
         };
       }),
     };
@@ -205,6 +207,11 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
       if (a.run === b.run) return a.id - b.id;
       return a.run - b.run;
     });
+    for (const command of commands) {
+      if (typeof command.callsite === 'string') {
+        command.callsite = JSON.parse((command.callsite as any) ?? '[]');
+      }
+    }
 
     return new CommandTimeline(
       commands,

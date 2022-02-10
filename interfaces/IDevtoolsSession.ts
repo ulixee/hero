@@ -11,6 +11,7 @@ export declare type DevtoolsEvents = {
 type DevtoolsCommandParams = {
   [Key in keyof ProtocolMapping.Commands]: ProtocolMapping.Commands[Key]['paramsType'][0];
 };
+
 type OptionalParamsCommands = keyof FilterFlags<DevtoolsCommandParams, void | never>;
 type RequiredParamsCommands = keyof FilterOutFlags<DevtoolsCommandParams, void | never>;
 

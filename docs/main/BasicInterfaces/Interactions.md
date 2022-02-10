@@ -18,7 +18,6 @@ Interaction Commands fall into three broad categories:
 
 - Mouse Commands
 - Keyboard Commands
-- WaitFor Commands
 
 ## The Six Mouse Commands
 
@@ -87,17 +86,9 @@ hero.interact({ click: { element: aElem, verification: 'exactElement' } });
 
 Import KeyboardKey from IKeyboardLayoutUS for all valid KeyboardChar values (e.g. `KeyboardKey['\n']`, `KeyboardKey.Enter`).
 
-## The Three WaitFor Commands
-
-- waitForNode: [`SuperNode`](/docs/awaited-dom/super-node)
-- waitForElementVisible: [`SuperElement`](/docs/awaited-dom/super-element)
-- waitForMillis: `number`
-
-Read [this StackOverflow discussion](https://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object) on the difference between Nodes and Elements.
-
 ## Using Shortcuts
 
-If you have no need to change the position of the mouse between commands (or other complexities, such as `waitFor`), you can create Interactions using simple `Command` strings.
+If you have no need to change the position of the mouse between commands you can create Interactions using simple `Command` strings.
 
 For example, follow up a move command with click:
 
@@ -119,19 +110,17 @@ hero.interact({ clickDown: [55, 42], move: [155, 142] }, 'clickUp');
 
 When multiple commands are combined within a single Interaction, their execution takes the following order:
 
-1. waitForNode
-2. waitForElementVisible
-3. waitForMillis
-4. click
-5. doubleclick
-6. clickDown
-7. scroll
-8. move
-9. clickUp
-10. keyPress
-11. keyDown
-12. type
-13. keyUp
+1. waitForMillis
+2. click
+3. doubleclick
+4. clickDown
+5. scroll
+6. move
+7. clickUp
+8. keyPress
+9. keyDown
+10. type
+11. keyUp
 
 Note: Although commands within a single Interaction are sometimes executed at "nearly" the same time, it is never at the same precise moment. Their execution always follows the order listed above.
 
