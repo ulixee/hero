@@ -1,7 +1,6 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import SourceLoader from '@ulixee/commons/lib/SourceLoader';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import Queue from '@ulixee/commons/lib/Queue';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToCore from '../connections/ConnectionToCore';

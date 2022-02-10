@@ -71,7 +71,7 @@ describe('basic Hero tests', () => {
     ]);
   });
 
-  it('includes callsites during non-production mode', async () => {
+  it('includes callsites for commands', async () => {
     const connectionToCore = new MockedConnectionToCore();
     const hero = await new Hero({ connectionToCore });
     await hero.close();
@@ -80,16 +80,6 @@ describe('basic Hero tests', () => {
 
     // Core.connect doesn't run over a command queue, so never gets callsites
     expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(2);
-  });
-
-  it('does not include callsites during non-production mode', async () => {
-    const connectionToCore = new MockedConnectionToCore();
-    const hero = await new Hero({ connectionToCore, mode: 'production' });
-    await hero.close();
-
-    const outgoingCommands = connectionToCore.outgoing.mock.calls;
-
-    expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(0);
   });
 });
 

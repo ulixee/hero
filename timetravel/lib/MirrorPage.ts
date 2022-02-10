@@ -74,13 +74,13 @@ export default class MirrorPage extends TypedEventEmitter<{
         this.page.on('console', msg => {
           log.info('MirrorPage.console', {
             ...msg,
-            sessionId: this.sessionId,
+            sessionId,
           });
         });
         this.page.on('crashed', msg => {
           log.info('MirrorPage.crashed', {
             ...msg,
-            sessionId: this.sessionId,
+            sessionId,
           });
         });
       }
@@ -481,6 +481,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       for (const [${columns.join(',')}] of event) {
         const event = { ${columns.join(',')} };
         event.frameIdPath = domNodePathsByFrameId[frameId];
+        if (frameId && !event.frameIdPath) continue;
         if (event.tagName !== undefined) event.tagName = tagNamesById[event.tagName];
         changeEvents.push(event);
       }

@@ -1,9 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
-import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import Hero, { Core, InteractionCommand, LocationStatus } from '../index';
+import Hero, { Core, LocationStatus } from '../index';
 import Session from '@ulixee/hero-core/lib/Session';
 
 let koaServer: ITestKoaServer;

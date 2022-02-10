@@ -25,23 +25,20 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     super();
     bindFunctions(this);
 
-    this.registeredEvents = addTypedEventListeners(heroSession, [
-      ['tab-created', this.onTabCreated],
-      ['kept-alive', this.onHeroSessionPaused],
-      ['will-close', this.onHeroSessionWillClose],
-      [
-        'closed',
-        () => {
-          heroSession.off('tab-created', this.onTabCreated);
-        },
-      ],
-    ]);
+    const tabCreatedEvent = addTypedEventListener(heroSession, 'tab-created', this.onTabCreated);
+    const removeTabCreated = removeEventListeners.bind(null, [tabCreatedEvent]);
+    this.registeredEvents = [tabCreatedEvent];
+    this.registeredEvents.push(
+      ...addTypedEventListeners(heroSession, [
+        ['will-close', this.onHeroSessionWillClose],
+        ['closed', removeTabCreated],
+      ]),
+    );
   }
 
   public stop(): void {
     if (!this.heroSession) return;
     removeEventListeners(this.registeredEvents);
-    this.stopRecording();
     this.dontExtendSessionPastTime();
   }
 
@@ -58,15 +55,6 @@ export default class TimelineRecorder extends TypedEventEmitter<{
       } else {
         this.closeTimer.resolve();
       }
-    }
-  }
-
-  public stopRecording(): void {
-    for (const tab of this.heroSession.tabsById.values()) {
-      tab
-        .stopRecording()
-        .then(() => this.emit('updated'))
-        .catch(console.error);
     }
   }
 
@@ -105,18 +93,16 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     }
   }
 
-  private onHeroSessionPaused(): void {
-    if (!this.heroSession) return;
-    this.stopRecording();
-  }
-
   private onTabCreated(event: { tab: Tab }): void {
     const tab = event.tab;
+    const statusChangeEvent = addTypedEventListener(
+      tab.navigations,
+      'status-change',
+      this.onStatusChange,
+    );
     this.registeredEvents.push(
-      addTypedEventListener(tab.navigations, 'status-change', this.onStatusChange),
-      addTypedEventListener(tab, 'close', () => {
-        tab.navigations.off('status-change', this.onStatusChange);
-      }),
+      statusChangeEvent,
+      addTypedEventListener(tab, 'close', () => removeEventListeners([statusChangeEvent])),
     );
   }
 
