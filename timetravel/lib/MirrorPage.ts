@@ -3,7 +3,7 @@ import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import InjectedScripts, { CorePageInjectedScript } from '@ulixee/hero-core/lib/InjectedScripts';
+import InjectedScripts, { CorePageInjectedScript, showInteractionScript } from '@ulixee/hero-core/lib/InjectedScripts';
 import { IMouseEventRecord } from '@ulixee/hero-core/models/MouseEventsTable';
 import { IScrollRecord } from '@ulixee/hero-core/models/ScrollEventsTable';
 import DomChangesTable, {
@@ -93,6 +93,12 @@ export default class MirrorPage extends TypedEventEmitter<{
         this.showBrowserInteractions ? InjectedScripts.installInteractionScript(this.page) : null,
         this.page.setJavaScriptEnabled(false),
       );
+      if (this.showBrowserInteractions) {
+        promises.push(
+          this.page.evaluate(detachedInjectedScript),
+          this.page.evaluate(showInteractionScript),
+        )
+      }
       if (viewport) {
         promises.push(
           this.page.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {

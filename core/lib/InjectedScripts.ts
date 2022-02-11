@@ -47,7 +47,7 @@ const injectedScript = `(function installInjectedScripts() {
     ${pageScripts.domStorage}
 })();`;
 
-const showInteractionScript = `(function installInteractionsScript() {
+export const showInteractionScript = `(function installInteractionsScript() {
     const exports = {}; // workaround for ts adding an exports variable
 
     window.selfFrameIdPath = '';
