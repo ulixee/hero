@@ -18,6 +18,7 @@ import {
   getNodePointerFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IElementRect from '@ulixee/hero-interfaces/IElementRect';
+import { isMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
 
 const { log } = Log(module);
 
@@ -60,7 +61,7 @@ export class JsPath {
     jsPath: IJsPath,
     containerOffset: IPoint,
   ): Promise<IExecJsPathResult<T>> {
-    if (typeof jsPath[0] === 'number') {
+    if (typeof jsPath[0] === 'number' && !isMousePositionXY(jsPath.slice(0, 2))) {
       const paths = this.getJsPathHistoryForNode(jsPath[0]);
       for (const path of paths) {
         const result = await this.getNodePointer(path.jsPath, containerOffset);
