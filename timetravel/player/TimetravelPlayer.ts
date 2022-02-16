@@ -255,7 +255,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       args: { sessionId: this.sessionId, omitWithoutResponse: true, omitNonHttpGet: true },
     });
 
-    this.mirrorNetwork.setResources(resourcesResult.resources);
+    this.mirrorNetwork.setResources(resourcesResult.resources, this.getResourceDetails.bind(this));
   }
 
   private onTabOpen(): void {
