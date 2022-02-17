@@ -31,9 +31,7 @@ export default class DevtoolsPreferences {
     session.on('Runtime.bindingCalled', event => this.onPreferenceAction(session, event));
 
     return Promise.all([
-      session.send('Runtime.enable'),
       session.send('Runtime.addBinding', { name: devtoolsPreferencesCallback }),
-      session.send('Page.enable'),
       session.send('Page.addScriptToEvaluateOnNewDocument', {
         source: `(function devtoolsPreferencesInterceptor() {
     const toIntercept = ['getPreferences', 'setPreference', 'removePreference', 'clearPreferences'];

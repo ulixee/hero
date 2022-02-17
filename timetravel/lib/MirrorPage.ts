@@ -36,7 +36,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     return this.page?.id;
   }
 
-  private domRecording: IDomRecording;
+  public domRecording: IDomRecording;
   private sessionId: string;
   private pendingDomChanges: IDomChangeRecord[] = [];
   private loadedDocument: IDocument;
@@ -49,7 +49,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     public network: MirrorNetwork,
     domRecording: IDomRecording,
     private showBrowserInteractions = false,
-    private debugLogging = true,
+    private debugLogging = false,
   ) {
     super();
     this.setDomRecording(domRecording);
@@ -95,9 +95,12 @@ export default class MirrorPage extends TypedEventEmitter<{
       );
       if (this.showBrowserInteractions) {
         promises.push(
-          this.page.evaluate(detachedInjectedScript),
-          this.page.evaluate(showInteractionScript),
-        )
+          this.page.mainFrame.evaluate(`(() => { 
+            window.isMainFrame = true;
+            ${detachedInjectedScript};
+            ${showInteractionScript};
+          })()`, true),
+        );
       }
       if (viewport) {
         promises.push(
@@ -219,6 +222,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     mouse: IMouseEventRecord,
     scroll: IScrollRecord,
   ): Promise<void> {
+    if (!this.showBrowserInteractions) return;
     const args = [highlightNodeIds, mouse, scroll].map(x => {
       if (!x) return 'undefined';
       return JSON.stringify(this.applyFrameNodePath(x));
@@ -227,6 +231,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async showStatusText(text: string): Promise<void> {
+    if (!this.showBrowserInteractions) return;
     await this.evaluate(`window.showReplayStatus("${text}");`);
   }
 
@@ -277,6 +282,19 @@ export default class MirrorPage extends TypedEventEmitter<{
   return retVal;
 })()`,
     );
+  }
+
+  public getDomRecordingSince(sinceTimestamp: number): IDomRecording {
+    this.processPendingDomChanges();
+    return {
+      mainFrameIds: new Set(this.domRecording.mainFrameIds),
+      paintEvents: this.domRecording.paintEvents.map(x => {
+        if (x.timestamp <= sinceTimestamp) return { ...x, changeEvents: [] };
+        return x;
+      }),
+      documents: [...this.domRecording.documents],
+      domNodePathByFrameId: { ...this.domRecording.domNodePathByFrameId },
+    };
   }
 
   private async getFrameWithDomNodeId(frameDomNodeId: number): Promise<IPuppetFrame> {

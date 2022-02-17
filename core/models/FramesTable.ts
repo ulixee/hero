@@ -3,6 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class FramesTable extends SqliteTable<IFrameRecord> {
   public frameDomNodePathsById: { [frameId: number]: string } = {};
+  public framesById: { [frameId: number]: { parentId: number; domNodeId: number } } = {};
 
   public get nextId(): number {
     this.#idCounter += 1;
@@ -81,6 +82,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       const parentPath = this.frameDomNodePathsById[frame.parentId];
       this.frameDomNodePathsById[frame.id] = `${parentPath ?? ''}_${frame.domNodeId}`;
     }
+    this.framesById[frame.id] = { parentId: frame.parentId, domNodeId: frame.domNodeId };
   }
 }
 

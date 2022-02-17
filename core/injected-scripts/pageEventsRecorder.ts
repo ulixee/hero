@@ -108,20 +108,22 @@ class PageEventsRecorder {
   }
 
   public start() {
-    if (isStarted || this.location === 'about:blank') {
+    if (isStarted) {
       return;
     }
     isStarted = true;
 
-    // preload with a document
-    const newDocument = {
-      id: -1,
-      textContent: this.location,
-    };
-    const stamp = Date.now();
-    this.pushChange(DomActionType.newDocument, newDocument, stamp);
-    this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
-    this.serializeChildren(document, stamp, new Map());
+    if (this.location !== 'about:blank') {
+      // preload with a document
+      const newDocument = {
+        id: -1,
+        textContent: this.location,
+      };
+      const stamp = Date.now();
+      this.pushChange(DomActionType.newDocument, newDocument, stamp);
+      this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
+      this.serializeChildren(document, stamp, new Map());
+    }
 
     this.observer.observe(document, {
       attributes: true,
@@ -669,12 +671,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('load', () => recorder.onLoadEvent('load'));
 
-if (window.self.location?.href !== 'about:blank') {
-  window.addEventListener('beforeunload', () => {
-    clearInterval(interval);
-    recorder.disconnect();
-  });
+window.addEventListener('beforeunload', () => {
+  clearInterval(interval);
+  recorder.disconnect();
+});
 
+if (window.self.location?.href !== 'about:blank') {
   const paintObserver = new PerformanceObserver(entryList => {
     if (entryList.getEntriesByName('first-contentful-paint').length) {
       recorder.start();

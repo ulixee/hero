@@ -94,6 +94,7 @@ export class DomStorageTracker
   }
 
   public track(securityOrigin: string): void {
+    if (!this.isEnabled) return;
     if (!securityOrigin || securityOrigin === 'null' || this.trackedOrigins.has(securityOrigin))
       return;
     // just initialized if needed

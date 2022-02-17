@@ -18,7 +18,14 @@ const { log } = Log(module);
 export default class TimetravelPlayer extends TypedEventEmitter<{
   'all-tabs-closed': void;
   'timetravel-to-end': void;
-  'new-tick-command': { commandId: number };
+  'new-tick-command': {
+    commandId: number;
+    paintIndex: number;
+  };
+  'new-paint-index': {
+    paintIndex: number;
+    documentLoadPaintIndex: number;
+  };
   open: void;
 }> {
   public get activeCommandId(): number {
@@ -120,8 +127,17 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     if (startedOpen && sessionOffsetPercent === 100) {
       this.emit('timetravel-to-end');
     }
-    if (tab.currentTick?.commandId !== startTick?.commandId) {
-      this.emit('new-tick-command', { commandId: tab.currentTick?.commandId });
+    if (tab.currentTick && tab.currentTick.commandId !== startTick?.commandId) {
+      this.emit('new-tick-command', {
+        commandId: tab.currentTick.commandId,
+        paintIndex: tab.currentTick.paintEventIndex,
+      });
+    }
+    if (tab.currentTick && tab.currentTick.paintEventIndex !== startTick?.paintEventIndex) {
+      this.emit('new-paint-index', {
+        paintIndex: tab.currentTick.paintEventIndex,
+        documentLoadPaintIndex: tab.currentTick.documentLoadPaintIndex,
+      });
     }
     if (statusMetadata) await this.showLoadStatus(statusMetadata);
     return tab;
