@@ -35,32 +35,32 @@ window.HERO = {
 `;
 
 const injectedScript = `(function installInjectedScripts() {
-    ${heroIncludes}
-    ${pageScripts.MouseEvents};
+${heroIncludes}
+${pageScripts.MouseEvents};
 
-    (function installDomRecorder(runtimeFunction) {
-       ${pageScripts.pageEventsRecorder}
-    })('${pageEventsCallbackName}');
+(function installDomRecorder(runtimeFunction) {
+   ${pageScripts.pageEventsRecorder}
+})('${pageEventsCallbackName}');
 
-    window.HERO.MouseEvents = MouseEvents;
+window.HERO.MouseEvents = MouseEvents;
 
-    ${pageScripts.domStorage}
+${pageScripts.domStorage}
 })();`;
 
 export const showInteractionScript = `(function installInteractionsScript() {
-    const exports = {}; // workaround for ts adding an exports variable
+const exports = {}; // workaround for ts adding an exports variable
 
-    window.selfFrameIdPath = '';
-    if (!('blockClickAndSubmit' in window)) window.blockClickAndSubmit = false;
+window.selfFrameIdPath = '';
+if (!('blockClickAndSubmit' in window)) window.blockClickAndSubmit = false;
 
-    if (!('getNodeById' in window)) {
-      window.getNodeById = function getNodeById(id) {
-        if (id === null || id === undefined) return null;
-        return NodeTracker.getWatchedNodeWithId(id, false);
-      };
-    }
+if (!('getNodeById' in window)) {
+  window.getNodeById = function getNodeById(id) {
+    if (id === null || id === undefined) return null;
+    return NodeTracker.getWatchedNodeWithId(id, false);
+  };
+}
 
-    ${pageScripts.interactReplayer};
+${pageScripts.interactReplayer};
 })();`;
 
 const installedSymbol = Symbol('InjectedScripts.Installed');

@@ -200,22 +200,30 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public async setFileInputFiles(objectId: string, files: string[]): Promise<void> {
-    await this.devtoolsSession.send('DOM.setFileInputFiles', {
-      objectId,
-      files,
-    });
+    await this.devtoolsSession.send(
+      'DOM.setFileInputFiles',
+      {
+        objectId,
+        files,
+      },
+      this,
+    );
   }
 
   public async evaluateOnNode<T>(nodeId: string, expression: string): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
     try {
-      const result = await this.devtoolsSession.send('Runtime.callFunctionOn', {
-        functionDeclaration: `function executeRemoteFn() {
+      const result = await this.devtoolsSession.send(
+        'Runtime.callFunctionOn',
+        {
+          functionDeclaration: `function executeRemoteFn() {
         return ${expression};
       }`,
-        returnByValue: true,
-        objectId: nodeId,
-      });
+          returnByValue: true,
+          objectId: nodeId,
+        },
+        this,
+      );
       if (result.exceptionDetails) {
         throw ConsoleMessage.exceptionToError(result.exceptionDetails);
       }
@@ -233,7 +241,11 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     try {
       if (!this.parentFrame || this.isolatedWorldElementObjectId)
         return this.isolatedWorldElementObjectId;
-      const owner = await this.devtoolsSession.send('DOM.getFrameOwner', { frameId: this.id });
+      const owner = await this.devtoolsSession.send(
+        'DOM.getFrameOwner',
+        { frameId: this.id },
+        this,
+      );
       this.isolatedWorldElementObjectId = await this.parentFrame.resolveNodeId(owner.backendNodeId);
       // don't dispose... will cleanup frame
       return this.isolatedWorldElementObjectId;
@@ -247,10 +259,14 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   }
 
   public async resolveNodeId(backendNodeId: number): Promise<string> {
-    const result = await this.devtoolsSession.send('DOM.resolveNode', {
-      backendNodeId,
-      executionContextId: this.getActiveContextId(true),
-    });
+    const result = await this.devtoolsSession.send(
+      'DOM.resolveNode',
+      {
+        backendNodeId,
+        executionContextId: this.getActiveContextId(true),
+      },
+      this,
+    );
     return result.object.objectId;
   }
 
