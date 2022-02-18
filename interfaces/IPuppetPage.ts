@@ -8,7 +8,6 @@ import { IPuppetWorker } from './IPuppetWorker';
 import IDevtoolsSession from './IDevtoolsSession';
 import IPuppetDialog from './IPuppetDialog';
 import IPuppetContext from './IPuppetContext';
-import IScreenRecordingOptions from './IScreenRecordingOptions';
 import IScreenshotOptions from './IScreenshotOptions';
 import IPuppetDomStorageTracker, { IPuppetStorageEvents } from './IPuppetDomStorageTracker';
 
@@ -33,8 +32,6 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   close(options?: { timeoutMs?: number }): Promise<void>;
   bringToFront(): Promise<void>;
   screenshot(options: IScreenshotOptions): Promise<Buffer>;
-  startScreenRecording(options: IScreenRecordingOptions): Promise<void>;
-  stopScreenRecording(): Promise<void>;
 
   popupInitializeFn?: (
     page: IPuppetPage,

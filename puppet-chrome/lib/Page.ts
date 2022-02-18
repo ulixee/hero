@@ -31,7 +31,6 @@ import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
 import ConsoleMessage from './ConsoleMessage';
 import Frame from './Frame';
-import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { DomStorageTracker } from './DomStorageTracker';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
@@ -86,8 +85,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   protected readonly logger: IBoundLog;
   private isClosing = false;
   private closePromise = createPromise();
-  private readonly registeredEvents: IRegisteredEventListener[];
-  private screencastOptions: IScreenRecordingOptions & { lastImage?: string };
 
   constructor(
     devtoolsSession: DevtoolsSession,
@@ -328,28 +325,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
 
     return Buffer.from(result.data, 'base64');
-  }
-
-  async startScreenRecording(options: IScreenRecordingOptions = {}): Promise<void> {
-    if (this.screencastOptions) return;
-
-    options.format ??= 'jpeg';
-    options.jpegQuality ??= 30;
-    this.screencastOptions = options;
-    await this.devtoolsSession.send('Page.startScreencast', {
-      format: options.format,
-      quality: options.jpegQuality,
-      everyNthFrame: 1,
-      maxHeight: options.imageSize?.height,
-      maxWidth: options.imageSize?.width,
-    });
-  }
-
-  async stopScreenRecording(): Promise<void> {
-    if (this.screencastOptions) {
-      await this.devtoolsSession.send('Page.stopScreencast');
-      this.screencastOptions = null;
-    }
   }
 
   onWorkerAttached(

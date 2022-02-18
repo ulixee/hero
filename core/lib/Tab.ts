@@ -37,7 +37,6 @@ import { IDomChangeRecord } from '../models/DomChangesTable';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import DomStateListener from './DomStateListener';
-import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
@@ -585,21 +584,6 @@ export default class Tab
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
     if (options.rectangle) options.rectangle.scale ??= 1;
     return this.puppetPage.screenshot(options);
-  }
-
-  public async recordScreen(
-    options: IScreenRecordingOptions & {
-      includeDuplicates?: boolean;
-      includeWhiteScreens?: boolean;
-    } = {},
-  ): Promise<void> {
-    this.session.db.screenshots.storeDuplicates = options.includeDuplicates ?? false;
-    this.session.db.screenshots.includeWhiteScreens = options.includeWhiteScreens ?? false;
-    await this.puppetPage.startScreenRecording(options);
-  }
-
-  public async stopRecording(): Promise<void> {
-    await this.puppetPage.stopScreenRecording();
   }
 
   public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
