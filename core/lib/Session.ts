@@ -41,6 +41,7 @@ import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 
 const { log } = Log(module);
 
@@ -106,13 +107,6 @@ export default class Session
     return this._isClosing;
   }
 
-  public get summary(): ISessionSummary {
-    return {
-      id: this.id,
-      options: { ...this.options },
-    };
-  }
-
   public get meta(): IHeroMeta {
     const { plugins, viewport, locale, timezoneId, geolocation } = this;
 
@@ -144,6 +138,7 @@ export default class Session
   private _isClosing = false;
   private isResettingState = false;
   private readonly logSubscriptionId: number;
+  private events = new EventSubscriber();
 
   constructor(readonly options: ISessionCreateOptions) {
     super();
@@ -172,7 +167,7 @@ export default class Session
         ...options,
         userAgentSelector: userAgent ?? userProfile?.userAgentString,
         deviceProfile: userProfile?.deviceProfile,
-        getSessionSummary: () => this.summary,
+        getSessionSummary: this.getSummary.bind(this),
       },
       this.logger,
     );
@@ -211,6 +206,13 @@ export default class Session
       this.removeRemoteEventListener,
       this.recordOutput,
     ]);
+  }
+
+  public getSummary(): ISessionSummary {
+    return {
+      id: this.id,
+      options: { ...this.options },
+    };
   }
 
   public configureHeaded(
@@ -372,7 +374,7 @@ export default class Session
 
   public async initialize(context: IPuppetContext): Promise<void> {
     this.browserContext = context;
-    context.on('devtools-message', this.onDevtoolsMessage.bind(this));
+    this.events.on(context as any, 'devtools-message', this.onDevtoolsMessage.bind(this));
     if (this.userProfile) {
       await UserProfile.install(this);
     }
@@ -381,12 +383,12 @@ export default class Session
       InjectedScripts.install(page, this.options.showBrowserInteractions);
 
     const requestSession = this.mitmRequestSession;
-    requestSession.on('request', this.onMitmRequest.bind(this));
-    requestSession.on('response', this.onMitmResponse.bind(this));
-    requestSession.on('http-error', this.onMitmError.bind(this));
-    requestSession.on('resource-state', this.onResourceStates.bind(this));
-    requestSession.on('socket-close', this.onSocketClose.bind(this));
-    requestSession.on('socket-connect', this.onSocketConnect.bind(this));
+    this.events.on(requestSession, 'request', this.onMitmRequest.bind(this));
+    this.events.on(requestSession, 'response', this.onMitmResponse.bind(this));
+    this.events.on(requestSession, 'http-error', this.onMitmError.bind(this));
+    this.events.on(requestSession, 'resource-state', this.onResourceStates.bind(this));
+    this.events.on(requestSession, 'socket-close', this.onSocketClose.bind(this));
+    this.events.on(requestSession, 'socket-connect', this.onSocketConnect.bind(this));
     await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
   }
 
@@ -503,20 +505,26 @@ export default class Session
     const closedEvent = { waitForPromise: null };
     this.emit('closed', closedEvent);
     await closedEvent.waitForPromise;
+
+    this.events.close();
+    this.websocketMessages.cleanup();
+    this.resources.cleanup();
+    this.commandRecorder.cleanup();
+    this.plugins.cleanup();
+
     // should go last so we can capture logs
     this.db.session.close(this.id, Date.now());
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
     this.db.flush();
 
+    this.removeAllListeners();
     // give the system a second to write to db before clearing
-    setImmediate(() => {
+    setImmediate(db => {
       try {
-        this.db.close();
-      } catch (err) {
-        // drown
-      }
-    });
+        db.close();
+      } catch (e) {}
+    }, this.db);
   }
 
   public addRemoteEventListener(
@@ -662,7 +670,7 @@ export default class Session
   private registerTab(tab: Tab): Tab {
     const id = tab.id;
     this.tabsById.set(id, tab);
-    tab.on('close', () => {
+    this.events.once(tab, 'close', () => {
       this.tabsById.delete(id);
       if (this.tabsById.size === 0 && !this.isResettingState) {
         this.emit('all-tabs-closed');

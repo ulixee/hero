@@ -7,6 +7,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
 import MitmSocketSession from './lib/MitmSocketSession';
 import IHttpSocketWrapper from '@ulixee/hero-interfaces/IHttpSocketWrapper';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IHttpSocketConnectOptions from '@ulixee/hero-interfaces/IHttpSocketConnectOptions';
 
 const { log } = Log(module);
@@ -53,6 +54,7 @@ export default class MitmSocket
   private server: net.Server;
   private connectPromise: Resolvable<void>;
   private socketReadyPromise = new Resolvable<void>();
+  private events = new EventSubscriber();
   private readonly callStack: string;
 
   constructor(readonly sessionId: string, readonly connectOpts: IHttpSocketConnectOptions) {
@@ -66,8 +68,8 @@ export default class MitmSocket
 
     // start listening
     this.server = new net.Server().unref();
-    this.server.on('connection', this.onConnected.bind(this));
-    this.server.on('error', error => {
+    this.events.on(this.server, 'connection', this.onConnected.bind(this));
+    this.events.on(this.server, 'error', error => {
       if (this.isClosing) return;
       this.logger.warn('IpcSocketServerError', { error });
     });
@@ -77,6 +79,7 @@ export default class MitmSocket
     });
 
     this.createTime = new Date();
+    this.close = this.close.bind(this);
   }
 
   public isReusable(): boolean {
@@ -109,6 +112,8 @@ export default class MitmSocket
     this.emit('close');
     this.cleanupSocket();
     this.closedPromise.resolve(this.closeTime);
+    this.events.close();
+    this.removeAllListeners();
     this.logger.stats(`MitmSocket.Closed`, {
       parentLogId,
     });
@@ -117,7 +122,7 @@ export default class MitmSocket
   public onConnected(socket: net.Socket): void {
     this.ipcConnectionTime = new Date();
     this.socket = socket;
-    socket.on('error', error => {
+    this.events.on(socket, 'error', error => {
       this.logger.warn('MitmSocket.SocketError', {
         sessionId: this.sessionId,
         error,
@@ -130,14 +135,14 @@ export default class MitmSocket
       }
       this.isConnected = false;
     });
-    socket.on('end', this.onSocketClose.bind(this, 'end'));
-    socket.on('close', this.onSocketClose.bind(this, 'close'));
+    this.events.on(socket, 'end', this.close);
+    this.events.once(socket, 'close', this.close);
     this.socketReadyPromise.resolve();
   }
 
   public async connect(session: MitmSocketSession, connectTimeoutMillis = 30e3): Promise<void> {
     if (!this.server.listening) {
-      await new Promise(resolve => this.server.once('listening', resolve));
+      await new Promise(resolve => this.events.once(this.server, 'listening', resolve));
     }
 
     this.connectPromise = new Resolvable<void>(
@@ -183,7 +188,7 @@ export default class MitmSocket
   private triggerConnectErrorIfNeeded(isExiting = false): void {
     if (this.connectPromise?.isResolved) return;
     if (isExiting && !this.connectError) {
-      this.connectPromise.resolve()
+      this.connectPromise.resolve();
       return;
     }
     this.connectPromise?.reject(
@@ -218,19 +223,13 @@ export default class MitmSocket
   private cleanupSocket(): void {
     if (this.socket) {
       this.socket.unref();
-      const closeError = this.connectError
-        ? buildConnectError(this.connectError, this.callStack)
-        : undefined;
-      this.socket.destroy(closeError);
+      this.socket.destroy();
     }
     this.server.unref().close();
+    this.server.removeAllListeners();
     this.isConnected = false;
     unlink(this.socketPath, () => null);
     delete this.socket;
-  }
-
-  private onSocketClose(): void {
-    this.close();
   }
 }
 

@@ -43,7 +43,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
         rawHeaders?: string[],
       ];
       const responsePromise = new Promise<HttpServerResponse>(resolve =>
-        proxyToServerRequest.once('response', (r, flags, headers) => resolve([r, flags, headers])),
+        this.context.events.once(proxyToServerRequest, 'response', (r, flags, headers) =>
+          resolve([r, flags, headers]),
+        ),
       );
 
       clientToProxyRequest.resume();
@@ -89,7 +91,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       );
     }
     // wait for MitmRequestContext to read this
-    context.serverToProxyResponse.on(
+    context.events.on(
+      context.serverToProxyResponse,
       'error',
       this.onError.bind(this, 'ServerToProxy.ResponseError'),
     );
@@ -124,6 +127,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return this.onError('ServerToProxyToClient.ReadWriteResponseError', err);
     }
     context.setState(ResourceState.End);
+    this.cleanup();
   }
 
   protected onError(kind: string, error: Error): void {
@@ -131,6 +135,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     const url = this.context.url.href;
     const { method, requestSession, proxyToClientResponse } = this.context;
+    // already cleaned up
+    if (requestSession === null || proxyToClientResponse === null) return;
+
     const sessionId = requestSession.sessionId;
 
     this.context.setState(ResourceState.Error);
@@ -163,12 +170,17 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     } catch (e) {
       // drown errors
     }
+    this.cleanup();
   }
 
   private bindErrorListeners(): void {
-    const { clientToProxyRequest, proxyToClientResponse } = this.context;
-    clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
-    proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
+    const { clientToProxyRequest, proxyToClientResponse, events } = this.context;
+    events.on(clientToProxyRequest, 'error', this.onError.bind(this, 'ClientToProxy.RequestError'));
+    events.on(
+      proxyToClientResponse,
+      'error',
+      this.onError.bind(this, 'ProxyToClient.ResponseError'),
+    );
 
     if (clientToProxyRequest instanceof Http2ServerRequest) {
       const stream = clientToProxyRequest.stream;
@@ -204,7 +216,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
   private writeResponseHead(): void {
     const context = this.context;
-    const { serverToProxyResponse, proxyToClientResponse, requestSession } = context;
+    const { serverToProxyResponse, proxyToClientResponse, requestSession, events } = context;
 
     proxyToClientResponse.statusCode = context.status;
     // write individually so we properly write header-lists
@@ -222,8 +234,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       }
     }
 
-
-    serverToProxyResponse.once('trailers', headers => {
+    events.once(serverToProxyResponse, 'trailers', headers => {
       context.responseTrailers = headers;
     });
 

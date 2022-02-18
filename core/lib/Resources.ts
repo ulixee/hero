@@ -24,9 +24,7 @@ import Tab from './Tab';
 const { log } = Log(module);
 
 export default class Resources {
-  public readonly browserRequestIdToResources: {
-    [browserRequestId: string]: IResourceMeta[];
-  } = {};
+  public readonly browserRequestIdToResources = new Map<string, IResourceMeta[]>();
 
   public readonly resourcesById = new Map<number, IResourceMeta>();
   public readonly cookiesByDomain = new Map<string, Record<string, ICookie>>();
@@ -45,7 +43,7 @@ export default class Resources {
   private readonly model: ResourcesTable;
   private readonly cookiesModel: StorageChangesTable;
 
-  constructor(private readonly session: Session) {
+  constructor(private session: Session) {
     this.model = session.db.resources;
     this.cookiesModel = session.db.storageChanges;
     this.logger = log.createChild(module, {
@@ -77,6 +75,15 @@ export default class Resources {
     this.session.mitmRequestSession?.registerWebsocketHeaders(tabId, event);
   }
 
+  public cleanup(): void {
+    this.mitmRequestsPendingBrowserRequest.length = 0;
+    this.mitmErrorsByUrl.clear();
+    this.resourcesById.clear();
+    this.cookiesByDomain.clear();
+    this.browserRequestIdToResources.clear();
+    this.session = null;
+  }
+
   public cancelPending(): void {
     for (const pending of this.mitmRequestsPendingBrowserRequest) {
       if (pending.browserRequestedPromise.isResolved) continue;
@@ -84,6 +91,7 @@ export default class Resources {
         new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
       );
     }
+    this.mitmRequestsPendingBrowserRequest.length = 0;
   }
 
   /////// BROWSER REQUEST ID MAPPING ///////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +101,7 @@ export default class Resources {
   }
 
   public getBrowserRequestLatestResource(browserRequestId: string): IResourceMeta {
-    const resources = this.browserRequestIdToResources[browserRequestId];
+    const resources = this.browserRequestIdToResources.get(browserRequestId);
     if (!resources?.length) {
       return;
     }
@@ -104,8 +112,10 @@ export default class Resources {
   public trackBrowserRequestToResourceId(browserRequestId: string, resource: IResourceMeta): void {
     if (!browserRequestId) return;
     // NOTE: browserRequestId can be shared amongst redirects
-    this.browserRequestIdToResources[browserRequestId] ??= [];
-    const resources = this.browserRequestIdToResources[browserRequestId];
+    let resources = this.browserRequestIdToResources.get(browserRequestId);
+    if (!resources) {
+      resources = this.browserRequestIdToResources.set(browserRequestId, []).get(browserRequestId);
+    }
     const replaceIdx = resources.findIndex(x => x.id === resource.id);
     if (replaceIdx !== -1) resources[replaceIdx] = resource;
     else resources.push(resource);
@@ -117,7 +127,7 @@ export default class Resources {
     resourceRequest: IPuppetResourceRequest,
     getBody: () => Promise<Buffer>,
   ): Promise<IResourceMeta | null> {
-    if (this.browserRequestIdToResources[resourceRequest.browserRequestId]) return;
+    if (this.browserRequestIdToResources.has(resourceRequest.browserRequestId)) return;
 
     const ctx = MitmRequestContext.createFromPuppetResourceRequest(resourceRequest);
     const resourceDetails = MitmRequestContext.toEmittedResource(ctx);

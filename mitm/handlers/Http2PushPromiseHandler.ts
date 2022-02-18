@@ -1,6 +1,7 @@
 import * as http2 from 'http2';
 import { ClientHttp2Stream, ServerHttp2Stream } from 'http2';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from '../lib/MitmRequestContext';
@@ -14,6 +15,7 @@ const { log } = Log(module);
 export default class Http2PushPromiseHandler {
   private readonly context: IMitmRequestContext;
   private onResponseHeadersPromise: Promise<void>;
+  private logger: IBoundLog;
   private get session(): RequestSession {
     return this.context.requestSession;
   }
@@ -27,14 +29,18 @@ export default class Http2PushPromiseHandler {
   ) {
     const session = parentContext.requestSession;
     const sessionId = session.sessionId;
+    this.logger = log.createChild(module, {
+      sessionId,
+    });
     log.info('Http2Client.pushReceived', { sessionId, requestHeaders, flags });
-    serverPushStream.on('error', error => {
-      log.warn('Http2.ProxyToServer.PushStreamError', {
-        sessionId,
+    this.logger.info('Http2Client.pushReceived', { requestHeaders, flags });
+    this.context = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
+    this.context.events.on(serverPushStream, 'error', error => {
+      this.logger.warn('Http2.ProxyToServer.PushStreamError', {
         error,
       });
     });
-    this.context = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
+
     this.context.serverToProxyResponse = serverPushStream;
     this.session.trackResourceRedirects(this.context);
     this.context.setState(ResourceState.ServerToProxyPush);
@@ -45,7 +51,6 @@ export default class Http2PushPromiseHandler {
     const pushContext = this.context;
     const parentContext = this.parentContext;
     const session = this.session;
-    const sessionId = this.session.sessionId;
     const serverPushStream = this.context.serverToProxyResponse as http2.ClientHttp2Stream;
 
     if (await InterceptorHandler.shouldIntercept(pushContext)) {
@@ -56,13 +61,15 @@ export default class Http2PushPromiseHandler {
     }
 
     HeadersHandler.cleanPushHeaders(pushContext);
+
     this.onResponseHeadersPromise = new Promise<void>(resolve => {
-      serverPushStream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
+      const events = this.context.events;
+      events.once(serverPushStream, 'push', (responseHeaders, responseFlags, rawHeaders) => {
         MitmRequestContext.readHttp2Response(
           pushContext,
           serverPushStream,
           responseHeaders[':status'],
-          responseRawHeaders,
+          rawHeaders,
         );
         resolve();
       });
@@ -81,8 +88,7 @@ export default class Http2PushPromiseHandler {
         this.onClientPushPromiseCreated.bind(this),
       );
     } catch (error) {
-      log.warn('Http2.ClientToProxy.CreatePushStreamError', {
-        sessionId,
+      this.logger.warn('Http2.ClientToProxy.CreatePushStreamError', {
         error,
       });
     }
@@ -96,28 +102,27 @@ export default class Http2PushPromiseHandler {
     const serverToProxyPushStream = this.context.serverToProxyResponse as ClientHttp2Stream;
     const cache = this.context.cacheHandler;
     const session = this.context.requestSession;
-    const sessionId = session.sessionId;
+    const events = this.context.events;
 
     if (createPushStreamError) {
-      log.warn('Http2.ClientToProxy.PushStreamError', {
-        sessionId,
+      this.logger.warn('Http2.ClientToProxy.PushStreamError', {
         error: createPushStreamError,
       });
       return;
     }
-    proxyToClientPushStream.on('error', pushError => {
-      log.warn('Http2.ClientToProxy.PushStreamError', {
-        sessionId,
+
+    events.on(proxyToClientPushStream, 'error', pushError => {
+      this.logger.warn('Http2.ClientToProxy.PushStreamError', {
         error: pushError,
       });
     });
 
-    serverToProxyPushStream.on('headers', additional => {
+    events.on(serverToProxyPushStream, 'headers', additional => {
       if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.additionalHeaders(additional);
     });
 
     let trailers: http2.IncomingHttpHeaders;
-    serverToProxyPushStream.once('trailers', trailerHeaders => {
+    events.once(serverToProxyPushStream, 'trailers', trailerHeaders => {
       trailers = trailerHeaders;
     });
 
@@ -139,7 +144,7 @@ export default class Http2PushPromiseHandler {
         }
       } else {
         proxyToClientPushStream.respond(this.context.responseHeaders, { waitForTrailers: true });
-        proxyToClientPushStream.on('wantTrailers', (): void => {
+        events.on(proxyToClientPushStream, 'wantTrailers', (): void => {
           this.context.responseTrailers = trailers;
           if (trailers) proxyToClientPushStream.sendTrailers(this.context.responseTrailers ?? {});
           else proxyToClientPushStream.close();
@@ -165,24 +170,30 @@ export default class Http2PushPromiseHandler {
     } catch (writeError) {
       this.onHttp2PushError('Http2PushProxyToClient.UnhandledError', writeError);
       if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.destroy();
+    } finally {
+      this.cleanupEventListeners();
     }
+  }
+
+  private cleanupEventListeners(): void {
+    this.context.events.close('error');
   }
 
   private onHttp2PushError(kind: string, error: Error): void {
     const isCanceled = error instanceof CanceledPromiseError;
 
     this.context.setState(ResourceState.Error);
-    this.session.emit('http-error', {
+    this.session?.emit('http-error', {
       request: MitmRequestContext.toEmittedResource(this.context),
       error,
     });
 
-    if (!isCanceled && !this.session.isClosing && !error[hasBeenLoggedSymbol]) {
-      log.info(`MitmHttpRequest.${kind}`, {
-        sessionId: this.session.sessionId,
+    if (!isCanceled && !this.session?.isClosing && !error[hasBeenLoggedSymbol]) {
+      this.logger.info(`MitmHttpRequest.${kind}`, {
         request: `H2PUSH: ${this.context.url.href}`,
         error,
       });
     }
+    this.cleanupEventListeners();
   }
 }

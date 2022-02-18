@@ -1,7 +1,6 @@
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
@@ -32,7 +31,7 @@ export class DomStorageTracker
 
   protected readonly logger: IBoundLog;
 
-  private readonly registeredEvents: IRegisteredEventListener[] = [];
+  private readonly events = new EventSubscriber();
   private readonly devtoolsSession: DevtoolsSession;
   private readonly page: Page;
   private readonly networkManager: NetworkManager;
@@ -53,28 +52,44 @@ export class DomStorageTracker
     super();
     this.isEnabled = isEnabled;
     this.page = page;
-    this.devtoolsSession = page.devtoolsSession;
+    const session = page.devtoolsSession;
+    this.devtoolsSession = session;
     this.networkManager = networkManager;
     this.storageByOrigin = storageByOrigin ?? {};
     this.logger = logger.createChild(module);
-    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
-      ['DOMStorage.domStorageItemAdded', this.onDomStorageAdded.bind(this)],
-      ['DOMStorage.domStorageItemRemoved', this.onDomStorageRemoved.bind(this)],
-      ['DOMStorage.domStorageItemUpdated', this.onDomStorageUpdated.bind(this)],
-      ['DOMStorage.domStorageItemsCleared', this.onDomStorageCleared.bind(this)],
 
-      ['Storage.indexedDBListUpdated', this.onIndexedDBListUpdated.bind(this)],
-      ['Storage.indexedDBContentUpdated', this.onIndexedDBContentUpdated.bind(this)],
-    ]);
+    this.events.on(session, 'DOMStorage.domStorageItemAdded', this.onDomStorageAdded.bind(this));
+    this.events.on(
+      session,
+      'DOMStorage.domStorageItemRemoved',
+      this.onDomStorageRemoved.bind(this),
+    );
+    this.events.on(
+      session,
+      'DOMStorage.domStorageItemUpdated',
+      this.onDomStorageUpdated.bind(this),
+    );
+    this.events.on(
+      session,
+      'DOMStorage.domStorageItemsCleared',
+      this.onDomStorageCleared.bind(this),
+    );
+
+    this.events.on(session, 'Storage.indexedDBListUpdated', this.onIndexedDBListUpdated.bind(this));
+    this.events.on(
+      session,
+      'Storage.indexedDBContentUpdated',
+      this.onIndexedDBContentUpdated.bind(this),
+    );
   }
 
   public close(): void {
-    eventUtils.removeEventListeners(this.registeredEvents);
+    this.events.close();
     this.cancelPendingEvents('DomStorageTracker closed');
   }
 
   public async finalFlush(timeoutMs = 30e3): Promise<void> {
-    eventUtils.removeEventListeners(this.registeredEvents);
+    this.events.close();
     await Promise.race([
       this.processingPromise,
       new Promise<void>(resolve => setTimeout(resolve, timeoutMs ?? 0)),

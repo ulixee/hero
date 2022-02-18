@@ -254,24 +254,6 @@ describe('Pages', () => {
     });
   });
 
-  describe('screencast', () => {
-    it('should be able to take a screen recording', async () => {
-      await page.startScreenRecording({ format: 'jpeg', jpegQuality: 1 });
-      const ss = new Promise(resolve => page.once('screenshot', resolve));
-
-      server.setRoute('/screencast.html', async (req, res) => {
-        res.setHeader('Content-Type', 'text/html');
-        res.end(`<html><body><div style="height: 500px; width: 500px; background:blue">&nbsp;</div>
-         <div style="height: 200px; width: 100px; background:red">&nbsp;</div></body></html>`);
-      });
-
-      await page.goto(server.url('screencast.html'));
-
-      await expect(ss).resolves.toBeTruthy();
-      await page.stopScreenRecording();
-    });
-  });
-
   describe('crash', () => {
     it('should emit crash event when page crashes', async () => {
       page.navigate('chrome://crash').catch(() => {});

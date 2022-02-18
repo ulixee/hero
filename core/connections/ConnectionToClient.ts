@@ -35,6 +35,13 @@ export default class ConnectionToClient
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private hasActiveCommand = false;
 
+  constructor() {
+    super();
+    this.emitMessage = this.emitMessage.bind(this);
+    this.checkForAutoShutdown = this.checkForAutoShutdown.bind(this);
+    this.disconnectIfInactive = this.disconnectIfInactive.bind(this);
+  }
+
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
@@ -169,17 +176,19 @@ export default class ConnectionToClient
     const { session, tab } = await Session.create(options);
     const sessionId = session.id;
     if (!this.sessionIdToRemoteEvents.has(sessionId)) {
-      this.sessionIdToRemoteEvents.set(
-        sessionId,
-        new RemoteEvents(this.emit.bind(this, 'message')),
-      );
+      const remoteEvents = new RemoteEvents(session, this.emitMessage);
+      this.sessionIdToRemoteEvents.set(sessionId, remoteEvents);
       session.once('closing', () => this.sessionIdToRemoteEvents.delete(sessionId));
-      session.once('closed', () => this.checkForAutoShutdown());
+      session.once('closed', this.checkForAutoShutdown);
     }
     return { tabId: tab.id, sessionId: session.id, frameId: tab.mainFrameId };
   }
 
   /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+
+  private emitMessage(message: ConnectionToClient['EventTypes']['message']): void {
+    this.emit('message', message);
+  }
 
   private async recordCommands(
     meta: ISessionMeta,
@@ -240,12 +249,14 @@ export default class ConnectionToClient
     return await commandRunner.runFn();
   }
 
+  private disconnectIfInactive(): Promise<void> {
+    if (this.isActive()) return;
+    return this.disconnect();
+  }
+
   private checkForAutoShutdown(): void {
     clearTimeout(this.autoShutdownTimer);
-    this.autoShutdownTimer = setTimeout(() => {
-      if (this.isActive()) return;
-      return this.disconnect();
-    }, this.autoShutdownMillis).unref();
+    this.autoShutdownTimer = setTimeout(this.disconnectIfInactive, this.autoShutdownMillis).unref();
   }
 
   private isLaunchError(error: Error): boolean {

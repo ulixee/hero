@@ -2,6 +2,7 @@ import { Http2Session } from 'http2';
 import logger from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
+import { IEventSubscriber } from '@ulixee/commons/interfaces/IRegisteredEventListener';
 
 const { log } = logger(module);
 
@@ -11,6 +12,7 @@ export default class Http2SessionBinding {
   constructor(
     readonly clientSession: Http2Session,
     readonly serverSession: Http2Session,
+    readonly events: IEventSubscriber,
     logData: { sessionId: string } & any,
   ) {
     this.logger = log.createChild(module, logData);
@@ -22,33 +24,33 @@ export default class Http2SessionBinding {
     const clientSession = this.clientSession;
     const serverSession = this.serverSession;
 
-    clientSession?.on('ping', this.pingServer);
+    if (clientSession) this.events.on(clientSession, 'ping', this.pingServer);
 
-    serverSession.on('error', this.onServerError);
-    serverSession.on('close', this.onServerClose);
-    serverSession.on('goaway', this.onServerGoaway);
+    this.events.on(serverSession, 'error', this.onServerError);
+    this.events.on(serverSession, 'close', this.onServerClose);
+    this.events.on(serverSession, 'goaway', this.onServerGoaway);
 
-    serverSession.on('remoteSettings', remoteSettings => {
+    this.events.on(serverSession, 'remoteSettings', remoteSettings => {
       this.logger.stats('Http2Client.remoteSettings', {
-        settings: remoteSettings,
+        remoteSettings,
       });
     });
 
-    serverSession.on('frameError', (frameType, errorCode) => {
+    this.events.on(serverSession, 'frameError', (frameType, errorCode) => {
       this.logger.warn('Http2Client.frameError', {
         frameType,
         errorCode,
       });
     });
 
-    serverSession.on('altsvc', (alt, altOrigin) => {
+    this.events.on(serverSession, 'altsvc', (alt, altOrigin) => {
       this.logger.stats('Http2.altsvc', {
         altOrigin,
         alt,
       });
     });
 
-    serverSession.on('origin', origins => {
+    this.events.on(serverSession, 'origin', origins => {
       this.logger.stats('Http2.origin', {
         origins,
       });

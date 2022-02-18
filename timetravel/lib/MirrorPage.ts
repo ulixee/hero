@@ -1,9 +1,13 @@
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import InjectedScripts, { CorePageInjectedScript, showInteractionScript } from '@ulixee/hero-core/lib/InjectedScripts';
+import InjectedScripts, {
+  CorePageInjectedScript,
+  showInteractionScript,
+} from '@ulixee/hero-core/lib/InjectedScripts';
 import { IMouseEventRecord } from '@ulixee/hero-core/models/MouseEventsTable';
 import { IScrollRecord } from '@ulixee/hero-core/models/ScrollEventsTable';
 import DomChangesTable, {
@@ -37,6 +41,8 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public domRecording: IDomRecording;
+
+  private events = new EventSubscriber();
   private sessionId: string;
   private pendingDomChanges: IDomChangeRecord[] = [];
   private loadedDocument: IDocument;
@@ -69,15 +75,15 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.isReady = ready.promise;
     try {
       this.page = await context.newPage({ runPageScripts: false, enableDomStorageTracker: false });
-      this.page.once('close', this.close.bind(this));
+      this.events.once(this.page, 'close', this.close.bind(this));
       if (this.debugLogging) {
-        this.page.on('console', msg => {
+        this.events.on(this.page, 'console', msg => {
           log.info('MirrorPage.console', {
             ...msg,
             sessionId,
           });
         });
-        this.page.on('crashed', msg => {
+        this.events.on(this.page, 'crashed', msg => {
           log.info('MirrorPage.crashed', {
             ...msg,
             sessionId,
@@ -89,17 +95,20 @@ export default class MirrorPage extends TypedEventEmitter<{
       if (onPage) promises.push(onPage(this.page));
       promises.push(
         this.page.setNetworkRequestInterceptor(this.network.mirrorNetworkRequests),
-        this.page.addNewDocumentScript(detachedInjectedScript, true),
+        this.page.addNewDocumentScript(injectedScript, true),
         this.showBrowserInteractions ? InjectedScripts.installInteractionScript(this.page) : null,
         this.page.setJavaScriptEnabled(false),
       );
       if (this.showBrowserInteractions) {
         promises.push(
-          this.page.mainFrame.evaluate(`(() => { 
+          this.page.mainFrame.evaluate(
+            `(() => { 
             window.isMainFrame = true;
-            ${detachedInjectedScript};
+            ${injectedScript};
             ${showInteractionScript};
-          })()`, true),
+          })()`,
+            true,
+          ),
         );
       }
       if (viewport) {
@@ -142,8 +151,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     // NOTE: domNodePathByFrameId and mainFrameIds are live objects
     this.domRecording.domNodePathByFrameId = tab.session.db.frames.frameDomNodePathsById;
     this.domRecording.mainFrameIds = tab.session.db.frames.mainFrameIds(tab.tabId);
-
-    tab.on('page-events', this.onPageEvents);
+    this.events.on(tab, 'page-events', this.onPageEvents);
     this.subscribeToTab = tab;
   }
 
@@ -249,7 +257,9 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.page = null;
     this.loadedDocument = null;
     this.network.close();
+    this.events.close();
     this.emit('close');
+    this.removeAllListeners();
   }
 
   public async getNodeOuterHtml(
@@ -524,7 +534,7 @@ const pageScripts = {
   domReplayerUI: fs.readFileSync(`${__dirname}/../injected-scripts/domReplayerUI.js`, 'utf8'),
 };
 
-const detachedInjectedScript = `(function installDetachedScripts() {
+const injectedScript = `(function mirrorInjectedScripts() {
   ${CorePageInjectedScript};
 
   ${pageScripts.DomActions};

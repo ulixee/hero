@@ -4,15 +4,11 @@ import IPuppetContext, {
   IPuppetPageOptions,
 } from '@ulixee/hero-interfaces/IPuppetContext';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import {
-  addTypedEventListener,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
@@ -61,7 +57,7 @@ export class BrowserContext
   private isClosing = false;
 
   private devtoolsSessions = new WeakSet<DevtoolsSession>();
-  private eventListeners: IRegisteredEventListener[] = [];
+  private readonly events = new EventSubscriber();
   private browserContextInitiatedMessageIds = new Set<number>();
 
   constructor(
@@ -251,8 +247,9 @@ export class BrowserContext
         });
       }
     }
-    removeEventListeners(this.eventListeners);
+    this.events.close();
     this.emit('close');
+    this.removeAllListeners();
   }
 
   async getCookies(url?: URL): Promise<ICookie[]> {
@@ -353,7 +350,7 @@ export class BrowserContext
     this.devtoolsSessions.add(devtoolsSession);
     const shouldFilter = details.sessionType === 'browser';
 
-    const receive = addTypedEventListener(devtoolsSession.messageEvents, 'receive', event => {
+    this.events.on(devtoolsSession.messageEvents, 'receive', event => {
       if (shouldFilter) {
         // see if this was initiated by this browser context
         const { id } = event as IDevtoolsResponseMessage;
@@ -369,24 +366,19 @@ export class BrowserContext
         ...event,
       });
     });
-    const send = addTypedEventListener(
-      devtoolsSession.messageEvents,
-      'send',
-      (event, initiator) => {
-        if (shouldFilter) {
-          if (initiator && initiator !== this) return;
-          this.browserContextInitiatedMessageIds.add(event.id);
-        }
-        if (initiator && initiator instanceof Frame) {
-          (event as any).frameId = initiator.id;
-        }
-        this.emit('devtools-message', {
-          direction: 'send',
-          ...details,
-          ...event,
-        });
-      },
-    );
-    this.eventListeners.push(receive, send);
+    this.events.on(devtoolsSession.messageEvents, 'send', (event, initiator) => {
+      if (shouldFilter) {
+        if (initiator && initiator !== this) return;
+        this.browserContextInitiatedMessageIds.add(event.id);
+      }
+      if (initiator && initiator instanceof Frame) {
+        (event as any).frameId = initiator.id;
+      }
+      this.emit('devtools-message', {
+        direction: 'send',
+        ...details,
+        ...event,
+      });
+    });
   }
 }

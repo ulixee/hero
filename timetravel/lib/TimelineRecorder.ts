@@ -1,15 +1,10 @@
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import { IFrameNavigationEvents } from '@ulixee/hero-core/lib/FrameNavigations';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
-import {
-  addTypedEventListeners,
-  removeEventListeners,
-  TypedEventEmitter,
-  addTypedEventListener,
-} from '@ulixee/commons/lib/eventUtils';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 
@@ -19,26 +14,20 @@ export default class TimelineRecorder extends TypedEventEmitter<{
   public recordScreenUntilTime = 0;
   public recordScreenUntilLoad = false;
   private closeTimer: IResolvablePromise;
-  private readonly registeredEvents: IRegisteredEventListener[];
+  private readonly events = new EventSubscriber();
 
   constructor(readonly heroSession: Session) {
     super();
     bindFunctions(this);
 
-    const tabCreatedEvent = addTypedEventListener(heroSession, 'tab-created', this.onTabCreated);
-    const removeTabCreated = removeEventListeners.bind(null, [tabCreatedEvent]);
-    this.registeredEvents = [tabCreatedEvent];
-    this.registeredEvents.push(
-      ...addTypedEventListeners(heroSession, [
-        ['will-close', this.onHeroSessionWillClose],
-        ['closed', removeTabCreated],
-      ]),
-    );
+    this.events.on(heroSession, 'tab-created', this.onTabCreated);
+    this.events.on(heroSession, 'will-close', this.onHeroSessionWillClose);
+    this.events.on(heroSession, 'closed', this.close);
   }
 
-  public stop(): void {
+  public close(): void {
     if (!this.heroSession) return;
-    removeEventListeners(this.registeredEvents);
+    this.events.off();
     this.dontExtendSessionPastTime();
   }
 
@@ -95,15 +84,8 @@ export default class TimelineRecorder extends TypedEventEmitter<{
 
   private onTabCreated(event: { tab: Tab }): void {
     const tab = event.tab;
-    const statusChangeEvent = addTypedEventListener(
-      tab.navigations,
-      'status-change',
-      this.onStatusChange,
-    );
-    this.registeredEvents.push(
-      statusChangeEvent,
-      addTypedEventListener(tab, 'close', () => removeEventListeners([statusChangeEvent])),
-    );
+    const statusChangeEvent = this.events.on(tab.navigations, 'status-change', this.onStatusChange);
+    this.events.once(tab, 'close', () => this.events.off(statusChangeEvent));
   }
 
   private onStatusChange(status: IFrameNavigationEvents['status-change']): void {

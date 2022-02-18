@@ -43,6 +43,7 @@ import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import GlobalPool, { disableMitm } from './GlobalPool';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import { IMouseEventRecord } from '../models/MouseEventsTable';
@@ -72,7 +73,8 @@ export default class Tab
 
   private collectedElementsPendingHTML = new Set<Resolvable<ICollectedElement>>();
 
-  private readonly commandRecorder: CommandRecorder;
+  private events = new EventSubscriber();
+  private commandRecorder: CommandRecorder;
   private readonly createdAtCommandId: number;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private lastFileChooserEvent: {
@@ -322,7 +324,12 @@ export default class Tab
         errors.push(error);
       }
     }
+    this.events.close();
+    this.commandRecorder = null;
     this.emit('close');
+    // clean up listener memory
+    this.removeAllListeners();
+
     this.logger.stats('Tab.Closed', { parentLogId, errors });
   }
 
@@ -729,7 +736,7 @@ export default class Tab
   public addDomStateListener(id: string, options: IDomStateListenArgs): DomStateListener {
     const listener = new DomStateListener(id, options, this);
     this.domStateListenersByJsPathId[id] = listener;
-    listener.once('resolved', () => delete this.domStateListenersByJsPathId[id]);
+    this.events.once(listener, 'resolved', () => delete this.domStateListenersByJsPathId[id]);
 
     this.emit('wait-for-domstate', { listener });
 
@@ -797,7 +804,7 @@ export default class Tab
       if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
         const domStateListener = this.addDomStateListener(id, options);
-        domStateListener.on('updated', listener.listenFn);
+        this.events.on(domStateListener, 'updated', listener.listenFn);
       }
     } else {
       this.on(type as any, listener.listenFn);
@@ -849,34 +856,40 @@ export default class Tab
 
   private listen(): void {
     const page = this.puppetPage;
-    this.on('resource', this.onResource.bind(this));
+    this.events.on(this, 'resources', this.onResource.bind(this));
 
     this.close = this.close.bind(this);
-    page.once('close', this.close);
-    page.on('page-error', this.onPageError.bind(this), true);
-    page.on('crashed', this.onTargetCrashed.bind(this));
-    page.on('console', this.onConsole.bind(this), true);
-    page.on('frame-created', this.onFrameCreated.bind(this), true);
-    page.on('page-callback-triggered', this.onPageCallback.bind(this));
-    page.on('dialog-opening', this.onDialogOpening.bind(this));
-    page.on('filechooser', this.onFileChooser.bind(this));
-    page.on('screenshot', this.onScreenshot.bind(this));
+    this.events.once(page, 'close', this.close);
+    this.events.on(page, 'page-error', this.onPageError.bind(this), true);
+    this.events.on(page, 'crashed', this.onTargetCrashed.bind(this));
+    this.events.on(page, 'console', this.onConsole.bind(this), true);
+    this.events.on(page, 'frame-created', this.onFrameCreated.bind(this), true);
+    this.events.on(page, 'page-callback-triggered', this.onPageCallback.bind(this));
+    this.events.on(page, 'dialog-opening', this.onDialogOpening.bind(this));
+    this.events.on(page, 'filechooser', this.onFileChooser.bind(this));
+    this.events.on(page, 'screenshot', this.onScreenshot.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
-    page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
-    page.on('resource-was-requested', this.onResourceWasRequested.bind(this), true);
-    page.on('resource-loaded', this.onResourceLoaded.bind(this), true);
-    page.on('resource-failed', this.onResourceFailed.bind(this), true);
-    page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
+    this.events.on(
+      page,
+      'resource-will-be-requested',
+      this.onResourceWillBeRequested.bind(this),
+      true,
+    );
+    this.events.on(page, 'resource-was-requested', this.onResourceWasRequested.bind(this), true);
+    this.events.on(page, 'resource-loaded', this.onResourceLoaded.bind(this), true);
+    this.events.on(page, 'resource-failed', this.onResourceFailed.bind(this), true);
+    this.events.on(page, 'navigation-response', this.onNavigationResourceResponse.bind(this), true);
 
-    page.on('dom-storage-updated', this.onStorageUpdated.bind(this), true);
+    this.events.on(page, 'dom-storage-updated', this.onStorageUpdated.bind(this), true);
 
     // websockets
-    page.on(
+    this.events.on(
+      page,
       'websocket-handshake',
       this.session.resources.registerWebsocketHeaders.bind(this.session.resources, this.id),
     );
-    page.on('websocket-frame', this.onWebsocketFrame.bind(this));
+    this.events.on(page, 'websocket-frame', this.onWebsocketFrame.bind(this));
   }
 
   private onPageCallback(event: IPuppetPageEvents['page-callback-triggered']): void {

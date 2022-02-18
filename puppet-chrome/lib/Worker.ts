@@ -1,7 +1,6 @@
-import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Protocol from 'devtools-protocol';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IPuppetWorker, IPuppetWorkerEvents } from '@ulixee/hero-interfaces/IPuppetWorker';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
@@ -32,7 +31,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   private readonly networkManager: NetworkManager;
   private readonly targetInfo: TargetInfo;
 
-  private readonly registeredEvents: IRegisteredEventListener[];
+  private readonly events = new EventSubscriber();
   private readonly executionContextId = createPromise<number>();
 
   public get id(): string {
@@ -63,12 +62,11 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       workerType: this.type,
     });
     this.networkManager = new NetworkManager(devtoolsSession, this.logger, browserContext.proxy);
-    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
-      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
-      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
-      ['Runtime.executionContextCreated', this.onContextCreated.bind(this)],
-      ['disconnected', this.emit.bind(this, 'close')],
-    ]);
+    const session = this.devtoolsSession;
+    this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
+    this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this));
+    this.events.on(session, 'Runtime.executionContextCreated', this.onContextCreated.bind(this));
+    this.events.once(session, 'disconnected', this.emit.bind(this, 'close'));
     this.isReady = this.initialize(parentNetworkManager).catch(err => err);
   }
 
@@ -109,7 +107,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   close(): void {
     this.networkManager.close();
     this.cancelPendingEvents('Worker closing', ['close']);
-    eventUtils.removeEventListeners(this.registeredEvents);
+    this.events.close();
   }
 
   toJSON(): unknown {

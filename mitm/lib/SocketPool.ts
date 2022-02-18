@@ -2,6 +2,7 @@ import Queue from '@ulixee/commons/lib/Queue';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import MitmSocket from '@ulixee/hero-mitm-socket';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { ClientHttp2Session } from 'http2';
@@ -12,6 +13,7 @@ const { log } = Log(module);
 export default class SocketPool {
   public alpn: string;
   public isClosing = false;
+  private readonly events = new EventSubscriber();
   private all = new Set<MitmSocket>();
   private pooled = 0;
   private free = new Set<MitmSocket>();
@@ -71,7 +73,7 @@ export default class SocketPool {
       }
 
       const mitmSocket = await createSocket();
-      mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket));
+      this.events.on(mitmSocket, 'close', this.onSocketClosed.bind(this, mitmSocket));
       this.alpn = mitmSocket.alpn;
 
       this.all.add(mitmSocket);
@@ -90,11 +92,14 @@ export default class SocketPool {
     for (const pending of this.pending) {
       pending.reject(new CanceledPromiseError('Shutting down socket pool'));
     }
+    this.pending.length = 0;
     for (const session of this.http2Sessions) {
       try {
         session.mitmSocket.close();
         session.client.destroy();
         session.client.unref();
+        if (!session.client.socket.destroyed) session.client.socket.destroy();
+        session.client.close();
       } catch (err) {
         // don't need to log closing sessions
       }
@@ -103,6 +108,7 @@ export default class SocketPool {
     for (const socket of this.all) {
       socket.close();
     }
+    this.events.close();
     this.all.clear();
     this.free.clear();
     this.queue.stop(new CanceledPromiseError('Shutting down socket pool'));
@@ -117,8 +123,8 @@ export default class SocketPool {
 
     const entry = { mitmSocket, client };
     this.http2Sessions.push(entry);
-    client.on('close', () => this.closeHttp2Session(entry));
-    client.on('goaway', () => this.closeHttp2Session(entry));
+    this.events.on(client, 'close', () => this.closeHttp2Session(entry));
+    this.events.on(client, 'goaway', () => this.closeHttp2Session(entry));
   }
 
   private onSocketClosed(socket: MitmSocket): void {

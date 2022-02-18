@@ -1,8 +1,9 @@
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IPuppetFrameManagerEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
@@ -44,7 +45,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
 
   private attachedFrameIds = new Set<string>();
   private activeContextIds = new Set<number>();
-  private readonly registeredEvents: IRegisteredEventListener[] = [];
+  private readonly events = new EventSubscriber();
   private readonly devtoolsSession: DevtoolsSession;
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
@@ -62,18 +63,20 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     this.networkManager = networkManager;
     this.domStorageTracker = domStorageTracker;
     this.logger = logger.createChild(module);
-    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
-      ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
-      ['Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument.bind(this)],
-      ['Page.frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this)],
-      ['Page.frameDetached', this.onFrameDetached.bind(this)],
-      ['Page.frameAttached', this.onFrameAttached.bind(this)],
-      ['Page.frameStoppedLoading', this.onFrameStoppedLoading.bind(this)],
-      ['Page.lifecycleEvent', this.onLifecycleEvent.bind(this)],
-      ['Runtime.executionContextsCleared', this.onExecutionContextsCleared.bind(this)],
-      ['Runtime.executionContextDestroyed', this.onExecutionContextDestroyed.bind(this)],
-      ['Runtime.executionContextCreated', this.onExecutionContextCreated.bind(this)],
-    ]);
+
+    bindFunctions(this);
+
+    const session = this.devtoolsSession;
+    this.events.on(session, 'Page.frameNavigated', this.onFrameNavigated);
+    this.events.on(session, 'Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument);
+    this.events.on(session, 'Page.frameRequestedNavigation', this.onFrameRequestedNavigation);
+    this.events.on(session, 'Page.frameDetached', this.onFrameDetached);
+    this.events.on(session, 'Page.frameAttached', this.onFrameAttached);
+    this.events.on(session, 'Page.frameStoppedLoading', this.onFrameStoppedLoading);
+    this.events.on(session, 'Page.lifecycleEvent', this.onLifecycleEvent);
+    this.events.on(session, 'Runtime.executionContextsCleared', this.onExecutionContextsCleared);
+    this.events.on(session, 'Runtime.executionContextDestroyed', this.onExecutionContextDestroyed);
+    this.events.on(session, 'Runtime.executionContextCreated', this.onExecutionContextCreated);
   }
 
   public initialize(): Promise<void> {
@@ -114,7 +117,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   }
 
   public close(error?: Error): void {
-    eventUtils.removeEventListeners(this.registeredEvents);
+    this.events.close();
     this.cancelPendingEvents('FramesManager closed');
     for (const frame of this.framesById.values()) {
       frame.close(error);
@@ -134,17 +137,13 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     }
     // add binding to every new context automatically
     await this.devtoolsSession.send('Runtime.addBinding', params);
-    return eventUtils.addEventListener(
-      this.devtoolsSession,
-      'Runtime.bindingCalled',
-      async event => {
-        if (event.name === name) {
-          await this.isReady;
-          const frameId = this.getFrameIdForExecutionContext(event.executionContextId);
-          onCallback(event.payload, frameId);
-        }
-      },
-    );
+    return this.events.on(this.devtoolsSession, 'Runtime.bindingCalled', async event => {
+      if (event.name === name) {
+        await this.isReady;
+        const frameId = this.getFrameIdForExecutionContext(event.executionContextId);
+        onCallback(event.payload, frameId);
+      }
+    });
   }
 
   public async addNewDocumentScript(

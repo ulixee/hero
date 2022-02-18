@@ -60,7 +60,11 @@ export default abstract class BaseHttpHandler {
 
       const request = await session.requestAgent.request(context);
       this.context.proxyToServerRequest = request;
-      request.on('error', this.onError.bind(this, 'ProxyToServer.RequestError'));
+      this.context.events.on(
+        request,
+        'error',
+        this.onError.bind(this, 'ProxyToServer.RequestError'),
+      );
 
       if (this.context.isServerHttp2) {
         const h2Request = request as ClientHttp2Stream;
@@ -73,22 +77,34 @@ export default abstract class BaseHttpHandler {
     }
   }
 
+  protected cleanup(): void {
+    this.context.events.close('error');
+    this.context.proxyToServerRequest = null;
+    this.context.clientToProxyRequest = null;
+    this.context.requestSession = null;
+    this.context.proxyToClientResponse = null;
+    this.context.proxyToServerMitmSocket = null;
+    this.context.cacheHandler = null;
+    this.context.browserHasRequested = null;
+  }
+
   protected bindHttp2ErrorListeners(
     source: string,
     stream: http2.Http2Stream,
     session: http2.Http2Session,
   ): void {
+    const events = this.context.events;
     if (!stream.listenerCount('error')) {
-      stream.on('error', this.onError.bind(this, `${source}.Http2StreamError`));
+      events.on(stream, 'error', this.onError.bind(this, `${source}.Http2StreamError`));
     }
 
-    stream.on('streamClosed', code => {
+    events.on(stream, 'streamClosed', code => {
       if (!code) return;
       this.onError(`${source}.Http2StreamError`, new Error(`Stream Closed ${code}`));
     });
 
     if (session && !session.listenerCount('error')) {
-      session.on('error', this.onError.bind(this, `${source}.Http2SessionError`));
+      events.on(session, 'error', this.onError.bind(this, `${source}.Http2SessionError`));
     }
   }
 }

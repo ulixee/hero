@@ -58,13 +58,13 @@ test('records a single resource for failed mitm requests', async () => {
   Helpers.needsClosing.push(session);
   const tab = Session.getTab(meta);
 
-  const resolvable = new Resolvable<void>();
+  const waitForEmptyKeyCheck = new Resolvable<void>();
   const didEmit = new Resolvable<void>();
   const originalEmit = tab.puppetPage.emit.bind(tab.puppetPage);
   // @ts-ignore
   jest.spyOn(tab.puppetPage.networkManager, 'emit').mockImplementation((evt, args) => {
     // eslint-disable-next-line promise/always-return,promise/catch-or-return,@typescript-eslint/no-floating-promises
-    resolvable.promise.then(() => {
+    waitForEmptyKeyCheck.promise.then(() => {
       originalEmit(evt as any, args);
     });
     if (evt === 'resource-loaded') didEmit.resolve();
@@ -77,14 +77,12 @@ test('records a single resource for failed mitm requests', async () => {
   const mitmErrorsByUrl = session.resources.mitmErrorsByUrl;
   expect(mitmErrorsByUrl.get(`http://localhost:2344/not-there`)).toHaveLength(1);
   expect(session.resources.getForTab(meta.tabId)).toHaveLength(1);
-  // @ts-ignore
-  expect(Object.keys(session.resources.browserRequestIdToResources)).toHaveLength(0);
-  resolvable.resolve();
+  expect([...session.resources.browserRequestIdToResources.keys()]).toHaveLength(0);
+  waitForEmptyKeyCheck.resolve();
   await didEmit.promise;
   await new Promise(setImmediate);
   expect(session.resources.getForTab(meta.tabId)).toHaveLength(1);
-  // @ts-ignore
-  expect(Object.keys(session.resources.browserRequestIdToResources)).toHaveLength(1);
+  expect([...session.resources.browserRequestIdToResources.keys()]).toHaveLength(1);
   await session.close();
 });
 

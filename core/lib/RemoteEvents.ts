@@ -1,71 +1,43 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import Session from './Session';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import Logger from '@ulixee/commons/lib/Logger';
-
-const { log } = Logger(module);
+import RemoteEventTarget from './RemoteEventTarget';
 
 export default class RemoteEvents {
-  constructor(readonly onCoreEvent: (event: ICoreEventPayload) => void) {}
+  private remoteTargets = new Map<IRemoteEventListener, RemoteEventTarget>();
 
-  public getEventTarget(meta: ISessionMeta): IRemoteEventsTarget {
-    const { sessionId, frameId } = meta;
-    let target: IRemoteEventListener = Session.get(sessionId);
+  constructor(private session: Session, readonly onCoreEvent: (event: ICoreEventPayload) => void) {
+    this.close = this.close.bind(this);
+    session.once('closing', this.close);
+  }
 
-    const tab = Session.getTab(meta);
+  public close(): void {
+    this.session.off('closing', this.close);
+    this.session = null;
+    for (const target of this.remoteTargets.values()) {
+      target.close();
+    }
+    this.remoteTargets.clear();
+  }
+
+  public getEventTarget(meta: ISessionMeta): RemoteEventTarget {
+    const session = this.session;
+    let target: IRemoteEventListener = session;
+
+    const tab = session.getTab(meta.tabId);
     if (tab) target = tab;
 
-    if (frameId) {
-      target = tab?.getFrameEnvironment(frameId);
+    if (meta.frameId) {
+      target = tab?.getFrameEnvironment(meta.frameId);
     }
-    const emitEvent = this.emitCoreEvent.bind(this, meta);
 
-    return {
-      isAllowedCommand(method: string): boolean {
-        return method === 'addEventListener' || method === 'removeEventListener';
-      },
-      addEventListener(
-        jsPath: IJsPath | null,
-        type: string,
-        options?: any,
-      ): Promise<{ listenerId: string }> {
-        return target.addRemoteEventListener(type, emitEvent, jsPath, options);
-      },
-      removeEventListener(listenerId: string, options?: any): Promise<void> {
-        return target.removeRemoteEventListener(listenerId, options);
-      },
-    };
-  }
-
-  private emitCoreEvent(meta: ISessionMeta, listenerId: string, ...eventArgs: any[]): void {
-    const session = Session.get(meta.sessionId);
-    if (session?.isClosing) {
-      if (session.commands.getRemoteEventListener(listenerId)?.type !== 'close') {
-        log.stats('Canceling event broadcast. Session is closing', {
-          sessionId: session.id,
-          listenerId,
-          meta,
-        });
-        return;
-      }
+    if (!this.remoteTargets.has(target)) {
+      this.remoteTargets.set(
+        target,
+        new RemoteEventTarget(this.session, target, meta, this.onCoreEvent),
+      );
     }
-    this.onCoreEvent({
-      meta,
-      listenerId,
-      eventArgs,
-      lastCommandId: session?.commands.lastId,
-    });
+    return this.remoteTargets.get(target);
   }
-}
-
-interface IRemoteEventsTarget extends ICommandableTarget {
-  addEventListener(
-    jsPath: IJsPath | null,
-    type: string,
-    options?: any,
-  ): Promise<{ listenerId: string }>;
-  removeEventListener(listenerId: string, options?: any): Promise<void>;
 }

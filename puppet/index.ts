@@ -68,7 +68,10 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       const launchedProcess = new BrowserProcess(this.browserEngine);
       const hasError = await launchedProcess.hasLaunchError;
       if (hasError) throw hasError;
-      launchedProcess.on('close', () => this.emit('close'));
+      launchedProcess.on('close', () => {
+        this.emit('close');
+        this.removeAllListeners();
+      });
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
       this.browser.onDevtoolsPanelAttached = attachToDevtools;
@@ -134,6 +137,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       log.error('Puppet.Closing:Error', { parentLogId, sessionId: null, error });
     } finally {
       this.emit('close');
+      this.removeAllListeners();
       log.stats('Puppet.Closed', { parentLogId, sessionId: null });
     }
   }
