@@ -100,7 +100,6 @@ export default class FrameEnvironment
 
   private puppetNodeIdsByHeroNodeId: Record<number, string> = {};
   private prefetchedJsPaths: IJsPathResult[];
-  private readonly isDetached: boolean;
   private isClosing = false;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
@@ -127,7 +126,6 @@ export default class FrameEnvironment
       frameId: this.id,
     });
     this.jsPath = new JsPath(this);
-    this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.session.commands.lastId;
     this.navigations = new FrameNavigations(
       this.tab.id,
@@ -213,10 +211,6 @@ export default class FrameEnvironment
   /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
-    if (this.isDetached) {
-      throw new Error("Sorry, you can't interact with a detached frame");
-    }
-
     // only install interactor on the main frame
     await this.interactor.initialize(this.isMainFrame);
     const timeoutMs = 120e3;

@@ -1,11 +1,8 @@
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import * as fs from 'fs';
 import SessionsTable from '../models/SessionsTable';
-import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
 import Core from '../index';
-import { IJsPathHistory } from '../lib/JsPath';
 import Session from '../lib/Session';
 
 interface IDbOptions {
@@ -17,7 +14,6 @@ export default class SessionsDb {
   private static instance: SessionsDb;
   private static hasInitialized = false;
   public readonly sessions: SessionsTable;
-  public readonly detachedJsPathCalls: DetachedJsPathCallsTable;
   public readonly readonly: boolean;
   private db: SqliteDatabase;
 
@@ -27,7 +23,6 @@ export default class SessionsDb {
     this.db = new Database(SessionsDb.databasePath, { readonly, fileMustExist });
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
-    this.detachedJsPathCalls = new DetachedJsPathCallsTable(this.db);
   }
 
   public findLatestSessionId(script: {
@@ -85,28 +80,6 @@ export default class SessionsDb {
   public recordSession(session: Session): void {
     if (!session.options?.scriptInstanceMeta) return;
     this.sessions.insert(session);
-  }
-
-  public findDetachedJsPathCalls(
-    scriptInstanceMeta: IScriptInstanceMeta,
-    callsite: string,
-    key?: string,
-  ): IJsPathHistory[] {
-    const detachedCalls = this.detachedJsPathCalls.find(scriptInstanceMeta, callsite, key);
-    if (detachedCalls?.execJsPathHistory) {
-      return JSON.parse(detachedCalls.execJsPathHistory);
-    }
-    return null;
-  }
-
-  public recordDetachedJsPathCalls(
-    scriptInstanceMeta: IScriptInstanceMeta,
-    calls: IJsPathHistory[],
-    callsite: string,
-    key?: string,
-  ): void {
-    if (!calls?.length) return;
-    this.detachedJsPathCalls.insert(scriptInstanceMeta, callsite, calls, new Date(), key);
   }
 
   public close(): void {

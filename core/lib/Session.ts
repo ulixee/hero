@@ -17,7 +17,6 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { MitmProxy } from '@ulixee/hero-mitm/index';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
@@ -38,7 +37,6 @@ import Commands from './Commands';
 import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import DetachedTabState from './DetachedTabState';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
@@ -103,7 +101,6 @@ export default class Session
   public readonly db: SessionDb;
 
   public tabsById = new Map<number, Tab>();
-  public detachedTabsById = new Map<number, Tab>();
 
   public get isClosing(): boolean {
     return this._isClosing;
@@ -200,7 +197,6 @@ export default class Session
     this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
-      this.detachTab,
       this.collectSnippet,
       this.getCollectedSnippets,
       this.getCollectedElements,
@@ -236,7 +232,7 @@ export default class Session
   }
 
   public getTab(id: number): Tab {
-    return this.tabsById.get(id) ?? this.detachedTabsById.get(id);
+    return this.tabsById.get(id);
   }
 
   public getTabs(): Promise<Tab[]> {
@@ -262,35 +258,6 @@ export default class Session
       }
     }
     this.plugins.configure(options);
-  }
-
-  public async detachTab(
-    sourceTabId: number,
-    callsite: string,
-    key?: string,
-  ): Promise<{
-    detachedTab: Tab;
-    prefetchedJsPaths: IJsPathResult[];
-    detachedState: DetachedTabState;
-  }> {
-    const sourceTab = this.getTab(sourceTabId);
-
-    const detachedState = await sourceTab.createDetachedState(callsite, key);
-    const browserContext = await GlobalPool.getUtilityContext();
-
-    const { detachedTab, prefetchedJsPaths } = await detachedState.openInNewTab(
-      browserContext,
-      this.viewport,
-      `Frozen Tab at Command ${detachedState.detachedAtCommandId}`,
-    );
-
-    this.recordTab(detachedTab, sourceTabId, detachedState.detachedAtCommandId);
-
-    const id = detachedTab.id;
-    this.detachedTabsById.set(id, detachedTab);
-    detachedTab.once('close', () => this.detachedTabsById.delete(id));
-
-    return { detachedTab, prefetchedJsPaths, detachedState };
   }
 
   public collectSnippet(name: string, value: any): Promise<void> {
@@ -521,9 +488,6 @@ export default class Session
       for (const tab of this.tabsById.values()) {
         promises.push(tab.close());
       }
-      for (const tab of this.detachedTabsById.values()) {
-        promises.push(tab.close());
-      }
       await Promise.all(promises);
       this.mitmRequestSession.close();
       if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
@@ -682,7 +646,7 @@ export default class Session
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ): Promise<Tab> {
-    const tab = Tab.create(this, page, false, parentTab?.id, {
+    const tab = Tab.create(this, page, parentTab?.id, {
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoader.id,
     });
@@ -700,7 +664,7 @@ export default class Session
     this.tabsById.set(id, tab);
     tab.on('close', () => {
       this.tabsById.delete(id);
-      if (this.tabsById.size === 0 && this.detachedTabsById.size === 0 && !this.isResettingState) {
+      if (this.tabsById.size === 0 && !this.isResettingState) {
         this.emit('all-tabs-closed');
       }
     });
@@ -722,14 +686,13 @@ export default class Session
     }
   }
 
-  private recordTab(tab: Tab, parentTabId?: number, detachedAtCommandId?: number): void {
+  private recordTab(tab: Tab, parentTabId?: number): void {
     this.db.tabs.insert(
       tab.id,
       tab.puppetPage.id,
       tab.puppetPage.devtoolsSession.id,
       this.viewport,
       parentTabId,
-      detachedAtCommandId,
     );
   }
 
@@ -824,7 +787,7 @@ ${data}`,
     if (!meta) return undefined;
     const session = this.get(meta.sessionId);
     if (!session) return undefined;
-    return session.tabsById.get(meta.tabId) ?? session.detachedTabsById.get(meta.tabId);
+    return session.tabsById.get(meta.tabId);
   }
 
   public static hasKeepAliveSessions(): boolean {

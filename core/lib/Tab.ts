@@ -33,8 +33,7 @@ import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import { IDomChangeRecord, IDomRecording } from '../models/DomChangesTable';
-import DetachedTabState from './DetachedTabState';
+import { IDomChangeRecord } from '../models/DomChangesTable';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import DomStateListener from './DomStateListener';
@@ -67,7 +66,6 @@ export default class Tab
   public puppetPage: IPuppetPage;
   public isClosing = false;
   public isReady: Promise<void>;
-  public isDetached = false;
   public readonly mirrorPage: MirrorPage;
 
   protected readonly logger: IBoundLog;
@@ -130,7 +128,6 @@ export default class Tab
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
-    isDetached: boolean,
     parentTabId?: number,
     windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
@@ -145,7 +142,6 @@ export default class Tab
     this.parentTabId = parentTabId;
     this.createdAtCommandId = session.commands.lastId;
     this.puppetPage = puppetPage;
-    this.isDetached = isDetached;
 
     for (const puppetFrame of puppetPage.frames) {
       const frame = new FrameEnvironment(this, puppetFrame);
@@ -773,35 +769,6 @@ export default class Tab
     return this.session.db.domChanges.getFrameChanges(frameId ?? this.mainFrameId, sinceCommandId);
   }
 
-  public async createDetachedState(callsite: string, key?: string): Promise<DetachedTabState> {
-    await this.mainFrameEnvironment.waitForNavigationLoader();
-    // find last page load
-    const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
-    const domChanges = await this.getDomChanges(
-      this.mainFrameId,
-      lastLoadedNavigation.startCommandId - 1,
-    );
-    this.logger.info('DetachingTab', {
-      url: lastLoadedNavigation.finalUrl,
-      domChangeIndices:
-        domChanges.length > 0
-          ? [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex]
-          : [],
-      domChanges: domChanges.length,
-    });
-    return new DetachedTabState(
-      this.session.db,
-      this.id,
-      new Set([lastLoadedNavigation.frameId]),
-      this.session,
-      this.session.commands.lastId,
-      lastLoadedNavigation,
-      domChanges,
-      callsite,
-      key,
-    );
-  }
-
   public registerFlowHandler(
     name: string,
     id: number,
@@ -886,13 +853,12 @@ export default class Tab
       sessionId: this.sessionId,
       url: this.url,
       createdAtCommandId: this.createdAtCommandId,
-      isDetached: this.isDetached,
     } as ISessionMeta; // must adhere to session meta spec
   }
 
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
-    if (!this.isDetached && this.session.options?.blockedResourceTypes) {
+    if (this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
   }
@@ -1245,11 +1211,10 @@ export default class Tab
   public static create(
     session: Session,
     puppetPage: IPuppetPage,
-    isDetached?: boolean,
     parentTabId?: number,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, isDetached, parentTabId, openParams);
+    const tab = new Tab(session, puppetPage, parentTabId, openParams);
     tab.logger.info('Tab.created', {
       parentTab: parentTabId,
       openParams,
