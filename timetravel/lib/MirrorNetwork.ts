@@ -139,17 +139,22 @@ export default class MirrorNetwork {
 
   public addResource(resource: IResourceSummary): void {
     const key = `${resource.method}_${resource.url}`;
+
+    if (this.resourceFilter) {
+      if (this.resourceFilter.hasResponse && !resource.hasResponse) {
+        return;
+      }
+      if (
+        this.resourceFilter.isGetOrDocument &&
+        !(resource.type === 'Document' || resource.method === 'GET')
+      ) {
+        return;
+      }
+    }
+
     if (!this.resourceLookup[key]?.length) {
       this.resourceLookup[key] = [resource];
     } else {
-      if (this.resourceFilter) {
-        if (this.resourceFilter.hasResponse && !resource.hasResponse) return;
-        if (
-          this.resourceFilter.isGetOrDocument &&
-          !(resource.type === 'Document' || resource.method === 'GET')
-        )
-          return;
-      }
       const pendingResolutionIdx = this.resourceLookup[key].findIndex(
         x => !!x.responsePromise && !x.responsePromise.isResolved,
       );
@@ -162,7 +167,11 @@ export default class MirrorNetwork {
     }
   }
 
-  public setResources(resources: (IResourceSummary | IResourcesRecord)[]): void {
+  public setResources(
+    resources: (IResourceSummary | IResourcesRecord)[],
+    loadDetails: IMirrorNetworkConfig['loadResourceDetails'],
+  ): void {
+    this.loadResourceDetails = loadDetails;
     for (const resourceSet of Object.values(this.resourceLookup)) {
       for (const resource of resourceSet) {
         if (resource.responsePromise && !resource.responsePromise.isResolved)
@@ -242,7 +251,7 @@ export default class MirrorNetwork {
       return true;
     });
     network.resourceFilter = options;
-    network.setResources(resources);
+    network.setResources(resources, options.loadResourceDetails);
     return network;
   }
 

@@ -190,9 +190,9 @@ export default class DefaultHumanEmulator extends HumanEmulator {
         mouseResultVerifier = listener.didTrigger;
       }
 
-      interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
       await runFn({
         ...interactionStep,
+        mousePosition: [targetPoint.x, targetPoint.y],
         mouseResultVerifier,
       });
 

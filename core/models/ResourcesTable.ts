@@ -294,21 +294,24 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): IResourceSummary[] {
     const { hasResponse, isGetOrDocument } = filters;
 
-    const useResourceBody = hasResponse ? 'responseData is not null' : '1=1';
+    const whereClause = hasResponse ? ' where (responseData is not null or redirectedToUrl is not null)' : '';
     const records = this.db
       .prepare(
         `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders 
-from ${this.tableName} where ${useResourceBody}`,
+from ${this.tableName}${whereClause}`,
       )
       .all();
 
     return records
       .filter(resource => {
-        if (hasResponse && (!resource.responseHeaders || resource.responseHeaders === '{}'))
+        if (hasResponse && (!resource.responseHeaders || resource.responseHeaders === '{}')) {
           return false;
+        }
         if (isGetOrDocument && resource.requestMethod !== 'GET') {
           // if this is a POST of a document, allow it
-          if (resource.type !== 'Document') return false;
+          if (resource.type !== 'Document') {
+            return false;
+          }
         }
         return true;
       })
@@ -371,7 +374,7 @@ from ${this.tableName} where ${useResourceBody}`,
       id: record.id,
       frameId: record.frameId,
       tabId: record.tabId,
-      url: record.responseUrl ?? record.requestUrl,
+      url: record.requestUrl, // only use requestUrl - we need to know redirects
       method: record.requestMethod,
       type: record.type,
       statusCode: record.statusCode,

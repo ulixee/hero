@@ -33,7 +33,7 @@ import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import { IDomChangeRecord } from '../models/DomChangesTable';
+import { IDomChangeRecord, IDomRecording } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
@@ -68,9 +68,9 @@ export default class Tab
   public isClosing = false;
   public isReady: Promise<void>;
   public isDetached = false;
+  public readonly mirrorPage: MirrorPage;
 
   protected readonly logger: IBoundLog;
-  private readonly mirrorPage: MirrorPage;
   private readonly mirrorNetwork: MirrorNetwork;
 
   private collectedElementsPendingHTML = new Set<Resolvable<ICollectedElement>>();
@@ -922,9 +922,10 @@ export default class Tab
     page.on('dom-storage-updated', this.onStorageUpdated.bind(this), true);
 
     // websockets
-    page.on('websocket-handshake', ev => {
-      this.session.resources.registerWebsocketHeaders(this.id, ev);
-    });
+    page.on(
+      'websocket-handshake',
+      this.session.resources.registerWebsocketHeaders.bind(this.session.resources, this.id),
+    );
     page.on('websocket-frame', this.onWebsocketFrame.bind(this));
   }
 

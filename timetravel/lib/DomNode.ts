@@ -49,11 +49,6 @@ export default class DomNode {
     return this.childNodeIds.map(x => this.nodesById[x]).filter(Boolean);
   }
 
-  get previousSiblingsOfTag(): number {
-    if (this.previousSiblingId) return 0;
-    return this.parentNode.children.filter(x => x.tagName === this.tagName).indexOf(this);
-  }
-
   constructor(private nodesById: INodesById, readonly nodeId: number) {}
 
   apply(change: IDomChangeRecord): void {

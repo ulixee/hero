@@ -31,7 +31,7 @@ class DomReplayer {
   constructor() {
     if (window.waitForFramesReady) {
       window.DomActions.onFrameModifiedCallbacks.push((element, change) => {
-        if (element.contentWindow && change.nodeId) {
+        if (element.contentWindow && change.nodeId && element.isConnected) {
           this.frameContentWindows.set(element.contentWindow, {
             frameNodeId: change.nodeId,
             isReady: false,
@@ -116,8 +116,11 @@ class DomReplayer {
 
     // queue for pending events
     this.pendingDelegatedEventsByChildNodeId[frameNodeId] ??= { isReverse, changes: [] };
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId].changes.push(event);
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId].isReverse = isReverse;
+    const pending = this.pendingDelegatedEventsByChildNodeId[frameNodeId];
+
+    if (isReverse !== pending.isReverse) pending.changes.length = 0;
+    pending.changes.push(event);
+    pending.isReverse = isReverse;
 
     this.sendPendingEvents(frameNodeId);
   }
@@ -137,10 +140,9 @@ class DomReplayer {
     }
 
     const events = this.pendingDelegatedEventsByChildNodeId[frameNodeId];
-    if (!events) return;
+    if (!events?.changes?.length) return;
 
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId].changes = [];
-    this.pendingDelegatedEventsByChildNodeId[frameNodeId].isReverse = false;
+    this.pendingDelegatedEventsByChildNodeId[frameNodeId] = { changes: [], isReverse: false };
 
     frame.contentWindow.postMessage(
       { recipientFrameIdPath: `${window.selfFrameIdPath}_${frameNodeId}`, events, action: 'dom' },
@@ -149,11 +151,11 @@ class DomReplayer {
   }
 
   private setChildFrameIsReady(frameWindow: Window): void {
-    if (!this.frameContentWindows.has(frameWindow)) {
+    const entry = this.frameContentWindows.get(frameWindow);
+    if (!entry) {
       debugLog('WARN: child frame activated without frameid');
       return;
     }
-    const entry = this.frameContentWindows.get(frameWindow);
     entry.isReady = true;
 
     this.sendPendingEvents(entry.frameNodeId);
@@ -163,7 +165,12 @@ class DomReplayer {
     if (window.waitForFramesReady !== true || window.isMainFrame || window.parent === window.self) {
       return;
     }
-    window.parent.postMessage({ action: 'ready' }, '*');
+
+    try {
+      window.parent.postMessage({ action: 'ready' }, '*');
+    } catch (e) {
+      debugLog('ERROR: could not send ready message to parent window');
+    }
   }
 
   static load() {
@@ -187,14 +194,15 @@ class DomReplayer {
     });
 
     if (document.readyState === 'complete') {
-      DomReplayer.register();
+      setTimeout(() => DomReplayer.register(), 10);
     } else {
       window.addEventListener('DOMContentLoaded', () => DomReplayer.register(), { once: true });
     }
   }
 }
 
-window.isMainFrame = false;
+// if not defined, set to false
+if (!window.isMainFrame) window.isMainFrame = false;
 
 DomReplayer.load();
 
