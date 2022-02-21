@@ -57,7 +57,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly sessionId: string,
     readonly plugins: ICorePlugins,
     public upstreamProxyUrl?: string,
-    readonly browserRequestMatcher?: IBrowserRequestMatcher,
+    public browserRequestMatcher?: IBrowserRequestMatcher,
   ) {
     super();
     this.logger = log.createChild(module, {
@@ -124,6 +124,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.isClosing = true;
     const errors: Error[] = [];
     this.browserRequestMatcher?.cancelPending();
+    this.browserRequestMatcher = null;
     try {
       this.requestAgent.close();
     } catch (err) {
@@ -136,7 +137,10 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     }
     this.logger.stats('MitmRequestSession.Closed', { parentLogId: logid, errors });
 
-    setImmediate(() => this.emit('close'));
+    setImmediate(() => {
+      this.emit('close');
+      this.removeAllListeners();
+    });
   }
 
   public shouldInterceptRequest(url: string): boolean {

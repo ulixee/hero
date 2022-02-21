@@ -1,6 +1,7 @@
 import Log from '@ulixee/commons/lib/Logger';
 import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import { URL } from 'url';
@@ -98,9 +99,10 @@ export default class FrameEnvironment
 
   protected readonly logger: IBoundLog;
 
+  private events = new EventSubscriber();
+
   private puppetNodeIdsByHeroNodeId: Record<number, string> = {};
   private prefetchedJsPaths: IJsPathResult[];
-  private readonly isDetached: boolean;
   private isClosing = false;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
@@ -127,7 +129,6 @@ export default class FrameEnvironment
       frameId: this.id,
     });
     this.jsPath = new JsPath(this);
-    this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.session.commands.lastId;
     this.navigations = new FrameNavigations(
       this.tab.id,
@@ -188,6 +189,8 @@ export default class FrameEnvironment
       for (const path of this.cleanPaths) {
         Fs.promises.unlink(path).catch(() => null);
       }
+      this.events.close();
+      this.commandRecorder.cleanup();
     } catch (error) {
       if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
         this.logger.error('FrameEnvironment.ClosingError', { error, parentLogId });
@@ -213,10 +216,6 @@ export default class FrameEnvironment
   /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
-    if (this.isDetached) {
-      throw new Error("Sorry, you can't interact with a detached frame");
-    }
-
     // only install interactor on the main frame
     await this.interactor.initialize(this.isMainFrame);
     const timeoutMs = 120e3;
@@ -233,7 +232,7 @@ export default class FrameEnvironment
     };
     try {
       this.interactor.play(interactionGroups, interactionResolvable);
-      this.puppetFrame.once('frame-navigated', cancelOnNavigate);
+      this.events.once(this.puppetFrame, 'frame-navigated', cancelOnNavigate);
       await interactionResolvable.promise;
     } catch (error) {
       if (error === cancelForNavigation) return;
@@ -748,9 +747,14 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private listen(): void {
     const frame = this.puppetFrame;
-    frame.on('frame-navigated', this.onFrameNavigated.bind(this), true);
-    frame.on('frame-requested-navigation', this.onFrameRequestedNavigation.bind(this), true);
-    frame.on('frame-lifecycle', this.onFrameLifecycle.bind(this), true);
+    this.events.on(frame, 'frame-navigated', this.onFrameNavigated.bind(this), true);
+    this.events.on(
+      frame,
+      'frame-requested-navigation',
+      this.onFrameRequestedNavigation.bind(this),
+      true,
+    );
+    this.events.on(frame, 'frame-lifecycle', this.onFrameLifecycle.bind(this), true);
   }
 
   private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {

@@ -1,13 +1,13 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/IResourceType';
-import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import {
   IPuppetNetworkEvents,
   IPuppetResourceRequest,
 } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { URL } from 'url';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
@@ -45,7 +45,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly navigationRequestIdsToLoaderId = new Map<string, string>();
 
   private parentManager?: NetworkManager;
-  private readonly registeredEvents: IRegisteredEventListener[];
+  private readonly events = new EventSubscriber();
   private mockNetworkRequests?: (
     request: Protocol.Fetch.RequestPausedEvent,
   ) => Promise<Protocol.Fetch.FulfillRequestRequest | Protocol.Fetch.ContinueRequestRequest>;
@@ -64,21 +64,28 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.devtools = devtoolsSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
-    this.registeredEvents = eventUtils.addEventListeners(this.devtools, [
-      ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
-      ['Fetch.authRequired', this.onAuthRequired.bind(this)],
+    bindFunctions(this);
+    const session = this.devtools;
+    this.events.on(session, 'Fetch.requestPaused', this.onRequestPaused);
+    this.events.on(session, 'Fetch.authRequired', this.onAuthRequired);
+    this.events.on(session, 'Network.webSocketWillSendHandshakeRequest', this.onWebsocketHandshake);
+    this.events.on(
+      session,
+      'Network.webSocketFrameReceived',
+      this.onWebsocketFrame.bind(this, true),
+    );
+    this.events.on(session, 'Network.webSocketFrameSent', this.onWebsocketFrame.bind(this, false));
 
-      ['Network.webSocketWillSendHandshakeRequest', this.onWebsocketHandshake.bind(this)],
-      ['Network.webSocketFrameReceived', this.onWebsocketFrame.bind(this, true)],
-      ['Network.webSocketFrameSent', this.onWebsocketFrame.bind(this, false)],
-
-      ['Network.requestWillBeSent', this.onNetworkRequestWillBeSent.bind(this)],
-      ['Network.requestWillBeSentExtraInfo', this.onNetworkRequestWillBeSentExtraInfo.bind(this)],
-      ['Network.responseReceived', this.onNetworkResponseReceived.bind(this)],
-      ['Network.loadingFinished', this.onLoadingFinished.bind(this)],
-      ['Network.loadingFailed', this.onLoadingFailed.bind(this)],
-      ['Network.requestServedFromCache', this.onNetworkRequestServedFromCache.bind(this)],
-    ]);
+    this.events.on(session, 'Network.requestWillBeSent', this.onNetworkRequestWillBeSent);
+    this.events.on(
+      session,
+      'Network.requestWillBeSentExtraInfo',
+      this.onNetworkRequestWillBeSentExtraInfo,
+    );
+    this.events.on(session, 'Network.responseReceived', this.onNetworkResponseReceived);
+    this.events.on(session, 'Network.loadingFinished', this.onLoadingFinished);
+    this.events.on(session, 'Network.loadingFailed', this.onLoadingFailed);
+    this.events.on(session, 'Network.requestServedFromCache', this.onNetworkRequestServedFromCache);
   }
 
   public emit<
@@ -141,7 +148,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   public close(): void {
-    eventUtils.removeEventListeners(this.registeredEvents);
+    this.events.close();
     this.cancelPendingEvents('NetworkManager closed');
   }
 
@@ -394,7 +401,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     // give it a small period to add extra info. no network id means it's running outside the normal "requestWillBeSent" flow
     publishing.emitTimeout = setTimeout(
-      this.doEmitResourceRequested.bind(this),
+      this.doEmitResourceRequested,
       200,
       browserRequestId,
     ).unref();

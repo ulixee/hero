@@ -1,7 +1,7 @@
 import * as Util from 'util';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import { bindFunctions, getCallSite } from '@ulixee/commons/lib/utils';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
@@ -52,7 +52,6 @@ import IHeroDefaults from '../interfaces/IHeroDefaults';
 import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnvironment';
-import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
@@ -260,19 +259,6 @@ export default class Hero extends AwaitedEventTarget<{
     options?: { sinceCommandId: number },
   ): Promise<Resource> {
     return await this.activeTab.findResource(filter, options);
-  }
-
-  public detach(tab: Tab, key?: string): FrozenTab {
-    const callsitePath = JSON.stringify(getCallSite(module.filename, scriptInstance.entrypoint));
-
-    const coreTab = getCoreTab(tab);
-    const coreSession = this.#getCoreSessionOrReject();
-
-    const detachedTab = coreSession.then(async session =>
-      session.detachTab(await coreTab, callsitePath, key),
-    );
-
-    return new FrozenTab(this, detachedTab);
   }
 
   public async focusTab(tab: Tab): Promise<void> {

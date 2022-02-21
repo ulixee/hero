@@ -11,10 +11,11 @@ type AsyncFunc = (...args: any[]) => Promise<any>;
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();
   private logger: IBoundLog;
+  private isClosed = false;
 
   constructor(
-    readonly owner: ICommandableTarget,
-    readonly session: Session,
+    private owner: ICommandableTarget,
+    private session: Session,
     readonly tabId: number,
     readonly frameId: number,
     fns: AsyncFunc[],
@@ -31,11 +32,19 @@ export default class CommandRecorder {
     });
   }
 
+  public cleanup(): void {
+    this.isClosed = true;
+    this.session = null;
+    this.owner = null;
+  }
+
   private async runCommandFn<T>(commandFn: AsyncFunc, ...args: any[]): Promise<T> {
+    if (this.isClosed) return;
     if (!this.fnNames.has(commandFn.name))
       throw new Error(`Unsupported function requested ${commandFn.name}`);
 
-    const { session } = this;
+    const { session, owner } = this;
+    if (session === null) return;
     const commands = session.commands;
 
     let tabId = this.tabId;
@@ -91,13 +100,13 @@ export default class CommandRecorder {
     try {
       commands.onStart(commandMeta, Date.now());
 
-      result = await commandFn.call(this.owner, ...args);
+      result = await commandFn.call(owner, ...args);
       return result;
     } catch (err) {
       result = err;
       throw err;
     } finally {
-      const mainFrame = frame ?? (tab ?? this.session.getLastActiveTab())?.mainFrameEnvironment;
+      const mainFrame = frame ?? (tab ?? session.getLastActiveTab())?.mainFrameEnvironment;
       commands.onFinished(commandMeta, result, mainFrame?.navigations?.top?.id);
       this.logger.stats('Command.done', { result, parentLogId: id });
     }

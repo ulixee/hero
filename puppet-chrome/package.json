@@ -3,7 +3,7 @@
   "version": "1.5.4",
   "description": "Puppet driver for chrome",
   "dependencies": {
-    "@ulixee/commons": "1.5.9",
+    "@ulixee/commons": "1.5.10",
     "@ulixee/hero-interfaces": "1.5.4",
     "devtools-protocol": "^0.0.799653"
   }

@@ -33,18 +33,17 @@ import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import { IDomChangeRecord, IDomRecording } from '../models/DomChangesTable';
-import DetachedTabState from './DetachedTabState';
+import { IDomChangeRecord } from '../models/DomChangesTable';
 import { ICommandableTarget } from './CommandRunner';
 import Resources from './Resources';
 import DomStateListener from './DomStateListener';
-import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import GlobalPool, { disableMitm } from './GlobalPool';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import { IMouseEventRecord } from '../models/MouseEventsTable';
@@ -67,7 +66,6 @@ export default class Tab
   public puppetPage: IPuppetPage;
   public isClosing = false;
   public isReady: Promise<void>;
-  public isDetached = false;
   public readonly mirrorPage: MirrorPage;
 
   protected readonly logger: IBoundLog;
@@ -75,7 +73,8 @@ export default class Tab
 
   private collectedElementsPendingHTML = new Set<Resolvable<ICollectedElement>>();
 
-  private readonly commandRecorder: CommandRecorder;
+  private events = new EventSubscriber();
+  private commandRecorder: CommandRecorder;
   private readonly createdAtCommandId: number;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private lastFileChooserEvent: {
@@ -130,7 +129,6 @@ export default class Tab
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
-    isDetached: boolean,
     parentTabId?: number,
     windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
@@ -145,7 +143,6 @@ export default class Tab
     this.parentTabId = parentTabId;
     this.createdAtCommandId = session.commands.lastId;
     this.puppetPage = puppetPage;
-    this.isDetached = isDetached;
 
     for (const puppetFrame of puppetPage.frames) {
       const frame = new FrameEnvironment(this, puppetFrame);
@@ -327,7 +324,12 @@ export default class Tab
         errors.push(error);
       }
     }
+    this.events.close();
+    this.commandRecorder = null;
     this.emit('close');
+    // clean up listener memory
+    this.removeAllListeners();
+
     this.logger.stats('Tab.Closed', { parentLogId, errors });
   }
 
@@ -591,21 +593,6 @@ export default class Tab
     return this.puppetPage.screenshot(options);
   }
 
-  public async recordScreen(
-    options: IScreenRecordingOptions & {
-      includeDuplicates?: boolean;
-      includeWhiteScreens?: boolean;
-    } = {},
-  ): Promise<void> {
-    this.session.db.screenshots.storeDuplicates = options.includeDuplicates ?? false;
-    this.session.db.screenshots.includeWhiteScreens = options.includeWhiteScreens ?? false;
-    await this.puppetPage.startScreenRecording(options);
-  }
-
-  public async stopRecording(): Promise<void> {
-    await this.puppetPage.stopScreenRecording();
-  }
-
   public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
     const resolvable = createPromise();
     this.mainFrameEnvironment.interactor.play(
@@ -749,7 +736,7 @@ export default class Tab
   public addDomStateListener(id: string, options: IDomStateListenArgs): DomStateListener {
     const listener = new DomStateListener(id, options, this);
     this.domStateListenersByJsPathId[id] = listener;
-    listener.once('resolved', () => delete this.domStateListenersByJsPathId[id]);
+    this.events.once(listener, 'resolved', () => delete this.domStateListenersByJsPathId[id]);
 
     this.emit('wait-for-domstate', { listener });
 
@@ -771,35 +758,6 @@ export default class Tab
     this.session.db.flush();
 
     return this.session.db.domChanges.getFrameChanges(frameId ?? this.mainFrameId, sinceCommandId);
-  }
-
-  public async createDetachedState(callsite: string, key?: string): Promise<DetachedTabState> {
-    await this.mainFrameEnvironment.waitForNavigationLoader();
-    // find last page load
-    const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
-    const domChanges = await this.getDomChanges(
-      this.mainFrameId,
-      lastLoadedNavigation.startCommandId - 1,
-    );
-    this.logger.info('DetachingTab', {
-      url: lastLoadedNavigation.finalUrl,
-      domChangeIndices:
-        domChanges.length > 0
-          ? [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex]
-          : [],
-      domChanges: domChanges.length,
-    });
-    return new DetachedTabState(
-      this.session.db,
-      this.id,
-      new Set([lastLoadedNavigation.frameId]),
-      this.session,
-      this.session.commands.lastId,
-      lastLoadedNavigation,
-      domChanges,
-      callsite,
-      key,
-    );
   }
 
   public registerFlowHandler(
@@ -846,7 +804,7 @@ export default class Tab
       if (type === 'dom-state') {
         const id = JSON.stringify(jsPath);
         const domStateListener = this.addDomStateListener(id, options);
-        domStateListener.on('updated', listener.listenFn);
+        this.events.on(domStateListener, 'updated', listener.listenFn);
       }
     } else {
       this.on(type as any, listener.listenFn);
@@ -886,47 +844,52 @@ export default class Tab
       sessionId: this.sessionId,
       url: this.url,
       createdAtCommandId: this.createdAtCommandId,
-      isDetached: this.isDetached,
     } as ISessionMeta; // must adhere to session meta spec
   }
 
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
-    if (!this.isDetached && this.session.options?.blockedResourceTypes) {
+    if (this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
   }
 
   private listen(): void {
     const page = this.puppetPage;
-    this.on('resource', this.onResource.bind(this));
+    this.events.on(this, 'resources', this.onResource.bind(this));
 
     this.close = this.close.bind(this);
-    page.once('close', this.close);
-    page.on('page-error', this.onPageError.bind(this), true);
-    page.on('crashed', this.onTargetCrashed.bind(this));
-    page.on('console', this.onConsole.bind(this), true);
-    page.on('frame-created', this.onFrameCreated.bind(this), true);
-    page.on('page-callback-triggered', this.onPageCallback.bind(this));
-    page.on('dialog-opening', this.onDialogOpening.bind(this));
-    page.on('filechooser', this.onFileChooser.bind(this));
-    page.on('screenshot', this.onScreenshot.bind(this));
+    this.events.once(page, 'close', this.close);
+    this.events.on(page, 'page-error', this.onPageError.bind(this), true);
+    this.events.on(page, 'crashed', this.onTargetCrashed.bind(this));
+    this.events.on(page, 'console', this.onConsole.bind(this), true);
+    this.events.on(page, 'frame-created', this.onFrameCreated.bind(this), true);
+    this.events.on(page, 'page-callback-triggered', this.onPageCallback.bind(this));
+    this.events.on(page, 'dialog-opening', this.onDialogOpening.bind(this));
+    this.events.on(page, 'filechooser', this.onFileChooser.bind(this));
+    this.events.on(page, 'screenshot', this.onScreenshot.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
-    page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
-    page.on('resource-was-requested', this.onResourceWasRequested.bind(this), true);
-    page.on('resource-loaded', this.onResourceLoaded.bind(this), true);
-    page.on('resource-failed', this.onResourceFailed.bind(this), true);
-    page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
+    this.events.on(
+      page,
+      'resource-will-be-requested',
+      this.onResourceWillBeRequested.bind(this),
+      true,
+    );
+    this.events.on(page, 'resource-was-requested', this.onResourceWasRequested.bind(this), true);
+    this.events.on(page, 'resource-loaded', this.onResourceLoaded.bind(this), true);
+    this.events.on(page, 'resource-failed', this.onResourceFailed.bind(this), true);
+    this.events.on(page, 'navigation-response', this.onNavigationResourceResponse.bind(this), true);
 
-    page.on('dom-storage-updated', this.onStorageUpdated.bind(this), true);
+    this.events.on(page, 'dom-storage-updated', this.onStorageUpdated.bind(this), true);
 
     // websockets
-    page.on(
+    this.events.on(
+      page,
       'websocket-handshake',
       this.session.resources.registerWebsocketHeaders.bind(this.session.resources, this.id),
     );
-    page.on('websocket-frame', this.onWebsocketFrame.bind(this));
+    this.events.on(page, 'websocket-frame', this.onWebsocketFrame.bind(this));
   }
 
   private onPageCallback(event: IPuppetPageEvents['page-callback-triggered']): void {
@@ -1245,11 +1208,10 @@ export default class Tab
   public static create(
     session: Session,
     puppetPage: IPuppetPage,
-    isDetached?: boolean,
     parentTabId?: number,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, isDetached, parentTabId, openParams);
+    const tab = new Tab(session, puppetPage, parentTabId, openParams);
     tab.logger.info('Tab.created', {
       parentTab: parentTabId,
       openParams,

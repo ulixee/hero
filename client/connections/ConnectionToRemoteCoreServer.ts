@@ -14,6 +14,7 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
   constructor(options: IConnectionToCoreOptions) {
     if (!options.host) throw new Error('A remote connection to core needs a host parameter!');
     super(options);
+    this.onMessageRaw = this.onMessageRaw.bind(this);
   }
 
   protected async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
@@ -45,6 +46,7 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
       try {
         webSocket.off('close', this.onConnectionTerminated);
         webSocket.off('error', this.internalDisconnect);
+        webSocket.off('message', this.onMessageRaw);
         webSocket.terminate();
       } catch (_) {
         // ignore errors terminating
@@ -63,14 +65,16 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
         const webSocket = await this.getWebsocket();
         webSocket.once('close', this.onConnectionTerminated);
         webSocket.once('error', this.internalDisconnect);
-        webSocket.on('message', message => {
-          const payload = TypeSerializer.parse(message.toString(), 'REMOTE CORE');
-          this.onMessage(payload);
-        });
+        webSocket.on('message', this.onMessageRaw);
       } catch (error) {
         return error;
       }
     }
+  }
+
+  private onMessageRaw(message: WebSocket.Data): void {
+    const payload = TypeSerializer.parse(message.toString(), 'REMOTE CORE');
+    this.onMessage(payload);
   }
 
   private async getWebsocket(throwIfError = true): Promise<WebSocket> {

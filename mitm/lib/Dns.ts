@@ -12,7 +12,7 @@ export class Dns {
   public socket: DnsOverTlsSocket;
   private readonly dnsSettings: IDnsSettings = {};
 
-  constructor(readonly requestSession?: RequestSession) {
+  constructor(private requestSession?: RequestSession) {
     requestSession?.plugins?.onDnsConfiguration(this.dnsSettings);
   }
 
@@ -54,6 +54,8 @@ export class Dns {
 
   public close(): void {
     this.socket?.close();
+    this.socket = null;
+    this.requestSession = null;
   }
 
   private async systemLookup(host: string): Promise<IDnsEntry> {

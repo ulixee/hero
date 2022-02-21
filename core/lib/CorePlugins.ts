@@ -53,9 +53,9 @@ interface IDependencyMap {
 export default class CorePlugins implements ICorePlugins {
   public static corePluginClassesById: { [id: string]: ICorePluginClass } = {};
 
-  public readonly browserEngine: IBrowserEngine;
-  public readonly browserEmulator: IBrowserEmulator;
-  public readonly humanEmulator: IHumanEmulator;
+  public browserEngine: IBrowserEngine;
+  public browserEmulator: IBrowserEmulator;
+  public humanEmulator: IHumanEmulator;
   public readonly instances: ICorePlugin[] = [];
 
   public get corePlugins(): ICorePlugin[] {
@@ -64,10 +64,10 @@ export default class CorePlugins implements ICorePlugins {
     });
   }
 
-  private readonly instanceById: { [id: string]: ICorePlugin } = {};
+  private instanceById: { [id: string]: ICorePlugin } = {};
   private readonly createOptions: ICorePluginCreateOptions;
   private readonly logger: IBoundLog;
-  private readonly getSessionSummary: () => ISessionSummary;
+  private getSessionSummary: () => ISessionSummary;
 
   constructor(options: IOptionsCreate, logger: IBoundLog) {
     const {
@@ -133,6 +133,14 @@ export default class CorePlugins implements ICorePlugins {
     }
   }
 
+  public cleanup(): void {
+    this.getSessionSummary = () => null;
+    this.instanceById = {};
+    this.instances.length = 0;
+    this.browserEngine = null;
+    this.humanEmulator = null;
+  }
+
   // BROWSER EMULATORS
 
   public configure(options: IBrowserEmulatorConfig): void {
@@ -168,7 +176,7 @@ export default class CorePlugins implements ICorePlugins {
         .map(p => p.onHttpAgentInitialized(agent)),
     );
   }
-  
+
   public onBrowserLaunchConfiguration(launchArguments: string[]): void {
     this.instances
       .filter(p => p.onBrowserLaunchConfiguration)

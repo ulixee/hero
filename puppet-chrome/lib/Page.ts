@@ -16,10 +16,10 @@
  */
 import Protocol from 'devtools-protocol';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
-import * as eventUtils from '@ulixee/commons/lib/eventUtils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { assert, createPromise } from '@ulixee/commons/lib/utils';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { DevtoolsSession } from './DevtoolsSession';
@@ -31,9 +31,9 @@ import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
 import ConsoleMessage from './ConsoleMessage';
 import Frame from './Frame';
-import IScreenRecordingOptions from '@ulixee/hero-interfaces/IScreenRecordingOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { DomStorageTracker } from './DomStorageTracker';
+import { IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
@@ -44,7 +44,6 @@ import Size = Protocol.SystemInfo.Size;
 import Rect = Protocol.DOM.Rect;
 import SetDeviceMetricsOverrideRequest = Protocol.Emulation.SetDeviceMetricsOverrideRequest;
 import Viewport = Protocol.Page.Viewport;
-import { IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -86,8 +85,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   protected readonly logger: IBoundLog;
   private isClosing = false;
   private closePromise = createPromise();
-  private readonly registeredEvents: IRegisteredEventListener[];
-  private screencastOptions: IScreenRecordingOptions & { lastImage?: string };
+  private readonly events = new EventSubscriber();
 
   constructor(
     devtoolsSession: DevtoolsSession,
@@ -151,16 +149,19 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
     this.devtoolsSession.once('disconnected', this.emit.bind(this, 'close'));
 
-    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
-      ['Inspector.targetCrashed', this.onTargetCrashed.bind(this)],
-      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
-      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
-      ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
-      ['Page.javascriptDialogOpening', this.onJavascriptDialogOpening.bind(this)],
-      ['Page.fileChooserOpened', this.onFileChooserOpened.bind(this)],
-      ['Page.windowOpen', this.onWindowOpen.bind(this)],
-      ['Page.screencastFrame', this.onScreencastFrame.bind(this)],
-    ]);
+    const session = this.devtoolsSession;
+    this.events.on(session, 'Inspector.targetCrashed', this.onTargetCrashed.bind(this));
+    this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this));
+    this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
+    this.events.on(session, 'Target.attachedToTarget', this.onAttachedToTarget.bind(this));
+    this.events.on(
+      session,
+      'Page.javascriptDialogOpening',
+      this.onJavascriptDialogOpening.bind(this),
+    );
+    this.events.on(session, 'Page.fileChooserOpened', this.onFileChooserOpened.bind(this));
+    this.events.on(session, 'Page.windowOpen', this.onWindowOpen.bind(this));
+    this.events.on(session, 'Page.screencastFrame', this.onScreencastFrame.bind(this));
 
     this.isReady = this.initialize().catch(error => {
       this.logger.error('Page.initializationError', {
@@ -330,28 +331,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return Buffer.from(result.data, 'base64');
   }
 
-  async startScreenRecording(options: IScreenRecordingOptions = {}): Promise<void> {
-    if (this.screencastOptions) return;
-
-    options.format ??= 'jpeg';
-    options.jpegQuality ??= 30;
-    this.screencastOptions = options;
-    await this.devtoolsSession.send('Page.startScreencast', {
-      format: options.format,
-      quality: options.jpegQuality,
-      everyNthFrame: 1,
-      maxHeight: options.imageSize?.height,
-      maxWidth: options.imageSize?.width,
-    });
-  }
-
-  async stopScreenRecording(): Promise<void> {
-    if (this.screencastOptions) {
-      await this.devtoolsSession.send('Page.stopScreencast');
-      this.screencastOptions = null;
-    }
-  }
-
   onWorkerAttached(
     devtoolsSession: DevtoolsSession,
     targetInfo: TargetInfo,
@@ -370,9 +349,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     if (worker.type !== 'shared_worker') this.workersById.set(targetId, worker);
     this.browserContext.onWorkerAttached(worker);
 
-    worker.on('console', this.emit.bind(this, 'console'));
-    worker.on('page-error', this.emit.bind(this, 'page-error'));
-    worker.on('close', () => this.workersById.delete(targetId));
+    this.events.on(worker, 'console', this.emit.bind(this, 'console'));
+    this.events.on(worker, 'page-error', this.emit.bind(this, 'page-error'));
+    this.events.on(worker, 'close', () => this.workersById.delete(targetId));
 
     this.emit('worker', { worker });
     return worker.isReady;
@@ -420,7 +399,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.framesManager.close(closeError);
       this.networkManager.close();
       this.domStorageTracker.close();
-      eventUtils.removeEventListeners(this.registeredEvents);
+      this.events.close();
       this.cancelPendingEvents('Page closed', ['close']);
       for (const worker of this.workersById.values()) {
         worker.close();
@@ -432,6 +411,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     } finally {
       this.closePromise.resolve();
       this.emit('close');
+      this.removeAllListeners();
     }
   }
 

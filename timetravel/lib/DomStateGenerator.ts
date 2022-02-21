@@ -281,6 +281,10 @@ export default class DomStateGenerator {
     }
   }
 
+  private clearContext(): void {
+    this.browserContext = null;
+  }
+
   private async createMirrorPageIfNeeded(session: IDomStateSession): Promise<void> {
     if (session.mirrorPage?.isReady) {
       await session.mirrorPage.replaceDomRecording(session.domRecording);
@@ -299,7 +303,7 @@ export default class DomStateGenerator {
 
     const fromSessionId = this.emulateSessionId ?? session.sessionId;
     this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
-      .then(context => context.once('close', () => (this.browserContext = null)))
+      .then(context => context.once('close', this.clearContext.bind(this)))
       .catch(err => err);
 
     const context = await this.browserContext;

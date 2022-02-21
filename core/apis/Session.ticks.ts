@@ -31,7 +31,6 @@ export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksR
   createCommandTicks(state, commands);
   createInteractionTicks(state, interactions);
   createPaintTicks(state, domChangesByTabId);
-  copyDetachedPaintEvents(state, commands);
 
   // now sort all ticks and assign events
   sortTicks(state);
@@ -141,32 +140,6 @@ function createPaintTicks(
       }
       idx += 1;
     }
-  }
-}
-
-function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithResult[]): void {
-  for (const command of commands) {
-    if (command.name !== 'detachTab' || command.resultType !== 'Object') continue;
-
-    const { result } = command;
-    if (!result) continue;
-
-    let parsedResult = result;
-    if (typeof result === 'string') {
-      parsedResult = JSON.parse(result);
-    }
-
-    const { id, parentTabId } = parsedResult.detachedTab;
-    const { domChangeRange, frameNavigationId, url } = parsedResult.detachedState;
-
-    const tabDetails = state.tabsById[id];
-
-    tabDetails.detachedPaintEvents = {
-      ...domChangeRange,
-      frameNavigationId,
-      url,
-      sourceTabId: parentTabId,
-    };
   }
 }
 

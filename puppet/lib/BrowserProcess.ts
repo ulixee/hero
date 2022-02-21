@@ -127,6 +127,7 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     }
 
     this.emit('close');
+    this.removeAllListeners();
     this.cleanDataDir();
   }
 

@@ -4,6 +4,7 @@ import { IDomRecording } from '@ulixee/hero-core/models/DomChangesTable';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import MirrorPage from '../lib/MirrorPage';
 import MirrorNetwork from '../lib/MirrorNetwork';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 
 export default class TabPlaybackController {
   public get id(): number {
@@ -58,6 +59,7 @@ export default class TabPlaybackController {
   public isPlaying = false;
   public currentTickIndex = -1;
   public readonly mirrorPage: MirrorPage;
+  private events = new EventSubscriber();
 
   // put in placeholder
   private paintEventsLoadedIdx = -1;
@@ -70,12 +72,6 @@ export default class TabPlaybackController {
   ) {
     const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
     this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
-    this.mirrorPage.once('close', () => {
-      this.paintEventsLoadedIdx = -1;
-      this.isPlaying = false;
-      this.currentTickIndex = -1;
-      this.currentTimelineOffsetPct = 0;
-    });
   }
 
   public updateTabDetails(tabDetails: ITabDetails): Promise<void> {
@@ -97,6 +93,12 @@ export default class TabPlaybackController {
     onPage?: (page: IPuppetPage) => Promise<void>,
   ): Promise<void> {
     await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
+    this.events.once(this.mirrorPage, 'close', () => {
+      this.paintEventsLoadedIdx = -1;
+      this.isPlaying = false;
+      this.currentTickIndex = -1;
+      this.currentTimelineOffsetPct = 0;
+    });
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -132,6 +134,7 @@ export default class TabPlaybackController {
     // go ahead and say this is closed
     this.mirrorPage.emit('close');
     await this.mirrorPage.close();
+    this.events.close();
   }
 
   public async setTimelineOffset(timelineOffset: number): Promise<void> {

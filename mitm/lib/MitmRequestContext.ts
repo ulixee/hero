@@ -5,6 +5,7 @@ import IResourceRequest from '@ulixee/hero-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
 import MitmSocket from '@ulixee/hero-mitm-socket';
 import OriginType, { isOriginType } from '@ulixee/hero-interfaces/OriginType';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import IResourceResponse from '@ulixee/hero-interfaces/IResourceResponse';
 import { IPuppetResourceRequest } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
@@ -101,6 +102,7 @@ export default class MitmRequestContext {
         state.set(stateStep, new Date());
         requestSession.emit('resource-state', { context: ctx, state: stateStep });
       },
+      events: new EventSubscriber(),
     };
 
     if (protocol === 'ws') {
@@ -120,12 +122,13 @@ export default class MitmRequestContext {
       `${parentContext.url.protocol}//${requestHeaders[':authority']}${requestHeaders[':path']}`,
     );
     const state = new Map<ResourceState, Date>();
+    const { requestSession } = parentContext;
     const ctx = {
       id: (this.contextIdCounter += 1),
       url,
       method: requestHeaders[':method'],
       isServerHttp2: parentContext.isServerHttp2,
-      requestSession: parentContext.requestSession,
+      requestSession,
       protocol: parentContext.protocol,
       remoteAddress: parentContext.remoteAddress,
       localAddress: parentContext.localAddress,
@@ -149,8 +152,9 @@ export default class MitmRequestContext {
       stateChanges: state,
       setState(stateStep: ResourceState) {
         state.set(stateStep, new Date());
-        parentContext.requestSession.emit('resource-state', { context: ctx, state: stateStep });
+        requestSession.emit('resource-state', { context: ctx, state: stateStep });
       },
+      events: new EventSubscriber(),
     } as IMitmRequestContext;
 
     ctx.cacheHandler = new CacheHandler(parentContext.cacheHandler.responseCache, ctx);

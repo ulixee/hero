@@ -9,6 +9,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import * as Os from 'os';
 import * as Path from 'path';
 import { createPromise } from '@ulixee/commons/lib/utils';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import CertificateGenerator from '@ulixee/hero-mitm-socket/lib/CertificateGenerator';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
@@ -46,6 +47,7 @@ export default class MitmProxy {
     return (this.httpsServer.address() as net.AddressInfo)?.port;
   }
 
+  private http2Sessions = new Set<http2.ServerHttp2Session>();
   // used if this is a one-off proxy
   private isolatedProxyForSessionId?: string;
 
@@ -60,6 +62,7 @@ export default class MitmProxy {
 
   private readonly http2Server: http2.Http2SecureServer;
   private readonly serverConnects = new Set<net.Socket>();
+  private readonly events = new EventSubscriber();
 
   private isClosing = false;
 
@@ -71,21 +74,21 @@ export default class MitmProxy {
     this.options = options;
 
     this.httpServer = http.createServer({ insecureHTTPParser: true });
-    this.httpServer.on('connect', this.onHttpConnect.bind(this));
-    this.httpServer.on('clientError', this.onClientError.bind(this, false));
-    this.httpServer.on('request', this.onHttpRequest.bind(this, false));
-    this.httpServer.on('upgrade', this.onHttpUpgrade.bind(this, false));
+    this.events.on(this.httpServer, 'connect', this.onHttpConnect.bind(this));
+    this.events.on(this.httpServer, 'clientError', this.onClientError.bind(this, false));
+    this.events.on(this.httpServer, 'request', this.onHttpRequest.bind(this, false));
+    this.events.on(this.httpServer, 'upgrade', this.onHttpUpgrade.bind(this, false));
 
     this.httpsServer = https.createServer({ insecureHTTPParser: true });
-    this.httpsServer.on('connect', this.onHttpConnect.bind(this));
-    this.httpsServer.on('tlsClientError', this.onClientError.bind(this, true));
-    this.httpsServer.on('request', this.onHttpRequest.bind(this, true));
-    this.httpsServer.on('upgrade', this.onHttpUpgrade.bind(this, true));
+    this.events.on(this.httpsServer, 'connect', this.onHttpConnect.bind(this));
+    this.events.on(this.httpsServer, 'request', this.onHttpRequest.bind(this, true));
+    this.events.on(this.httpsServer, 'upgrade', this.onHttpUpgrade.bind(this, true));
 
     this.http2Server = http2.createSecureServer();
-    this.http2Server.on('sessionError', this.onClientError.bind(this, true));
-    this.http2Server.on('request', this.onHttpRequest.bind(this, true));
-    this.http2Server.on('upgrade', this.onHttpUpgrade.bind(this, true));
+    this.events.on(this.http2Server, 'session', this.onHttp2Session.bind(this));
+    this.events.on(this.http2Server, 'sessionError', this.onClientError.bind(this, true));
+    this.events.on(this.http2Server, 'request', this.onHttpRequest.bind(this, true));
+    this.events.on(this.http2Server, 'upgrade', this.onHttpUpgrade.bind(this, true));
   }
 
   public close(): void {
@@ -104,6 +107,7 @@ export default class MitmProxy {
         errors.push(err);
       }
     }
+    this.sessionById = {};
 
     for (const connect of this.serverConnects) {
       destroyConnection(connect);
@@ -116,6 +120,10 @@ export default class MitmProxy {
     }
 
     try {
+      for (const session of this.http2Sessions) {
+        session.destroy();
+      }
+      this.http2Sessions.clear();
       this.http2Server.close();
     } catch (err) {
       errors.push(err);
@@ -125,6 +133,7 @@ export default class MitmProxy {
     } catch (err) {
       errors.push(err);
     }
+    this.events.close();
 
     log.stats('MitmProxy.Closed', {
       sessionId: this.isolatedProxyForSessionId,
@@ -163,8 +172,9 @@ export default class MitmProxy {
     await startServer(this.http2Server);
 
     // don't listen for errors until server already started
-    this.httpServer.on('error', this.onGenericHttpError.bind(this, false));
-    this.http2Server.on('error', this.onGenericHttpError.bind(this, true));
+    this.events.on(this.httpServer, 'error', this.onGenericHttpError.bind(this, false));
+    this.events.on(this.httpsServer, 'error', this.onGenericHttpError.bind(this, true));
+    this.events.on(this.http2Server, 'error', this.onGenericHttpError.bind(this, true));
 
     return this;
   }
@@ -367,6 +377,11 @@ export default class MitmProxy {
     socket.pipe(proxyConnection).pipe(socket);
     if (head.length) socket.emit('data', head);
     socket.resume();
+  }
+
+  private onHttp2Session(session: http2.ServerHttp2Session): void {
+    this.http2Sessions.add(session);
+    this.events.once(session, 'close', () => this.http2Sessions.delete(session));
   }
 
   /////// ERROR HANDLING ///////////////////////////////////////////////////////

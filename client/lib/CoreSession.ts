@@ -4,7 +4,6 @@ import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionO
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as readline from 'readline';
 import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -24,7 +23,6 @@ import Hero from './Hero';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
-  public frozenTabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
   public commandQueue: CoreCommandQueue;
@@ -127,27 +125,6 @@ export default class CoreSession implements IJsPathEventTarget {
 
   public removeTab(tab: CoreTab): void {
     this.tabsById.delete(tab.tabId);
-  }
-
-  public async detachTab(
-    tab: CoreTab,
-    callsitePath: string,
-    key?: string,
-  ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
-    const { detachedTab, prefetchedJsPaths } = await this.commandQueue.run<{
-      detachedTab: ISessionMeta;
-      prefetchedJsPaths: IJsPathResult[];
-    }>('Session.detachTab', tab.tabId, callsitePath, key);
-    const coreTab = new CoreTab(
-      { ...detachedTab, sessionName: this.sessionName },
-      this.connectionToCore,
-      this,
-    );
-    this.frozenTabsById.set(detachedTab.tabId, coreTab);
-    return {
-      coreTab,
-      prefetchedJsPaths,
-    };
   }
 
   // START OF PRIVATE APIS FOR DATABOX /////////////////////////////////////////////////////////////
@@ -258,9 +235,6 @@ export default class CoreSession implements IJsPathEventTarget {
   private async doClose(force: boolean): Promise<{ didKeepAlive: boolean; message: string }> {
     await this.commandQueue.flush();
     for (const tab of this.tabsById.values()) {
-      await tab.flush();
-    }
-    for (const tab of this.frozenTabsById.values()) {
       await tab.flush();
     }
     return await this.commandQueue.runOutOfBand('Session.close', force);

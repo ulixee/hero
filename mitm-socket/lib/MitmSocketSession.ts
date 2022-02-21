@@ -19,7 +19,7 @@ export default class MitmSocketSession extends BaseIpcHandler {
     const id = socket.id;
     this.socketsById.set(id, socket);
 
-    socket.on('close', () => this.socketsById.delete(id));
+    socket.once('close', () => this.socketsById.delete(id));
 
     await this.waitForConnected;
 

@@ -19,7 +19,6 @@ export default function sessionTabsApi(args: ISessionTabsArgs): ISessionTabsResu
     const startNavigation = frameNavigations.find(x => x.frameId === mainFrame.id);
     result.tabs.push({
       id: tab.id,
-      detachedFromTabId: tab.detachedAtCommandId ? tab.parentId : null,
       width: tab.viewportWidth,
       height: tab.viewportHeight,
       startUrl: startNavigation.finalUrl ?? startNavigation.requestedUrl,
@@ -53,7 +52,6 @@ export interface ISessionTabsResult {
 export interface ISessionTab {
   id: number;
   createdTime: number;
-  detachedFromTabId?: number;
   startUrl: string;
   width: number;
   height: number;

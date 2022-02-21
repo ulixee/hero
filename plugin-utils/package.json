@@ -5,7 +5,7 @@
   "scripts": {},
   "dependencies": {
     "@ulixee/chrome-app": "1.0.2",
-    "@ulixee/commons": "1.5.9",
+    "@ulixee/commons": "1.5.10",
     "@ulixee/hero-interfaces": "1.5.4",
     "progress": "^2.0.3",
     "tar": "^6.1.11"

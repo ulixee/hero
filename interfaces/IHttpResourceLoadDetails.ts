@@ -2,6 +2,7 @@ import { URL } from 'url';
 import IResourceType from './IResourceType';
 import IResourceHeaders from './IResourceHeaders';
 import OriginType from './OriginType';
+import { IEventSubscriber } from '@ulixee/commons/interfaces/IRegisteredEventListener';
 
 export default interface IHttpResourceLoadDetails {
   id: number;
@@ -45,4 +46,5 @@ export default interface IHttpResourceLoadDetails {
   browserLoadFailure?: string;
   browserBlockedReason?: string;
   browserCanceled?: boolean;
+  events: IEventSubscriber;
 }
