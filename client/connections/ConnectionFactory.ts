@@ -1,5 +1,6 @@
 import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import UlixeeConfig from '@ulixee/commons/config';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
 import ConnectionToRemoteCoreServer from './ConnectionToRemoteCoreServer';
@@ -24,6 +25,13 @@ export default class ConnectionFactory {
     } else if (options.host) {
       connection = new ConnectionToRemoteCoreServer(options);
     } else {
+      const serverHost = UlixeeConfig.load()?.serverHost ?? UlixeeConfig.global.serverHost;
+      if (serverHost) {
+        connection = new ConnectionToRemoteCoreServer({ ...options, host: serverHost });
+      }
+    }
+
+    if (!connection) {
       throw new Error(
         'Hero Core could not be found locally' +
           '\n' +
