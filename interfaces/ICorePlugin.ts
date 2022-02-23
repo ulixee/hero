@@ -120,7 +120,7 @@ export interface IBrowserEmulator extends ICorePlugin {
 export interface IBrowserEmulatorMethods {
   configure?(options: IBrowserEmulatorConfig, sessionSummary?: ISessionSummary): void;
 
-  onBrowserLaunchConfiguration?(launchArguments: string[]): void;
+  onBrowserLaunchConfiguration?(launchArguments: string[]): Promise<void> | void;
 
   onDnsConfiguration?(settings: IDnsSettings, sessionSummary?: ISessionSummary): void;
   onTcpConfiguration?(settings: ITcpSettings, sessionSummary?: ISessionSummary): void;
