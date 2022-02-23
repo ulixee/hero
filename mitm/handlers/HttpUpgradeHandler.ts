@@ -26,7 +26,10 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
   public async onUpgrade(): Promise<void> {
     try {
       const proxyToServerRequest = await this.createProxyToServerRequest();
-      if (!proxyToServerRequest) return;
+      if (!proxyToServerRequest) {
+        this.cleanup();
+        return;
+      }
 
       this.context.events.once(
         proxyToServerRequest,

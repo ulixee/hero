@@ -37,6 +37,7 @@ export default class HeadersHandler {
     const fetchSite = this.getRequestHeader<string>(ctx, SecFetchSite);
     const fetchMode = this.getRequestHeader<string>(ctx, SecFetchMode);
     const hasUserActivity = this.getRequestHeader<string>(ctx, SecFetchUser);
+    const origin = this.getRequestHeader<string>(ctx, 'origin');
     const isDocumentNavigation = fetchMode === 'navigate' && fetchDest === 'document';
 
     // fill in known details
@@ -50,11 +51,19 @@ export default class HeadersHandler {
 
     session.browserRequestMatcher.determineResourceType(ctx);
 
-    if (session.bypassResourceRegistrationForUrl === ctx.url.href) return;
+    if (
+      session.bypassResourceRegistrationForHost?.host === ctx.url.host ||
+      // can't register extension content in page
+      origin?.startsWith('chrome-extension://')
+    ) {
+      return;
+    }
 
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
-    } else if (!ctx.resourceType || ctx.resourceType === 'Fetch') {
+    }
+
+    if (!ctx.resourceType || ctx.resourceType === 'Fetch') {
       // if fetch, we need to wait for the browser request so we can see if we should use xhr order or fetch order
       await ctx.browserHasRequested;
     }
