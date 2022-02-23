@@ -50,7 +50,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
-  public bypassResourceRegistrationForUrl: string;
+  public bypassResourceRegistrationForHost: URL;
 
   private readonly dns: Dns;
 
