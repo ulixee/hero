@@ -3,4 +3,6 @@ export default interface IWindowOffset {
   innerHeight: number;
   scrollX: number;
   scrollY: number;
+  scrollHeight: number;
+  scrollWidth: number;
 }

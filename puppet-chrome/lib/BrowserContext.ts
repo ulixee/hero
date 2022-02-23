@@ -196,7 +196,7 @@ export class BrowserContext
 
   onWorkerAttached(worker: IPuppetWorker): void {
     this.workersById.set(worker.id, worker);
-    worker.on('close', () => this.workersById.delete(worker.id));
+    this.events.once(worker,'close', () => this.workersById.delete(worker.id));
     this.emit('worker', { worker });
   }
 

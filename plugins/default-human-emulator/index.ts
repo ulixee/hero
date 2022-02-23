@@ -25,8 +25,11 @@ export default class DefaultHumanEmulator extends HumanEmulator {
   public static overshootRadius = 5;
   public static overshootThreshold = 250;
   public static boxPaddingPercent = { width: 33, height: 33 };
-  public static minimumMoveSteps = 5;
-  public static minimumScrollSteps = 10;
+  // NOTE: max steps are not total max if you overshoot. It's max per section
+  public static minMoveVectorPoints = 5;
+  public static maxMoveVectorPoints = 50;
+  public static minScrollVectorPoints = 10;
+  public static maxScrollVectorPoints = 25;
   public static maxScrollIncrement = 500;
   public static maxScrollDelayMillis = 15;
   public static maxDelayBetweenInteractions = 200;
@@ -242,7 +245,8 @@ export default class DefaultHumanEmulator extends HumanEmulator {
       mousePosition,
       targetPoint,
       targetWidth,
-      DefaultHumanEmulator.minimumMoveSteps,
+      DefaultHumanEmulator.minMoveVectorPoints,
+      DefaultHumanEmulator.maxMoveVectorPoints,
       {
         threshold: DefaultHumanEmulator.overshootThreshold,
         radius: DefaultHumanEmulator.overshootRadius,
@@ -346,11 +350,14 @@ export default class DefaultHumanEmulator extends HumanEmulator {
     if (!shouldScrollY && !shouldScrollX) return [];
 
     let lastPoint: IPoint = currentScrollOffset;
+    const maxVectorPoints = helper.doesBrowserAnimateScrolling ? 2 : DefaultHumanEmulator.maxScrollVectorPoints;
+
     const scrollVector = generateVector(
       currentScrollOffset,
       scrollToPoint,
       200,
-      DefaultHumanEmulator.minimumScrollSteps,
+      DefaultHumanEmulator.minScrollVectorPoints,
+      maxVectorPoints,
       {
         threshold: DefaultHumanEmulator.overshootThreshold,
         radius: DefaultHumanEmulator.overshootRadius,

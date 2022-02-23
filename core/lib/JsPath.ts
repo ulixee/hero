@@ -111,14 +111,9 @@ export class JsPath {
     return this.frameEnvironment.runIsolatedFn(`${InjectedScripts.JsPath}.getWindowOffset`);
   }
 
-  public waitForScrollOffset(
-    scrollX: number,
-    scrollY: number,
-    timeoutMillis = 2e3,
-  ): Promise<boolean> {
+  public waitForScrollStop(timeoutMillis = 2e3): Promise<[scrollX:number,scrollY:number]> {
     return this.frameEnvironment.runIsolatedFn(
-      `${InjectedScripts.JsPath}.waitForScrollOffset`,
-      [scrollX, scrollY],
+      `${InjectedScripts.JsPath}.waitForScrollStop`,
       timeoutMillis,
     );
   }

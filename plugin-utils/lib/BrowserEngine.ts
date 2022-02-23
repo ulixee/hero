@@ -16,6 +16,7 @@ export default class BrowserEngine implements IBrowserEngine {
 
   public isHeaded?: boolean;
   public isInstalled: boolean;
+  public doesBrowserAnimateScrolling = false;
 
   private engineOption: IBrowserEngineOption;
   private readonly engineFetcher: IBrowserEngineFetcher;

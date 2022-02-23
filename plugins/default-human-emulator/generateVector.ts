@@ -5,7 +5,8 @@ export default function generateVector(
   startPoint: IPoint,
   destinationPoint: IPoint,
   targetWidth: number,
-  minSteps: number,
+  minPoints: number,
+  maxPoints: number,
   overshoot: { threshold: number; radius: number; spread: number },
 ) {
   const shouldOvershoot = magnitude(direction(startPoint, destinationPoint)) > overshoot.threshold;
@@ -13,14 +14,15 @@ export default function generateVector(
   const firstTargetPoint = shouldOvershoot
     ? getOvershootPoint(destinationPoint, overshoot.radius)
     : destinationPoint;
-  const points = path(startPoint, firstTargetPoint, Math.max(targetWidth, 100), minSteps);
+  const points = path(startPoint, firstTargetPoint, Math.max(targetWidth, 100), minPoints, maxPoints);
 
   if (shouldOvershoot) {
     const correction = path(
       firstTargetPoint,
       destinationPoint,
       targetWidth,
-      minSteps,
+      minPoints,
+      maxPoints,
       overshoot.spread,
     );
     points.push(...correction);
@@ -34,7 +36,8 @@ function path(
   start: IPoint,
   finish: IPoint,
   targetWidth: number,
-  minSteps: number,
+  minPoints: number,
+  maxPoints: number,
   spreadOverride?: number,
 ): IPoint[] {
   if (!targetWidth || Number.isNaN(targetWidth)) targetWidth = 1;
@@ -48,9 +51,10 @@ function path(
 
   const curve = new Bezier(start, ...anchors, finish);
   const length = curve.length() * 0.8;
-  const baseTime = Math.random() * minSteps;
+  const baseTime = Math.random() * minPoints;
   let steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
-  if (Number.isNaN(steps)) steps = minSteps;
+  if (Number.isNaN(steps)) steps = minPoints;
+  if (steps > maxPoints) steps = maxPoints;
 
   return curve
     .getLookupTable(steps)
@@ -66,7 +70,7 @@ const div = (a: IPoint, b: number): IPoint => ({ x: a.x / b, y: a.y / b });
 const mult = (a: IPoint, b: number): IPoint => ({ x: a.x * b, y: a.y * b });
 const add = (a: IPoint, b: IPoint): IPoint => ({ x: a.x + b.x, y: a.y + b.y });
 
-function randomVectorOnLine(a: IPoint, b: IPoint) {
+function randomVectorOnLine(a: IPoint, b: IPoint): IPoint {
   const vec = direction(a, b);
   const multiplier = Math.random();
   return add(a, mult(vec, multiplier));
@@ -88,7 +92,7 @@ function generateBezierAnchors(a: IPoint, b: IPoint, spread: number): IPoint[] {
   return [calc(), calc()].sort((sortA, sortB) => sortA.x - sortB.x);
 }
 
-function getOvershootPoint(coordinate: IPoint, radius: number) {
+function getOvershootPoint(coordinate: IPoint, radius: number): IPoint {
   const a = Math.random() * 2 * Math.PI;
   const rad = radius * Math.sqrt(Math.random());
   const vector = { x: rad * Math.cos(a), y: rad * Math.sin(a) };
@@ -100,26 +104,26 @@ function getOvershootPoint(coordinate: IPoint, radius: number) {
  * given the width of the element being clicked on
  * https://en.wikipedia.org/wiki/Fitts%27s_law
  */
-function fitts(distance: number, width: number) {
+function fitts(distance: number, width: number): number {
   return 2 * Math.log2(distance / width + 1);
 }
 
-function direction(a: IPoint, b: IPoint) {
+function direction(a: IPoint, b: IPoint): IPoint {
   return sub(b, a);
 }
 
-function perpendicular(a: IPoint) {
+function perpendicular(a: IPoint): IPoint {
   return { x: a.y, y: -1 * a.x };
 }
 
-function magnitude(a: IPoint) {
+function magnitude(a: IPoint): number {
   return Math.sqrt(a.x ** 2 + a.y ** 2);
 }
 
-function unit(a: IPoint) {
+function unit(a: IPoint): IPoint {
   return div(a, magnitude(a));
 }
 
-function setMagnitude(a: IPoint, amount: number) {
+function setMagnitude(a: IPoint, amount: number): IPoint {
   return mult(unit(a), amount);
 }

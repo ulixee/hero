@@ -4,7 +4,10 @@ import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
 import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
 import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { BrowserEmulatorClassDecorator, IBrowserEmulatorConfig } from '@ulixee/hero-interfaces/ICorePlugin';
+import {
+  BrowserEmulatorClassDecorator,
+  IBrowserEmulatorConfig,
+} from '@ulixee/hero-interfaces/ICorePlugin';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
@@ -37,10 +40,23 @@ import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
 import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
+import * as packageJson from './package.json';
 
 const dataLoader = new DataLoader(__dirname);
-export const latestBrowserEngineId = 'chrome-89-0';
-export const latestChromeBrowserVersion = { major: '89', minor: '0' };
+
+const chromeVersions = Object.keys(packageJson.dependencies)
+  .filter(x => x.startsWith('@ulixee/chrome-'))
+  .map(x => {
+    const [major, minor] = x.replace('@ulixee/chrome-', '').split('-');
+    return { major, minor };
+  });
+
+chromeVersions.sort((a, b) => {
+  return Number(b.major) - Number(a.major);
+});
+
+export const latestChromeBrowserVersion = chromeVersions[0];
+export const latestBrowserEngineId = `@ulixee/chrome-${latestChromeBrowserVersion.major}-${latestChromeBrowserVersion.minor}`;
 
 @BrowserEmulatorClassDecorator
 export default class DefaultBrowserEmulator extends BrowserEmulator {
@@ -173,7 +189,14 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
       browserEngineId,
       dataLoader.browserEngineOptions,
     );
+
     const browserEngine = new BrowserEngine(this, browserEngineOption);
+
+    if (browserEngine.name === 'chrome') {
+      const version = browserEngine.fullVersion.split('.').map(Number);
+      // changes at version 90
+      browserEngine.doesBrowserAnimateScrolling = version[0] >= 91;
+    }
     return { browserEngine, userAgentOption };
   }
 
