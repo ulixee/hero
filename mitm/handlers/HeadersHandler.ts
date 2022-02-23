@@ -50,6 +50,8 @@ export default class HeadersHandler {
 
     session.browserRequestMatcher.determineResourceType(ctx);
 
+    if (session.bypassResourceRegistrationForUrl === ctx.url.href) return;
+
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
     } else if (!ctx.resourceType || ctx.resourceType === 'Fetch') {

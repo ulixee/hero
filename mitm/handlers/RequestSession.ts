@@ -50,6 +50,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
+  public bypassResourceRegistrationForUrl: string;
 
   private readonly dns: Dns;
 
@@ -165,7 +166,11 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       const isMatch =
         handler.types?.includes(ctx.resourceType) ||
         handler.urls?.some(x => url.includes(x) || url.match(x));
-      if (isMatch && (await handler.handlerFn(ctx.url, ctx.resourceType, request, response))) {
+      if (
+        isMatch &&
+        handler.handlerFn &&
+        (await handler.handlerFn(ctx.url, ctx.resourceType, request, response))
+      ) {
         return true;
       }
     }
