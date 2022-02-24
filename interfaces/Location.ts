@@ -4,6 +4,7 @@ export enum LoadStatus {
   HttpRedirected = 'HttpRedirected',
   HttpResponded = 'HttpResponded',
 
+  JavascriptReady = 'JavascriptReady',
   DomContentLoaded = 'DomContentLoaded',
   PaintingStable = 'PaintingStable',
   AllContentLoaded = 'AllContentLoaded',
@@ -21,9 +22,10 @@ const LoadStatusPipeline = {
   HttpRequested: 1,
   HttpRedirected: 2,
   HttpResponded: 3,
-  DomContentLoaded: 4,
-  PaintingStable: 5,
-  AllContentLoaded: 6,
+  JavascriptReady: 4,
+  DomContentLoaded: 5,
+  PaintingStable: 6,
+  AllContentLoaded: 7,
 } as const;
 
 export { LoadStatusPipeline };
