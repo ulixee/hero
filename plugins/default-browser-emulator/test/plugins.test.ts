@@ -10,19 +10,20 @@ import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
+import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
 
 const { log } = Log(module);
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
+const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
 
-const navigatorJsonPath = Path.resolve(
-  __dirname,
-  '../data/as-chrome-88-0/as-mac-os-10-14/window-navigator.json',
-);
-
-const { navigator } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any;
-
+let navigatorConfig:any;
 let puppet: Puppet;
 beforeAll(async () => {
+  const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
+  const navigatorJsonPath = Path.resolve(
+    __dirname,
+    `../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-navigator.json`,
+  );
+  ({ navigator: navigatorConfig } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any);
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
   await puppet.start();
@@ -44,52 +45,10 @@ test('it should override plugins in a browser window', async () => {
   if (debug) {
     page.on('console', console.log);
   }
+  const pluginsData = parseNavigatorPlugins(navigatorConfig)
+  if(debug) console.log(pluginsData)
   await page.addNewDocumentScript(
-    getOverrideScript('navigator.plugins', {
-      mimeTypes: [
-        {
-          type: 'application/pdf',
-          suffixes: 'pdf',
-          description: '',
-          __pluginName: 'Chrome PDF Viewer',
-        },
-        {
-          type: 'application/x-google-chrome-pdf',
-          suffixes: 'pdf',
-          description: 'Portable Document Format',
-          __pluginName: 'Chrome PDF Plugin',
-        },
-        {
-          type: 'application/x-nacl',
-          suffixes: '',
-          description: 'Native Client Executable',
-          __pluginName: 'Native Client',
-        },
-        {
-          type: 'application/x-pnacl',
-          suffixes: '',
-          description: 'Portable Native Client Executable',
-          __pluginName: 'Native Client',
-        },
-      ],
-      plugins: [
-        {
-          name: 'Chrome PDF Plugin',
-          filename: 'internal-pdf-viewer',
-          description: 'Portable Document Format',
-        },
-        {
-          name: 'Chrome PDF Viewer',
-          filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai',
-          description: '',
-        },
-        {
-          name: 'Native Client',
-          filename: 'internal-nacl-plugin',
-          description: '',
-        },
-      ],
-    }).script,
+    getOverrideScript('navigator.plugins', pluginsData).script,
     false,
   );
   await Promise.all([
@@ -104,9 +63,9 @@ test('it should override plugins in a browser window', async () => {
   expect(hasPlugins).toBe(true);
 
   const pluginCount = await page.mainFrame.evaluate(`navigator.plugins.length`, false);
-  expect(pluginCount).toBe(3);
+  expect(pluginCount).toBe(pluginsData.plugins.length);
 
-  const plugin1Count = await page.mainFrame.evaluate(
+  const plugin1Mimes = await page.mainFrame.evaluate(
     `(() => {
   let mimes = [];
   for(const mime of navigator.plugins[0]) {
@@ -116,10 +75,10 @@ test('it should override plugins in a browser window', async () => {
 })()`,
     false,
   );
-  expect(plugin1Count).toStrictEqual(['application/x-google-chrome-pdf']);
+  expect(plugin1Mimes).toStrictEqual(pluginsData.mimeTypes.map(x => x.type));
 
   const mimecount = await page.mainFrame.evaluate(`navigator.mimeTypes.length`, false);
-  expect(mimecount).toBe(4);
+  expect(mimecount).toBe(pluginsData.mimeTypes.length);
 
   const structure = JSON.parse(
     (await page.mainFrame.evaluate(
@@ -132,10 +91,13 @@ test('it should override plugins in a browser window', async () => {
     if (debug) console.log(proto, inspect(structure[proto], false, null, true));
     expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);
   }
-  const navigatorStructure = structure.navigator;
-  if (debug) console.log(inspect(navigatorStructure.mimeTypes, false, null, true));
-  expect(navigatorStructure.mimeTypes).toStrictEqual(navigator.mimeTypes);
+  const navigatorPageStructure = structure.navigator;
+  if (debug) {
+    console.log('Installed', inspect(navigatorPageStructure.mimeTypes, false, null, true));
+    console.log('Expected', inspect(navigatorConfig.mimeTypes, false, null, true));
+  }
+  expect(navigatorPageStructure.mimeTypes).toStrictEqual(navigatorConfig.mimeTypes);
 
-  if (debug) console.log(inspect(navigatorStructure.plugins, false, null, true));
-  expect(navigatorStructure.plugins).toStrictEqual(navigator.plugins);
+  if (debug) console.log(inspect(navigatorPageStructure.plugins, false, null, true));
+  expect(navigatorPageStructure.plugins).toStrictEqual(navigatorConfig.plugins);
 }, 60e3);

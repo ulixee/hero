@@ -25,9 +25,7 @@ test('it should work even if dependency not registered through Core.use', async 
 </body>`;
   });
 
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({ userAgent });
+  const hero = new Hero();
   Helpers.onClose(() => hero.close(), true);
   hero.use(ExecuteJsPlugin);
 
@@ -54,9 +52,7 @@ test('it should fail if dependency not registered and allowDynamicPluginLoading 
   });
 
   Core.allowDynamicPluginLoading = false;
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({ userAgent });
+  const hero = new Hero();
   Helpers.onClose(() => hero.close(), true);
   hero.use(ExecuteJsPlugin);
 

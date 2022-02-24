@@ -40,23 +40,18 @@ import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
 import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
-import * as packageJson from './package.json';
+import IUserAgentData from './interfaces/IUserAgentData';
+import UserAgentOptions from './lib/UserAgentOptions';
+import BrowserEngineOptions from './lib/BrowserEngineOptions';
+
+// Configuration to rotate out the default browser id. Used for testing different browsers via cli
+const defaultBrowserId = process.env.HERO_DEFAULT_BROWSER_ID;
 
 const dataLoader = new DataLoader(__dirname);
+const browserEngineOptions = new BrowserEngineOptions(dataLoader, defaultBrowserId);
+const userAgentOptions = new UserAgentOptions(dataLoader, browserEngineOptions);
 
-const chromeVersions = Object.keys(packageJson.dependencies)
-  .filter(x => x.startsWith('@ulixee/chrome-'))
-  .map(x => {
-    const [major, minor] = x.replace('@ulixee/chrome-', '').split('-');
-    return { major, minor };
-  });
-
-chromeVersions.sort((a, b) => {
-  return Number(b.major) - Number(a.major);
-});
-
-export const latestChromeBrowserVersion = chromeVersions[0];
-export const latestBrowserEngineId = `@ulixee/chrome-${latestChromeBrowserVersion.major}-${latestChromeBrowserVersion.minor}`;
+export const defaultBrowserEngine = browserEngineOptions.default;
 
 @BrowserEmulatorClassDecorator
 export default class DefaultBrowserEmulator extends BrowserEmulator {
@@ -201,11 +196,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     browserEngine: BrowserEngine;
     userAgentOption: IUserAgentOption;
   } {
-    const userAgentOption = selectUserAgentOption(
-      userAgentSelector,
-      dataLoader.userAgentOptions,
-      dataLoader.installedEngineUserAgentOptions,
-    );
+    const userAgentOption = selectUserAgentOption(userAgentSelector, userAgentOptions);
 
     const { browserName, browserVersion } = userAgentOption;
     const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;

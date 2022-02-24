@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import { findClosestVersionMatch } from '../lib/VersionUtils';
-import DefaultBrowserEmulator from '../index';
+import DefaultBrowserEmulator, { defaultBrowserEngine } from '../index';
 import DataLoader from '../lib/DataLoader';
 import getLocalOperatingSystemMeta from '../lib/utils/getLocalOperatingSystemMeta';
 
@@ -18,7 +18,7 @@ test('it should findClosestVersionMatch even if minor is not matched', async () 
 
 test('it should find correct browser meta', async () => {
   const browserMeta = DefaultBrowserEmulator.selectBrowserMeta(
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_4_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36',
+    `Mozilla/5.0 (Macintosh; Intel Mac OS X 11_4_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${defaultBrowserEngine.version.major}.0.4324.182 Safari/537.36`,
   );
   const dataLoader = new DataLoader(Path.resolve(__dirname, '../'));
   const data = dataLoader.as(browserMeta.userAgentOption) as any;

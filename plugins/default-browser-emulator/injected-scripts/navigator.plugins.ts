@@ -30,10 +30,29 @@ function createNamedNodeMap(
   protoClass: PluginArray | MimeTypeArray,
   list: (Plugin | MimeType)[],
   prop: 'type' | 'name',
+  hiddenProperties: PropertyKey[] = [],
 ) {
-  const nativeObj = Object.create(protoClass) as PluginArray | MimeTypeArray;
+  const nativeObj = new Proxy(Object.create(protoClass) as PluginArray | MimeTypeArray, {
+    has(target: MimeTypeArray | PluginArray, p: string | symbol): boolean {
+      if (hiddenProperties.includes(p)) return false;
+      return p in target;
+    },
+  });
 
   installNamedNodeItems(nativeObj, list, prop);
+
+  proxyFunction(
+    nativeObj,
+    // @ts-expect-error
+    'hasOwnProperty',
+    (target, thisArg, argArray) => {
+      if (argArray && argArray.length) {
+        if (hiddenProperties.includes(argArray[0])) return false;
+      }
+      return ProxyOverride.callOriginal;
+    },
+    true,
+  );
 
   proxyFunction(
     nativeObj,
@@ -57,7 +76,7 @@ function createNamedNodeMap(
     proxyFunction(nativeObj, 'refresh', () => undefined, true);
   }
   // @ts-ignore - seems to be missing from ts def
-  // proxyFunction(nativeObj, Symbol.iterator, () => [...list], true);
+  // proxyFunction(nativeObj, Symbol.iterator, () => [...list][Symbol.iterator], true);
   proxyGetter(nativeObj, 'length', () => list.length, true);
   return nativeObj;
 }
@@ -68,16 +87,22 @@ function createMime(fakeMime) {
   proxyGetter(mime, 'suffixes', () => fakeMime.suffixes, true);
   proxyGetter(mime, 'description', () => fakeMime.description, true);
   proxyGetter(mime, 'enabledPlugin', () => navigator.plugins[fakeMime.__pluginName], true);
+
   return mime;
 }
 
 const mimeList: MimeType[] = args.mimeTypes.map(createMime);
-const mimes = createNamedNodeMap(MimeTypeArray.prototype, mimeList, 'type') as MimeTypeArray;
+const mimes = createNamedNodeMap(
+  MimeTypeArray.prototype,
+  mimeList,
+  'type',
+  args.mimeTypes.filter(x => x.hasNamedPropertyRef === false).map(x => x.type),
+) as MimeTypeArray;
 
 const pluginList: Plugin[] = args.plugins.map(fakeP => {
   let plugin: Plugin = Object.create(Plugin.prototype);
 
-  const pluginMimes = args.mimeTypes.filter(m => m.__pluginName === fakeP.name);
+  const pluginMimes = args.mimeTypes.filter(m => fakeP.mimeTypes.includes(m.type));
   const mimeProps = installNamedNodeItems(plugin, pluginMimes.map(createMime), 'type');
 
   proxyGetter(plugin, 'name', () => fakeP.name, true);

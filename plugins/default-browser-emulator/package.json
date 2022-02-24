@@ -4,7 +4,7 @@
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/chrome-89-0": "^4389.128.4",
+    "@ulixee/chrome-98-0": "^4758.102.4",
     "@ulixee/commons": "1.5.10",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",

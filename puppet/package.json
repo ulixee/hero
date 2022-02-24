@@ -11,6 +11,7 @@
   "devDependencies": {
     "@ulixee/hero-core": "1.5.4",
     "@ulixee/default-browser-emulator": "1.5.4",
-    "@ulixee/hero-testing": "1.5.4"
+    "@ulixee/hero-testing": "1.5.4",
+    "image-size": "^1.0.1"
   }
 }

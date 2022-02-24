@@ -2042,10 +2042,10 @@
     "@typescript-eslint/types" "5.10.1"
     eslint-visitor-keys "^3.0.0"
 
-"@ulixee/chrome-89-0@^4389.128.4":
-  version "4389.128.4"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-89-0/-/chrome-89-0-4389.128.4.tgz#a71f9739078c90d93e97bb26a2eac145ce397a45"
-  integrity sha512-BmoLbzC2ACmep5pAXnpK2HvvWbjeMxsum/9PDsyzdVlHzJ3HbdTVZuaqPrJ5h12ZYZbEK9PYlamy9twaaulDfA==
+"@ulixee/chrome-98-0@^4758.102.4":
+  version "4758.102.4"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-98-0/-/chrome-98-0-4758.102.4.tgz#a2192b6ebc1be8a1de371aa847dc8a0c6df83421"
+  integrity sha512-+MXP9pTPBOdkjDtrQNiib0pvXV3S/SZE6uwNfeP2TRNFOiZJX8XjCr9/v7Gj934JGzQGPAV10GMbe3yqaq/0oA==
   dependencies:
     "@ulixee/chrome-app" "^1.0.2"
 
@@ -4487,6 +4487,13 @@ ignore@^5.0.5, ignore@^5.1.4, ignore@^5.1.8:
   version "5.1.8"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.8.tgz#f150a8b50a34289b33e22f5889abd4d8016f0e57"
   integrity sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
+
+image-size@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-1.0.1.tgz#86d6cfc2b1d19eab5d2b368d4b9194d9e48541c5"
+  integrity sha512-VAwkvNSNGClRw9mDHhc5Efax8PLlsOGcUTh0T/LIriC8vPA3U5PdqXWqkz406MoYHMKW8Uf9gWr05T/rYB44kQ==
+  dependencies:
+    queue "6.0.2"
 
 import-fresh@^3.0.0, import-fresh@^3.2.1:
   version "3.3.0"
@@ -7002,6 +7009,13 @@ queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+
+queue@6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/queue/-/queue-6.0.2.tgz#b91525283e2315c7553d2efa18d83e76432fed65"
+  integrity sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==
+  dependencies:
+    inherits "~2.0.3"
 
 quick-lru@^4.0.1:
   version "4.0.1"

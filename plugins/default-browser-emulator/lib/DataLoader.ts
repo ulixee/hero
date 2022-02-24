@@ -41,8 +41,20 @@ export default class DataLoader implements IDataCore {
     }
   }
 
-  public isSupportedEmulator(osDir: string): boolean {
+  public isSupportedEmulatorOs(osDir: string): boolean {
     return this.osDataDirs.has(osDir);
+  }
+
+  public isInstalledBrowser(browserId: string): boolean {
+    return !!(
+      this.browserOsEmulatorsByVersion[browserId] ||
+      this.browserOsEmulatorsByVersion[`as-${browserId}`]
+    );
+  }
+
+  public isInstalledBrowserAndOs(browserId: string, osId: string): boolean {
+    const path = `${this.dataDir}/as-${browserId}/as-${osId}`;
+    return this.osDataDirs.has(path);
   }
 
   public get pkg(): any {
