@@ -83,7 +83,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
       createOptions.corePlugins.use(FirstPartyCookiesPlugin);
     }
-    this.domOverridesBuilder = loadDomOverrides(this, this.data);
+    this.domOverridesBuilder = loadDomOverrides(this, this.data, this.getUserAgentData());
   }
 
   configure(config: IBrowserEmulatorConfig): void {
@@ -159,7 +159,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools),
+      setUserAgent(this, devtools, this.getUserAgentData()),
       setTimezone(this, devtools),
       setLocale(this, devtools),
       setScreensize(this, page, devtools),
@@ -172,16 +172,40 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public onNewPuppetWorker(worker: IPuppetWorker): Promise<any> {
     const devtools = worker.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools),
+      setUserAgent(this, devtools, this.getUserAgentData()),
       setWorkerDomOverrides(this.domOverridesBuilder, this.data, worker),
     ]);
+  }
+
+  protected getUserAgentData(): IUserAgentData {
+    if (!this.data.windowNavigator.navigator.userAgentData) return null;
+    const uaFullVersion = `${this.browserVersion.major}.0.${this.browserVersion.patch}.${this.browserVersion.build}}`;
+    const platformVersion = `${this.operatingSystemVersion.major}.${
+      this.operatingSystemVersion.minor ?? '0'
+    }.${this.operatingSystemVersion.build ?? '1'}`;
+
+    const brands = this.data.windowNavigator.navigator.userAgentData.brands;
+    const brandData = [brands['0'], brands['1'], brands['2']].map(x => ({
+      brand: x.brand._$value,
+      version: x.version._$value,
+    }));
+    return {
+      uaFullVersion,
+      brands: brandData,
+      platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
+      platformVersion,
+    };
   }
 
   public static selectBrowserMeta(userAgentSelector?: string): {
     browserEngine: BrowserEngine;
     userAgentOption: IUserAgentOption;
   } {
-    const userAgentOption = selectUserAgentOption(userAgentSelector, dataLoader.userAgentOptions);
+    const userAgentOption = selectUserAgentOption(
+      userAgentSelector,
+      dataLoader.userAgentOptions,
+      dataLoader.installedEngineUserAgentOptions,
+    );
 
     const { browserName, browserVersion } = userAgentOption;
     const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;

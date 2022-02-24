@@ -1,10 +1,37 @@
-if (args.userAgentString && self.navigator?.userAgent !== args.userAgentString) {
+if (args.userAgentString) {
   proxyGetter(self.navigator, 'userAgent', () => args.userAgentString, true);
   proxyGetter(
     self.navigator,
     'appVersion',
     () => args.userAgentString.replace('Mozilla/', ''),
     true,
+  );
+}
+
+if (args.userAgentData && 'userAgentData' in self.navigator) {
+  // @ts-expect-error
+  const userAgentData = self.navigator.userAgentData;
+
+  proxyGetter(userAgentData, 'brands', () => Object.seal(Object.freeze(args.userAgentData.brands)));
+  proxyGetter(userAgentData, 'platform', () => args.userAgentData.platform);
+  proxyFunction(
+    userAgentData,
+    'getHighEntropyValues',
+    async (target, thisArg, argArray) => {
+      // check if these work
+      await target.getHighEntropyValues(...argArray);
+      const props: any = {
+        brands: Object.seal(Object.freeze(args.userAgentData.brands)),
+        mobile: false,
+      };
+      for (const key of argArray as string[]) {
+        if (key in args.userAgentData) {
+          props[key] = args.userAgentData[key];
+        }
+      }
+
+      return Promise.resolve(props);
+    },
   );
 }
 
