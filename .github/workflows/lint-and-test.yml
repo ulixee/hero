@@ -57,7 +57,7 @@ jobs:
           retention-days: 1
 
   test:
-    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    name: Test ${{matrix.browser || 'chrome-98-0' }} (node ${{ matrix.node-version }}; ${{ matrix.os }})
     needs: lint
     timeout-minutes: 30
 
