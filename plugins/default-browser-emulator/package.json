@@ -3,6 +3,9 @@
   "version": "1.5.4",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
+  "bin": {
+    "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
+  },
   "dependencies": {
     "@ulixee/chrome-98-0": "^4758.102.4",
     "@ulixee/commons": "1.5.10",
