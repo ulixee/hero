@@ -15,14 +15,13 @@ import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
 const { log } = Log(module);
 const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
 
-let navigatorConfig:any;
+let navigatorConfig: any;
 let puppet: Puppet;
 beforeAll(async () => {
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
-  const navigatorJsonPath = Path.resolve(
-    __dirname,
-    `../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-navigator.json`,
-  );
+  const asOsDataDir = `${__dirname}/../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}`;
+
+  const navigatorJsonPath = `${asOsDataDir}/window-navigator.json`;
   ({ navigator: navigatorConfig } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any);
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
@@ -45,8 +44,8 @@ test('it should override plugins in a browser window', async () => {
   if (debug) {
     page.on('console', console.log);
   }
-  const pluginsData = parseNavigatorPlugins(navigatorConfig)
-  if(debug) console.log(pluginsData)
+  const pluginsData = parseNavigatorPlugins(navigatorConfig);
+  if (debug) console.log(pluginsData);
   await page.addNewDocumentScript(
     getOverrideScript('navigator.plugins', pluginsData).script,
     false,
@@ -100,4 +99,55 @@ test('it should override plugins in a browser window', async () => {
 
   if (debug) console.log(inspect(navigatorPageStructure.plugins, false, null, true));
   expect(navigatorPageStructure.plugins).toStrictEqual(navigatorConfig.plugins);
+}, 60e3);
+
+test('it should override userAgentData in a browser window', async () => {
+  const httpServer = await Helpers.runHttpsServer((req, res) => {
+    res.end('<html><head></head><body>Hi</body></html>');
+  });
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
+  const context = await puppet.newContext(plugins, log);
+  Helpers.onClose(() => context.close());
+  const page = await context.newPage();
+
+  page.on('page-error', console.log);
+  if (debug) {
+    page.on('console', console.log);
+  }
+  const pluginsData = {};
+  if (debug) console.log(pluginsData);
+  await page.addNewDocumentScript(
+    getOverrideScript('navigator', {
+      brands: [
+        { brand: ' Not A;Brand', version: '99' },
+        { brand: 'Chromium', version: '98' },
+        { brand: 'Google Chrome', version: '98' },
+      ],
+      platform: 'macOS',
+      mobile: false,
+    }).script,
+    false,
+  );
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+  ]);
+
+  const structure = JSON.parse(
+    (await page.mainFrame.evaluate(
+      `new (${DomExtractor.toString()})('window').run(window, 'window',  ['NavigatorUAData','navigator'])`,
+      false,
+    )) as any,
+  ).window;
+
+  for (const proto of ['NavigatorUAData']) {
+    if (debug) console.log(proto, inspect(structure[proto], false, null, true));
+    expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);
+  }
+  const navigatorPageStructure = structure.navigator;
+  if (debug) {
+    console.log('Installed', inspect(navigatorPageStructure, false, null, true));
+    console.log('Expected', inspect(navigatorConfig, false, null, true));
+  }
+  expect(navigatorPageStructure.userAgentData).toStrictEqual(navigatorConfig.userAgentData);
 }, 60e3);

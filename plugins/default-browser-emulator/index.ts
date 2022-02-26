@@ -67,18 +67,19 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
 
   protected readonly data: IBrowserData;
   private readonly domOverridesBuilder: DomOverridesBuilder;
+  private readonly userAgentData: IUserAgentData;
 
   constructor(createOptions: ICorePluginCreateOptions) {
     super(createOptions);
     this.data = dataLoader.as(createOptions.userAgentOption) as any;
-
+    this.userAgentData = this.getUserAgentData();
     // set default device profile options
     configureDeviceProfile(this.deviceProfile);
 
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
       createOptions.corePlugins.use(FirstPartyCookiesPlugin);
     }
-    this.domOverridesBuilder = loadDomOverrides(this, this.data, this.getUserAgentData());
+    this.domOverridesBuilder = loadDomOverrides(this, this.data, this.userAgentData);
   }
 
   configure(config: IBrowserEmulatorConfig): void {
@@ -120,7 +121,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   }
 
   public beforeHttpRequest(resource: IHttpResourceLoadDetails): void {
-    modifyHeaders(this, this.data, resource);
+    modifyHeaders(this, this.data, this.userAgentData, resource);
   }
 
   public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
@@ -154,7 +155,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools, this.getUserAgentData()),
+      setUserAgent(this, devtools, this.userAgentData),
       setTimezone(this, devtools),
       setLocale(this, devtools),
       setScreensize(this, page, devtools),
@@ -167,7 +168,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public onNewPuppetWorker(worker: IPuppetWorker): Promise<any> {
     const devtools = worker.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools, this.getUserAgentData()),
+      setUserAgent(this, devtools, this.userAgentData),
       setWorkerDomOverrides(this.domOverridesBuilder, this.data, worker),
     ]);
   }

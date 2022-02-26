@@ -68,7 +68,7 @@ export default class UserAgentSelector {
   }
 
   private convertToSemVer(version: IVersion) {
-    return [version.major, version.minor, version.patch].filter(x => x).join('.');
+    return [version.major, version.minor, version.patch].filter(x => x !== undefined).join('.');
   }
 
   private cleanupName(name: string) {

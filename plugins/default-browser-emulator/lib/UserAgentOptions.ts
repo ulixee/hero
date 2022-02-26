@@ -2,7 +2,7 @@ import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrow
 import DataLoader from './DataLoader';
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
+import IUserAgentOption, { IVersion } from '@ulixee/hero-interfaces/IUserAgentOption';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';
 import BrowserEngineOptions from './BrowserEngineOptions';
@@ -59,6 +59,14 @@ export default class UserAgentOptions {
       !this.dataLoader.isInstalledBrowserAndOs(browserId, osId) ||
       !this.browserEngineOptions.installedOptions.some(x => x.id === browserId)
     ) {
+      console.log('useragent not installed', {
+        userAgent,
+        browserId,
+        osId,
+        installedData: this.dataLoader.isInstalledBrowserAndOs(browserId, osId),
+        browser: this.browserEngineOptions.installedOptions.some(x => x.id === browserId),
+      });
+
       userAgent = this.findClosestInstalled(userAgent);
       userAgent.string = userAgentString;
     }
@@ -70,16 +78,27 @@ export default class UserAgentOptions {
   }
 
   public findClosestInstalled(userAgent: IUserAgentOption): IUserAgentOption {
-    const matchingBrowser = this.installedOptions.filter(
+    let filteredOptions = this.installedOptions.filter(
       x =>
         x.browserName === userAgent.browserName &&
-        x.browserVersion.major === userAgent.browserVersion.major &&
-        x.browserVersion.minor === userAgent.browserVersion.minor,
+        x.browserVersion.major === userAgent.browserVersion.major,
     );
-    if (matchingBrowser.length) {
-      return UserAgentOptions.random(matchingBrowser);
-    }
-    return this.getDefaultAgentOption();
+    // if none on this version, go to default
+    if (!filteredOptions.length) filteredOptions = this.defaultBrowserUserAgentOptions;
+
+    const withOs = filteredOptions.filter(
+      x => x.operatingSystemName === userAgent.operatingSystemName,
+    );
+
+    if (withOs.length) filteredOptions = withOs;
+
+    const withOsVersion = filteredOptions.filter(x =>
+      isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion, true),
+    );
+
+    if (withOsVersion.length) filteredOptions = withOsVersion;
+
+    return UserAgentOptions.random(filteredOptions);
   }
 
   public findWithSelector(selectors: UserAgentSelector): IUserAgentOption {
@@ -152,7 +171,7 @@ export default class UserAgentOptions {
     const parsed = this.parse(userAgent.string);
     userAgent.browserVersion.build ??= parsed.browserVersion.build;
 
-    if (this.canTrustOsVersionForAgentString(userAgent)) {
+    if (this.canTrustOsVersionForAgentString(parsed)) {
       userAgent.operatingSystemVersion = parsed.operatingSystemVersion;
     } else {
       this.chooseOsPatchValue(userAgent);
@@ -161,6 +180,7 @@ export default class UserAgentOptions {
   }
 
   private static canTrustOsVersionForAgentString(agentOption: IUserAgentOption): boolean {
+    // Chrome 90+ started pegging the OS versions to 10.15.7
     if (
       agentOption.operatingSystemName === 'mac-os' &&
       Number(agentOption.browserVersion.major) > 90 &&
@@ -170,9 +190,11 @@ export default class UserAgentOptions {
     ) {
       return false;
     }
+
+    // windows 11 never shows up in the os version (shows as 10)
     if (
       agentOption.operatingSystemName === 'windows' &&
-      agentOption.operatingSystemVersion.major === '11'
+      agentOption.operatingSystemVersion.major === '10'
     ) {
       return false;
     }
@@ -189,9 +211,7 @@ export default class UserAgentOptions {
         x.browserVersion.major === userAgent.browserVersion.major &&
         x.browserVersion.minor === userAgent.browserVersion.minor &&
         x.operatingSystemName === userAgent.operatingSystemName &&
-        Number(x.operatingSystemVersion.major) > Number(userAgent.operatingSystemVersion.major) &&
-        Number(x.operatingSystemVersion.minor ?? 0) >
-          Number(userAgent.operatingSystemVersion.minor ?? 0),
+        isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion),
     );
     if (realOperatingSystem) {
       userAgent.operatingSystemVersion = { ...realOperatingSystem.operatingSystemVersion };
@@ -204,4 +224,16 @@ export default class UserAgentOptions {
   private static chooseOsPatchValue(userAgent: IUserAgentOption): void {
     userAgent.operatingSystemVersion.patch = '1';
   }
+}
+
+function isLeftVersionGreater(a: IVersion, b: IVersion, allowEqual = false): boolean {
+  for (const key of ['major', 'minor', 'patch', 'build']) {
+    const aValue = Number(a[key] ?? 0);
+    const bValue = Number(b[key] ?? 0);
+    if (aValue > bValue) return true;
+    if (allowEqual && aValue === bValue) return true;
+    if (aValue < bValue) return false;
+  }
+
+  return false;
 }

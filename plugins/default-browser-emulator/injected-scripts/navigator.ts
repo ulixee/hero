@@ -11,28 +11,53 @@ if (args.userAgentString) {
 if (args.userAgentData && 'userAgentData' in self.navigator) {
   // @ts-expect-error
   const userAgentData = self.navigator.userAgentData;
+  function checkThisArg(thisArg, customMessage = ''): TypeError {
+    // @ts-expect-error
+    if (Object.getPrototypeOf(thisArg) !== NavigatorUAData.prototype) {
+      return new TypeError(customMessage + 'Illegal invocation');
+    }
+  }
 
-  proxyGetter(userAgentData, 'brands', () => Object.seal(Object.freeze(args.userAgentData.brands)));
-  proxyGetter(userAgentData, 'platform', () => args.userAgentData.platform);
-  proxyFunction(
-    userAgentData,
-    'getHighEntropyValues',
-    async (target, thisArg, argArray) => {
-      // check if these work
-      await target.getHighEntropyValues(...argArray);
-      const props: any = {
-        brands: Object.seal(Object.freeze(args.userAgentData.brands)),
-        mobile: false,
-      };
-      for (const key of argArray as string[]) {
-        if (key in args.userAgentData) {
-          props[key] = args.userAgentData[key];
-        }
+  proxyGetter(userAgentData, 'brands', (_, thisArg) => {
+    const thisArgError = checkThisArg(thisArg);
+    if (thisArgError) throw cleanErrorStack(thisArgError);
+    const clonedValues = args.userAgentData.brands.map(x => ({...x}));
+
+    return Object.seal(Object.freeze(clonedValues));
+  });
+  proxyGetter(userAgentData, 'platform', (_, thisArg) => {
+    const thisArgError = checkThisArg(thisArg);
+    if (thisArgError) throw cleanErrorStack(thisArgError);
+
+    return args.userAgentData.platform;
+  });
+  proxyFunction(userAgentData, 'getHighEntropyValues', async (target, thisArg, argArray) => {
+    // TODO: pull Error messages directly from dom extraction files
+    let error = checkThisArg(
+      thisArg,
+      "Failed to execute 'getHighEntropyValues' on 'NavigatorUAData': ",
+    );
+    if (!error) {
+      try {
+        // check if these work
+        await target.call(thisArg, argArray);
+      } catch (e) {
+        error = e;
       }
+    }
+    if (error) return Promise.reject(cleanErrorStack(error));
+    const props: any = {
+      brands: Object.seal(Object.freeze(args.userAgentData.brands)),
+      mobile: false,
+    };
+    for (const key of argArray as string[]) {
+      if (key in args.userAgentData) {
+        props[key] = args.userAgentData[key];
+      }
+    }
 
-      return Promise.resolve(props);
-    },
-  );
+    return Promise.resolve(props);
+  });
 }
 
 // always override
