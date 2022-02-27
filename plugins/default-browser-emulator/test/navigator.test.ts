@@ -1,5 +1,4 @@
 import * as Fs from 'fs';
-import * as Path from 'path';
 import { inspect } from 'util';
 import * as Helpers from '@ulixee/hero-testing/helpers';
 import Puppet from '@ulixee/hero-puppet';
@@ -9,8 +8,8 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
-import DomExtractor = require('./DomExtractor');
 import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
+import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
 const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');

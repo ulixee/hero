@@ -311,3 +311,171 @@ test('should not have too much recursion in prototype', async () => {
 
   expect(error2.name).toBe('TypeError');
 });
+
+describe('Proxy detections', () => {
+  const ProxyDetections = {
+    checkInstanceof(apiFunction) {
+      const proxy = new Proxy(apiFunction, {});
+
+      function hasValidStack(error, targetStack) {
+        if (error.name !== 'TypeError') return false;
+        if (error.message !== "Function has non-object prototype 'undefined' in instanceof check")
+          return false;
+        const targetStackLine = ((error.stack || '').split('\n') || [])[1];
+        return targetStackLine.startsWith(targetStack);
+      }
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        proxy instanceof proxy;
+        return '"proxy instanceof proxy" failed to throw';
+      } catch (error) {
+        // ---- FAILING HERE! -----
+
+        if (!hasValidStack(error, '    at Proxy.[Symbol.hasInstance]')) {
+          return 'expect Proxy.[Symbol.hasInstance]';
+        }
+      }
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        apiFunction instanceof apiFunction;
+        return '"apiFunction instanceof apiFunction" failed to throw';
+      } catch (error) {
+        if (!hasValidStack(error, '    at Function.[Symbol.hasInstance]')) {
+          return 'expect Function.[Symbol.hasInstance]. Was ' + error.stack.split('\n')[1];
+        }
+      }
+      return 'ok';
+    },
+
+    getChainCycleLie(apiFunction, method = 'setPrototypeOf') {
+      try {
+        if (method == 'setPrototypeOf') {
+          return Object.setPrototypeOf(apiFunction, Object.create(apiFunction)) + '';
+        } else {
+          apiFunction.__proto__ = apiFunction;
+          return apiFunction++ + '... no failure';
+        }
+      } catch (error) {
+        if (error.name !== 'TypeError')
+          return 'Not TypeError - ' + error.name + ':' + error.message;
+        if (error.message !== `Cyclic __proto__ value`) return 'Not cyclic __proto__';
+
+        const targetStackLine = ((error.stack || '').split('\n') || [])[1];
+        if (
+          method === '__proto__' &&
+          !targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`)
+        ) {
+          return 'Stack doesnt have "at Function.set __proto__ [as __proto__]": ' + error.stack;
+        }
+      }
+      return 'ok';
+    },
+  };
+
+  test('should not reveal instanceof proxy behavior on getter', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+    page.on('console', console.log);
+    const result: string = await page.evaluate(
+      `(function ${ProxyDetections.checkInstanceof.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get);`,
+    );
+    expect(result).toBe('ok');
+  });
+
+  test('should not reveal instanceof proxy behavior on fn', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+    page.on('console', console.log);
+    const result: string = await page.evaluate(
+      `(function ${ProxyDetections.checkInstanceof.toString()})(Permissions.prototype.query);`,
+    );
+    expect(result).toBe('ok');
+  });
+
+  test('should not reveal recursion errors for getPrototypeOf', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+
+    const result: string = await page.evaluate(
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query)`,
+    );
+    expect(result).toBe('ok');
+  });
+
+
+  test('should not reveal recursion errors for getPrototypeOf of a getter', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+
+    const result: string = await page.evaluate(
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get)`,
+    );
+    expect(result).toBe('ok');
+  });
+
+  test('should not reveal recursion errors for __proto__', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+    const protoResult: string = await page.evaluate(
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query, '__proto__')`,
+    );
+    expect(protoResult).toBe('ok');
+  });
+
+  test('should not fail at setting proto of Reflect.setPrototypeOf', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const tabId = await hero.activeTab.tabId;
+    await hero.goto(`${koaServer.baseUrl}`);
+    const sessionId = await hero.sessionId;
+    const tab = Session.getTab({ tabId, sessionId });
+    const page = tab.puppetPage;
+
+    function getReflectSetProtoLie(apiFunction) {
+      try {
+        if (Reflect.setPrototypeOf(apiFunction, Object.create(apiFunction))) {
+          return 'setPrototypeOf should have failed';
+        }
+      } catch (error) {
+        return 'failed setting prototype ' + error.message;
+      }
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        '123' in apiFunction;
+        return 'ok';
+      } catch (error) {
+        return 'Error checking "123 in fn":' + error.message;
+      }
+    }
+    const result: string = await page.evaluate(
+      `(${getReflectSetProtoLie.toString()})(Permissions.prototype.query)`,
+    );
+    expect(result).toBe('ok');
+  });
+});

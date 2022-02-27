@@ -21,7 +21,7 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
   proxyGetter(userAgentData, 'brands', (_, thisArg) => {
     const thisArgError = checkThisArg(thisArg);
     if (thisArgError) throw cleanErrorStack(thisArgError);
-    const clonedValues = args.userAgentData.brands.map(x => ({...x}));
+    const clonedValues = args.userAgentData.brands.map(x => ({ ...x }));
 
     return Object.seal(Object.freeze(clonedValues));
   });
@@ -58,6 +58,11 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
 
     return Promise.resolve(props);
   });
+}
+
+if (args.pdfViewerEnabled && 'pdfViewerEnabled' in self.navigator) {
+  // @ts-expect-error
+  proxyGetter(self.navigator, 'pdfViewerEnabled', () => args.pdfViewerEnabled, true);
 }
 
 // always override

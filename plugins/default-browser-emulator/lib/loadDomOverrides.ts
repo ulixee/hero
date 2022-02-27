@@ -20,6 +20,7 @@ export default function loadDomOverrides(
     userAgentString: emulator.userAgentString,
     platform: emulator.operatingSystemPlatform,
     headless: emulator.browserEngine.isHeaded !== true,
+    pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
     userAgentData,
   });
 

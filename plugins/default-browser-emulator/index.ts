@@ -175,7 +175,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
 
   protected getUserAgentData(): IUserAgentData {
     if (!this.data.windowNavigator.navigator.userAgentData) return null;
-    const uaFullVersion = `${this.browserVersion.major}.0.${this.browserVersion.patch}.${this.browserVersion.build}}`;
+    const uaFullVersion = `${this.browserVersion.major}.0.${this.browserVersion.patch}.${this.browserVersion.build}`;
     const platformVersion = `${this.operatingSystemVersion.major}.${
       this.operatingSystemVersion.minor ?? '0'
     }.${this.operatingSystemVersion.build ?? '1'}`;

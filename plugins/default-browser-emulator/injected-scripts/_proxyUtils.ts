@@ -5,49 +5,40 @@ let nativeToStringFunctionString = `${Function.toString}`;
 // when functions are re-bound to work around the loss of scope issue in chromium, they blow up their native toString
 const overriddenFns = new Map<Function, string>();
 
-// eslint-disable-next-line no-extend-native
+const fnToStringDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, 'toString');
+const fnToStringProxy = internalCreateFnProxy(
+  Function.prototype.toString,
+  fnToStringDescriptor,
+  (target, thisArg, args) => {
+    if (overriddenFns.has(thisArg)) {
+      return overriddenFns.get(thisArg);
+    }
+    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
+    // if not indicates that we are doing a check across different windows
+    const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
+      thisArg.toString,
+    );
+    if (hasSameProto === false) {
+      // Pass the call on to the local Function.prototype.toString instead
+      return thisArg.toString(...(args ?? []));
+    }
+    try {
+      return target.apply(thisArg, args);
+    } catch (error) {
+      cleanErrorStack(error, (line, i) => {
+        if (line.includes('Object.toString') && i === 1) {
+          return line.replace('Object.toString', 'Function.toString');
+        }
+        return line;
+      });
+      throw error;
+    }
+  },
+);
 Object.defineProperty(Function.prototype, 'toString', {
-  ...Object.getOwnPropertyDescriptor(Function.prototype, 'toString'),
-  value: new Proxy(Function.prototype.toString, {
-    apply(target: () => string, thisArg: any, args?: any): any {
-      if (overriddenFns.has(thisArg)) {
-        return overriddenFns.get(thisArg);
-      }
-      // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
-      // if not indicates that we are doing a check across different windows
-      const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
-        thisArg.toString,
-      );
-      if (hasSameProto === false) {
-        // Pass the call on to the local Function.prototype.toString instead
-        return thisArg.toString(...(args ?? []));
-      }
-      try {
-        return target.apply(thisArg, args);
-      } catch (error) {
-        cleanErrorStack(error, (line, i) => {
-          if (line.includes('Object.toString') && i === 1) {
-            return line.replace('Object.toString', 'Function.toString');
-          }
-          return line;
-        });
-        throw error;
-      }
-    },
-    setPrototypeOf(target: any, v: any): boolean {
-      let protoTarget = v;
-      if (v === Function.prototype.toString) {
-        protoTarget = target;
-      }
-      try {
-        return ObjectCached.setPrototypeOf(target, protoTarget);
-      } catch (error) {
-        throw cleanErrorStack(error, null, true);
-      }
-    },
-  }),
+  ...fnToStringDescriptor,
+  value: fnToStringProxy,
 });
-overriddenFns.set(Function.prototype.toString, nativeToStringFunctionString);
 
 /////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -57,13 +48,31 @@ const ReflectCached = {
   get: Reflect.get.bind(Reflect),
   set: Reflect.set.bind(Reflect),
   apply: Reflect.apply.bind(Reflect),
+  setPrototypeOf: Reflect.setPrototypeOf.bind(Reflect),
   ownKeys: Reflect.ownKeys.bind(Reflect),
   getOwnPropertyDescriptor: Reflect.getOwnPropertyDescriptor.bind(Reflect),
 };
 
 const ObjectCached = {
   setPrototypeOf: Object.setPrototypeOf.bind(Object),
+  getPrototypeOf: Object.getPrototypeOf.bind(Object),
 };
+
+let isObjectSetPrototypeOf = false;
+const nativeToStringObjectSetPrototypeOfString = `${Object.setPrototypeOf}`;
+Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
+  apply(target: (o: any, proto: object | null) => any, thisArg: any, argArray: any[]): any {
+    isObjectSetPrototypeOf = true;
+    try {
+      return ReflectCached.apply(...arguments);
+    } catch (error) {
+      throw cleanErrorStack(error);
+    } finally {
+      isObjectSetPrototypeOf = false;
+    }
+  },
+});
+overriddenFns.set(Object.setPrototypeOf, nativeToStringObjectSetPrototypeOfString);
 
 enum ProxyOverride {
   callOriginal = '_____invoke_original_____',
@@ -124,6 +133,55 @@ function proxyConstructor<T, K extends keyof T>(
   Object.defineProperty(owner, key, descriptor);
 }
 
+function internalCreateFnProxy(
+  targetFn: any,
+  descriptor: PropertyDescriptor,
+  onApply: (target: any, thisArg: any, argArray: any[]) => any,
+) {
+  const toString = targetFn.toString();
+  const proxy = new Proxy<any>(targetFn, {
+    apply: onApply,
+    setPrototypeOf(target: any, newPrototype: any): boolean {
+      let protoTarget = newPrototype;
+      if (newPrototype === proxy || newPrototype?.__proto__ === proxy) {
+        protoTarget = target;
+      }
+      try {
+        const caller = isObjectSetPrototypeOf ? ObjectCached : ReflectCached;
+        return caller.setPrototypeOf(target, protoTarget);
+      } catch (error) {
+        throw cleanErrorStack(error);
+      }
+    },
+    get(target: any, p: string | symbol, receiver: any): any {
+      if (p === Symbol.hasInstance && receiver === proxy) {
+        try {
+          return target[Symbol.hasInstance].bind(target);
+        } catch (err) {
+          throw cleanErrorStack(err);
+        }
+      }
+      return ReflectCached.get(target, p, receiver);
+    },
+    set(target: any, p: string | symbol, value: any, receiver: any): boolean {
+      if (p === '__proto__') {
+        let protoTarget = value;
+        if (protoTarget === proxy || protoTarget?.__proto__ === proxy) {
+          protoTarget = target;
+        }
+        try {
+          return (target.__proto__ = protoTarget);
+        } catch (error) {
+          throw cleanErrorStack(error);
+        }
+      }
+      return ReflectCached.set(...arguments);
+    },
+  });
+  overriddenFns.set(proxy, toString);
+  return proxy;
+}
+
 function proxyFunction<T, K extends keyof T>(
   thisObject: T,
   functionName: K,
@@ -140,39 +198,17 @@ function proxyFunction<T, K extends keyof T>(
   }
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
 
-  const toString = descriptor.value.toString();
-  descriptorOwner[functionName] = new Proxy<any>(descriptorOwner[functionName], {
-    apply(target, thisArg, argArray) {
-      if (overrideOnlyForInstance === false || thisArg === thisObject) {
-        try {
-          const result = overrideFn(...arguments);
-          if (result !== ProxyOverride.callOriginal) {
-            if (result instanceof Promise && result.catch) {
-              return result.catch(err => {
-                throw cleanErrorStack(err);
-              });
-            }
-            return result;
-          }
-        } catch (err) {
-          throw cleanErrorStack(err);
-        }
-      }
-      return ReflectCached.apply(...arguments);
+  const fnProxy = internalCreateFnProxy(
+    descriptorOwner[functionName],
+    descriptor,
+    (target, thisArg, argArray) => {
+      const shouldOverride = overrideOnlyForInstance === false || thisArg === thisObject;
+      const overrideFnToUse = shouldOverride ? overrideFn : null;
+      return defaultProxyApply([target, thisArg, argArray], overrideFnToUse);
     },
-    setPrototypeOf(target: any, v: any): boolean {
-      let protoTarget = v;
-      if (v === descriptorOwner[functionName]) {
-        protoTarget = target;
-      }
-      try {
-        return ObjectCached.setPrototypeOf(target, protoTarget);
-      } catch (error) {
-        throw cleanErrorStack(error, null, true);
-      }
-    },
-  });
-  overriddenFns.set(descriptorOwner[functionName] as any, toString);
+  );
+
+  descriptorOwner[functionName] = fnProxy;
   return thisObject[functionName];
 }
 
@@ -188,28 +224,16 @@ function proxyGetter<T, K extends keyof T>(
   }
 
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
-  const toString = descriptor.get.toString();
-  descriptor.get = new Proxy(descriptor.get, {
-    apply(_, thisArg) {
-      if (overrideOnlyForInstance === false || thisArg === thisObject) {
-        const result = overrideFn(...arguments);
-        if (result !== ProxyOverride.callOriginal) return result;
-      }
-      return ReflectCached.apply(...arguments);
+
+  descriptor.get = internalCreateFnProxy(
+    descriptor.get,
+    descriptor,
+    (target, thisArg, argArray) => {
+      const shouldOverride = overrideOnlyForInstance === false || thisArg === thisObject;
+      const overrideFnToUse = shouldOverride ? overrideFn : null;
+      return defaultProxyApply([target, thisArg, argArray], overrideFnToUse);
     },
-    setPrototypeOf(target: any, v: any): boolean {
-      let protoTarget = v;
-      if (v === descriptor.get) {
-        protoTarget = target;
-      }
-      try {
-        return ObjectCached.setPrototypeOf(target, protoTarget);
-      } catch (error) {
-        throw cleanErrorStack(error, null, true);
-      }
-    },
-  });
-  overriddenFns.set(descriptor.get, toString);
+  );
   Object.defineProperty(descriptorOwner, propertyName, descriptor);
   return descriptor.get;
 }
@@ -229,19 +253,47 @@ function proxySetter<T, K extends keyof T>(
     throw new Error(`Could not find descriptor for setter: ${propertyName}`);
   }
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
-  const toString = descriptor.set.toString();
-  descriptor.set = new Proxy(descriptor.set, {
-    apply(target, thisArg, args) {
+  descriptor.set = internalCreateFnProxy(
+    descriptor.set,
+    descriptor,
+    (target, thisArg, argArray) => {
       if (!overrideOnlyForInstance || thisArg === thisObject) {
-        const result = overrideFn(target as any, thisArg, ...args);
-        if (result !== ProxyOverride.callOriginal) return result;
+        try {
+          const result = overrideFn(target, thisArg, ...argArray);
+          if (result !== ProxyOverride.callOriginal) return result;
+        } catch (err) {
+          throw cleanErrorStack(err);
+        }
       }
-      return ReflectCached.apply(...arguments);
+      return ReflectCached.apply(target, thisArg, argArray);
     },
-  });
-  overriddenFns.set(descriptor.set, toString);
+  );
   Object.defineProperty(descriptorOwner, propertyName, descriptor);
   return descriptor.set;
+}
+
+function defaultProxyApply<T, K extends keyof T>(
+  args: [target: any, thisArg: T, argArray: any[]],
+  overrideFn?: (target?: T[K], thisArg?: T, argArray?: any[]) => T[K] | ProxyOverride,
+): any {
+  if (overrideFn) {
+    try {
+      const result = overrideFn(...args);
+      if (result !== ProxyOverride.callOriginal) {
+        // @ts-expect-error
+        if (result && result.then && result.catch) {
+          // @ts-expect-error
+          return result.catch(err => {
+            throw cleanErrorStack(err)
+          });
+        }
+        return result;
+      }
+    } catch (err) {
+      throw cleanErrorStack(err);
+    }
+  }
+  return ReflectCached.apply(...args);
 }
 
 function getDescriptorInHierarchy<T, K extends keyof T>(obj: T, prop: K) {

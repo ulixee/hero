@@ -59,14 +59,6 @@ export default class UserAgentOptions {
       !this.dataLoader.isInstalledBrowserAndOs(browserId, osId) ||
       !this.browserEngineOptions.installedOptions.some(x => x.id === browserId)
     ) {
-      console.log('useragent not installed', {
-        userAgent,
-        browserId,
-        osId,
-        installedData: this.dataLoader.isInstalledBrowserAndOs(browserId, osId),
-        browser: this.browserEngineOptions.installedOptions.some(x => x.id === browserId),
-      });
-
       userAgent = this.findClosestInstalled(userAgent);
       userAgent.string = userAgentString;
     }
