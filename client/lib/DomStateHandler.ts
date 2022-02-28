@@ -229,6 +229,11 @@ export default class DomStateHandler {
       },
     );
 
+    for (const [, command] of Object.values(this.#rawCommandsById)) {
+      if (command.includes('.waitFor'))
+        throw new Error(`"${command}" can't be used inside a State assertion block. Use an equivalent function that checks current state - eg, waitForState(PaintingStable) -> isPaintingStable`);
+    }
+
     if (isPromise(result)) {
       throw new Error(
         `DomState (${

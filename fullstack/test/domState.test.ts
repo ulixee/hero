@@ -25,11 +25,22 @@ test('can wait for a url', async () => {
   await expect(state1).resolves.toBeUndefined();
 
   const state2 = hero.activeTab.validateState({
-    all(assert ) {
+    all(assert) {
       assert(hero.url, url => url.includes('page2'));
     },
   });
   await expect(state2).resolves.toBe(false);
+});
+
+test('does not allow nested "waitFor" commands', async () => {
+  const hero = await openBrowser('/');
+  await expect(
+    hero.activeTab.waitForState({
+      all(assert) {
+        assert(hero.waitForPaintingStable());
+      },
+    }),
+  ).rejects.toThrow("can't be used inside a State assertion block");
 });
 
 test('can wait for a domElement', async () => {
@@ -58,7 +69,6 @@ setInterval(() => {
   await expect(hero.activeTab.validateState(domState)).resolves.toBe(true);
 });
 
-
 test('can wait for a domElement on a second tab', async () => {
   const hero = await openBrowser('/');
   koaServer.get('/waitForDomStateTabs', ctx => {
@@ -85,7 +95,7 @@ setTimeout(() => {
 
   const domState = {
     all(assert) {
-      assert(hero.url, x => x.includes('/waitForDomStateTab2'))
+      assert(hero.url, x => x.includes('/waitForDomStateTab2'));
       assert(hero.querySelector('h2').$isVisible);
       assert(hero.querySelector('#wait-for-me').$isVisible);
     },
@@ -167,7 +177,7 @@ test('can wait for resources', async () => {
     },
   };
 
-  await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined()
+  await expect(hero.activeTab.waitForState(domState)).resolves.toBeUndefined();
 });
 
 test('surfaces errors in query selectors that are invalid (vs simply not there)', async () => {

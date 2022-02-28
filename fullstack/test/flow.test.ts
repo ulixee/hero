@@ -66,7 +66,7 @@ test('can handle multiple simultaneous handlers', async () => {
   );
   await hero.registerFlowHandler('flow3',
     assert => {
-      assert(hero.querySelector('h3').$exists);
+      assert(hero.querySelector('h3'));
       assert(hero.url, 'https://test2.com');
     },
     () => Promise.resolve(),

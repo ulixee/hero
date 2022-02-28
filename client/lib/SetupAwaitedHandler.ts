@@ -5,7 +5,6 @@ import INodePointer from 'awaited-dom/base/INodePointer';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import NodeFactory from 'awaited-dom/base/NodeFactory';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
@@ -154,20 +153,11 @@ export function convertJsPathArgs(path: IJsPath): void {
 
 export async function execJsPath<T>(
   coreFrame: CoreFrameEnvironment,
-  awaitedOptions: IAwaitedOptions & { prefetchedJsPaths?: Promise<Map<string, IJsPathResult>> },
+  awaitedOptions: IAwaitedOptions,
   path: IJsPath,
 ): Promise<IExecJsPathResult<T>> {
   convertJsPathArgs(path);
-  if (awaitedOptions.prefetchedJsPaths) {
-    const prefetchedJsPaths = await awaitedOptions.prefetchedJsPaths;
-    const prefetched = prefetchedJsPaths.get(JSON.stringify(path));
-    if (prefetched) {
-      const result = prefetched.result;
-      coreFrame.recordDetachedJsPath(prefetched.index, new Date(), new Date());
-      return result;
-    }
-  }
-  return coreFrame.execJsPath<T>(path);
+  return await coreFrame.execJsPath<T>(path);
 }
 
 export function cleanResult<T, TClass>(
