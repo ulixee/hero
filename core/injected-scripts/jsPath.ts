@@ -9,43 +9,38 @@ import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 const pointerFnName = '__getNodePointer__';
 
 class JsPath {
-  public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
-    let left = Math.max(coordinates[0], 0);
-    const scrollWidth = document.body.scrollWidth || document.documentElement.scrollWidth;
-    const maxScrollX = Math.max(scrollWidth - window.innerWidth, 0);
-    if (left >= maxScrollX) {
-      left = maxScrollX;
-    }
-
-    let top = Math.max(coordinates[1], 0);
-    const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
-    const maxScrollY = Math.max(scrollHeight - window.innerHeight, 0);
-    if (top >= maxScrollY) {
-      top = maxScrollY;
-    }
-
+  public static async waitForScrollStop(timeoutMillis: number) {
     const endTime = new Date().getTime() + (timeoutMillis ?? 50);
-    let count = 0;
+    const scrollElement = document.scrollingElement ?? document.documentElement;
+    let left = 0;
+    let top = 0;
+    let consecutiveMatches = 0;
     do {
-      if (Math.abs(window.scrollX - left) <= 1 && Math.abs(window.scrollY - top) <= 1) {
-        return true;
-      }
-      if (count === 2) {
-        window.scroll({ behavior: 'auto', left, top });
-      }
       await new Promise(requestAnimationFrame);
-      count += 1;
+      const prevLeft = left;
+      const prevTop = top;
+      left = scrollElement.scrollLeft;
+      top = scrollElement.scrollTop;
+      if (left === prevLeft && top === prevTop) {
+        consecutiveMatches += 1;
+      } else {
+        consecutiveMatches = 0;
+      }
+      if (consecutiveMatches >= 2) return [left, top];
     } while (new Date().getTime() < endTime);
 
-    return false;
+    return [left, top];
   }
 
   public static getWindowOffset() {
+    const scrollElement = document.scrollingElement ?? document.documentElement;
     return {
-      innerHeight: window.innerHeight ?? document.documentElement?.clientHeight,
-      innerWidth: window.innerWidth ?? document.documentElement?.clientWidth,
-      scrollY: window.scrollY ?? document.documentElement?.scrollTop,
-      scrollX: window.scrollX ?? document.documentElement?.scrollLeft,
+      innerHeight,
+      innerWidth,
+      scrollY: scrollElement?.scrollTop ?? 0,
+      scrollX: scrollElement?.scrollLeft ?? 0,
+      scrollHeight: scrollElement?.scrollHeight ?? 0,
+      scrollWidth: scrollElement?.scrollWidth ?? 0,
     };
   }
 

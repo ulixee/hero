@@ -28,10 +28,10 @@ export default class BrowserData implements IBrowserData {
     const os = getOperatingSystemParts(userAgentOption);
     this.dataLoader = dataLoader;
     this.baseDataDir = `${dataLoader.dataDir}/as-${browserId}`;
-    this.osDataDir = `${this.baseDataDir}/as-${os.name}-${os.version}`;
-    if (!this.dataLoader.isSupportedEmulator(this.osDataDir)) {
+    this.osDataDir = `${this.baseDataDir}/as-${createOsId(userAgentOption)}`;
+    if (!this.dataLoader.isSupportedEmulatorOs(this.osDataDir)) {
       const otherVersions = this.dataLoader.getBrowserOperatingSystemVersions(browserId, os.name);
-      if (!otherVersions.length) {
+      if (!otherVersions?.length) {
         throw new Error(`${browserId} has no emulation data for ${os.name}`);
       }
       const closestVersionMatch = findClosestVersionMatch(os.version, otherVersions);
@@ -130,7 +130,12 @@ function extractPolyfillFilename(dataDir: string) {
   return filenameMap[localOsMeta.name][versionMatch];
 }
 
-function createBrowserId(userAgentOption: IUserAgentOption) {
+export function createOsId(userAgentOption: IUserAgentOption) {
+  const parts = getOperatingSystemParts(userAgentOption);
+  return `${parts.name}-${parts.version}`;
+}
+
+export function createBrowserId(userAgentOption: IUserAgentOption) {
   const { browserName, browserVersion } = userAgentOption;
   return [browserName, browserVersion.major, browserVersion.minor].filter(x => x).join('-');
 }
@@ -141,7 +146,8 @@ function getOperatingSystemParts(userAgentOption: IUserAgentOption) {
 
   if (name.startsWith('mac')) {
     [major, minor] = convertMacOsVersionString([major, minor].filter(x => x).join('.')).split('.');
-  } else if (name.startsWith('win') && version.minor === '0') {
+  }
+  if (name.startsWith('win') && version.minor === '0') {
     minor = null;
   }
   const finalVersion = [major, minor].filter(x => x).join('-');

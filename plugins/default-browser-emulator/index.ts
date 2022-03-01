@@ -4,7 +4,10 @@ import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
 import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
 import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { BrowserEmulatorClassDecorator, IBrowserEmulatorConfig } from '@ulixee/hero-interfaces/ICorePlugin';
+import {
+  BrowserEmulatorClassDecorator,
+  IBrowserEmulatorConfig,
+} from '@ulixee/hero-interfaces/ICorePlugin';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
@@ -37,10 +40,18 @@ import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
 import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
+import IUserAgentData from './interfaces/IUserAgentData';
+import UserAgentOptions from './lib/UserAgentOptions';
+import BrowserEngineOptions from './lib/BrowserEngineOptions';
+
+// Configuration to rotate out the default browser id. Used for testing different browsers via cli
+const defaultBrowserId = process.env.HERO_DEFAULT_BROWSER_ID;
 
 const dataLoader = new DataLoader(__dirname);
-export const latestBrowserEngineId = 'chrome-89-0';
-export const latestChromeBrowserVersion = { major: '89', minor: '0' };
+const browserEngineOptions = new BrowserEngineOptions(dataLoader, defaultBrowserId);
+const userAgentOptions = new UserAgentOptions(dataLoader, browserEngineOptions);
+
+export const defaultBrowserEngine = browserEngineOptions.default;
 
 @BrowserEmulatorClassDecorator
 export default class DefaultBrowserEmulator extends BrowserEmulator {
@@ -56,18 +67,19 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
 
   protected readonly data: IBrowserData;
   private readonly domOverridesBuilder: DomOverridesBuilder;
+  private readonly userAgentData: IUserAgentData;
 
   constructor(createOptions: ICorePluginCreateOptions) {
     super(createOptions);
     this.data = dataLoader.as(createOptions.userAgentOption) as any;
-
+    this.userAgentData = this.getUserAgentData();
     // set default device profile options
     configureDeviceProfile(this.deviceProfile);
 
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
       createOptions.corePlugins.use(FirstPartyCookiesPlugin);
     }
-    this.domOverridesBuilder = loadDomOverrides(this, this.data);
+    this.domOverridesBuilder = loadDomOverrides(this, this.data, this.userAgentData);
   }
 
   configure(config: IBrowserEmulatorConfig): void {
@@ -109,7 +121,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   }
 
   public beforeHttpRequest(resource: IHttpResourceLoadDetails): void {
-    modifyHeaders(this, this.data, resource);
+    modifyHeaders(this, this.data, this.userAgentData, resource);
   }
 
   public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
@@ -143,7 +155,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools),
+      setUserAgent(this, devtools, this.userAgentData),
       setTimezone(this, devtools),
       setLocale(this, devtools),
       setScreensize(this, page, devtools),
@@ -156,16 +168,36 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public onNewPuppetWorker(worker: IPuppetWorker): Promise<any> {
     const devtools = worker.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools),
+      setUserAgent(this, devtools, this.userAgentData),
       setWorkerDomOverrides(this.domOverridesBuilder, this.data, worker),
     ]);
+  }
+
+  protected getUserAgentData(): IUserAgentData {
+    if (!this.data.windowNavigator.navigator.userAgentData) return null;
+    const uaFullVersion = `${this.browserVersion.major}.0.${this.browserVersion.patch}.${this.browserVersion.build}`;
+    const platformVersion = `${this.operatingSystemVersion.major}.${
+      this.operatingSystemVersion.minor ?? '0'
+    }.${this.operatingSystemVersion.build ?? '1'}`;
+
+    const brands = this.data.windowNavigator.navigator.userAgentData.brands;
+    const brandData = [brands['0'], brands['1'], brands['2']].map(x => ({
+      brand: x.brand._$value,
+      version: x.version._$value,
+    }));
+    return {
+      uaFullVersion,
+      brands: brandData,
+      platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
+      platformVersion,
+    };
   }
 
   public static selectBrowserMeta(userAgentSelector?: string): {
     browserEngine: BrowserEngine;
     userAgentOption: IUserAgentOption;
   } {
-    const userAgentOption = selectUserAgentOption(userAgentSelector, dataLoader.userAgentOptions);
+    const userAgentOption = selectUserAgentOption(userAgentSelector, userAgentOptions);
 
     const { browserName, browserVersion } = userAgentOption;
     const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;
@@ -173,7 +205,14 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
       browserEngineId,
       dataLoader.browserEngineOptions,
     );
+
     const browserEngine = new BrowserEngine(this, browserEngineOption);
+
+    if (browserEngine.name === 'chrome') {
+      const version = browserEngine.fullVersion.split('.').map(Number);
+      // changes at version 90
+      browserEngine.doesBrowserAnimateScrolling = version[0] >= 91;
+    }
     return { browserEngine, userAgentOption };
   }
 

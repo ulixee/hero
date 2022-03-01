@@ -36,6 +36,7 @@ import * as rectUtils from './rectUtils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
+import IRect from '@ulixee/hero-interfaces/IRect';
 
 const { log } = Log(module);
 
@@ -61,13 +62,19 @@ export default class Interactor implements IInteractionsHelper {
     return { ...this.mouse.position };
   }
 
-  public get scrollOffset(): Promise<IPoint> {
+  public get scrollOffset(): Promise<IRect> {
     return this.getWindowOffset().then(offset => {
       return {
         x: offset.scrollX,
         y: offset.scrollY,
+        width: offset.scrollWidth,
+        height: offset.scrollHeight,
       };
     });
+  }
+
+  public get doesBrowserAnimateScrolling(): boolean {
+    return this.tab.session.browserEngine.doesBrowserAnimateScrolling;
   }
 
   public logger: IBoundLog;
@@ -257,14 +264,16 @@ export default class Interactor implements IInteractionsHelper {
       case InteractionCommand.scroll: {
         const startScroll = await this.scrollOffset;
         const [x, y] = await this.getMousePositionXY(interaction, false);
-        const deltaX = x - startScroll.x;
-        const deltaY = y - startScroll.y;
-        await this.mouse.wheel({ deltaX, deltaY });
-        // need to check for offset since wheel event doesn't wait for scroll
-        await this.jsPath.waitForScrollOffset(
-          Math.max(0, deltaX + startScroll.x),
-          Math.max(0, deltaY + startScroll.y),
-        );
+        const maxX = startScroll.width - this.viewportSize.width;
+        const maxY = startScroll.height - this.viewportSize.height;
+
+        const deltaX = Math.min(x, maxX) - startScroll.x;
+        const deltaY = Math.min(y, maxY) - startScroll.y;
+        if (deltaY !== 0 || deltaX !== 0) {
+          await this.mouse.wheel({ deltaX, deltaY });
+          // need to check for offset since wheel event doesn't wait for scroll
+          await this.jsPath.waitForScrollStop();
+        }
         break;
       }
 

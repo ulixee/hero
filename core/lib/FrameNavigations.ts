@@ -87,6 +87,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     return false;
   }
 
+
   public getPaintStableStatus(): { isStable: boolean; timeUntilReadyMs?: number } {
     const top = this.top;
     if (!top) return { isStable: false };
@@ -223,6 +224,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
 
     this.changeNavigationStatus(LoadStatus.HttpRequested, loaderId);
+  }
+
+  public setPageReady(navigation: INavigation, timestamp: number): void {
+    this.recordStatusChange(navigation, LoadStatus.JavascriptReady, timestamp);
   }
 
   public onHttpResponded(

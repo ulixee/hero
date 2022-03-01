@@ -2,10 +2,12 @@ import { BrowserEmulator } from '@ulixee/hero-plugin-utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
+import IUserAgentData from '../interfaces/IUserAgentData';
 
 export default function loadDomOverrides(
   emulator: BrowserEmulator,
   data: IBrowserData,
+  userAgentData: IUserAgentData
 ): DomOverridesBuilder {
   const domOverrides = new DomOverridesBuilder();
 
@@ -18,6 +20,8 @@ export default function loadDomOverrides(
     userAgentString: emulator.userAgentString,
     platform: emulator.operatingSystemPlatform,
     headless: emulator.browserEngine.isHeaded !== true,
+    pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
+    userAgentData,
   });
 
   domOverrides.add('MediaDevices.prototype.enumerateDevices', {

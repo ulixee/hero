@@ -4,10 +4,10 @@ import { GlobalPool } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
-import { latestChromeBrowserVersion } from '@ulixee/default-browser-emulator';
+import { defaultBrowserEngine } from '@ulixee/default-browser-emulator';
 import Hero from '../index';
 
-const chromeVersion = latestChromeBrowserVersion.major;
+const chromeVersion = defaultBrowserEngine.version.major;
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -205,7 +205,15 @@ describe('geolocation', () => {
 });
 
 describe('user hero and platform', () => {
-  const propsToGet = `appVersion, platform, userAgent, deviceMemory`.split(',').map(x => x.trim());
+  const propsToGet = [
+    `appVersion`,
+    `platform`,
+    `userAgent`,
+    `deviceMemory`,
+    `userAgentData.mobile`,
+    `userAgentData.platform`,
+    `userAgentData.brands`,
+  ];
 
   it('should be able to configure a userAgent', async () => {
     const userAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion}.0.4389.114 Safari/537.36`;
@@ -228,7 +236,7 @@ describe('user hero and platform', () => {
     const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
-    expect(version).toBe(89);
+    expect(version).toBe(Number(chromeVersion));
   });
 
   it('should be able to configure a userAgent with a wildcard', async () => {
@@ -241,7 +249,7 @@ describe('user hero and platform', () => {
     const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
-    expect(version).toBe(89);
+    expect(version).toBe(Number(chromeVersion));
   });
 
   it('should add user hero and platform to window & frames', async () => {
@@ -264,10 +272,13 @@ describe('user hero and platform', () => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html><body>
 <script>
-  const { ${propsToGet.join(',')} } = navigator;
+  const data = {
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
+  };
+
   fetch('${koaServer.baseUrl}/frame-xhr', {
    method: 'POST',
-   body: JSON.stringify({ ${propsToGet.join(',')} })
+   body: JSON.stringify(data)
   });
 </script>
 </body></html>`;
@@ -323,8 +334,9 @@ describe('user hero and platform', () => {
         res.end(
           `<html lang="en">
 <script>
-  const { ${propsToGet.join(',')} } = navigator;
-  var startPageVars = { ${propsToGet.join(',')} };
+  var startPageVars = {
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
+  };
 </script>
 <body><a href="${koaServer.baseUrl}/page2">link</a></body></html>`,
         );
@@ -377,16 +389,16 @@ describe('user hero and platform', () => {
     await hero.click(hero.document.querySelector('a'));
     const page3WindowParams = await getParams();
     for (const key of propsToGet) {
-      expect(page3WindowParams[key]).toBe(page1WindowParams[key]);
+      expect(page3WindowParams[key]).toStrictEqual(page1WindowParams[key]);
     }
 
     await hero.goBack();
     const backParams = await getParams();
     for (const key of propsToGet) {
-      expect(backParams[key]).toBe(page1WindowParams[key]);
+      expect(backParams[key]).toStrictEqual(page1WindowParams[key]);
     }
     for (const useragent of requestUserAgentStrings) {
-      expect(useragent).toBe(heroMeta.userAgentString);
+      expect(useragent).toStrictEqual(heroMeta.userAgentString);
     }
   });
 
@@ -410,10 +422,12 @@ describe('user hero and platform', () => {
       ctx.set('content-type', 'application/javascript');
       ctx.body = `onmessage = () => {
 
-  const { ${propsToGet.join(',')} } = navigator;
+  const data = {
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
+  };
   fetch('/worker-xhr', {
    method: 'POST',
-   body: JSON.stringify({ ${propsToGet.join(',')} })
+   body: JSON.stringify(data)
   });
 }`;
     });
@@ -488,8 +502,10 @@ self.addEventListener('message', async event => {
   self.clients.claim();
   const clients = await self.clients.matchAll();
 
-  const { ${propsToGet.join(',')} } = navigator;
-  const data = JSON.stringify({ ${propsToGet.join(',')} });
+  const result = {
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
+  };
+  const data = JSON.stringify(result);
 
   clients.forEach(client => client.postMessage(data));
 });`;

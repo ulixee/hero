@@ -1,8 +1,9 @@
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
+import { pickRandom } from '@ulixee/commons/lib/utils';
 import { randomBytes } from 'crypto';
 
 export default function configureDeviceProfile(deviceProfile: IDeviceProfile): void {
-  deviceProfile.deviceMemory ??= Math.ceil(Math.random() * 4) * 2;
+  deviceProfile.deviceMemory ??= pickRandom([1,2,4,8]);
   deviceProfile.videoDevice ??= {
     deviceId: randomBytes(32).toString('hex'),
     groupId: randomBytes(32).toString('hex'),

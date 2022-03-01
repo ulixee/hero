@@ -11,16 +11,18 @@ import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
+const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.14');
 
-const windowChromePath = Path.resolve(
-  __dirname,
-  '../data/as-chrome-88-0/as-mac-os-10-14/window-chrome.json',
-);
-const { chrome, prevProperty } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any;
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
-
+let chrome;
+let prevProperty: string;
 let puppet: Puppet;
 beforeAll(async () => {
+  const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
+  const windowChromePath = Path.resolve(
+    __dirname,
+    `../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-chrome.json`,
+  );
+  ({ chrome, prevProperty } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any);
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
   await puppet.start();

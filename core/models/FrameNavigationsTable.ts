@@ -29,6 +29,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
         ['httpRequestedTime', 'DATETIME'],
         ['httpRespondedTime', 'DATETIME'],
         ['httpRedirectedTime', 'DATETIME'],
+        ['javascriptReadyTime', 'DATETIME'],
         ['domContentLoadedTime', 'DATETIME'],
         ['loadTime', 'DATETIME'],
         ['contentPaintedTime', 'DATETIME'],
@@ -69,6 +70,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.statusChanges.get(LoadStatus.HttpRequested),
       navigation.statusChanges.get(LoadStatus.HttpResponded),
       navigation.statusChanges.get(LoadStatus.HttpRedirected),
+      navigation.statusChanges.get(LoadStatus.JavascriptReady),
       navigation.statusChanges.get(LoadStatus.DomContentLoaded),
       navigation.statusChanges.get(LoadStatus.AllContentLoaded),
       navigation.statusChanges.get(ContentPaint),
@@ -110,6 +112,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       [LoadStatus.HttpRequested, record.httpRequestedTime],
       [LoadStatus.HttpResponded, record.httpRespondedTime],
       [LoadStatus.HttpRedirected, record.httpRedirectedTime],
+      [LoadStatus.JavascriptReady, record.javascriptReadyTime],
       [LoadStatus.DomContentLoaded, record.domContentLoadedTime],
       [LoadStatus.AllContentLoaded, record.loadTime],
       [ContentPaint, record.contentPaintedTime],
@@ -140,6 +143,7 @@ export interface IFrameNavigationRecord {
   httpRequestedTime: number;
   httpRespondedTime: number;
   httpRedirectedTime?: number;
+  javascriptReadyTime?: number;
   domContentLoadedTime?: number;
   loadTime?: number;
   contentPaintedTime?: number;

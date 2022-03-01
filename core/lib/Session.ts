@@ -110,7 +110,8 @@ export default class Session
   public get meta(): IHeroMeta {
     const { plugins, viewport, locale, timezoneId, geolocation } = this;
 
-    const { userAgentString, operatingSystemPlatform } = this.plugins.browserEmulator;
+    const { userAgentString, operatingSystemPlatform, operatingSystemVersion } =
+      this.plugins.browserEmulator;
 
     return {
       sessionId: this.id,
@@ -125,6 +126,15 @@ export default class Session
       geolocation,
       userAgentString,
       operatingSystemPlatform,
+      operatingSystemVersion: [
+        operatingSystemVersion.major,
+        operatingSystemVersion.minor,
+        operatingSystemVersion.patch,
+        operatingSystemVersion.build,
+      ]
+        .filter(x => x !== undefined)
+        .join('.'),
+      browserFullVersion: this.browserEngine.fullVersion,
     };
   }
 

@@ -374,7 +374,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
         !this.activeLoader.lifecycle.init &&
         !this.activeLoader.isNavigationComplete
       ) {
-        this.activeLoader.setNavigationResult(new CanceledPromiseError('Navigation canceled'));
+        // match chrome error if navigation is intercepted
+        this.activeLoader.setNavigationResult(new CanceledPromiseError('net::ERR_ABORTED'));
       }
       this.startedLoaderId = pageLoaderId;
     }

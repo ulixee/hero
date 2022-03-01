@@ -5,7 +5,7 @@ import {
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
-import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
+import DefaultBrowserEmulator, { defaultBrowserEngine } from '@ulixee/default-browser-emulator';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 
 const id = 'test';
@@ -22,10 +22,7 @@ const viewport: IViewport = {
 
 const userAgentOption: IUserAgentOption = {
   browserName: 'chrome',
-  browserVersion: {
-    major: '88',
-    minor: '0',
-  },
+  browserVersion: defaultBrowserEngine.version,
 
   operatingSystemPlatform: 'linux',
   operatingSystemName: 'linux',

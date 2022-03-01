@@ -501,7 +501,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async waitForNavigationLoader(timeoutMs?: number): Promise<void> {
-    await this.puppetFrame.waitForLoader(undefined, timeoutMs);
+    await this.navigationsObserver.waitForLoad(LoadStatus.JavascriptReady, { timeoutMs });
   }
 
   public async flushPageEventsRecorder(): Promise<boolean> {
@@ -573,6 +573,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         documentNavigation = this.navigations.findHistory(x => x.finalUrl === url);
 
         if (documentNavigation) {
+          this.navigations.setPageReady(documentNavigation, timestamp);
           if (action === DomActionType.location && documentNavigation.initiatedTime < timestamp) {
             documentNavigation.initiatedTime = timestamp;
             // if we already have dom content loaded, update to the new timestamp

@@ -2,6 +2,7 @@ import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
@@ -28,6 +29,7 @@ it('can operate when unsafe eval not on', async () => {
   const tab = session.getTab(meta.tabId);
 
   await tab.goto(inputUrl);
+  await tab.waitForLoad(LoadStatus.DomContentLoaded)
   const input = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
   expect(input.value).toBe('');
   const x = await tab.execJsPath(['document', ['querySelector', 'body'], 'scrollTop']);

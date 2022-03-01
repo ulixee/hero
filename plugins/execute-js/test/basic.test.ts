@@ -28,9 +28,7 @@ test('it should run function in browser and return response', async () => {
 </body>`;
   });
 
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({ userAgent });
+  const hero = new Hero();
   Helpers.onClose(() => hero.close());
   hero.use(ExecuteJsPlugin);
 
@@ -55,9 +53,7 @@ test('it should run function in browser and return incr', async () => {
 </body>`;
   });
 
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({ userAgent });
+  const hero = new Hero();
   Helpers.onClose(() => hero.close());
   hero.use(ExecuteJsPlugin);
 

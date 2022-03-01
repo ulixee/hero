@@ -1,4 +1,95 @@
 {
+  "NavigatorUAData": {
+    "length": {
+      "_$type": "number",
+      "_$flags": "c",
+      "_$value": 0
+    },
+    "name": {
+      "_$type": "string",
+      "_$flags": "c",
+      "_$value": "NavigatorUAData"
+    },
+    "arguments": {
+      "_$type": "object",
+      "_$flags": "",
+      "_$value": null
+    },
+    "caller": {
+      "_$type": "object",
+      "_$flags": "",
+      "_$value": null
+    },
+    "prototype": {
+      "_$protos": ["Object.prototype"],
+      "brands": {
+        "_$flags": "ce",
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get brands() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      },
+      "mobile": {
+        "_$flags": "ce",
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get mobile() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      },
+      "platform": {
+        "_$flags": "ce",
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get platform() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      },
+      "getHighEntropyValues": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getHighEntropyValues"
+        },
+        "_$type": "function",
+        "_$function": "function getHighEntropyValues() { [native code] }",
+        "_$invocation": "TypeError: Failed to execute 'getHighEntropyValues' on 'NavigatorUAData': Illegal invocation",
+        "_$flags": "cew",
+        "_$value": "function getHighEntropyValues() { [native code] }"
+      },
+      "toJSON": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "toJSON"
+        },
+        "_$type": "function",
+        "_$function": "function toJSON() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": "cew",
+        "_$value": "function toJSON() { [native code] }"
+      },
+      "Symbol(Symbol.toStringTag)": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": "NavigatorUAData"
+      }
+    },
+    "new()": {
+      "_$type": "constructor",
+      "_$constructorException": "TypeError: Illegal constructor"
+    },
+    "_$type": "function",
+    "_$function": "function NavigatorUAData() { [native code] }",
+    "_$invocation": "TypeError: Illegal constructor",
+    "_$flags": "cw",
+    "_$value": "function NavigatorUAData() { [native code] }"
+  },
   "MimeType": {
     "length": {
       "_$type": "number",

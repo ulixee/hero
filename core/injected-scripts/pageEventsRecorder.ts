@@ -102,16 +102,10 @@ class PageEventsRecorder {
   private readonly stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
   private readonly observer: MutationObserver;
+  private didSerializeDocument = false;
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
-  }
-
-  public start() {
-    if (isStarted) {
-      return;
-    }
-    isStarted = true;
 
     if (this.location !== 'about:blank') {
       // preload with a document
@@ -122,9 +116,17 @@ class PageEventsRecorder {
       const stamp = Date.now();
       this.pushChange(DomActionType.newDocument, newDocument, stamp);
       this.pushChange(DomActionType.added, this.serializeNode(document), stamp);
-      this.serializeChildren(document, stamp, new Map());
+      this.serializeDocument(stamp);
+      this.uploadChanges();
     }
+  }
 
+  public start() {
+    if (isStarted) {
+      return;
+    }
+    isStarted = true;
+    this.serializeDocument(Date.now());
     this.observer.observe(document, {
       attributes: true,
       childList: true,
@@ -289,6 +291,13 @@ class PageEventsRecorder {
       capture: true,
       passive: true,
     });
+  }
+
+  private serializeDocument(stamp: number) {
+    if (document) {
+      this.serializeChildren(document, stamp, new Map());
+      this.didSerializeDocument = true;
+    }
   }
 
   private getLocationChange(changeUnixTime: number) {

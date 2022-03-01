@@ -275,14 +275,19 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         scrollHeight: document.body.scrollHeight,
       }))()`);
 
-    const {
-      contentSize,
-      visualViewport: { scale, pageX, pageY },
-    } = await this.devtoolsSession.send('Page.getLayoutMetrics');
+    const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
+
+    const { scale, pageX, pageY }  = layoutMetrics.visualViewport;
+    // @ts-expect-error -- Chrome 98 added css content size, which is scaled correctly
+    const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
 
     let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;
     let clip: Viewport;
     if (options.fullPage) {
+      if (scale > 1) {
+        contentSize.height = Math.floor(contentSize.height / scale);
+        contentSize.width = Math.floor(contentSize.width / scale);
+      }
       // Ignore current page scale when taking fullpage screenshots (based on the page content, not viewport),
       clip = { x: 0, y: 0, ...contentSize, scale: 1 };
 

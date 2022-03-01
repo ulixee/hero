@@ -3,10 +3,12 @@ import { pickRandom } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '../../index';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
+import IUserAgentData from '../../interfaces/IUserAgentData';
 
 export default function modifyHeaders(
   browserEmulator: BrowserEmulator,
   data: IBrowserData,
+  userAgentData: IUserAgentData,
   resource: IHttpResourceLoadDetails,
 ) {
   const { userAgentString, locale } = browserEmulator;
@@ -56,6 +58,9 @@ export default function modifyHeaders(
       // if header is an Sec- header, trust Chrome
     } else if (value && lowerName.startsWith('sec-')) {
       // keep given value
+    } else if (!value && lowerName === 'sec-ch-ua-platform') {
+      // must align to user platform! (eg, "Windows")
+      value = `"${userAgentData.platform}"`;
     } else if (value && lowerName === 'accept' && isXhr) {
       // allow user to customize accept value on fetch/xhr
     } else if (lowerName === 'user-agent') {

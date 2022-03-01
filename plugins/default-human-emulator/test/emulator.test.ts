@@ -208,6 +208,7 @@ function createInteractHelper(extras: Partial<IInteractionsHelper>): IInteractio
         y: 50000,
       };
     },
+    doesBrowserAnimateScrolling: true,
     scrollOffset: Promise.resolve({ x: 0, y: 0 }),
     logger: log,
     createMousedownTrigger() {

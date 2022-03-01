@@ -273,9 +273,8 @@ describe('basic Interact tests', () => {
     const tab = Session.getTab({ tabId, sessionId });
     const interactor = tab.mainFrameEnvironment.interactor;
     const reloadSpy = jest.spyOn(interactor, 'reloadJsPath');
-    await tab.goto(`${koaServer.baseUrl}/replace-list`);
-    await tab.waitForLoad(LocationStatus.PaintingStable);
-
+    await hero.goto(`${koaServer.baseUrl}/replace-list`);
+    await hero.activeTab.waitForLoad(LocationStatus.PaintingStable);
 
     for (const result of await hero.querySelectorAll('#outer .inner')) {
       for (const inner of await result.querySelectorAll('ul')) {

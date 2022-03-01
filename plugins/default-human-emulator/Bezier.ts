@@ -36,15 +36,13 @@ export default class Bezier {
     return curveLength(t => Bezier.compute(t, this.derivativePoints[0]));
   }
 
-  getLookupTable(steps = 100): IPoint[] {
-    if (Number.isNaN(steps)) steps = 100;
-    // We want a range from 0 to 1 inclusive, so
-    // we decrement and then use <= rather than <:
-    steps -= 1;
+  getLookupTable(points = 100): IPoint[] {
+    if (Number.isNaN(points)) points = 100;
 
     const table: IPointWithT[] = [];
-    for (let i = 0; i < steps; i += 1) {
-      const t = i / (steps - 1);
+    for (let i = 0; i <= points; i += 1) {
+      let t = i;
+      if (i > 0) t = i / points;
       const p = Bezier.compute(t, this.points);
       p.t = t;
 

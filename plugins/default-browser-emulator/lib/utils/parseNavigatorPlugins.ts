@@ -4,6 +4,10 @@ export default function parseNavigatorPlugins(navigator: any) {
     .filter(x => x[0].match(/\d+/))
     .map(x => x[1]);
 
+  for (const mimeType of mimeTypes) {
+    mimeType.hasNamedPropertyRef = !!mimesJson[mimeType.type];
+  }
+
   const firstMimeType = (mimeTypes[0] as any).type;
   const mimesListHasRefForTypeEntry =
     typeof mimesJson[firstMimeType] === 'string' &&
@@ -15,12 +19,14 @@ export default function parseNavigatorPlugins(navigator: any) {
     .map(x => x[1]);
 
   for (const plugin of plugins) {
+    plugin.mimeTypes = [];
     delete plugin.length;
     for (const [pluginKey, pluginProp] of Object.entries(plugin)) {
       if (pluginKey.match(/\d+/)) {
         const mimeType = (pluginProp as any).type as string;
         delete plugin[pluginKey];
         delete plugin[mimeType];
+        plugin.mimeTypes.push(mimeType);
         mimeTypes.find(x => x.type === mimeType).__pluginName = plugin.name;
       }
     }

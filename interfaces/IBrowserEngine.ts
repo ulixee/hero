@@ -8,6 +8,7 @@ export default interface IBrowserEngine {
   launchArguments: string[];
   isInstalled: boolean;
   userDataDir?: string;
+  doesBrowserAnimateScrolling: boolean;
 
   isHeaded?: boolean;
   verifyLaunchable?(): Promise<any>;

@@ -464,7 +464,7 @@ describe('Frames', () => {
         const result = await page.navigate(server.emptyPage);
         expect(result.loaderId).toBeTruthy();
       } catch (error) {
-        expect(String(error)).toMatch(/Navigation canceled/);
+        expect(String(error)).toMatch(/net::ERR_ABORTED/);
       }
     });
   });
