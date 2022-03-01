@@ -1,4 +1,5 @@
 import { IKeyboardKeyCode } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { IKeyboardShortcut } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
 import {
   IElementInteractVerification,
   IMousePositionXY,
@@ -36,6 +37,7 @@ export enum Command {
 
   keyPress = 'keyPress',
   keyDown = 'keyDown',
+  keyShortcut = 'keyShortcut',
   keyUp = 'keyUp',
   type = 'type',
 
@@ -68,6 +70,7 @@ export interface ICommandDetailed {
   [Command.keyPress]?: IKeyboardKeyCode;
   [Command.keyUp]?: IKeyboardKeyCode;
   [Command.keyDown]?: IKeyboardKeyCode;
+  [Command.keyShortcut]?: IKeyboardShortcut;
 
   [Command.waitForMillis]?: number;
 }

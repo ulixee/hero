@@ -22,6 +22,7 @@ import Interactor from './Interactor';
 import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
 import { createSuperNode } from 'awaited-dom/impl/create';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
+import { KeyboardShortcuts } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
 
 const awaitedPathState = StateMachine<
   any,
@@ -118,8 +119,7 @@ const NodeExtensionFns: INodeExtensionFns = {
     const coreFrame = await awaitedOptions.coreFrame;
     await Interactor.run(coreFrame, [
       { click: this },
-      { keyDown: KeyboardKey.Meta, keyPress: KeyboardKey.a },
-      { keyUp: KeyboardKey.Meta },
+      { keyShortcut: KeyboardShortcuts.selectAll },
       { keyPress: KeyboardKey.Backspace },
     ]);
   },

@@ -22,6 +22,7 @@ import IInteractions, {
 } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { isAwaitedNode } from './SetupAwaitedHandler';
+import { IKeyboardShortcut } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
@@ -199,6 +200,13 @@ function convertInteractionToInteractionGroup(interaction: IInteraction): IInter
       case Command.keyDown: {
         const command = CoreCommand.type;
         return iGroup.push({ command, keyboardCommands: [{ down: value as IKeyboardKeyCode }] });
+      }
+      case Command.keyShortcut: {
+        const command = CoreCommand.type;
+        return iGroup.push({
+          command,
+          keyboardCommands: [{ shortcut: value as IKeyboardShortcut }],
+        });
       }
       case Command.keyUp: {
         const command = CoreCommand.type;

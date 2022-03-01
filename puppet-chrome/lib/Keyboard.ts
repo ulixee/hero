@@ -57,6 +57,13 @@ export class Keyboard implements IPuppetKeyboard {
     });
   }
 
+  async command(command: string): Promise<void> {
+    await this.devtoolsSession.send('Input.dispatchKeyEvent', {
+      type: 'rawKeyDown',
+      commands: [command],
+    });
+  }
+
   async up(key: IKeyboardKey): Promise<void> {
     const description = this.keyDescriptionForString(key);
 
