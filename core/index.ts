@@ -101,13 +101,10 @@ export default class Core {
     this.isStarting = true;
     this.registerSignals();
 
-    const { localProxyPortStart, maxConcurrentClientCount } = options;
+    const { maxConcurrentClientCount } = options;
 
     if (maxConcurrentClientCount !== undefined)
       GlobalPool.maxConcurrentClientCount = maxConcurrentClientCount;
-
-    if (localProxyPortStart !== undefined)
-      GlobalPool.localProxyPortStart = options.localProxyPortStart;
 
     if (options.dataDir !== undefined) {
       Core.dataDir = options.dataDir;

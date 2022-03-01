@@ -201,7 +201,6 @@ export default class Session
     this.websocketMessages = new WebsocketMessages(this.db);
     this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
-      this.configure,
       this.collectSnippet,
       this.getCollectedSnippets,
       this.getCollectedElements,
@@ -258,18 +257,6 @@ export default class Session
 
   public getHeroMeta(): Promise<IHeroMeta> {
     return Promise.resolve(this.meta);
-  }
-
-  public async configure(options: IConfigureSessionOptions): Promise<void> {
-    Object.assign(this.options, options);
-    this.mitmRequestSession.upstreamProxyUrl = this.options.upstreamProxyUrl;
-
-    if (options.blockedResourceTypes !== undefined) {
-      for (const tab of this.tabsById.values()) {
-        await tab.setBlockedResourceTypes(options.blockedResourceTypes);
-      }
-    }
-    this.plugins.configure(options);
   }
 
   public collectSnippet(name: string, value: any): Promise<void> {
@@ -375,7 +362,7 @@ export default class Session
   ): Promise<void> {
     let mitmProxy = sharedMitmProxy;
     if (doesPuppetSupportBrowserContextProxy && this.useIncognitoContext()) {
-      this.isolatedMitmProxy = await MitmProxy.start(GlobalPool.localProxyPortStart, Core.dataDir);
+      this.isolatedMitmProxy = await MitmProxy.start(Core.dataDir);
       mitmProxy = this.isolatedMitmProxy;
     }
 

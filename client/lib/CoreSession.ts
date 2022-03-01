@@ -101,10 +101,6 @@ export default class CoreSession implements IJsPathEventTarget {
     return this.commandQueue.run('Session.getHeroMeta');
   }
 
-  public async configure(options?: Partial<IConfigureSessionOptions>): Promise<void> {
-    await this.commandQueue.run('Session.configure', options);
-  }
-
   public async getTabs(): Promise<CoreTab[]> {
     const tabSessionMetas = await this.commandQueue.run<ISessionMeta[]>('Session.getTabs');
     for (const tabMeta of tabSessionMetas) {

@@ -480,7 +480,7 @@ export default class MitmProxy {
     this.sessionIdByPort[loopbackProxySocket.localPort] = sessionId;
   }
 
-  public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
+  public static async start(sslCaDir?: string): Promise<MitmProxy> {
     if (this.certificateGenerator == null) {
       const baseDir = sslCaDir ?? defaultStorageDirectory;
       if (!Fs.existsSync(baseDir)) {
@@ -490,9 +490,7 @@ export default class MitmProxy {
       this.networkDb = new NetworkDb(baseDir);
       this.certificateGenerator = new CertificateGenerator({ storageDir: baseDir });
     }
-    const proxy = new MitmProxy({
-      port: startingPort,
-    });
+    const proxy = new MitmProxy({});
 
     await proxy.listen();
     return proxy;
