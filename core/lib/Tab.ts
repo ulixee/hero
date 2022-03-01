@@ -187,6 +187,7 @@ export default class Tab
       this.takeScreenshot,
       this.collectResource,
       this.registerFlowHandler,
+      this.registerFlowCommand,
       this.waitForFileChooser,
       this.waitForMillis,
       this.waitForNewTab,
@@ -768,6 +769,20 @@ export default class Tab
     this.session.db.flowHandlers.insert({
       name,
       id,
+      tabId: this.id,
+      callsite: JSON.stringify(callsitePath),
+    });
+    return Promise.resolve();
+  }
+
+  public registerFlowCommand(
+    id: number,
+    parentId: number,
+    callsitePath: ISourceCodeLocation,
+  ): Promise<void> {
+    this.session.db.flowCommands.insert({
+      id,
+      parentId,
       tabId: this.id,
       callsite: JSON.stringify(callsitePath),
     });

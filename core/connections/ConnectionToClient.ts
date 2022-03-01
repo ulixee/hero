@@ -56,6 +56,7 @@ export default class ConnectionToClient
       callsite,
       retryNumber,
       activeFlowHandlerId,
+      flowCommandId,
     } = payload;
     const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
 
@@ -73,6 +74,7 @@ export default class ConnectionToClient
         callsite,
         retryNumber,
         activeFlowHandlerId,
+        flowCommandId,
       });
 
       // make sure to get tab metadata
@@ -227,6 +229,7 @@ export default class ConnectionToClient
       callsite?: ISourceCodeLocation[];
       retryNumber?: number;
       activeFlowHandlerId?: number;
+      flowCommandId?: number
     },
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);

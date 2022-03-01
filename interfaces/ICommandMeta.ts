@@ -20,4 +20,5 @@ export default interface ICommandMeta {
   startNavigationId?: number;
   endNavigationId?: number;
   activeFlowHandlerId?: number;
+  flowCommandId?: number;
 }

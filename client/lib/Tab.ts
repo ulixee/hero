@@ -29,7 +29,7 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Hero  from './Hero';
+import Hero from './Hero';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -37,7 +37,8 @@ import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
-import { InternalPropertiesSymbol,scriptInstance } from './internal';
+import { InternalPropertiesSymbol, scriptInstance } from './internal';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
 const awaitedPathState = StateMachine<
   any,
@@ -77,7 +78,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     return {
-      coreTabPromise: this.#coreTabPromise
+      coreTabPromise: this.#coreTabPromise,
     };
   }
 
@@ -278,6 +279,17 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 
     const coreTab = await this.#coreTabPromise;
     await coreTab.registerFlowHandler(name, state, handlerFn, callsitePath);
+  }
+
+  public async flowCommand(
+    commandFn: () => Promise<void>,
+    exitState?: IDomState | DomState | IDomStateAllFn,
+    options?: IFlowCommandOptions
+  ): Promise<void> {
+    const callsitePath = scriptInstance.getScriptCallsite();
+
+    const coreTab = await this.#coreTabPromise;
+    await coreTab.runFlowCommand(commandFn, exitState, callsitePath, options);
   }
 
   public async triggerFlowHandlers(): Promise<void> {

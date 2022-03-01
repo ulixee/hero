@@ -37,6 +37,7 @@ export default class Commands extends TypedEventEmitter<{
     callsite?: ISourceCodeLocation[];
     retryNumber?: number;
     activeFlowHandlerId?: number;
+    flowCommandId?: number;
   };
 
   private eventLogByRun = new Map<number, IEventRecord[]>();
@@ -44,7 +45,7 @@ export default class Commands extends TypedEventEmitter<{
   private listenerIdCounter = 0;
 
   constructor(readonly db: SessionDb) {
-    super()
+    super();
   }
 
   public create(
@@ -66,8 +67,15 @@ export default class Commands extends TypedEventEmitter<{
     } as ICommandMeta;
 
     if (this.nextCommandMeta) {
-      const { commandId, sendDate, startDate, callsite, retryNumber, activeFlowHandlerId } =
-        this.nextCommandMeta;
+      const {
+        commandId,
+        sendDate,
+        startDate,
+        callsite,
+        retryNumber,
+        activeFlowHandlerId,
+        flowCommandId,
+      } = this.nextCommandMeta;
       this.nextCommandMeta = null;
       if (commandId) commandMeta.id = commandId;
       commandMeta.clientSendDate = sendDate?.getTime();
@@ -75,6 +83,7 @@ export default class Commands extends TypedEventEmitter<{
       commandMeta.callsite = callsite;
       commandMeta.retryNumber = retryNumber;
       commandMeta.activeFlowHandlerId = activeFlowHandlerId;
+      commandMeta.flowCommandId = flowCommandId;
     }
     return commandMeta;
   }
@@ -83,7 +92,7 @@ export default class Commands extends TypedEventEmitter<{
     commandMeta.runStartDate = startDate;
     this.history.push(commandMeta);
     this.db.commands.insert(commandMeta);
-    this.emit('start', commandMeta)
+    this.emit('start', commandMeta);
   }
 
   public onFinished(commandMeta: ICommandMeta, result: any, endNavigationId: number): void {
@@ -91,7 +100,7 @@ export default class Commands extends TypedEventEmitter<{
     commandMeta.result = result;
     commandMeta.endNavigationId = endNavigationId;
     this.db.commands.insert(commandMeta);
-    this.emit('finish', commandMeta)
+    this.emit('finish', commandMeta);
   }
 
   public getCommandForTimestamp(lastCommand: ICommandMeta, timestamp: number): ICommandMeta {

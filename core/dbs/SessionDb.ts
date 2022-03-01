@@ -29,6 +29,7 @@ import CollectedSnippetsTable from '../models/CollectedSnippetsTable';
 import CollectedResourcesTable from '../models/CollectedResourcesTable';
 import OutputTable from '../models/OutputTable';
 import FlowHandlersTable from '../models/FlowHandlersTable';
+import FlowCommandsTable from '../models/FlowCommandsTable';
 
 const { log } = Log(module);
 
@@ -57,6 +58,7 @@ export default class SessionDb {
   public readonly collectedResources: CollectedResourcesTable;
   public readonly collectedSnippets: CollectedSnippetsTable;
   public readonly flowHandlers: FlowHandlersTable;
+  public readonly flowCommands: FlowCommandsTable;
   public readonly pageLogs: PageLogsTable;
   public readonly sessionLogs: SessionLogsTable;
   public readonly session: SessionTable;
@@ -101,6 +103,7 @@ export default class SessionDb {
     this.collectedResources = new CollectedResourcesTable(this.db);
     this.collectedSnippets = new CollectedSnippetsTable(this.db);
     this.flowHandlers = new FlowHandlersTable(this.db);
+    this.flowCommands = new FlowCommandsTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
     this.session = new SessionTable(this.db);
     this.mouseEvents = new MouseEventsTable(this.db);
@@ -127,6 +130,7 @@ export default class SessionDb {
       this.collectedResources,
       this.collectedSnippets,
       this.flowHandlers,
+      this.flowCommands,
       this.pageLogs,
       this.session,
       this.mouseEvents,
