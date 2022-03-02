@@ -7,7 +7,7 @@ import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation'
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
-export default class FlowCommand implements IFlowCommand {
+export default class FlowCommand<T= void> implements IFlowCommand {
   public retryNumber = 0;
 
   public get isComplete(): Promise<boolean> {
@@ -29,10 +29,11 @@ export default class FlowCommand implements IFlowCommand {
   public isFlowStateChanged = false;
 
   private readonly exitHandler: DomStateHandler;
+  private lastResult: T;
 
   constructor(
     private readonly coreTab: CoreTab,
-    private runCommandsFn: () => Promise<void>,
+    private runCommandsFn: () => Promise<T>,
     exitState: IDomState,
     readonly id: number,
     readonly parent: FlowCommand,
@@ -47,9 +48,11 @@ export default class FlowCommand implements IFlowCommand {
     }
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<T> {
     // if we have previously tried this and it's still valid, break out
-    if (this.retryNumber > 0 && !!this.exitHandler && (await this.isComplete)) return;
+    if (this.retryNumber > 0 && !!this.exitHandler && (await this.isComplete)) {
+      return this.lastResult;
+    }
 
     // Retry until isComplete is satisfied, or we have retried a max number of times
     for (let count = 0; count < this.options.maxRetries; count += 1) {
@@ -58,9 +61,9 @@ export default class FlowCommand implements IFlowCommand {
         this.isFlowStateChanged = false; // clear out any flow state changes
         this.retryNumber += count; // add to retry count because we might be nested
         this.setCommandState();
-        await this.runCommandsFn();
+        this.lastResult = await this.runCommandsFn();
 
-        if (await this.isComplete) return;
+        if (await this.isComplete) return this.lastResult;
 
         if (this.isFlowStateChanged) continue;
         // if not complete, trigger flow handlers to retry (catch will trigger on its own)

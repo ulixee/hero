@@ -144,18 +144,18 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', name, id, callsitePath);
   }
 
-  public async runFlowCommand(
-    commandFn: () => Promise<void>,
+  public async runFlowCommand<T>(
+    commandFn: () => Promise<T>,
     exitState: IDomState | DomState | IDomStateAllFn,
     callsitePath: ISourceCodeLocation[],
     options?: IFlowCommandOptions
-  ): Promise<void> {
+  ): Promise<T> {
     if (typeof exitState === 'function') {
       exitState = { all: exitState };
     }
     const flowCommand = await this.flowCommands.create(commandFn, exitState, callsitePath, options);
 
-    await flowCommand.run();
+    return await flowCommand.run();
   }
 
   public async shouldRetryFlowHandlers(

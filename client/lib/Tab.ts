@@ -281,20 +281,20 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     await coreTab.registerFlowHandler(name, state, handlerFn, callsitePath);
   }
 
-  public async flowCommand(
-    commandFn: () => Promise<void>,
-    exitState?: IDomState | DomState | IDomStateAllFn,
-    options?: IFlowCommandOptions
-  ): Promise<void> {
-    const callsitePath = scriptInstance.getScriptCallsite();
-
-    const coreTab = await this.#coreTabPromise;
-    await coreTab.runFlowCommand(commandFn, exitState, callsitePath, options);
-  }
-
   public async triggerFlowHandlers(): Promise<void> {
     const coreTab = await this.#coreTabPromise;
     await coreTab.triggerFlowHandlers();
+  }
+
+  public async flowCommand<T = void>(
+    commandFn: () => Promise<T>,
+    exitState?: IDomState | DomState | IDomStateAllFn,
+    options?: IFlowCommandOptions
+  ): Promise<T> {
+    const callsitePath = scriptInstance.getScriptCallsite();
+
+    const coreTab = await this.#coreTabPromise;
+    return await coreTab.runFlowCommand(commandFn, exitState, callsitePath, options);
   }
 
   public waitForResource(
