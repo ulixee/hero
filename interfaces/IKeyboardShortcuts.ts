@@ -1,9 +1,12 @@
 export enum KeyboardShortcuts {
   'selectAll' = 'selectAll',
 
-  'delete' = 'delete',
-  'deleteBackward' = 'deleteBackward',
-  'deleteForward' = 'deleteForward',
+  'copy' = 'copy',
+  'cut' = 'cut',
+  'paste' = 'paste',
+  'pasteAndMatchStyle' = 'pasteAndMatchStyle',
+  'undo' = 'undo',
+  'redo' = 'redo',
   'deleteToEndOfParagraph' = 'deleteToEndOfParagraph',
   'deleteWordForward' = 'deleteWordForward',
   'deleteWordBackward' = 'deleteWordBackward',

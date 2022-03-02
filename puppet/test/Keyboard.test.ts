@@ -321,16 +321,10 @@ describe('Keyboard', () => {
     await page.keyboard.press('Meta');
     const lastEvent = await captureLastKeydown(page);
     const { key, code, metaKey } = lastEvent;
-    // if (options.FIREFOX && !MAC) expect(key).toBe('OS');
-    // else
     expect(key).toBe('Meta');
 
-    // if (options.FIREFOX) expect(code).toBe('OSLeft');
-    // else
     expect(code).toBe('MetaLeft');
 
-    // if (options.FIREFOX && !MAC) expect(metaKey).toBe(false);
-    // else
     expect(metaKey).toBe(true);
   });
 
