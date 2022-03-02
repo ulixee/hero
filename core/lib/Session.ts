@@ -11,7 +11,6 @@ import IPuppetContext, { IPuppetContextEvents } from '@ulixee/hero-interfaces/IP
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
-import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
