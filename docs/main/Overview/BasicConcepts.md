@@ -33,7 +33,7 @@ for (const elem of await elems) {
 }
 ```
 
-Hero's Dynamic DOM allows you to keep all calls within your script context. It also follows the W3C spec to a T. In fact, go ahead and copy lines 3 through 7 and run paste them into your browser's DevTools. They run perfectly.
+Hero's Awaited DOM allows you to keep all calls within your script context. It also follows the W3C spec to a T. In fact, go ahead and copy lines 3 through 7 and run paste them into your browser's DevTools. They run perfectly.
 
 ### Doing It with Puppeteer
 
@@ -67,8 +67,7 @@ When you're trying to eke out performance, a common technique is to disable rend
 ```js
 import Hero from '@ulixee/hero';
 
-const hero = new Hero();
-await hero.configure({
+const hero = new Hero({
   blockedResourceTypes: ['All'],
 });
 await hero.goto('https://ulixee.org');

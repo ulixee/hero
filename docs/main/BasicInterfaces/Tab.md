@@ -320,6 +320,96 @@ Reload the currently loaded url.
 
 #### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The loaded resource representing this page.
 
+
+### tab.registerFlowHandler*(name, state, handlerFn)* {#register-flow-handler}
+
+Register a [FlowHandler](/docs/advanced/flow) on the given tab. A FlowHandler is a callback function that will be invoked anytime your Hero script encounters Awaited Dom errors. These can be used to correct your script flow.
+
+As an example, imagine you are interacting with a website that sometimes pops up an "Accept Cookies" modal. As you don't know "when" it might trigger, it can be difficult to know when to look for the modal. With a FlowHandler, you declare the [State](#wait-for-state) that should trigger the associated callback, and a function to dismiss the cookie popup. 
+
+```
+5.   await hero.registerFlowHandler('CookieModal', assert => {
+6.     assert(hero.querySelector('#cookie-modal').$isVisible);
+7.   },
+8.   async error => {
+9.     await hero.querySelector('#cookie-modal .dismiss').$click();
+10.  });
+```
+
+Once registered, your `CookieModal` FlowHandler will be automatically checked anytime an AwaitedDom error occurs. These errors are things like: an element can't be found, an element interaction failed, or waiting for an element [State](#wait-for-state) timed out. 
+
+So, to continue our example, imagine your script is filling out a form field. As you go to click on the field, it can't be clicked because the `CookieModal` has displayed. 
+
+```
+5.    await hero.registerFlowHandler('CookieModal',
+...
+12.   await hero.querySelector('#field1').$click(); // FAILS DUE TO OBSTRUCTION
+```
+
+When your script fails to click on `#field1` (line 12 above), the `CookieModal` handler is checked. It matches the current state, and so triggers closing the modal.
+
+```
+9.     await hero.querySelector('#cookie-modal .dismiss').$click(); <--- Closes the modal!
+```
+
+Now your script is no longer obstructed and will re-resume clicking on `#field1` (line 12 above). 
+
+
+You might find it useful to continue to accumulate FlowHandlers as you encounter edge cases in your script. In the default case, your individual commands will be retried when a FlowHandler can resolve your page state. In more advanced cases, you might find that you need to resume a "block" of activities. To handle these cases, we have [FlowCommands](#flow-commands).
+
+[FlowCommands](#flow-commands) are simply ways to group a series of commands together. When an AwaitedDom error occurs, a Flow Command will re-rerun the entire block. In the example above, your interaction might have many steps. You would want to ensure all steps are run when a failure is encountered.
+
+```
+  await hero.flowCommand(async () => { 
+    await hero.querySelector('#field1').$click();
+    await hero.querySelector('#field1').$clearInputText();
+
+    // Failure here resumes the entire block once a FlowHandler fixes the state
+    await hero.querySelector('#field1').$type('value'); 
+  });
+```
+
+#### **Arguments**:
+- name `string`. A required name to give to this FlowHandler. NOTE: many FlowHandlers trigger on generic querySelector strings (eg, .modal.a1-regEU). Without this self-documenting name, we found them very difficult to decipher after a few weeks passed.
+- state `DomState | (assert: IPageStateAssert) => void`. A [State](#wait-for-state) object or callback for the assertion to match.
+- handlerFn `() => Promise<any>`. An asynchronous function in which you can resolve the page state to handle this issue.
+
+#### **Returns**: `Promise<void>`
+
+### tab.flowCommand*(commandFn, exitState?, options?)* {#flow-command}
+
+A FlowCommand allows you define a "recovery" boundary in the case where an AwaitedDom error triggers a FlowHandler and modifies your page state. In some cases, you may wish to ensure that a series of commands are re-run instead of a single failing command. For instance, if you lose focus on a modal-window field in the middle of typing, you will want to run the logic that prompted the modal-window to show up.
+
+FlowCommands can define an `exitState`, which will be tested before moving on. An `exitState` is a [`State`](#wait-for-state) object or callback function defined the same as the parameter to [`waitForState`](#wait-for-state). If your function completes and the `exitState` cannot be satisfied, all FlowHandlers will be triggered and the function will try again (up to the `maxRetries` times provided in options).
+
+```
+  await hero.flowCommand(async () => { 
+    await hero.querySelector('#modalPrompt').$click();
+    await hero.querySelector('#field1').$type('text'); 
+  }, assert => {
+    assert(hero.querySelector('#field1').value, 'text'); <--- if false, 1. Prompt FlowHandlers, 2. Retry Command
+  });
+```
+
+
+Flow Commands can be nested within each other. If nested commands cannot be completed due to AwaitedDom errors (interactions, dom errors, dom state timeouts), they will trigger the outer block to be re-tried.
+
+#### **Arguments**:
+
+- commandFn `() => Promise<T>`. Your command function containing one or more Hero commands to retry on AwaitedDom errors (after resolving one or more FlowHandlers). Any returned value will be returned to the `tab.flowCommand` call.
+- exitState `DomState | (assert: IPageStateAssert) => void`. Optional [State](#wait-for-state) object that must resolve before continuing your script execution. If false, FlowHandlers will be retried to determine if another pass should be made.
+- options `object`. Optional options to configure this flowCommand
+  - maxRetries `number`. Default `3`.The number of times this FlowCommand should be retried before throwing an error. 
+
+#### **Returns**: `Promise<T>`
+
+
+### tab.triggerFlowHandlers*()* {#trigger-flow-handler}
+
+Check the state of all [FlowHandlers](#register-flow-handler) and trigger them to run if they match the current page state. 
+
+#### **Returns**: `Promise<void>`
+
 ### tab.takeScreenshot*(options?)* {#take-screenshot}
 
 Takes a screenshot of the current contents rendered in the browser.
@@ -406,9 +496,19 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
  });
 ``` 
 
+WaitForState can be optionally shortened to the callback:
+
+```
+await hero.waitForState(assert => {
+  assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
+  assert(hero.isPaintingStable);
+  assert(hero.document.querySelector('h1').textContent, text => text === "It's Time to Open the Data Economy");
+});
+```
+
 #### **Arguments**:
 
-- state `object`
+- state `object` | `(assert: IPageStateAssert) => void`. A state object or just the callback directly as a shorter option.
   - name? `string`. Optional name of the state
   - url? `string` | `Regexp`. Optional url to run this state on (useful for running in a loop)
   - all `(assert: IPageStateAssert) => void`. A synchronous function that will be true if all assertions evaluate to true. 
@@ -418,8 +518,16 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
 - options `object` Optional
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
 
-#### **Returns**: `Promise<boolean>`
+#### **Returns**: `Promise<void>`
 
+### tab.validateState*(state)* {#validate-state}
+
+Check a [State](#wait-for-state) defined as per `tab.waitForState` above. Instead of waiting, this method will check the state a single time and return a boolean if the state is valid.
+
+#### **Arguments**:
+- state `object` | `(assert: IPageStateAssert) => void`. A state object or just the callback directly as a shorter option.
+
+#### **Returns**: `Promise<boolean>`
 
 ### tab.waitForFileChooser*(options)* {#wait-for-file-chooser}
 

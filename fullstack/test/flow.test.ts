@@ -229,7 +229,7 @@ describe('flow commands', () => {
       flowCommandSpy();
       const field = await hero.querySelector('#text-field');
       await field.$click();
-      await field.$clearValue();
+      await field.$clearInputText();
       const text = await hero.querySelector('h1').textContent;
       await field.$type(text);
     });
@@ -307,7 +307,7 @@ describe('flow commands', () => {
       },
       async () => {
         await hero.querySelector('#text').focus();
-        await hero.querySelector('#text').$clearValue();
+        await hero.querySelector('#text').$clearInputText();
       },
     );
 
@@ -328,6 +328,7 @@ describe('flow commands', () => {
     await expect(hero.querySelector('#text').value).resolves.toBe('test');
   });
 
+
   it('can handle nested command blocks', async () => {
     koaServer.get('/flowForm', ctx => {
       ctx.body = `
@@ -337,14 +338,15 @@ describe('flow commands', () => {
     <button class="close" onclick="closeCookiePrompt()">X</button>
   </div>
   <form>
-    <input type="text" value="" id="field1" name="field1"/>
-    <input type="text" value="" id="field2" name="field2" onfocus="showCookiePrompt()"/>
+    <input type="text" value="" id="field1" name="field1" />
+    <input type="text" value="" id="field2" name="field2" onkeypress="showCookiePrompt()" />
   </form>
   <script type="text/javascript">
   
   const dialog = document.querySelector('#dialog');
   let hasTriggered = false;
   function showCookiePrompt() {
+    if (!document.querySelector('#field2').value) return;
     if (hasTriggered) return;
     hasTriggered = true;
     document.forms[0].reset();
@@ -381,7 +383,7 @@ describe('flow commands', () => {
         async () => {
           flow1CommandSpy()
           await field1.$click();
-          await field1.$clearValue();
+          await field1.$clearInputText();
           await field1.$type('value1');
         },
         assert => assert(field1.value, 'value1'),
@@ -391,7 +393,7 @@ describe('flow commands', () => {
         async () => {
           flow2CommandSpy()
           await field2.$click();
-          await field2.$clearValue();
+          await field2.$clearInputText();
           await field2.$type('value2');
         },
         assert => assert(field2.value, 'value2'),

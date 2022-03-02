@@ -20,12 +20,6 @@ Browsers will be saved to a shared location on each OS. Each browser version wil
 - Linux: ~/.cache (environment variable XDG_CACHE_HOME)
 - Windows: ~/AppData/Local (environment variable LOCALAPPDATA)
 
-#### Replay
-
-Hero also installs an app called [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions. Replay is ~200MB unpacked. To skip download (ie, in a production environment), you can set the following environmental variable: `HERO_REPLAY_SKIP_BINARY_DOWNLOAD=true`.
-
-If you continue to have problems, [let us know](https://github.com/ulixee/ulixee/issues).
-
 ### Debugging Logs
 
 By default, Hero logs everything to a [Session](/docs/advanced/session) database that is created per Hero instance. The SessionLogs table contains all debug logs.
@@ -73,4 +67,4 @@ Logger.injectLogger({
 
 ### Problems after an upgrade
 
-If you have problems after upgrading, [let us know](https://github.com/ulixee/ulixee/issues).
+If you have problems after upgrading, [let us know](https://github.com/ulixee/hero/issues).

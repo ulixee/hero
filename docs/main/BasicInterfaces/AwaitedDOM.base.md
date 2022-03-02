@@ -14,6 +14,8 @@ Supers give you access to all properties and methods of dependent classes.
 
 [INTERFACES:Super]
 
+Some helpers are added to the Super classes to make using Hero more intuitive. Find a list [here](/docs/basic-interfaces/dom-extenders)
+
 ## Document Interfaces
 
 [INTERFACES:Document]

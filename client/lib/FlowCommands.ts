@@ -32,26 +32,28 @@ export default class FlowCommands {
       flowCommand = this.flowCommands.find(
         x => x.parentId === parentFlow.id && callsiteJson === JSON.stringify(x.callsitePath),
       ) as any;
+    }
+    if (flowCommand) {
       flowCommand.retryNumber += 1;
       return flowCommand;
-    } else {
-      flowCommand = new FlowCommand(
-        this.coreTab,
-        commandFn,
-        exitState,
-        id,
-        parentFlow,
-        callsitePath,
-        options,
-      );
-      this.flowCommands.push(flowCommand);
-      await this.coreTab.commandQueue.runOutOfBand(
-        'Tab.registerFlowCommand',
-        flowCommand.id,
-        flowCommand.parentId,
-        callsitePath,
-      );
     }
+
+    flowCommand = new FlowCommand(
+      this.coreTab,
+      commandFn,
+      exitState,
+      id,
+      parentFlow,
+      callsitePath,
+      options,
+    );
+    this.flowCommands.push(flowCommand);
+    await this.coreTab.commandQueue.runOutOfBand(
+      'Tab.registerFlowCommand',
+      flowCommand.id,
+      flowCommand.parentId,
+      callsitePath,
+    );
 
     return flowCommand;
   }

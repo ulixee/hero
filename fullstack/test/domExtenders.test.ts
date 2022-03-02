@@ -59,7 +59,7 @@ describe('basic DomExtender tests', () => {
       ctx.body = `<body><input id="field" type="text" value="1234Test"/></body>`;
     });
     const hero = await openBrowser(`/domextender-clear`);
-    await expect(hero.querySelector('#field').$clearValue()).resolves.toBe(undefined);
+    await expect(hero.querySelector('#field').$clearInputText()).resolves.toBe(undefined);
     await expect(hero.querySelector('#field').value).resolves.toBe('');
   });
 });
