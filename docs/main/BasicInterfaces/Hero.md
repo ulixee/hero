@@ -13,7 +13,7 @@ const Hero = require('@ulixee/hero');
 })();
 ```
 
-An Hero instance can be thought of as a single user-browsing session. A default instance is automatically initialized and available as the default export of `ulixee`. Each additional instance you create has the following attributes:
+An Hero instance can be thought of as a single user-browsing session. Each instance you create has the following attributes:
 
 #### Replayable
 
@@ -21,7 +21,7 @@ An instance has a [replayable](/docs/advanced/session-replay)&nbsp;[Session](/do
 
 #### Lightweight
 
-Instances are very lightweight, sharing a pool of browsers underneath. To manage concurrent scrapes in a single script, you can create one Hero for each scrape, or manage load and concurrency with a [Handler](/docs/basic-interfaces/handler).
+Instances are very lightweight, sharing a pool of browsers underneath. To manage concurrent scrapes in a single script, you can create one Hero for each scrape.
 
 #### Single Active Tab
 
@@ -30,24 +30,6 @@ Hero instances can have multiple [Tabs](/docs/basic-interfaces/tab), but only a 
 #### Sandboxed
 
 Each Hero instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/plugins/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
-
-## Default Instance {#default}
-
-A default instance is automatically initialized and available as the default export of `ulixee`.
-
-The default instance can receive configuration via command line arguments. Any args starting with `--input.*` will be processed. The resulting json object is available as [`hero.input`](#input)
-
-```js
-// script.js
-const Hero = require('@ulixee/hero');
-
-const hero = new Hero();
-console.log(hero.input); // { secret: "true", hero: "true" }
-```
-
-```bash
-$ node script.js --input.secret=true --input.hero=true
-```
 
 ## Constructor
 
@@ -78,6 +60,7 @@ const Hero = require('@ulixee/hero');
   - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (~) allows for dynamic options.
   - browserEmulatorId `string` defaults to `default-browser-emulator`. Chooses the BrowserEmulator plugin which emulates the properties that help Hero look like a normal browser.
   - humanEmulatorId `string` defaults to `default-human-emulator`. Chooses the HumanEmulator plugin which drives the mouse/keyboard movements.
+  - mode `string`. A mode of operation. This variable controls logging levels and whether Hero "tooling" should be activated. Defaults to environment variable `NODE_ENV`.
   - dnsOverTlsProvider `object`. Configure the host and port to use for DNS over TLS. This feature replicates the Chrome feature that is used if the host DNS provider supports DNS over TLS or DNS over HTTPS. A `null` value will disable this feature.
     - host `string`. The DNS provider host address. Google=8.8.8.8, Cloudflare=1.1.1.1, Quad9=9.9.9.9.
     - servername `string`. The DNS provider tls servername. Google=dns.google, Cloudflare=cloudflare-dns.com, Quad9=dns.quad9.net.
@@ -97,8 +80,8 @@ const Hero = require('@ulixee/hero');
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
-  - input `object`. An object containing properties to attach to the hero. NOTE: if using the default hero, this object will be populated with command line variables starting with `--input.{json path}`. The `{json path}` will be translated into an object set to `hero.input`.
-  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `HERO_SHOW_REPLAY=true`.
+  - showBrowser `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `HERO_SHOW_BROWSER=true`.
+  - showBrowserInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
     - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in `plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts`. Defaults to `ipify.org`.
@@ -115,7 +98,7 @@ Returns a reference to the currently active tab.
 
 ### hero.coreHost {#core-host}
 
-The connectionToCore host address to which this Hero has connected. This is useful in scenarios where a Handler is round-robining connections between multiple hosts.
+The connectionToCore host address to which this Hero has connected. This is useful in scenarios where Hero instances are round-robining between multiple hosts.
 
 #### **Type**: `Promise<string>`
 
@@ -132,17 +115,6 @@ Alias for [activeTab.document](/docs/basic-interfaces/tab#document)
 Returns a list of [FrameEnvironments](/docs/basic-interfaces/frame-environment) loaded for the active tab.
 
 #### **Type**: [`Promise<FrameEnvironment[]>`](/docs/basic-interfaces/frame-environment).
-
-### hero.input {#input}
-
-Contains the input configuration (if any) for this hero. This might come from:
-
-- [`Handler.dispatchHero`](/docs/basic-interfaces/handler#dispatch-hero)
-- or the [default `hero`](#default)
-
-NOTE: if using the default hero, this object will be populated with command line variables starting with `--input.*`. The parameters will be translated into an object set to `hero.input`.
-
-#### **Type**: Object
 
 ### hero.isAllContentLoaded {#is-all-content-loaded}
 
@@ -211,39 +183,11 @@ Retrieves metadata about the hero configuration:
   - proxyIp `string`. The public IP address of the proxy.
   - publicIp `string`. The public IP address of the host machine.
 - userAgentString `string`. The user agent string used in Http requests and within the DOM.
+- browserFullVersion `string`. The full version of Chrome (eg, 98.0.4758.102)
+- operatingSystemPlatform `string`. The emulated operating system (eg, Windows)
+- operatingSystemVersion `string`. The full operating system version (eg, 11.0.1)
 
 #### **Type**: `Promise<IHeroMeta>`
-
-### hero.output {#output}
-
-Hero output is an object used to track any data you collect during your session. Output will be shown in Replay during playback for easy visual playback of data collection.
-
-Output is able to act like an Array or an Object. It will serialize properly in either use-case.
-
-NOTE: any object you assign into Output is "copied" into the Output object. You should not expect further changes to the source object to synchronize.
-
-```js
-const Hero = require('@ulixee/hero');
-
-(async () => {
-  const hero = new Hero();
-  await hero.goto('https://www.google.com');
-  const document = hero.document;
-
-  for (const link of await document.querySelectorAll('a')) {
-    hero.output.push({
-      // will display in Replay UI.
-      text: await link.textContent,
-      href: await link.href,
-    });
-  }
-
-  console.log(hero.output);
-  await hero.close();
-})();
-```
-
-#### **Type**: `Output`. An array-like object.
 
 ### hero.sessionId {#sessionId}
 
@@ -254,8 +198,6 @@ An identifier used for storing logs, snapshots, and other assets associated with
 ### hero.sessionName {#sessionName}
 
 A human-readable identifier of the current Hero session.
-
-You can set this property when calling [Handler.dispatchHero()](/docs/basic-interfaces/handler#dipatch-hero) or [Handler.createHero()](/docs/basic-interfaces/handler#create-hero).
 
 #### **Type**: `Promise<string>`
 
@@ -312,32 +254,9 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 Alias for [Tab.close()](/docs/basic-interfaces/tab#close)
 
-### hero.configure*(options)* {#configure}
-
-Update existing configuration settings.
-
-#### **Arguments**:
-
-- options `object` Accepts any of the following:
-  - userProfile `IUserProfile`. Previous user's cookies, session, etc.
-  - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
-  - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
-  - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width. (See constructor for parameters).
-  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
-  - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
-  - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
-    - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in `plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts`. Defaults to `ipify.org`.
-    - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
-    - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
-  - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to booting up and connecting to a local `Core`.
-
-#### **Returns**: `Promise`
-
-See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/plugins/browser-emulators) and [HumanEmulators](/docs/plugins/human-emulators).
-
 ### hero.exportUserProfile*()* {#export-profile}
 
-Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `hero.configure({ userProfile: serialized })`. See the [UserProfile page](/docs/advanced/user-profile) for more details.
+Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `new Hero({ userProfile: serialized })`. See the [UserProfile page](/docs/advanced/user-profile) for more details.
 
 #### **Returns**: [`Promise<IUserProfile>`](/docs/advanced/user-profile)
 
@@ -508,6 +427,14 @@ Alias for [Tab.querySelector](/docs/basic-interfaces/tab#query-selector)
 
 Alias for [Tab.querySelectorAll](/docs/basic-interfaces/tab#query-selector-all)
 
+### hero.registerFlowHandler*(name, state, handlerFn)* {#register-flow-handler}
+
+Alias for [Tab.registerFlowHandler](/docs/basic-interfaces/tab#register-flow-handler)
+
+### tab.flowCommand*(commandFn, exitState?, options?)* {#flow-command}
+
+Alias for [Tab.flowCommand](/docs/basic-interfaces/tab#flow-command)
+
 ### hero.reload*(timeoutMs?)* {#reload}
 
 Alias for [Tab.reload](/docs/basic-interfaces/tab#reload)
@@ -515,6 +442,10 @@ Alias for [Tab.reload](/docs/basic-interfaces/tab#reload)
 ### hero.takeScreenshot*(options?)* {#take-screenshot}
 
 Alias for [Tab.takeScreenshot](/docs/basic-interfaces/tab#take-screenshot)
+
+### hero.validateState*(state)* {#validate-state}
+
+Alias for [Tab.validateState](/docs/basic-interfaces/tab#validate-state)
 
 ### hero.waitForFileChooser*(options)* {#wait-for-file-chooser}
 

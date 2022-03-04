@@ -7,6 +7,7 @@ import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionO
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
@@ -26,8 +27,13 @@ import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation'
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { scriptInstance } from './internal';
+import FlowCommands from './FlowCommands';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
 export default class CoreTab implements IJsPathEventTarget {
+  private static waitForStateCommandPlaceholder = 'waitForState';
+
   public tabId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
@@ -39,6 +45,7 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public frameEnvironmentsById = new Map<number, CoreFrameEnvironment>();
   protected readonly meta: ISessionMeta & { sessionName: string };
+  private readonly flowCommands = new FlowCommands(this);
   private readonly flowHandlers: IFlowHandler[] = [];
   private readonly connection: ConnectionToCore;
   private readonly mainFrameId: number;
@@ -64,7 +71,7 @@ export default class CoreTab implements IJsPathEventTarget {
       connection,
       coreSession as ICommandCounter,
     );
-    this.commandQueue.registerCommandRetryHandlerFn(this.shouldRetryFlowHandler.bind(this));
+    this.commandQueue.registerCommandRetryHandlerFn(this.shouldRetryFlowHandlers.bind(this));
     this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(this, meta, null));
@@ -84,13 +91,26 @@ export default class CoreTab implements IJsPathEventTarget {
     if (typeof state === 'function') {
       state = { all: state };
     }
-    const handler = new DomStateHandler(state, null, this, callsitePath);
+    const handler = new DomStateHandler(state, null, this, callsitePath, {
+      flowCommand: this.flowCommands.runningFlowCommand,
+    });
     try {
       await handler.waitFor(options.timeoutMs);
     } catch (error) {
+      if (!(error instanceof TimeoutError)) throw error;
+
+      // Retry state after each flow handler, but do not retry the timeout
       for (let i = 0; i < CoreCommandQueue.maxCommandRetries; i += 1) {
+        this.commandQueue.retryingCommand = {
+          command: CoreTab.waitForStateCommandPlaceholder,
+          retryNumber: i,
+        } as any;
+
         const keepGoing = await this.triggerFlowHandlers();
         if (!keepGoing) break;
+
+        if (this.flowCommands.isRunning) throw error;
+
         const didPass = await handler.check(true);
         if (didPass) return;
       }
@@ -124,14 +144,30 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.runOutOfBand('Tab.registerFlowHandler', name, id, callsitePath);
   }
 
-  public async shouldRetryFlowHandler(
+  public async runFlowCommand<T>(
+    commandFn: () => Promise<T>,
+    exitState: IDomState | DomState | IDomStateAllFn,
+    callsitePath: ISourceCodeLocation[],
+    options?: IFlowCommandOptions
+  ): Promise<T> {
+    if (typeof exitState === 'function') {
+      exitState = { all: exitState };
+    }
+    const flowCommand = await this.flowCommands.create(commandFn, exitState, callsitePath, options);
+
+    return await flowCommand.run();
+  }
+
+  public async shouldRetryFlowHandlers(
     command: CoreCommandQueue['internalState']['lastCommand'],
     error: Error,
   ): Promise<boolean> {
     if (error instanceof CanceledPromiseError) return false;
     if (
-      command.command === 'FrameEnvironment.execJsPath' ||
-      command.command === 'FrameEnvironment.interact'
+      // NOTE: waitForState is also handled in it's own fn
+      command?.command === 'FrameEnvironment.execJsPath' ||
+      command?.command === 'FrameEnvironment.interact' ||
+      command?.command === CoreTab.waitForStateCommandPlaceholder
     ) {
       return await this.triggerFlowHandlers();
     }
@@ -147,6 +183,7 @@ export default class CoreTab implements IJsPathEventTarget {
           null,
           this,
           flowHandler.callsitePath,
+          { flowHandlerId: flowHandler.id },
         );
         try {
           if (await handler.check()) {
@@ -161,11 +198,12 @@ export default class CoreTab implements IJsPathEventTarget {
 
     try {
       const flowHandler = matchingStates[0];
+      this.flowCommands.didRunFlowHandlers();
       this.commandQueue.setCommandMetadata({ activeFlowHandlerId: flowHandler.id });
       await flowHandler.handlerFn();
       return true;
     } finally {
-      this.commandQueue.setCommandMetadata({});
+      this.commandQueue.setCommandMetadata({ activeFlowHandlerId: undefined });
     }
   }
 
@@ -266,12 +304,13 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    source?: {
-      callsite: ISourceCodeLocation[];
-      retryNumber: number;
-    },
+    extras?: Partial<ICoreRequestPayload>,
   ): Promise<void> {
-    await this.eventHeap.addListener(jsPath, eventType, listenerFn, options, source);
+    if (this.commandQueue.commandMetadata) {
+      extras ??= {};
+      Object.assign(extras, this.commandQueue.commandMetadata);
+    }
+    await this.eventHeap.addListener(jsPath, eventType, listenerFn, options, extras);
   }
 
   public async removeEventListener(
@@ -279,12 +318,14 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    source?: {
-      callsite: ISourceCodeLocation[];
-      retryNumber: number;
-    },
+    extras?: Partial<ICoreRequestPayload>,
   ): Promise<void> {
-    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options, source);
+    if (this.commandQueue.commandMetadata) {
+      extras ??= {};
+      Object.assign(extras, this.commandQueue.commandMetadata);
+    }
+
+    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options, extras);
   }
 
   public async flush(): Promise<void> {

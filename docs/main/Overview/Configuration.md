@@ -2,50 +2,32 @@
 
 Configuration variables can be defined at a few levels:
 
-- `Hero` At an instance level, configured via [hero.configure()](/docs/basic-interfaces/hero#configure) or [new Hero()](/docs/basic-interfaces/hero#constructor), or when creating [Handler](/docs/basic-interfaces/handler) heros using [handler.createHero()](/docs/basic-interfaces/handler#create-hero) or [handler.dispatchHero()](/docs/basic-interfaces/handler#dispatch-hero).
+- `Hero` At an instance level, configured via [new Hero()](/docs/basic-interfaces/hero#constructor).
 - `Connection` At a connection level, which can be configured when creating a new [ConnectionToCore](/docs/advanced/connection-to-core#configuration).
 - `Core` At an internal level, using the `@ulixee/hero-core` module of Hero. This must be run in the environment where your Browser Engine(s) and `@ulixee/hero-core` module are running. If you're running remote, this will be your server.
 
-The internal `@ulixee/hero-core` module can receive several configuration options on [start](#core-start), or when a [Handler](/docs/basic-interfaces/handler) or [Hero](/docs/basic-interfaces/hero) establishes a [connection](/docs/advanced/connection-to-core).
+The internal `@ulixee/hero-core` module can receive several configuration options on [start](#core-start), or when a new [connection](/docs/advanced/connection-to-core) is established.
 
 ### Connection To Core <div class="specs"><i>Hero</i></div>
 
-The [ConnectionToCore](/docs/advanced/connection-to-core) to be used by a [Handler](/docs/basic-interfaces/handler) or [Hero](/docs/basic-interfaces/hero).
+The [ConnectionToCore](/docs/advanced/connection-to-core) to be used by one or more [Hero](/docs/basic-interfaces/hero) instances.
 
 All [configurations](/docs/advanced/connection-to-core#configurations) accept both an `options` object and a [`ConnectionToCore`](/docs/advanced/connection-to-core) instance.
 
-Configuration is accepted in the following methods and constructors:
+### Max Concurrent Heroes Count <div class="specs"><i>Core</i></div>
 
-- [hero.configure()](/docs/basic-interfaces/hero#configure) - apply the connection to the default hero, or to a an hero constructed prior to the first connection.
-- [new Hero()](/docs/basic-interfaces/hero#constructor) - the new hero will use this connection.
-- [new Handler(...connections)](/docs/basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.
-
-### Max Concurrent Heros Count <div class="specs"><i>Core</i></div>
-
-Limit concurrent Heros operating at any given time across all [connections](/docs/advanced/connection-to-core) to a "Core". Defaults to `10`.
+Limit concurrent Heroes operating at any given time across all [connections](/docs/advanced/connection-to-core) to a "Core". Defaults to `10`.
 
 Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](/docs/advanced/connection-to-core#configuration).
 
-### Local Proxy Port Start <div class="specs"><i>Connection</i><i>Core</i></div>
-
-Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
-
-Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/advanced/connection-to-core#configuration).
-
-### Replay Session Port <div class="specs"><i>Connection</i><i>Core</i></div>
-
-Configures the port Replay uses to serve Session data.
-
-Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/advanced/connection-to-core#configuration).
-
-### Sessions Dir <div class="specs"><i>Connection</i><i>Core</i></div> {#sessions-dir}
+### Data Dir <div class="specs"><i>Connection</i><i>Core</i></div> {#data-dir}
 
 Configures the storage location for files created by Core.
 
-- Replay session files
+- Session Databases
 - Man-in-the-middle network certificates
 
-`Environmental variable`: `HERO_SESSIONS_DIR=/your-absolute-dir-path`
+`Environmental variable`: `HERO_DATA_DIR=/your-absolute-dir-path`
 
 Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/advanced/connection-to-core).
 
@@ -77,7 +59,7 @@ A user profile stores and restores Cookies, DOM Storage and IndexedDB records fo
 const rawProfileJson = fs.readFileSync('profile.json', 'utf-8');
 const profile = JSON.parse(rawProfileJson); // { cookies: { sessionId: 'test' }}
 
-hero.configure({ userProfile: profile });
+const hero = new Hero({ userProfile: profile });
 const latestUserProfile = await hero.exportUserProfile();
 // { cookies, localStorage, sessionStorage, indexedDBs }
 
@@ -88,7 +70,7 @@ const latestUserProfile = await hero.exportUserProfile();
 fs.writeFileSync('profile.json', JSON.stringify(latestUserProfile, null, 2));
 ```
 
-### Upstream Proxy <div class="specs"><i>Hero</i></div>
+### Upstream Proxy Url <div class="specs"><i>Hero</i></div>
 
 Configures a proxy url to route traffic through for a given Hero. This function supports two types of proxies:
 
@@ -116,9 +98,7 @@ Update existing settings.
 #### **Arguments**:
 
 - options `object` Accepts any of the following:
-  - maxConcurrentHerosCount `number` defaults to `10`. Limit concurrent Hero sessions running at any given time.
-  - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
-  - sessionsDir `string` defaults to `os.tmpdir()/.ulixee`. Directory to store session files and mitm certificates.
-  - coreServerPort `number`. Port to run the Core Websocket/Replay server on.
+  - maxConcurrentClientCount `number` defaults to `10`. Limit concurrent Hero sessions running at any given time.
+  - dataDir `string` defaults to `os.tmpdir()/.ulixee`. Directory to store session databases and mitm certificates.
 
 #### **Returns**: `Promise`

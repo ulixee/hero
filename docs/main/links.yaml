@@ -8,11 +8,11 @@
 - title: Basic Interfaces
   items:
     - Hero
-    - Handler
     - Tab
     - FrameEnvironment
     - Interactions
     - AwaitedDOM
+    - DomExtenders
     #- DetachedDOM
 
 - title: Advanced

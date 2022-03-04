@@ -58,7 +58,7 @@ All button commands (click, doubleclick, etc) operate on the `Left` button by de
 hero.interact({ clickRight: [55, 42] });
 ```
 
-#### **ClickVerification**:
+#### **ClickVerification**: {#click-verification}
 
 Click commands can include a click verification when a [`SuperElement`](/docs/awaited-dom/super-element) is provided as the `MousePosition`. This is the strategy used to confirm that a specific element is clicked after scrolling and moving the mouse over the target. The default verification is `elementAtPath` if none is provided.
 

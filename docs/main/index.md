@@ -23,16 +23,16 @@ Instead of creating another complex puppeteer-like API that requires use of nest
 To use Hero in your project, install it with npm or yarn:
 
 ```bash
-npm i --save ulixee
+npm i --save @ulixee/hero-fullstack
 ```
 
 or
 
 ```bash
-yarn add ulixee
+yarn add @ulixee/hero-fullstack
 ```
 
-When you install Hero, it also downloads a recent version of Chrome and an app call [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions.
+When you install Hero, it also downloads a recent version of Chrome and data files to emulate headed (visible UI) Chrome on Mac OS and Windows.
 
 More details about installation can be found on the [troubleshooting](/docs/help/troubleshooting) page.
 

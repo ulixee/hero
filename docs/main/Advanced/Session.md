@@ -8,7 +8,7 @@ Sessions store data into a Sqlite database using a module called SessionState. T
 
 By default, session databases are located in `os.tmpdir()\.ulixee`. Tmpdir refers to the NodeJs function in the [OS module](https://nodejs.org/api/os.html#os_os_tmpdir).
 
-You can control the location sessions are stored using the [`sessionsDir`](/docs/overview/configuration#sessions-dir) configuration when starting a Core server.
+You can control the location sessions are stored using the [`dataDir`](/docs/overview/configuration#data-dir) configuration when starting a Core server.
 
 ### Managing Sessions
 

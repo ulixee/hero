@@ -61,6 +61,7 @@ import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import './DomExtender';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -470,6 +471,14 @@ export default class Hero extends AwaitedEventTarget<{
 
   public async validateState(state: IDomState | DomState | IDomStateAllFn): Promise<boolean> {
     return await this.activeTab.validateState(state);
+  }
+
+  public async flowCommand(
+    commandFn: () => Promise<void>,
+    exitState?: IDomState | DomState | IDomStateAllFn,
+    options?: IFlowCommandOptions
+  ): Promise<void> {
+    return await this.activeTab.flowCommand(commandFn, exitState, options);
   }
 
   public async registerFlowHandler(

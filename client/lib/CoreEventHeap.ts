@@ -1,11 +1,11 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import { scriptInstance } from './internal';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 
 const { log } = Log(module);
 
@@ -48,10 +48,7 @@ export default class CoreEventHeap {
     type: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    source?: {
-      callsite: ISourceCodeLocation[];
-      retryNumber: number;
-    },
+    extras?: Partial<ICoreRequestPayload>,
   ): Promise<void> {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
@@ -62,8 +59,8 @@ export default class CoreEventHeap {
       startDate: new Date(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
-      callsite: source?.callsite ?? scriptInstance.getScriptCallsite(),
-      retryNumber: source?.retryNumber,
+      ...(extras ?? {}),
+      callsite: extras?.callsite ?? scriptInstance.getScriptCallsite(),
     });
 
     const registered = new Resolvable<void>();
@@ -85,10 +82,7 @@ export default class CoreEventHeap {
     type: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    source?: {
-      callsite: ISourceCodeLocation[];
-      retryNumber: number;
-    },
+    extras?: Partial<ICoreRequestPayload>,
   ): void {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);
@@ -101,8 +95,8 @@ export default class CoreEventHeap {
         startDate: new Date(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
-        callsite: source?.callsite ?? scriptInstance.getScriptCallsite(),
-        retryNumber: source?.retryNumber,
+        ...(extras ?? {}),
+        callsite: extras?.callsite ?? scriptInstance.getScriptCallsite(),
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
@@ -112,7 +106,7 @@ export default class CoreEventHeap {
   }
 
   public incomingEvent(meta: ISessionMeta, listenerId: string, eventArgs: any[]): void {
-    let waitForPending = Promise.resolve()
+    let waitForPending = Promise.resolve();
     if (!this.listenerFnById.has(listenerId)) {
       waitForPending = this.pendingRegistrations;
     }

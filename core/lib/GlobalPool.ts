@@ -22,7 +22,6 @@ export const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? '
 
 export default class GlobalPool {
   public static maxConcurrentClientCount = 10;
-  public static localProxyPortStart = 0;
   public static get activeSessionCount(): number {
     return this._activeSessionCount;
   }
@@ -166,7 +165,7 @@ export default class GlobalPool {
     if (this.mitmServer || disableMitm === true) return;
     if (this.mitmStartPromise) await this.mitmStartPromise;
     else {
-      this.mitmStartPromise = MitmProxy.start(this.localProxyPortStart, Core.dataDir);
+      this.mitmStartPromise = MitmProxy.start(Core.dataDir);
       this.mitmServer = await this.mitmStartPromise;
     }
   }

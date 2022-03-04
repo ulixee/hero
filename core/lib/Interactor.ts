@@ -332,6 +332,8 @@ export default class Interactor implements IInteractionsHelper {
           } else if ('down' in keyboardCommand) {
             const key = getKeyboardKey(keyboardCommand.down);
             await this.keyboard.down(key);
+          } else if ('shortcut' in keyboardCommand) {
+            await this.keyboard.command(keyboardCommand.shortcut);
           } else if ('string' in keyboardCommand) {
             const text = keyboardCommand.string;
             for (const char of text) {

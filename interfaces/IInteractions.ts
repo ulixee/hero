@@ -3,6 +3,7 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from './IKeyboardLayoutUS';
 import IMouseResult from './IMouseResult';
 import IPoint from './IPoint';
+import { IKeyboardShortcut } from './IKeyboardShortcuts';
 
 export type IElementInteractVerification = 'elementAtPath' | 'exactElement' | 'none';
 
@@ -71,12 +72,15 @@ export type IMousePosition = IMousePositionXY | IJsPath;
 // Keyboard-specific Types
 
 export type IKeyboardCommand = IKeyPress | IKeyboardObject;
-export type IKeyboardObject = IKeyboardString | IKeyboardUp | IKeyboardDown;
+export type IKeyboardObject = IKeyboardString | IKeyboardUp | IKeyboardDown | IKeyShortcutPress;
 export interface IKeyboardString {
   string: string;
 }
 export interface IKeyPress {
   keyCode: IKeyboardKeyCode;
+}
+export interface IKeyShortcutPress {
+  shortcut: IKeyboardShortcut;
 }
 export interface IKeyboardUp {
   up: IKeyboardKeyCode;

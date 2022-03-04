@@ -24,7 +24,7 @@ const theStoredProfile = await hero.exportUserProfile();
 // This browser will be instantiated with all the cookies
 // dom storage, etc from the prior session.
 
-const heroWithProfile = await handler.createHero({
+const heroWithProfile = new Hero({
   userProfile: theStoredProfile,
 });
 ```

@@ -22,8 +22,28 @@ export default class CoreCommandQueue {
     return this.internalState.lastCommand;
   }
 
+  public get commandMetadata(): Record<string, any> {
+    return this.internalState.commandMetadata;
+  }
+
+  public get retryingCommand(): CoreCommandQueue['internalState']['retryingCommand'] {
+    return this.internalState.retryingCommand;
+  }
+
+  public set retryingCommand(commandMeta: CoreCommandQueue['internalState']['retryingCommand']) {
+    this.internalState.retryingCommand = commandMeta;
+  }
+
   public get nextCommandId(): number {
     return this.commandCounter?.nextCommandId;
+  }
+
+  public get shouldRetryCommands(): boolean {
+    return this.internalState.shouldRetryCommands;
+  }
+
+  public set shouldRetryCommands(shouldRetry: boolean) {
+    this.internalState.shouldRetryCommands = shouldRetry;
   }
 
   private readonly internalState: {
@@ -35,12 +55,14 @@ export default class CoreCommandQueue {
       ICoreRequestPayload,
       'command' | 'commandId' | 'args' | 'callsite' | 'meta' | 'startDate'
     >;
+    retryingCommand?: CoreCommandQueue['internalState']['lastCommand'];
     commandRetryHandlerFns: ((
       command: CoreCommandQueue['internalState']['lastCommand'],
       error: Error,
     ) => Promise<boolean>)[];
     commandMetadata?: Record<string, any>;
-    isRetrying: boolean;
+    isCheckingForRetry: boolean;
+    shouldRetryCommands: boolean;
   };
 
   private readonly commandCounter?: ICommandCounter;
@@ -79,12 +101,14 @@ export default class CoreCommandQueue {
       queue: new Queue('CORE COMMANDS', 1),
       commandsToRecord: [],
       commandRetryHandlerFns: [],
-      isRetrying: false,
+      isCheckingForRetry: false,
+      shouldRetryCommands: true,
     };
   }
 
   public setCommandMetadata(metadata: Record<string, any>): void {
-    this.internalState.commandMetadata = metadata;
+    this.internalState.commandMetadata ??= {};
+    Object.assign(this.internalState.commandMetadata, metadata);
   }
 
   public registerCommandRetryHandlerFn(
@@ -95,14 +119,14 @@ export default class CoreCommandQueue {
 
   public async intercept<T>(
     interceptCommandFn: (meta: ISessionMeta, command: string, ...args: any[]) => any,
-    runFn: () => Promise<T>,
+    runCommandsToInterceptFn: () => Promise<T>,
   ): Promise<T> {
     this.internalState.interceptQueue ??= new Queue();
 
     return await this.internalState.interceptQueue.run(async () => {
       this.internalState.interceptFn = interceptCommandFn;
       try {
-        return await runFn();
+        return await runCommandsToInterceptFn();
       } finally {
         this.internalState.interceptFn = undefined;
       }
@@ -201,18 +225,23 @@ export default class CoreCommandQueue {
 
         this.commandCounter?.emitter.emit('command', command, commandId, args);
 
-        return await this.sendRequest<T>({ ...commandPayload, recordCommands });
+        return await this.sendRequest<T>({
+          ...commandPayload,
+          recordCommands,
+        });
       })
       .catch(error => {
         if (error instanceof DisconnectedFromCoreError) throw error;
-        return this.retryCommand<T>(commandPayload, error);
+
+        this.internalState.retryingCommand = commandPayload;
+        return this.tryRetryCommand<T>(error);
       })
       .catch(error => {
         if (!error.stack.includes(this.sessionMarker)) {
           error.stack += `${this.sessionMarker}`;
         }
         if (callsite?.length) {
-          const lastLine = callsite[callsite.length - 1];
+          const lastLine = callsite[0];
           if (lastLine) {
             try {
               const code = SourceLoader.getSource(lastLine)?.code;
@@ -264,21 +293,24 @@ export default class CoreCommandQueue {
     }
   }
 
-  private async retryCommand<T>(
-    commandPayload: CoreCommandQueue['internalState']['lastCommand'],
-    error: Error,
-  ): Promise<T> {
+  private async tryRetryCommand<T>(error: Error): Promise<T> {
     // don't retry within an existing "retry" run
-    if (this.internalState.isRetrying) throw error;
+    if (this.internalState.isCheckingForRetry || !this.shouldRetryCommands) throw error;
 
     // perform retries out of the "queue" so we don't get stuck
     let lastError = error;
-    for (let count = 1; count < CoreCommandQueue.maxCommandRetries; count += 1) {
-      const shouldRetry = await this.shouldRetryCommand(commandPayload, lastError);
+    for (let retryNumber = 1; retryNumber < CoreCommandQueue.maxCommandRetries; retryNumber += 1) {
+      const shouldRetry = await this.shouldRetryCommand(
+        this.internalState.retryingCommand,
+        lastError,
+      );
       if (!shouldRetry) break;
 
       try {
-        return await this.sendRequest<T>({ ...commandPayload, retryNumber: count });
+        return await this.sendRequest<T>({
+          ...this.internalState.retryingCommand,
+          retryNumber,
+        });
       } catch (nestedError) {
         lastError = nestedError;
       }
@@ -287,17 +319,17 @@ export default class CoreCommandQueue {
   }
 
   private async shouldRetryCommand(
-    command: CoreCommandQueue['internalState']['lastCommand'],
-    error: Error,
+    command?: CoreCommandQueue['internalState']['lastCommand'],
+    error?: Error,
   ): Promise<boolean> {
     for (const handler of this.internalState.commandRetryHandlerFns) {
-      this.internalState.isRetrying = true;
+      this.internalState.isCheckingForRetry = true;
       try {
         if (await handler(command, error)) {
           return true;
         }
       } finally {
-        this.internalState.isRetrying = false;
+        this.internalState.isCheckingForRetry = false;
       }
     }
     return false;

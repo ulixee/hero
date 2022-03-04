@@ -11,6 +11,7 @@ export default interface ICoreRequestPayload {
   sendDate: Date;
   retryNumber?: number;
   activeFlowHandlerId?: number;
+  flowCommandId?: number;
   args: any[];
   recordCommands?: Omit<ICoreRequestPayload, 'meta' | 'messageId' | 'sendDate'>[];
 }

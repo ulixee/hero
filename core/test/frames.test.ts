@@ -98,8 +98,6 @@ test('should allow query selectors in cross-domain frames', async () => {
   const frameMetas = await tab.getFrameEnvironments();
   const frames = await Promise.all(
     frameMetas.map(async x => {
-      if (x.url) return x;
-
       const env = tab.frameEnvironmentsById.get(x.id);
       await env.waitForLoad('DomContentLoaded');
       return env.toJSON();

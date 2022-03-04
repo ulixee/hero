@@ -76,7 +76,7 @@ The following methods are optional. Add them to your plugin as needed.
 
 ### configure<em>(config)</em>
 
-This hook is called during the initialization of a session/browserEmulator as well as every time hero.configure is called from the client.
+This hook is called during the initialization of a session/browserEmulator.
 
 #### **Arguments**:
 
@@ -85,6 +85,9 @@ This hook is called during the initialization of a session/browserEmulator as we
   - geolocation `Geolocation`. This is an object containing longtitude and latitude, among other properties.
   - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
   - locale `string`. The configured locale in use (eg, en-US).
+  - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. See Hero constructor for details.
+  - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. See Hero constructor for details.
+  - dnsOverTlsProvider `object`. Configure the host and port to use for DNS over TLS. See Hero constructor for details.
 
 Modify any value in the object to change it session-wide.
 

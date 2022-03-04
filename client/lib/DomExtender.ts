@@ -22,6 +22,8 @@ import Interactor from './Interactor';
 import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
 import { createSuperNode } from 'awaited-dom/impl/create';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
+import { KeyboardShortcuts } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
+import { scriptInstance } from './internal';
 
 const awaitedPathState = StateMachine<
   any,
@@ -33,7 +35,7 @@ interface IBaseExtendNode {
   $exists: Promise<boolean>;
   $isClickable: Promise<boolean>;
   $hasFocus: Promise<boolean>;
-  $clearValue(): Promise<void>;
+  $clearInputText(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
   $waitForExists(options?: { timeoutMs?: number }): Promise<ISuperElement>;
@@ -67,7 +69,10 @@ declare module 'awaited-dom/base/interfaces/official' {
   interface IHTMLCollection extends IBaseExtendNodeList {}
 }
 
-type INodeExtensionFns = Omit<IBaseExtendNode, '$isClickable' | '$isVisible' | '$exists' | '$hasFocus'>;
+type INodeExtensionFns = Omit<
+  IBaseExtendNode,
+  '$isClickable' | '$isVisible' | '$exists' | '$hasFocus'
+>;
 const NodeExtensionFns: INodeExtensionFns = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
     const coreFrame = await getCoreFrame(this);
@@ -113,15 +118,23 @@ const NodeExtensionFns: INodeExtensionFns = {
       ...options,
     });
   },
-  async $clearValue(): Promise<void> {
+  async $clearInputText(): Promise<void> {
     const { awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    await Interactor.run(coreFrame, [
-      { click: this },
-      { keyDown: KeyboardKey.Meta, keyPress: KeyboardKey.a },
-      { keyUp: KeyboardKey.Meta },
-      { keyPress: KeyboardKey.Backspace },
-    ]);
+    const callsitePath = scriptInstance.getScriptCallsite();
+    await coreFrame.coreTab.runFlowCommand(
+      async () => {
+        await this.focus();
+        await Interactor.run(coreFrame, [
+          { keyShortcut: KeyboardShortcuts.selectAll },
+          { keyPress: KeyboardKey.Backspace },
+        ]);
+      },
+      assert => {
+        assert(this.value, x => !x);
+      },
+      callsitePath,
+    );
   },
   $xpathSelector(selector: string, orderedNodeResults = false): ISuperNode {
     const { awaitedOptions, awaitedPath } = awaitedPathState.getState(this);
@@ -230,6 +243,4 @@ async function getCoreFrame(element: ISuperElement): Promise<CoreFrameEnvironmen
 extendNodes<INodeExtensionFns, INodeExtensionGetters>(NodeExtensionFns, NodeExtensionGetters);
 extendNodeLists(NodeListExtensionFns);
 
-export {
-  awaitedPathState,
-};
+export { awaitedPathState };

@@ -75,14 +75,6 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.execJsPath', jsPath);
   }
 
-  public recordDetachedJsPath(index: number, startDate: Date, endDate: Date): void {
-    this.commandQueue.record({
-      commandId: this.commandQueue.nextCommandId,
-      command: 'FrameEnvironment.recordDetachedJsPath',
-      args: [index, startDate.getTime(), endDate.getTime()],
-    });
-  }
-
   public async getJsValue<T>(expression: string): Promise<T> {
     return await this.commandQueue.run('FrameEnvironment.getJsValue', expression);
   }
@@ -95,8 +87,17 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
-  public async collectElement(name: string, jsPath: IJsPath, waitForElement = false): Promise<ICollectedElement[]> {
-    return await this.commandQueue.run('FrameEnvironment.collectElement', name, jsPath, waitForElement);
+  public async collectElement(
+    name: string,
+    jsPath: IJsPath,
+    waitForElement = false,
+  ): Promise<ICollectedElement[]> {
+    return await this.commandQueue.run(
+      'FrameEnvironment.collectElement',
+      name,
+      jsPath,
+      waitForElement,
+    );
   }
 
   public async getUrl(): Promise<string> {

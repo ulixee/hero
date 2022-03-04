@@ -10,6 +10,7 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState, { IStateAndAssertion } from '@ulixee/hero-interfaces/IDomState';
 import IDomStateListenArgs, { IRawCommand } from '@ulixee/hero-interfaces/IDomStateListenArgs';
+import IFlowCommand from '../interfaces/IFlowCommand';
 
 let counter = 0;
 
@@ -32,16 +33,27 @@ export default class DomStateHandler {
   #isSubscribed = false;
   #onlyRunCallbackOnMatch = false;
   #retryNumber = 0;
+  #flowCommandId: number;
+  #flowHandlerId: number;
 
   constructor(
     readonly domState: IDomState,
     readonly name: string,
     coreTab: CoreTab,
     callsitePath: ISourceCodeLocation[],
+    scope?: {
+      flowCommand?: IFlowCommand;
+      flowHandlerId?: number;
+    },
   ) {
     this.#coreTab = coreTab;
     this.#callsite = callsitePath;
     bindFunctions(this);
+    if (scope?.flowCommand) {
+      this.#flowCommandId = scope.flowCommand.id;
+      this.#retryNumber = scope.flowCommand.retryNumber;
+    }
+    this.#flowHandlerId = scope?.flowHandlerId;
   }
 
   async cancel(cancelPromise: CanceledPromiseError): Promise<void> {
@@ -72,6 +84,8 @@ export default class DomStateHandler {
       {
         retryNumber: this.#retryNumber,
         callsite: this.#callsite,
+        flowCommandId: this.#flowCommandId,
+        activeFlowHandlerId: this.#flowHandlerId,
       },
     );
     this.#isSubscribed = true;
@@ -91,6 +105,8 @@ export default class DomStateHandler {
       {
         retryNumber: this.#retryNumber,
         callsite: this.#callsite,
+        flowCommandId: this.#flowCommandId,
+        activeFlowHandlerId: this.#flowHandlerId,
       },
     );
   }
@@ -228,6 +244,13 @@ export default class DomStateHandler {
         await Promise.all(runCommands);
       },
     );
+
+    for (const [, command] of Object.values(this.#rawCommandsById)) {
+      if (command.includes('.waitFor'))
+        throw new Error(
+          `"${command}" can't be used inside a State assertion block. Use an equivalent function that checks current state - eg, waitForState(PaintingStable) -> isPaintingStable`,
+        );
+    }
 
     if (isPromise(result)) {
       throw new Error(

@@ -34,7 +34,7 @@ import CommandRecorder from './CommandRecorder';
 import FrameNavigations from './FrameNavigations';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
-import { IJsPathHistory, JsPath } from './JsPath';
+import { JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
@@ -171,8 +171,7 @@ export default class FrameEnvironment
   public isAllowedCommand(method: string): boolean {
     return (
       this.commandRecorder.fnNames.has(method) ||
-      method === 'close' ||
-      method === 'recordDetachedJsPath'
+      method === 'close'
     );
   }
 
@@ -307,23 +306,6 @@ export default class FrameEnvironment
     await this.waitForNavigationLoader();
     const containerOffset = await this.getContainerOffset();
     return await this.jsPath.exec(jsPath, containerOffset);
-  }
-
-  public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
-    const containerOffset = await this.getContainerOffset();
-    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths, containerOffset, false);
-    return this.prefetchedJsPaths;
-  }
-
-  public recordDetachedJsPath(index: number, runStartDate: number, endDate: number): void {
-    const entry = this.prefetchedJsPaths[index];
-
-    const commands = this.session.commands;
-    const command = commands.create(this.tab.id, this.id, undefined, 'execJsPath', [entry.jsPath]);
-    command.wasPrefetched = true;
-    command.endDate = endDate;
-    command.result = entry.result;
-    commands.onStart(command, runStartDate);
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
