@@ -43,14 +43,14 @@ afterAll(Helpers.afterAll);
 describe('waitForResource', () => {
   it('should break after finding one resource', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         return { data: [{ id: 1, url: '/test.js' } as IResourceMeta] };
       }
     };
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({ url: '/test.js' });
+    const resources = await hero.waitForResources({ url: '/test.js' });
     expect(resources).toHaveLength(1);
     await hero.close();
   });
@@ -58,7 +58,7 @@ describe('waitForResource', () => {
   it('should try more than once to get files', async () => {
     let attempts = 0;
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         attempts += 1;
         if (attempts === 3) {
           return { data: [{ id: 1, url: '/test2.js' } as IResourceMeta] };
@@ -69,7 +69,7 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({ url: '/test2.js' });
+    const resources = await hero.waitForResources({ url: '/test2.js' });
     expect(resources).toHaveLength(1);
     expect(attempts).toBe(3);
 
@@ -78,7 +78,7 @@ describe('waitForResource', () => {
 
   it('should return multiple files if many match on one round trip', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         return {
           data: [
             { id: 1, url: '/test3.js', type: 'XHR' } as IResourceMeta,
@@ -90,7 +90,7 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({ type: 'XHR' });
+    const resources = await hero.waitForResources({ type: 'XHR' });
     expect(resources).toHaveLength(2);
 
     await hero.close();
@@ -98,7 +98,7 @@ describe('waitForResource', () => {
 
   it('should match multiple files by url', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         return {
           data: [
             { id: 1, url: '/test3.js' } as IResourceMeta,
@@ -110,7 +110,7 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({ url: '/test3.js' });
+    const resources = await hero.waitForResources({ url: '/test3.js' });
     expect(resources).toHaveLength(2);
 
     await hero.close();
@@ -118,7 +118,7 @@ describe('waitForResource', () => {
 
   it('should allow a user to specify a match function', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         return {
           data: [
             { id: 1, url: '/test1.js' } as IResourceMeta,
@@ -132,16 +132,10 @@ describe('waitForResource', () => {
 
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
-    const resources = await hero.waitForResource({
-      filterFn(resource, done) {
-        if (resource.url === '/test1.js') {
-          done();
-          return true;
-        }
-      },
+    const resource = await hero.waitForResource({
+      filterFn: x => x.url === '/test1.js',
     });
-    expect(resources).toHaveLength(1);
-    expect(resources[0].url).toBe('/test1.js');
+    expect(resource.url).toBe('/test1.js');
 
     await hero.close();
   });
@@ -149,7 +143,7 @@ describe('waitForResource', () => {
   it('should run multiple batches when a match function is provided', async () => {
     let counter = 0;
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'Tab.waitForResource') {
+      if (command === 'Tab.waitForResources') {
         counter += 1;
         if (counter === 1) {
           return {
@@ -173,7 +167,7 @@ describe('waitForResource', () => {
     const hero = new Hero({ connectionToCore: new Piper() });
     Helpers.needsClosing.push(hero);
     let calls = 0;
-    const resources = await hero.waitForResource({
+    const resources = await hero.waitForResources({
       filterFn(resource, done) {
         calls += 1;
         if (resource.url === '/test5.js') {
