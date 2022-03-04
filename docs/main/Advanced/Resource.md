@@ -2,7 +2,7 @@
 
 > Resources are all network assets loaded to render a page, including CSS, Javascript, Fonts, Web Sockets, XHR/Fetch Requests, and more.
 
-The Resource class is returned from `window.waitForResource` calls. It is used to dynamically load portions of a Resource on demand.
+The Resource class is returned from [`tab.waitForResource`](/docs/hero/basic-interfaces/tab#wait-for-resource) calls. It is used to dynamically load portions of a Resource on demand.
 
 If an obtained Resource is a Websocket, a `WebsocketResource` is returned.
 
@@ -12,13 +12,13 @@ If an obtained Resource is a Websocket, a `WebsocketResource` is returned.
 
 Retrieve the network request used to retrieve this resource.
 
-#### **Returns** [`ResourceRequest`](/docs/advanced/resource-request)
+#### **Returns** [`ResourceRequest`](/docs/hero/advanced/resource-request)
 
 ### response
 
 Retrieve the network request used to retrieve this resource.
 
-#### **Returns** [`ResourceResponse`](/docs/advanced/resource-response)
+#### **Returns** [`ResourceResponse`](/docs/hero/advanced/resource-response)
 
 ### url
 

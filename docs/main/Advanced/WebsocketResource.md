@@ -10,13 +10,13 @@ The WebsocketResource class is returned from `window.waitForResource`. It contai
 
 The Http Upgrade request used to create this Websocket.
 
-#### **Returns** [`ResourceRequest`](/docs/advanced/resource-request)
+#### **Returns** [`ResourceRequest`](/docs/hero/advanced/resource-request)
 
 ### response
 
 A simulation of an HTTP response pieced together from the socket headers returned during a normal HTTP upgrade.
 
-#### **Returns** [`ResourceResponse`](/docs/advanced/resource-response)
+#### **Returns** [`ResourceResponse`](/docs/hero/advanced/resource-response)
 
 ### url
 

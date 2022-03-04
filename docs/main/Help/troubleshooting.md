@@ -12,7 +12,7 @@ You can remove the library and reinstall or rebuild manually using npm run build
 
 #### Browser Emulators
 
-When you install Hero, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+When you install Hero, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/hero/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
 
 Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Hero npm installations.
 
@@ -22,7 +22,7 @@ Browsers will be saved to a shared location on each OS. Each browser version wil
 
 ### Debugging Logs
 
-By default, Hero logs everything to a [Session](/docs/advanced/session) database that is created per Hero instance. The SessionLogs table contains all debug logs.
+By default, Hero logs everything to a [Session](/docs/hero/advanced/session) database that is created per Hero instance. The SessionLogs table contains all debug logs.
 
 To output logs to the console during operation, you can set the environmental variable `DEBUG=true`.
 

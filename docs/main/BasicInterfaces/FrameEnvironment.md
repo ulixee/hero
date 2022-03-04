@@ -4,7 +4,7 @@ A FrameEnvironment represents a browsing context which allows you to interact wi
 
 ## Constructor
 
-Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/basic-interfaces/tab#frame-environments) array.
+Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/hero/basic-interfaces/tab#frame-environments) array.
 
 ## Properties
 
@@ -12,13 +12,13 @@ Frames cannot be constructed in Hero. They're made available through the [tab.fr
 
 Returns child FrameEnvironments for this frame.
 
-#### **Type**: Promise<[`FrameEnvironment`](/docs/basic-interfaces/tab#frame-environments)[]>
+#### **Type**: Promise<[`FrameEnvironment`](/docs/hero/basic-interfaces/tab#frame-environments)[]>
 
 ### frameEnvironment.cookieStorage {#cookie-storage}
 
-Returns a [CookieStorage](/docs/advanced/cookie-storage) instance to get/set/delete cookies.
+Returns a [CookieStorage](/docs/hero/advanced/cookie-storage) instance to get/set/delete cookies.
 
-#### **Type**: [`CookieStorage`](/docs/advanced/cookie-storage)
+#### **Type**: [`CookieStorage`](/docs/hero/advanced/cookie-storage)
 
 ### frameEnvironment.document <div class="specs"><i>W3C</i></div> {#document}
 
@@ -158,13 +158,13 @@ const response = await mainFrame.fetch(postUrl, {
 
 ### frameEnvironment.getFrameEnvironment*(frameElement)* {#get-frame-environment}
 
-Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
+Get the [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
 
 #### **Arguments**:
 
 - element [`SuperElement`](/docs/awaited-dom/super-element) A frame or iframe element loaded in this frame environment (ie, a direct child element of this frame document).
 
-#### **Returns**: [`Promise<Frame>`](/docs/basic-interfaces/frame-environment)
+#### **Returns**: [`Promise<Frame>`](/docs/hero/basic-interfaces/frame-environment)
 
 ```js
 await hero.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe');
@@ -205,7 +205,7 @@ Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is
 - no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
 - on the visible screen (not beyond the horizontal or vertical viewport)
 
-Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interfaces/frame-environment#get-computed-visibility).
+Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/basic-interfaces/frame-environment#get-computed-visibility).
 
 #### **Arguments**:
 
@@ -269,6 +269,28 @@ This is a shortcut for document.querySelector.
 This is a shortcut for document.querySelectorAll.
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given selector. Returns an empty list if a resultset is not found.
+
+### frameEnvironment.xpathSelector*(selector, orderedResults)* {#xpath-selector}
+
+This is a shortcut for document.evaluate(`selector`, document, `FIRST_ORDERED_NODE_TYPE` | `ANY_UNORDERED_NODE_TYPE`)
+
+#### **Arguments**:
+- selector `string`. An XPath selector that can return a single node result.
+- orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
+
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
+
+### frameEnvironment.xpathSelectorAll*(selector, orderedResults)* {#xpath-selector-all}
+
+This is a shortcut for document.evaluate(`selector`, document, `ORDERED_NODE_ITERATOR_TYPE` | `UNORDERED_NODE_ITERATOR_TYPE`).
+
+NOTE: this API will iterate through the results to return an array of all matching nodes.
+
+#### **Arguments**:
+- selector `string`. An XPath selector that can return node results.
+- orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
+
+#### **Returns**: Promise<Array<[`SuperNode`](/docs/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
 
 ### frameEnvironment.waitForPaintingStable*(options)* {#wait-for-painting-stable}
 
@@ -348,7 +370,7 @@ Waits for a navigational change to document.location either because of a `reload
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for changes.
 
-#### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The resource representing this location change or reload.
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource) The resource representing this location change or reload.
 
 Location changes are triggered in one of two ways:
 
