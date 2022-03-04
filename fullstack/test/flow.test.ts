@@ -318,8 +318,11 @@ describe('flow commands', () => {
         const field = await hero.querySelector('#text').$waitForVisible({ timeoutMs: 500 });
         await field.$type('test');
       },
-      assert => {
-        assert(hero.querySelector('#text').value, 'test');
+      {
+        maxRetries: 2,
+        exitState(assert) {
+          assert(hero.querySelector('#text').value, 'test');
+        },
       },
     );
 
@@ -327,7 +330,6 @@ describe('flow commands', () => {
 
     await expect(hero.querySelector('#text').value).resolves.toBe('test');
   });
-
 
   it('can handle nested command blocks', async () => {
     koaServer.get('/flowForm', ctx => {
@@ -374,34 +376,37 @@ describe('flow commands', () => {
     const outerFlowCommandSpy = jest.fn();
     const flow1CommandSpy = jest.fn();
     const flow2CommandSpy = jest.fn();
-    await hero.flowCommand(async () => {
-      outerFlowCommandSpy();
-      const field1 = await hero.querySelector('#field1');
-      const field2 = await hero.querySelector('#field2');
+    await hero.flowCommand(
+      async () => {
+        outerFlowCommandSpy();
+        const field1 = await hero.querySelector('#field1');
+        const field2 = await hero.querySelector('#field2');
 
-      await hero.flowCommand(
-        async () => {
-          flow1CommandSpy()
-          await field1.$click();
-          await field1.$clearInputText();
-          await field1.$type('value1');
-        },
-        assert => assert(field1.value, 'value1'),
-      );
+        await hero.flowCommand(
+          async () => {
+            flow1CommandSpy();
+            await field1.$click();
+            await field1.$clearInputText();
+            await field1.$type('value1');
+          },
+          assert => assert(field1.value, 'value1'),
+        );
 
-      await hero.flowCommand(
-        async () => {
-          flow2CommandSpy()
-          await field2.$click();
-          await field2.$clearInputText();
-          await field2.$type('value2');
-        },
-        assert => assert(field2.value, 'value2'),
-      );
-    }, assert => {
-      assert(hero.querySelector('#field1').value, 'value1')
-      assert(hero.querySelector('#field2').value, 'value2')
-    });
+        await hero.flowCommand(
+          async () => {
+            flow2CommandSpy();
+            await field2.$click();
+            await field2.$clearInputText();
+            await field2.$type('value2');
+          },
+          assert => assert(field2.value, 'value2'),
+        );
+      },
+      assert => {
+        assert(hero.querySelector('#field1').value, 'value1');
+        assert(hero.querySelector('#field2').value, 'value2');
+      },
+    );
     /**
      * Should have flow as follows:
      * 1. Type value 1 in field 1
