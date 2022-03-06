@@ -296,12 +296,26 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 
   public async flowCommand<T = void>(
     commandFn: () => Promise<T>,
-    exitState?: IDomState | DomState | IDomStateAllFn,
-    options?: IFlowCommandOptions,
+    optionsOrExitState?: IDomStateAllFn | IFlowCommandOptions,
   ): Promise<T> {
     const callsitePath = scriptInstance.getScriptCallsite();
 
     const coreTab = await this.#coreTabPromise;
+
+    let exitState: IDomState | IDomStateAllFn;
+    let options: IFlowCommandOptions;
+    if (optionsOrExitState) {
+      if (typeof optionsOrExitState === 'function') exitState = { all: optionsOrExitState };
+      else {
+        if ('maxRetries' in optionsOrExitState) {
+          options = { maxRetries: optionsOrExitState.maxRetries };
+        }
+        if ('exitState' in optionsOrExitState) {
+          exitState = optionsOrExitState.exitState;
+        }
+      }
+    }
+
     return await coreTab.runFlowCommand(commandFn, exitState, callsitePath, options);
   }
 

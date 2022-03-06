@@ -490,10 +490,9 @@ export default class Hero extends AwaitedEventTarget<{
 
   public async flowCommand(
     commandFn: () => Promise<void>,
-    exitState?: IDomState | DomState | IDomStateAllFn,
-    options?: IFlowCommandOptions,
+    optionsOrExitState?: IDomStateAllFn | IFlowCommandOptions,
   ): Promise<void> {
-    return await this.activeTab.flowCommand(commandFn, exitState, options);
+    return await this.activeTab.flowCommand(commandFn, optionsOrExitState);
   }
 
   public async registerFlowHandler(

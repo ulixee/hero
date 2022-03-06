@@ -208,7 +208,7 @@ By default, this command will find resources loaded since the current [mainFrame
 
 #### **Returns**: [`Promise<Resource[]>`](/docs/hero/advanced/resource)
 
-### tab.flowCommand*(commandFn, exitState?, options?)* {#flow-command}
+### tab.flowCommand*(commandFn, exitState? | options?)* {#flow-command}
 
 A FlowCommand allows you define a "recovery" boundary in the case where an AwaitedDom error triggers a FlowHandler and modifies your page state. In some cases, you may wish to ensure that a series of commands are re-run instead of a single failing command. For instance, if you lose focus on a modal-window field in the middle of typing, you will want to run the logic that prompted the modal-window to show up.
 
@@ -219,7 +219,7 @@ FlowCommands can define an `exitState`, which will be tested before moving on. A
     await hero.querySelector('#modalPrompt').$click();
     await hero.querySelector('#field1').$type('text');
   }, assert => {
-    assert(hero.querySelector('#field1').value, 'text'); <--- if false, 1. Prompt FlowHandlers, 2. Retry Command
+    assert(hero.querySelector('#field1').value, 'text'); // if false, 1. Prompt FlowHandlers, 2. Retry Command
   });
 ```
 
@@ -228,9 +228,10 @@ Flow Commands can be nested within each other. If nested commands cannot be comp
 #### **Arguments**:
 
 - commandFn `() => Promise<T>`. Your command function containing one or more Hero commands to retry on AwaitedDom errors (after resolving one or more FlowHandlers). Any returned value will be returned to the `tab.flowCommand` call.
-- exitState `DomState | (assert: IPageStateAssert) => void`. Optional [State](#wait-for-state) object that must resolve before continuing your script execution. If false, FlowHandlers will be retried to determine if another pass should be made.
-- options `object`. Optional options to configure this flowCommand
-  - maxRetries `number`. Default `3`.The number of times this FlowCommand should be retried before throwing an error.
+- exitState `DomState | function(assert: IPageStateAssert): void`. Optional [State](#wait-for-state) object that must resolve before continuing your script execution. If false, FlowHandlers will be retried to determine if another pass should be made.
+- options `object`. Optional options to configure this flowCommand. This must be your second argument to `flowCommand`
+  - exitState `DomState | function(assert: IPageStateAssert): void`. Optional [State](#wait-for-state) assertion. This parameter is used in place passing a [State](#wait-for-state) directly as a second parameter to `flowCommand`.
+  - maxRetries `number`. Default `3`. Optional number of times this FlowCommand should be retried before throwing an error.
 
 #### **Returns**: `Promise<T>`
 
@@ -406,7 +407,7 @@ await hero.flowCommand(async () => {
 #### **Arguments**:
 
 - name `string`. A required name to give to this FlowHandler. NOTE: many FlowHandlers trigger on generic querySelector strings (eg, .modal.a1-regEU). Without this self-documenting name, we found them very difficult to decipher after a few weeks passed.
-- state `DomState | (assert: IPageStateAssert) => void`. A [State](#wait-for-state) object or callback for the assertion to match.
+- state `DomState | function(assert: IPageStateAssert): void`. A [State](#wait-for-state) object or callback for the assertion to match.
 - handlerFn `() => Promise<any>`. An asynchronous function in which you can resolve the page state to handle this issue.
 
 #### **Returns**: `Promise<void>`
@@ -541,11 +542,11 @@ await hero.waitForState(assert => {
 
 #### **Arguments**:
 
-- state `object` | `(assert: IPageStateAssert) => void`. A state object or just the callback directly as a shorter option.
+- state `object` | `function(assert: IPageStateAssert): void`. A state object or just the callback directly as a shorter option.
   - name? `string`. Optional name of the state
   - url? `string` | `Regexp`. Optional url to run this state on (useful for running in a loop)
-  - all `(assert: IPageStateAssert) => void`. A synchronous function that will be true if all assertions evaluate to true.
-    - assert `function(statePromise: Promise<T>, assertionValueOrCallbackFn: (result: T) => boolean): void`. A function that takes a Promise as a first parameter, and a callback that will be checked when new state is available.
+  - all `function(assert: IPageStateAssert): void`. A synchronous function that will be true if all assertions evaluate to true.
+    - assert `function(statePromise: Promise<T>, assertionValueOrCallbackFn: (function(result: T): boolean)): void`. A function that takes a Promise as a first parameter, and a callback that will be checked when new state is available.
       - statePromise `PromiseLike<T>` A Hero Promise that issues a command against this tab (url, isPaintingStable, domElement, isVisible, etc).
       - assertionValueOrCallbackFn `value: T | function(state: T): boolean`. A function that will receive updated state as it becomes available. You should synchronously evaluate to true/false. If this parameter is a non-function, it will be compared for equality.
 - options `object` Optional
