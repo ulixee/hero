@@ -39,6 +39,7 @@ import DomState from './DomState';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
+import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 
 const awaitedPathState = StateMachine<
   any,
@@ -163,6 +164,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     options?: { sinceCommandId: number },
   ): Promise<Resource> {
     return Resource.findLatest(this, filter, options);
+  }
+
+  public findResources(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<Resource[]> {
+    return Resource.findAll(this, filter, options);
   }
 
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
@@ -314,8 +322,15 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public waitForResource(
     filter: IWaitForResourceFilter,
     options?: IWaitForResourceOptions,
+  ): Promise<Resource | WebsocketResource> {
+    return Resource.waitForOne(this, filter, options);
+  }
+
+  public waitForResources(
+    filter: IWaitForResourcesFilter,
+    options?: IWaitForResourceOptions,
   ): Promise<(Resource | WebsocketResource)[]> {
-    return Resource.waitFor(this, filter, options);
+    return Resource.waitForMany(this, filter, options);
   }
 
   public async waitForElement(

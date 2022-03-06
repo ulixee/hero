@@ -178,6 +178,7 @@ export default class Tab
       this.focus,
       this.dismissDialog,
       this.findResource,
+      this.findResources,
       this.getFrameEnvironments,
       this.goto,
       this.goBack,
@@ -191,7 +192,7 @@ export default class Tab
       this.waitForFileChooser,
       this.waitForMillis,
       this.waitForNewTab,
-      this.waitForResource,
+      this.waitForResources,
       this.runPluginCommand,
       this.addRemoteEventListener,
       this.removeRemoteEventListener,
@@ -389,6 +390,23 @@ export default class Tab
       }
     }
     return Promise.resolve(null);
+  }
+
+  public findResources(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<IResourceMeta[]> {
+    // escape query string ? so it can run as regex
+    if (typeof filter.url === 'string') {
+      filter.url = stringToRegex(filter.url);
+    }
+    const sinceCommandId =
+      options?.sinceCommandId ?? this.navigations.lastHttpNavigationRequest?.startCommandId;
+    // find all resources
+    const resourceMetas = this.session.resources.getForTab(this.id).filter(meta => {
+      return this.isResourceFilterMatch(meta, filter, sinceCommandId);
+    });
+    return Promise.resolve(resourceMetas);
   }
 
   public findStorageChange(
@@ -633,7 +651,7 @@ export default class Tab
     return newTab;
   }
 
-  public async waitForResource(
+  public async waitForResources(
     filter: IResourceFilterProperties,
     options?: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
@@ -930,8 +948,7 @@ export default class Tab
     sinceCommandId?: number,
   ): boolean {
     if (resourceMeta.tabId !== this.id) return false;
-    if (resourceMeta.seenAtCommandId === undefined) {
-      resourceMeta.seenAtCommandId = this.lastCommandId;
+    if (!resourceMeta.seenAtCommandId) {
       // need to set directly since passed in object is a copy
       this.session.resources.recordSeen(resourceMeta, this.lastCommandId);
     }
