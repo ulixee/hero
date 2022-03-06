@@ -16,8 +16,6 @@ import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 const { log } = Log(module);
 
 export default class TimetravelPlayer extends TypedEventEmitter<{
-  'all-tabs-closed': void;
-  'timetravel-to-end': void;
   'new-tick-command': {
     commandId: number;
     paintIndex: number;
@@ -26,7 +24,8 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     paintIndex: number;
     documentLoadPaintIndex: number;
   };
-  open: void;
+  'tab-opened': void;
+  'all-tabs-closed': void;
 }> {
   public get activeCommandId(): number {
     if (this.isOpen) {
@@ -123,9 +122,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
      *       If 1 tab is active, switch to it, otherwise, need to show the multi-timeline view and pick one tab to show
      */
     const tab = this.activeTab;
-
     const startTick = tab.currentTick;
-    const startedOpen = tab.isOpen;
     await this.openTab(tab);
     if (sessionOffsetPercent !== undefined) {
       await tab.setTimelineOffset(sessionOffsetPercent);
@@ -133,9 +130,6 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       await tab.loadEndState();
     }
 
-    if (startedOpen && sessionOffsetPercent === 100) {
-      this.emit('timetravel-to-end');
-    }
     if (tab.currentTick && tab.currentTick.commandId !== startTick?.commandId) {
       this.emit('new-tick-command', {
         commandId: tab.currentTick.commandId,
@@ -284,7 +278,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   private onTabOpen(): void {
-    this.emit('open');
+    this.emit('tab-opened');
   }
 
   private async getResourceDetails(resourceId: number): Promise<ISessionResourceDetails> {
