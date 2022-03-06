@@ -2,23 +2,23 @@
 
 Configuration variables can be defined at a few levels:
 
-- `Hero` At an instance level, configured via [new Hero()](/docs/basic-interfaces/hero#constructor).
-- `Connection` At a connection level, which can be configured when creating a new [ConnectionToCore](/docs/advanced/connection-to-core#configuration).
+- `Hero` At an instance level, configured via [new Hero()](/docs/hero/basic-interfaces/hero#constructor).
+- `Connection` At a connection level, which can be configured when creating a new [ConnectionToCore](/docs/hero/advanced/connection-to-core#configuration).
 - `Core` At an internal level, using the `@ulixee/hero-core` module of Hero. This must be run in the environment where your Browser Engine(s) and `@ulixee/hero-core` module are running. If you're running remote, this will be your server.
 
-The internal `@ulixee/hero-core` module can receive several configuration options on [start](#core-start), or when a new [connection](/docs/advanced/connection-to-core) is established.
+The internal `@ulixee/hero-core` module can receive several configuration options on [start](#core-start), or when a new [connection](/docs/hero/advanced/connection-to-core) is established.
 
 ### Connection To Core <div class="specs"><i>Hero</i></div>
 
-The [ConnectionToCore](/docs/advanced/connection-to-core) to be used by one or more [Hero](/docs/basic-interfaces/hero) instances.
+The [ConnectionToCore](/docs/hero/advanced/connection-to-core) to be used by one or more [Hero](/docs/hero/basic-interfaces/hero) instances.
 
-All [configurations](/docs/advanced/connection-to-core#configurations) accept both an `options` object and a [`ConnectionToCore`](/docs/advanced/connection-to-core) instance.
+All [configurations](/docs/hero/advanced/connection-to-core#configurations) accept both an `options` object and a [`ConnectionToCore`](/docs/hero/advanced/connection-to-core) instance.
 
 ### Max Concurrent Heroes Count <div class="specs"><i>Core</i></div>
 
-Limit concurrent Heroes operating at any given time across all [connections](/docs/advanced/connection-to-core) to a "Core". Defaults to `10`.
+Limit concurrent Heroes operating at any given time across all [connections](/docs/hero/advanced/connection-to-core) to a "Core". Defaults to `10`.
 
-Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](/docs/advanced/connection-to-core#configuration).
+Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](/docs/hero/advanced/connection-to-core#configuration).
 
 ### Data Dir <div class="specs"><i>Connection</i><i>Core</i></div> {#data-dir}
 
@@ -29,7 +29,7 @@ Configures the storage location for files created by Core.
 
 `Environmental variable`: `HERO_DATA_DIR=/your-absolute-dir-path`
 
-Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/advanced/connection-to-core).
+Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/hero/advanced/connection-to-core).
 
 ### Blocked Resource Types <div class="specs"><i>Connection</i><i>Hero</i></div> {#blocked-resources}
 
@@ -81,11 +81,11 @@ An upstream proxy url should be a fully formatted url to the proxy. If your prox
 
 ### Browsers Emulator Id <div class="specs"><i>Hero</i></div>
 
-Configures which [BrowserEmulator](/docs/plugins/browser-emulators) to use in a given Hero.
+Configures which [BrowserEmulator](/docs/hero/plugins/browser-emulators) to use in a given Hero.
 
 ### Human Emulator Id <div class="specs"><i>Hero</i></div>
 
-Configures which [HumanEmulator](/docs/plugins/human-emulators) to use in a Hero instance.
+Configures which [HumanEmulator](/docs/hero/plugins/human-emulators) to use in a Hero instance.
 
 ## Core Configuration
 

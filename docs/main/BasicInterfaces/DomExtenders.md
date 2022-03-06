@@ -23,8 +23,8 @@ DomExtenders cannot be constructed. They're additions added to the following Sup
 
 Checks if a given node is valid and retrievable in the DOM. This API is used mostly to determine if a querySelector can be resolved.
 
-```
-    await hero.querySelector('.not-in-dom').$exists; // false if not in dom!
+```js
+await hero.querySelector('.not-in-dom').$exists; // false if not in dom!
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
@@ -35,9 +35,9 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 Checks if a given node has focus in the DOM. Useful for form interactions.
 
-```
-    const hasFocus = await hero.querySelector('.field').$hasFocus;
-    if (!hasFocus) await hero.querySelector('.field').focus();
+```js
+const hasFocus = await hero.querySelector('.field').$hasFocus;
+if (!hasFocus) await hero.querySelector('.field').focus();
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
@@ -46,24 +46,24 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ### node.$isClickable {#is-clickable}
 
-Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/basic-interfaces/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/hero/basic-interfaces/tab#get-computed-visibility).
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
-```
-    await hero.querySelector('.element').$isClickable;
+```js
+await hero.querySelector('.element').$isClickable;
 ```
 
 #### **Returns**: `Promise<boolean>`
 
 ### node.$isVisible {#is-visible}
 
-Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/basic-interfaces/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/hero/basic-interfaces/tab#get-computed-visibility).
 
 NOTE: this does not mean the node is scrolled into view.
 
-```
-    await hero.querySelector('.element').$isVisible;
+```js
+await hero.querySelector('.element').$isVisible;
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
@@ -84,22 +84,22 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 A normal DOM node has a `click()` API on it, but it does not trigger human-like behavior or mouse events resembling the actions of a normal user. For that reason, it can be detected if a given website is looking for it.
 
-The `$click()` API triggers clicking on the given node using the [Human Emulator](/docs/plugins/human-emulators) functionality.
+The `$click()` API triggers clicking on the given node using the [Human Emulator](/docs/hero/plugins/human-emulators) functionality.
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Arguments**:
 
-- verification `elementAtPath` | `exactElement` | `none`. Default `elementAtPath`. Determines what [verification](/docs/basic-interfaces/interactions#click-verification) should be used in this operation. A verification determines how to recover from the node disappearing from the DOM during execution.
+- verification `elementAtPath` | `exactElement` | `none`. Default `elementAtPath`. Determines what [verification](/docs/hero/basic-interfaces/interactions#click-verification) should be used in this operation. A verification determines how to recover from the node disappearing from the DOM during execution.
 
 #### **Returns**: `Promise<void>`
 
 ### node.$type*(...typeInteractions)* {#type}
 
-Perform a typing interaction on the given node. This is a shortcut for `focusing` on an input and then performing `keyboard` operations using the [Human Emulator](/docs/plugins/human-emulators) functionality.
+Perform a typing interaction on the given node. This is a shortcut for `focusing` on an input and then performing `keyboard` operations using the [Human Emulator](/docs/hero/plugins/human-emulators) functionality.
 
-```
-    await hero.querySelector('.field').$type('fill-in', KeyboardKey.Enter);
+```js
+await hero.querySelector('.field').$type('fill-in', KeyboardKey.Enter);
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
@@ -114,8 +114,8 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 Wait for the given Node "Path" to exist in the DOM. Returns the resolved SuperElement.
 
-```
-    await hero.querySelector('.not.here.yet').$waitForExists(); // waits until this querySelector resolves.
+```js
+await hero.querySelector('.not.here.yet').$waitForExists(); // waits until this querySelector resolves.
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
@@ -161,7 +161,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 Wait for the given Node "Path" to be visible in the DOM.
 
-Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/basic-interfaces/tab#get-computed-visibility)
+Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/hero/basic-interfaces/tab#get-computed-visibility)
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
@@ -178,8 +178,8 @@ Perform an XPath query with this node provided as the "ContextScope". NOTE: you 
 
 This is often useful to mix and match with querySelectors when you want to select on Text values of nodes.
 
-```
-  await hero.querySelector('ul').$xpathSelector('.//[.,"LAX"]')
+```js
+await hero.querySelector('ul').$xpathSelector('.//[.,"LAX"]');
 ```
 
 Attached to Nodes and Elements ([see list](#super-nodes)).

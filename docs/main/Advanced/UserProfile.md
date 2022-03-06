@@ -9,7 +9,7 @@ UserProfiles enable you to capture the full browser state of a user after perfor
 
 ## Constructor
 
-This "state" is not instantiated, but retrieved from an Hero instance: [hero.exportUserProfile()](/docs/basic-interfaces/hero#export-profile).
+This "state" is not instantiated, but retrieved from an Hero instance: [hero.exportUserProfile()](/docs/hero/basic-interfaces/hero#export-profile).
 
 State is stored for all domains (origins) that are loaded into a window at the time of export. The exported state is JSON with additional type information for IndexedDB complex objects.
 
@@ -35,7 +35,7 @@ const heroWithProfile = new Hero({
 
 Cookies for all loaded "origins" for the browsing session.
 
-#### **Type**: [`Cookie[]`](/docs/advanced/cookie-storage#cookie)
+#### **Type**: [`Cookie[]`](/docs/hero/advanced/cookie-storage#cookie)
 
 ### deviceProfile
 
@@ -61,7 +61,7 @@ An object with a key for each "security origin" of a page, and value all the ass
 
 ### userAgentString
 
-The user agent used in this profile. Many sites that track user fingerprint information track the useragent information and expect it to remain the same. You can still override this (eg, to update a browser version) by overriding the `userAgent` parameter when constructing a new [`Agent`](/docs/basic-interfaces/agent).
+The user agent used in this profile. Many sites that track user fingerprint information track the useragent information and expect it to remain the same. You can still override this (eg, to update a browser version) by overriding the `userAgent` parameter when constructing a new [`Agent`](/docs/hero/basic-interfaces/agent).
 
 #### **Type** string
 

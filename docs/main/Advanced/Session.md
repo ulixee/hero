@@ -1,14 +1,14 @@
 # Session
 
-> A Session tracks a single "scraping" session. It tracks and coordinates the [HumanEmulator](/docs/plugins/human-emulators), [BrowserEmulator](/docs/plugins/browser-emulators) and [Hero](/docs/basic-interfaces/hero) that will be used.
+> A Session tracks a single "scraping" session. It tracks and coordinates the [HumanEmulator](/docs/hero/plugins/human-emulators), [BrowserEmulator](/docs/hero/plugins/browser-emulators) and [Hero](/docs/hero/basic-interfaces/hero) that will be used.
 
-Sessions store data into a Sqlite database using a module called SessionState. This database tracks all the information needed to [TimeTravel](/docs/advanced/timetravel).
+Sessions store data into a Sqlite database using a module called SessionState. This database tracks all the information needed to [TimeTravel](/docs/hero/advanced/timetravel).
 
 ### Default Database Location
 
 By default, session databases are located in `os.tmpdir()\.ulixee`. Tmpdir refers to the NodeJs function in the [OS module](https://nodejs.org/api/os.html#os_os_tmpdir).
 
-You can control the location sessions are stored using the [`dataDir`](/docs/overview/configuration#data-dir) configuration when starting a Core server.
+You can control the location sessions are stored using the [`dataDir`](/docs/hero/overview/configuration#data-dir) configuration when starting a Core server.
 
 ### Managing Sessions
 

@@ -4,7 +4,7 @@
 
 #### High Fidelity
 
-Everytime you create a new [Hero](/docs/basic-interfaces/hero), a [Session](/docs/advanced/session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, IFrame updates, and everything else we can measure on the page. 
+Everytime you create a new [Hero](/docs/hero/basic-interfaces/hero), a [Session](/docs/hero/advanced/session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, IFrame updates, and everything else we can measure on the page. 
 
 TimeTravel "reconstructs" your page using all these events from every single micro-tick that occurred during your scrape.
 

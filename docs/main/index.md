@@ -50,10 +50,11 @@ import Hero from '@ulixee/hero';
   await hero.goto('https://example.org');
   const title = await hero.document.title;
   const intro = await hero.document.querySelector('p').textContent;
-  hero.output = { title, intro };
   await hero.close();
+  
+  const output = { title, intro };
 
-  console.log('Retrieved from https://example.org', hero.output);
+  console.log('Retrieved from https://example.org', output);
 })();
 ```
 
