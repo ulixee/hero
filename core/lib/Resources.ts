@@ -64,6 +64,7 @@ export default class Resources {
   }
 
   public recordSeen(resource: IResourceMeta, atCommandId: number): void {
+    resource.seenAtCommandId = atCommandId;
     this.get(resource.id).seenAtCommandId = atCommandId;
   }
 

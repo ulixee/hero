@@ -148,7 +148,7 @@ export default class CoreTab implements IJsPathEventTarget {
     commandFn: () => Promise<T>,
     exitState: IDomState | DomState | IDomStateAllFn,
     callsitePath: ISourceCodeLocation[],
-    options?: IFlowCommandOptions
+    options?: IFlowCommandOptions,
   ): Promise<T> {
     if (typeof exitState === 'function') {
       exitState = { all: exitState };
@@ -258,6 +258,13 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.findResource', filter, options);
   }
 
+  public async findResources(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId?: number },
+  ): Promise<IResourceMeta[]> {
+    return await this.commandQueue.run('Tab.findResources', filter, options);
+  }
+
   public async reload(options: { timeoutMs?: number }): Promise<IResourceMeta> {
     return await this.commandQueue.run('Tab.reload', options);
   }
@@ -274,11 +281,11 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.waitForFileChooser', options);
   }
 
-  public async waitForResource(
+  public async waitForResources(
     filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
     opts: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
-    return await this.commandQueue.run('Tab.waitForResource', filter, opts);
+    return await this.commandQueue.run('Tab.waitForResources', filter, opts);
   }
 
   public async waitForMillis(millis: number): Promise<void> {

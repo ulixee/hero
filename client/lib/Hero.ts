@@ -62,6 +62,7 @@ import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import './DomExtender';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
+import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -262,6 +263,13 @@ export default class Hero extends AwaitedEventTarget<{
     return await this.activeTab.findResource(filter, options);
   }
 
+  public async findResources(
+    filter: IResourceFilterProperties,
+    options?: { sinceCommandId: number },
+  ): Promise<Resource[]> {
+    return await this.activeTab.findResources(filter, options);
+  }
+
   public async focusTab(tab: Tab): Promise<void> {
     const coreTab = await getCoreTab(tab);
     await coreTab.focusTab();
@@ -439,8 +447,15 @@ export default class Hero extends AwaitedEventTarget<{
   public waitForResource(
     filter: IWaitForResourceFilter,
     options?: IWaitForResourceOptions,
-  ): Promise<(Resource | WebsocketResource)[]> {
+  ): Promise<Resource | WebsocketResource> {
     return this.activeTab.waitForResource(filter, options);
+  }
+
+  public waitForResources(
+    filter: IWaitForResourcesFilter,
+    options?: IWaitForResourceOptions,
+  ): Promise<(Resource | WebsocketResource)[]> {
+    return this.activeTab.waitForResources(filter, options);
   }
 
   public waitForElement(
@@ -476,7 +491,7 @@ export default class Hero extends AwaitedEventTarget<{
   public async flowCommand(
     commandFn: () => Promise<void>,
     exitState?: IDomState | DomState | IDomStateAllFn,
-    options?: IFlowCommandOptions
+    options?: IFlowCommandOptions,
   ): Promise<void> {
     return await this.activeTab.flowCommand(commandFn, exitState, options);
   }

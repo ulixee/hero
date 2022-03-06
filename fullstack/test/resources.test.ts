@@ -40,8 +40,11 @@ describe('basic resource tests', () => {
     const elem = hero.document.querySelector('a');
     await hero.click(elem);
 
-    const resources = await hero.waitForResource({ type: 'Fetch' });
+    const resources = await hero.waitForResources({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
+
+    const findResource = await hero.findResource({ type: 'Fetch' });
+    expect(findResource).toBeTruthy()
   });
 
   it('waits for resources by default since the previous command', async () => {
@@ -55,17 +58,26 @@ describe('basic resource tests', () => {
     const startCommandId = await hero.lastCommandId;
     await hero.click(elem);
 
-    const resources = await hero.waitForResource({ type: 'Fetch' });
+    let sinceCommandId = await hero.lastCommandId;
+    const resources = await hero.waitForResources({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
+
+    await expect(
+      hero.waitForResource({ type: 'Fetch' }, { sinceCommandId }),
+    ).resolves.toStrictEqual(resources[0]);
 
     await hero.interact({ move: elem });
     await hero.click(elem);
 
-    const resources2 = await hero.waitForResource({ type: 'Fetch' });
+    sinceCommandId = await hero.lastCommandId;
+    const resources2 = await hero.waitForResources({ type: 'Fetch' });
     expect(resources2).toHaveLength(1);
+    await expect(
+      hero.waitForResource({ type: 'Fetch' }, { sinceCommandId }),
+    ).resolves.toStrictEqual(resources[0]);
 
     let counter = 0;
-    const allResources = await hero.waitForResource(
+    const allResources = await hero.waitForResources(
       {
         filterFn: (resource, done) => {
           if (resource.type === 'Fetch') {
@@ -93,7 +105,7 @@ describe('basic resource tests', () => {
     for (let i = 0; i <= 4; i += 1) {
       const elem = hero.document.querySelector('a');
       await hero.click(elem);
-      const resources = await hero.waitForResource(
+      const resources = await hero.waitForResources(
         { type: 'Fetch' },
         { sinceCommandId: lastCommandId },
       );
@@ -101,6 +113,8 @@ describe('basic resource tests', () => {
       expect(resources).toHaveLength(1);
       expect(resources[0].url).toContain(`counter=${i}`);
     }
+
+    await expect(hero.findResources({ type: 'Fetch' })).resolves.toHaveLength(5);
   });
 
   it('can find resources', async () => {
@@ -140,10 +154,10 @@ describe('basic resource tests', () => {
       const elem = hero1.document.querySelector('a');
       await hero1.click(elem);
 
-      const resources = await hero1.waitForResource({ type: 'Fetch' });
-      expect(resources).toHaveLength(1);
+      const resource = await hero1.waitForResource({ type: 'Fetch' });
+      expect(resource).toBeTruthy();
       const coreSession1 = await hero1[InternalPropertiesSymbol].coreSessionPromise;
-      const { resourceMeta, coreTabPromise } = resources[0][InternalPropertiesSymbol];
+      const { resourceMeta, coreTabPromise } = resource[InternalPropertiesSymbol];
       const coreTab = await coreTabPromise;
       await coreTab.collectResource('xhr', resourceMeta.id);
 

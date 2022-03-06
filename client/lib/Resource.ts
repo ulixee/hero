@@ -13,6 +13,7 @@ import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { InternalPropertiesSymbol } from './internal';
 import Tab, { getCoreTab } from './Tab';
+import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 
 const propertyKeys: (keyof Resource)[] = [
   'url',
@@ -39,7 +40,7 @@ export default class Resource {
     return {
       coreTabPromise: this.#coreTabPromise,
       resourceMeta: this.#resourceMeta,
-    }
+    };
   }
 
   constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
@@ -94,9 +95,47 @@ export default class Resource {
     return null;
   }
 
-  public static async waitFor(
+  public static async findAll(
+    tab: Tab,
+    filter: IResourceFilterProperties,
+    options: { sinceCommandId: number },
+  ): Promise<Resource[]> {
+    const coreTab = await getCoreTab(tab);
+    const resourceMetas = await coreTab.findResources(filter, options);
+    if (resourceMetas) {
+      return resourceMetas.map(resourceMeta =>
+        createResource(Promise.resolve(coreTab), resourceMeta),
+      );
+    }
+    return [];
+  }
+
+  public static async waitForOne(
     tab: Tab,
     filter: IWaitForResourceFilter,
+    options: IWaitForResourceOptions,
+  ): Promise<Resource> {
+    const allFilters = {
+      ...filter,
+      filterFn(resource, done) {
+        if (!filter.filterFn) {
+          done();
+          return true;
+        } else if (filter.filterFn(resource)) {
+          done();
+          return true;
+        }
+        return false;
+      },
+    } as IWaitForResourcesFilter;
+    const resources = await this.waitForMany(tab, allFilters, options);
+    if (resources.length) return resources[0];
+    return null;
+  }
+
+  public static async waitForMany(
+    tab: Tab,
+    filter: IWaitForResourcesFilter,
     options: IWaitForResourceOptions,
   ): Promise<Resource[]> {
     const coreTab = await getCoreTab(tab);
@@ -118,7 +157,7 @@ export default class Resource {
 
     do {
       try {
-        const waitForResourcePromise = coreTab.waitForResource(resourceFilter, resourceOptions);
+        const waitForResourcePromise = coreTab.waitForResources(resourceFilter, resourceOptions);
         const foundResources = await timer.waitForPromise(
           waitForResourcePromise,
           'Timeout waiting for Resource(s)',

@@ -105,7 +105,7 @@ describe('Multi-tab scenarios', () => {
     await hero.click(hero.document.querySelector('a'));
 
     const tab1 = hero.activeTab;
-    const page1Logos = await tab1.waitForResource({
+    const page1Logos = await tab1.waitForResources({
       url: '/logo.png',
     });
     expect(page1Logos).toHaveLength(2);
@@ -120,7 +120,7 @@ describe('Multi-tab scenarios', () => {
     const tabs = await hero.tabs;
     expect(tabs).toHaveLength(2);
     const tab2 = tabs[1];
-    const page2Logos = await tab2.waitForResource({
+    const page2Logos = await tab2.waitForResources({
       url: '/logo.png?page=page2',
     });
     expect(page2Logos).toHaveLength(1);

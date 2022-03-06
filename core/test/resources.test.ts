@@ -46,7 +46,7 @@ test('loads http2 resources', async () => {
   await tab.goto(server.url);
   await tab.waitForLoad('DomContentLoaded');
 
-  const resources = await tab.waitForResource({ url: /.*\/img.png/ });
+  const resources = await tab.waitForResources({ url: /.*\/img.png/ });
   expect(resources).toHaveLength(1);
   expect(resources[0].type).toBe('Image');
   await session.close();

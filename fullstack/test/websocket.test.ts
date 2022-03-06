@@ -73,10 +73,9 @@ describe('Websocket tests', () => {
 
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
 
-    const resources = await hero.waitForResource({ type: 'Websocket' });
-    expect(resources).toHaveLength(1);
+    const resource = await hero.waitForResource({ type: 'Websocket' });
 
-    const [wsResource] = resources as WebsocketResource[];
+    const wsResource = resource as WebsocketResource;
 
     const broadcast = createPromise();
     let messagesCtr = 0;
