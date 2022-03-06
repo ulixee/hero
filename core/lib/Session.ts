@@ -7,7 +7,7 @@ import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
 } from '@ulixee/hero-mitm/handlers/RequestSession';
-import IPuppetContext, { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
+import IPuppetContext, { IPuppetContextEvents, IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -55,8 +55,7 @@ export default class Session
     'all-tabs-closed': void;
     output: { changes: IOutputChangeRecord[] };
   }>
-  implements ICommandableTarget, IRemoteEventListener
-{
+  implements ICommandableTarget, IRemoteEventListener {
   private static readonly byId: { [id: string]: Session } = {};
 
   public readonly id: string;
@@ -393,7 +392,7 @@ export default class Session
   }
 
   public async createTab(): Promise<Tab> {
-    const page = await this.newPage();
+    const page = await this.newPage({ groupName: 'session' });
 
     // if first tab, install session storage
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
@@ -677,9 +676,9 @@ export default class Session
     return tab;
   }
 
-  private async newPage(): Promise<IPuppetPage> {
+  private async newPage(options?: IPuppetPageOptions): Promise<IPuppetPage> {
     if (this._isClosing) throw new Error('Cannot create tab, shutting down');
-    return await this.browserContext.newPage();
+    return await this.browserContext.newPage(options);
   }
 
   private recordLog(entry: ILogEntry): void {

@@ -54,6 +54,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
   public domStorageTracker: DomStorageTracker;
+  public groupName: string;
 
   public popupInitializeFn?: (
     page: IPuppetPage,
@@ -97,6 +98,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   ) {
     super();
 
+    this.groupName = pageOptions?.groupName;
     this.logger = logger.createChild(module, {
       targetId,
     });
