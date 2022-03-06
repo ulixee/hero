@@ -79,6 +79,15 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     return false;
   }
 
+  public async findCommandPercentOffset(commandId: number): Promise<number> {
+    this.isReady ??= this.load();
+    await this.isReady;
+    for (const tick of this.activeTab.ticks) {
+      if (tick.commandId === commandId) return tick.timelineOffsetPercent;
+    }
+    return 0;
+  }
+
   public async loadTick(tick: ITick): Promise<void> {
     await this.isReady;
     const tab = this.activeTab;
