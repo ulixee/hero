@@ -22,7 +22,8 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   mainFrame: IPuppetFrame;
   domStorageTracker: IPuppetDomStorageTracker;
   opener?: IPuppetPage;
-
+  groupName: string;
+  
   isClosed: boolean;
   navigate(url: string, options?: { referrer?: string }): Promise<{ loaderId: string }>;
   dismissDialog(accept: boolean, promptText?: string): Promise<void>;
