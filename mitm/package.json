@@ -7,7 +7,7 @@
     "@ulixee/commons": "1.5.10",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-mitm-socket": "1.5.4",
-    "better-sqlite3": "^7.4.1",
+    "better-sqlite3": "^7.5.0",
     "devtools-protocol": "^0.0.799653",
     "dns-packet": "^5.2.4",
     "moment": "^2.24.1"

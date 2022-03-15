@@ -55,14 +55,26 @@ export default class TabPlaybackController {
     return !!this.mirrorPage?.puppetPageId;
   }
 
+  public get focusedPaintIndexes(): [start: number, end: number] {
+    if (!this.focusedTickRange) {
+      return [this.currentTick?.paintEventIndex, this.currentTick?.paintEventIndex];
+    }
+    const [start, end] = this.focusedTickRange;
+    const startTick = this.ticks[start];
+    const endTick = this.ticks[end];
+    return [startTick?.paintEventIndex ?? -1, endTick?.paintEventIndex ?? -1];
+  }
+
   public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
   public readonly mirrorPage: MirrorPage;
+  public focusedOffsetRange: [start: number, end: number];
   private events = new EventSubscriber();
 
   // put in placeholder
   private paintEventsLoadedIdx = -1;
+  private focusedTickRange: [start: number, end: number];
 
   constructor(
     private readonly tabDetails: ITabDetails,
@@ -137,9 +149,32 @@ export default class TabPlaybackController {
     this.events.close();
   }
 
-  public async setTimelineOffset(timelineOffset: number): Promise<void> {
+  public setFocusedOffsetRange(offsetRange: [start: number, end: number]): void {
+    if (!offsetRange) {
+      this.focusedTickRange = null;
+      this.focusedOffsetRange = null;
+      return;
+    }
+    const [startPercent, endPercent] = offsetRange;
+    this.focusedOffsetRange = offsetRange;
+    this.focusedTickRange = [-1, -1];
+    for (let i = 0; i < this.ticks.length; i += 1) {
+      const offset = this.ticks[i].timelineOffsetPercent;
+      if (offset < startPercent) continue;
+      if (offset > endPercent) break;
+
+      if (this.focusedTickRange[0] === -1) {
+        this.focusedTickRange[0] = i;
+      }
+      this.focusedTickRange[1] = i;
+    }
+    if (this.focusedTickRange[1] === -1) this.focusedTickRange[1] = this.currentTickIndex;
+  }
+
+  public findClosestTickIndex(timelineOffset: number): number {
     const ticks = this.ticks;
-    if (!ticks.length || this.currentTimelineOffsetPct === timelineOffset) return;
+    if (!ticks.length || this.currentTimelineOffsetPct === timelineOffset)
+      return this.currentTickIndex;
 
     let newTickIdx = this.currentTickIndex;
     // if going forward, load next ticks
@@ -155,7 +190,12 @@ export default class TabPlaybackController {
         if (ticks[i].timelineOffsetPercent <= timelineOffset) break;
       }
     }
+    return newTickIdx;
+  }
 
+  public async setTimelineOffset(timelineOffset: number): Promise<void> {
+    const newTickIdx = this.findClosestTickIndex(timelineOffset);
+    if (this.currentTickIndex === newTickIdx) return;
     await this.loadTick(newTickIdx, timelineOffset);
   }
 
