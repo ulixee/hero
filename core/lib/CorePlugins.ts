@@ -308,6 +308,14 @@ export default class CorePlugins implements ICorePlugins {
     );
   }
 
+  public async onDevtoolsPanelDetached(devtoolsSession: IDevtoolsSession): Promise<any> {
+    await Promise.all(
+      this.instances
+        .filter(p => p.onDevtoolsPanelDetached)
+        .map(p => p.onDevtoolsPanelDetached(devtoolsSession)),
+    );
+  }
+
   public async onServiceWorkerAttached(
     devtoolsSession: IDevtoolsSession,
     event: Protocol.Target.AttachedToTargetEvent,
