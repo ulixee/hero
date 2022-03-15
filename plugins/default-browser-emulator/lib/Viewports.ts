@@ -13,6 +13,7 @@ const defaultWindowFraming = {
 export const defaultScreen = {
   width: 1440,
   height: 900,
+  scale: 1,
 };
 
 export default class Viewports {
@@ -21,6 +22,7 @@ export default class Viewports {
     const base = windowBaseFraming || { ...defaultWindowFraming };
     const screenWidth = defaultScreen.width;
     const screenHeight = defaultScreen.height;
+    const deviceScaleFactor = defaultScreen.scale;
 
     const windowInnerWidth =
       screenWidth - (base.screenGapLeft + base.screenGapRight + base.frameBorderWidth);
@@ -53,7 +55,7 @@ export default class Viewports {
       screenHeight,
       width: windowWidth,
       height: windowHeight,
-      deviceScaleFactor: 0,
+      deviceScaleFactor,
       isDefault: true,
     } as IViewport;
   }

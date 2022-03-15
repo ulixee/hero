@@ -21,8 +21,14 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     paintIndex: number;
   };
   'new-paint-index': {
-    paintIndex: number;
+    tabId: number;
+    paintIndexRange: [start: number, end: number];
     documentLoadPaintIndex: number;
+  };
+  'new-offset': {
+    tabId: number;
+    percentOffset: number;
+    focusedRange: [start: number, end: number];
   };
   'tab-opened': void;
   'all-tabs-closed': void;
@@ -110,6 +116,12 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     return percentOffset;
   }
 
+  public async setFocusedOffsetRange(offsetRange: [start: number, end: number]): Promise<void> {
+    this.isReady ??= this.load();
+    await this.isReady;
+    this.activeTab.setFocusedOffsetRange(offsetRange);
+  }
+
   public async goto(
     sessionOffsetPercent: number,
     statusMetadata?: ITimelineMetadata,
@@ -123,6 +135,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
      */
     const tab = this.activeTab;
     const startTick = tab.currentTick;
+    const startOffset = tab.currentTimelineOffsetPct;
     await this.openTab(tab);
     if (sessionOffsetPercent !== undefined) {
       await tab.setTimelineOffset(sessionOffsetPercent);
@@ -138,8 +151,16 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     }
     if (tab.currentTick && tab.currentTick.paintEventIndex !== startTick?.paintEventIndex) {
       this.emit('new-paint-index', {
-        paintIndex: tab.currentTick.paintEventIndex,
+        paintIndexRange: tab.focusedPaintIndexes,
+        tabId: tab.id,
         documentLoadPaintIndex: tab.currentTick.documentLoadPaintIndex,
+      });
+    }
+    if (tab.currentTimelineOffsetPct !== startOffset) {
+      this.emit('new-offset', {
+        tabId: tab.id,
+        percentOffset: tab.currentTimelineOffsetPct,
+        focusedRange: tab.focusedOffsetRange,
       });
     }
     if (statusMetadata) await this.showLoadStatus(statusMetadata);
