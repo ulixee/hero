@@ -1,5 +1,14 @@
 import '@ulixee/commons/lib/SourceMapSupport';
-import type { ISuperDocument, ISuperElement, ISuperNode, ISuperNodeList, ISuperHTMLCollection, ISuperText, ISuperStyleSheet, ISuperHTMLElement } from "awaited-dom/base/interfaces/super";
+import type {
+  ISuperDocument,
+  ISuperElement,
+  ISuperNode,
+  ISuperNodeList,
+  ISuperHTMLCollection,
+  ISuperText,
+  ISuperStyleSheet,
+  ISuperHTMLElement,
+} from 'awaited-dom/base/interfaces/super';
 import {
   BlockedResourceType,
   ConnectionToCore,
@@ -14,6 +23,7 @@ import {
   IResourceType,
   ResourceType,
   Tab,
+  LoadStatus,
   XPathResult,
   IHeroCreateOptions,
   IConnectionToCoreOptions,
@@ -44,6 +54,7 @@ export {
   Tab,
   XPathResult,
   LocationStatus,
+  LoadStatus,
   LocationTrigger,
   IHeroCreateOptions,
   IConnectionToCoreOptions,
