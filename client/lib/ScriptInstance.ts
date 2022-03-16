@@ -18,7 +18,9 @@ export default class ScriptInstance {
 
   constructor() {
     this.mode = process.env.NODE_ENV as any;
-    if (!['development', 'production', 'multiverse', 'timetravel'].includes(this.mode)) {
+    if (
+      !['development', 'production', 'multiverse', 'timetravel', 'background'].includes(this.mode)
+    ) {
       this.mode = 'development';
     }
   }
@@ -62,7 +64,7 @@ export default class ScriptInstance {
       if (!filename) continue;
 
       if (this.ignoreModulePaths.find(x => filename.startsWith(x))) {
-        continue
+        continue;
       }
       if (filename.endsWith(this.entrypoint)) {
         lastIndexOfEntrypoint = stackLines.length;
