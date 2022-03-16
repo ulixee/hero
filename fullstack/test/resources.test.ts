@@ -163,7 +163,7 @@ describe('basic resource tests', () => {
 
       const collected = await coreSession1.getCollectedResources(await hero1.sessionId, 'xhr');
       expect(collected).toHaveLength(1);
-      expect(collected[0].response.json).toEqual({ hi: 'there' });
+      expect(JSON.parse(collected[0].resource.response.buffer.toString())).toEqual({ hi: 'there' });
       await hero1.close();
     }
 
@@ -177,9 +177,9 @@ describe('basic resource tests', () => {
       const coreSession2 = await hero2[InternalPropertiesSymbol].coreSessionPromise;
       const collected2 = await coreSession2.getCollectedResources(await hero1.sessionId, 'xhr');
       expect(collected2).toHaveLength(1);
-      expect(collected2[0].url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
+      expect(collected2[0].resource.url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
       // should prefetch the body
-      expect(collected2[0].response.buffer).toBeTruthy();
+      expect(collected2[0].resource.response.buffer).toBeTruthy();
     }
   });
 });

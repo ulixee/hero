@@ -10,6 +10,8 @@ export default class CollectedResourcesTable extends SqliteTable<ICollectedResou
         ['name', 'TEXT'],
         ['resourceId', 'INTEGER'],
         ['tabId', 'INTEGER'],
+        ['timestamp', 'DATETIME'],
+        ['commandId', 'INTEGER'],
       ],
       true,
     );
@@ -19,8 +21,20 @@ export default class CollectedResourcesTable extends SqliteTable<ICollectedResou
     return this.db.prepare(`select * from ${this.tableName} where name=:name`).all({ name });
   }
 
-  public insert(tabId: number, resourceId: number, name: string): void {
-    return this.queuePendingInsert([name, resourceId, tabId]);
+  public insert(
+    tabId: number,
+    resourceId: number,
+    name: string,
+    timestamp: number,
+    commandId: number,
+  ): void {
+    return this.queuePendingInsert([
+      name,
+      resourceId,
+      tabId,
+      timestamp,
+      commandId,
+    ]);
   }
 }
 
@@ -28,4 +42,6 @@ export interface ICollectedResourcesRecord {
   name: string;
   resourceId: number;
   tabId: number;
+  timestamp: number;
+  commandId: number;
 }

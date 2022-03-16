@@ -44,6 +44,7 @@ import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 
 const { log } = Log(module);
 
@@ -57,8 +58,13 @@ export default class Session
     'tab-created': { tab: Tab };
     'all-tabs-closed': void;
     output: { changes: IOutputChangeRecord[] };
+    'collected-asset': {
+      type: 'resource' | 'snippet' | 'element';
+      asset: ICollectedSnippet | ICollectedElement | IResourceMeta;
+    };
   }>
-  implements ICommandableTarget, IRemoteEventListener {
+  implements ICommandableTarget, IRemoteEventListener
+{
   private static readonly byId: { [id: string]: Session } = {};
 
   public readonly id: string;
@@ -320,7 +326,7 @@ export default class Session
     return Promise.resolve(db.collectedSnippets.getByName(name));
   }
 
-  public getCollectedResources(fromSessionId: string, name: string): Promise<IResourceMeta[]> {
+  public getCollectedResources(fromSessionId: string, name: string): Promise<ICollectedResource[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
@@ -329,9 +335,14 @@ export default class Session
     }
     const resources = db.collectedResources.getByName(name).map(async x => {
       const resource = await db.resources.getMeta(x.resourceId, true);
+      const collectedResource = {
+        ...x,
+        resource,
+      } as ICollectedResource;
+
       if (resource.type === 'Websocket') {
         const messages = db.websocketMessages.getMessages(resource.id);
-        (resource as any).messages = messages.map(
+        collectedResource.websocketMessages = messages.map(
           message =>
             <IWebsocketMessage>{
               message: message.isBinary ? message.message : message.message.toString(),
@@ -339,7 +350,8 @@ export default class Session
             },
         );
       }
-      return resource;
+
+      return collectedResource;
     });
     return Promise.all(resources);
   }

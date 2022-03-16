@@ -122,7 +122,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       )
       .get(id);
 
-    const body =
+    const buffer =
       'responseData' in record
         ? await decodeBuffer(record.responseData, record.responseEncoding)
         : null;
@@ -156,7 +156,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         statusCode: record.statusCode,
         statusMessage: record.statusMessage,
         remoteAddress: null,
-        body,
+        buffer,
       },
     };
   }
@@ -294,7 +294,9 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   public filter(filters: { hasResponse?: boolean; isGetOrDocument?: boolean }): IResourceSummary[] {
     const { hasResponse, isGetOrDocument } = filters;
 
-    const whereClause = hasResponse ? ' where (responseData is not null or redirectedToUrl is not null)' : '';
+    const whereClause = hasResponse
+      ? ' where (responseData is not null or redirectedToUrl is not null)'
+      : '';
     const records = this.db
       .prepare(
         `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders 

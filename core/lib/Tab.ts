@@ -353,18 +353,25 @@ export default class Tab
     }
   }
 
-  public collectResource(name: string, resourceId: number): Promise<void> {
+  public collectResource(name: string, resourceId: number, timestamp: number): Promise<void> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
-    this.session.db.collectedResources.insert(this.id, resourceId, name);
+    this.session.db.collectedResources.insert(
+      this.id,
+      resourceId,
+      name,
+      timestamp,
+      this.session.commands.lastId,
+    );
+    this.session.emit('collected-asset', { type: 'resource', asset: resource });
     return Promise.resolve();
   }
 
   public async getResourceProperty(
     resourceId: number,
-    propertyPath: 'response.body' | 'messages' | 'request.postData',
+    propertyPath: 'response.buffer' | 'messages' | 'request.postData',
   ): Promise<Buffer | IWebsocketMessage[]> {
-    if (propertyPath === 'response.body') {
+    if (propertyPath === 'response.buffer') {
       return await this.session.db.resources.getResourceBodyById(resourceId, true);
     } else if (propertyPath === 'request.postData') {
       return this.session.db.resources.getResourcePostDataById(resourceId);
