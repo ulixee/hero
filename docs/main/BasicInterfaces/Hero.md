@@ -183,9 +183,13 @@ Retrieves metadata about the hero configuration:
   - proxyIp `string`. The public IP address of the proxy.
   - publicIp `string`. The public IP address of the host machine.
 - userAgentString `string`. The user agent string used in Http requests and within the DOM.
-- browserFullVersion `string`. The full version of Chrome (eg, 98.0.4758.102)
-- operatingSystemPlatform `string`. The emulated operating system (eg, Windows)
-- operatingSystemVersion `string`. The full operating system version (eg, 11.0.1)
+- browserName `string`. The emulated browser (eg, chrome)
+- browserFullVersion `string`. The emulated full version of Chrome (eg, 98.0.4758.102)
+- operatingSystemName `string`. The emulated operating system (eg, windows)
+- operatingSystemPlatform `string`. The emulated operating platform (eg, Win32, MacIntel)
+- operatingSystemVersion `string`. The emulated operating system version (eg, 11.0.1)
+- renderingEngine `string`. The actual browser being used (eg, chrome)
+- renderingEngineVersion `string`. The actual full version of Chrome (eg, 98.0.4758.102)
 
 #### **Type**: `Promise<IHeroMeta>`
 

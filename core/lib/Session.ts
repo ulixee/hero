@@ -7,7 +7,10 @@ import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
 } from '@ulixee/hero-mitm/handlers/RequestSession';
-import IPuppetContext, { IPuppetContextEvents, IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+  IPuppetPageOptions,
+} from '@ulixee/hero-interfaces/IPuppetContext';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -108,8 +111,14 @@ export default class Session
   public get meta(): IHeroMeta {
     const { plugins, viewport, locale, timezoneId, geolocation } = this;
 
-    const { userAgentString, operatingSystemPlatform, operatingSystemVersion } =
-      this.plugins.browserEmulator;
+    const {
+      userAgentString,
+      operatingSystemPlatform,
+      operatingSystemName,
+      operatingSystemVersion,
+      browserVersion,
+      browserName,
+    } = this.plugins.browserEmulator;
 
     return {
       sessionId: this.id,
@@ -123,6 +132,7 @@ export default class Session
       timezoneId,
       geolocation,
       userAgentString,
+      operatingSystemName,
       operatingSystemPlatform,
       operatingSystemVersion: [
         operatingSystemVersion.major,
@@ -132,7 +142,18 @@ export default class Session
       ]
         .filter(x => x !== undefined)
         .join('.'),
-      browserFullVersion: this.browserEngine.fullVersion,
+      browserName,
+      browserFullVersion: [
+        browserVersion.major,
+        browserVersion.minor,
+        browserVersion.patch,
+        browserVersion.build,
+      ]
+        .filter(x => x !== undefined)
+        .join('.'),
+
+      renderingEngine: this.browserEngine.name,
+      renderingEngineVersion: this.browserEngine.fullVersion,
     };
   }
 
@@ -385,6 +406,9 @@ export default class Session
     this.events.on(requestSession, 'socket-close', this.onSocketClose.bind(this));
     this.events.on(requestSession, 'socket-connect', this.onSocketConnect.bind(this));
     await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
+    if (this.options.upstreamProxyIpMask) {
+      this.db.session.updateConfiguration(this.meta);
+    }
   }
 
   public exportUserProfile(): Promise<IUserProfile> {
@@ -405,7 +429,7 @@ export default class Session
     this.recordTab(tab);
     this.registerTab(tab);
     await tab.isReady;
-    if (first) this.db.session.updateConfiguration(this.id, this.meta);
+    if (first) this.db.session.updateConfiguration(this.meta);
     return tab;
   }
 
@@ -508,7 +532,7 @@ export default class Session
     this.plugins.cleanup();
 
     // should go last so we can capture logs
-    this.db.session.close(this.id, Date.now());
+    this.db.session.close(Date.now());
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
     this.db.flush();
@@ -705,6 +729,7 @@ export default class Session
     this.db.session.insert(
       this.id,
       configuration,
+      this.browserEngine.name,
       this.browserEngine.fullVersion,
       this.createdTime,
       scriptInstanceMeta,

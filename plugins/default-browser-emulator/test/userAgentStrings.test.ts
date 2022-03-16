@@ -13,7 +13,8 @@ test('it should run uninstalled userAgent strings on the closest installed brows
   const meta = await hero.meta;
 
   expect(meta.userAgentString).toBe(userAgent);
-  expect(meta.browserFullVersion).toBe(defaultBrowserEngine.fullVersion);
+  expect(meta.renderingEngineVersion).toBe(defaultBrowserEngine.fullVersion);
+  expect(meta.browserFullVersion.split('.').shift()).toBe(defaultBrowserEngine.version.major)
 });
 
 test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async () => {
@@ -22,7 +23,8 @@ test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async ()
   Helpers.onClose(() => hero.close(), true);
   const meta = await hero.meta;
   expect(meta.userAgentString).toBe(userAgent);
-  expect(meta.browserFullVersion).toBe(defaultBrowserEngine.fullVersion);
+  expect(meta.renderingEngineVersion).toBe(defaultBrowserEngine.fullVersion);
+  expect(meta.browserFullVersion.split('.').shift()).toBe(defaultBrowserEngine.version.major)
   const osVersion = meta.operatingSystemVersion.split('.').map(Number);
   expect(osVersion[0]).toBeGreaterThanOrEqual(10);
   if (osVersion[0] === 10) {
