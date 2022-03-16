@@ -39,8 +39,6 @@ import Commands from './Commands';
 import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
@@ -60,7 +58,7 @@ export default class Session
     output: { changes: IOutputChangeRecord[] };
     'collected-asset': {
       type: 'resource' | 'snippet' | 'element';
-      asset: ICollectedSnippet | ICollectedElement | IResourceMeta;
+      asset: ICollectedSnippet | ICollectedElement | ICollectedResource;
     };
   }>
   implements ICommandableTarget, IRemoteEventListener
@@ -284,8 +282,9 @@ export default class Session
     return Promise.resolve(this.meta);
   }
 
-  public collectSnippet(name: string, value: any): Promise<void> {
-    this.db.collectedSnippets.insert(name, value);
+  public collectSnippet(name: string, value: any, timestamp: number): Promise<void> {
+    const asset = this.db.collectedSnippets.insert(name, value, timestamp, this.commands.lastId);
+    this.emit('collected-asset', { type: 'snippet', asset });
     return Promise.resolve();
   }
 
@@ -341,13 +340,8 @@ export default class Session
       } as ICollectedResource;
 
       if (resource.type === 'Websocket') {
-        const messages = db.websocketMessages.getMessages(resource.id);
-        collectedResource.websocketMessages = messages.map(
-          message =>
-            <IWebsocketMessage>{
-              message: message.isBinary ? message.message : message.message.toString(),
-              source: message.isFromServer ? 'server' : 'client',
-            },
+        collectedResource.websocketMessages = db.websocketMessages.getTranslatedMessages(
+          resource.id,
         );
       }
 

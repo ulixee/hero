@@ -13,7 +13,6 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
@@ -132,7 +131,7 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async collectSnippet(name: string, value: any): Promise<void> {
-    await this.commandQueue.run('Session.collectSnippet', name, value);
+    await this.commandQueue.run('Session.collectSnippet', name, value, Date.now());
   }
 
   public async getCollectedAssetNames(

@@ -1,6 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import { formatJsPath } from '../lib/CommandFormatter';
 
 export default class CollectedElementsTable extends SqliteTable<
   ICollectedElement & { id?: number }
@@ -13,11 +14,14 @@ export default class CollectedElementsTable extends SqliteTable<
       [
         ['id', 'INTEGER', 'PRIMARY KEY'],
         ['name', 'TEXT'],
+        ['timestamp', 'DATETIME'],
         ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
         ['frameNavigationId', 'INTEGER'],
         ['commandId', 'INTEGER'],
-        ['domChangesTimestamp', 'INTEGER'],
+        ['nodePath', 'TEXT'],
+        ['documentUrl', 'TEXT'],
+        ['domChangesTimestamp', 'DATETIME'],
         ['nodePointerId', 'INTEGER'],
         ['nodeType', 'TEXT'],
         ['nodePreview', 'TEXT'],
@@ -34,10 +38,13 @@ export default class CollectedElementsTable extends SqliteTable<
     this.queuePendingInsert([
       collectedElement.id,
       collectedElement.name,
+      collectedElement.timestamp,
       collectedElement.tabId,
       collectedElement.frameId,
       collectedElement.frameNavigationId,
       collectedElement.commandId,
+      collectedElement.nodePath ? formatJsPath(collectedElement.nodePath) : null,
+      collectedElement.documentUrl,
       collectedElement.domChangesTimestamp,
       collectedElement.nodePointerId,
       collectedElement.nodeType,
@@ -63,6 +70,10 @@ export default class CollectedElementsTable extends SqliteTable<
       pending[7] = element.outerHTML;
       return;
     }
-    this.db.prepare(`update ${this.tableName} set outerHTML=:outerHTML where id=:id`).run(element);
+    this.db
+      .prepare(
+        `update ${this.tableName} set outerHTML=:outerHTML, documentUrl=:documentUrl where id=:id`,
+      )
+      .run(element);
   }
 }

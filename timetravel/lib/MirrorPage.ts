@@ -266,10 +266,11 @@ export default class MirrorPage extends TypedEventEmitter<{
     paintIndex: number,
     nodeId: number,
     frameDomNodeId?: number,
-  ): Promise<string> {
-    return await this.load<string>(paintIndex, null, async () => {
+  ): Promise<{ html: string; url: string }> {
+    return await this.load(paintIndex, null, async () => {
       const frame = await this.getFrameWithDomNodeId(frameDomNodeId);
-      return await frame.evaluate(
+      const url = frame.url;
+      const html = await frame.evaluate<string>(
         `(() => {
      const node = NodeTracker.getWatchedNodeWithId(${nodeId});
      if (node) return node.outerHTML;
@@ -278,6 +279,7 @@ export default class MirrorPage extends TypedEventEmitter<{
         true,
         { retriesWaitingForLoad: 2 },
       );
+      return { url, html };
     });
   }
 

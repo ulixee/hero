@@ -253,6 +253,7 @@ export default class FrameEnvironment
   public async collectElement(
     name: string,
     jsPath: IJsPath,
+    timestamp: number,
     waitForElement = false,
   ): Promise<ICollectedElement[]> {
     const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
@@ -266,6 +267,8 @@ export default class FrameEnvironment
       for (const item of nodePointer.iterableItems as INodePointer[]) {
         elements.push({
           name,
+          nodePath: this.jsPath.getNodePath(item),
+          documentUrl: this.url,
           nodePointerId: item.id,
           frameId: this.id,
           tabId: this.tab.id,
@@ -274,12 +277,15 @@ export default class FrameEnvironment
           frameNavigationId: navigation.id,
           commandId,
           domChangesTimestamp,
+          timestamp,
         });
       }
     } else if (!nodePointer.iterableItems) {
       elements.push({
         name,
         nodePointerId: nodePointer.id,
+        nodePath: this.jsPath.getNodePath(nodePointer),
+        documentUrl: this.url,
         frameId: this.id,
         tabId: this.tab.id,
         nodeType: nodePointer.type,
@@ -287,6 +293,7 @@ export default class FrameEnvironment
         frameNavigationId: navigation.id,
         commandId,
         domChangesTimestamp,
+        timestamp,
       });
     }
 

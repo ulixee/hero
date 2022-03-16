@@ -96,6 +96,7 @@ export default class CoreFrameEnvironment {
       'FrameEnvironment.collectElement',
       name,
       jsPath,
+      Date.now(),
       waitForElement,
     );
   }
