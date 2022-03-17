@@ -280,7 +280,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
 
     const { scale, pageX, pageY }  = layoutMetrics.visualViewport;
-    // @ts-expect-error -- Chrome 98 added css content size, which is scaled correctly
     const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
 
     let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;

@@ -5,6 +5,6 @@
   "dependencies": {
     "@ulixee/commons": "1.5.10",
     "@ulixee/hero-interfaces": "1.5.4",
-    "devtools-protocol": "^0.0.799653"
+    "devtools-protocol": "^0.0.981744"
   }
 }

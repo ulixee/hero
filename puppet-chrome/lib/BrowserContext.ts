@@ -36,6 +36,7 @@ export class BrowserContext
 
   public workersById = new Map<string, IPuppetWorker>();
   public pagesById = new Map<string, Page>();
+  public devtoolsSessionsById = new Map<string, DevtoolsSession>();
   public plugins: ICorePlugins;
   public proxy: IProxyConnectionOptions;
   public domStorage: IDomStorage;
@@ -170,7 +171,22 @@ export class BrowserContext
     if (page) {
       this.pagesById.delete(targetId);
       page.didClose();
+      return;
     }
+
+    const devtoolsSession = this.devtoolsSessionsById.get(targetId);
+    if (devtoolsSession) {
+      this.onDevtoolsPanelDetached(devtoolsSession);
+    }
+  }
+
+  onDevtoolsPanelAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): void {
+    this.devtoolsSessionsById.set(targetInfo.targetId, devtoolsSession);
+    this.plugins.onDevtoolsPanelAttached(devtoolsSession).catch(() => null);
+  }
+
+  onDevtoolsPanelDetached(devtoolsSession: DevtoolsSession): void {
+    this.plugins.onDevtoolsPanelDetached(devtoolsSession).catch(() => null);
   }
 
   async onSharedWorkerAttached(

@@ -156,10 +156,11 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
 
     if (targetInfo.type === 'other' && targetInfo.url.startsWith('devtools://devtools')) {
       const devtoolsSession = this.connection.getSession(sessionId);
-      if (this.onDevtoolsPanelAttached)
+      if (this.onDevtoolsPanelAttached) {
         this.onDevtoolsPanelAttached(devtoolsSession).catch(() => null);
+      }
       const context = this.getBrowserContext(targetInfo.browserContextId);
-      context?.plugins.onDevtoolsPanelAttached(devtoolsSession).catch(() => null);
+      context?.onDevtoolsPanelAttached(devtoolsSession, targetInfo);
       return;
     }
 
@@ -203,8 +204,8 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent): void {
-    const targetId = payload.targetId;
+  private onDetachedFromTarget(event: Protocol.Target.DetachedFromTargetEvent): void {
+    const targetId = event.targetId;
     for (const [, context] of this.browserContextsById) {
       context.onPageDetached(targetId);
     }
