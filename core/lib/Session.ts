@@ -422,6 +422,7 @@ export default class Session
   }
 
   public async createTab(): Promise<Tab> {
+    if (this.mode === 'browserless') return null;
     const page = await this.newPage({ groupName: 'session' });
 
     // if first tab, install session storage

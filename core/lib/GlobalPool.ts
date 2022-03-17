@@ -178,6 +178,8 @@ export default class GlobalPool {
       const session = new Session(options);
       this.events.emit('session-created', { session });
 
+      if (session.mode === 'browserless') return session;
+
       const puppet = await this.getPuppet(session.plugins, session.browserEngine);
 
       if (disableMitm !== true) {

@@ -19,7 +19,7 @@ export default class ScriptInstance {
   constructor() {
     this.mode = process.env.NODE_ENV as any;
     if (
-      !['development', 'production', 'multiverse', 'timetravel', 'background'].includes(this.mode)
+      !['development', 'production', 'multiverse', 'timetravel', 'browserless'].includes(this.mode)
     ) {
       this.mode = 'development';
     }

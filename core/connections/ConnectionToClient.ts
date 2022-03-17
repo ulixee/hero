@@ -183,7 +183,7 @@ export default class ConnectionToClient
       session.once('closing', () => this.sessionIdToRemoteEvents.delete(sessionId));
       session.once('closed', this.checkForAutoShutdown);
     }
-    return { tabId: tab.id, sessionId: session.id, frameId: tab.mainFrameId };
+    return { tabId: tab?.id, sessionId: session.id, frameId: tab?.mainFrameId };
   }
 
   /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
