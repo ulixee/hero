@@ -8,6 +8,8 @@ export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippe
     super(db, 'CollectedSnippets', [
       ['name', 'TEXT'],
       ['value', 'TEXT'],
+      ['timestamp', 'DATETIME'],
+      ['commandId', 'INTEGER'],
     ]);
   }
 
@@ -17,13 +19,24 @@ export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippe
       .all({ name })
       .map((x: ICollectedSnippet) => {
         return {
-          name: x.name,
+          ...x,
           value: TypeSerializer.parse(x.value),
         };
       });
   }
 
-  public insert(name: string, value: any): void {
-    return this.queuePendingInsert([name, TypeSerializer.stringify(value)]);
+  public insert(
+    name: string,
+    value: any,
+    timestamp: number,
+    commandId: number,
+  ): ICollectedSnippet {
+    this.queuePendingInsert([
+      name,
+      TypeSerializer.stringify(value),
+      timestamp,
+      commandId,
+    ]);
+    return { name, value, timestamp, commandId };
   }
 }

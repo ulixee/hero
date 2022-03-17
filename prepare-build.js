@@ -7,7 +7,6 @@ function processPackageJson(packagePath) {
   let overridesJson = null;
   if (fs.existsSync(`${packagePath}/package.build.json`)) {
     overridesJson = JSON.parse(fs.readFileSync(`${packagePath}/package.build.json`, 'utf8'));
-    console.log('Has package.json overrides', packagePath, overridesJson);
   }
 
   if (!overridesJson) return;
@@ -28,7 +27,6 @@ function processPackageJson(packagePath) {
       return x;
     });
   }
-  console.log('writing', `${packagePath}/package.json`);
   fs.writeFileSync(`${packagePath}/package.json`, JSON.stringify(finalPackageJson, null, 2));
 }
 
@@ -45,4 +43,6 @@ function processDir(path) {
   }
 }
 
+console.log('Preparing package.json for build');
 processDir(buildDir);
+console.log('Completed preparing package.json for build');

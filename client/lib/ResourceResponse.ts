@@ -65,9 +65,9 @@ export default class ResourceResponse {
   }
 
   public get buffer(): Promise<Buffer> {
-    if (this.#response?.body) return Promise.resolve(this.#response.body);
+    if (this.#response?.buffer) return Promise.resolve(this.#response.buffer);
     const id = this.#resourceId;
-    return this.#coreTab.then(x => x.getResourceProperty(id, `response.body`));
+    return this.#coreTab.then(x => x.getResourceProperty(id, `response.buffer`));
   }
 
   public get text(): Promise<string> {

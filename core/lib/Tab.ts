@@ -51,6 +51,7 @@ import { IScrollRecord } from '../models/ScrollEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 
 const { log } = Log(module);
 
@@ -353,18 +354,38 @@ export default class Tab
     }
   }
 
-  public collectResource(name: string, resourceId: number): Promise<void> {
+  public async collectResource(name: string, resourceId: number, timestamp: number): Promise<void> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
-    this.session.db.collectedResources.insert(this.id, resourceId, name);
-    return Promise.resolve();
+    this.session.db.collectedResources.insert(
+      this.id,
+      resourceId,
+      name,
+      timestamp,
+      this.session.commands.lastId,
+    );
+
+    const collectedResource: ICollectedResource = {
+      name,
+      commandId: this.session.commands.lastId,
+      timestamp,
+      resource: resource as any,
+      websocketMessages: [],
+    };
+
+    resource.response.buffer = await this.session.db.resources.getResourceBodyById(resourceId, true);
+
+    if (resource.type === 'Websocket') {
+      collectedResource.websocketMessages = this.session.websocketMessages.getMessages(resourceId);
+    }
+    this.session.emit('collected-asset', { type: 'resource', asset: collectedResource });
   }
 
   public async getResourceProperty(
     resourceId: number,
-    propertyPath: 'response.body' | 'messages' | 'request.postData',
+    propertyPath: 'response.buffer' | 'messages' | 'request.postData',
   ): Promise<Buffer | IWebsocketMessage[]> {
-    if (propertyPath === 'response.body') {
+    if (propertyPath === 'response.buffer') {
       return await this.session.db.resources.getResourceBodyById(resourceId, true);
     } else if (propertyPath === 'request.postData') {
       return this.session.db.resources.getResourcePostDataById(resourceId);
@@ -592,12 +613,15 @@ export default class Tab
         this.session.viewport,
       );
       const frameDomNodeId = this.frameEnvironmentsById.get(collectedElement.frameId).domNodeId;
-      collectedElement.outerHTML = await this.mirrorPage.getNodeOuterHtml(
+      const outerHtml = await this.mirrorPage.getNodeOuterHtml(
         paintIndex,
         collectedElement.nodePointerId,
         frameDomNodeId,
       );
+      collectedElement.documentUrl = outerHtml.url;
+      collectedElement.outerHTML = outerHtml.html;
       this.session.db.collectedElements.updateHtml(collectedElement);
+      this.session.emit('collected-asset', { type: 'element', asset: collectedElement });
     } catch (error) {
       this.logger.warn('Tab.getElementHtml: ERROR', {
         Element: collectedElement,

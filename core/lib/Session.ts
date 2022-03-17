@@ -7,7 +7,10 @@ import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
 } from '@ulixee/hero-mitm/handlers/RequestSession';
-import IPuppetContext, { IPuppetContextEvents, IPuppetPageOptions } from '@ulixee/hero-interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+  IPuppetPageOptions,
+} from '@ulixee/hero-interfaces/IPuppetContext';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -36,11 +39,10 @@ import Commands from './Commands';
 import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 
 const { log } = Log(module);
 
@@ -54,8 +56,13 @@ export default class Session
     'tab-created': { tab: Tab };
     'all-tabs-closed': void;
     output: { changes: IOutputChangeRecord[] };
+    'collected-asset': {
+      type: 'resource' | 'snippet' | 'element';
+      asset: ICollectedSnippet | ICollectedElement | ICollectedResource;
+    };
   }>
-  implements ICommandableTarget, IRemoteEventListener {
+  implements ICommandableTarget, IRemoteEventListener
+{
   private static readonly byId: { [id: string]: Session } = {};
 
   public readonly id: string;
@@ -108,8 +115,14 @@ export default class Session
   public get meta(): IHeroMeta {
     const { plugins, viewport, locale, timezoneId, geolocation } = this;
 
-    const { userAgentString, operatingSystemPlatform, operatingSystemVersion } =
-      this.plugins.browserEmulator;
+    const {
+      userAgentString,
+      operatingSystemPlatform,
+      operatingSystemName,
+      operatingSystemVersion,
+      browserVersion,
+      browserName,
+    } = this.plugins.browserEmulator;
 
     return {
       sessionId: this.id,
@@ -123,6 +136,7 @@ export default class Session
       timezoneId,
       geolocation,
       userAgentString,
+      operatingSystemName,
       operatingSystemPlatform,
       operatingSystemVersion: [
         operatingSystemVersion.major,
@@ -132,7 +146,18 @@ export default class Session
       ]
         .filter(x => x !== undefined)
         .join('.'),
-      browserFullVersion: this.browserEngine.fullVersion,
+      browserName,
+      browserFullVersion: [
+        browserVersion.major,
+        browserVersion.minor,
+        browserVersion.patch,
+        browserVersion.build,
+      ]
+        .filter(x => x !== undefined)
+        .join('.'),
+
+      renderingEngine: this.browserEngine.name,
+      renderingEngineVersion: this.browserEngine.fullVersion,
     };
   }
 
@@ -257,8 +282,9 @@ export default class Session
     return Promise.resolve(this.meta);
   }
 
-  public collectSnippet(name: string, value: any): Promise<void> {
-    this.db.collectedSnippets.insert(name, value);
+  public collectSnippet(name: string, value: any, timestamp: number): Promise<void> {
+    const asset = this.db.collectedSnippets.insert(name, value, timestamp, this.commands.lastId);
+    this.emit('collected-asset', { type: 'snippet', asset });
     return Promise.resolve();
   }
 
@@ -299,7 +325,7 @@ export default class Session
     return Promise.resolve(db.collectedSnippets.getByName(name));
   }
 
-  public getCollectedResources(fromSessionId: string, name: string): Promise<IResourceMeta[]> {
+  public getCollectedResources(fromSessionId: string, name: string): Promise<ICollectedResource[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
@@ -308,17 +334,18 @@ export default class Session
     }
     const resources = db.collectedResources.getByName(name).map(async x => {
       const resource = await db.resources.getMeta(x.resourceId, true);
+      const collectedResource = {
+        ...x,
+        resource,
+      } as ICollectedResource;
+
       if (resource.type === 'Websocket') {
-        const messages = db.websocketMessages.getMessages(resource.id);
-        (resource as any).messages = messages.map(
-          message =>
-            <IWebsocketMessage>{
-              message: message.isBinary ? message.message : message.message.toString(),
-              source: message.isFromServer ? 'server' : 'client',
-            },
+        collectedResource.websocketMessages = db.websocketMessages.getTranslatedMessages(
+          resource.id,
         );
       }
-      return resource;
+
+      return collectedResource;
     });
     return Promise.all(resources);
   }
@@ -385,6 +412,9 @@ export default class Session
     this.events.on(requestSession, 'socket-close', this.onSocketClose.bind(this));
     this.events.on(requestSession, 'socket-connect', this.onSocketConnect.bind(this));
     await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
+    if (this.options.upstreamProxyIpMask) {
+      this.db.session.updateConfiguration(this.meta);
+    }
   }
 
   public exportUserProfile(): Promise<IUserProfile> {
@@ -392,6 +422,7 @@ export default class Session
   }
 
   public async createTab(): Promise<Tab> {
+    if (this.mode === 'browserless') return null;
     const page = await this.newPage({ groupName: 'session' });
 
     // if first tab, install session storage
@@ -405,7 +436,7 @@ export default class Session
     this.recordTab(tab);
     this.registerTab(tab);
     await tab.isReady;
-    if (first) this.db.session.updateConfiguration(this.id, this.meta);
+    if (first) this.db.session.updateConfiguration(this.meta);
     return tab;
   }
 
@@ -508,7 +539,7 @@ export default class Session
     this.plugins.cleanup();
 
     // should go last so we can capture logs
-    this.db.session.close(this.id, Date.now());
+    this.db.session.close(Date.now());
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
     this.db.flush();
@@ -705,6 +736,7 @@ export default class Session
     this.db.session.insert(
       this.id,
       configuration,
+      this.browserEngine.name,
       this.browserEngine.fullVersion,
       this.createdTime,
       scriptInstanceMeta,

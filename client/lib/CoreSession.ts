@@ -13,7 +13,6 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
@@ -132,7 +131,7 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async collectSnippet(name: string, value: any): Promise<void> {
-    await this.commandQueue.run('Session.collectSnippet', name, value);
+    await this.commandQueue.run('Session.collectSnippet', name, value, Date.now());
   }
 
   public async getCollectedAssetNames(
@@ -153,29 +152,7 @@ export default class CoreSession implements IJsPathEventTarget {
     sessionId: string,
     name: string,
   ): Promise<ICollectedResource[]> {
-    const resources: IResourceMeta[] = await this.commandQueue.run(
-      'Session.getCollectedResources',
-      sessionId,
-      name,
-    );
-    const results: ICollectedResource[] = [];
-    for (const resource of resources) {
-      const buffer = resource.response?.body;
-      delete resource.response?.body;
-
-      const properties: PropertyDescriptorMap = {
-        buffer: { get: () => buffer, enumerable: true },
-        json: { get: () => (buffer ? JSON.parse(buffer.toString()) : null), enumerable: true },
-        text: { get: () => buffer?.toString(), enumerable: true },
-      };
-
-      if (resource.response) {
-        Object.defineProperties(resource.response, properties);
-      }
-      Object.defineProperties(resource, properties);
-      results.push(resource as ICollectedResource);
-    }
-    return results;
+    return await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
   }
 
   // END OF PRIVATE APIS FOR DATABOX ///////////////////////////////////////////////////////////////

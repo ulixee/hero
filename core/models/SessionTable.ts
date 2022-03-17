@@ -7,6 +7,8 @@ import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {
+  private id: string;
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
@@ -15,7 +17,12 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['id', 'TEXT'],
         ['name', 'TEXT'],
         ['browserEmulatorId', 'TEXT'],
-        ['browserVersion', 'TEXT'],
+        ['browserName', 'TEXT'],
+        ['browserFullVersion', 'TEXT'],
+        ['operatingSystemName', 'TEXT'],
+        ['operatingSystemVersion', 'TEXT'],
+        ['renderingEngine', 'TEXT'],
+        ['renderingEngineVersion', 'TEXT'],
         ['humanEmulatorId', 'TEXT'],
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
@@ -28,6 +35,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['deviceProfile', 'TEXT'],
         ['timezoneId', 'TEXT'],
         ['locale', 'TEXT'],
+        ['publicIp', 'TEXT'],
+        ['proxyIp', 'TEXT'],
         ['createSessionOptions', 'TEXT'],
       ],
       true,
@@ -37,17 +46,24 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
   public insert(
     id: string,
     configuration: IHeroMeta,
-    browserVersion: string,
+    browserName: string,
+    browserFullVersion: string,
     startDate: number,
     scriptInstanceMeta: IScriptInstanceMeta,
     deviceProfile: IDeviceProfile,
     createSessionOptions: any,
   ): void {
+    this.id = id;
     const record = [
-      id,
+      this.id,
       configuration.sessionName,
       configuration.browserEmulatorId,
-      browserVersion,
+      browserName,
+      browserFullVersion,
+      configuration.operatingSystemName,
+      configuration.operatingSystemVersion,
+      configuration.renderingEngine,
+      configuration.renderingEngineVersion,
       configuration.humanEmulatorId,
       startDate,
       null,
@@ -60,28 +76,32 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       JSON.stringify(deviceProfile),
       configuration.timezoneId,
       configuration.locale,
+      configuration.upstreamProxyIpMask?.publicIp,
+      configuration.upstreamProxyIpMask?.proxyIp,
       JSON.stringify(createSessionOptions),
     ];
     this.insertNow(record);
   }
 
-  public updateConfiguration(id: string, configuration: IHeroMeta): void {
+  public updateConfiguration(configuration: IHeroMeta): void {
     const toUpdate = {
       viewport: JSON.stringify(configuration.viewport),
       timezoneId: configuration.timezoneId,
       locale: configuration.locale,
+      publicIp: configuration.upstreamProxyIpMask?.publicIp,
+      proxyIp: configuration.upstreamProxyIpMask?.proxyIp,
     };
 
     this.db
       .prepare(
-        `UPDATE ${this.tableName} SET viewport=:viewport, timezoneId=:timezoneId, locale=:locale WHERE id=?`,
+        `UPDATE ${this.tableName} SET viewport=:viewport, timezoneId=:timezoneId, locale=:locale, publicIp=:publicIp, proxyIp=:proxyIp WHERE id=?`,
       )
-      .run(id, toUpdate);
+      .run(this.id, toUpdate);
     if (this.insertCallbackFn) this.insertCallbackFn([]);
   }
 
-  public close(id: string, closeDate: number): void {
-    const values = [closeDate, id];
+  public close(closeDate: number): void {
+    const values = [closeDate, this.id];
     const fields = ['closeDate'];
     const sql = `UPDATE ${this.tableName} SET ${fields.map(n => `${n}=?`).join(', ')} WHERE id=?`;
     this.db.prepare(sql).run(...values);
@@ -101,7 +121,12 @@ export interface ISessionRecord {
   id: string;
   name: string;
   browserEmulatorId: string;
-  browserVersion: string;
+  renderingEngine: string;
+  renderingEngineVersion: string;
+  browserName: string;
+  browserFullVersion: string;
+  operatingSystemName: string;
+  operatingSystemVersion: string;
   humanEmulatorId: string;
   startDate: number;
   closeDate: number;
@@ -113,6 +138,8 @@ export interface ISessionRecord {
   viewport: IViewport;
   timezoneId: string;
   locale: string;
+  publicIp?: string;
+  proxyIp?: string;
   deviceProfile: IDeviceProfile;
   createSessionOptions: ISessionCreateOptions;
 }

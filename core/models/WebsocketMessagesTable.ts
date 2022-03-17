@@ -1,6 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
 export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessageRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -18,6 +19,16 @@ export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessag
 
   public getMessages(resourceId: number): IWebsocketMessageRecord[] {
     return this.db.prepare(`select * from ${this.tableName} where resourceId=?`).all(resourceId);
+  }
+
+  public getTranslatedMessages(resourceId: number): IWebsocketMessage[] {
+    return this.getMessages(resourceId).map(message => {
+      return {
+        message: message.isBinary ? message.message : message.message.toString(),
+        source: message.isFromServer ? 'server' : 'client',
+        timestamp: message.timestamp,
+      };
+    });
   }
 
   public insert(lastCommandId: number, resourceMessage: IWebsocketResourceMessage): void {

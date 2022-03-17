@@ -5,7 +5,6 @@ export default interface ICommandMeta {
   tabId: number;
   frameId: number;
   name: string;
-  wasPrefetched?: boolean;
   retryNumber: number;
   args?: string;
   clientStartDate?: number;

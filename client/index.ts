@@ -22,7 +22,7 @@ import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import IResourceType, { ResourceType } from '@ulixee/hero-interfaces/IResourceType';
 import { InteractionCommand, MouseButton } from '@ulixee/hero-interfaces/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
-import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus, LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
@@ -46,6 +46,7 @@ export {
   Resource,
   WebsocketResource,
   XPathResult,
+  LoadStatus,
   LocationStatus,
   LocationTrigger,
   IHeroCreateOptions,

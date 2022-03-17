@@ -6,7 +6,6 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
@@ -23,17 +22,12 @@ import { isMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
 const { log } = Log(module);
 
 interface IJsPathSource {
-  execHistoryIdx: number;
   parentNodeId?: number;
   isFromIterable: boolean;
   jsPath: IJsPath;
 }
 
 export class JsPath {
-  public hasNewExecJsPathHistory = false;
-  public readonly execHistory: IJsPathHistory[] = [];
-
-  private readonly execHistoryIndexByKey: { [jsPath_sourceIndex: string]: number } = {};
   private readonly frameEnvironment: FrameEnvironment;
   private readonly logger: IBoundLog;
   private readonly clientRectByNodePointerId = new Map<number, IElementRect>();
@@ -111,40 +105,25 @@ export class JsPath {
     return this.frameEnvironment.runIsolatedFn(`${InjectedScripts.JsPath}.getWindowOffset`);
   }
 
-  public waitForScrollStop(timeoutMillis = 2e3): Promise<[scrollX:number,scrollY:number]> {
+  public waitForScrollStop(timeoutMillis = 2e3): Promise<[scrollX: number, scrollY: number]> {
     return this.frameEnvironment.runIsolatedFn(
       `${InjectedScripts.JsPath}.waitForScrollStop`,
       timeoutMillis,
     );
   }
 
-  public async runJsPaths(
-    jsPaths: IJsPathHistory[],
-    containerOffset: IPoint,
-    shouldRedirectRemovedNodes = true,
-  ): Promise<IJsPathResult[]> {
-    if (!jsPaths?.length) return [];
-
-    if (shouldRedirectRemovedNodes && Object.keys(this.nodeIdRedirectToNewNodeId)) {
-      for (const path of jsPaths) {
-        this.replaceRedirectedJsPathNodePointer(path.jsPath);
+  public getNodePath(nodePointer: INodePointer): IJsPath {
+    const path: IJsPath = [];
+    const history = this.getJsPathHistoryForNode(nodePointer.id);
+    for (const entry of history) {
+      const jsPath = entry.jsPath;
+      if (typeof jsPath[0] === 'number') {
+        path.push(...jsPath.slice(1))
+      } else {
+        path.push(...jsPath);
       }
     }
-
-    const results = await this.frameEnvironment.runIsolatedFn<IJsPathResult[]>(
-      `${InjectedScripts.JsPath}.execJsPaths`,
-      jsPaths as any,
-      containerOffset,
-    );
-
-    for (const { result, jsPath } of results) {
-      if (result?.isValueSerialized === true) {
-        result.isValueSerialized = undefined;
-        result.value = TypeSerializer.revive(result.value, 'BROWSER');
-      }
-      this.recordExecResult(jsPath, result, false);
-    }
-    return results;
+    return path;
   }
 
   private async runJsPath<T>(
@@ -189,78 +168,41 @@ export class JsPath {
     return paths;
   }
 
-  private recordExecResult(
-    jsPath: IJsPath,
-    result: IExecJsPathResult<any>,
-    isLiveQuery = true,
-  ): void {
-    let execHistoryIdx: number;
-    if (isLiveQuery) this.hasNewExecJsPathHistory = true;
+  private recordExecResult(jsPath: IJsPath, result: IExecJsPathResult<any>): void {
+    if (!result.nodePointer) return;
 
-    if (result.nodePointer && isLiveQuery) {
-      // try to record last known position
-      const method = this.getJsPathMethod(jsPath);
-      if (method === getClientRectFnName) {
-        this.clientRectByNodePointerId.set(result.nodePointer.id, result.value);
-      } else if (method === getComputedVisibilityFnName) {
-        const clientRect = (result.value as INodeVisibility).boundingClientRect;
-        this.clientRectByNodePointerId.set(result.nodePointer.id, clientRect);
-      }
+    // try to record last known position
+    const method = this.getJsPathMethod(jsPath);
+    const { id, iterableItems, iterableIsState } = result.nodePointer;
+    const parentNodeId = typeof jsPath[0] === 'number' ? jsPath[0] : undefined;
+
+    if (method === getClientRectFnName) {
+      this.clientRectByNodePointerId.set(result.nodePointer.id, result.value);
+    } else if (method === getComputedVisibilityFnName) {
+      const clientRect = (result.value as INodeVisibility).boundingClientRect;
+      this.clientRectByNodePointerId.set(result.nodePointer.id, clientRect);
     }
 
-    // if jspath starts with an id, this is a nested query
-    if (typeof jsPath[0] === 'number') {
-      const id = jsPath[0];
+    const cleanJsPath = [...jsPath];
+    if (method && method.startsWith('__')) cleanJsPath.pop();
 
-      const queryIndex = this.nodeIdToJsPathSource.get(id);
-      if (queryIndex === undefined) return;
-      const operator = queryIndex.isFromIterable ? '*.' : '.';
-      const operatorPath = [operator, ...jsPath.slice(1)];
-      const key = `${JSON.stringify(operatorPath)}_${queryIndex.execHistoryIdx}`;
-
-      execHistoryIdx = this.execHistoryIndexByKey[key];
-      if (execHistoryIdx === undefined) {
-        this.execHistory.push({
-          jsPath: operatorPath,
-          sourceIndex: queryIndex.execHistoryIdx,
-        });
-        execHistoryIdx = this.execHistory.length - 1;
-        this.execHistoryIndexByKey[key] = execHistoryIdx;
-      }
-    } else {
-      this.execHistory.push({
-        jsPath,
+    const queryIndex = this.nodeIdToJsPathSource.get(id);
+    if (!queryIndex) {
+      this.nodeIdToJsPathSource.set(id, {
+        isFromIterable: false,
+        parentNodeId,
+        jsPath: cleanJsPath,
       });
-      execHistoryIdx = this.execHistory.length - 1;
     }
-
-    if (result.nodePointer) {
-      const { id, iterableItems, iterableIsState } = result.nodePointer;
-      const parentNodeId = typeof jsPath[0] === 'number' ? jsPath[0] : undefined;
-      const cleanJsPath = [...jsPath];
-      const method = this.getJsPathMethod(cleanJsPath);
-      if (method && method.startsWith('__')) cleanJsPath.pop();
-
-      const queryIndex = this.nodeIdToJsPathSource.get(id);
-      if (!queryIndex) {
-        this.nodeIdToJsPathSource.set(id, {
-          isFromIterable: false,
-          execHistoryIdx,
+    if (iterableIsState) {
+      for (let i = 0; i < iterableItems.length; i += 1) {
+        const nodePointer = iterableItems[i] as INodePointer;
+        if (this.nodeIdToJsPathSource.has(nodePointer.id)) continue;
+        this.nodeIdToJsPathSource.set(nodePointer.id, {
+          isFromIterable: true,
+          jsPath: [...cleanJsPath, String(i)],
           parentNodeId,
-          jsPath: cleanJsPath,
         });
-      }
-      if (iterableIsState) {
-        for (let i = 0; i < iterableItems.length; i += 1) {
-          const nodePointer = iterableItems[i] as INodePointer;
-          if (this.nodeIdToJsPathSource.has(nodePointer.id)) continue;
-          this.nodeIdToJsPathSource.set(nodePointer.id, {
-            isFromIterable: true,
-            execHistoryIdx,
-            jsPath: [...cleanJsPath, String(i)],
-            parentNodeId,
-          });
-        }
       }
     }
   }
