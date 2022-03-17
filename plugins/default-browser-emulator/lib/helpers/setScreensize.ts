@@ -50,7 +50,6 @@ export default async function setScreensize(
   if (viewport.width === 0 || viewport.height === 0) {
     promises.push(
       devtools.send('Page.getLayoutMetrics').then(x => {
-        // @ts-expect-error - chrome 98 add correctly sized cssVisualViewport.
         const visualViewport: Protocol.Page.VisualViewport = x.cssVisualViewport ?? x.visualViewport;
         viewport.height = visualViewport.clientHeight;
         viewport.width = visualViewport.clientWidth;

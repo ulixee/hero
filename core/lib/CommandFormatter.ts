@@ -132,6 +132,10 @@ export default class CommandFormatter {
             command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
           }
         }
+      } else if (meta.resultType === 'Array' && result.length) {
+        if (result[0].nodePointerId) {
+          command.resultNodeIds = result.map(x => x.nodePointerId).filter(Boolean);
+        }
       }
     }
 

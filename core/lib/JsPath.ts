@@ -116,7 +116,12 @@ export class JsPath {
     const path: IJsPath = [];
     const history = this.getJsPathHistoryForNode(nodePointer.id);
     for (const entry of history) {
-      path.push(...entry.jsPath);
+      const jsPath = entry.jsPath;
+      if (typeof jsPath[0] === 'number') {
+        path.push(...jsPath.slice(1))
+      } else {
+        path.push(...jsPath);
+      }
     }
     return path;
   }
