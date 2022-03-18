@@ -51,7 +51,7 @@ export interface IOnClientCommandMeta {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function CorePluginClassDecorator(constructor: ICorePluginClass): void {}
+export function CorePluginClassDecorator(staticClass: ICorePluginClass): void {}
 
 // HUMAN EMULATORS ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -80,7 +80,7 @@ export interface IHumanEmulatorMethods {
 
 // decorator for human emulator classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function HumanEmulatorClassDecorator(constructor: IHumanEmulatorClass): void {}
+export function HumanEmulatorClassDecorator(staticClass: IHumanEmulatorClass): void {}
 
 // BROWSER EMULATORS ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -167,4 +167,4 @@ export type IBrowserEmulatorConfig = Pick<
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function BrowserEmulatorClassDecorator(constructor: IBrowserEmulatorClass): void {}
+export function BrowserEmulatorClassDecorator(staticClass: IBrowserEmulatorClass): void {}

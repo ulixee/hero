@@ -23,6 +23,6 @@ export interface IClientPluginClass {
 
 // decorator for client plugin classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function ClientPluginClassDecorator(constructor: IClientPluginClass): void {}
+export function ClientPluginClassDecorator(staticClass: IClientPluginClass): void {}
 
 export type ISendToCoreFn = (toPluginId: string, ...args: any[]) => Promise<any>;

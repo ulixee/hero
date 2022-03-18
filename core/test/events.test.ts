@@ -59,7 +59,7 @@ describe('Core events tests', () => {
     await tab.goto(`${koaServer.baseUrl}/page2`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
-    // ToDo: this should really be 2; it's emitting base document as an resource
+    // TODO: this should really be 2; it's emitting base document as an resource
     expect(onEventFn.mock.calls).toHaveLength(4);
   }, 10e3);
 
@@ -88,7 +88,7 @@ describe('Core events tests', () => {
     await tab.goto(`${koaServer.baseUrl}/page2`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
-    // ToDo: this should really be 1; it's emitting base document as an resource
+    // TODO: this should really be 1; it's emitting base document as an resource
     expect(onEventFn.mock.calls).toHaveLength(2);
   }, 10e3);
 });

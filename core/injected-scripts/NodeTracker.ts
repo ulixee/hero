@@ -1,4 +1,4 @@
-function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
+function NodeTrackerStatics(staticClass: IStaticNodeTracker) {}
 
 @NodeTrackerStatics
 class NodeTracker {
