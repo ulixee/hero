@@ -165,13 +165,7 @@ export default class Tab
       headersFilter: ['set-cookie'],
       loadResourceDetails: MirrorNetwork.loadResourceFromDb.bind(MirrorNetwork, this.session.db),
     });
-    this.mirrorPage = new MirrorPage(this.mirrorNetwork, {
-      paintEvents: [],
-      mainFrameIds: new Set([this.mainFrameId]),
-      documents: [],
-      domNodePathByFrameId: this.session.db.frames.frameDomNodePathsById,
-    });
-    this.mirrorPage.subscribe(this);
+    this.mirrorPage = this.createMirrorPage();
 
     this.listen();
     this.isReady = this.waitForReady();
@@ -199,6 +193,17 @@ export default class Tab
       this.removeRemoteEventListener,
       // DO NOT ADD waitForReady
     ]);
+  }
+
+  public createMirrorPage(): MirrorPage {
+    const mirrorPage = new MirrorPage(this.mirrorNetwork, {
+      paintEvents: [],
+      mainFrameIds: new Set([this.mainFrameId]),
+      documents: [],
+      domNodePathByFrameId: this.session.db.frames.frameDomNodePathsById,
+    });
+    mirrorPage.subscribe(this);
+    return mirrorPage;
   }
 
   public getFrameEnvironment(frameId?: number): FrameEnvironment {

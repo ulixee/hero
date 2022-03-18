@@ -6,6 +6,7 @@ declare global {
   interface Window {
     loadPaintEvents(paintEvents: IFrontendDomChangeEvent[][]);
     applyDomChanges(changes: IFrontendDomChangeEvent[]);
+    domReplayer: DomReplayer;
     setPaintIndex(index: number);
     repositionInteractElements();
     debugLogs: any[];
@@ -39,6 +40,15 @@ class DomReplayer {
         }
       });
     }
+  }
+
+  public reset(): void {
+    this.paintEvents.length =0;
+    this.loadedIndex = 0;
+    this.pendingDelegatedEventsByChildNodeId = {};
+    this.pendingDomChanges = [];
+    this.frameContentWindows = new WeakMap();
+    location.href = 'about:blank';
   }
 
   public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
@@ -175,7 +185,7 @@ class DomReplayer {
 
   static load() {
     const replayer = new DomReplayer();
-    (window as any).domReplayer = replayer;
+    window.domReplayer = replayer;
     window.loadPaintEvents = replayer.loadPaintEvents.bind(replayer);
     window.setPaintIndex = replayer.setPaintIndex.bind(replayer);
     window.applyDomChanges = replayer.applyDomChanges.bind(replayer);

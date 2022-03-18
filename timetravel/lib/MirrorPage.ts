@@ -4,10 +4,7 @@ import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import InjectedScripts, {
-  CorePageInjectedScript,
-  showInteractionScript,
-} from '@ulixee/hero-core/lib/InjectedScripts';
+import InjectedScripts, { CorePageInjectedScript } from '@ulixee/hero-core/lib/InjectedScripts';
 import { IMouseEventRecord } from '@ulixee/hero-core/models/MouseEventsTable';
 import { IScrollRecord } from '@ulixee/hero-core/models/ScrollEventsTable';
 import DomChangesTable, {
@@ -27,6 +24,8 @@ import Queue from '@ulixee/commons/lib/Queue';
 import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
 
 const { log } = Log(module);
+
+const installedScriptsSymbol = Symbol.for('MirrorPageScripts');
 
 export default class MirrorPage extends TypedEventEmitter<{
   close: void;
@@ -62,6 +61,49 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.onPageEvents = this.onPageEvents.bind(this);
   }
 
+  public async attachToPage(page: IPuppetPage, sessionId: string, setReady = true): Promise<void> {
+    this.page = page;
+    let readyResolvable: Resolvable<void>;
+    if (setReady) {
+      readyResolvable = new Resolvable<void>();
+      this.isReady = readyResolvable.promise;
+    }
+    try {
+      this.events.once(page, 'close', this.close.bind(this));
+      if (this.debugLogging) {
+        this.events.on(page, 'console', msg => {
+          log.info('MirrorPage.console', {
+            ...msg,
+            sessionId,
+          });
+        });
+        this.events.on(page, 'crashed', msg => {
+          log.info('MirrorPage.crashed', {
+            ...msg,
+            sessionId,
+          });
+        });
+      }
+
+      const promises: Promise<any>[] = [
+        page.setNetworkRequestInterceptor(this.network.mirrorNetworkRequests),
+      ];
+
+      if (page[installedScriptsSymbol]) {
+        await page.mainFrame.evaluate(`window.domReplayer.reset()`, true);
+      } else {
+        promises.push(
+          this.showBrowserInteractions ? InjectedScripts.installInteractionScript(page) : null,
+          page.addNewDocumentScript(injectedScript, true).then(() => page.reload()),
+          page.setJavaScriptEnabled(false),
+        );
+      }
+      await Promise.all(promises);
+    } finally {
+      if (readyResolvable) readyResolvable.resolve();
+    }
+  }
+
   public async open(
     context: IPuppetContext,
     sessionId: string,
@@ -75,53 +117,17 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.isReady = ready.promise;
     try {
       this.page = await context.newPage({ runPageScripts: false, enableDomStorageTracker: false });
-      this.events.once(this.page, 'close', this.close.bind(this));
-      if (this.debugLogging) {
-        this.events.on(this.page, 'console', msg => {
-          log.info('MirrorPage.console', {
-            ...msg,
-            sessionId,
-          });
-        });
-        this.events.on(this.page, 'crashed', msg => {
-          log.info('MirrorPage.crashed', {
-            ...msg,
-            sessionId,
-          });
-        });
-      }
+      await this.attachToPage(this.page, sessionId, false);
 
-      const promises = [];
-      if (onPage) promises.push(onPage(this.page));
-      promises.push(
-        this.page.setNetworkRequestInterceptor(this.network.mirrorNetworkRequests),
-        this.page.addNewDocumentScript(injectedScript, true),
-        this.showBrowserInteractions ? InjectedScripts.installInteractionScript(this.page) : null,
-        this.page.setJavaScriptEnabled(false),
-      );
-      if (this.showBrowserInteractions) {
-        promises.push(
-          this.page.mainFrame.evaluate(
-            `(() => { 
-            window.isMainFrame = true;
-            ${injectedScript};
-            ${showInteractionScript};
-          })()`,
-            true,
-          ),
-        );
-      }
+      if (onPage) await onPage(this.page);
       if (viewport) {
-        promises.push(
-          this.page.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
-            height: viewport.height,
-            width: viewport.width,
-            deviceScaleFactor: viewport.deviceScaleFactor,
-            mobile: false,
-          }),
-        );
+        await this.page.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
+          height: viewport.height,
+          width: viewport.width,
+          deviceScaleFactor: viewport.deviceScaleFactor,
+          mobile: false,
+        });
       }
-      await Promise.all(promises);
     } finally {
       ready.resolve();
       this.emit('open');
