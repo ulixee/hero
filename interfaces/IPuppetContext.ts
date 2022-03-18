@@ -11,6 +11,7 @@ export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContex
   browserId: string;
   isIncognito: boolean;
   domStorage: IDomStorage;
+  pagesById: Map<string, IPuppetPage>;
   workersById: Map<string, IPuppetWorker>;
   defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
   sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(
