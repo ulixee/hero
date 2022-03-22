@@ -489,6 +489,29 @@ export default class Session
     }
   }
 
+  public async closeTabs(): Promise<void> {
+    try {
+      const promises: Promise<any>[] = [];
+      for (const tab of this.tabsById.values()) {
+        promises.push(tab.close());
+      }
+      await Promise.all(promises);
+    } catch (error) {
+      log.error('Session.CloseTabsError', { error, sessionId: this.id });
+    }
+  }
+
+  public closeMitm(): void {
+    try {
+      this.mitmRequestSession.close();
+      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
+    } catch (error) {
+      log.error('Session.CloseMitmError', { error, sessionId: this.id });
+    }
+    this.websocketMessages.cleanup();
+    this.resources.cleanup();
+  }
+
   public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
     // if this session is set to keep alive and core isn't closing
     if (
@@ -500,7 +523,6 @@ export default class Session
       return await this.keepAlive();
     }
 
-    delete Session.byId[this.id];
     if (this._isClosing) return;
     this._isClosing = true;
 
@@ -512,17 +534,8 @@ export default class Session
       sessionId: this.id,
     });
 
-    try {
-      const promises: Promise<any>[] = [];
-      for (const tab of this.tabsById.values()) {
-        promises.push(tab.close());
-      }
-      await Promise.all(promises);
-      this.mitmRequestSession.close();
-      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
-    } catch (error) {
-      log.error('Session.CloseMitmError', { error, sessionId: this.id });
-    }
+    await this.closeTabs();
+    this.closeMitm();
 
     log.stats('Session.Closed', {
       sessionId: this.id,
@@ -534,8 +547,6 @@ export default class Session
     await closedEvent.waitForPromise;
 
     this.events.close();
-    this.websocketMessages.cleanup();
-    this.resources.cleanup();
     this.commandRecorder.cleanup();
     this.plugins.cleanup();
 
@@ -555,11 +566,11 @@ export default class Session
   }
 
   public addRemoteEventListener(
-    type: string,
+    type: keyof Session['awaitedEventEmitter']['EventTypes'],
     emitFn: IRemoteEmitFn,
   ): Promise<{ listenerId: string }> {
     const listener = this.commands.observeRemoteEvents(type, emitFn);
-    this.awaitedEventEmitter.on(type as any, listener.listenFn);
+    this.awaitedEventEmitter.on(type, listener.listenFn);
     return Promise.resolve({ listenerId: listener.id });
   }
 

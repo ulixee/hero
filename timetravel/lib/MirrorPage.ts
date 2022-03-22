@@ -157,7 +157,14 @@ export default class MirrorPage extends TypedEventEmitter<{
     // NOTE: domNodePathByFrameId and mainFrameIds are live objects
     this.domRecording.domNodePathByFrameId = tab.session.db.frames.frameDomNodePathsById;
     this.domRecording.mainFrameIds = tab.session.db.frames.mainFrameIds(tab.tabId);
-    this.events.on(tab, 'page-events', this.onPageEvents);
+    const onPageEvents = this.events.on(tab, 'page-events', this.onPageEvents);
+    this.events.once(tab, 'close', () => {
+      this.events.off(onPageEvents);
+      this.subscribeToTab = null;
+      this.domRecording = null;
+      this.isReady = null;
+      this.loadQueue.reset();
+    });
     this.subscribeToTab = tab;
   }
 
@@ -256,10 +263,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     if (this.page && !this.page.isClosed) {
       await this.page.close();
     }
-    if (this.subscribeToTab) {
-      this.subscribeToTab.off('page-events', this.onPageEvents);
-      this.subscribeToTab = null;
-    }
+    this.subscribeToTab = null;
     this.page = null;
     this.loadedDocument = null;
     this.network.close();

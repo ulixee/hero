@@ -378,7 +378,10 @@ export default class Tab
       websocketMessages: [],
     };
 
-    resource.response.buffer = await this.session.db.resources.getResourceBodyById(resourceId, true);
+    resource.response.buffer = await this.session.db.resources.getResourceBodyById(
+      resourceId,
+      true,
+    );
 
     if (resource.type === 'Websocket') {
       collectedResource.websocketMessages = this.session.websocketMessages.getMessages(resourceId);
@@ -844,32 +847,28 @@ export default class Tab
   }
 
   public addRemoteEventListener(
-    type: string,
+    type: 'message' | 'dom-state' | keyof Tab['EventTypes'],
     emitFn: IRemoteEmitFn,
     jsPath?: IJsPath,
     options?: any,
   ): Promise<{ listenerId: string }> {
     const listener = this.session.commands.observeRemoteEvents(type, emitFn, jsPath, this.id);
 
-    if (jsPath) {
-      if (type === 'message') {
-        const [domain, resourceId] = jsPath;
-        if (domain !== 'resources') {
-          throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
-        }
-        // need to give client time to register function sending events
-        process.nextTick(() =>
-          this.session.websocketMessages.listen(Number(resourceId), listener.listenFn),
-        );
+    if (type === 'message') {
+      const [domain, resourceId] = jsPath;
+      if (domain !== 'resources') {
+        throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
       }
-
-      if (type === 'dom-state') {
-        const id = JSON.stringify(jsPath);
-        const domStateListener = this.addDomStateListener(id, options);
-        this.events.on(domStateListener, 'updated', listener.listenFn);
-      }
+      // need to give client time to register function sending events
+      process.nextTick(() =>
+        this.session.websocketMessages.listen(Number(resourceId), listener.listenFn),
+      );
+    } else if (type === 'dom-state') {
+      const id = JSON.stringify(jsPath);
+      const domStateListener = this.addDomStateListener(id, options);
+      this.events.on(domStateListener, 'updated', listener.listenFn);
     } else {
-      this.on(type as any, listener.listenFn);
+      this.on(type, listener.listenFn);
     }
     return Promise.resolve({ listenerId: listener.id });
   }
@@ -918,7 +917,7 @@ export default class Tab
 
   private listen(): void {
     const page = this.puppetPage;
-    this.events.on(this, 'resources', this.onResource.bind(this));
+    this.events.on(this, 'resource', this.onResource.bind(this));
 
     this.close = this.close.bind(this);
     this.events.once(page, 'close', this.close);

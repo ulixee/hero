@@ -686,7 +686,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public addRemoteEventListener(
-    type: string,
+    type: keyof FrameEnvironment['EventTypes'],
     emitFn: IRemoteEmitFn,
     jsPath?: IJsPath,
   ): Promise<{ listenerId: string }> {
@@ -697,7 +697,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       this.tab.id,
       this.id,
     );
-    this.on(details.type as any, details.listenFn);
+    this.on(type, details.listenFn);
     return Promise.resolve({ listenerId: details.id });
   }
 

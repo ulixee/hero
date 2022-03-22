@@ -47,11 +47,6 @@ export default class TimelineRecorder extends TypedEventEmitter<{
     }
   }
 
-  public getScreenshot(tabId: number, timestamp: number): string {
-    const image = this.heroSession.db.screenshots.getImage(tabId, timestamp);
-    if (image) return image.toString('base64');
-  }
-
   private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
     if (!this.recordScreenUntilTime && !this.recordScreenUntilLoad) return;
 
@@ -90,9 +85,12 @@ export default class TimelineRecorder extends TypedEventEmitter<{
 
   private onStatusChange(status: IFrameNavigationEvents['status-change']): void {
     if (
-      [LoadStatus.DomContentLoaded, LoadStatus.AllContentLoaded, ContentPaint].includes(
-        status.newStatus,
-      )
+      [
+        LoadStatus.DomContentLoaded,
+        LoadStatus.AllContentLoaded,
+        ContentPaint,
+        LoadStatus.JavascriptReady,
+      ].includes(status.newStatus)
     ) {
       this.emit('updated');
     }
