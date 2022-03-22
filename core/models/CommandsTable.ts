@@ -10,7 +10,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       'Commands',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
-        ['run', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['retryNumber', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
@@ -24,7 +23,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
         ['endDate', 'INTEGER'],
         ['result', 'TEXT'],
         ['resultType', 'TEXT'],
-        ['reusedCommandFromRun', 'INTEGER'],
         ['callsite', 'TEXT'],
       ],
       true,
@@ -37,7 +35,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
 
     this.queuePendingInsert([
       commandMeta.id,
-      commandMeta.run,
       commandMeta.retryNumber ?? 0,
       commandMeta.tabId,
       commandMeta.frameId,
@@ -51,7 +48,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       commandMeta.endDate,
       TypeSerializer.stringify(commandMeta.result),
       commandMeta.resultType,
-      commandMeta.reusedCommandFromRun,
       commandMeta.callsite ? JSON.stringify(commandMeta.callsite) : undefined,
     ]);
   }

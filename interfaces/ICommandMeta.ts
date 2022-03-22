@@ -13,9 +13,7 @@ export default interface ICommandMeta {
   endDate?: number;
   result?: any;
   resultType?: string;
-  run: number;
   callsite?: ISourceCodeLocation[];
-  reusedCommandFromRun?: number;
   startNavigationId?: number;
   endNavigationId?: number;
   activeFlowHandlerId?: number;

@@ -24,7 +24,6 @@ import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -177,7 +176,9 @@ export default class Session
     super();
     this.createdTime = Date.now();
     this.id = this.getId(options.sessionId);
-    Session.byId[this.id] = this;
+    const id = this.id;
+    Session.byId[id] = this;
+    this.events.once(this, 'closed', () => delete Session.byId[id]);
     this.db = new SessionDb(this.id);
 
     this.logger = log.createChild(module, { sessionId: this.id });
@@ -602,7 +603,7 @@ export default class Session
       // create a new tab
     }
     Object.assign(this.options, options);
-    this.commands.resumeCounter += 1;
+    this.commands.nextCommandMeta = null;
     this.emit('resumed');
   }
 
@@ -795,12 +796,15 @@ ${data}`,
     // try to resume session. Modify options to match if not active.
     const resumeSessionId = options?.sessionResume?.sessionId;
     if (resumeSessionId) {
-      session = Session.get(resumeSessionId);
-      if (session) {
-        await session.resume(options);
-        tab = session.getLastActiveTab();
-        isSessionResume = true;
-      } else {
+      if (options.sessionResume.startLocation === 'currentLocation') {
+        session = Session.get(resumeSessionId);
+        if (session) {
+          await session.resume(options);
+          tab = session.getLastActiveTab();
+          isSessionResume = true;
+        }
+      }
+      if (!session) {
         Session.restoreOptionsFromSessionRecord(options, resumeSessionId);
       }
     }

@@ -623,7 +623,7 @@ export default class Resources {
       tabId,
       frameId,
       url: request.url,
-      receivedAtCommandId: this.session.commands.lastId,
+      receivedAtCommandId: this.session?.commands?.lastId,
       type: resourceType,
       isRedirect: !!redirectedToUrl,
       documentUrl: resourceEvent.documentUrl,

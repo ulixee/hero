@@ -12,7 +12,6 @@ export default class AwaitedEventsTable extends SqliteTable<IEventRecord> {
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
-        ['run', 'INTEGER'],
         ['listenerId', 'INTEGER'],
         ['eventArgs', 'TEXT'],
         ['timestamp', 'DATETIME'],
@@ -30,7 +29,6 @@ export default class AwaitedEventsTable extends SqliteTable<IEventRecord> {
       id,
       eventRecord.tabId,
       eventRecord.frameId,
-      eventRecord.run,
       eventRecord.listenerId,
       TypeSerializer.stringify(eventRecord.eventArgs),
       eventRecord.timestamp,
@@ -43,7 +41,6 @@ export interface IEventRecord {
   id: number;
   tabId: number;
   frameId: number;
-  run: number;
   listenerId: string;
   eventArgs: any;
   timestamp: number;
