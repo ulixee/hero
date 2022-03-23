@@ -3,6 +3,7 @@ import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
@@ -26,6 +27,33 @@ beforeAll(async () => {
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
+
+describe('miscellaneous', () => {
+  test('can pause and resume sessions', async () => {
+    playInteractionSpy.mockClear();
+    koaServer.get('/sessionPause1', async ctx => {
+      ctx.body = `<body><h1>Done</h1></body>`;
+    });
+    koaServer.get('/sessionPause2', async ctx => {
+      ctx.body = `<body><h1>Done</h1></body>`;
+    });
+    const { session, tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/sessionPause1`);
+    await session.pauseCommands();
+
+    const pauseResponse = tab.goto(`${koaServer.baseUrl}/sessionPause2`);
+    const response = await Promise.race([
+      pauseResponse,
+      new Promise(resolve => setTimeout(resolve, 500)),
+    ]);
+    expect(response).not.toBeTruthy();
+    expect(tab.url).toBe(`${koaServer.baseUrl}/sessionPause1`);
+    await session.resumeCommands();
+
+    await expect(pauseResponse).resolves.toBeTruthy();
+    expect(tab.url).toBe(`${koaServer.baseUrl}/sessionPause2`);
+  });
+});
 
 describe('sessionResume tests when resume location is sessionStart', () => {
   test('should restart a session within a currently open browserContext', async () => {

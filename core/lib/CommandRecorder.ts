@@ -46,6 +46,10 @@ export default class CommandRecorder {
     if (session === null) return;
     const commands = session.commands;
 
+    const shouldWait =
+      !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(commandFn.name);
+    if (shouldWait) await commands.waitForCommandLock();
+
     let tabId = this.tabId;
     const frameId = this.frameId;
 

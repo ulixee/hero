@@ -238,6 +238,8 @@ export default class Session
       this.addRemoteEventListener,
       this.removeRemoteEventListener,
       this.recordOutput,
+      this.pauseCommands,
+      this.resumeCommands,
     ]);
   }
 
@@ -261,9 +263,8 @@ export default class Session
     return this.commandRecorder.fnNames.has(method);
   }
 
-  public canReuseCommand(command: ICommandMeta): boolean {
-    if (command.name === 'close') return false;
-    return true;
+  public shouldWaitForCommandLock(method: keyof Session): boolean {
+    return method !== 'resumeCommands';
   }
 
   public getTab(id: number): Tab {
@@ -585,6 +586,16 @@ export default class Session
       this.db.output.insert(change);
     }
     this.emit('output', { changes });
+    return Promise.resolve();
+  }
+
+  public pauseCommands(): Promise<void> {
+    this.commands.pause();
+    return Promise.resolve();
+  }
+
+  public resumeCommands(): Promise<void> {
+    this.commands.resume();
     return Promise.resolve();
   }
 

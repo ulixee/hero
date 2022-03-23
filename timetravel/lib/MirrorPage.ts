@@ -163,6 +163,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       this.subscribeToTab = null;
       this.domRecording = null;
       this.isReady = null;
+      // @ts-expect-error
       this.loadQueue.reset();
     });
     this.subscribeToTab = tab;
