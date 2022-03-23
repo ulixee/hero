@@ -169,10 +169,7 @@ export default class FrameEnvironment
   }
 
   public isAllowedCommand(method: string): boolean {
-    return (
-      this.commandRecorder.fnNames.has(method) ||
-      method === 'close'
-    );
+    return this.commandRecorder.fnNames.has(method) || method === 'close';
   }
 
   public close(): void {
@@ -477,13 +474,13 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     options?: IWaitForOptions,
   ): Promise<IResourceMeta> {
     const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
-    await timer.waitForPromise(
+    const navigation = await timer.waitForPromise(
       this.navigationsObserver.waitForLocation(trigger, options),
       `Timeout waiting for location ${trigger}`,
     );
 
     const resourceId = await timer.waitForPromise(
-      this.navigationsObserver.waitForNavigationResourceId(),
+      this.navigationsObserver.waitForNavigationResourceId(navigation),
       `Timeout waiting for location ${trigger}`,
     );
     return this.session.resources.get(resourceId);

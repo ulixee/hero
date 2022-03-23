@@ -87,7 +87,6 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     return false;
   }
 
-
   public getPaintStableStatus(): { isStable: boolean; timeUntilReadyMs?: number } {
     const top = this.top;
     if (!top) return { isStable: false };
@@ -248,18 +247,18 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     browserRequestId: string,
     requestedUrl: string,
     finalUrl: string,
+    loaderId?: string,
   ): boolean {
     const top = this.lastHttpNavigationRequest;
     if (!top || top.resourceIdResolvable.isResolved) return false;
+    if (loaderId && top.loaderId !== loaderId) return false;
+    if (browserRequestId && top.browserRequestId && browserRequestId !== top.browserRequestId)
+      return false;
 
     // hash won't be in the http request
     const frameRequestedUrl = top.requestedUrl?.split('#')?.shift();
 
-    if (
-      (top.finalUrl && finalUrl === top.finalUrl) ||
-      requestedUrl === frameRequestedUrl ||
-      browserRequestId === top.browserRequestId
-    ) {
+    if ((top.finalUrl && finalUrl === top.finalUrl) || requestedUrl === frameRequestedUrl) {
       return true;
     }
     return false;

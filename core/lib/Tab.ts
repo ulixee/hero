@@ -1068,6 +1068,7 @@ export default class Tab
       resource.browserRequestId,
       resource.url?.href,
       resource.responseUrl,
+      event.loaderId,
     );
     if (isPending) {
       if (resource.browserServedFromCache) {

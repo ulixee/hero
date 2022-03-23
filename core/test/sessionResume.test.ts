@@ -3,7 +3,6 @@ import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import { createPromise } from '@ulixee/commons/lib/utils';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
