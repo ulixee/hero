@@ -3,7 +3,6 @@ import Log from '@ulixee/commons/lib/Logger';
 import Session from './Session';
 import Tab from './Tab';
 import { ICommandableTarget } from './CommandRunner';
-import { ScriptChangedNeedsRestartError } from './errorTypes';
 
 const { log } = Log(module);
 type AsyncFunc = (...args: any[]) => Promise<any>;
@@ -47,6 +46,10 @@ export default class CommandRecorder {
     if (session === null) return;
     const commands = session.commands;
 
+    const shouldWait =
+      !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(commandFn.name);
+    if (shouldWait) await commands.waitForCommandLock();
+
     let tabId = this.tabId;
     const frameId = this.frameId;
 
@@ -65,29 +68,6 @@ export default class CommandRecorder {
       commandFn.name,
       args,
     );
-
-    let shouldTryToReuse = commandMeta.run > 0;
-
-    if (shouldTryToReuse && 'canReuseCommand' in this.owner) {
-      shouldTryToReuse = this.owner.canReuseCommand(commandMeta);
-    }
-
-    if (shouldTryToReuse && session.options.sessionResume) {
-      const { startLocation } = session.options.sessionResume;
-      const reusableCommand = commands.findReusableCommandFromRun(
-        startLocation,
-        commandMeta,
-        commandMeta.run - 1,
-      );
-
-      if (!!reusableCommand) {
-        return commands.reuseCommand(commandMeta, reusableCommand, args);
-      }
-
-      // if we couldn't find a reusable command, see if we need to restart
-      const needsRestart = commands.doesUnreusableCommandRequireRestart(startLocation, commandMeta);
-      if (needsRestart) throw ScriptChangedNeedsRestartError.atCommand(commandMeta);
-    }
 
     tab?.willRunCommand(commandMeta);
 

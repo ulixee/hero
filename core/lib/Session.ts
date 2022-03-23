@@ -24,7 +24,6 @@ import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -177,7 +176,9 @@ export default class Session
     super();
     this.createdTime = Date.now();
     this.id = this.getId(options.sessionId);
-    Session.byId[this.id] = this;
+    const id = this.id;
+    Session.byId[id] = this;
+    this.events.once(this, 'closed', () => delete Session.byId[id]);
     this.db = new SessionDb(this.id);
 
     this.logger = log.createChild(module, { sessionId: this.id });
@@ -236,7 +237,8 @@ export default class Session
       this.getHeroMeta,
       this.addRemoteEventListener,
       this.removeRemoteEventListener,
-      this.recordOutput,
+      this.pauseCommands,
+      this.resumeCommands,
     ]);
   }
 
@@ -257,12 +259,11 @@ export default class Session
   }
 
   public isAllowedCommand(method: string): boolean {
-    return this.commandRecorder.fnNames.has(method);
+    return this.commandRecorder.fnNames.has(method) || method === 'recordOutput';
   }
 
-  public canReuseCommand(command: ICommandMeta): boolean {
-    if (command.name === 'close') return false;
-    return true;
+  public shouldWaitForCommandLock(method: keyof Session): boolean {
+    return method !== 'resumeCommands';
   }
 
   public getTab(id: number): Tab {
@@ -488,6 +489,29 @@ export default class Session
     }
   }
 
+  public async closeTabs(): Promise<void> {
+    try {
+      const promises: Promise<any>[] = [];
+      for (const tab of this.tabsById.values()) {
+        promises.push(tab.close());
+      }
+      await Promise.all(promises);
+    } catch (error) {
+      log.error('Session.CloseTabsError', { error, sessionId: this.id });
+    }
+  }
+
+  public closeMitm(): void {
+    try {
+      this.mitmRequestSession.close();
+      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
+    } catch (error) {
+      log.error('Session.CloseMitmError', { error, sessionId: this.id });
+    }
+    this.websocketMessages.cleanup();
+    this.resources.cleanup();
+  }
+
   public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
     // if this session is set to keep alive and core isn't closing
     if (
@@ -499,7 +523,6 @@ export default class Session
       return await this.keepAlive();
     }
 
-    delete Session.byId[this.id];
     if (this._isClosing) return;
     this._isClosing = true;
 
@@ -511,17 +534,8 @@ export default class Session
       sessionId: this.id,
     });
 
-    try {
-      const promises: Promise<any>[] = [];
-      for (const tab of this.tabsById.values()) {
-        promises.push(tab.close());
-      }
-      await Promise.all(promises);
-      this.mitmRequestSession.close();
-      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
-    } catch (error) {
-      log.error('Session.CloseMitmError', { error, sessionId: this.id });
-    }
+    await this.closeTabs();
+    this.closeMitm();
 
     log.stats('Session.Closed', {
       sessionId: this.id,
@@ -533,8 +547,6 @@ export default class Session
     await closedEvent.waitForPromise;
 
     this.events.close();
-    this.websocketMessages.cleanup();
-    this.resources.cleanup();
     this.commandRecorder.cleanup();
     this.plugins.cleanup();
 
@@ -554,11 +566,11 @@ export default class Session
   }
 
   public addRemoteEventListener(
-    type: string,
+    type: keyof Session['awaitedEventEmitter']['EventTypes'],
     emitFn: IRemoteEmitFn,
   ): Promise<{ listenerId: string }> {
     const listener = this.commands.observeRemoteEvents(type, emitFn);
-    this.awaitedEventEmitter.on(type as any, listener.listenFn);
+    this.awaitedEventEmitter.on(type, listener.listenFn);
     return Promise.resolve({ listenerId: listener.id });
   }
 
@@ -573,6 +585,16 @@ export default class Session
       this.db.output.insert(change);
     }
     this.emit('output', { changes });
+    return Promise.resolve();
+  }
+
+  public pauseCommands(): Promise<void> {
+    this.commands.pause();
+    return Promise.resolve();
+  }
+
+  public resumeCommands(): Promise<void> {
+    this.commands.resume();
     return Promise.resolve();
   }
 
@@ -602,7 +624,7 @@ export default class Session
       // create a new tab
     }
     Object.assign(this.options, options);
-    this.commands.resumeCounter += 1;
+    this.commands.nextCommandMeta = null;
     this.emit('resumed');
   }
 
@@ -795,12 +817,15 @@ ${data}`,
     // try to resume session. Modify options to match if not active.
     const resumeSessionId = options?.sessionResume?.sessionId;
     if (resumeSessionId) {
-      session = Session.get(resumeSessionId);
-      if (session) {
-        await session.resume(options);
-        tab = session.getLastActiveTab();
-        isSessionResume = true;
-      } else {
+      if (options.sessionResume.startLocation === 'currentLocation') {
+        session = Session.get(resumeSessionId);
+        if (session) {
+          await session.resume(options);
+          tab = session.getLastActiveTab();
+          isSessionResume = true;
+        }
+      }
+      if (!session) {
         Session.restoreOptionsFromSessionRecord(options, resumeSessionId);
       }
     }

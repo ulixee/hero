@@ -155,6 +155,7 @@ export default class CoreCommandQueue {
     const flush = this.connection.sendRequest({
       meta: this.meta,
       command: 'Session.flush',
+      commandId: this.nextCommandId,
       startDate: new Date(),
       args: [],
       recordCommands,

@@ -11,7 +11,6 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   sessionResume?: {
     sessionId: string;
     startLocation: 'currentLocation' | 'sessionStart';
-    startNavigationId?: number;
   };
   browserEmulatorId?: string;
   mode?: 'development' | 'multiverse' | 'production' | 'timetravel' | 'browserless';

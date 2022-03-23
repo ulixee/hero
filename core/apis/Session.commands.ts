@@ -19,7 +19,7 @@ export function loadCommandTimeline(args: ISessionCommandsArgs): CommandTimeline
   Session.get(args.sessionId)?.db?.flush();
   const sessionDb = SessionDb.getCached(args.sessionId, true);
 
-  return CommandTimeline.fromDb(sessionDb, args.timelineRange);
+  return CommandTimeline.fromDb(sessionDb);
 }
 
 export interface ISessionCommandsApi extends ICoreApi {
@@ -29,7 +29,6 @@ export interface ISessionCommandsApi extends ICoreApi {
 
 export interface ISessionCommandsArgs {
   sessionId: string;
-  timelineRange?: [startTime: number, endTime?: number];
 }
 
 export interface ISessionCommandsResult {

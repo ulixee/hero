@@ -251,6 +251,8 @@ export default class Interactor implements IInteractionsHelper {
       throw new CanceledPromiseError('Canceling interaction - tab closing');
     }
 
+    await this.tab.session.commands.waitForCommandLock();
+
     if (mouseCommands.has(interaction.command)) {
       this.frameEnvironment.setInteractionDisplay(true);
     }

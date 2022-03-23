@@ -1,5 +1,4 @@
 import SessionClosedOrMissingError from '@ulixee/commons/lib/SessionClosedOrMissingError';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 
 export default class CommandRunner {
   public runFn: () => Promise<any>;
@@ -41,5 +40,5 @@ export default class CommandRunner {
 
 export interface ICommandableTarget {
   isAllowedCommand(method: string): boolean;
-  canReuseCommand?(command: ICommandMeta): boolean;
+  shouldWaitForCommandLock?(commandName: string): boolean;
 }
