@@ -237,7 +237,6 @@ export default class Session
       this.getHeroMeta,
       this.addRemoteEventListener,
       this.removeRemoteEventListener,
-      this.recordOutput,
       this.pauseCommands,
       this.resumeCommands,
     ]);
@@ -260,7 +259,7 @@ export default class Session
   }
 
   public isAllowedCommand(method: string): boolean {
-    return this.commandRecorder.fnNames.has(method);
+    return this.commandRecorder.fnNames.has(method) || method === 'recordOutput';
   }
 
   public shouldWaitForCommandLock(method: keyof Session): boolean {

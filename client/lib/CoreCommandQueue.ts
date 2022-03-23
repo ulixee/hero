@@ -137,7 +137,6 @@ export default class CoreCommandQueue {
     this.internalState.commandsToRecord.push({
       ...command,
       startDate: new Date(),
-      commandId: command?.commandId ?? this.nextCommandId,
     });
     if (this.internalState.commandsToRecord.length > 1000) {
       this.flush().catch(() => null);
