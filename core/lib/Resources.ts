@@ -256,6 +256,13 @@ export default class Resources {
     this.record(null, request, false);
   }
 
+  public resolveBrowserRequest(mitmResource: IHttpResourceLoadDetails): void {
+    const pendingBrowserRequest = this.findMatchingRequest(mitmResource, 'noMitmResourceId');
+    if (pendingBrowserRequest && !pendingBrowserRequest.browserRequestedPromise.isResolved) {
+      pendingBrowserRequest.browserRequestedPromise.resolve();
+    }
+  }
+
   public determineResourceType(mitmResource: IHttpResourceLoadDetails): void {
     const pendingBrowserRequest =
       this.findMatchingRequest(mitmResource, 'noMitmResourceId') ??

@@ -6,9 +6,11 @@ import Hero, { Core } from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  Core.use(class BasicHumanEmulator extends HumanEmulator {
-    static id = 'basic';
-  });
+  Core.use(
+    class BasicHumanEmulator extends HumanEmulator {
+      static id = 'basic';
+    },
+  );
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -56,6 +58,46 @@ describe('Filechooser tests', () => {
     await didSubmit.promise;
   });
 
+  it('can trigger file upload when a user profile is set', async () => {
+    koaServer.get('/get-upload-profile', ctx => {
+      ctx.body = `<html>
+<body>
+<h1>Upload form</h1>
+<form name="upload" action="/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" id="files"  />
+  <input type="submit" name="Go" id="submitter">
+</body>
+</html>`;
+    });
+
+    const hero = new Hero({
+      humanEmulatorId: 'basic',
+      userProfile: {
+        cookies: [],
+        storage: {
+          'https://domain1.com': {
+            indexedDB: [],
+            localStorage: [],
+            sessionStorage: [['2', '1']],
+          },
+          'https://domain2.com': {
+            indexedDB: [],
+            localStorage: [],
+            sessionStorage: [['1', '2']],
+          },
+        },
+      },
+    });
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(`${koaServer.baseUrl}/get-upload-profile`);
+    await hero.waitForPaintingStable();
+    const input = await hero.document.querySelector('#files');
+    await hero.click(input);
+    const chooser = await hero.waitForFileChooser();
+    expect(chooser).toBeTruthy();
+  });
+
   it('can upload multiple files', async () => {
     const didSubmit = createPromise<void>();
     koaServer.post('/upload-multi', koaServer.upload.array('sourcefiles'), ctx => {
@@ -76,7 +118,9 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const hero = new Hero({ humanEmulatorId: 'basic' });
+    const hero = new Hero({
+      humanEmulatorId: 'basic',
+    });
     Helpers.needsClosing.push(hero);
 
     const file1 = await Fs.promises.readFile(`${__dirname}/filechooser.test.js`);

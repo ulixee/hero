@@ -351,6 +351,7 @@ describe('basic MitM tests', () => {
       determineResourceType(resource: IHttpResourceLoadDetails) {
         resource.resourceType = 'Document';
       },
+      resolveBrowserRequest() {},
       cancelPending() {},
     });
     session.plugins.beforeHttpRequest = jest.fn();

@@ -399,7 +399,7 @@ export default class Session
     this.browserContext = context;
     this.events.on(context as any, 'devtools-message', this.onDevtoolsMessage.bind(this));
     if (this.userProfile) {
-      await UserProfile.install(this);
+      await UserProfile.installCookies(this);
     }
 
     context.defaultPageInitializationFn = page =>
@@ -428,7 +428,7 @@ export default class Session
 
     // if first tab, install session storage
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
-      await UserProfile.installSessionStorage(this, page);
+      await UserProfile.installStorage(this, page);
       this.hasLoadedUserProfile = true;
     }
 
@@ -480,7 +480,7 @@ export default class Session
       }
       // after we're all the way cleared, install user profile again
       if (this.userProfile) {
-        await UserProfile.install(this);
+        await UserProfile.installCookies(this);
       }
       // pop a new tab on
       await this.createTab();

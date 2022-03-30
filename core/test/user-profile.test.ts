@@ -10,6 +10,8 @@ import Session from '../lib/Session';
 import { URL } from 'url';
 import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import IResourceType from '@ulixee/hero-interfaces/IResourceType';
+import MitmRequestAgent from '@ulixee/hero-mitm/lib/MitmRequestAgent';
+import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -221,6 +223,41 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await tab2.close();
   });
 
+  it('should be able to restore storage for a large number of sites', async () => {
+    const storage: IDomStorage = {
+      [`http://${koaServer.baseHost}`]: {
+        indexedDB: [],
+        localStorage: [['test', '1']],
+        sessionStorage: [['test', '2']],
+      },
+    };
+    for (let i = 0; i < 100; i += 1) {
+      storage[`https://domain${i}.com`] = {
+        indexedDB: [],
+        localStorage: [
+          ['1', '2'],
+          ['test2', '1'],
+        ],
+        sessionStorage: [
+          ['1', '2'],
+          ['test2', '1'],
+        ],
+      };
+    }
+    const meta = await connection.createSession({
+      userProfile: {
+        storage,
+      },
+    });
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+
+    await tab.goto(`${koaServer.baseUrl}`);
+    await tab.waitForLoad('PaintingStable');
+    await expect(tab.getJsValue('localStorage.getItem("test")')).resolves.toBe('1');
+    await expect(tab.getJsValue('sessionStorage.getItem("test")')).resolves.toBe('2');
+  });
+
   it("should keep profile information for sites that aren't loaded in a session", async () => {
     const meta = await connection.createSession({
       userProfile: {
@@ -277,7 +314,7 @@ localStorage.setItem('Test1', 'value1');
   });
 
   it('should not make requests to end sites during profile "install"', async () => {
-    const mitmSpy = jest.spyOn(HttpRequestHandler, 'onRequest');
+    const mitmSpy = jest.spyOn(MitmRequestAgent.prototype, 'request');
     await connection.createSession({
       userProfile: {
         cookies: [],
