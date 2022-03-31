@@ -73,12 +73,15 @@ export default class UserProfile {
 
   public static async installStorage(session: Session, page: IPuppetPage): Promise<void> {
     const { userProfile } = session;
-    const domStorage = userProfile.storage;
-    if (!domStorage) return;
-    const sessionId = session.id;
-    const origins = Object.keys(domStorage);
-
+    const domStorage: IDomStorage = {};
+    const origins: string[] = [];
+    for (const [origin, storage] of Object.entries(userProfile.storage)) {
+      const og = origin.toLowerCase();
+      origins.push(og);
+      domStorage[og] = storage;
+    }
     if (!origins.length) return;
+    const sessionId = session.id;
 
     const interceptorHandlers = session.mitmRequestSession.interceptorHandlers;
 
@@ -109,12 +112,19 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
 }\n`;
             }
 
-            if (originStorage?.indexedDB) {
+            let readyClass = 'ready';
+            if (originStorage?.indexedDB?.length) {
+              readyClass ='';
               script += `\n\n 
-             ${InjectedScripts.getIndexedDbStorageRestoreScript(originStorage.indexedDB)}`;
+             ${InjectedScripts.getIndexedDbStorageRestoreScript()}
+             
+             const dbs = ${JSON.stringify(originStorage.indexedDB)};
+             restoreUserStorage(dbs).then(() => {
+               document.body.setAttribute('class', 'ready');
+             });`;
             }
 
-            res.end(`<html><body>
+            res.end(`<html><body class="${readyClass}">
 <h5>${url.origin}</h5>
 <script>
 ${script}
@@ -138,12 +148,24 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
       for (const frame of page.frames) {
         if (frame === page.mainFrame) {
           // no loader is set, so need to have special handling
-          if (!page.mainFrame.activeLoader.lifecycle.load) {
-            await page.mainFrame.waitOn('frame-lifecycle', x => x.name === 'load');
+          if (!frame.activeLoader.lifecycle.load) {
+            await frame.waitOn('frame-lifecycle', x => x.name === 'load');
           }
           continue;
         }
         await frame.waitForLifecycleEvent('load');
+
+        await frame.evaluate(
+          `(async function() {
+            while (!document.querySelector("body.ready")) {
+              await new Promise(resolve => setTimeout(resolve, 20));
+            }
+          })()`,
+          true,
+          {
+            shouldAwaitExpression: true,
+          },
+        );
       }
     } finally {
       session.mitmRequestSession.interceptorHandlers = interceptorHandlers;

@@ -89,14 +89,12 @@ export default class InjectedScripts {
     return puppetPage.addNewDocumentScript(showInteractionScript, true);
   }
 
-  public static getIndexedDbStorageRestoreScript(restoreDBs: IIndexedDB[]): string {
+  public static getIndexedDbStorageRestoreScript(): string {
     return `(function restoreIndexedDB(dbs) {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};
 
 ${pageScripts.indexedDbRestore};
-restoreUserStorage(dbs);
-})(${JSON.stringify(restoreDBs)});`;
-
+})();`;
   }
 }

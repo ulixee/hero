@@ -222,9 +222,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     const { serverToProxyResponse, proxyToClientResponse, requestSession, events } = context;
 
     proxyToClientResponse.statusCode = context.status;
+
     // write individually so we properly write header-lists
     for (const [key, value] of Object.entries(context.responseHeaders)) {
-      proxyToClientResponse.setHeader(key, value);
       try {
         proxyToClientResponse.setHeader(key, value);
       } catch (error) {

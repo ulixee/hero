@@ -232,7 +232,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
       },
     };
     for (let i = 0; i < 100; i += 1) {
-      storage[`https://domain${i}.com`] = {
+      storage[`https://${(i === 1 ? 'D' : 'd')}omain${i}.com`] = {
         indexedDB: [],
         localStorage: [
           ['1', '2'],
@@ -324,7 +324,7 @@ localStorage.setItem('Test1', 'value1');
             localStorage: [['test', 'site1.org']],
             sessionStorage: [],
           },
-          'https://site2.org': {
+          'https://SITE2.org': {
             indexedDB: [],
             localStorage: [['test2', 'site2.org']],
             sessionStorage: [],
