@@ -90,12 +90,14 @@ export default class MirrorPage extends TypedEventEmitter<{
       ];
 
       if (page[installedScriptsSymbol]) {
-        await page.mainFrame.evaluate(`window.domReplayer.reset()`, true);
+        promises.push(
+          page.mainFrame.evaluate(`window.domReplayer.reset()`, false),
+        );
+
       } else {
         promises.push(
-          this.showBrowserInteractions ? InjectedScripts.installInteractionScript(page) : null,
-          page.addNewDocumentScript(injectedScript, true).then(() => page.reload()),
-          page.setJavaScriptEnabled(false),
+          this.showBrowserInteractions ? InjectedScripts.installInteractionScript(page, false) : null,
+          page.addNewDocumentScript(injectedScript, false).then(() => page.reload()),
         );
       }
       await Promise.all(promises);
@@ -287,7 +289,7 @@ export default class MirrorPage extends TypedEventEmitter<{
      if (node) return node.outerHTML;
      return null;
    })()`,
-        true,
+        false,
         { retriesWaitingForLoad: 2 },
       );
       return { url, html };
@@ -433,7 +435,7 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   private async evaluate<T>(expression: string): Promise<T> {
     await this.isReady;
-    return await this.page.mainFrame.evaluate(expression, true, { retriesWaitingForLoad: 2 });
+    return await this.page.mainFrame.evaluate(expression, false, { retriesWaitingForLoad: 2 });
   }
 
   private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
@@ -553,6 +555,7 @@ const injectedScript = `(function mirrorInjectedScripts() {
   ${pageScripts.DomActions};
   ${pageScripts.domReplayer};
   ${pageScripts.domReplayerUI};
-
+  
+  window.waitForFramesReady = true;
   window.blockClickAndSubmit = true;
 })();`;

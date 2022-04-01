@@ -87,6 +87,7 @@ class DomReplayer {
 
     this.loadedIndex = index;
     if (window.repositionInteractElements) window.repositionInteractElements();
+    console.clear();
   }
 
   private applyDomChanges(changeEvents: IFrontendDomChangeEvent[], isReverse = false): void {

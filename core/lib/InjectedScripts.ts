@@ -83,8 +83,8 @@ export default class InjectedScripts {
     ]);
   }
 
-  public static installInteractionScript(puppetPage: IPuppetPage): Promise<{ identifier: string }> {
-    return puppetPage.addNewDocumentScript(showInteractionScript, true);
+  public static installInteractionScript(puppetPage: IPuppetPage, isolatedFromWebPage = true): Promise<{ identifier: string }> {
+    return puppetPage.addNewDocumentScript(showInteractionScript, isolatedFromWebPage);
   }
 
   public static async installDomStorageRestore(

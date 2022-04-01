@@ -59,7 +59,10 @@ export default class MirrorNetwork {
       return {
         requestId: request.requestId,
         responseCode: 200,
-        responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
+        responseHeaders: [
+          { name: 'Content-Type', value: 'text/html; charset=utf-8' },
+          { name: 'Content-Security-Policy', value: "script-src 'nonce-hero-timetravel'" },
+        ],
         body: Buffer.from(`${doctype}<html><head></head><body></body></html>`).toString('base64'),
       };
     }
