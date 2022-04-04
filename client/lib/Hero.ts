@@ -420,6 +420,11 @@ export default class Hero extends AwaitedEventTarget<{
     return await this.getComputedVisibility(element as any).then(x => x.isVisible);
   }
 
+  public async pause(): Promise<void> {
+    const session = await this.#getCoreSessionOrReject();
+    await session.pause();
+  }
+
   public querySelector(selector: string): ISuperNode {
     return this.activeTab.querySelector(selector);
   }

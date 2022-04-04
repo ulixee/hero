@@ -11,6 +11,8 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 export default class Commands extends TypedEventEmitter<{
   start: ICommandMeta;
   finish: ICommandMeta;
+  pause: void;
+  resume: void;
 }> {
   public readonly history: ICommandMeta[] = [];
   public get last(): ICommandMeta | undefined {
@@ -54,11 +56,13 @@ export default class Commands extends TypedEventEmitter<{
     if (!this.commandLockPromise || this.commandLockPromise.isResolved) {
       this.commandLockPromise = new Resolvable();
     }
+    this.emit('pause');
   }
 
   public resume(): void {
     this.commandLockPromise.resolve();
     this.commandLockPromise = null;
+    this.emit('resume');
   }
 
   public create(

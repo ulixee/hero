@@ -204,6 +204,10 @@ export default class CoreSession implements IJsPathEventTarget {
     }
   }
 
+  public async pause(): Promise<void> {
+    await this.commandQueue.run('Session.pauseCommands');
+  }
+
   private async doClose(force: boolean): Promise<{ didKeepAlive: boolean; message: string }> {
     await this.commandQueue.flush();
     for (const tab of this.tabsById.values()) {
