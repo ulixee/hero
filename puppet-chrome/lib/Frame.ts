@@ -503,6 +503,9 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private async createIsolatedWorld(): Promise<number> {
     try {
       if (!this.isAttached) return;
+      await new Promise(setImmediate);
+      if (this.isolatedContextId) return this.isolatedContextId;
+
       const isolatedWorld = await this.devtoolsSession.send(
         'Page.createIsolatedWorld',
         {

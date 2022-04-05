@@ -1,9 +1,11 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
+import { IIndexedDB } from '@ulixee/hero-interfaces/IIndexedDB';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
+  indexedDbRestore: fs.readFileSync(`${__dirname}/../injected-scripts/indexedDbRestore.js`, 'utf8'),
   interactReplayer: fs.readFileSync(`${__dirname}/../injected-scripts/interactReplayer.js`, 'utf8'),
   NodeTracker: fs.readFileSync(`${__dirname}/../injected-scripts/NodeTracker.js`, 'utf8'),
   DomAssertions: fs.readFileSync(`${__dirname}/../injected-scripts/DomAssertions.js`, 'utf8'),
@@ -87,17 +89,12 @@ export default class InjectedScripts {
     return puppetPage.addNewDocumentScript(showInteractionScript, isolatedFromWebPage);
   }
 
-  public static async installDomStorageRestore(
-    puppetPage: IPuppetPage,
-  ): Promise<{ identifier: string }> {
-    return await puppetPage.addNewDocumentScript(
-      `(function restoreDomStorage() {
+  public static getIndexedDbStorageRestoreScript(): string {
+    return `(function restoreIndexedDB(dbs) {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};
 
-${pageScripts.domStorage};
-})();`,
-      true,
-    );
+${pageScripts.indexedDbRestore};
+})();`;
   }
 }

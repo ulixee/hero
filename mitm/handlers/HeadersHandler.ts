@@ -56,8 +56,16 @@ export default class HeadersHandler {
       // can't register extension content in page
       origin?.startsWith('chrome-extension://')
     ) {
+      session.browserRequestMatcher.resolveBrowserRequest(ctx);
       return;
     }
+
+    // if we're going to block this, don't wait for a resource type
+    if (!ctx.resourceType && session.shouldInterceptRequest(ctx.url.href)) {
+      session.browserRequestMatcher.resolveBrowserRequest(ctx);
+      return;
+    }
+
 
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
