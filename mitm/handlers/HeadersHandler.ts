@@ -25,6 +25,10 @@ const SecFetchUser = 'sec-fetch-user';
 const SecFetchMode = 'sec-fetch-mode';
 const PublicKeyPins = 'public-key-pins';
 const Http2Settings = 'http2-settings';
+const nodeVersion = process.version
+  .replace('v', '')
+  .split('.')
+  .map(Number);
 
 export default class HeadersHandler {
   public static async determineResourceType(ctx: IMitmRequestContext): Promise<void> {
@@ -168,16 +172,25 @@ export default class HeadersHandler {
     const url = ctx.url;
     const oldHeaders = ctx.requestHeaders;
     ctx.requestHeaders = Object.create(null);
-    // WORKAROUND: nodejs inserts headers in reverse to front of list, so will mess with the order
-    // to workaround, insert in reverse order
-    // https://github.com/nodejs/node/blob/e46c680bf2b211bbd52cf959ca17ee98c7f657f5/lib/internal/http2/util.js#L521
-    Object.assign(ctx.requestHeaders, {
-      [HTTP2_HEADER_PATH]: url.pathname + url.search,
-      [HTTP2_HEADER_SCHEME]: 'https',
+
+    let headers: IResourceHeaders = {
+      [HTTP2_HEADER_METHOD]: ctx.method,
       [HTTP2_HEADER_AUTHORITY]:
         oldHeaders[HTTP2_HEADER_AUTHORITY] ?? this.getRequestHeader<string>(ctx, 'host'),
-      [HTTP2_HEADER_METHOD]: ctx.method,
-    });
+      [HTTP2_HEADER_SCHEME]: 'https',
+      [HTTP2_HEADER_PATH]: url.pathname + url.search,
+    };
+
+    if (nodeHasPseudoHeaderPatch()) {
+      headers = {
+        [HTTP2_HEADER_PATH]: url.pathname + url.search,
+        [HTTP2_HEADER_SCHEME]: 'https',
+        [HTTP2_HEADER_AUTHORITY]:
+          oldHeaders[HTTP2_HEADER_AUTHORITY] ?? this.getRequestHeader<string>(ctx, 'host'),
+        [HTTP2_HEADER_METHOD]: ctx.method,
+      };
+    }
+    Object.assign(ctx.requestHeaders, headers);
 
     for (const header of Object.keys(oldHeaders)) {
       const lowerKey = toLowerCase(header);
@@ -322,3 +335,15 @@ const singleValueHttp2Headers = new Set([
   http2.constants.HTTP2_HEADER_USER_AGENT,
   'x-content-type-options',
 ]);
+
+function nodeHasPseudoHeaderPatch(): boolean {
+  const [nodeVersionMajor, nodeVersionMinor, nodeVersionPatch] = nodeVersion;
+
+  // Node.js was reversing pseudo-headers as provided. Fixed in 17.5.0, 16.14.1
+  let needsReverseHeaders = nodeVersionMajor <= 17;
+  if (nodeVersionMajor === 17 && nodeVersionMinor >= 5) needsReverseHeaders = false;
+  if (nodeVersionMajor === 16 && nodeVersionMinor === 14 && nodeVersionPatch >= 1)
+    needsReverseHeaders = false;
+  if (nodeVersionMajor === 16 && nodeVersionMinor > 14) needsReverseHeaders = false;
+  return needsReverseHeaders;
+}
