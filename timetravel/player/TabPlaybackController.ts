@@ -105,6 +105,9 @@ export default class TabPlaybackController {
     onPage?: (page: IPuppetPage) => Promise<void>,
   ): Promise<void> {
     await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
+    if (this.mirrorPage.page.mainFrame.url === 'about:blank') {
+      await this.mirrorPage.page.navigate(this.tabDetails.documents[0].url);
+    }
     this.events.once(this.mirrorPage, 'close', () => {
       this.paintEventsLoadedIdx = -1;
       this.isPlaying = false;

@@ -4,11 +4,11 @@
 
 - user-agent
 - ip address
-- audio fingerprint
-- fonts
-- webgl / canvas
 - cookies & storage
 - screen details
+- audio fingerprint (todo)
+- fonts (todo)
+- webgl / canvas  (todo)
 - 100s more
 
 Note: IP addresses are set through upstreamProxyUrl on each Hero.
