@@ -1,7 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import HttpRequestHandler from '@ulixee/hero-mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import Core from '../index';

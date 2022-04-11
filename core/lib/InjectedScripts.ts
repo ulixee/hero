@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
-import { IIndexedDB } from '@ulixee/hero-interfaces/IIndexedDB';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
