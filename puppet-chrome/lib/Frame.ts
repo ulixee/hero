@@ -112,7 +112,12 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   public async evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
-    options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
+    options?: {
+      shouldAwaitExpression?: boolean;
+      retriesWaitingForLoad?: number;
+      returnByValue?: boolean;
+      includeCommandLineAPI?: boolean;
+    },
   ): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
     const startUrl = this.url;
@@ -124,7 +129,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
         {
           expression,
           contextId,
-          returnByValue: true,
+          returnByValue: options?.returnByValue ?? true,
+          includeCommandLineAPI: options?.includeCommandLineAPI ?? false,
           awaitPromise: options?.shouldAwaitExpression ?? true,
         },
         this,
@@ -258,12 +264,15 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     }
   }
 
-  public async resolveNodeId(backendNodeId: number): Promise<string> {
+  public async resolveNodeId(
+    backendNodeId: number,
+    resolveInIsolatedContext = true,
+  ): Promise<string> {
     const result = await this.devtoolsSession.send(
       'DOM.resolveNode',
       {
         backendNodeId,
-        executionContextId: this.getActiveContextId(true),
+        executionContextId: this.getActiveContextId(resolveInIsolatedContext),
       },
       this,
     );

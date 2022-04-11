@@ -1,6 +1,6 @@
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
-import { IDomRecording } from '@ulixee/hero-core/models/DomChangesTable';
+import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import MirrorPage from '../lib/MirrorPage';
 import MirrorNetwork from '../lib/MirrorNetwork';
@@ -243,6 +243,10 @@ export default class TabPlaybackController {
 
   public async showStatusText(text: string): Promise<void> {
     await this.mirrorPage.showStatusText(text);
+  }
+
+  public getPaintEventAtIndex(index: number): IPaintEvent {
+    return this.tabDetails.paintEvents[index];
   }
 
   private static tabDetailsToDomRecording(tabDetails: ITabDetails): IDomRecording {

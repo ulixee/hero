@@ -13,7 +13,7 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   isDefaultUrl: boolean;
   html(): Promise<string>;
   isAttached: boolean;
-  resolveNodeId(backendNodeId: number): Promise<string>;
+  resolveNodeId(backendNodeId: number, resolveInIsolatedContext?: boolean): Promise<string>;
   waitForLifecycleEvent(
     event: keyof ILifecycleEvents,
     loaderId?: string,
@@ -25,7 +25,12 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
-    options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
+    options?: {
+      shouldAwaitExpression?: boolean;
+      retriesWaitingForLoad?: number;
+      returnByValue?: boolean;
+      includeCommandLineAPI?: boolean;
+    },
   ): Promise<T>;
   evaluateOnNode<T>(nodeId: string, expression: string): Promise<T>;
   setFileInputFiles(nodeId: string, filePaths: string[]): Promise<void>;
