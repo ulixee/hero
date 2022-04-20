@@ -17,6 +17,8 @@ import FrameEnvironment from '../lib/FrameEnvironment';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
+const version = require('../package.json');
 
 const { log } = Log(module);
 
@@ -116,9 +118,16 @@ export default class ConnectionToClient
   }
 
   public async connect(
-    options: ICoreConfigureOptions & { isPersistent?: boolean } = {},
+    options: ICoreConfigureOptions & { isPersistent?: boolean; version?: string } = {},
   ): Promise<{ maxConcurrency: number }> {
     this.isPersistent = options.isPersistent ?? true;
+    if (options.version) {
+      if (!isSemverSatisfied(options.version, version)) {
+        throw new Error(
+          `This Hero Core (version=${version}) cannot satisfy the requested version (${options.version}).`,
+        );
+      }
+    }
     this.isClosing = false;
     await Core.start(options, false);
     return {
@@ -229,7 +238,7 @@ export default class ConnectionToClient
       callsite?: ISourceCodeLocation[];
       retryNumber?: number;
       activeFlowHandlerId?: number;
-      flowCommandId?: number
+      flowCommandId?: number;
     },
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);

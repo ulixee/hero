@@ -55,12 +55,14 @@ export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
   }
 
   protected async createConnection(): Promise<Error | null> {
-    // do this first to see if we can resolve the host
-    const hostOrError = await this.hostOrError;
-    if (hostOrError instanceof Error) return hostOrError;
+    {
+      // do this first to see if we can resolve the host
+      const hostOrError = await this.hostOrError;
+      if (hostOrError instanceof Error) return hostOrError;
+    }
 
     if (!this.webSocketOrError) {
-      this.webSocketOrError = connectToWebsocketHost(hostOrError);
+      this.webSocketOrError = connectToWebsocketHost(this.resolvedHost);
       try {
         const webSocket = await this.getWebsocket();
         webSocket.once('close', this.onConnectionTerminated);
