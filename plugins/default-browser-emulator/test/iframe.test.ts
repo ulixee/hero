@@ -4,6 +4,7 @@ import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import CoreServerConnection from '@ulixee/hero-core/connections/ConnectionToClient';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 
 let koaServer: ITestKoaServer;
 let coreServerConnection: CoreServerConnection;
@@ -146,6 +147,23 @@ test('should not be able to detect contentWindow overrides', async () => {
   expect(results.windowType).toBe('object');
 });
 
+test('should override before iframe.src using javascript', async () => {
+  const meta = await coreServerConnection.createSession();
+  const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session);
+  const page = tab.puppetPage;
+  const complete = new Promise(resolve => page.once('console', msg => resolve(msg.message)));
+
+  await page.evaluate(`(() => {
+
+    const iframe = document.createElement('iframe');
+    iframe.src = 'javascript:console.log(navigator.userAgent)';
+    document.body.appendChild(iframe);
+  })()`);
+
+  await expect(complete).resolves.toBe(tab.session.meta.userAgentString);
+});
+
 test('should emulate contentWindow features', async () => {
   const page = await createPage();
 
@@ -265,8 +283,8 @@ test.skip('should not break recaptcha popup', async () => {
   expect(hasRecaptchaPopup).toBe(true);
 });
 
-async function createPage(): Promise<IPuppetPage> {
-  const meta = await coreServerConnection.createSession();
+async function createPage(options?: ISessionCreateOptions): Promise<IPuppetPage> {
+  const meta = await coreServerConnection.createSession(options);
   const tab = Session.getTab(meta);
   Helpers.needsClosing.push(tab.session);
   await tab.goto(koaServer.baseUrl);

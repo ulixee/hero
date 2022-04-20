@@ -29,4 +29,9 @@ if ('RTCSessionDescription' in self && RTCSessionDescription.prototype) {
     }
     return result;
   });
+  proxyFunction(RTCSessionDescription.prototype, 'toJSON', function () {
+    const json = ReflectCached.apply(...arguments);
+    if ('sdp' in json) json.sdp = json.sdp.replace(maskLocalIp, replacementIp);
+    return json;
+  });
 }
