@@ -535,7 +535,7 @@ describe('basic interaction tests', () => {
         <script>
             document.addEventListener('mousemove', () => {
                window.location = '${koaServer.baseUrl}/';
-            })
+            }, { once: true })
         </script>
       </body>
     `;
