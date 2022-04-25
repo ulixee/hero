@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@ulixee/chrome-98-0": "^4758.102.4",
-    "@ulixee/commons": "1.5.10",
+    "@ulixee/commons": "1.5.11",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "compare-versions": "^3.6.0",

@@ -28,7 +28,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   connected: void;
 }> {
   public readonly commandQueue: CoreCommandQueue;
-  public readonly hostOrError: Promise<string | Error>;
+  public hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
   public isDisconnecting: Promise<void>;
   public isConnectionTerminated = false;
@@ -36,10 +36,11 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   protected resolvedHost: string;
 
   private connectPromise: IResolvablePromise<Error | null>;
-  private get connectOptions(): ICoreConfigureOptions & { isPersistent: boolean } {
+  private get connectOptions(): ICoreConfigureOptions & { isPersistent: boolean; version: string } {
     return {
       isPersistent: this.options.isPersistent,
       dataDir: this.options.dataDir,
+      version: this.options.version,
     };
   }
 
@@ -61,16 +62,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
 
     if (this.options.host) {
       this.hostOrError = Promise.resolve(this.options.host)
-        .then(x => {
-          if (!x.includes('://')) {
-            return `ws://${x}`;
-          }
-          return x;
-        })
-        .then(x => {
-          this.resolvedHost = x;
-          return this.resolvedHost;
-        })
+        .then(this.setHost.bind(this))
         .catch(err => err);
     } else {
       this.hostOrError = Promise.resolve(new Error('No host provided'));
@@ -81,6 +73,15 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   protected abstract internalSendRequest(payload: ICoreRequestPayload): Promise<void>;
   protected abstract createConnection(): Promise<Error | null>;
   protected abstract destroyConnection(): Promise<any>;
+
+  public setHost(host: string): string {
+    if (!host.includes('://')) {
+      host = `ws://${host}`;
+    }
+    this.hostOrError = Promise.resolve(host);
+    this.resolvedHost = host;
+    return host;
+  }
 
   public async connect(isAutoConnect = false): Promise<Error | null> {
     if (!this.connectPromise) {
