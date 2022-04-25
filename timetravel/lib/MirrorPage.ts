@@ -53,7 +53,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   constructor(
     public network: MirrorNetwork,
     domRecording: IDomRecording,
-    private showBrowserInteractions = false,
+    private showChromeInteractions = false,
     private debugLogging = false,
   ) {
     super();
@@ -96,7 +96,7 @@ export default class MirrorPage extends TypedEventEmitter<{
 
       } else {
         promises.push(
-          this.showBrowserInteractions ? InjectedScripts.installInteractionScript(page, false) : null,
+          this.showChromeInteractions ? InjectedScripts.installInteractionScript(page, false) : null,
           page.addNewDocumentScript(injectedScript, false).then(() => page.reload()),
         );
       }
@@ -223,7 +223,7 @@ export default class MirrorPage extends TypedEventEmitter<{
           });
         }
 
-        const showOverlay = (overlayLabel || isLoadingDocument) && this.showBrowserInteractions;
+        const showOverlay = (overlayLabel || isLoadingDocument) && this.showChromeInteractions;
 
         if (showOverlay) await this.evaluate('window.overlay();');
 
@@ -246,7 +246,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     mouse: IMouseEventRecord,
     scroll: IScrollRecord,
   ): Promise<void> {
-    if (!this.showBrowserInteractions) return;
+    if (!this.showChromeInteractions) return;
     const args = [highlightNodeIds, mouse, scroll].map(x => {
       if (!x) return 'undefined';
       return JSON.stringify(this.applyFrameNodePath(x));
@@ -255,7 +255,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async showStatusText(text: string): Promise<void> {
-    if (!this.showBrowserInteractions) return;
+    if (!this.showChromeInteractions) return;
     await this.evaluate(`window.showReplayStatus("${text}");`);
   }
 

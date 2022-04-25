@@ -98,7 +98,7 @@ export interface IBrowserEmulatorClass {
   onBrowserWillLaunch?(
     browserEngine: IBrowserEngine,
     launchSettings: {
-      showBrowser?: boolean;
+      showChrome?: boolean;
       disableGpu?: boolean;
       disableDevtools?: boolean;
     },

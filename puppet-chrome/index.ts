@@ -35,7 +35,7 @@ const PuppetLauncher: IPuppetLauncher = {
       }
     }
 
-    browserEngine.isHeaded = options.showBrowser === true;
+    browserEngine.isHeaded = options.showChrome === true;
     if (!browserEngine.isHeaded) {
       chromeArguments.push('--headless');
     }

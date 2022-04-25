@@ -199,7 +199,7 @@ export default class FrameEnvironment
     hideMouse = false,
     hideHighlightedNodes = false,
   ): void {
-    if (!this.session.options.showBrowserInteractions) return;
+    if (!this.session.options.showChromeInteractions) return;
     if (this.isTrackingMouse === followMouseMoves) return;
     this.isTrackingMouse = followMouseMoves;
     this.puppetFrame

@@ -8,8 +8,8 @@ const resumeSessionId = Fs.existsSync(sessionIdPath)
 
 (async () => {
   const hero = new Hero({
-    showBrowserInteractions: true, // disable to remove mouse movements and node highlights (can be detected by page!)
-    showBrowser: true,
+    showChromeInteractions: true, // disable to remove mouse movements and node highlights (can be detected by page!)
+    showChrome: true,
     sessionKeepAlive: true,
     sessionResume: {
       startLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation

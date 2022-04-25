@@ -1,5 +1,5 @@
 export default interface ILaunchOptions {
-  showBrowser?: boolean;
+  showChrome?: boolean;
   executablePath: string;
   proxyPort: number;
   dumpio?: boolean;

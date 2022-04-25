@@ -80,8 +80,8 @@ const Hero = require('@ulixee/hero');
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
-  - showBrowser `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `HERO_SHOW_BROWSER=true`. Default `false`.
-  - showBrowserInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
+  - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `HERO_SHOW_CHROME=true`. Default `false`.
+  - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.

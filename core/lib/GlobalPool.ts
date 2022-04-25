@@ -56,7 +56,7 @@ export default class GlobalPool {
     const corePlugins = new CorePlugins({}, log);
 
     this.utilityBrowserContext = this.getPuppet(corePlugins, corePlugins.browserEngine, null, {
-      showBrowser: false,
+      showChrome: false,
       enableMitm: false,
     }).then(puppet => puppet.newContext(corePlugins, log, null, true));
 
@@ -293,9 +293,7 @@ export default class GlobalPool {
 
   private static getPuppetLaunchArgs(): IPuppetLaunchArgs {
     this.defaultLaunchArgs ??= {
-      showBrowser: Boolean(
-        JSON.parse(process.env.HERO_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
-      ),
+      showChrome: Boolean(JSON.parse(process.env.HERO_SHOW_CHROME ?? 'false')),
       disableDevtools: Boolean(JSON.parse(process.env.HERO_DISABLE_DEVTOOLS ?? 'false')),
       noChromeSandbox: Boolean(JSON.parse(process.env.HERO_NO_CHROME_SANDBOX ?? 'false')),
       disableGpu: Boolean(JSON.parse(process.env.HERO_DISABLE_GPU ?? 'false')),

@@ -57,7 +57,7 @@ describe('MirrorPage tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     Helpers.needsClosing.push(tab.session);
-    tab.session.options.showBrowserInteractions = true;
+    tab.session.options.showChromeInteractions = true;
     await InjectedScripts.installInteractionScript(tab.puppetPage);
     await tab.goto(`${koaServer.baseUrl}/domrecording`);
     await tab.waitForLoad('DomContentLoaded');

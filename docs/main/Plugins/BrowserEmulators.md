@@ -31,7 +31,7 @@ This is called every time a new browser engine is started, which may not be ever
 #### **Arguments**:
 
  - launchSettings: `object`
-    - showBrowser: `boolean` - has the user requested to show the browser
+    - showChrome: `boolean` - has the user requested to show the browser
     - disableGpu: `boolean` - has the user requested to disable the gpu
     - disableDevtools: `boolean` - has the user requested to disable automatically showing devtools
 
