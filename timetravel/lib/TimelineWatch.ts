@@ -7,71 +7,87 @@ import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import Log from '@ulixee/commons/lib/Logger';
 
-export default class TimelineRecorder extends TypedEventEmitter<{
+const { log } = Log(module);
+
+export default class TimelineWatch extends TypedEventEmitter<{
   updated: void;
 }> {
-  public recordScreenUntilTime = 0;
-  public recordScreenUntilLoad = false;
   private closeTimer: IResolvablePromise;
   private readonly events = new EventSubscriber();
+  private extendTimelineUntilTimestamp: number;
 
-  constructor(readonly heroSession: Session) {
+  constructor(
+    readonly heroSession: Session,
+    readonly timelineExtenders?: {
+      extendAfterCommands?: number;
+      extendAfterLoadStatus?: { status: LoadStatus; msAfterStatus: number };
+    },
+  ) {
     super();
     bindFunctions(this);
+    this.logger = log.createChild(module, { sessionId: heroSession.id });
 
     this.events.on(heroSession, 'tab-created', this.onTabCreated);
     this.events.on(heroSession, 'will-close', this.onHeroSessionWillClose);
+    this.events.on(heroSession.commands, 'finish', this.onCommandFinish);
     this.events.on(heroSession, 'closed', this.close);
   }
 
   public close(): void {
     if (!this.heroSession) return;
     this.events.off();
-    this.dontExtendSessionPastTime();
+    this.closeTimer?.resolve();
   }
 
-  public dontExtendSessionPastTime(delayUntilTimestamp?: number): void {
-    this.recordScreenUntilLoad = false;
-    if (delayUntilTimestamp) {
-      this.recordScreenUntilTime = delayUntilTimestamp ?? Date.now();
-    }
-    if (this.closeTimer) {
-      const timer = this.closeTimer;
-      const remainingMs = this.recordScreenUntilTime ? Date.now() - this.recordScreenUntilTime : 0;
-      if (remainingMs > 0) {
-        setTimeout(() => timer.resolve(), remainingMs).unref();
-      } else {
-        this.closeTimer.resolve();
-      }
+  private onCommandFinish(command: ICommandMeta): void {
+    if (this.timelineExtenders.extendAfterCommands) {
+      this.extendTimelineUntilTimestamp =
+        command.endDate + this.timelineExtenders.extendAfterCommands;
     }
   }
 
   private onHeroSessionWillClose(event: { waitForPromise?: Promise<any> }): void {
-    if (!this.recordScreenUntilTime && !this.recordScreenUntilLoad) return;
+    if (!this.timelineExtenders) return;
 
     this.closeTimer?.resolve();
 
     let loadPromise: Promise<any>;
-    if (this.recordScreenUntilLoad && this.heroSession) {
-      loadPromise = Promise.all(
-        [...this.heroSession.tabsById.values()].map(x => {
-          return x.navigationsObserver.waitForLoad(LoadStatus.AllContentLoaded);
-        }),
-      );
+    const { extendAfterLoadStatus } = this.timelineExtenders;
+    if (extendAfterLoadStatus) {
+      const { status, msAfterStatus } = extendAfterLoadStatus;
+      const promises: Promise<any>[] = [];
+      for (const tab of this.heroSession.tabsById.values()) {
+        if (!tab.navigations.hasLoadStatus(status)) {
+          this.logger.info('Waiting for load status before session close', {
+            status,
+            tabId: tab.id,
+          });
+          promises.push(
+            tab.navigationsObserver
+              .waitForLoad(status)
+              .then(() => new Promise(resolve => setTimeout(resolve, msAfterStatus))),
+          );
+        }
+      }
+      loadPromise = Promise.all(promises);
     }
 
-    const delay = this.recordScreenUntilTime - Date.now();
+    const delay = this.extendTimelineUntilTimestamp
+      ? this.extendTimelineUntilTimestamp - Date.now()
+      : 0;
     let delayPromise: Promise<void>;
     if (delay > 0) {
+      this.logger.info(`Waiting for ${delay}ms since last command`);
       delayPromise = new Promise<void>(resolve => setTimeout(resolve, delay));
     }
     if (loadPromise || delayPromise) {
       this.closeTimer = new Resolvable<void>(60e3);
+      const { resolve } = this.closeTimer;
 
-      Promise.all([loadPromise, delayPromise])
-        .then(() => this.closeTimer.resolve())
-        .catch(() => this.closeTimer.resolve());
+      Promise.all([loadPromise, delayPromise]).then(resolve).catch(resolve);
 
       event.waitForPromise = this.closeTimer.promise;
     }
