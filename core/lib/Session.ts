@@ -375,11 +375,7 @@ export default class Session
   }
 
   public useIncognitoContext(): boolean {
-    const isChromeAlive =
-      this.options.showBrowser === true &&
-      this.options.sessionKeepAlive === true &&
-      this.mode === 'development';
-    return isChromeAlive === false;
+    return this.options.showChromeAlive !== true;
   }
 
   public async registerWithMitm(

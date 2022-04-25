@@ -16,6 +16,7 @@ import Core from '../index';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import CorePlugins from './CorePlugins';
+import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 
 const { log } = Log(module);
 export const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
@@ -54,7 +55,7 @@ export default class GlobalPool {
 
     const corePlugins = new CorePlugins({}, log);
 
-    this.utilityBrowserContext = this.getPuppet(corePlugins, corePlugins.browserEngine, {
+    this.utilityBrowserContext = this.getPuppet(corePlugins, corePlugins.browserEngine, null, {
       showBrowser: false,
       enableMitm: false,
     }).then(puppet => puppet.newContext(corePlugins, log, null, true));
@@ -136,6 +137,7 @@ export default class GlobalPool {
   public static async getPuppet(
     plugins: ICorePlugins,
     browserEngine: IBrowserEngine,
+    sessionSummary?: ISessionSummary,
     launchArgs?: IPuppetLaunchArgs,
   ): Promise<Puppet> {
     const args = launchArgs ?? this.getPuppetLaunchArgs();
@@ -180,7 +182,11 @@ export default class GlobalPool {
 
       if (session.mode === 'browserless') return session;
 
-      const puppet = await this.getPuppet(session.plugins, session.browserEngine);
+      const puppet = await this.getPuppet(
+        session.plugins,
+        session.browserEngine,
+        session.getSummary(),
+      );
 
       if (disableMitm !== true) {
         await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);

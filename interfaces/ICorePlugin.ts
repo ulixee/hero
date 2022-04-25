@@ -36,11 +36,18 @@ export interface ICorePluginClass {
 
 export interface ICorePluginMethods {
   onClientCommand?(meta: IOnClientCommandMeta, ...args: any[]): Promise<any>;
-  onDevtoolsPanelAttached?(devtoolsSession: IDevtoolsSession): Promise<any>;
-  onDevtoolsPanelDetached?(devtoolsSession: IDevtoolsSession): Promise<any>;
+  onDevtoolsPanelAttached?(
+    devtoolsSession: IDevtoolsSession,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any>;
+  onDevtoolsPanelDetached?(
+    devtoolsSession: IDevtoolsSession,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any>;
   onServiceWorkerAttached?(
     devtoolsSession: IDevtoolsSession,
     event: Protocol.Target.AttachedToTargetEvent,
+    sessionSummary?: ISessionSummary,
   ): Promise<any>;
 }
 
@@ -121,7 +128,7 @@ export interface IBrowserEmulator extends ICorePlugin {
 export interface IBrowserEmulatorMethods {
   configure?(options: IBrowserEmulatorConfig, sessionSummary?: ISessionSummary): void;
 
-  onBrowserLaunchConfiguration?(launchArguments: string[]): Promise<void> | void;
+  onBrowserLaunchConfiguration?(launchArguments: string[], sessionSummary?: ISessionSummary): Promise<void> | void;
 
   onDnsConfiguration?(settings: IDnsSettings, sessionSummary?: ISessionSummary): void;
   onTcpConfiguration?(settings: ITcpSettings, sessionSummary?: ISessionSummary): void;
