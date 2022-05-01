@@ -221,7 +221,7 @@ export default class Session
       this.resources,
     );
     this.mitmRequestSession.respondWithHttpErrorStacks =
-      this.mode === 'development' && this.options.showBrowserInteractions === true;
+      this.mode === 'development' && this.options.showChromeInteractions === true;
     this.websocketMessages = new WebsocketMessages(this.db);
     this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
@@ -250,12 +250,12 @@ export default class Session
   }
 
   public configureHeaded(
-    options: Pick<ISessionCreateOptions, 'showBrowser' | 'showBrowserInteractions'>,
+    options: Pick<ISessionCreateOptions, 'showChrome' | 'showChromeInteractions'>,
   ): void {
-    this.options.showBrowser = options.showBrowser ?? false;
-    this.options.showBrowserInteractions = options.showBrowserInteractions ?? options.showBrowser;
+    this.options.showChrome = options.showChrome ?? false;
+    this.options.showChromeInteractions = options.showChromeInteractions ?? options.showChrome;
 
-    this.browserEngine.isHeaded = this.options.showBrowser;
+    this.browserEngine.isHeaded = this.options.showChrome;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -375,11 +375,7 @@ export default class Session
   }
 
   public useIncognitoContext(): boolean {
-    const isChromeAlive =
-      this.options.showBrowser === true &&
-      this.options.sessionKeepAlive === true &&
-      this.mode === 'development';
-    return isChromeAlive === false;
+    return this.options.showChromeAlive !== true;
   }
 
   public async registerWithMitm(
@@ -403,7 +399,7 @@ export default class Session
     }
 
     context.defaultPageInitializationFn = page =>
-      InjectedScripts.install(page, this.options.showBrowserInteractions);
+      InjectedScripts.install(page, this.options.showChromeInteractions);
 
     const requestSession = this.mitmRequestSession;
     this.events.on(requestSession, 'request', this.onMitmRequest.bind(this));

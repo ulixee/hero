@@ -27,7 +27,7 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   dependencyMap?: { [clientPluginId: string]: string[] };
   corePluginPaths?: string[];
   dnsOverTlsProvider?: { host: string; servername: string; port?: number };
-  showBrowser?: boolean;
+  showChrome?: boolean;
   showChromeAlive?: boolean;
-  showBrowserInteractions?: boolean;
+  showChromeInteractions?: boolean;
 }

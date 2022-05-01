@@ -37,7 +37,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
     this.browserEngine = browserEngine;
     this.id = puppBrowserCounter;
     if (browserEngine.name === 'chrome') {
-      if (browserEngine.isHeaded) args.showBrowser = true;
+      if (browserEngine.isHeaded) args.showChrome = true;
       PuppetChrome.getLaunchArgs(args, browserEngine);
       this.launcher = PuppetChrome;
     } else {

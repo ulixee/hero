@@ -1,11 +1,11 @@
 const Hero = require('@ulixee/hero-fullstack');
 
-//process.env.HERO_SHOW_BROWSER = 'true';
+//process.env.HERO_SHOW_CHROME = 'true';
 
 (async () => {
   const url = `https://dataliberationfoundation.org/`;
   console.log('Opened Browser');
-  const hero = new Hero({ showBrowserInteractions: true, showBrowser: true });
+  const hero = new Hero({ showChromeInteractions: true, showChrome: true });
 
   await hero.goto(url, 5e3);
   await hero.waitForPaintingStable();

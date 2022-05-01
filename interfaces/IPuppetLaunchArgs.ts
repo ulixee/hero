@@ -1,6 +1,6 @@
 export default interface IPuppetLaunchArgs {
   proxyPort?: number;
-  showBrowser?: boolean;
+  showChrome?: boolean;
   disableDevtools?: boolean;
   disableGpu?: boolean;
   noChromeSandbox?: boolean;

@@ -8,7 +8,7 @@ let sessionDirCounter = 0;
 export function configureBrowserLaunchArgs(
   engine: BrowserEngine,
   options: {
-    showBrowser?: boolean;
+    showChrome?: boolean;
     disableGpu?: boolean;
     disableDevtools?: boolean;
   },
@@ -57,7 +57,7 @@ export function configureBrowserLaunchArgs(
     '--no-startup-window',
   );
 
-  if (options.showBrowser) {
+  if (options.showChrome) {
     const dataDir = Path.join(
       os.tmpdir(),
       engine.fullVersion.replace('.', '-'),

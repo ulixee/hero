@@ -178,10 +178,11 @@ export default class CorePlugins implements ICorePlugins {
   }
 
   public async onBrowserLaunchConfiguration(launchArguments: string[]): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
       this.instances
         .filter(p => p.onBrowserLaunchConfiguration)
-        .map(p => p.onBrowserLaunchConfiguration(launchArguments)),
+        .map(p => p.onBrowserLaunchConfiguration(launchArguments, sessionSummary)),
     );
   }
 
@@ -301,18 +302,20 @@ export default class CorePlugins implements ICorePlugins {
   // MISCELLANEOUS
 
   public async onDevtoolsPanelAttached(devtoolsSession: IDevtoolsSession): Promise<any> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
       this.instances
         .filter(p => p.onDevtoolsPanelAttached)
-        .map(p => p.onDevtoolsPanelAttached(devtoolsSession)),
+        .map(p => p.onDevtoolsPanelAttached(devtoolsSession, sessionSummary)),
     );
   }
 
   public async onDevtoolsPanelDetached(devtoolsSession: IDevtoolsSession): Promise<any> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
       this.instances
         .filter(p => p.onDevtoolsPanelDetached)
-        .map(p => p.onDevtoolsPanelDetached(devtoolsSession)),
+        .map(p => p.onDevtoolsPanelDetached(devtoolsSession, sessionSummary)),
     );
   }
 
@@ -320,10 +323,11 @@ export default class CorePlugins implements ICorePlugins {
     devtoolsSession: IDevtoolsSession,
     event: Protocol.Target.AttachedToTargetEvent,
   ): Promise<any> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
       this.instances
         .filter(p => p.onServiceWorkerAttached)
-        .map(p => p.onServiceWorkerAttached(devtoolsSession, event)),
+        .map(p => p.onServiceWorkerAttached(devtoolsSession, event, sessionSummary)),
     );
   }
 

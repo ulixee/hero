@@ -62,7 +62,7 @@ ${remedyMessage}`);
   }
 
   public beforeLaunch(launchSettings: {
-    showBrowser?: boolean;
+    showChrome?: boolean;
     disableGpu?: boolean;
     disableDevtools?: boolean;
   }): void {

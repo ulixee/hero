@@ -219,7 +219,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public static onBrowserWillLaunch(
     browserEngine: BrowserEngine,
     options: {
-      showBrowser?: boolean;
+      showChrome?: boolean;
       disableGpu?: boolean;
       disableDevtools?: boolean;
     },

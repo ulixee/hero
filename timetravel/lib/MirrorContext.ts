@@ -12,8 +12,8 @@ export default class MirrorContext {
   ): Promise<IPuppetContext> {
     const options = Session.restoreOptionsFromSessionRecord({}, sessionId);
     options.sessionResume = null;
-    options.showBrowserInteractions = headed;
-    options.showBrowser = headed;
+    options.showChromeInteractions = headed;
+    options.showChrome = headed;
 
     const plugins = new CorePlugins(
       {
@@ -30,7 +30,7 @@ export default class MirrorContext {
       },
       log,
     );
-    plugins.browserEngine.isHeaded = options.showBrowser;
+    plugins.browserEngine.isHeaded = options.showChrome;
     plugins.configure(options);
 
     const puppet = await GlobalPool.getPuppet(plugins, plugins.browserEngine);
