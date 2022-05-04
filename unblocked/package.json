@@ -1,0 +1,12 @@
+{
+  "name": "unblocked",
+  "version": "0.0.2",
+  "description": "A suite of tools for protecting the web's open knowledge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Data Liberation Foundation",
+  "license": "ISC",
+  "repository": "git@github.com:unblockable/unblocked.git"
+}
