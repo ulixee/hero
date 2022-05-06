@@ -1,13 +1,17 @@
-export enum PluginTypes {
-  ClientPlugin = 'ClientPlugin',
-  CorePlugin = 'CorePlugin',
-  BrowserEmulator = 'CorePlugin:BrowserEmulator',
-  HumanEmulator = 'CorePlugin:HumanEmulator',
-}
+import { EmulatorTypes } from '@bureau/interfaces/IEmulatorTypes';
 
-type ValueOf<T> = T[keyof T];
+const ClientPlugin = 'ClientPlugin';
+const CorePlugin = 'CorePlugin';
+const BrowserEmulator = EmulatorTypes.BrowserEmulator;
+const HumanEmulator = EmulatorTypes.HumanEmulator;
 
-type IPluginType = ValueOf<PluginTypes>;
+const PluginTypes = {
+  ClientPlugin,
+  CorePlugin,
+  BrowserEmulator,
+  HumanEmulator,
+} as const;
 
-export default IPluginType;
+type IPluginType = keyof typeof PluginTypes;
 
+export { PluginTypes, IPluginType };

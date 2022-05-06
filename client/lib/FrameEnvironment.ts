@@ -17,7 +17,7 @@ import {
   createSuperNodeList,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILoadStatus, ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger, LocationStatus } from '@bureau/interfaces/Location';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
@@ -28,7 +28,7 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility } from '@bureau/interfaces/INodeVisibility';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
@@ -38,7 +38,7 @@ import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { getCoreTab } from './Tab';
 import Resource, { createResource } from './Resource';
-import { IMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
+import { IMousePositionXY } from '@bureau/interfaces/IInteractions';
 import { InternalPropertiesSymbol } from './internal';
 
 const awaitedPathState = StateMachine<

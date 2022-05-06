@@ -1,21 +1,21 @@
-import { IInteractionGroups, isMousePositionXY } from '@ulixee/hero-interfaces/IInteractions';
+import { IInteractionGroups, isMousePositionXY } from '@bureau/interfaces/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger } from '@bureau/interfaces/Location';
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@ulixee/hero-interfaces/ICookie';
+import { ICookie } from '@bureau/interfaces/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@bureau/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import {
   getComputedVisibilityFnName,
   isFocusedFnName,
-} from '@ulixee/hero-interfaces/jsPathFnNames';
+} from '@bureau/interfaces/IJsPathFunctions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import { INodeVisibility } from '@bureau/interfaces/INodeVisibility';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';

@@ -1,4 +1,4 @@
-import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
+import IHttpHeaders from '@bureau/interfaces/IHttpHeaders';
 import SessionDb from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
 
@@ -42,6 +42,6 @@ export interface ISessionResourceResult {
 
 export interface ISessionResourceDetails {
   body: Buffer;
-  headers: IResourceHeaders;
+  headers: IHttpHeaders;
   statusCode: number;
 }

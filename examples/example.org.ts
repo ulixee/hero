@@ -1,5 +1,5 @@
 import Hero from '@ulixee/hero-fullstack';
-import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { LocationTrigger } from '@bureau/interfaces/Location';
 
 async function run() {
   const hero = new Hero();

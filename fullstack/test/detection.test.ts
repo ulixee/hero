@@ -100,7 +100,7 @@ test('should not be denied for notifications but prompt for permissions', async 
   const tabId = await activeTab.tabId;
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   const permissions = await page.evaluate<any>(`(async () => {
     const permissionStatus = await navigator.permissions.query({
       name: 'notifications',
@@ -123,7 +123,7 @@ test('should not leave markers on permissions.query.toString', async () => {
   await hero.goto(`${koaServer.baseUrl}`);
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   const perms: any = await page.evaluate(`(() => {
     const permissions = window.navigator.permissions;
     return {
@@ -150,7 +150,7 @@ test('should not recurse the toString function', async () => {
   const tabId = await hero.activeTab.tabId;
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   const isHeadless = await page.evaluate(`(() => {
     let gotYou = 0;
     const spooky = /./;
@@ -171,7 +171,7 @@ test('should properly maintain stack traces in toString', async () => {
   const tabId = await hero.activeTab.tabId;
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   await page.evaluate(`(() => {
       window.hasProperStackTrace = apiFunction => {
         try {
@@ -207,7 +207,7 @@ test('should not leave stack trace markers when calling getJsValue', async () =>
   await hero.goto(koaServer.baseUrl);
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   await page.evaluate(`(() => {
 document.querySelector = (function (orig) {
   return function() {
@@ -271,7 +271,7 @@ test('should not have too much recursion in prototype', async () => {
   const tabId = await hero.activeTab.tabId;
   const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
-  const page = tab.puppetPage;
+  const page = tab.page;
   await hero.goto(`${koaServer.baseUrl}`);
   await hero.activeTab.waitForLoad(LocationStatus.AllContentLoaded);
 
@@ -380,7 +380,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
     page.on('console', console.log);
     const result: string = await page.evaluate(
       `(function ${ProxyDetections.checkInstanceof.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get);`,
@@ -395,7 +395,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
     page.on('console', console.log);
     const result: string = await page.evaluate(
       `(function ${ProxyDetections.checkInstanceof.toString()})(Permissions.prototype.query);`,
@@ -410,7 +410,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
 
     const result: string = await page.evaluate(
       `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query)`,
@@ -426,7 +426,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
 
     const result: string = await page.evaluate(
       `(function ${ProxyDetections.getChainCycleLie.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get)`,
@@ -441,7 +441,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
     const protoResult: string = await page.evaluate(
       `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query, '__proto__')`,
     );
@@ -455,7 +455,7 @@ describe('Proxy detections', () => {
     await hero.goto(`${koaServer.baseUrl}`);
     const sessionId = await hero.sessionId;
     const tab = Session.getTab({ tabId, sessionId });
-    const page = tab.puppetPage;
+    const page = tab.page;
 
     function getReflectSetProtoLie(apiFunction) {
       try {

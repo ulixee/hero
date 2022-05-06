@@ -1,14 +1,14 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import IScreenshotOptions from '@bureau/interfaces/IScreenshotOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
+import IFileChooserPrompt from '@bureau/interfaces/IFileChooserPrompt';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';

@@ -42,7 +42,7 @@ test('it should run function in browser and return response', async () => {
   await hero.close();
 });
 
-test('it should run function in browser and return incr', async () => {
+test('it can pass parameters and get results', async () => {
   koaServer.get('/test2', ctx => {
     ctx.body = `<body>
 <script>

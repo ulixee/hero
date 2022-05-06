@@ -1,6 +1,5 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import Log from '@ulixee/commons/lib/Logger';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { IFrameNavigationRecord } from '@ulixee/hero-core/models/FrameNavigationsTable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import DomChangesTable, {
@@ -20,11 +19,12 @@ import DomStateAssertions, { IFrameAssertions } from './DomStateAssertions';
 import XPathGenerator from './XPathGenerator';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
+import BrowserContext from 'secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
 export default class DomStateGenerator {
-  public browserContext: Promise<IPuppetContext>;
+  public browserContext: Promise<BrowserContext>;
   public sessionsById = new Map<string, IDomStateSession>();
   public sessionAssertions = new DomStateAssertions();
 

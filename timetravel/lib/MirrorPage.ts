@@ -1,7 +1,5 @@
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import IViewport from '@bureau/interfaces/IViewport';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import InjectedScripts, { CorePageInjectedScript } from '@ulixee/hero-core/lib/InjectedScripts';
@@ -14,14 +12,15 @@ import DomChangesTable, {
   IPaintEvent,
 } from '@ulixee/hero-core/models/DomChangesTable';
 import Log from '@ulixee/commons/lib/Logger';
-import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import * as fs from 'fs';
 import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import MirrorNetwork from './MirrorNetwork';
 import { Tab } from '@ulixee/hero-core';
-import { IPuppetFrame } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { IFrame } from '@bureau/interfaces/IFrame';
 import Queue from '@ulixee/commons/lib/Queue';
 import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
+import Page from 'secret-agent/lib/Page';
+import BrowserContext from 'secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
@@ -32,10 +31,10 @@ export default class MirrorPage extends TypedEventEmitter<{
   open: void;
   goto: { url: string; loaderId: string };
 }> {
-  public page: IPuppetPage;
+  public page: Page;
   public isReady: Promise<void>;
 
-  public get puppetPageId(): string {
+  public get pageId(): string {
     return this.page?.id;
   }
 
@@ -50,6 +49,10 @@ export default class MirrorPage extends TypedEventEmitter<{
   private subscribeToTab: Tab;
   private loadQueue = new Queue(null, 1);
 
+  private get useIsolatedContext(): boolean {
+    return this.page.installJsPathIntoIsolatedContext;
+  }
+
   constructor(
     public network: MirrorNetwork,
     domRecording: IDomRecording,
@@ -61,7 +64,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     this.onPageEvents = this.onPageEvents.bind(this);
   }
 
-  public async attachToPage(page: IPuppetPage, sessionId: string, setReady = true): Promise<void> {
+  public async attachToPage(page: Page, sessionId: string, setReady = true): Promise<void> {
     this.page = page;
     let readyResolvable: Resolvable<void>;
     if (setReady) {
@@ -91,13 +94,16 @@ export default class MirrorPage extends TypedEventEmitter<{
 
       if (page[installedScriptsSymbol]) {
         promises.push(
-          page.mainFrame.evaluate(`window.domReplayer.reset()`, false),
+          page.mainFrame.evaluate(`window.domReplayer.reset()`, this.useIsolatedContext),
         );
-
       } else {
         promises.push(
-          this.showChromeInteractions ? InjectedScripts.installInteractionScript(page, false) : null,
-          page.addNewDocumentScript(injectedScript, false).then(() => page.reload()),
+          this.showChromeInteractions
+            ? InjectedScripts.installInteractionScript(page, this.useIsolatedContext)
+            : null,
+          page
+            .addNewDocumentScript(injectedScript, this.useIsolatedContext)
+            .then(() => page.reload()),
         );
       }
       await Promise.all(promises);
@@ -107,10 +113,10 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async open(
-    context: IPuppetContext,
+    context: BrowserContext,
     sessionId: string,
     viewport?: IViewport,
-    onPage?: (page: IPuppetPage) => Promise<void>,
+    onPage?: (page: Page) => Promise<void>,
   ): Promise<void> {
     if (this.isReady) return await this.isReady;
 
@@ -118,7 +124,11 @@ export default class MirrorPage extends TypedEventEmitter<{
     const ready = new Resolvable<void>();
     this.isReady = ready.promise;
     try {
-      this.page = await context.newPage({ runPageScripts: false, enableDomStorageTracker: false });
+      this.page = await context.newPage({
+        runPageScripts: false,
+        enableDomStorageTracker: false,
+        installJsPathIntoDefaultContext: true,
+      });
       await this.attachToPage(this.page, sessionId, false);
 
       if (onPage) await onPage(this.page);
@@ -278,10 +288,10 @@ export default class MirrorPage extends TypedEventEmitter<{
   public async getNodeOuterHtml(
     paintIndex: number,
     nodeId: number,
-    frameDomNodeId?: number,
+    frameElementNodePointerId?: number,
   ): Promise<{ html: string; url: string }> {
     return await this.load(paintIndex, null, async () => {
-      const frame = await this.getFrameWithDomNodeId(frameDomNodeId);
+      const frame = await this.getFrameWithDomNodeId(frameElementNodePointerId);
       const url = frame.url;
       const html = await frame.evaluate<string>(
         `(() => {
@@ -289,24 +299,15 @@ export default class MirrorPage extends TypedEventEmitter<{
      if (node) return node.outerHTML;
      return null;
    })()`,
-        false,
+        this.useIsolatedContext,
         { retriesWaitingForLoad: 2 },
       );
       return { url, html };
     });
   }
 
-  public async getHtml(): Promise<string> {
-    return await this.evaluate(
-      `(() => {
-  let retVal = '';
-  if (document.doctype)
-    retVal = new XMLSerializer().serializeToString(document.doctype);
-  if (document.documentElement)
-    retVal += document.documentElement.outerHTML;
-  return retVal;
-})()`,
-    );
+  public async outerHTML(): Promise<string> {
+    return await this.page.mainFrame.outerHTML();
   }
 
   public getDomRecordingSince(sinceTimestamp: number): IDomRecording {
@@ -322,19 +323,15 @@ export default class MirrorPage extends TypedEventEmitter<{
     };
   }
 
-  private async getFrameWithDomNodeId(frameDomNodeId: number): Promise<IPuppetFrame> {
+  private async getFrameWithDomNodeId(frameDomNodeId: number): Promise<IFrame> {
     if (!frameDomNodeId) return this.page.mainFrame;
     for (const frame of this.page.frames) {
       // don't check main frame
       if (!frame.parentId) continue;
 
       try {
-        const nodeId = await frame.getFrameElementNodeId();
-        const frameNodeId = await frame.evaluateOnNode<number>(
-          nodeId,
-          'NodeTracker.watchNode(this)',
-        );
-        if (frameNodeId === frameDomNodeId) {
+        const frameNodePointerId = await frame.getFrameElementNodePointerId();
+        if (frameNodePointerId === frameDomNodeId) {
           return frame;
         }
       } catch (error) {
@@ -435,7 +432,9 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   private async evaluate<T>(expression: string): Promise<T> {
     await this.isReady;
-    return await this.page.mainFrame.evaluate(expression, false, { retriesWaitingForLoad: 2 });
+    return await this.page.mainFrame.evaluate(expression, this.useIsolatedContext, {
+      retriesWaitingForLoad: 2,
+    });
   }
 
   private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
@@ -538,7 +537,7 @@ export default class MirrorPage extends TypedEventEmitter<{
 
     window.loadPaintEvents(paintEvents);
 })();
-//# sourceURL=${injectedSourceUrl}`,
+//# sourceURL=hero/timetravel/MirrorPage.ts`,
     );
   }
 }

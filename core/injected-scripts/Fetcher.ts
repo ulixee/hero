@@ -1,23 +1,30 @@
-declare let ObjectAtPath: any;
+import INodePointer from '@bureau/interfaces/INodePointer';
 
 class Fetcher {
-  public static createRequest(input: string | number, init?: RequestInit) {
+  public static createRequest(input: string | number, init?: RequestInit): INodePointer {
     let requestOrUrl = input as string | Request;
     if (typeof input === 'number') {
       requestOrUrl = NodeTracker.getWatchedNodeWithId(input) as any;
     }
     const request = new Request(requestOrUrl, init);
-    return ObjectAtPath.createNodePointer(request);
+    const nodeId = NodeTracker.watchNode(request as any);
+    return {
+      id: nodeId,
+      type: 'Request',
+    };
   }
 
-  public static async fetch(input: string | number, init?: RequestInit) {
+  public static async fetch(input: string | number, init?: RequestInit): Promise<INodePointer> {
     let requestOrUrl = input as string | Request;
     if (typeof input === 'number') {
       requestOrUrl = NodeTracker.getWatchedNodeWithId(input) as any;
     }
 
     const response = await fetch(requestOrUrl, init);
-
-    return ObjectAtPath.createNodePointer(response);
+    const nodeId = NodeTracker.watchNode(response as any);
+    return {
+      id: nodeId,
+      type: response.constructor.name,
+    };
   }
 }

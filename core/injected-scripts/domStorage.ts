@@ -1,5 +1,5 @@
-import { IDomStorageForOrigin, IStorageEntry } from '@ulixee/hero-interfaces/IDomStorage';
-import { IIndexedDB } from '@ulixee/hero-interfaces/IIndexedDB';
+import type { IDomStorageForOrigin } from '@bureau/interfaces/IDomStorage';
+import type { IIndexedDB } from '@bureau/interfaces/IIndexedDB';
 
 function dumpStorage(storage: Storage) {
   const store: [string, string][] = [];

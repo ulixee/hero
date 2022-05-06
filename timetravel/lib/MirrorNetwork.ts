@@ -1,4 +1,3 @@
-import { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
@@ -6,6 +5,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import { Protocol } from '@bureau/interfaces/IDevtoolsSession';
 import Fetch = Protocol.Fetch;
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 

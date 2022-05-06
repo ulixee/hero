@@ -111,7 +111,7 @@ test('bubbles up handler errors to the line of code that triggers the handlers',
 
   expect(spy).not.toHaveBeenCalled();
   // will bubble up the interaction error here
-  await expect(hero.querySelector('.ready').textContent).rejects.toThrow('element does not exist');
+  await expect(hero.querySelector('.ready').textContent).rejects.toThrow('Element does not exist');
   expect(spy).toHaveBeenCalledTimes(1);
 });
 

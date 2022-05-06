@@ -1,10 +1,9 @@
 import * as Fs from 'fs';
 import { Helpers } from '@ulixee/hero-testing';
-import { GlobalPool } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
-import { defaultBrowserEngine } from '@ulixee/default-browser-emulator';
+import Viewports from '@bureau/default-browser-emulator/lib/Viewports';
+import { defaultBrowserEngine } from '@bureau/default-browser-emulator';
 import Hero from '../index';
 
 const chromeVersion = defaultBrowserEngine.version.major;
@@ -12,7 +11,6 @@ const chromeVersion = defaultBrowserEngine.version.major;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentClientCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);

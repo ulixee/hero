@@ -1,6 +1,5 @@
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { IPage } from '@bureau/interfaces/IPage';
 import Log from '@ulixee/commons/lib/Logger';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ConnectionToCoreApi from '@ulixee/hero-core/connections/ConnectionToCoreApi';
@@ -12,6 +11,7 @@ import MirrorNetwork from '../lib/MirrorNetwork';
 import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import BrowserContext from 'secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
@@ -65,7 +65,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   private constructor(
     readonly sessionId: string,
     readonly connection: ConnectionToCoreApi,
-    readonly loadIntoContext: { browserContext?: IPuppetContext; plugins?: CorePlugins },
+    readonly loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
     private timelineRange?: [startTime: number, endTime?: number],
     readonly debugLogging = false,
   ) {
@@ -230,17 +230,10 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     await tab.open(this.loadIntoContext.browserContext, this.activePlugins.bind(this));
   }
 
-  private async activePlugins(page: IPuppetPage): Promise<void> {
+  private async activePlugins(page: IPage): Promise<void> {
     if (!this.loadIntoContext.plugins) return;
     await Promise.all(
-      this.loadIntoContext.plugins.corePlugins
-        .filter(x => x.onNewPuppetPage)
-        .map(x =>
-          x.onNewPuppetPage(page, {
-            id: this.sessionId,
-            options: this.sessionOptions,
-          }),
-        ),
+      this.loadIntoContext.plugins.corePlugins.filter(x => x.onNewPage).map(x => x.onNewPage(page)),
     );
   }
 
@@ -315,7 +308,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
 
   public static create(
     heroSessionId: string,
-    loadIntoContext: { browserContext?: IPuppetContext; plugins?: CorePlugins },
+    loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
     timelineRange?: [startTime: number, endTime: number],
     connectionToCoreApi?: ConnectionToCoreApi,
   ): TimetravelPlayer {

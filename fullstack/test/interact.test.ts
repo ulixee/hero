@@ -1,8 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { KeyboardKey } from '@bureau/interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
+import HumanEmulator from '@bureau/default-human-emulator';
 import Hero, { Core, LocationStatus } from '../index';
 import Session from '@ulixee/hero-core/lib/Session';
 
@@ -271,7 +271,7 @@ describe('basic Interact tests', () => {
     const sessionId = await hero.sessionId;
     const tabId = await hero.activeTab.tabId;
     const tab = Session.getTab({ tabId, sessionId });
-    const interactor = tab.mainFrameEnvironment.interactor;
+    const interactor = tab.mainFrameEnvironment.frame.interactor;
     const reloadSpy = jest.spyOn(interactor, 'reloadJsPath');
     await hero.goto(`${koaServer.baseUrl}/replace-list`);
     await hero.activeTab.waitForLoad(LocationStatus.PaintingStable);

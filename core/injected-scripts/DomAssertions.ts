@@ -1,4 +1,4 @@
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import type { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import IDomStateAssertionBatch, {
   IAssertionAndResult,
 } from '@ulixee/hero-interfaces/IDomStateAssertionBatch';

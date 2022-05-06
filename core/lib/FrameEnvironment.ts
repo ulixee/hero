@@ -1,58 +1,52 @@
 import Log from '@ulixee/commons/lib/Logger';
-import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger, LoadStatus } from '@bureau/interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ICookie } from '@ulixee/hero-interfaces/ICookie';
-import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
+import { ICookie } from '@bureau/interfaces/ICookie';
+import { IInteractionGroups, IInteractionStep } from '@bureau/interfaces/IInteractions';
 import { URL } from 'url';
 import * as Fs from 'fs';
-import Timer from '@ulixee/commons/lib/Timer';
-import { createPromise } from '@ulixee/commons/lib/utils';
-import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@bureau/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IPuppetFrame, IPuppetFrameEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { IFrameEvents } from '@bureau/interfaces/IFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as Os from 'os';
-import IPoint from '@ulixee/hero-interfaces/IPoint';
-import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
+import INavigation from '@bureau/interfaces/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
 import Tab, { ITabEventParams } from './Tab';
-import Interactor from './Interactor';
 import CommandRecorder from './CommandRecorder';
-import FrameNavigations from './FrameNavigations';
-import { Serializable } from '../interfaces/ISerializable';
-import InjectedScriptError from './InjectedScriptError';
-import { JsPath } from './JsPath';
+import { IFrameNavigationEvents } from '@bureau/interfaces/IFrameNavigations';
+import { ISerializable } from 'secret-agent/lib/JsPath';
+import Frame from 'secret-agent/lib/Frame';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import { IInteractHooks } from '@bureau/interfaces/IHooks';
+import FrameNavigations from 'secret-agent/lib/FrameNavigations';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 
 const { log } = Log(module);
 
 export default class FrameEnvironment
   extends TypedEventEmitter<{ paint: void }>
-  implements ICommandableTarget, IRemoteEventListener
+  implements ICommandableTarget, IRemoteEventListener, IInteractHooks
 {
   public get session(): Session {
     return this.tab.session;
   }
 
   public get devtoolsFrameId(): string {
-    return this.puppetFrame.id;
+    return this.frame.id;
   }
 
   public get parentId(): number {
@@ -60,53 +54,52 @@ export default class FrameEnvironment
   }
 
   public get parentFrame(): FrameEnvironment | null {
-    if (this.puppetFrame.parentId) {
-      return this.tab.frameEnvironmentsByPuppetId.get(this.puppetFrame.parentId);
+    if (this.frame.parentId) {
+      return this.tab.frameEnvironmentsByDevtoolsId.get(this.frame.parentId);
     }
     return null;
   }
 
   public get isAttached(): boolean {
-    return this.puppetFrame.isAttached;
+    return this.frame.isAttached;
   }
 
   public get securityOrigin(): string {
-    return this.puppetFrame.securityOrigin;
+    return this.frame.securityOrigin;
   }
 
   public get childFrameEnvironments(): FrameEnvironment[] {
     return [...this.tab.frameEnvironmentsById.values()].filter(
-      x => x.puppetFrame.parentId === this.devtoolsFrameId && this.isAttached,
+      x => x.frame.parentId === this.devtoolsFrameId && this.isAttached,
     );
   }
 
   public get isMainFrame(): boolean {
-    return !this.puppetFrame.parentId;
+    return !this.frame.parentId;
   }
 
-  public readonly navigationsObserver: TabNavigationObserver;
-  public readonly navigations: FrameNavigations;
+  public get navigations(): FrameNavigations {
+    return this.frame.navigations;
+  }
 
-  public readonly id: number;
+  public get id(): number {
+    return this.frame.frameId;
+  }
+
   public readonly tab: Tab;
-  public readonly jsPath: JsPath;
   public readonly createdTime: Date;
   public readonly createdAtCommandId: number;
-  public puppetFrame: IPuppetFrame;
+  public frame: Frame;
   public isReady: Promise<Error | void>;
   public domNodeId: number;
-  public readonly interactor: Interactor;
 
   protected readonly logger: IBoundLog;
 
   private events = new EventSubscriber();
 
-  private puppetNodeIdsByHeroNodeId: Record<number, string> = {};
-  private prefetchedJsPaths: IJsPathResult[];
   private isClosing = false;
-  private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
-  private readonly cleanPaths: string[] = [];
+  private readonly filePathsToClean: string[] = [];
   private lastDomChangeDocumentNavigationId: number;
   private lastDomChangeTimestamp = 0;
   private isTrackingMouse = false;
@@ -117,27 +110,20 @@ export default class FrameEnvironment
     return this.navigations.currentUrl;
   }
 
-  constructor(tab: Tab, frame: IPuppetFrame) {
+  constructor(tab: Tab, frame: Frame) {
     super();
-    this.puppetFrame = frame;
+    this.frame = frame;
     this.tab = tab;
     this.createdTime = new Date();
-    this.id = this.session.db.frames.nextId;
     this.logger = log.createChild(module, {
       tabId: tab.id,
       sessionId: tab.session.id,
       frameId: this.id,
     });
-    this.jsPath = new JsPath(this);
     this.createdAtCommandId = this.session.commands.lastId;
-    this.navigations = new FrameNavigations(
-      this.tab.id,
-      this.id,
-      this.tab.sessionId,
-      tab.session.db.frameNavigations,
-    );
-    this.navigationsObserver = new TabNavigationObserver(this.navigations);
-    this.interactor = new Interactor(this);
+    if (this.session.options.showChromeInteractions) {
+      frame.hook(this);
+    }
 
     // give tab time to setup
     process.nextTick(() => this.listen());
@@ -178,11 +164,9 @@ export default class FrameEnvironment
     const parentLogId = this.logger.stats('FrameEnvironment.Closing');
 
     try {
-      const cancelMessage = 'Terminated command because session closing';
-      Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
-      this.navigationsObserver.cancelWaiting(cancelMessage);
+      this.frame.close();
       this.logger.stats('FrameEnvironment.Closed', { parentLogId });
-      for (const path of this.cleanPaths) {
+      for (const path of this.filePathsToClean) {
         Fs.promises.unlink(path).catch(() => null);
       }
       this.events.close();
@@ -199,48 +183,46 @@ export default class FrameEnvironment
     hideMouse = false,
     hideHighlightedNodes = false,
   ): void {
-    if (!this.session.options.showChromeInteractions) return;
     if (this.isTrackingMouse === followMouseMoves) return;
     this.isTrackingMouse = followMouseMoves;
-    this.puppetFrame
+    this.frame
       .evaluate(
         `window.setInteractionDisplay(${followMouseMoves}, ${hideMouse}, ${hideHighlightedNodes})`,
       )
       .catch(() => null);
   }
 
-  /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
+  public afterInteractionGroups(): void {
+    this.tab.mainFrameEnvironment.setInteractionDisplay(false);
+  }
 
-  public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
-    // only install interactor on the main frame
-    await this.interactor.initialize(this.isMainFrame);
-    const timeoutMs = 120e3;
-    const interactionResolvable = createPromise<void>(timeoutMs);
-    await this.waitForNavigationLoader(timeoutMs);
-    this.waitTimeouts.push({
-      timeout: interactionResolvable.timeout,
-      reject: interactionResolvable.reject,
-    });
+  public async beforeEachInteractionStep(
+    interaction: IInteractionStep,
+    isMouseCommand: boolean,
+  ): Promise<void> {
+    if (this.tab.isClosing) {
+      throw new CanceledPromiseError('Canceling interaction - tab closing');
+    }
 
-    const cancelForNavigation = new CanceledPromiseError('Frame navigated');
-    const cancelOnNavigate = (): void => {
-      interactionResolvable.reject(cancelForNavigation);
-    };
-    try {
-      this.interactor.play(interactionGroups, interactionResolvable);
-      this.events.once(this.puppetFrame, 'frame-navigated', cancelOnNavigate);
-      await interactionResolvable.promise;
-    } catch (error) {
-      if (error === cancelForNavigation) return;
-      if (error instanceof CanceledPromiseError && this.isClosing) return;
-      throw error;
-    } finally {
-      this.puppetFrame.off('frame-navigated', cancelOnNavigate);
+    await this.tab.session.commands.waitForCommandLock();
+
+    if (isMouseCommand) {
+      this.tab.mainFrameEnvironment.setInteractionDisplay(true);
     }
   }
 
+  /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
+    await this.frame.interact(...interactionGroups);
+  }
+
   public async getJsValue<T>(expression: string): Promise<T> {
-    return await this.puppetFrame.evaluate<T>(expression, false);
+    return await this.frame.evaluate<T>(expression, false);
+  }
+
+  public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
+    return await this.frame.jsPath.exec(jsPath);
   }
 
   public meta(): IFrameMeta {
@@ -253,7 +235,7 @@ export default class FrameEnvironment
     timestamp: number,
     waitForElement = false,
   ): Promise<ICollectedElement[]> {
-    const { nodePointer } = await this.jsPath.getNodePointer(jsPath);
+    const { nodePointer } = await this.frame.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
     const navigation = this.navigations.lastHttpNavigationRequest;
     const commandId = this.session.commands.lastId;
@@ -264,7 +246,7 @@ export default class FrameEnvironment
       for (const item of nodePointer.iterableItems as INodePointer[]) {
         elements.push({
           name,
-          nodePath: this.jsPath.getNodePath(item),
+          nodePath: this.frame.jsPath.getSourceJsPath(item),
           documentUrl: this.url,
           nodePointerId: item.id,
           frameId: this.id,
@@ -281,7 +263,7 @@ export default class FrameEnvironment
       elements.push({
         name,
         nodePointerId: nodePointer.id,
-        nodePath: this.jsPath.getNodePath(nodePointer),
+        nodePath: this.frame.jsPath.getSourceJsPath(nodePointer),
         documentUrl: this.url,
         frameId: this.id,
         tabId: this.tab.id,
@@ -304,21 +286,13 @@ export default class FrameEnvironment
     return waitForElement ? await Promise.all(promises) : elements;
   }
 
-  public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
-    // if nothing loaded yet, return immediately
-    if (!this.navigations.top) return null;
-    await this.waitForNavigationLoader();
-    const containerOffset = await this.getContainerOffset();
-    return await this.jsPath.exec(jsPath, containerOffset);
-  }
-
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
     if (!this.navigations.top && !this.url) {
       throw new Error(
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
       );
     }
-    await this.waitForNavigationLoader();
+    await this.frame.waitForLoad();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.createRequest`,
       input,
@@ -333,7 +307,7 @@ export default class FrameEnvironment
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
       );
     }
-    await this.waitForNavigationLoader();
+    await this.frame.waitForLoad();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.fetch`,
       input,
@@ -342,12 +316,8 @@ export default class FrameEnvironment
     );
   }
 
-  public getViewportSize(): Promise<{ innerWidth: number; innerHeight: number }> {
-    return this.jsPath.getWindowOffset();
-  }
-
   public getUrl(): Promise<string> {
-    return Promise.resolve(this.navigations.currentUrl || this.puppetFrame.url);
+    return Promise.resolve(this.navigations.currentUrl || this.frame.url);
   }
 
   public isPaintingStable(): Promise<boolean> {
@@ -363,9 +333,9 @@ export default class FrameEnvironment
   }
 
   public async getCookies(): Promise<ICookie[]> {
-    await this.waitForNavigationLoader();
+    await this.frame.waitForLoad();
     return await this.session.browserContext.getCookies(
-      new URL(this.puppetFrame.securityOrigin ?? this.puppetFrame.url),
+      new URL(this.frame.securityOrigin ?? this.frame.url),
     );
   }
 
@@ -374,7 +344,7 @@ export default class FrameEnvironment
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    if (!this.navigations.top && this.puppetFrame.url === 'about:blank') {
+    if (!this.navigations.top && this.frame.url === 'about:blank') {
       throw new Error(`Chrome won't allow you to set cookies on a blank tab.
 
 Hero supports two options to set cookies:
@@ -383,7 +353,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       `);
     }
 
-    await this.waitForNavigationLoader();
+    await this.frame.waitForLoad();
     const url = this.navigations.currentUrl;
     await this.session.browserContext.addCookies([
       {
@@ -402,24 +372,22 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         name,
         value: '',
         expires: 0,
-        url: this.puppetFrame.url,
+        url: this.frame.url,
       },
     ]);
     return true;
   }
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
-    await this.waitForNavigationLoader();
-    const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]], null);
-    if (!nodeIdResult.value) return null;
-
-    const domId = nodeIdResult.value;
+    await this.frame.waitForLoad();
+    const nodeId = await this.frame.jsPath.getNodePointerId(jsPath);
+    if (!nodeId) return null;
 
     for (const frame of this.childFrameEnvironments) {
       if (!frame.isAttached) continue;
 
       await frame.isReady;
-      if (frame.domNodeId === domId) {
+      if (frame.domNodeId === nodeId) {
         return frame.toJSON();
       }
     }
@@ -458,44 +426,35 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public async runPluginCommand(toPluginId: string, args: any[]): Promise<any> {
     const commandMeta = {
-      puppetPage: this.tab.puppetPage,
-      puppetFrame: this.puppetFrame,
+      page: this.tab.page,
+      frame: this.frame,
     };
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }
 
-  public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<INavigation> {
+  public async waitForLoad(
+    status: ILoadStatus,
+    options: IWaitForOptions = {},
+  ): Promise<INavigation> {
     await this.isReady;
-    return this.navigationsObserver.waitForLoad(status, options);
+    return this.frame.waitForLoad({ loadStatus: status, ...options });
   }
 
   public async waitForLocation(
     trigger: ILocationTrigger,
     options?: IWaitForOptions,
   ): Promise<IResourceMeta> {
-    const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
-    const navigation = await timer.waitForPromise(
-      this.navigationsObserver.waitForLocation(trigger, options),
-      `Timeout waiting for location ${trigger}`,
-    );
-
-    const resourceId = await timer.waitForPromise(
-      this.navigationsObserver.waitForNavigationResourceId(navigation),
-      `Timeout waiting for location ${trigger}`,
-    );
+    const location = await this.frame.waitForLocation(trigger, options);
+    const resourceId = location.resourceId ?? (await location.resourceIdResolvable.promise);
     return this.session.resources.get(resourceId);
-  }
-
-  public async waitForNavigationLoader(timeoutMs?: number): Promise<void> {
-    await this.navigationsObserver.waitForLoad(LoadStatus.JavascriptReady, { timeoutMs });
   }
 
   public async flushPageEventsRecorder(): Promise<boolean> {
     try {
       // don't wait for env to be available
-      if (!this.puppetFrame.canEvaluate(true)) return false;
+      if (!this.frame.canEvaluate(true)) return false;
 
-      const results = await this.puppetFrame.evaluate<PageRecorderResultSet>(
+      const results = await this.frame.evaluate<PageRecorderResultSet>(
         `window.flushPageRecorder()`,
         true,
       );
@@ -525,14 +484,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       loadEvents,
     });
 
-    for (const [event, url, timestamp] of loadEvents) {
-      const incomingStatus = domStateToLoadStatus[event];
-      // only record the content paint
-      if (incomingStatus === ContentPaint) {
-        this.navigations.onLoadStatusChanged(incomingStatus, url, null, timestamp);
-      }
-    }
-
     if (domChanges.length) {
       this.emit('paint');
     }
@@ -556,17 +507,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
       if (action === DomActionType.newDocument || action === DomActionType.location) {
         const url = domChange[1].textContent;
-        documentNavigation = this.navigations.findHistory(x => x.finalUrl === url);
+        documentNavigation = this.navigations.findMostRecentHistory(x => x.finalUrl === url);
 
         if (documentNavigation) {
-          this.navigations.setPageReady(documentNavigation, timestamp);
           if (action === DomActionType.location && documentNavigation.initiatedTime < timestamp) {
-            documentNavigation.initiatedTime = timestamp;
-            // if we already have dom content loaded, update to the new timestamp
-            if (documentNavigation.statusChanges.has('DomContentLoaded')) {
-              documentNavigation.statusChanges.set('DomContentLoaded', timestamp);
-              documentNavigation.statusChanges.set('AllContentLoaded', timestamp);
-            }
+            this.frame.navigations.adjustInPageLocationChangeTime(documentNavigation, timestamp);
           }
           if (
             action === DomActionType.newDocument &&
@@ -620,7 +565,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return {
       id: this.id,
       parentFrameId: this.parentId,
-      name: this.puppetFrame.name,
+      name: this.frame.name,
       tabId: this.tab.id,
       puppetId: this.devtoolsFrameId,
       url: this.navigations.currentUrl,
@@ -630,7 +575,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     } as IFrameMeta;
   }
 
-  public runIsolatedFn<T>(fnName: string, ...args: Serializable[]): Promise<T> {
+  public runIsolatedFn<T>(fnName: string, ...args: ISerializable[]): Promise<T> {
     const callFn = `${fnName}(${args
       .map(x => {
         if (!x) return 'undefined';
@@ -640,46 +585,19 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.runFn<T>(fnName, callFn);
   }
 
-  public async getDomNodeId(puppetNodeId: string): Promise<number> {
-    const nodeId = await this.puppetFrame.evaluateOnNode<number>(
-      puppetNodeId,
-      'NodeTracker.watchNode(this)',
-    );
-    this.puppetNodeIdsByHeroNodeId[nodeId] = puppetNodeId;
-    return nodeId;
-  }
-
-  public async getContainerOffset(): Promise<IPoint> {
-    if (!this.parentId) return { x: 0, y: 0 };
-    const parentOffset = await this.parentFrame.getContainerOffset();
-    const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
-    const thisOffset = await this.puppetFrame.evaluateOnNode<IPoint>(
-      frameElementNodeId,
-      `(() => {
-      const rect = this.getBoundingClientRect();
-      return { x:rect.x, y:rect.y };
- })()`,
-    );
-    return {
-      x: thisOffset.x + parentOffset.x,
-      y: thisOffset.y + parentOffset.y,
-    };
-  }
-
   public async setFileInputFiles(
     jsPath: IJsPath,
     files: { name: string; data: Buffer }[],
   ): Promise<void> {
-    const puppetNodeId = this.puppetNodeIdsByHeroNodeId[jsPath[0] as number];
-    const tmpDir = await Fs.promises.mkdtemp(`${Os.tmpdir()}/sa-upload`);
+    const tmpDir = await Fs.promises.mkdtemp(`${Os.tmpdir()}/hero-upload`);
     const filepaths: string[] = [];
     for (const file of files) {
       const fileName = `${tmpDir}/${file.name}`;
       filepaths.push(fileName);
       await Fs.promises.writeFile(fileName, file.data);
     }
-    await this.puppetFrame.setFileInputFiles(puppetNodeId, filepaths);
-    this.cleanPaths.push(tmpDir);
+    await this.frame.setFileInputFiles(jsPath[0] as number, filepaths);
+    this.filePathsToClean.push(tmpDir);
   }
 
   public addRemoteEventListener(
@@ -705,11 +623,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
-    const result = await this.puppetFrame.evaluate<T>(serializedFn, true);
+    const result = await this.frame.evaluate<T>(serializedFn, true);
 
     if ((result as any)?.error) {
       this.logger.error(fnName, { result });
-      throw new InjectedScriptError((result as any).error as string);
+      throw new Error((result as any).error as string);
     } else {
       return result as T;
     }
@@ -718,9 +636,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   protected async install(): Promise<void> {
     try {
       if (!this.isMainFrame) {
-        const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
-        this.domNodeId = await this.getDomNodeId(frameElementNodeId);
+        this.domNodeId = await this.frame.getFrameElementNodePointerId();
       }
     } catch (error) {
       // This can happen if the node goes away. Still want to record frame
@@ -733,60 +650,21 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   private listen(): void {
-    const frame = this.puppetFrame;
+    const frame = this.frame;
     this.events.on(frame, 'frame-navigated', this.onFrameNavigated.bind(this), true);
-    this.events.on(
-      frame,
-      'frame-requested-navigation',
-      this.onFrameRequestedNavigation.bind(this),
-      true,
-    );
-    this.events.on(frame, 'frame-lifecycle', this.onFrameLifecycle.bind(this), true);
+    this.events.on(frame.navigations, 'change', this.recordNavigationChange.bind(this));
   }
 
-  private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {
-    const lowerEventName = event.name.toLowerCase();
-    let status: LoadStatus.AllContentLoaded | LoadStatus.DomContentLoaded;
-
-    if (lowerEventName === 'load') status = LoadStatus.AllContentLoaded;
-    else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
-
-    if (status) {
-      this.navigations.onLoadStatusChanged(
-        status,
-        event.loader.url ?? event.frame.url,
-        event.loader.id,
-        event.timestamp,
-      );
-    }
-  }
-
-  private onFrameNavigated(event: IPuppetFrameEvents['frame-navigated']): void {
-    const { navigatedInDocument, frame } = event;
-    if (navigatedInDocument) {
-      this.logger.info('Page.navigatedWithinDocument', event);
-      // set load state back to all loaded
-      this.navigations.onNavigationRequested(
-        'inPage',
-        frame.url,
-        this.tab.lastCommandId,
-        event.loaderId,
-      );
-    } else {
+  private onFrameNavigated(event: IFrameEvents['frame-navigated']): void {
+    const { navigatedInDocument } = event;
+    if (!navigatedInDocument) {
       this.installedDomAssertions.clear();
     }
-    this.puppetFrame = frame;
     this.record();
   }
 
-  // client-side frame navigations (form posts/gets, redirects/ page reloads)
-  private onFrameRequestedNavigation(
-    event: IPuppetFrameEvents['frame-requested-navigation'],
-  ): void {
-    this.logger.info('Page.frameRequestedNavigation', event);
-    // disposition options: currentTab, newTab, newWindow, download
-    const { url, reason } = event;
-    this.navigations.updateNavigationReason(url, reason);
+  private recordNavigationChange(event: IFrameNavigationEvents['change']): void {
+    this.session.db.frameNavigations.insert(event.navigation);
   }
 
   private record(): void {
@@ -800,9 +678,3 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     });
   }
 }
-
-const domStateToLoadStatus = {
-  LargestContentfulPaint: ContentPaint,
-  DOMContentLoaded: LoadStatus.DomContentLoaded,
-  load: LoadStatus.AllContentLoaded,
-};

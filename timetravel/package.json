@@ -4,8 +4,10 @@
   "description": "The interface to playback and examine previous Hero sessions",
   "dependencies": {
     "@ulixee/commons": "1.5.11",
+    "secret-agent": "2.0.0-alpha.1",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-core": "1.5.4",
+    "@bureau/interfaces": "2.0.0-alpha.1",
     "nanoid": "^3.1.30"
   },
   "devDependencies": {

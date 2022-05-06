@@ -14,8 +14,10 @@
     "@ulixee/execute-js-plugin": "1.5.4"
   },
   "devDependencies": {
-    "@ulixee/default-browser-emulator": "1.5.4",
-    "@ulixee/hero-mitm": "1.5.4",
+    "@bureau/default-browser-emulator": "2.0.0-alpha.1",
+    "@bureau/default-human-emulator": "2.0.0-alpha.1",
+    "@bureau/interfaces": "2.0.0-alpha.1",
+    "@secret-agent/mitm": "2.0.0-alpha.1",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/hero-timetravel": "1.5.4",
     "@ulixee/hero-testing": "1.5.4",

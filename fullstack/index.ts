@@ -28,15 +28,15 @@ import {
   IHeroCreateOptions,
   IConnectionToCoreOptions,
 } from '@ulixee/hero';
-import Core, { GlobalPool } from '@ulixee/hero-core';
+import Core from '@ulixee/hero-core';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import Hero from './lib/Hero';
 
 ShutdownHandler.exitOnSignal = false;
 
 if (process.env.NODE_ENV !== 'test') {
-  GlobalPool.events.on('browser-has-no-open-windows', ({ puppet }) => puppet.close());
-  GlobalPool.events.on('all-browsers-closed', () => Core.shutdown());
+  Core.pool.on('browser-has-no-open-windows', ({ browser }) => browser.close());
+  Core.pool.on('all-browsers-closed', () => Core.shutdown());
 }
 
 export {

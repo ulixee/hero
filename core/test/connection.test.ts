@@ -1,10 +1,10 @@
 import { Helpers } from '@ulixee/hero-testing';
 import Hero, { Core } from '@ulixee/hero-fullstack';
 import { Log } from '@ulixee/commons/lib/Logger';
-import BrowserEmulator from '@ulixee/default-browser-emulator';
+import BrowserEmulator from '@bureau/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
 import ChromeApp from '@ulixee/chrome-app/index';
-import BrowserEngine from '@ulixee/hero-plugin-utils/lib/BrowserEngine';
+import BrowserEngine from '@bureau/default-browser-emulator/lib/BrowserEngine';
 
 const validate = jest.spyOn(BrowserEngine.prototype, 'verifyLaunchable');
 const logError = jest.spyOn(Log.prototype, 'error');
@@ -16,12 +16,12 @@ describe('basic connection tests', () => {
   it('should throw an error informing how to install dependencies', async () => {
     class CustomEmulator extends BrowserEmulator {
       public static id = 'emulate-test';
-      public static selectBrowserMeta() {
-        return super.selectBrowserMeta();
+      public onNewBrowser() {
+        // don't change launch args so it doesn't reuse a previous one
       }
 
-      public static onBrowserWillLaunch() {
-        // don't change launch args so it doesn't reuse a previous one
+      public static selectBrowserMeta() {
+        return super.selectBrowserMeta();
       }
     }
     Core.use(CustomEmulator as any);
@@ -48,7 +48,7 @@ describe('basic connection tests', () => {
     );
     expect(logError).toHaveBeenCalledTimes(1);
     const error = String((logError.mock.calls[0][1] as any).error);
-    expect(error).toMatch('PuppetLaunchError');
+    expect(error).toMatch('BrowserLaunchError');
     expect(error).toMatch('You can resolve this by running');
     expect(validate).toHaveBeenCalledTimes(1);
   });

@@ -11,9 +11,6 @@
     },
     {
       "path": "timetravel/injected-scripts/tsconfig.dist.json"
-    },
-    {
-      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json"],
@@ -29,8 +26,6 @@
     "build-dist",
     "examples",
     "core/injected-scripts",
-    "timetravel/injected-scripts",
-    "plugins/default-browser-emulator/injected-scripts",
-    "plugins/default-browser-emulator/data"
+    "timetravel/injected-scripts"
   ]
 }

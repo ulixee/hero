@@ -1,7 +1,7 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IDomStorage, { IDomStorageForOrigin } from '@ulixee/hero-interfaces/IDomStorage';
+import IDomStorage, { IDomStorageForOrigin } from '@bureau/interfaces/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { IPage } from '@bureau/interfaces/IPage';
 import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
@@ -14,7 +14,7 @@ export default class UserProfile {
 
     const exportedStorage: IDomStorage = { ...(session.options.userProfile?.storage ?? {}) };
     for (const tab of session.tabsById.values()) {
-      const page = tab.puppetPage;
+      const page = tab.page;
 
       for (const {
         origin,
@@ -71,7 +71,7 @@ export default class UserProfile {
     return this;
   }
 
-  public static async installStorage(session: Session, page: IPuppetPage): Promise<void> {
+  public static async installStorage(session: Session, page: IPage): Promise<void> {
     const { userProfile } = session;
     const domStorage: IDomStorage = {};
     const origins: string[] = [];

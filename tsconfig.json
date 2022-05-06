@@ -26,9 +26,6 @@
     },
     {
       "path": "timetravel/injected-scripts/tsconfig.json"
-    },
-    {
-      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
@@ -40,11 +37,10 @@
     "**/build",
     "build",
     "build-dist",
+    "secret-agent",
     "core/injected-scripts",
     "timetravel/injected-scripts",
     "examples/*.js",
-    "plugins/default-browser-emulator/injected-scripts",
-    "plugins/default-browser-emulator/data",
     "**/*.d.ts"
   ]
 }

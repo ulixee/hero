@@ -1,4 +1,4 @@
-import IResourceMeta from './IResourceMeta';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 import IWebsocketMessage from './IWebsocketMessage';
 
 export default interface ICollectedResource {

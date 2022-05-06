@@ -16,7 +16,7 @@ export default interface IClientPlugin {
 
 export interface IClientPluginClass {
   id: string;
-  type: PluginTypes.ClientPlugin;
+  type: typeof PluginTypes.ClientPlugin;
   coreDependencyIds?: string[];
   new (): IClientPlugin;
 }

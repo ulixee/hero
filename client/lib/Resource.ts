@@ -1,6 +1,6 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceType from '@bureau/interfaces/IResourceType';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
@@ -30,8 +30,13 @@ const propertyKeys: (keyof Resource)[] = [
 export default class Resource {
   readonly #coreTabPromise: Promise<CoreTab>;
   readonly #resourceMeta: IResourceMeta;
-  readonly request: ResourceRequest;
-  readonly response: ResourceResponse;
+  public readonly id: number;
+  public readonly url: string;
+  public readonly type: IResourceType;
+  public readonly documentUrl: string;
+  public readonly isRedirect?: boolean;
+  public readonly request: ResourceRequest;
+  public readonly response: ResourceResponse;
 
   get [InternalPropertiesSymbol](): {
     coreTabPromise: Promise<CoreTab>;
@@ -46,24 +51,12 @@ export default class Resource {
   constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
     this.#coreTabPromise = coreTabPromise;
     this.#resourceMeta = resourceMeta;
+    this.url = resourceMeta.url;
+    this.documentUrl = resourceMeta.documentUrl;
+    this.type = resourceMeta.type;
+    this.isRedirect = resourceMeta.isRedirect ?? false;
     this.request = createResourceRequest(coreTabPromise, resourceMeta);
     this.response = createResourceResponse(coreTabPromise, resourceMeta);
-  }
-
-  public get url(): string {
-    return this.#resourceMeta.url;
-  }
-
-  public get documentUrl(): string {
-    return this.#resourceMeta.documentUrl;
-  }
-
-  public get type(): IResourceType {
-    return this.#resourceMeta.type;
-  }
-
-  public get isRedirect(): boolean {
-    return this.#resourceMeta.isRedirect ?? false;
   }
 
   public get buffer(): Promise<Buffer> {

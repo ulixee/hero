@@ -1,11 +1,7 @@
-import ICorePlugin, {
-  IBrowserEmulator,
-  IBrowserEmulatorClass,
-  ICorePluginClass,
-  IHumanEmulator,
-  IHumanEmulatorClass,
-} from './ICorePlugin';
+import ICorePlugin, { ICorePluginClass } from './ICorePlugin';
 import IClientPlugin, { IClientPluginClass } from './IClientPlugin';
+import { IBrowserEmulator, IBrowserEmulatorClass } from '@bureau/interfaces/IBrowserEmulator';
+import { IHumanEmulator, IHumanEmulatorClass } from '@bureau/interfaces/IHumanEmulator';
 
 type IPlugin = IClientPlugin | ICorePlugin | IBrowserEmulator | IHumanEmulator;
 export default IPlugin;

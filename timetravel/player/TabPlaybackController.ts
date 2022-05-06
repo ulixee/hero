@@ -1,10 +1,10 @@
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import MirrorPage from '../lib/MirrorPage';
 import MirrorNetwork from '../lib/MirrorNetwork';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import BrowserContext from 'secret-agent/lib/BrowserContext';
+import Page from 'secret-agent/lib/Page';
 
 export default class TabPlaybackController {
   public get id(): number {
@@ -52,7 +52,7 @@ export default class TabPlaybackController {
   }
 
   public get isOpen(): boolean {
-    return !!this.mirrorPage?.puppetPageId;
+    return !!this.mirrorPage?.pageId;
   }
 
   public get focusedPaintIndexes(): [start: number, end: number] {
@@ -97,12 +97,12 @@ export default class TabPlaybackController {
   }
 
   public isPage(id: string): boolean {
-    return this.mirrorPage?.puppetPageId === id;
+    return this.mirrorPage?.pageId === id;
   }
 
   public async open(
-    browserContext: IPuppetContext,
-    onPage?: (page: IPuppetPage) => Promise<void>,
+    browserContext: BrowserContext,
+    onPage?: (page: Page) => Promise<void>,
   ): Promise<void> {
     await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
     if (this.mirrorPage.page.mainFrame.url === 'about:blank') {

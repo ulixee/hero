@@ -1,4 +1,4 @@
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import Hero from '../index';

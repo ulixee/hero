@@ -1,34 +1,59 @@
-import * as Os from 'os';
 import * as Fs from 'fs';
 import * as Path from 'path';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { LocationTrigger } from '@bureau/interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import {
-  IBrowserEmulatorClass,
-  ICorePluginClass,
-  IHumanEmulatorClass,
-} from '@ulixee/hero-interfaces/ICorePlugin';
+import { ICorePluginClass } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
-import DefaultHumanEmulator from '@ulixee/default-human-emulator';
+import DefaultBrowserEmulator from '@bureau/default-browser-emulator';
+import DefaultHumanEmulator from '@bureau/default-human-emulator';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import ConnectionToClient from './connections/ConnectionToClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
-import GlobalPool from './lib/GlobalPool';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import { IHumanEmulatorClass } from '@bureau/interfaces/IHumanEmulator';
+import { IBrowserEmulatorClass } from '@bureau/interfaces/IBrowserEmulator';
+import { dataDir } from './env';
+import NetworkDb from './dbs/NetworkDb';
+import Pool from 'secret-agent/lib/Pool';
+import CorePlugins from './lib/CorePlugins';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import SessionsDb from './dbs/SessionsDb';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import BrowserContext from 'secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
-let dataDir = process.env.HERO_DATA_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to static variable below class definition
 
-export { GlobalPool, Tab, Session, LocationTrigger };
+export { Tab, Session, LocationTrigger };
 
 export default class Core {
+  public static get dataDir(): string {
+    return this._dataDir;
+  }
+
+  public static set dataDir(dir: string) {
+    const absoluteDataDir = Path.isAbsolute(dir) ? dir : Path.join(process.cwd(), dir);
+    if (!Fs.existsSync(`${absoluteDataDir}`)) {
+      Fs.mkdirSync(`${absoluteDataDir}`, { recursive: true });
+    }
+    this._dataDir = absoluteDataDir;
+  }
+
+  public static events = new TypedEventEmitter<
+    Pick<
+      Pool['EventTypes'],
+      'browser-has-no-open-windows' | 'browser-launched' | 'all-browsers-closed'
+    > & {
+      'session-created': { session: Session };
+    }
+  >();
+
   public static readonly connections: ConnectionToClient[] = [];
+
   public static pluginMap: {
     humanEmulatorsById: { [id: string]: IHumanEmulatorClass };
     browserEmulatorsById: { [id: string]: IBrowserEmulatorClass };
@@ -44,6 +69,7 @@ export default class Core {
   };
 
   public static onShutdown: () => void;
+  public static pool: Pool;
 
   public static allowDynamicPluginLoading = true;
   public static isClosing: Promise<void>;
@@ -53,6 +79,9 @@ export default class Core {
   private static isStarting = false;
   private static autoShutdownTimer: NodeJS.Timer;
   private static didRegisterSignals = false;
+  private static _dataDir: string = dataDir;
+  private static networkDb: NetworkDb;
+  private static utilityBrowserContext: Promise<BrowserContext>;
 
   public static addConnection(): ConnectionToClient {
     const connection = new ConnectionToClient();
@@ -86,6 +115,20 @@ export default class Core {
     }
   }
 
+  public static getUtilityContext(): Promise<BrowserContext> {
+    if (this.utilityBrowserContext) return this.utilityBrowserContext;
+
+    const corePlugins = new CorePlugins({}, log);
+
+    this.utilityBrowserContext = this.pool
+      .getBrowser(corePlugins.browserEngine, corePlugins, {
+        showChrome: false,
+      })
+      .then(browser => browser.newContext({ logger: log as IBoundLog, isIncognito: true }));
+
+    return this.utilityBrowserContext;
+  }
+
   public static async start(
     options: ICoreConfigureOptions = {},
     isExplicitlyStarted = true,
@@ -103,14 +146,25 @@ export default class Core {
 
     const { maxConcurrentClientCount } = options;
 
-    if (maxConcurrentClientCount !== undefined)
-      GlobalPool.maxConcurrentClientCount = maxConcurrentClientCount;
-
     if (options.dataDir !== undefined) {
       Core.dataDir = options.dataDir;
     }
+    this.networkDb = new NetworkDb();
 
-    await GlobalPool.start();
+    this.pool = new Pool({
+      certificateStore: this.networkDb.certificates,
+      dataDir: Core.dataDir,
+      logger: log.createChild(module),
+      maxConcurrentAgents: maxConcurrentClientCount,
+    });
+
+    this.pool.addEventEmitter(this.events, [
+      'all-browsers-closed',
+      'browser-has-no-open-windows',
+      'browser-launched',
+    ]);
+
+    await this.pool.start();
 
     log.info('Core started', {
       sessionId: null,
@@ -128,12 +182,18 @@ export default class Core {
 
     this.isStarting = false;
     const logid = log.info('Core.shutdown');
-    const shutDownErrors: Error[] = [];
+    let shutDownErrors: (Error | null)[] = [];
     try {
-      await Promise.all(this.connections.map(x => x.disconnect())).catch(error =>
-        shutDownErrors.push(error),
-      );
-      await GlobalPool.close().catch(error => shutDownErrors.push(error));
+      shutDownErrors = await Promise.all([
+        ...this.connections.map(x => x.disconnect().catch(err => err)),
+        this.utilityBrowserContext?.then(x => x.close()).catch(err => err),
+        this.pool?.close().catch(err => err),
+      ]);
+      shutDownErrors = shutDownErrors.filter(Boolean);
+
+      this.utilityBrowserContext = null;
+      this.networkDb?.close();
+      SessionsDb.shutdown();
 
       this.wasManuallyStarted = false;
       if (this.onShutdown) this.onShutdown();
@@ -188,18 +248,6 @@ export default class Core {
     );
   }
 
-  public static get dataDir(): string {
-    return dataDir;
-  }
-
-  public static set dataDir(dir: string) {
-    const absoluteDataDir = Path.isAbsolute(dir) ? dir : Path.join(process.cwd(), dir);
-    if (!Fs.existsSync(`${absoluteDataDir}`)) {
-      Fs.mkdirSync(`${absoluteDataDir}`, { recursive: true });
-    }
-    dataDir = absoluteDataDir;
-  }
-
   private static registerSignals(): void {
     if (this.didRegisterSignals) return;
     this.didRegisterSignals = true;
@@ -216,5 +264,3 @@ export default class Core {
     }
   }
 }
-
-Core.dataDir = dataDir;

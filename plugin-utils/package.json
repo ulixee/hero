@@ -1,19 +1,11 @@
 {
   "name": "@ulixee/hero-plugin-utils",
   "version": "1.5.4",
-  "description": "Hero client that runs remotely",
+  "description": "Base classes to build hero plugins",
   "scripts": {},
   "dependencies": {
-    "@ulixee/chrome-app": "1.0.2",
     "@ulixee/commons": "1.5.11",
     "@ulixee/hero-interfaces": "1.5.4",
-    "progress": "^2.0.3",
-    "tar": "^6.1.11"
-  },
-  "devDependencies": {
-    "@ulixee/hero-core": "1.5.4",
-    "@ulixee/default-browser-emulator": "1.5.4",
-    "@ulixee/hero-puppet": "1.5.4",
-    "@ulixee/hero-testing": "1.5.4"
+    "@bureau/interfaces": "2.0.0-alpha.1"
   }
 }

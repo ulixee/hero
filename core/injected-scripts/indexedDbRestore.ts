@@ -1,4 +1,4 @@
-import { IIndexedDB } from '@ulixee/hero-interfaces/IIndexedDB';
+import type { IIndexedDB } from '@bureau/interfaces/IIndexedDB';
 
 async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
   if (!restoreDBs || !restoreDBs.length) return;

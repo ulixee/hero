@@ -8,6 +8,7 @@ import { createHash } from 'crypto';
 import Tab from './Tab';
 import CommandRunner from './CommandRunner';
 import Log from '@ulixee/commons/lib/Logger';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 
 const { log } = Log(module);
 
@@ -53,6 +54,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
   private isCheckingState = false;
   private runAgainTime = 0;
   private watchedFrameIds = new Set<number>();
+  private events = new EventSubscriber();
 
   constructor(
     public readonly jsPathId: string,
@@ -83,8 +85,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
     const previousCommand = commands.history[commands.history.length - 2];
     // go one ms after the previous command
     this.startTime = previousCommand ? previousCommand.runStartDate + 1 : Date.now();
-
-    tab.once('close', this.stop);
+    this.events.once(tab, 'close', this.stop);
     this.bindFrameEvents();
     this.checkInterval = setInterval(this.validateState, 2e3).unref();
   }
@@ -98,14 +99,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
       didMatch: result?.didMatch ?? false,
       error: result?.error,
     });
-
-    this.tab.off('close', this.stop);
-    for (const frameId of this.watchedFrameIds) {
-      const frame = this.tab.getFrameEnvironment(frameId);
-      if (!frame) continue;
-      frame.off('paint', this.validateState);
-      frame.navigations.off('status-change', this.validateState);
-    }
+    this.events.close();
   }
 
   public async runBatchAssert(batchId: string): Promise<boolean> {
@@ -235,9 +229,8 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
 
     if (!this.watchedFrameIds.has(frame.id)) {
       this.watchedFrameIds.add(frame.id);
-
-      frame.on('paint', this.validateState);
-      frame.navigations.on('status-change', this.validateState);
+      this.events.on(frame, 'paint', this.validateState);
+      this.events.on(frame.navigations, 'status-change', this.validateState);
     }
   }
 

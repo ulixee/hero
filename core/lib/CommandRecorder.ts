@@ -50,6 +50,7 @@ export default class CommandRecorder {
       !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(commandFn.name);
     if (shouldWait) await commands.waitForCommandLock();
 
+
     let tabId = this.tabId;
     const frameId = this.frameId;
 
@@ -69,11 +70,9 @@ export default class CommandRecorder {
       args,
     );
 
+    commands.willRunCommand(commandMeta);
     tab?.willRunCommand(commandMeta);
 
-    if (frame) {
-      frame.navigationsObserver.willRunCommand(commandMeta, commands.history);
-    }
     const id = this.logger.info('Command.run', commandMeta);
 
     let result: T;

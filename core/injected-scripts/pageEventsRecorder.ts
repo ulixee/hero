@@ -1,10 +1,10 @@
 // NOTE: do not use node dependencies
 
-import { IDomChangeEvent, INodeData } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
-import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
-import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
-import { ILoadEvent } from '@ulixee/hero-interfaces/ILoadEvent';
+import type { IDomChangeEvent, INodeData } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import type { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
+import type { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
+import type { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
+import type { ILoadEvent } from '@ulixee/hero-interfaces/ILoadEvent';
 
 declare global {
   interface Window {
@@ -13,6 +13,16 @@ declare global {
     listenToInteractionEvents(): void;
     trackElement(element: Element): void;
     doNotTrackElement(element: Element): void;
+    PaintEvents: {
+      onEventCallbackFn: (
+        paintEvent:
+          | 'DOMContentLoaded'
+          | 'AllContentLoaded'
+          | 'LargestContentfulPaint'
+          | 'FirstContentfulPaint',
+        timestamp: number,
+      ) => void;
+    };
   }
 }
 declare const runtimeFunction: string;
@@ -202,9 +212,9 @@ class PageEventsRecorder {
     this.scrollEvents.push([scrollX, scrollY, Date.now()]);
   }
 
-  public onLoadEvent(name: string) {
+  public onLoadEvent(name: string, timestamp: number) {
     this.start();
-    this.loadEvents.push([name, window.self.location.href, Date.now()]);
+    this.loadEvents.push([name, window.self.location.href, timestamp]);
     this.uploadChanges();
   }
 
@@ -673,33 +683,18 @@ const interval = setInterval(() => {
   }
 }, 500);
 
-window.addEventListener('DOMContentLoaded', () => {
-  // force domContentLoaded to come first
-  recorder.onLoadEvent('DOMContentLoaded');
-});
-
-window.addEventListener('load', () => recorder.onLoadEvent('load'));
+window.PaintEvents.onEventCallbackFn = (paintEvent, timestamp) => {
+  if (paintEvent === 'FirstContentfulPaint') {
+    recorder.start();
+  } else {
+    recorder.onLoadEvent(paintEvent, timestamp);
+  }
+};
 
 window.addEventListener('beforeunload', () => {
   clearInterval(interval);
   recorder.disconnect();
 });
-
-if (window.self.location?.href !== 'about:blank') {
-  const paintObserver = new PerformanceObserver(entryList => {
-    if (entryList.getEntriesByName('first-contentful-paint').length) {
-      recorder.start();
-      paintObserver.disconnect();
-    }
-  });
-  paintObserver.observe({ type: 'paint', buffered: true });
-
-  const contentStableObserver = new PerformanceObserver(() => {
-    recorder.onLoadEvent('LargestContentfulPaint');
-    contentStableObserver.disconnect();
-  });
-  contentStableObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-}
 
 // need duplicate since this is a variable - not just a type
 enum MouseEventType {

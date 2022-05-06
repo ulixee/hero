@@ -381,7 +381,7 @@ describe('basic Document tests', () => {
     const dialogPromise = new Promise<Dialog>(resolve => hero.activeTab.on('dialog', resolve));
     await expect(dialogPromise).resolves.toBeTruthy();
     const dialog = await dialogPromise;
-    await (await dialog).dismiss(true);
+    await expect(dialog.dismiss(true)).resolves.toBe(undefined);
     // test that we don't hang here
     await expect(document.querySelector('h1').textContent).resolves.toBeTruthy();
   });

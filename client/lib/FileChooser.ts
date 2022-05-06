@@ -1,4 +1,4 @@
-import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
+import IFileChooserPrompt from '@bureau/interfaces/IFileChooserPrompt';
 import * as Fs from 'fs';
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { createHTMLInputElement } from 'awaited-dom/impl/create';

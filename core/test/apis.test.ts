@@ -30,7 +30,6 @@ describe('basic Apis tests', () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession({
-      humanEmulatorId: 'basic',
       scriptInstanceMeta: {
         startDate: Date.now(),
         workingDirectory: process.cwd(),

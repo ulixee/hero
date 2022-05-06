@@ -19,14 +19,18 @@ import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core, { Session, Tab } from '@ulixee/hero-core';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import MitmSocket from '@ulixee/hero-mitm-socket';
-import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
+import MitmSocket from '@secret-agent/mitm-socket';
+import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import { Helpers } from './index';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import type { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
-import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import Logger from '@ulixee/commons/lib/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { getComputedVisibilityFnName } from '@bureau/interfaces/IJsPathFunctions';
+
+const { log } = Logger(module) as { log: IBoundLog };
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -282,7 +286,7 @@ export async function http2Get(
   proxyUrl?: string,
 ): Promise<string> {
   const hostUrl = new URL(host);
-  const socketSession = new MitmSocketSession(sessionId, {
+  const socketSession = new MitmSocketSession(log, {
     clientHelloId: 'Chrome79',
     rejectUnauthorized: false,
   });
@@ -426,7 +430,7 @@ export function getTlsConnection(
   isWebsocket = false,
   proxyUrl?: string,
 ): MitmSocket {
-  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
+  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, log, {
     host,
     port: String(serverPort),
     servername: host,
@@ -529,7 +533,7 @@ function destroyServerFn(
 ): () => Promise<void> {
   const connections = new Set<net.Socket>();
 
-  server.on('connection', conn => {
+  server.on('connection', (conn: net.Socket) => {
     connections.add(conn);
     conn.on('close', () => connections.delete(conn));
   });

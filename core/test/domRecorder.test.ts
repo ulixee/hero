@@ -1,9 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus } from '@ulixee/hero-interfaces/Location';
-import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { LocationStatus } from '@bureau/interfaces/Location';
+import { InteractionCommand } from '@bureau/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
+import HumanEmulator from '@bureau/default-human-emulator';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import Core, { Session } from '../index';
@@ -14,6 +14,13 @@ beforeAll(async () => {
   Core.use(
     class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
+      async playInteractions(interactionGroups, runFn): Promise<void> {
+        for (const group of interactionGroups) {
+          for (const step of group) {
+            await runFn(step);
+          }
+        }
+      }
     },
   );
   connectionToClient = Core.addConnection();
@@ -217,17 +224,17 @@ function sort() {
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
     const session = tab.session;
 
-    expect(tab.puppetPage.frames).toHaveLength(4);
-    await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
-    await tab.puppetPage.frames[2].waitForLifecycleEvent('load');
-    // await tab.puppetPage.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
+    expect(tab.page.frames).toHaveLength(4);
+    await tab.page.frames[1].waitForLifecycleEvent('load');
+    await tab.page.frames[2].waitForLifecycleEvent('load');
+    // await tab.page.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
     await session.db.flush();
     const domChanges = session.db.domChanges.all();
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
-    await tab.frameEnvironmentsByPuppetId.get(tab.puppetPage.frames[3].id).isReady;
+    await tab.frameEnvironmentsByDevtoolsId.get(tab.page.frames[3].id).isReady;
 
     await session.db.flush();
     const frames = session.db.frames.all();

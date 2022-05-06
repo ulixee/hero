@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { InteractionCommand } from '@bureau/interfaces/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
@@ -7,10 +7,10 @@ import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import { URL } from 'url';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
-import MitmRequestAgent from '@ulixee/hero-mitm/lib/MitmRequestAgent';
-import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
+import { LoadStatus } from '@bureau/interfaces/Location';
+import IResourceType from '@bureau/interfaces/IResourceType';
+import MitmRequestAgent from '@secret-agent/mitm/lib/MitmRequestAgent';
+import IDomStorage from '@bureau/interfaces/IDomStorage';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -103,7 +103,7 @@ describe('UserProfile cookie tests', () => {
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
+      await tab.page.frames[1].waitForLifecycleEvent('load');
 
       profile = await tab.session.exportUserProfile();
       expect(profile.cookies).toHaveLength(3);
@@ -428,7 +428,7 @@ localStorage.setItem('cross', '1');
 
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
+      await tab.page.frames[1].waitForLifecycleEvent('load');
       profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);

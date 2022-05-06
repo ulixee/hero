@@ -1,10 +1,10 @@
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceMeta from '@bureau/interfaces/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
-import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
+import IResourceType from '@bureau/interfaces/IResourceType';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import IResourceProcessingDetails from 'secret-agent/interfaces/IResourceProcessingDetails';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -67,7 +67,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       .run(timestamp, id);
   }
 
-  public updateResource(id: number, data: { tabId: number; browserRequestId: string }): void {
+  public updateBrowserRequestId(id: number, data: { tabId: number; browserRequestId: string }): void {
     const pendingInserts = this.findPendingInserts(x => x[0] === id);
     if (pendingInserts.length) {
       const pending = pendingInserts.pop();
@@ -203,25 +203,59 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     ]);
   }
 
+  public mergeWithExisting(
+    resourceId: number,
+    existingResource: IResourceMeta,
+    newResourceDetails: IResourceMeta,
+    resourceFailedEvent: IResourceProcessingDetails,
+    error?: Error,
+  ): void {
+    const existingDbRecord = this.get(resourceId);
+
+    existingDbRecord.type ??= newResourceDetails.type;
+    existingResource.type ??= newResourceDetails.type;
+    existingDbRecord.devtoolsRequestId ??= resourceFailedEvent.browserRequestId;
+    existingDbRecord.browserBlockedReason = resourceFailedEvent.browserBlockedReason;
+    existingDbRecord.browserCanceled = resourceFailedEvent.browserCanceled;
+    existingDbRecord.redirectedToUrl ??= resourceFailedEvent.redirectedToUrl;
+    existingDbRecord.statusCode ??= newResourceDetails.response.statusCode;
+    existingDbRecord.statusMessage ??= newResourceDetails.response.statusMessage;
+    existingDbRecord.browserLoadFailure = newResourceDetails.response.browserLoadFailure;
+    existingDbRecord.browserLoadedTimestamp ??= newResourceDetails.response.timestamp;
+    existingDbRecord.frameId ??= newResourceDetails.frameId;
+
+    if (!existingResource.response) {
+      existingResource.response = newResourceDetails.response ?? ({} as any);
+    }
+
+    if (newResourceDetails.response.headers) {
+      const responseHeaders = JSON.stringify(newResourceDetails.response.headers);
+      if (responseHeaders.length > existingDbRecord.responseHeaders?.length) {
+        existingDbRecord.responseHeaders = responseHeaders;
+        existingResource.response.headers = newResourceDetails.response.headers;
+      }
+    }
+    if (resourceFailedEvent.responseOriginalHeaders) {
+      const responseHeaders = JSON.stringify(resourceFailedEvent.responseOriginalHeaders);
+      if (responseHeaders.length > existingDbRecord.responseOriginalHeaders?.length) {
+        existingDbRecord.responseOriginalHeaders = responseHeaders;
+      }
+    }
+    if (error) {
+      existingDbRecord.httpError = ResourcesTable.getErrorString(error);
+    }
+
+    existingResource.response.browserLoadFailure = newResourceDetails.response?.browserLoadFailure;
+
+    this.save(existingDbRecord);
+  }
+
   public insert(
     tabId: number,
     meta: IResourceMeta,
     postData: Buffer,
     body: Buffer,
-    extras: {
-      socketId: number;
-      redirectedToUrl?: string;
-      originalHeaders: IResourceHeaders;
-      responseOriginalHeaders?: IResourceHeaders;
-      protocol: string;
-      dnsResolvedIp?: string;
-      wasCached?: boolean;
-      wasIntercepted: boolean;
-      browserRequestId?: string;
-      isHttp2Push: boolean;
-      browserBlockedReason?: string;
-      browserCanceled?: boolean;
-    },
+    extras: IResourceProcessingDetails,
     error?: Error,
   ): void {
     const errorString = ResourcesTable.getErrorString(error);

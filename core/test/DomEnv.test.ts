@@ -2,7 +2,7 @@ import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus } from '@bureau/interfaces/Location';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
