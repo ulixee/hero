@@ -1,0 +1,1 @@
+proxyGetter(Notification, 'permission', () => 'default');

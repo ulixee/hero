@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "test:build": "cross-env NODE_ENV=test SA_DATA_DIR=.data-test jest"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6",
+    "jest-environment-node": "^27.0.6",
+    "jest-summary-reporter": "^0.0.2",
+    "cross-env": "^7.0.2"
+  }
+}
