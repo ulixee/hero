@@ -1,0 +1,25 @@
+{
+  "name": "@unblocked-web/default-browser-emulator",
+  "version": "2.0.0-alpha.1",
+  "description": "Browser emulator generated from DoubleAgent data",
+  "main": "index.js",
+  "bin": {
+    "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
+  },
+  "dependencies": {
+    "@ulixee/chrome-98-0": "^4758.102.4",
+    "@ulixee/chrome-app": "^1.0.2",
+    "@ulixee/commons": "1.5.11",
+    "@unblocked-web/emulator-spec": "2.0.0-alpha.1",
+    "compare-versions": "^3.6.0",
+    "tough-cookie": "^4.0.0",
+    "ua-parser-js": "^0.7.22"
+  },
+  "devDependencies": {
+    "@unblocked-web/secret-agent": "2.0.0-alpha.1",
+    "@unblocked-web/sa-mitm": "2.0.0-alpha.1",
+    "@unblocked-web/sa-testing": "2.0.0-alpha.1",
+    "@types/tough-cookie": "^4.0.0",
+    "source-map-loader": "^0.2.4"
+  }
+}

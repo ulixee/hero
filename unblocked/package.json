@@ -1,12 +1,89 @@
 {
-  "name": "unblocked",
-  "version": "0.0.2",
-  "description": "A suite of tools for protecting the web's open knowledge",
-  "main": "index.js",
+  "name": "@unblocked-web/unblocked-monorepo",
+  "private": true,
+  "description": "The Unblocking Bot-Blocker monorepo",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "husky install",
+    "bump-version": "lerna version --conventional-commits --no-push --exact --force-publish",
+    "build": "pwd && yarn && yarn tsc && cd ./build && yarn",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
+    "build:js-path": "cd js-path && pwd && yarn && yarn build",
+    "build:spec": "cd emulator-spec && pwd && yarn && yarn build",
+    "build:sa": "cd secret-agent && pwd && yarn && yarn build",
+    "build:all": "yarn build:js-path && yarn build:spec && yarn build:sa && yarn build",
+    "copy:build": "cross-env OUT_DIR=./build node copyfiles.js && node prepare-build.js",
+    "copy:dist": "cross-env OUT_DIR=./build-dist node copyfiles.js && node prepare-dist.js",
+    "tsc": "tsc -b -i tsconfig.json && yarn copy:build",
+    "watch": "yarn tsc && tsc -b -w tsconfig.json",
+    "watch:all": "concurrently -n jspath,spec,plugins,sa \"cd js-path && yarn watch\" \"cd emulator-spec && yarn watch\" \"yarn watch\" \"cd secret-agent && yarn watch\"",
+    "test": "yarn copy:build && yarn test:build",
+    "test:build": "cd ./build && cross-env SA_DATA_DIR=.data-test NODE_ENV=test jest",
+    "test:all": "yarn copy:build && cross-env SA_DATA_DIR=.data-test NODE_ENV=test jest",
+    "lint": "eslint --cache ./"
   },
-  "author": "Data Liberation Foundation",
-  "license": "ISC",
-  "repository": "git@github.com:unblockable/unblocked.git"
+  "repository": "git@github.com:ulixee/ulixee.git",
+  "author": "Ulixee",
+  "contributors": [
+    "Caleb Clark",
+    "Blake Byrnes"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unblocked-web/unblocked/issues"
+  },
+  "homepage": "https://ulixee.org/unblocked",
+  "engines": {
+    "node": ">=14.17.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^12.0.1",
+    "@commitlint/config-conventional": "^12.0.1",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.17.9",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.1.0",
+    "concurrently": "^6.2.1",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-typescript": "^14.0.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jest": "^25.2.2",
+    "eslint-plugin-monorepo-cop": "^1.0.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.1.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^7.0.1",
+    "jest": "^27.0.6",
+    "jest-environment-node": "^27.0.6",
+    "jest-summary-reporter": "^0.0.2",
+    "lerna": "^4.0.0",
+    "lint-staged": "^10.5.2",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "shx": "^0.3.3",
+    "typescript": "~4.5.5"
+  },
+  "workspaces": {
+    "packages": [
+      "secret-agent/build/*",
+      "emulator-plugins/*",
+      "emulator-spec/build",
+      "js-path/build"
+    ],
+    "nohoist": []
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {}
 }

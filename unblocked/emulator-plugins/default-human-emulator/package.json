@@ -1,0 +1,15 @@
+{
+  "name": "@unblocked-web/default-human-emulator",
+  "version": "2.0.0-alpha.1",
+  "description": "Default human emulator based on Xetera/ghost-cursor",
+  "main": "index.js",
+  "dependencies": {
+    "@ulixee/commons": "1.5.11",
+    "@unblocked-web/emulator-spec": "2.0.0-alpha.1"
+  },
+  "devDependencies": {
+    "@unblocked-web/secret-agent": "2.0.0-alpha.1",
+    "@unblocked-web/sa-testing": "2.0.0-alpha.1",
+    "@unblocked-web/js-path": "2.0.0-alpha.1"
+  }
+}

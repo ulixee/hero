@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "dist": "lerna publish from-package"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}

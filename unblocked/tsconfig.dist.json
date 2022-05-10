@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build-dist",
+    "sourceMap": true,
+    "inlineSourceMap": false
+  },
+  "references": [
+    {
+      "path": "emulator-plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
+    }
+  ]
+}
