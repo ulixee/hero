@@ -1,14 +1,14 @@
 import { URL } from 'url';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { IPage } from '@bureau/interfaces/IPage';
-import { IWorker } from '@bureau/interfaces/IWorker';
-import IHttpResourceLoadDetails from '@bureau/interfaces/IHttpResourceLoadDetails';
-import IDnsSettings from '@bureau/interfaces/IDnsSettings';
-import ITcpSettings from '@bureau/interfaces/ITcpSettings';
-import ITlsSettings from '@bureau/interfaces/ITlsSettings';
-import { IInteractionGroups, IInteractionStep } from '@bureau/interfaces/IInteractions';
-import IInteractionsHelper from '@bureau/interfaces/IInteractionsHelper';
-import IPoint from '@bureau/interfaces/IPoint';
+import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
+import { IWorker } from '@unblocked-web/emulator-spec/browser/IWorker';
+import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
+import IDnsSettings from '@unblocked-web/emulator-spec/net/IDnsSettings';
+import ITcpSettings from '@unblocked-web/emulator-spec/net/ITcpSettings';
+import ITlsSettings from '@unblocked-web/emulator-spec/net/ITlsSettings';
+import { IInteractionGroups, IInteractionStep } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import IInteractionsHelper from '@unblocked-web/emulator-spec/interact/IInteractionsHelper';
+import IPoint from '@unblocked-web/emulator-spec/browser/IPoint';
 import ICorePlugin, {
   ICorePluginClass,
   IOnClientCommandMeta,
@@ -17,26 +17,26 @@ import ICorePlugin, {
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
-import IBrowserEngine from '@bureau/interfaces/IBrowserEngine';
+import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
 import {
   IBrowserEmulator,
   IBrowserEmulatorClass,
   IBrowserEmulatorConfig,
   ISelectBrowserMeta,
-} from '@bureau/interfaces/IBrowserEmulator';
-import { IHumanEmulator, IHumanEmulatorClass } from '@bureau/interfaces/IHumanEmulator';
-import IDeviceProfile from '@bureau/interfaces/IDeviceProfile';
-import IDevtoolsSession from '@bureau/interfaces/IDevtoolsSession';
+} from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import { IHumanEmulator, IHumanEmulatorClass } from '@unblocked-web/emulator-spec/IHumanEmulator';
+import IDeviceProfile from '@unblocked-web/emulator-spec/browser/IDeviceProfile';
+import IDevtoolsSession from '@unblocked-web/emulator-spec/browser/IDevtoolsSession';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import IHttp2ConnectSettings from '@bureau/interfaces/IHttp2ConnectSettings';
+import IHttp2ConnectSettings from '@unblocked-web/emulator-spec/net/IHttp2ConnectSettings';
 import Core from '../index';
-import IHttpSocketAgent from '@bureau/interfaces/IHttpSocketAgent';
-import IBrowserContext from '@bureau/interfaces/IBrowserContext';
-import IBrowser from '@bureau/interfaces/IBrowser';
-import IBrowserLaunchArgs from '@bureau/interfaces/IBrowserLaunchArgs';
+import IHttpSocketAgent from '@unblocked-web/emulator-spec/net/IHttpSocketAgent';
+import IBrowserContext from '@unblocked-web/emulator-spec/browser/IBrowserContext';
+import IBrowser from '@unblocked-web/emulator-spec/browser/IBrowser';
+import IBrowserLaunchArgs from '@unblocked-web/emulator-spec/browser/IBrowserLaunchArgs';
 
-const DefaultBrowserEmulatorId = '@bureau/default-browser-emulator';
-const DefaultHumanEmulatorId = '@bureau/default-human-emulator';
+const DefaultBrowserEmulatorId = '@unblocked-web/default-browser-emulator';
+const DefaultHumanEmulatorId = '@unblocked-web/default-human-emulator';
 
 interface IOptionsCreate {
   userAgentSelector?: string;

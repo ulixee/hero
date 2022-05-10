@@ -1,9 +1,9 @@
-import { IKeyboardKeyCode } from '@bureau/interfaces/IKeyboardLayoutUS';
-import { IKeyboardShortcut } from '@bureau/interfaces/IKeyboardShortcuts';
+import { IKeyboardKeyCode } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
+import { IKeyboardShortcut } from '@unblocked-web/emulator-spec/interact/IKeyboardShortcuts';
 import {
   IElementInteractVerification,
   IMousePositionXY,
-} from '@bureau/interfaces/IInteractions';
+} from '@unblocked-web/emulator-spec/interact/IInteractions';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 
 export type IInteraction = ICommand | ICommandDetailed;

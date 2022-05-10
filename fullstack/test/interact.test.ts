@@ -1,8 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { KeyboardKey } from '@bureau/interfaces/IKeyboardLayoutUS';
+import { KeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import HumanEmulator from '@bureau/default-human-emulator';
+import HumanEmulator from '@unblocked-web/default-human-emulator';
 import Hero, { Core, LocationStatus } from '../index';
 import Session from '@ulixee/hero-core/lib/Session';
 

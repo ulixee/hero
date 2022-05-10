@@ -1,4 +1,4 @@
-import type { IIndexedDB } from '@bureau/interfaces/IIndexedDB';
+import type { IIndexedDB } from '@unblocked-web/emulator-spec/browser/IIndexedDB';
 
 async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
   if (!restoreDBs || !restoreDBs.length) return;

@@ -1,6 +1,6 @@
-import { ICookie } from '@bureau/interfaces/ICookie';
-import IDomStorage from '@bureau/interfaces/IDomStorage';
-import IDeviceProfile from '@bureau/interfaces/IDeviceProfile';
+import { ICookie } from '@unblocked-web/emulator-spec/net/ICookie';
+import IDomStorage from '@unblocked-web/emulator-spec/browser/IDomStorage';
+import IDeviceProfile from '@unblocked-web/emulator-spec/browser/IDeviceProfile';
 
 export default interface IUserProfile {
   cookies?: ICookie[];

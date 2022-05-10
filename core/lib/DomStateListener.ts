@@ -2,7 +2,7 @@ import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import { createHash } from 'crypto';
 import Tab from './Tab';

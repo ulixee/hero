@@ -19,16 +19,16 @@ import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core, { Session, Tab } from '@ulixee/hero-core';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import MitmSocket from '@secret-agent/mitm-socket';
-import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
+import MitmSocket from '@unblocked-web/sa-mitm-socket';
+import MitmSocketSession from '@unblocked-web/sa-mitm-socket/lib/MitmSocketSession';
 import { Helpers } from './index';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
-import type { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
 import Logger from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { getComputedVisibilityFnName } from '@bureau/interfaces/IJsPathFunctions';
+import { getComputedVisibilityFnName } from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
 
 const { log } = Logger(module) as { log: IBoundLog };
 

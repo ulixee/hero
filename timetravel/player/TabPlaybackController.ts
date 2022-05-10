@@ -3,8 +3,8 @@ import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesT
 import MirrorPage from '../lib/MirrorPage';
 import MirrorNetwork from '../lib/MirrorNetwork';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
-import Page from 'secret-agent/lib/Page';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import Page from '@unblocked-web/secret-agent/lib/Page';
 
 export default class TabPlaybackController {
   public get id(): number {

@@ -4,7 +4,7 @@
 
 The biggest difference that BrowserEmulators have over standard CorePlugins is that only a single instance is ever run within a session -- i.e. you cannot use two BrowserEmulators within the same session. In addition, the Browser Emulator is always run before any standard Core Plugins, and as such, the Browser Emulator is responsible for choosing which browser engine to use (i.e., Chrome 88 vs Chrome 91).
 
-ADVICE: Unless you have access to the exact data that a browser resembles, it's recommended that you extend `@bureau/default-browser-emulator` with additional overrides.
+ADVICE: Unless you have access to the exact data that a browser resembles, it's recommended that you extend `@unblocked-web/default-browser-emulator` with additional overrides.
 
 ## Special Class Properties
 
@@ -20,13 +20,13 @@ BrowserEmulators require a method that receives a userAgentSelector and returns 
 
 ### selectBrowserMeta<em>(userAgentSelector)</em> *required*
 
-See @bureau/default-browser-emulator for an implementation example.
+See @unblocked-web/default-browser-emulator for an implementation example.
 
 #### **Returns** `SelectBrowserMeta`
 
 ## Special Instance Properties
 
-Browser Emulators require a few extra properties than standard Core Plugins. These are all related to the browser engine selected by the emulator. See `@bureau/default-browser-emulator` for an implementation example.
+Browser Emulators require a few extra properties than standard Core Plugins. These are all related to the browser engine selected by the emulator. See `@unblocked-web/default-browser-emulator` for an implementation example.
 
 ### browserName *required*
 #### **Type**: `string`.

@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@bureau/interfaces/IInteractions';
+import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
@@ -7,10 +7,10 @@ import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import { URL } from 'url';
-import { LoadStatus } from '@bureau/interfaces/Location';
-import IResourceType from '@bureau/interfaces/IResourceType';
-import MitmRequestAgent from '@secret-agent/mitm/lib/MitmRequestAgent';
-import IDomStorage from '@bureau/interfaces/IDomStorage';
+import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
+import MitmRequestAgent from '@unblocked-web/sa-mitm/lib/MitmRequestAgent';
+import IDomStorage from '@unblocked-web/emulator-spec/browser/IDomStorage';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;

@@ -2,12 +2,12 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import SessionDb from '../dbs/SessionDb';
 import { IEventRecord } from '../models/AwaitedEventsTable';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICommandMarker from 'secret-agent/interfaces/ICommandMarker';
+import ICommandMarker from '@unblocked-web/secret-agent/interfaces/ICommandMarker';
 
 export default class Commands
   extends TypedEventEmitter<{
@@ -132,11 +132,11 @@ export default class Commands
     if (newCommand.name === 'goto') {
       this.defaultWaitForLocationCommandId = newCommand.id;
     }
-    // find the last "waitFor" command that is not followed by another waitFor
-    const last = this.history[this.history.length - 2];
-    if (last?.name.startsWith('waitFor') && last?.name !== 'waitForMillis') {
-      // handle cases like waitForLocation two times in a row
-      if (!newCommand.name.startsWith('waitFor') || newCommand.name === 'waitForLocation') {
+    // handle cases like waitForLocation two times in a row
+    if (!newCommand.name.startsWith('waitFor') || newCommand.name === 'waitForLocation') {
+      // find the last "waitFor" command that is not followed by another waitFor
+      const last = this.last;
+      if (last && last.name.startsWith('waitFor') && last.name !== 'waitForMillis') {
         this.defaultWaitForLocationCommandId = newCommand.id;
       }
     }

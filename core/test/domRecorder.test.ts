@@ -1,9 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus } from '@bureau/interfaces/Location';
-import { InteractionCommand } from '@bureau/interfaces/IInteractions';
+import { LocationStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import HumanEmulator from '@bureau/default-human-emulator';
+import HumanEmulator from '@unblocked-web/default-human-emulator';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import Core, { Session } from '../index';

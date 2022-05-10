@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import DevtoolsSessionLogger from 'secret-agent/lib/DevtoolsSessionLogger';
+import DevtoolsSessionLogger from '@unblocked-web/secret-agent/lib/DevtoolsSessionLogger';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private pageIds = new IdAssigner();

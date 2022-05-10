@@ -16,7 +16,7 @@ import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
-import BrowserLaunchError from 'secret-agent/errors/BrowserLaunchError';
+import BrowserLaunchError from '@unblocked-web/secret-agent/errors/BrowserLaunchError';
 
 const version = require('../package.json');
 

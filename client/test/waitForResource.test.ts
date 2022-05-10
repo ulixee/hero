@@ -1,4 +1,4 @@
-import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
 import { Helpers } from '@ulixee/hero-testing/index';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';

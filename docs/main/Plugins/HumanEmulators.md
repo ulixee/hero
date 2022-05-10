@@ -4,4 +4,4 @@
 
 This is a major work in progress. We are trying to determine whether Human Emulators are necessary as a unique type of Core Plugin.
 
-See `@bureau/default-human-emulator` for an implementation example. 
+See `@unblocked-web/default-human-emulator` for an implementation example. 

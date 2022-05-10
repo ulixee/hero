@@ -1,5 +1,5 @@
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IViewport from '@bureau/interfaces/IViewport';
+import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import InjectedScripts, { CorePageInjectedScript } from '@ulixee/hero-core/lib/InjectedScripts';
@@ -16,11 +16,11 @@ import * as fs from 'fs';
 import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import MirrorNetwork from './MirrorNetwork';
 import { Tab } from '@ulixee/hero-core';
-import { IFrame } from '@bureau/interfaces/IFrame';
+import { IFrame } from '@unblocked-web/emulator-spec/browser/IFrame';
 import Queue from '@ulixee/commons/lib/Queue';
 import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
-import Page from 'secret-agent/lib/Page';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
+import Page from '@unblocked-web/secret-agent/lib/Page';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 

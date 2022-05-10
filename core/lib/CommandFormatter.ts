@@ -1,7 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import { IInteractionGroup } from '@bureau/interfaces/IInteractions';
-import { getKeyboardKey } from '@bureau/interfaces/IKeyboardLayoutUS';
-import { getNodePointerFnName } from '@bureau/interfaces/IJsPathFunctions';
+import { IInteractionGroup } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { getKeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
+import { getNodePointerFnName } from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
@@ -128,7 +128,7 @@ export default class CommandFormatter {
           if (result.nodePointer.iterableItems) {
             command.result = result.nodePointer.iterableItems;
           }
-          if (result.nodePointer.iterableIsState) {
+          if (result.nodePointer.iterableIsNodePointers) {
             command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
           }
         }

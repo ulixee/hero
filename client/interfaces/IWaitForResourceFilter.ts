@@ -1,4 +1,4 @@
-import IResourceType from '@bureau/interfaces/IResourceType';
+import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
 import Resource from '../lib/Resource';
 
 export default interface IWaitForResourceFilter {

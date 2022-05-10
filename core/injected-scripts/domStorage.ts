@@ -1,5 +1,5 @@
-import type { IDomStorageForOrigin } from '@bureau/interfaces/IDomStorage';
-import type { IIndexedDB } from '@bureau/interfaces/IIndexedDB';
+import type { IDomStorageForOrigin } from '@unblocked-web/emulator-spec/browser/IDomStorage';
+import type { IIndexedDB } from '@unblocked-web/emulator-spec/browser/IIndexedDB';
 
 function dumpStorage(storage: Storage) {
   const store: [string, string][] = [];

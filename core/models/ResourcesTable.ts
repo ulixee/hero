@@ -1,10 +1,10 @@
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
-import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IResourceType from '@bureau/interfaces/IResourceType';
+import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import IResourceProcessingDetails from 'secret-agent/interfaces/IResourceProcessingDetails';
+import IResourceProcessingDetails from '@unblocked-web/secret-agent/interfaces/IResourceProcessingDetails';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -67,7 +67,16 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       .run(timestamp, id);
   }
 
-  public updateBrowserRequestId(id: number, data: { tabId: number; browserRequestId: string }): void {
+  public updateSeenAtCommandId(id: number, seenAtCommandId: number): void {
+    this.db
+      .prepare(`update ${this.tableName} set seenAtCommandId=? where id=?`)
+      .run(id, seenAtCommandId);
+  }
+
+  public updateBrowserRequestId(
+    id: number,
+    data: { tabId: number; browserRequestId: string },
+  ): void {
     const pendingInserts = this.findPendingInserts(x => x[0] === id);
     if (pendingInserts.length) {
       const pending = pendingInserts.pop();

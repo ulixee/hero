@@ -1,8 +1,8 @@
 import IUserProfile from './IUserProfile';
 import ISessionOptions from './ISessionOptions';
 import IScriptInstanceMeta from './IScriptInstanceMeta';
-import { IBrowserEmulatorConfig } from '@bureau/interfaces/IBrowserEmulator';
-import IBrowserLaunchArgs from '@bureau/interfaces/IBrowserLaunchArgs';
+import { IBrowserEmulatorConfig } from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import IBrowserLaunchArgs from '@unblocked-web/emulator-spec/browser/IBrowserLaunchArgs';
 
 export default interface ISessionCreateOptions extends ISessionOptions, IBrowserEmulatorConfig, IBrowserLaunchArgs {
   sessionId?: string;

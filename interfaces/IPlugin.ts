@@ -1,7 +1,7 @@
 import ICorePlugin, { ICorePluginClass } from './ICorePlugin';
 import IClientPlugin, { IClientPluginClass } from './IClientPlugin';
-import { IBrowserEmulator, IBrowserEmulatorClass } from '@bureau/interfaces/IBrowserEmulator';
-import { IHumanEmulator, IHumanEmulatorClass } from '@bureau/interfaces/IHumanEmulator';
+import { IBrowserEmulator, IBrowserEmulatorClass } from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import { IHumanEmulator, IHumanEmulatorClass } from '@unblocked-web/emulator-spec/IHumanEmulator';
 
 type IPlugin = IClientPlugin | ICorePlugin | IBrowserEmulator | IHumanEmulator;
 export default IPlugin;

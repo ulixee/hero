@@ -1,4 +1,4 @@
-import { ICookie } from '@bureau/interfaces/ICookie';
+import { ICookie } from '@unblocked-web/emulator-spec/net/ICookie';
 
 export default interface ISetCookieOptions
   extends Pick<ICookie, 'httpOnly' | 'secure' | 'sameSite'> {

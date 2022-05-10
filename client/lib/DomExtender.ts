@@ -10,11 +10,11 @@ import NodeList from 'awaited-dom/impl/official-klasses/NodeList';
 import HTMLCollection from 'awaited-dom/impl/official-klasses/HTMLCollection';
 import HTMLElement from 'awaited-dom/impl/official-klasses/HTMLElement';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import INodePointer from 'awaited-dom/base/INodePointer';
-import { IElementInteractVerification } from '@bureau/interfaces/IInteractions';
+import { INodePointer } from '@unblocked-web/js-path';
+import { IElementInteractVerification } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
 import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
-import { KeyboardKey } from '@bureau/interfaces/IKeyboardLayoutUS';
+import { KeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -22,7 +22,7 @@ import Interactor from './Interactor';
 import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
 import { createSuperNode } from 'awaited-dom/impl/create';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
-import { KeyboardShortcuts } from '@bureau/interfaces/IKeyboardShortcuts';
+import { KeyboardShortcuts } from '@unblocked-web/emulator-spec/interact/IKeyboardShortcuts';
 import { scriptInstance } from './internal';
 
 const awaitedPathState = StateMachine<

@@ -1,8 +1,8 @@
-import IHttpHeaders from '@bureau/interfaces/IHttpHeaders';
-import IResourceRequest from '@bureau/interfaces/IResourceRequest';
+import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
+import IResourceRequest from '@unblocked-web/emulator-spec/net/IResourceRequest';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
-import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 
 const propertyKeys: (keyof ResourceRequest)[] = [

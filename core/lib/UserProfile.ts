@@ -1,7 +1,7 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IDomStorage, { IDomStorageForOrigin } from '@bureau/interfaces/IDomStorage';
+import IDomStorage, { IDomStorageForOrigin } from '@unblocked-web/emulator-spec/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
-import { IPage } from '@bureau/interfaces/IPage';
+import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';

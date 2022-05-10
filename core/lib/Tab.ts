@@ -2,26 +2,30 @@ import Log from '@ulixee/commons/lib/Logger';
 import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import Timer from '@ulixee/commons/lib/Timer';
-import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import { IPageEvents } from '@bureau/interfaces/IPage';
+import { IPageEvents } from '@unblocked-web/emulator-spec/browser/IPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@bureau/interfaces/IScreenshotOptions';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { IInteractionGroups } from '@bureau/interfaces/IInteractions';
-import IExecJsPathResult from '@bureau/interfaces/IExecJsPathResult';
-import { ILoadStatus, ILocationTrigger, LoadStatus } from '@bureau/interfaces/Location';
+import IScreenshotOptions from '@unblocked-web/emulator-spec/browser/IScreenshotOptions';
+import { IJsPath } from '@unblocked-web/js-path';
+import { IInteractionGroups } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+  LoadStatus,
+} from '@unblocked-web/emulator-spec/browser/Location';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IDialog from '@bureau/interfaces/IDialog';
-import IFileChooserPrompt from '@bureau/interfaces/IFileChooserPrompt';
+import IDialog from '@unblocked-web/emulator-spec/browser/IDialog';
+import IFileChooserPrompt from '@unblocked-web/emulator-spec/browser/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import INavigation from '@bureau/interfaces/INavigation';
+import INavigation from '@unblocked-web/emulator-spec/browser/INavigation';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import CommandRecorder from './CommandRecorder';
@@ -44,13 +48,13 @@ import { IFocusRecord } from '../models/FocusEventsTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
 import Core from '../index';
-import FrameNavigations from 'secret-agent/lib/FrameNavigations';
-import FrameNavigationsObserver from 'secret-agent/lib/FrameNavigationsObserver';
-import Page from 'secret-agent/lib/Page';
-import { IWebsocketMessage } from 'secret-agent/lib/WebsocketMessages';
-import { injectedSourceUrl } from '@bureau/default-browser-emulator/lib/DomOverridesBuilder';
+import FrameNavigations from '@unblocked-web/secret-agent/lib/FrameNavigations';
+import FrameNavigationsObserver from '@unblocked-web/secret-agent/lib/FrameNavigationsObserver';
+import Page from '@unblocked-web/secret-agent/lib/Page';
+import { IWebsocketMessage } from '@unblocked-web/secret-agent/lib/WebsocketMessages';
+import { injectedSourceUrl } from '@unblocked-web/default-browser-emulator/lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -860,11 +864,13 @@ export default class Tab
     if (resourceMeta.tabId !== this.id) return false;
     if (!resourceMeta.seenAtCommandId) {
       resourceMeta.seenAtCommandId = this.lastCommandId;
-      const existing = this.session.resources.get(resourceMeta.id);
-      // need to set directly since passed in object is a copy
-      if (existing) existing.seenAtCommandId = this.lastCommandId;
+      this.session.db.resources.updateSeenAtCommandId(
+        resourceMeta.id,
+        resourceMeta.seenAtCommandId,
+      );
+    } else if (sinceCommandId && resourceMeta.seenAtCommandId <= sinceCommandId) {
+      return false;
     }
-    if (sinceCommandId && resourceMeta.seenAtCommandId < sinceCommandId) return false;
     if (filter.type && resourceMeta.type !== filter.type) return false;
     if (filter.url && !resourceMeta.url.match(filter.url)) return false;
 

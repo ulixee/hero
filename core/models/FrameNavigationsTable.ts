@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import INavigation, { ContentPaint, NavigationStatus } from '@bureau/interfaces/INavigation';
+import INavigation, { ContentPaint, NavigationStatus } from '@unblocked-web/emulator-spec/browser/INavigation';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import { LoadStatus } from '@bureau/interfaces/Location';
+import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {

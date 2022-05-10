@@ -4,14 +4,14 @@ import inspectInstanceProperties from 'awaited-dom/base/inspectInstancePropertie
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import IDomStorage from '@bureau/interfaces/IDomStorage';
+import IDomStorage from '@unblocked-web/emulator-spec/browser/IDomStorage';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import { ILocationTrigger } from '@bureau/interfaces/Location';
+import { ILocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
@@ -23,8 +23,8 @@ import {
 } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
-import IScreenshotOptions from '@bureau/interfaces/IScreenshotOptions';
-import { INodeVisibility } from '@bureau/interfaces/INodeVisibility';
+import IScreenshotOptions from '@unblocked-web/emulator-spec/browser/IScreenshotOptions';
+import { INodeVisibility } from '@unblocked-web/js-path';
 import IClientPlugin, { IClientPluginClass } from '@ulixee/hero-interfaces/IClientPlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
@@ -35,7 +35,7 @@ import {
   IElementInteractVerification,
   IMousePositionXY,
   isMousePositionXY,
-} from '@bureau/interfaces/IInteractions';
+} from '@unblocked-web/emulator-spec/interact/IInteractions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';

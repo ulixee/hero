@@ -1,4 +1,4 @@
-import INodePointer from '@bureau/interfaces/INodePointer';
+import { INodePointer } from '@unblocked-web/js-path'
 
 class Fetcher {
   public static createRequest(input: string | number, init?: RequestInit): INodePointer {

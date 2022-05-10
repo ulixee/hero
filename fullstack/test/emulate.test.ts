@@ -2,8 +2,8 @@ import * as Fs from 'fs';
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import Viewports from '@bureau/default-browser-emulator/lib/Viewports';
-import { defaultBrowserEngine } from '@bureau/default-browser-emulator';
+import Viewports from '@unblocked-web/default-browser-emulator/lib/Viewports';
+import { defaultBrowserEngine } from '@unblocked-web/default-browser-emulator';
 import Hero from '../index';
 
 const chromeVersion = defaultBrowserEngine.version.major;

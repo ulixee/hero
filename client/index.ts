@@ -18,11 +18,11 @@ import {
   INodeList,
 } from 'awaited-dom/base/interfaces/official';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import { KeyboardKey } from '@bureau/interfaces/IKeyboardLayoutUS';
-import IResourceType, { ResourceType } from '@bureau/interfaces/IResourceType';
-import { InteractionCommand, MouseButton } from '@bureau/interfaces/IInteractions';
+import { KeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
+import IResourceType, { ResourceType } from '@unblocked-web/emulator-spec/net/IResourceType';
+import { InteractionCommand, MouseButton } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
-import { LoadStatus, LocationStatus, LocationTrigger } from '@bureau/interfaces/Location';
+import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';

@@ -1,13 +1,13 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@bureau/interfaces/Location';
+import { LocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ICorePluginClass } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import DefaultBrowserEmulator from '@bureau/default-browser-emulator';
-import DefaultHumanEmulator from '@bureau/default-human-emulator';
+import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
+import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
@@ -15,16 +15,16 @@ import ConnectionToClient from './connections/ConnectionToClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import { IHumanEmulatorClass } from '@bureau/interfaces/IHumanEmulator';
-import { IBrowserEmulatorClass } from '@bureau/interfaces/IBrowserEmulator';
+import { IHumanEmulatorClass } from '@unblocked-web/emulator-spec/IHumanEmulator';
+import { IBrowserEmulatorClass } from '@unblocked-web/emulator-spec/IBrowserEmulator';
 import { dataDir } from './env';
 import NetworkDb from './dbs/NetworkDb';
-import Pool from 'secret-agent/lib/Pool';
+import Pool from '@unblocked-web/secret-agent/lib/Pool';
 import CorePlugins from './lib/CorePlugins';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import SessionsDb from './dbs/SessionsDb';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
@@ -158,6 +158,7 @@ export default class Core {
       maxConcurrentAgents: maxConcurrentClientCount,
     });
 
+    // @ts-ignore
     this.pool.addEventEmitter(this.events, [
       'all-browsers-closed',
       'browser-has-no-open-windows',

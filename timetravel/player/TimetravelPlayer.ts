@@ -1,4 +1,4 @@
-import { IPage } from '@bureau/interfaces/IPage';
+import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -11,7 +11,7 @@ import MirrorNetwork from '../lib/MirrorNetwork';
 import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
 
 const { log } = Log(module);
 

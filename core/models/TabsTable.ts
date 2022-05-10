@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import IViewport from '@bureau/interfaces/IViewport';
+import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
 
 export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {

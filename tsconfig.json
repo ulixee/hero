@@ -37,7 +37,7 @@
     "**/build",
     "build",
     "build-dist",
-    "secret-agent",
+    "unblocked",
     "core/injected-scripts",
     "timetravel/injected-scripts",
     "examples/*.js",

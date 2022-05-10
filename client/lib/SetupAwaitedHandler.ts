@@ -1,9 +1,9 @@
 import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHandler';
-import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath , INodePointer } from '@unblocked-web/js-path';
+import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
-import INodePointer from 'awaited-dom/base/INodePointer';
-import IExecJsPathResult from '@bureau/interfaces/IExecJsPathResult';
-import { getNodePointerFnName } from '@bureau/interfaces/IJsPathFunctions';
+import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
+import { getNodePointerFnName } from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import NodeFactory from 'awaited-dom/base/NodeFactory';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';

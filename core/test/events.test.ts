@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { LocationStatus } from '@bureau/interfaces/Location';
+import { LocationStatus } from '@unblocked-web/emulator-spec/browser/Location';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 

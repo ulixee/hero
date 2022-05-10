@@ -1,4 +1,4 @@
-import { LoadStatus } from '@bureau/interfaces/Location';
+import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
 
 export default interface ITimelineMetadata {
   // don't group by tabid/frameid for now

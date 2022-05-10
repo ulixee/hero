@@ -1,10 +1,10 @@
 import { PluginTypes } from './IPluginTypes';
 import ICorePluginCreateOptions from './ICorePluginCreateOptions';
-import { IPage } from '@bureau/interfaces/IPage';
+import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import ISessionCreateOptions from './ISessionCreateOptions';
-import { IFrame } from '@bureau/interfaces/IFrame';
-import { IBrowserEmulatorMethods } from '@bureau/interfaces/IBrowserEmulator';
-import { IHumanEmulatorMethods } from '@bureau/interfaces/IHumanEmulator';
+import { IFrame } from '@unblocked-web/emulator-spec/browser/IFrame';
+import { IBrowserEmulatorMethods } from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import { IHumanEmulatorMethods } from '@unblocked-web/emulator-spec/IHumanEmulator';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,

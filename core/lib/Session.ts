@@ -3,15 +3,15 @@ import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons
 import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
-} from '@secret-agent/mitm/handlers/RequestSession';
+} from '@unblocked-web/sa-mitm/handlers/RequestSession';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IBrowserEngine from '@bureau/interfaces/IBrowserEngine';
+import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IViewport from '@bureau/interfaces/IViewport';
+import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IGeolocation from '@bureau/interfaces/IGeolocation';
+import IGeolocation from '@unblocked-web/emulator-spec/browser/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
@@ -30,12 +30,12 @@ import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import Agent from 'secret-agent/lib/Agent';
-import Resources from 'secret-agent/lib/Resources';
-import WebsocketMessages from 'secret-agent/lib/WebsocketMessages';
-import BrowserContext from 'secret-agent/lib/BrowserContext';
-import DevtoolsSessionLogger from 'secret-agent/lib/DevtoolsSessionLogger';
-import Page from 'secret-agent/lib/Page';
+import Agent from '@unblocked-web/secret-agent/lib/Agent';
+import Resources from '@unblocked-web/secret-agent/lib/Resources';
+import WebsocketMessages from '@unblocked-web/secret-agent/lib/WebsocketMessages';
+import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import DevtoolsSessionLogger from '@unblocked-web/secret-agent/lib/DevtoolsSessionLogger';
+import Page from '@unblocked-web/secret-agent/lib/Page';
 import env from '../env';
 
 const { log } = Log(module);
@@ -813,15 +813,18 @@ ${data}`,
       if (session.mode !== 'browserless') {
         await Core.start({}, false);
         const agent = await Core.pool.createAgent({
-          ...env,
-          ...session.options,
           id: session.id,
           browserEngine: session.browserEngine,
           logger: session.logger,
           hooks: session.plugins,
           upstreamProxyUrl: session.options.upstreamProxyUrl,
           commandMarker: session.commands,
-          disableIncognito: session.options.showChromeAlive === true,
+          showChrome: session.options.showChrome ?? env.showChrome,
+          noChromeSandbox: session.options.noChromeSandbox ?? env.noChromeSandbox,
+          disableIncognito: session.options.disableIncognito,
+          disableGpu: session.options.disableGpu ?? env.disableGpu,
+          disableMitm: session.options.disableMitm ?? env.disableMitm,
+          disableDevtools: session.options.disableDevtools ?? env.disableDevtools,
         });
         await session.initialize(agent);
       }

@@ -1,12 +1,12 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import HumanEmulator from '@bureau/default-human-emulator';
+import HumanEmulator from '@unblocked-web/default-human-emulator';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
-import Interactor from 'secret-agent/lib/Interactor';
+import Interactor from '@unblocked-web/secret-agent/lib/Interactor';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;

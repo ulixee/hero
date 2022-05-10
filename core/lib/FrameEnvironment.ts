@@ -1,22 +1,21 @@
 import Log from '@ulixee/commons/lib/Logger';
-import { ILoadStatus, ILocationTrigger, LoadStatus } from '@bureau/interfaces/Location';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { ILoadStatus, ILocationTrigger, LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import { IJsPath , INodePointer } from '@unblocked-web/js-path';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ICookie } from '@bureau/interfaces/ICookie';
-import { IInteractionGroups, IInteractionStep } from '@bureau/interfaces/IInteractions';
+import { ICookie } from '@unblocked-web/emulator-spec/net/ICookie';
+import { IInteractionGroups, IInteractionStep } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import { URL } from 'url';
 import * as Fs from 'fs';
-import IExecJsPathResult from '@bureau/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IFrameEvents } from '@bureau/interfaces/IFrame';
+import { IFrameEvents } from '@unblocked-web/emulator-spec/browser/IFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import * as Os from 'os';
-import INavigation from '@bureau/interfaces/INavigation';
+import INavigation from '@unblocked-web/emulator-spec/browser/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
@@ -24,16 +23,16 @@ import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import Session from './Session';
 import Tab, { ITabEventParams } from './Tab';
 import CommandRecorder from './CommandRecorder';
-import { IFrameNavigationEvents } from '@bureau/interfaces/IFrameNavigations';
-import { ISerializable } from 'secret-agent/lib/JsPath';
-import Frame from 'secret-agent/lib/Frame';
+import { IFrameNavigationEvents } from '@unblocked-web/emulator-spec/browser/IFrameNavigations';
+import { ISerializable } from '@unblocked-web/secret-agent/lib/JsPath';
+import Frame from '@unblocked-web/secret-agent/lib/Frame';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import { IInteractHooks } from '@bureau/interfaces/IHooks';
-import FrameNavigations from 'secret-agent/lib/FrameNavigations';
-import IResourceMeta from '@bureau/interfaces/IResourceMeta';
+import { IInteractHooks } from '@unblocked-web/emulator-spec/hooks/IHooks';
+import FrameNavigations from '@unblocked-web/secret-agent/lib/FrameNavigations';
+import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
 
 const { log } = Log(module);
 
@@ -242,7 +241,7 @@ export default class FrameEnvironment
     const domChangesTimestamp = this.lastDomChangeTimestamp;
 
     const elements: ICollectedElement[] = [];
-    if (nodePointer.iterableItems && nodePointer.iterableIsState) {
+    if (nodePointer.iterableItems && nodePointer.iterableIsNodePointers) {
       for (const item of nodePointer.iterableItems as INodePointer[]) {
         elements.push({
           name,

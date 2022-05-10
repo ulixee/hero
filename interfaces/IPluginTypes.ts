@@ -1,4 +1,4 @@
-import { EmulatorTypes } from '@bureau/interfaces/IEmulatorTypes';
+import { EmulatorTypes } from '@unblocked-web/emulator-spec/IEmulatorTypes';
 
 const ClientPlugin = 'ClientPlugin';
 const CorePlugin = 'CorePlugin';
