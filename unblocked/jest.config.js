@@ -47,7 +47,7 @@ module.exports = {
     '<rootDir>/.*.json',
   ],
   globalSetup: './jest.setup.js',
-  modulePathIgnorePatterns: ['build/apps/desktop/packages'],
+  modulePathIgnorePatterns: ['node_modules'],
   globalTeardown: './jest.teardown.js',
   testTimeout: 15e3,
   reporters: ['default', 'jest-summary-reporter'],
