@@ -408,12 +408,22 @@ export default class Session
 
   public async createTab(): Promise<Tab> {
     if (this.mode === 'browserless') return null;
-    const page = await this.browserContext.newPage({ groupName: 'session' });
+
+    let page: Page;
 
     // if first tab, install session storage
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
+      page = await this.browserContext.newPage({
+        groupName: 'session',
+        runPageScripts: false,
+        enableDomStorageTracker: false,
+      });
       await UserProfile.installStorage(this, page);
       this.hasLoadedUserProfile = true;
+    } else {
+      page = await this.browserContext.newPage({
+        groupName: 'session',
+      });
     }
 
     const first = this.tabsById.size === 0;
@@ -670,14 +680,17 @@ export default class Session
   }
 
   private onResourceStates(event: IResourceStateChangeEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.resourceStates.insert(event.context.id, event.context.stateChanges);
   }
 
   private onSocketClose(event: ISocketEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.sockets.insert(event.socket);
   }
 
   private onSocketConnect(event: ISocketEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.sockets.insert(event.socket);
   }
 

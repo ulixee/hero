@@ -1,10 +1,12 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IDomStorage, { IDomStorageForOrigin } from '@unblocked-web/emulator-spec/browser/IDomStorage';
+import IDomStorage, {
+  IDomStorageForOrigin,
+} from '@unblocked-web/emulator-spec/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
+import Page from '@unblocked-web/secret-agent/lib/Page';
 
 const { log } = Log(module);
 
@@ -71,7 +73,7 @@ export default class UserProfile {
     return this;
   }
 
-  public static async installStorage(session: Session, page: IPage): Promise<void> {
+  public static async installStorage(session: Session, page: Page): Promise<void> {
     const { userProfile } = session;
     const domStorage: IDomStorage = {};
     const origins: string[] = [];
@@ -89,8 +91,11 @@ export default class UserProfile {
       sessionId,
       storageDomains: origins?.length,
     });
-
+    const browserContext = session.browserContext;
     try {
+      browserContext.resources.isCollecting = false;
+      page.storeEventsWithoutListeners = false;
+
       session.mitmRequestSession.interceptorHandlers = [
         {
           urls: origins,
@@ -114,7 +119,7 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
 
             let readyClass = 'ready';
             if (originStorage?.indexedDB?.length) {
-              readyClass ='';
+              readyClass = '';
               script += `\n\n 
              ${InjectedScripts.getIndexedDbStorageRestoreScript()}
              
@@ -153,7 +158,7 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
           }
           continue;
         }
-        await frame.waitForLifecycleEvent('load');
+        await frame.waitForLifecycleEvent('DOMContentLoaded');
 
         await frame.evaluate(
           `(async function() {
@@ -167,8 +172,20 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
           },
         );
       }
+
+      // clear out frame state
+      await page.navigate('about:blank');
+      await page.mainFrame.waitForLifecycleEvent('load');
+      page.storeEventsWithoutListeners = true;
+
+      page.domStorageTracker.isEnabled = true;
+      await page.domStorageTracker.initialize();
+      // run initialization after page is initialized
+      page.runPageScripts = true;
+      await browserContext.initializePage(page);
     } finally {
       session.mitmRequestSession.interceptorHandlers = interceptorHandlers;
+      browserContext.resources.isCollecting = true;
       log.stats('UserProfile.installedStorage', { sessionId, parentLogId });
     }
 
