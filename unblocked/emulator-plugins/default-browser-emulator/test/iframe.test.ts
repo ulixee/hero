@@ -11,19 +11,16 @@ let koaServer: ITestKoaServer;
 let pool: Pool;
 
 const logger = TestLogger.forTest(module);
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  pool = new Pool({ defaultBrowserEngine: selectBrowserMeta.browserEngine });
+  pool = new Pool({ emulatorPlugins: [BrowserEmulator] });
   Helpers.onClose(() => pool.close(), true);
   await pool.start();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
-beforeEach(() => {
-  TestLogger.testNumber += 1;
-});
 
 test('should have a chrome object on iframes', async () => {
   const page = await createPage();
@@ -157,12 +154,11 @@ test('should not be able to detect contentWindow overrides', async () => {
 });
 
 test('should override before iframe.src using javascript', async () => {
-  const emulator = new BrowserEmulator(selectBrowserMeta);
-  const agent = await createAgent(emulator);
+  const agent = await createAgent();
   const page = await agent.newPage();
   await page.goto(`${koaServer.baseUrl}`);
   await page.waitForLoad(LoadStatus.DomContentLoaded);
-  const complete = new Promise(resolve => page.once('console', msg => resolve(msg.message)));
+  const complete = new Promise((resolve) => page.once('console', (msg) => resolve(msg.message)));
 
   await page.evaluate(`(() => {
 
@@ -171,7 +167,7 @@ test('should override before iframe.src using javascript', async () => {
     document.body.appendChild(iframe);
   })()`);
 
-  await expect(complete).resolves.toBe(emulator.userAgentString);
+  await expect(complete).resolves.toBe(agent.emulatorProfile.userAgentOption.string);
 });
 
 test('should emulate contentWindow features', async () => {
@@ -206,8 +202,7 @@ test('should emulate contentWindow features', async () => {
 });
 
 test('should handle a removed frame', async () => {
-  const emulator = new BrowserEmulator(selectBrowserMeta);
-  const agent = await createAgent(emulator);
+  const agent = await createAgent();
   const page = await createPage(agent);
   await page.goto(koaServer.baseUrl);
   await page.waitForLoad('PaintingStable');
@@ -226,7 +221,7 @@ test('should handle a removed frame', async () => {
     }
   })()`);
   await page.close();
-  expect(navigatorPlatform).toBe(emulator.operatingSystemPlatform);
+  expect(navigatorPlatform).toBe(agent.emulatorProfile.userAgentOption.operatingSystemPlatform);
 });
 
 // only run this test manually
@@ -277,7 +272,7 @@ test.skip('should not break recaptcha popup', async () => {
       mousePosition: ['window', 'document', ['querySelector', '#tswsubmit']],
     },
   ]);
-  await new Promise(resolve => setTimeout(resolve, 1e3));
+  await new Promise((resolve) => setTimeout(resolve, 1e3));
 
   const { hasRecaptchaPopup } = await page.evaluate(`(() => {
     const hasRecaptchaPopup = !!document.querySelectorAll('iframe[title="recaptcha challenge"]')
@@ -291,8 +286,7 @@ test.skip('should not break recaptcha popup', async () => {
 });
 
 async function createPage(agent?: Agent): Promise<Page> {
-  const emulator = new BrowserEmulator({ ...selectBrowserMeta });
-  agent ??= await createAgent(emulator);
+  agent ??= await createAgent();
   const page = await agent.newPage();
   Helpers.needsClosing.push(page);
   await page.goto(koaServer.baseUrl);
@@ -300,10 +294,8 @@ async function createPage(agent?: Agent): Promise<Page> {
   return page;
 }
 
-async function createAgent(emulator: BrowserEmulator): Promise<Agent> {
-  const agent = await pool.createAgent({
-    hooks: emulator,
-    browserEngine: emulator.browserEngine,
+async function createAgent(): Promise<Agent> {
+  const agent = pool.createAgent({
     logger,
   });
   Helpers.needsClosing.push(agent);

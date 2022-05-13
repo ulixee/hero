@@ -28,6 +28,10 @@ export default class BrowserEngine implements IBrowserEngine {
     this.engineOption = browserEngineOption;
     this.name = browserEngineOption.name;
     this.fullVersion = this.engineFetcher.fullVersion;
+
+    const version = browserEngineOption.fullVersion.split('.').map(Number);
+    // changes at version 90
+    this.doesBrowserAnimateScrolling = version[0] >= 91;
     this.executablePath = this.engineFetcher.executablePath;
     this.executablePathEnvVar = this.engineFetcher.executablePathEnvVar;
     this.isInstalled = this.engineFetcher.isInstalled;

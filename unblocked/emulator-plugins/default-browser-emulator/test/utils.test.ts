@@ -14,6 +14,7 @@ const { log } = Log(module);
 const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
 let browser: Browser;
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
   browser = new Browser(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => browser.close(), true);

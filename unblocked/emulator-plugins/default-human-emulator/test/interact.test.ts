@@ -9,13 +9,16 @@ import {
 import { IElementRect } from '@unblocked-web/js-path';
 import { LoadStatus, LocationStatus } from '@unblocked-web/emulator-spec/browser/Location';
 import { Agent, Pool } from '@unblocked-web/secret-agent';
-import { IBrowserEmulatorConfig } from '@unblocked-web/emulator-spec/IBrowserEmulator';
 import { PageHooks } from '@unblocked-web/sa-testing/browserUtils';
+import { IEmulatorConfig } from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeAll(async () => {
-  pool = new Pool({ defaultBrowserEngine: BrowserUtils.defaultBrowserEngine });
+  pool = new Pool({
+    defaultBrowserEngine: BrowserUtils.defaultBrowserEngine,
+    emulatorPlugins: [HumanEmulator],
+  });
   Helpers.onClose(() => pool.close(), true);
   await pool.start();
 
@@ -28,22 +31,16 @@ beforeAll(async () => {
   HumanEmulator.maxScrollDelayMillis = 0;
   koaServer = await Helpers.runKoaServer();
 });
-beforeEach(() => {
-  TestLogger.testNumber += 1;
-});
+beforeEach(Helpers.beforeEach);
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach);
 
-async function createAgent(configuration?: IBrowserEmulatorConfig): Promise<Agent> {
-  const pageHooks = new PageHooks(configuration);
-  const agent = await pool.createAgent({ hooks: pageHooks, logger: TestLogger.forTest(module) });
+async function createAgent(configuration?: IEmulatorConfig): Promise<Agent> {
+  const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
   Helpers.needsClosing.push(agent);
-  agent.hook(new HumanEmulator());
-  agent.hook({
-    beforeEachInteractionStep(step) {
-      // console.log('interact step', step);
-    },
-  });
+  if (configuration) {
+    agent.hook(new PageHooks(configuration));
+  }
   return agent;
 }
 

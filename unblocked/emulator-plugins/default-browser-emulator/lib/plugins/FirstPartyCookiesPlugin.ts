@@ -14,10 +14,14 @@ import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import DomOverridesBuilder from '../DomOverridesBuilder';
 import { IHooksProvider } from '@unblocked-web/emulator-spec/hooks/IHooks';
-import ILogger from '@unblocked-web/emulator-spec/ILogger';
-import { IBrowserEmulator } from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { EmulatorPluginClassDecorator } from '@unblocked-web/emulator-spec/emulator/IEmulatorPlugin';
 
+@EmulatorPluginClassDecorator
 export default class FirstPartyCookiesPlugin implements IHooksProvider {
+  public static id = 'FirstPartyCookiesPlugin';
+
   private cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
   private sitesWithUserInteraction: string[] = [];
@@ -34,7 +38,11 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
     [site: string]: IResolvablePromise;
   } = {};
 
-  constructor(readonly logger: ILogger, readonly browserEmulator: IBrowserEmulator) {}
+  private readonly logger: IBoundLog;
+
+  constructor(readonly emulatorProfile: IEmulatorProfile) {
+    this.logger = emulatorProfile.logger?.createChild(module);
+  }
 
   public onLoadUserProfileCookies(cookies, storage): void {
     this.loadProfileCookies(cookies, storage);
@@ -274,7 +282,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
   }
 
   private isMinimumVersion(minor: number, patch = 0): boolean {
-    const { browserVersion } = this.browserEmulator;
+    const { browserVersion } = this.emulatorProfile.userAgentOption;
     return Number(browserVersion.minor) >= minor && Number(browserVersion.patch) >= patch;
   }
 }

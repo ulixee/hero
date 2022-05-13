@@ -1,23 +1,17 @@
+import IEmulatorPlugin, {
+  EmulatorPluginClassDecorator,
+} from '@unblocked-web/emulator-spec/emulator/IEmulatorPlugin';
+import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import {
-  BrowserEmulatorClassDecorator,
-  IBrowserEmulator,
-  IBrowserEmulatorClass,
-  IBrowserEmulatorConfig,
-  IBrowserEmulatorCreateOptions,
-} from '@unblocked-web/emulator-spec/IBrowserEmulator';
-import { EmulatorTypes } from '@unblocked-web/emulator-spec/IEmulatorTypes';
-import IDeviceProfile from '@unblocked-web/emulator-spec/browser/IDeviceProfile';
+import IDeviceProfile from '@unblocked-web/emulator-spec/emulator/IDeviceProfile';
 import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
-import IUserAgentOption, { IVersion } from '@unblocked-web/emulator-spec/browser/IUserAgentOption';
+import IUserAgentOption from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
 import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
 import IDnsSettings from '@unblocked-web/emulator-spec/net/IDnsSettings';
 import ITcpSettings from '@unblocked-web/emulator-spec/net/ITcpSettings';
 import ITlsSettings from '@unblocked-web/emulator-spec/net/ITlsSettings';
 import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import { IWorker } from '@unblocked-web/emulator-spec/browser/IWorker';
-import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
-import IGeolocation from '@unblocked-web/emulator-spec/browser/IGeolocation';
 import IHttp2ConnectSettings from '@unblocked-web/emulator-spec/net/IHttp2ConnectSettings';
 import IHttpSocketAgent from '@unblocked-web/emulator-spec/net/IHttpSocketAgent';
 import Viewports from './lib/Viewports';
@@ -62,121 +56,88 @@ export const defaultBrowserEngine = browserEngineOptions.default;
 
 const { log } = Log(module);
 
-@BrowserEmulatorClassDecorator
-export default class DefaultBrowserEmulator implements IBrowserEmulator {
-  public static readonly id: string = dataLoader.pkg.name.replace('@ulixee/', '');
-  public static readonly type = EmulatorTypes.BrowserEmulator;
+export interface IEmulatorOptions {
+  userAgentSelector?: string;
+}
 
-  public readonly id: string;
-
-  public readonly browserName: string;
-  public readonly browserVersion: IVersion;
-
-  public readonly operatingSystemName: string;
-  public readonly operatingSystemVersion: IVersion;
-  public readonly operatingSystemPlatform: string;
-
-  public readonly userAgentString: string;
-  public readonly browserEngine: IBrowserEngine;
+@EmulatorPluginClassDecorator
+export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IEmulatorPlugin<T> {
   public readonly logger: IBoundLog;
-  public readonly deviceProfile: IDeviceProfile;
+  public readonly emulatorProfile: IEmulatorProfile<T>;
 
-  public timezoneId: string;
-  public locale: string;
-  public viewport: IViewport;
-  public geolocation: IGeolocation;
-  public dnsOverTlsProvider: IDnsSettings['dnsOverTlsConnection'];
-  public upstreamProxyIpMask: IBrowserEmulatorConfig['upstreamProxyIpMask'];
-  public upstreamProxyUrl: string;
+  public get userAgentString(): string {
+    return this.emulatorProfile.userAgentOption.string;
+  }
+
+  public get browserEngine(): IBrowserEngine {
+    return this.emulatorProfile.browserEngine;
+  }
+
+  public get deviceProfile(): IDeviceProfile {
+    return this.emulatorProfile.deviceProfile;
+  }
 
   protected readonly data: IBrowserData;
   private readonly domOverridesBuilder: DomOverridesBuilder;
   private readonly userAgentData: IUserAgentData;
 
-  constructor(createOptions: IBrowserEmulatorCreateOptions) {
-    const { userAgentOption, browserEngine, logger, deviceProfile } = createOptions;
-    this.id = (this.constructor as IBrowserEmulatorClass).id;
-    this.browserName = userAgentOption.browserName;
-    this.browserVersion = userAgentOption.browserVersion;
-
-    this.operatingSystemPlatform = userAgentOption.operatingSystemPlatform;
-    this.operatingSystemName = userAgentOption.operatingSystemName;
-    this.operatingSystemVersion = userAgentOption.operatingSystemVersion;
-
-    this.userAgentString = userAgentOption.string;
-    this.browserEngine = browserEngine;
-
-    this.logger = logger ?? log.createChild(module, {});
-    this.deviceProfile = deviceProfile ?? {};
-    this.data = dataLoader.as(createOptions.userAgentOption) as any;
+  constructor(emulatorProfile: IEmulatorProfile<T>) {
+    this.logger = emulatorProfile.logger ?? log.createChild(module);
+    this.emulatorProfile = emulatorProfile;
+    this.data = dataLoader.as(emulatorProfile.userAgentOption) as any;
     this.userAgentData = this.getUserAgentData();
     // set default device profile options
+    emulatorProfile.deviceProfile ??= {};
     configureDeviceProfile(this.deviceProfile);
-
-    if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
-      // createOptions.corePlugins.use(FirstPartyCookiesPlugin);
-    }
-    this.domOverridesBuilder = loadDomOverrides(this, this.data, this.userAgentData);
+    this.domOverridesBuilder = loadDomOverrides(this.emulatorProfile, this.data, this.userAgentData);
   }
 
-  configure(config: IBrowserEmulatorConfig): void {
-    if (!config) return;
+  configure(emulatorProfile: IEmulatorProfile<T>): void {
+    emulatorProfile.locale ??= this.data.browserConfig.defaultLocale;
+    emulatorProfile.viewport ??= Viewports.getDefault(
+      this.data.windowBaseFraming,
+      this.data.windowFraming,
+    );
+    emulatorProfile.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    config.locale ??= this.locale ?? this.data.browserConfig.defaultLocale;
-    config.viewport ??=
-      this.viewport ?? Viewports.getDefault(this.data.windowBaseFraming, this.data.windowFraming);
-    config.timezoneId ??= this.timezoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-    config.geolocation ??= this.geolocation;
-    if (config.upstreamProxyUrl) {
-      config.upstreamProxyIpMask ??= {};
-      config.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
+    if (emulatorProfile.upstreamProxyUrl) {
+      emulatorProfile.upstreamProxyIpMask ??= {};
+      emulatorProfile.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
     }
-
-    this.locale = config.locale;
-    this.viewport = config.viewport;
-    this.timezoneId = config.timezoneId;
-    this.geolocation = config.geolocation;
-    this.dnsOverTlsProvider = config.dnsOverTlsProvider;
-    this.upstreamProxyIpMask = config.upstreamProxyIpMask;
-    this.upstreamProxyUrl = config.upstreamProxyUrl;
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
-    configureSessionDns(this, settings);
-
-    if (this.dnsOverTlsProvider !== undefined) {
-      settings.dnsOverTlsConnection = this.dnsOverTlsProvider;
-    }
+    configureSessionDns(this.emulatorProfile, settings);
   }
 
   public onTcpConfiguration(settings: ITcpSettings): void {
-    configureSessionTcp(this, settings);
+    configureSessionTcp(this.emulatorProfile, settings);
   }
 
   public onTlsConfiguration(settings: ITlsSettings): void {
-    configureSessionTls(this, settings);
+    configureSessionTls(this.emulatorProfile, settings);
   }
 
   public beforeHttpRequest(resource: IHttpResourceLoadDetails): void {
-    modifyHeaders(this, this.data, this.userAgentData, resource);
+    modifyHeaders(this.emulatorProfile, this.data, this.userAgentData, resource);
   }
 
   public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
-    if (this.upstreamProxyIpMask) {
-      this.upstreamProxyIpMask.publicIp ??= await lookupPublicIp(
-        this.upstreamProxyIpMask.ipLookupService,
-      );
-      this.upstreamProxyIpMask.proxyIp ??= await lookupPublicIp(
-        this.upstreamProxyIpMask.ipLookupService,
+    const profile = this.emulatorProfile;
+    const upstreamProxyIpMask = profile.upstreamProxyIpMask;
+    if (upstreamProxyIpMask) {
+      upstreamProxyIpMask.publicIp ??= await lookupPublicIp(upstreamProxyIpMask.ipLookupService);
+      upstreamProxyIpMask.proxyIp ??= await lookupPublicIp(
+        upstreamProxyIpMask.ipLookupService,
         agent,
-        this.upstreamProxyUrl,
+        profile.upstreamProxyUrl,
       );
       this.logger.info('PublicIp Lookup', {
-        ...this.upstreamProxyIpMask,
+        ...upstreamProxyIpMask,
       });
       this.domOverridesBuilder.add('webrtc', {
-        localIp: this.upstreamProxyIpMask.publicIp,
-        proxyIp: this.upstreamProxyIpMask.proxyIp,
+        localIp: upstreamProxyIpMask.publicIp,
+        proxyIp: upstreamProxyIpMask.proxyIp,
       });
     }
   }
@@ -185,7 +146,7 @@ export default class DefaultBrowserEmulator implements IBrowserEmulator {
     request: IHttpResourceLoadDetails,
     settings: IHttp2ConnectSettings,
   ): void {
-    configureHttp2Session(this, this.data, request, settings);
+    configureHttp2Session(this.emulatorProfile, this.data, request, settings);
   }
 
   public onNewBrowser(browser: IBrowser, options: IBrowserLaunchArgs): void {
@@ -195,34 +156,36 @@ export default class DefaultBrowserEmulator implements IBrowserEmulator {
   public onNewPage(page: IPage): Promise<any> {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
+    const emulatorProfile = this.emulatorProfile;
     return Promise.all([
-      setUserAgent(this, devtools, this.userAgentData),
-      setTimezone(this, devtools),
-      setLocale(this, devtools),
-      setScreensize(this, page, devtools),
-      setActiveAndFocused(this, devtools),
+      setUserAgent(emulatorProfile, devtools, this.userAgentData),
+      setTimezone(emulatorProfile, devtools),
+      setLocale(emulatorProfile, devtools),
+      setScreensize(emulatorProfile, page, devtools),
+      setActiveAndFocused(emulatorProfile, devtools),
       setPageDomOverrides(this.domOverridesBuilder, this.data, page),
-      setGeolocation(this, page),
+      setGeolocation(emulatorProfile, page),
     ]);
   }
 
   public onNewWorker(worker: IWorker): Promise<any> {
     const devtools = worker.devtoolsSession;
     return Promise.all([
-      setUserAgent(this, devtools, this.userAgentData),
+      setUserAgent(this.emulatorProfile, devtools, this.userAgentData),
       setWorkerDomOverrides(this.domOverridesBuilder, this.data, worker),
     ]);
   }
 
   protected getUserAgentData(): IUserAgentData {
     if (!this.data.windowNavigator.navigator.userAgentData) return null;
-    const uaFullVersion = `${this.browserVersion.major}.0.${this.browserVersion.patch}.${this.browserVersion.build}`;
-    const platformVersion = `${this.operatingSystemVersion.major}.${
-      this.operatingSystemVersion.minor ?? '0'
-    }.${this.operatingSystemVersion.build ?? '1'}`;
+    const { browserVersion, operatingSystemVersion } = this.emulatorProfile.userAgentOption;
+    const uaFullVersion = `${browserVersion.major}.0.${browserVersion.patch}.${browserVersion.build}`;
+    const platformVersion = `${operatingSystemVersion.major}.${
+      operatingSystemVersion.minor ?? '0'
+    }.${operatingSystemVersion.build ?? '1'}`;
 
     const brands = this.data.windowNavigator.navigator.userAgentData.brands;
-    const brandData = [brands['0'], brands['1'], brands['2']].map(x => ({
+    const brandData = [brands['0'], brands['1'], brands['2']].map((x) => ({
       brand: x.brand._$value,
       version: x.version._$value,
     }));
@@ -232,6 +195,33 @@ export default class DefaultBrowserEmulator implements IBrowserEmulator {
       platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
       platformVersion,
     };
+  }
+
+  public static shouldActivate(emulatorProfile: IEmulatorProfile<IEmulatorOptions>): boolean {
+    if (
+      emulatorProfile.userAgentOption &&
+      !userAgentOptions.hasDataSupport(emulatorProfile.userAgentOption)
+    ) {
+      emulatorProfile.logger?.info(
+        "DefaultBrowserEmulator doesn't have data file for the provided userAgentOption",
+        { userAgentOption: emulatorProfile.userAgentOption },
+      );
+      return false;
+    }
+
+    // assign a browser engine and user agent option if not provided
+    if (!emulatorProfile.userAgentOption) {
+      try {
+        const { browserEngine, userAgentOption } = DefaultBrowserEmulator.selectBrowserMeta(
+          emulatorProfile.customEmulatorConfig?.userAgentSelector,
+        );
+        emulatorProfile.browserEngine = browserEngine;
+        emulatorProfile.userAgentOption = userAgentOption;
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static selectBrowserMeta(userAgentSelector?: string): {
@@ -248,12 +238,10 @@ export default class DefaultBrowserEmulator implements IBrowserEmulator {
     );
 
     const browserEngine = new BrowserEngine(browserEngineOption);
-
-    if (browserEngine.name === 'chrome') {
-      const version = browserEngine.fullVersion.split('.').map(Number);
-      // changes at version 90
-      browserEngine.doesBrowserAnimateScrolling = version[0] >= 91;
-    }
     return { browserEngine, userAgentOption };
+  }
+
+  public static defaultBrowserEngine(): IBrowserEngine {
+    return new BrowserEngine(defaultBrowserEngine);
   }
 }

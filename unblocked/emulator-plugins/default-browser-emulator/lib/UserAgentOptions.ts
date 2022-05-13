@@ -2,7 +2,7 @@ import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrow
 import DataLoader from './DataLoader';
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IUserAgentOption, { IVersion } from '@unblocked-web/emulator-spec/browser/IUserAgentOption';
+import IUserAgentOption, { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';
 import BrowserEngineOptions from './BrowserEngineOptions';
@@ -40,7 +40,7 @@ export default class UserAgentOptions {
   ) {
     const defaultBrowserEngine = browserEngineOptions.default;
     this.defaultBrowserUserAgentOptions = this.installedOptions.filter(
-      x =>
+      (x) =>
         x.browserName === defaultBrowserEngine.name &&
         x.browserVersion.major === defaultBrowserEngine.version.major,
     );
@@ -50,6 +50,13 @@ export default class UserAgentOptions {
     return UserAgentOptions.random(this.defaultBrowserUserAgentOptions);
   }
 
+  public hasDataSupport(userAgentOption: IUserAgentOption): boolean {
+    const browserId = createBrowserId(userAgentOption);
+    const osId = createOsId(userAgentOption);
+
+    return this.dataLoader.isInstalledBrowserAndOs(browserId, osId);
+  }
+
   public findClosestInstalledToUserAgentString(userAgentString: string): IUserAgentOption {
     // otherwise parse the agent
     let userAgent = UserAgentOptions.parse(userAgentString);
@@ -57,7 +64,7 @@ export default class UserAgentOptions {
     const osId = createOsId(userAgent);
     if (
       !this.dataLoader.isInstalledBrowserAndOs(browserId, osId) ||
-      !this.browserEngineOptions.installedOptions.some(x => x.id === browserId)
+      !this.browserEngineOptions.installedOptions.some((x) => x.id === browserId)
     ) {
       userAgent = this.findClosestInstalled(userAgent);
       userAgent.string = userAgentString;
@@ -71,7 +78,7 @@ export default class UserAgentOptions {
 
   public findClosestInstalled(userAgent: IUserAgentOption): IUserAgentOption {
     let filteredOptions = this.installedOptions.filter(
-      x =>
+      (x) =>
         x.browserName === userAgent.browserName &&
         x.browserVersion.major === userAgent.browserVersion.major,
     );
@@ -79,12 +86,12 @@ export default class UserAgentOptions {
     if (!filteredOptions.length) filteredOptions = this.defaultBrowserUserAgentOptions;
 
     const withOs = filteredOptions.filter(
-      x => x.operatingSystemName === userAgent.operatingSystemName,
+      (x) => x.operatingSystemName === userAgent.operatingSystemName,
     );
 
     if (withOs.length) filteredOptions = withOs;
 
-    const withOsVersion = filteredOptions.filter(x =>
+    const withOsVersion = filteredOptions.filter((x) =>
       isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion, true),
     );
 
@@ -198,7 +205,7 @@ export default class UserAgentOptions {
     dataUserAgentOptions: IDataUserAgentOptions,
   ): void {
     const realOperatingSystem = dataUserAgentOptions.find(
-      x =>
+      (x) =>
         x.browserName === userAgent.browserName &&
         x.browserVersion.major === userAgent.browserVersion.major &&
         x.browserVersion.minor === userAgent.browserVersion.minor &&

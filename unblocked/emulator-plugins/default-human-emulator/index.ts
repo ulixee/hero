@@ -8,29 +8,24 @@ import {
   isMousePositionXY,
 } from '@unblocked-web/emulator-spec/interact/IInteractions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IInteractionsHelper, { IRectLookup } from '@unblocked-web/emulator-spec/interact/IInteractionsHelper';
+import IInteractionsHelper, {
+  IRectLookup,
+} from '@unblocked-web/emulator-spec/interact/IInteractionsHelper';
 import IPoint from '@unblocked-web/emulator-spec/browser/IPoint';
 import generateVector from './generateVector';
 import IMouseResult from '@unblocked-web/emulator-spec/interact/IMouseResult';
-import {
-  IHumanEmulator,
-  IHumanEmulatorCreateOptions,
-  HumanEmulatorClassDecorator,
-  IHumanEmulatorClass,
-} from '@unblocked-web/emulator-spec/IHumanEmulator';
-import { EmulatorTypes } from '@unblocked-web/emulator-spec/IEmulatorTypes';
-import * as pkg from './package.json';
 import logger from '@ulixee/commons/lib/Logger';
+import IEmulatorPlugin, {
+  EmulatorPluginClassDecorator,
+} from '@unblocked-web/emulator-spec/emulator/IEmulatorPlugin';
+import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
 
 const { log } = logger(module);
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
-@HumanEmulatorClassDecorator
-export default class DefaultHumanEmulator implements IHumanEmulator {
-  public static readonly id = pkg.name.replace('@ulixee/', '');
-  public static readonly type = EmulatorTypes.HumanEmulator;
-
+@EmulatorPluginClassDecorator
+export default class DefaultHumanEmulator implements IEmulatorPlugin {
   public static overshootSpread = 2;
   public static overshootRadius = 5;
   public static overshootThreshold = 250;
@@ -46,12 +41,10 @@ export default class DefaultHumanEmulator implements IHumanEmulator {
 
   public static wordsPerMinuteRange = [80, 100];
 
-  public id: string;
   private millisPerCharacter: number;
   private readonly logger: IBoundLog;
 
-  constructor(options?: IHumanEmulatorCreateOptions) {
-    this.id = (this.constructor as IHumanEmulatorClass).id;
+  constructor(options?: IEmulatorProfile) {
     this.logger = options?.logger ?? log.createChild(module);
   }
 
@@ -139,7 +132,6 @@ export default class DefaultHumanEmulator implements IHumanEmulator {
       if (shouldAddMouseJitter) {
         await this.jitterMouse(helper, run);
       }
-
       await run({
         mousePosition: [x, y],
         command: InteractionCommand.scroll,
@@ -515,7 +507,7 @@ export default class DefaultHumanEmulator implements IHumanEmulator {
 
 async function delay(millis: number): Promise<void> {
   if (!millis) return;
-  await new Promise<void>(resolve => setTimeout(resolve, Math.floor(millis)).unref());
+  await new Promise<void>((resolve) => setTimeout(resolve, Math.floor(millis)).unref());
 }
 
 function splitIntoMaxLengthSegments(total: number, maxValue: number): number[] {

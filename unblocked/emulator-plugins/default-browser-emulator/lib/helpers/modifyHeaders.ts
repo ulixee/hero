@@ -1,18 +1,19 @@
 import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
-import BrowserEmulator from '../../index';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 import IUserAgentData from '../../interfaces/IUserAgentData';
+import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
 
 export default function modifyHeaders(
-  browserEmulator: BrowserEmulator,
+  emulatorProfile: IEmulatorProfile,
   data: IBrowserData,
   userAgentData: IUserAgentData,
   resource: IHttpResourceLoadDetails,
 ): boolean {
-  const { userAgentString, locale } = browserEmulator;
-  const defaultOrder = getResourceHeaderDefaults(browserEmulator, data.headers, resource);
+  const userAgentString = emulatorProfile.userAgentOption.string;
+  const locale = emulatorProfile.locale;
+  const defaultOrder = getResourceHeaderDefaults(emulatorProfile, data.headers, resource);
   const headers = resource.requestHeaders;
 
   // if no default order, at least ensure connection and user-agent
@@ -97,7 +98,7 @@ export default function modifyHeaders(
 }
 
 function getResourceHeaderDefaults(
-  browserEmulator: BrowserEmulator,
+  emulatorProfile: IEmulatorProfile,
   headerProfiles: IDataHeaders,
   resource: IHttpResourceLoadDetails,
 ): Pick<IDataHeaderOrder, 'order' | 'orderKeys' | 'defaults'> {
@@ -116,21 +117,21 @@ function getResourceHeaderDefaults(
     defaultOrder.orderKeys ??= new Set(defaultOrder.order.map(toLowerCase));
   }
 
-  let defaultOrders = profiles.filter(x => x.method === method);
+  let defaultOrders = profiles.filter((x) => x.method === method);
 
   if (defaultOrders.length > 1) {
-    const filtered = defaultOrders.filter(x => x.originTypes.includes(originType));
+    const filtered = defaultOrders.filter((x) => x.originTypes.includes(originType));
     if (filtered.length) defaultOrders = filtered;
   }
 
   if (defaultOrders.length > 1 && (headers['sec-fetch-user'] || headers['Sec-Fetch-User'])) {
-    const filtered = defaultOrders.filter(x => x.orderKeys.has('sec-fetch-user'));
+    const filtered = defaultOrders.filter((x) => x.orderKeys.has('sec-fetch-user'));
     if (filtered.length) defaultOrders = filtered;
   }
 
   if (defaultOrders.length > 1) {
     if (headers.Cookie || headers.cookie) {
-      const filtered = defaultOrders.filter(x => x.orderKeys.has('cookie'));
+      const filtered = defaultOrders.filter((x) => x.orderKeys.has('cookie'));
       if (filtered.length) defaultOrders = filtered;
     }
   }

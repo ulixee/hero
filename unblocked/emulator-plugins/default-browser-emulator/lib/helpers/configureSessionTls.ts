@@ -1,10 +1,10 @@
-import { IBrowserEmulator } from '@unblocked-web/emulator-spec/IBrowserEmulator';
+import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
 import ITlsSettings from '@unblocked-web/emulator-spec/net/ITlsSettings';
 
 export default function configureSessionTcp(
-  browserEmulator: IBrowserEmulator,
+  emulatorProfile: IEmulatorProfile,
   settings: ITlsSettings,
 ): void {
-  const { browserName, browserVersion } = browserEmulator;
+  const { browserName, browserVersion } = emulatorProfile.userAgentOption;
   settings.tlsClientHelloId = `${browserName}-${browserVersion.major}`;
 }

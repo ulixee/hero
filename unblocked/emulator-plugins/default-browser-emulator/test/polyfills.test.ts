@@ -2,28 +2,23 @@ import * as http from 'http';
 import { inspect } from 'util';
 import * as Helpers from '@unblocked-web/sa-testing/helpers';
 import { ITestHttpServer } from '@unblocked-web/sa-testing/helpers';
+import { defaultBrowserEngine } from '@unblocked-web/sa-testing/browserUtils';
 import { Browser } from '@unblocked-web/secret-agent';
-import Log from '@ulixee/commons/lib/Logger';
-import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
-import BrowserEmulator from '../index';
-import DomExtractor = require('./DomExtractor');
 import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
-
-const { log } = Log(module);
+import { TestLogger } from '@unblocked-web/sa-testing';
+import DomExtractor = require('./DomExtractor');
 
 let browser: Browser;
 let httpServer: ITestHttpServer<http.Server>;
 let context: BrowserContext;
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
-  browser = new Browser(selectBrowserMeta.browserEngine);
+  browser = new Browser(defaultBrowserEngine);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
-  const emulator = new BrowserEmulator({ ...selectBrowserMeta, logger: log as IBoundLog });
-  emulator.onNewPage = null;
-  context = await browser.newContext({ logger: log as IBoundLog });
-  context.hook(emulator);
+
+  context = await browser.newContext({ logger: TestLogger.forTest(module) });
   Helpers.onClose(() => context.close().catch(), true);
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
 });
@@ -109,7 +104,7 @@ test('it should be able to add polyfills', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
   const json = await page.mainFrame.evaluate(
@@ -149,7 +144,7 @@ test('it should be able to remove properties', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
   expect(await page.mainFrame.evaluate(`!!window.Atomics`, false)).not.toBeTruthy();
@@ -178,7 +173,7 @@ test('it should be able to change properties', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
   const protocolToString = await page.mainFrame.evaluate(
@@ -224,7 +219,7 @@ test('it should be able to change property order', async () => {
   await new Promise(setImmediate);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
   const keyOrder = (await page.mainFrame.evaluate(
@@ -271,7 +266,7 @@ test('it should be able to change window property order', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
   const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
 

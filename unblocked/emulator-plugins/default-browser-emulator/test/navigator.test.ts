@@ -12,11 +12,12 @@ import { TestLogger } from '@unblocked-web/sa-testing';
 import DomExtractor = require('./DomExtractor');
 
 const logger = TestLogger.forTest(module);
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
 
 let navigatorConfig: any;
 let browser: Browser;
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
+  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
   const asOsDataDir = `${__dirname}/../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}`;
 
@@ -29,9 +30,6 @@ beforeAll(async () => {
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
-beforeEach(() => {
-  TestLogger.testNumber += 1;
-});
 
 const debug = process.env.DEBUG || false;
 
@@ -73,7 +71,7 @@ test('it should override plugins in a browser window', async () => {
 })()`,
     false,
   );
-  expect(plugin1Mimes).toStrictEqual(pluginsData.mimeTypes.map(x => x.type));
+  expect(plugin1Mimes).toStrictEqual(pluginsData.mimeTypes.map((x) => x.type));
 
   const mimecount = await page.mainFrame.evaluate(`navigator.mimeTypes.length`, false);
   expect(mimecount).toBe(pluginsData.mimeTypes.length);
@@ -104,26 +102,28 @@ test('it should override userAgentData in a browser window', async () => {
   const httpServer = await Helpers.runHttpsServer((req, res) => {
     res.end('<html><head></head><body>Hi</body></html>');
   });
-  const context = await browser.newContext({ logger });
-  Helpers.onClose(() => context.close());
-  context.hook({
-    onNewPage(page: IPage): Promise<any> {
-      return page.addNewDocumentScript(
-        getOverrideScript('navigator', {
-          userAgentData: {
-            brands: [
-              { brand: ' Not A;Brand', version: '99' },
-              { brand: 'Chromium', version: '98' },
-              { brand: 'Google Chrome', version: '98' },
-            ],
-            platform: 'macOS',
-            mobile: false,
-          },
-        }).script,
-        false,
-      );
+  const context = await browser.newContext({
+    logger,
+    hooks: {
+      onNewPage(page: IPage): Promise<any> {
+        return page.addNewDocumentScript(
+          getOverrideScript('navigator', {
+            userAgentData: {
+              brands: [
+                { brand: ' Not A;Brand', version: '99' },
+                { brand: 'Chromium', version: '98' },
+                { brand: 'Google Chrome', version: '98' },
+              ],
+              platform: 'macOS',
+              mobile: false,
+            },
+          }).script,
+          false,
+        );
+      },
     },
   });
+  Helpers.onClose(() => context.close());
 
   const page = await context.newPage();
 

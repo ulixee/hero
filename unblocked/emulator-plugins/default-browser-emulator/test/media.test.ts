@@ -1,31 +1,24 @@
 import { Helpers, TestLogger } from '@unblocked-web/sa-testing';
 import { ITestKoaServer } from '@unblocked-web/sa-testing/helpers';
 import BrowserEmulator from '../index';
-import { Browser, Agent, Pool } from '@unblocked-web/secret-agent';
+import { Pool } from '@unblocked-web/secret-agent';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
 const logger = TestLogger.forTest(module);
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  const emulator = new BrowserEmulator(selectBrowserMeta);
-  pool = new Pool({ defaultBrowserEngine: emulator.browserEngine });
+  pool = new Pool({ emulatorPlugins: [BrowserEmulator] });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
-beforeEach(() => {
-  TestLogger.testNumber += 1;
-});
 
 test('can use widevine', async () => {
-  const emulator = new BrowserEmulator(selectBrowserMeta);
-  const agent = await pool.createAgent({
-    browserEngine: emulator.browserEngine,
-    hooks: emulator,
+  const agent = pool.createAgent({
     logger,
   });
   Helpers.needsClosing.push(agent);
@@ -59,10 +52,7 @@ test('can use widevine', async () => {
 });
 
 test('plays m3u8', async () => {
-  const emulator = new BrowserEmulator(selectBrowserMeta);
-  const agent = await pool.createAgent({
-    browserEngine: emulator.browserEngine,
-    hooks: emulator,
+  const agent = pool.createAgent({
     logger,
   });
   Helpers.needsClosing.push(agent);

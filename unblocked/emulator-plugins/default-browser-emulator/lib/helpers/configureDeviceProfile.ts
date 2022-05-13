@@ -1,4 +1,4 @@
-import IDeviceProfile from '@unblocked-web/emulator-spec/browser/IDeviceProfile';
+import IDeviceProfile from '@unblocked-web/emulator-spec/emulator/IDeviceProfile';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import { randomBytes } from 'crypto';
 

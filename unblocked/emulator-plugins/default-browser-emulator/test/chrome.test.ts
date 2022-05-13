@@ -3,19 +3,19 @@ import * as Path from 'path';
 import * as Helpers from '@unblocked-web/sa-testing/helpers';
 import { inspect } from 'util';
 import { Browser } from '@unblocked-web/secret-agent';
-import Log from '@ulixee/commons/lib/Logger';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import Page from '@unblocked-web/secret-agent/lib/Page';
+import { TestLogger } from '@unblocked-web/sa-testing';
 import DomExtractor = require('./DomExtractor');
-
-const { log } = Log(module);
-const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.14');
 
 let chrome;
 let prevProperty: string;
 let browser: Browser;
+
+beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
+  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.14');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
   const windowChromePath = Path.resolve(
     __dirname,
@@ -43,7 +43,7 @@ test('it should mimic a chrome object', async () => {
   await page.addNewDocumentScript(script, false);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', (ev) => ev.name === 'DOMContentLoaded'),
   ]);
 
   const structure = JSON.parse(
@@ -82,7 +82,7 @@ test('it should update loadtimes and csi values', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', (ev) => ev.name === 'DOMContentLoaded'),
   ]);
 
   const loadTimes = JSON.parse(
@@ -103,9 +103,7 @@ test('it should update loadtimes and csi values', async () => {
 }, 60e3);
 
 async function createPage(): Promise<Page> {
-  const emulator = new BrowserEmulator({ ...selectBrowserMeta, logger: log });
-  const context = await browser.newContext(emulator);
-  context.hook(emulator)
+  const context = await browser.newContext({ logger: TestLogger.forTest(module) });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
   page.on('page-error', console.log);

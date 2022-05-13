@@ -3,15 +3,16 @@ const rmSync = 'rmSync' in fs ? 'rmSync' : 'rmdirSync';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const CertificateManager = require('@unblocked-web/sa-mitm-socket/lib/CertificateGenerator').default;
+const dataDir = process.env.SA_DATA_DIR ?? `${__dirname}/.data-test`;
 
 module.exports = async () => {
   try {
-    fs[rmSync](`${__dirname}/.data-test`, { recursive: true });
-    fs.mkdirSync(`${__dirname}/.data-test`);
+    fs[rmSync](dataDir, { recursive: true });
+    fs.mkdirSync(dataDir);
   
     // generate base certs
     const certManager = new CertificateManager({
-      storageDir: `${__dirname}/.data-test`,
+      storageDir: dataDir,
     });
     await certManager.waitForConnected;
     certManager.close();

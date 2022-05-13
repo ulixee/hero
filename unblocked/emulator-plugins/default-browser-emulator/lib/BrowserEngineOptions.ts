@@ -1,4 +1,4 @@
-import { IVersion } from '@unblocked-web/emulator-spec/browser/IUserAgentOption';
+import { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
 import IBrowserEngineOption from '@unblocked-web/emulator-spec/browser/IBrowserEngineOption';
 import DataLoader from './DataLoader';
 
