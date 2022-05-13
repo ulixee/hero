@@ -1,8 +1,8 @@
 [submodule "emulator-spec"]
-	path = emulator-spec
+	path = specifications
 	url = https://github.com/unblocked-web/emulator-spec.git
 [submodule "secret-agent"]
-	path = secret-agent
+	path = agent
 	url = https://github.com/unblocked-web/secret-agent
 [submodule "js-path"]
 	path = js-path
