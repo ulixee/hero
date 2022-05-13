@@ -1,4 +1,4 @@
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import IWebsocketMessage from './IWebsocketMessage';
 
 export default interface ICollectedResource {

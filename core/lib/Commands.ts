@@ -7,7 +7,7 @@ import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICommandMarker from '@unblocked-web/secret-agent/interfaces/ICommandMarker';
+import ICommandMarker from '@unblocked-web/agent/interfaces/ICommandMarker';
 
 export default class Commands
   extends TypedEventEmitter<{

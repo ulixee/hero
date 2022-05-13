@@ -1,7 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import { IInteractionGroup } from '@unblocked-web/emulator-spec/interact/IInteractions';
-import { getKeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
-import { getNodePointerFnName } from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
+import { IInteractionGroup } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { getKeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import { getNodePointerFnName } from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';

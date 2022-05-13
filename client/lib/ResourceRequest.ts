@@ -1,8 +1,8 @@
-import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
-import IResourceRequest from '@unblocked-web/emulator-spec/net/IResourceRequest';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IResourceRequest from '@unblocked-web/specifications/agent/net/IResourceRequest';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 
 const propertyKeys: (keyof ResourceRequest)[] = [

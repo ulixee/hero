@@ -2053,16 +2053,6 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
-"@ulixee/commons@1.5.11":
-  version "1.5.11"
-  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-1.5.11.tgz#5747c33a3946d543ae66242fab7f7753ea855909"
-  integrity sha512-96nND7jf3oN+gvIlTCDrOZnWA77EQRTEm5nU6AcXDmShm1cU6DLv8SKfMNCd/F0JQt/lW+L9wKHlNfaQn3Ea4A==
-  dependencies:
-    devtools-protocol "^0.0.981744"
-    https-proxy-agent "^5.0.0"
-    semver "^7.3.7"
-    source-map-js "^1.0.1"
-
 JSONStream@^1.0.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"

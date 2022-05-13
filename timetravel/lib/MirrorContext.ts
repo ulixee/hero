@@ -1,7 +1,7 @@
 import Core, { Session } from '@ulixee/hero-core';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import Log from '@ulixee/commons/lib/Logger';
-import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
@@ -16,26 +16,23 @@ export default class MirrorContext {
     options.showChrome = headed;
 
     const logger = log.createChild(module, { sessionId });
-    const plugins = new CorePlugins(
-      {
-        humanEmulatorId: options.humanEmulatorId,
-        browserEmulatorId: options.browserEmulatorId,
-        userAgentSelector: options.userAgent,
-        deviceProfile: options?.userProfile?.deviceProfile,
-        getSessionSummary() {
-          return {
-            id: sessionId,
-            options,
-          };
-        },
-      },
+
+    const agent = Core.pool.createAgent({
+      options,
       logger,
-    );
-    plugins.browserEngine.isHeaded = options.showChrome;
-    plugins.configure(options);
+      deviceProfile: options?.userProfile?.deviceProfile,
+      id: sessionId,
+    });
 
-    const browser = await Core.pool.getBrowser(plugins.browserEngine, plugins);
+    new CorePlugins(agent, {
+      getSessionSummary() {
+        return {
+          id: sessionId,
+          options,
+        };
+      },
+    });
 
-    return await browser.newContext({ logger });
+    return await agent.open();
   }
 }

@@ -1,13 +1,11 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
+import { LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ICorePluginClass } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
-import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
@@ -15,22 +13,32 @@ import ConnectionToClient from './connections/ConnectionToClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import { IHumanEmulatorClass } from '@unblocked-web/emulator-spec/IHumanEmulator';
-import { IBrowserEmulatorClass } from '@unblocked-web/emulator-spec/IBrowserEmulator';
 import { dataDir } from './env';
 import NetworkDb from './dbs/NetworkDb';
-import Pool from '@unblocked-web/secret-agent/lib/Pool';
-import CorePlugins from './lib/CorePlugins';
+import Pool from '@unblocked-web/agent/lib/Pool';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import SessionsDb from './dbs/SessionsDb';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
+import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
+import { IAgentPluginClass } from '@unblocked-web/specifications/plugin/IAgentPlugin';
 
 const { log } = Log(module);
 
 export { Tab, Session, LocationTrigger };
 
 export default class Core {
+  public static get defaultAgentPlugins(): IAgentPluginClass[] {
+    if (this.pool) return this.pool.agentPlugins;
+    return this._defaultAgentPlugins;
+  }
+
+  public static set defaultAgentPlugins(value) {
+    this._defaultAgentPlugins = value;
+    if (this.pool) this.pool.agentPlugins = value;
+  }
+
   public static get dataDir(): string {
     return this._dataDir;
   }
@@ -54,19 +62,7 @@ export default class Core {
 
   public static readonly connections: ConnectionToClient[] = [];
 
-  public static pluginMap: {
-    humanEmulatorsById: { [id: string]: IHumanEmulatorClass };
-    browserEmulatorsById: { [id: string]: IBrowserEmulatorClass };
-    corePluginsById: { [id: string]: ICorePluginClass };
-  } = {
-    humanEmulatorsById: {
-      [DefaultHumanEmulator.id]: DefaultHumanEmulator,
-    },
-    browserEmulatorsById: {
-      [DefaultBrowserEmulator.id]: DefaultBrowserEmulator,
-    },
-    corePluginsById: {},
-  };
+  public static corePluginsById: { [id: string]: ICorePluginClass } = {};
 
   public static onShutdown: () => void;
   public static pool: Pool;
@@ -80,6 +76,11 @@ export default class Core {
   private static autoShutdownTimer: NodeJS.Timer;
   private static didRegisterSignals = false;
   private static _dataDir: string = dataDir;
+  private static _defaultAgentPlugins: IAgentPluginClass[] = [
+    DefaultBrowserEmulator,
+    DefaultHumanEmulator,
+  ];
+
   private static networkDb: NetworkDb;
   private static utilityBrowserContext: Promise<BrowserContext>;
 
@@ -105,12 +106,8 @@ export default class Core {
     }
 
     for (const Plugin of Plugins) {
-      if (Plugin.type === PluginTypes.HumanEmulator) {
-        this.pluginMap.humanEmulatorsById[Plugin.id] = Plugin as IHumanEmulatorClass;
-      } else if (Plugin.type === PluginTypes.BrowserEmulator) {
-        this.pluginMap.browserEmulatorsById[Plugin.id] = Plugin as IBrowserEmulatorClass;
-      } else if (Plugin.type === PluginTypes.CorePlugin) {
-        this.pluginMap.corePluginsById[Plugin.id] = Plugin;
+      if (Plugin.type === PluginTypes.CorePlugin) {
+        this.corePluginsById[Plugin.id] = Plugin;
       }
     }
   }
@@ -118,12 +115,14 @@ export default class Core {
   public static getUtilityContext(): Promise<BrowserContext> {
     if (this.utilityBrowserContext) return this.utilityBrowserContext;
 
-    const corePlugins = new CorePlugins({}, log);
-
     this.utilityBrowserContext = this.pool
-      .getBrowser(corePlugins.browserEngine, corePlugins, {
-        showChrome: false,
-      })
+      .getBrowser(
+        DefaultBrowserEmulator.defaultBrowserEngine(),
+        {},
+        {
+          showChrome: false,
+        },
+      )
       .then(browser => browser.newContext({ logger: log as IBoundLog, isIncognito: true }));
 
     return this.utilityBrowserContext;
@@ -150,12 +149,15 @@ export default class Core {
       Core.dataDir = options.dataDir;
     }
     this.networkDb = new NetworkDb();
+    if (options.defaultAgentPlugins)
+      this.defaultAgentPlugins = options.defaultAgentPlugins;
 
     this.pool = new Pool({
       certificateStore: this.networkDb.certificates,
       dataDir: Core.dataDir,
       logger: log.createChild(module),
       maxConcurrentAgents: maxConcurrentClientCount,
+      agentPlugins: this.defaultAgentPlugins,
     });
 
     // @ts-ignore

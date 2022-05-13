@@ -1,4 +1,4 @@
-import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import SessionDb from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
 

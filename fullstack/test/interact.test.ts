@@ -1,18 +1,12 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { KeyboardKey } from '@unblocked-web/emulator-spec/interact/IKeyboardLayoutUS';
+import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import HumanEmulator from '@unblocked-web/default-human-emulator';
-import Hero, { Core, LocationStatus } from '../index';
+import Hero, { LocationStatus } from '../index';
 import Session from '@ulixee/hero-core/lib/Session';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  Core.use(
-    class BasicHumanEmulator extends HumanEmulator {
-      static id = 'basic';
-    },
-  );
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
@@ -136,7 +130,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const hero = new Hero({ humanEmulatorId: 'basic' });
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/twice`);
     await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
@@ -163,7 +157,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const hero = new Hero({ humanEmulatorId: 'basic' });
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/empty-click`);
     await hero.activeTab.waitForLoad(LocationStatus.PaintingStable);
@@ -283,6 +277,5 @@ describe('basic Interact tests', () => {
       }
     }
     expect(reloadSpy).toHaveBeenCalledTimes(2);
-
   });
 });

@@ -27,7 +27,5 @@ function isPluginMatch(PotentialPlugin: any, pluginType?: IPluginType): boolean 
   }
   if (PotentialPlugin.type === PluginTypes.ClientPlugin) return true;
   if (PotentialPlugin.type === PluginTypes.CorePlugin) return true;
-  if (PotentialPlugin.type === PluginTypes.BrowserEmulator) return true;
-  if (PotentialPlugin.type === PluginTypes.HumanEmulator) return true;
   return false;
 }

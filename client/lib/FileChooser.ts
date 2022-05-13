@@ -1,4 +1,4 @@
-import IFileChooserPrompt from '@unblocked-web/emulator-spec/browser/IFileChooserPrompt';
+import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
 import * as Fs from 'fs';
 import { IJsPath } from '@unblocked-web/js-path';
 import AwaitedPath  from 'awaited-dom/base/AwaitedPath';

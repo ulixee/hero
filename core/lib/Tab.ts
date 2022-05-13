@@ -2,30 +2,30 @@ import Log from '@ulixee/commons/lib/Logger';
 import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import Timer from '@ulixee/commons/lib/Timer';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import { IPageEvents } from '@unblocked-web/emulator-spec/browser/IPage';
+import { IPageEvents } from '@unblocked-web/specifications/agent/browser/IPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@unblocked-web/emulator-spec/browser/IScreenshotOptions';
+import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
 import { IJsPath } from '@unblocked-web/js-path';
-import { IInteractionGroups } from '@unblocked-web/emulator-spec/interact/IInteractions';
-import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
+import { IInteractionGroups } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
 import {
   ILoadStatus,
   ILocationTrigger,
   LoadStatus,
-} from '@unblocked-web/emulator-spec/browser/Location';
+} from '@unblocked-web/specifications/agent/browser/Location';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IDialog from '@unblocked-web/emulator-spec/browser/IDialog';
-import IFileChooserPrompt from '@unblocked-web/emulator-spec/browser/IFileChooserPrompt';
+import IDialog from '@unblocked-web/specifications/agent/browser/IDialog';
+import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import INavigation from '@unblocked-web/emulator-spec/browser/INavigation';
+import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import CommandRecorder from './CommandRecorder';
@@ -48,12 +48,12 @@ import { IFocusRecord } from '../models/FocusEventsTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import Core from '../index';
-import FrameNavigations from '@unblocked-web/secret-agent/lib/FrameNavigations';
-import FrameNavigationsObserver from '@unblocked-web/secret-agent/lib/FrameNavigationsObserver';
-import Page from '@unblocked-web/secret-agent/lib/Page';
-import { IWebsocketMessage } from '@unblocked-web/secret-agent/lib/WebsocketMessages';
+import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
+import FrameNavigationsObserver from '@unblocked-web/agent/lib/FrameNavigationsObserver';
+import Page from '@unblocked-web/agent/lib/Page';
+import { IWebsocketMessage } from '@unblocked-web/agent/lib/WebsocketMessages';
 import { injectedSourceUrl } from '@unblocked-web/default-browser-emulator/lib/DomOverridesBuilder';
 
 const { log } = Log(module);

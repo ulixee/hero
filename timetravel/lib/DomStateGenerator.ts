@@ -19,7 +19,7 @@ import DomStateAssertions, { IFrameAssertions } from './DomStateAssertions';
 import XPathGenerator from './XPathGenerator';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 
 const { log } = Log(module);
 

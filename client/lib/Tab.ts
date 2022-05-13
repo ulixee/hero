@@ -6,7 +6,7 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILoadStatus, ILocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
+import { ILoadStatus, ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -18,7 +18,7 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import IScreenshotOptions from '@unblocked-web/emulator-spec/browser/IScreenshotOptions';
+import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@unblocked-web/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';

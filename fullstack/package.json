@@ -16,8 +16,8 @@
   "devDependencies": {
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.1",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.1",
-    "@unblocked-web/emulator-spec": "2.0.0-alpha.1",
-    "@unblocked-web/sa-mitm": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.1",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/hero-timetravel": "1.5.4",
     "@ulixee/hero-testing": "1.5.4",

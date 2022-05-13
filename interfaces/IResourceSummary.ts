@@ -1,4 +1,4 @@
-import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 
 export default interface IResourceSummary {
   url: string;

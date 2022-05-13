@@ -2,7 +2,7 @@
 
 > Websocket Resources are core websocket connections between a client and server.
 
-The WebsocketResource class is returned from `window.waitForResource`. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
+Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/basic-interfaces/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/basic-interfaces/tab#resource-event) or from the initial window document load. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
 
 ## Properties
 

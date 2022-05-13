@@ -1,10 +1,10 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
-import IResourceResponse from '@unblocked-web/emulator-spec/net/IResourceResponse';
-import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
+import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 
 const propertyKeys: (keyof ResourceResponse)[] = [
   'headers',

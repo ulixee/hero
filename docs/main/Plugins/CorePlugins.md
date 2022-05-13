@@ -96,11 +96,11 @@ Modify any value in the object to change it session-wide.
 ### onNewBrowser<em>(browser, launchArgs)</em> *optional*
 
 This is called every time a new browser engine is started, which may not be every session. A Core Plugin can add to the launch arguments that will sent to the process creation of the browser:
-- For Chrome, a list can be found (here)[https://peter.sh/experiments/chromium-command-line-switches/]
+- For Chrome, a list can be found [here](https://peter.sh/experiments/chromium-command-line-switches/)
 
 #### **Arguments**:
 
-- browser `IBrowser`. The SecretAgent browser. Arguments can be manipulated on the `engine.launchArguments` property.
+- browser `IBrowser`. The Agent browser. Arguments can be manipulated on the `engine.launchArguments` property.
 - launchArgs `IBrowserLaunchArgs`. Additional options provided to launch this instance.
   - showChrome: `boolean` - has the user requested to show the browser
   - disableGpu: `boolean` - has the user requested to disable the gpu

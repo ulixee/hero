@@ -1,7 +1,7 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
-import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';

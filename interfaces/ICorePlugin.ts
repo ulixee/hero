@@ -1,15 +1,12 @@
+import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
+import IAgentPlugin from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import { PluginTypes } from './IPluginTypes';
 import ICorePluginCreateOptions from './ICorePluginCreateOptions';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
 import ISessionCreateOptions from './ISessionCreateOptions';
-import { IFrame } from '@unblocked-web/emulator-spec/browser/IFrame';
-import { IBrowserEmulatorMethods } from '@unblocked-web/emulator-spec/IBrowserEmulator';
-import { IHumanEmulatorMethods } from '@unblocked-web/emulator-spec/IHumanEmulator';
 
-export default interface ICorePlugin
-  extends ICorePluginMethods,
-    IBrowserEmulatorMethods,
-    IHumanEmulatorMethods {
+export default interface ICorePlugin extends ICorePluginMethods, IAgentPlugin {
   id: string;
   readonly sessionSummary?: ISessionSummary;
 }
@@ -18,6 +15,10 @@ export interface ICorePluginClass {
   id: string;
   type: keyof typeof PluginTypes;
   new (createOptions: ICorePluginCreateOptions): ICorePlugin;
+  shouldActivate?(
+    emulationProfile: IEmulationProfile<unknown>,
+    sessionSummary: ISessionSummary,
+  ): boolean;
 }
 
 export interface ICorePluginMethods {

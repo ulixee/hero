@@ -1,16 +1,10 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import HumanEmulator from '@unblocked-web/default-human-emulator';
 import * as Fs from 'fs';
-import Hero, { Core } from '../index';
+import Hero from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  Core.use(
-    class BasicHumanEmulator extends HumanEmulator {
-      static id = 'basic';
-    },
-  );
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -37,7 +31,7 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const hero = new Hero({ humanEmulatorId: 'basic' });
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/get-upload`);
@@ -71,7 +65,6 @@ describe('Filechooser tests', () => {
     });
 
     const hero = new Hero({
-      humanEmulatorId: 'basic',
       userProfile: {
         cookies: [],
         storage: {
@@ -118,9 +111,7 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const hero = new Hero({
-      humanEmulatorId: 'basic',
-    });
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     const file1 = await Fs.promises.readFile(`${__dirname}/filechooser.test.js`);

@@ -14,7 +14,7 @@
     "@ulixee/commons": "1.5.11",
     "@ulixee/hero-interfaces": "1.5.4",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/emulator-spec": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.1",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "awaited-dom": "1.4.0",
     "nanoid": "^3.1.30",

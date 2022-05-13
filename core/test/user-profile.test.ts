@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
@@ -7,10 +7,10 @@ import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import { URL } from 'url';
-import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
-import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
-import MitmRequestAgent from '@unblocked-web/sa-mitm/lib/MitmRequestAgent';
-import IDomStorage from '@unblocked-web/emulator-spec/browser/IDomStorage';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import MitmRequestAgent from '@unblocked-web/agent-mitm/lib/MitmRequestAgent';
+import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -69,7 +69,7 @@ describe('UserProfile cookie tests', () => {
     const cookiesBefore = await tab3.session.exportUserProfile();
     expect(cookiesBefore.cookies).toHaveLength(1);
     expect(cookiesBefore.userAgentString).toBe(profile.userAgentString);
-    expect(tab3.session.plugins.browserEmulator.userAgentString).toBe(profile.userAgentString);
+    expect(tab3.session.meta.userAgentString).toBe(profile.userAgentString);
     expect(cookiesBefore.deviceProfile).toEqual(profile.deviceProfile);
 
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
@@ -255,7 +255,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await tab.waitForLoad('PaintingStable');
     await expect(tab.getJsValue('localStorage.getItem("test")')).resolves.toBe('1');
     await expect(tab.getJsValue('sessionStorage.getItem("test")')).resolves.toBe('2');
-  });
+  }, 30e3);
 
   it("should keep profile information for sites that aren't loaded in a session", async () => {
     const meta = await connection.createSession({

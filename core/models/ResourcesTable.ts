@@ -1,10 +1,10 @@
 import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IResourceType from '@unblocked-web/emulator-spec/net/IResourceType';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import IResourceProcessingDetails from '@unblocked-web/secret-agent/interfaces/IResourceProcessingDetails';
+import IResourceProcessingDetails from '@unblocked-web/agent/interfaces/IResourceProcessingDetails';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {

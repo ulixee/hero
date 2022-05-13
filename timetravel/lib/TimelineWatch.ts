@@ -1,6 +1,6 @@
-import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ContentPaint } from '@unblocked-web/emulator-spec/browser/INavigation';
+import { ContentPaint } from '@unblocked-web/specifications/agent/browser/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -8,7 +8,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import Log from '@ulixee/commons/lib/Logger';
-import { IFrameNavigationEvents } from '@unblocked-web/emulator-spec/browser/IFrameNavigations';
+import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
 
 const { log } = Log(module);
 

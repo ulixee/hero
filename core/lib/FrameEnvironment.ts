@@ -1,21 +1,28 @@
 import Log from '@ulixee/commons/lib/Logger';
-import { ILoadStatus, ILocationTrigger, LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
-import { IJsPath , INodePointer } from '@unblocked-web/js-path';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+  LoadStatus,
+} from '@unblocked-web/specifications/agent/browser/Location';
+import { IJsPath, INodePointer } from '@unblocked-web/js-path';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ICookie } from '@unblocked-web/emulator-spec/net/ICookie';
-import { IInteractionGroups, IInteractionStep } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
+import {
+  IInteractionGroups,
+  IInteractionStep,
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { URL } from 'url';
 import * as Fs from 'fs';
-import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
+import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IFrameEvents } from '@unblocked-web/emulator-spec/browser/IFrame';
+import { IFrameEvents } from '@unblocked-web/specifications/agent/browser/IFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import * as Os from 'os';
-import INavigation from '@unblocked-web/emulator-spec/browser/INavigation';
+import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
@@ -23,22 +30,21 @@ import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import Session from './Session';
 import Tab, { ITabEventParams } from './Tab';
 import CommandRecorder from './CommandRecorder';
-import { IFrameNavigationEvents } from '@unblocked-web/emulator-spec/browser/IFrameNavigations';
-import { ISerializable } from '@unblocked-web/secret-agent/lib/JsPath';
-import Frame from '@unblocked-web/secret-agent/lib/Frame';
+import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
+import { ISerializable } from '@unblocked-web/agent/lib/JsPath';
+import Frame from '@unblocked-web/agent/lib/Frame';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import { IInteractHooks } from '@unblocked-web/emulator-spec/hooks/IHooks';
-import FrameNavigations from '@unblocked-web/secret-agent/lib/FrameNavigations';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 
 const { log } = Log(module);
 
 export default class FrameEnvironment
   extends TypedEventEmitter<{ paint: void }>
-  implements ICommandableTarget, IRemoteEventListener, IInteractHooks
+  implements ICommandableTarget, IRemoteEventListener
 {
   public get session(): Session {
     return this.tab.session;
@@ -121,7 +127,8 @@ export default class FrameEnvironment
     });
     this.createdAtCommandId = this.session.commands.lastId;
     if (this.session.options.showChromeInteractions) {
-      frame.hook(this);
+      frame.interactor.beforeEachInteractionStep = this.beforeEachInteractionStep.bind(this);
+      frame.interactor.afterInteractionGroups = this.afterInteractionGroups.bind(this);
     }
 
     // give tab time to setup
@@ -191,8 +198,9 @@ export default class FrameEnvironment
       .catch(() => null);
   }
 
-  public afterInteractionGroups(): void {
+  public afterInteractionGroups(): Promise<void> {
     this.tab.mainFrameEnvironment.setInteractionDisplay(false);
+    return Promise.resolve();
   }
 
   public async beforeEachInteractionStep(

@@ -4,12 +4,6 @@
 
 Hero operates with a few different spawned processes:
 
-#### Socket Connect
-
-Each socket created by the browser is proxied through a `Go` process that emulates the TLS signatures of the headed version of the browser engine being used. A small library is placed in `node_modules/@ulixee/hero-mitm-socket/dist` during installation. If this is unsuccessful, or aborts, you will see errors.
-
-You can remove the library and reinstall or rebuild manually using npm run build in the `@ulixee/hero-mitm-socket` directory with environmental variable: `HERO_REBUILD_MITM_SOCKET=true`.
-
 #### Browser Emulators
 
 When you install Hero, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/hero/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.

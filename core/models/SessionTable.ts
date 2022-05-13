@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import IDeviceProfile from '@unblocked-web/emulator-spec/browser/IDeviceProfile';
+import IDeviceProfile from '@unblocked-web/specifications/plugin/IDeviceProfile';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
@@ -16,14 +16,12 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       [
         ['id', 'TEXT'],
         ['name', 'TEXT'],
-        ['browserEmulatorId', 'TEXT'],
         ['browserName', 'TEXT'],
         ['browserFullVersion', 'TEXT'],
         ['operatingSystemName', 'TEXT'],
         ['operatingSystemVersion', 'TEXT'],
         ['renderingEngine', 'TEXT'],
         ['renderingEngineVersion', 'TEXT'],
-        ['humanEmulatorId', 'TEXT'],
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
         ['scriptInstanceId', 'TEXT'],
@@ -57,14 +55,12 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     const record = [
       this.id,
       configuration.sessionName,
-      configuration.browserEmulatorId,
       browserName,
       browserFullVersion,
       configuration.operatingSystemName,
       configuration.operatingSystemVersion,
       configuration.renderingEngine,
       configuration.renderingEngineVersion,
-      configuration.humanEmulatorId,
       startDate,
       null,
       scriptInstanceMeta?.id,
@@ -120,14 +116,12 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
 export interface ISessionRecord {
   id: string;
   name: string;
-  browserEmulatorId: string;
   renderingEngine: string;
   renderingEngineVersion: string;
   browserName: string;
   browserFullVersion: string;
   operatingSystemName: string;
   operatingSystemVersion: string;
-  humanEmulatorId: string;
   startDate: number;
   closeDate: number;
   scriptInstanceId: string;

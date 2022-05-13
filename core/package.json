@@ -18,10 +18,10 @@
   "dependencies": {
     "@ulixee/commons": "1.5.11",
     "@ulixee/hero-interfaces": "1.5.4",
-    "@unblocked-web/secret-agent": "2.0.0-alpha.1",
+    "@unblocked-web/agent": "2.0.0-alpha.1",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/emulator-spec": "2.0.0-alpha.1",
-    "@unblocked-web/sa-mitm": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.1",
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.1",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.1",
     "@ulixee/hero-plugin-utils": "1.5.4",

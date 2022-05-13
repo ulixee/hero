@@ -1,20 +1,20 @@
-import { IInteractionGroups, isMousePositionXY } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { IInteractionGroups, isMousePositionXY } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { ILoadStatus, ILocationTrigger } from '@unblocked-web/emulator-spec/browser/Location';
+import { ILoadStatus, ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import { IJsPath , INodeVisibility , INodePointer } from '@unblocked-web/js-path';
 import AwaitedPath  from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@unblocked-web/emulator-spec/net/ICookie';
+import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@unblocked-web/emulator-spec/browser/IExecJsPathResult';
+import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import {
   getComputedVisibilityFnName,
   isFocusedFnName,
-} from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
+} from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';

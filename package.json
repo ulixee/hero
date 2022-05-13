@@ -8,7 +8,7 @@
     "build": "yarn tsc && cd build && yarn",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js",
-    "build:dist-local": "yarn build:dist && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
+    "build:dist-local": "yarn build:dist && cd build-dist && yarn",
     "build:docker": "yarn build:dist && docker build -t hero .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
@@ -18,7 +18,7 @@
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json",
-    "test:build": "cross-env NODE_ENV=test HERO_DATA_DIR=.data-test jest",
+    "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest",
     "test": "yarn copy:build && node ./prepare-build.js && cd build && yarn test:build",
     "lint": "eslint --cache ./"
   },
@@ -84,9 +84,9 @@
       "plugin-utils",
       "plugins/*",
       "../build/commons",
-      "../../unblocked/secret-agent/build/*",
-      "../../unblocked/build/emulator-plugins/*",
-      "../../unblocked/emulator-spec/build",
+      "../../unblocked/agent/build/*",
+      "../../unblocked/build/agent-plugins/*",
+      "../../unblocked/specifications/build",
       "../../unblocked/js-path/build"
     ]
   },

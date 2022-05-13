@@ -1,7 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { SourceMapSupport } from '@ulixee/commons/lib/SourceMapSupport';
-import INavigation, { ContentPaint } from '@unblocked-web/emulator-spec/browser/INavigation';
-import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import INavigation, { ContentPaint } from '@unblocked-web/specifications/agent/browser/INavigation';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import Session from '@ulixee/hero-core/lib/Session';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';

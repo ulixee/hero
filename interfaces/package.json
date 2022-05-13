@@ -6,7 +6,7 @@
     "awaited-dom": "1.4.0",
     "@ulixee/commons": "1.5.11",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/emulator-spec": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.1",
     "devtools-protocol": "^0.0.981744"
   }
 }

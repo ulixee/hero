@@ -1,12 +1,12 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IDomStorage, {
   IDomStorageForOrigin,
-} from '@unblocked-web/emulator-spec/browser/IDomStorage';
+} from '@unblocked-web/specifications/agent/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
 import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
-import Page from '@unblocked-web/secret-agent/lib/Page';
+import Page from '@unblocked-web/agent/lib/Page';
 
 const { log } = Log(module);
 
@@ -50,8 +50,8 @@ export default class UserProfile {
     return {
       cookies,
       storage: exportedStorage,
-      userAgentString: session.plugins.browserEmulator.userAgentString,
-      deviceProfile: session.plugins.browserEmulator.deviceProfile,
+      userAgentString: session.emulationProfile.userAgentOption.string,
+      deviceProfile: session.emulationProfile.deviceProfile,
     } as IUserProfile;
   }
 

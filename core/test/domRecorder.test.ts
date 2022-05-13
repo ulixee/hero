@@ -1,9 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus } from '@unblocked-web/emulator-spec/browser/Location';
-import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import HumanEmulator from '@unblocked-web/default-human-emulator';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import Core, { Session } from '../index';
@@ -11,9 +10,8 @@ import Core, { Session } from '../index';
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  Core.use(
-    class BasicHumanEmulator extends HumanEmulator {
-      static id = 'basic';
+  Core.defaultAgentPlugins.push(
+    class BasicHumanEmulator {
       async playInteractions(interactionGroups, runFn): Promise<void> {
         for (const group of interactionGroups) {
           for (const step of group) {
@@ -46,9 +44,7 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'basic',
-    });
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
@@ -366,7 +362,6 @@ describe('basic Mouse Event tests', () => {
 </body>`;
     });
     const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'basic',
       viewport: {
         height: 800,
         width: 1000,

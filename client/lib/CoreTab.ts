@@ -1,14 +1,14 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from '@unblocked-web/js-path';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
-import IResourceMeta from '@unblocked-web/emulator-spec/net/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@unblocked-web/emulator-spec/browser/IScreenshotOptions';
+import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import IFileChooserPrompt from '@unblocked-web/emulator-spec/browser/IFileChooserPrompt';
+import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';

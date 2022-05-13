@@ -1,6 +1,6 @@
 const Hero = require('@ulixee/hero-fullstack');
 
-//process.env.HERO_SHOW_CHROME = 'true';
+//process.env.ULX_SHOW_CHROME = 'true';
 
 (async () => {
   const url = `https://dataliberationfoundation.org/`;

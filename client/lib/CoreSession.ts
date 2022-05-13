@@ -224,7 +224,7 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   private showSessionKeepAlivePrompt(message: string): void {
-    if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
+    if (/yes|1|true/i.test(process.env.ULX_CLI_NOPROMPT)) return;
 
     this.cliPrompt = readline.createInterface({
       input: process.stdin,

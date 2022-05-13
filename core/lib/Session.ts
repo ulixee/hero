@@ -3,15 +3,13 @@ import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons
 import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
-} from '@unblocked-web/sa-mitm/handlers/RequestSession';
+} from '@unblocked-web/agent-mitm/handlers/RequestSession';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
+import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IGeolocation from '@unblocked-web/emulator-spec/browser/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
@@ -30,13 +28,16 @@ import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import Agent from '@unblocked-web/secret-agent/lib/Agent';
-import Resources from '@unblocked-web/secret-agent/lib/Resources';
-import WebsocketMessages from '@unblocked-web/secret-agent/lib/WebsocketMessages';
-import BrowserContext from '@unblocked-web/secret-agent/lib/BrowserContext';
-import DevtoolsSessionLogger from '@unblocked-web/secret-agent/lib/DevtoolsSessionLogger';
-import Page from '@unblocked-web/secret-agent/lib/Page';
+import Agent from '@unblocked-web/agent/lib/Agent';
+import Resources from '@unblocked-web/agent/lib/Resources';
+import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
+import Page from '@unblocked-web/agent/lib/Page';
 import env from '../env';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 
 const { log } = Log(module);
 
@@ -68,23 +69,7 @@ export default class Session
   public readonly plugins: CorePlugins;
 
   public get browserEngine(): IBrowserEngine {
-    return this.plugins.browserEngine;
-  }
-
-  public get viewport(): IViewport {
-    return this.options.viewport;
-  }
-
-  public get timezoneId(): string {
-    return this.options.timezoneId;
-  }
-
-  public get locale(): string {
-    return this.options.locale;
-  }
-
-  public get geolocation(): IGeolocation {
-    return this.options.geolocation;
+    return this.emulationProfile.browserEngine;
   }
 
   public get userProfile(): IUserProfile {
@@ -93,6 +78,10 @@ export default class Session
 
   public get mode(): ISessionCreateOptions['mode'] {
     return this.options.mode;
+  }
+
+  public get viewport(): IViewport {
+    return this.emulationProfile.viewport;
   }
 
   public readonly createdTime: number;
@@ -120,23 +109,25 @@ export default class Session
     return this._isClosing;
   }
 
+  public get emulationProfile(): IEmulationProfile {
+    return this.agent?.emulationProfile;
+  }
+
   public get meta(): IHeroMeta {
-    const { plugins, viewport, locale, timezoneId, geolocation } = this;
+    const { viewport, locale, timezoneId, geolocation } = this.emulationProfile;
 
     const {
-      userAgentString,
+      string: userAgentString,
       operatingSystemPlatform,
       operatingSystemName,
       operatingSystemVersion,
       browserVersion,
       browserName,
-    } = this.plugins.browserEmulator;
+    } = this.emulationProfile.userAgentOption;
 
     return {
       sessionId: this.id,
       ...this.options,
-      browserEmulatorId: plugins.browserEmulator.id,
-      humanEmulatorId: plugins.humanEmulator.id,
       upstreamProxyUrl: this.options.upstreamProxyUrl,
       upstreamProxyIpMask: this.options.upstreamProxyIpMask,
       viewport,
@@ -170,7 +161,7 @@ export default class Session
   }
 
   public awaitedEventEmitter = new TypedEventEmitter<{ close: void }>();
-  public agent: Agent;
+  public readonly agent: Agent;
 
   protected readonly logger: IBoundLog;
 
@@ -181,7 +172,7 @@ export default class Session
   private readonly logSubscriptionId: number;
   private events = new EventSubscriber();
 
-  constructor(readonly options: ISessionCreateOptions) {
+  protected constructor(readonly options: ISessionCreateOptions) {
     super();
     this.createdTime = Date.now();
     this.id = this.getId(options.sessionId);
@@ -189,11 +180,13 @@ export default class Session
     Session.byId[id] = this;
     this.events.once(this, 'closed', () => delete Session.byId[id]);
     this.db = new SessionDb(this.id);
+    this.commands = new Commands(this.db);
 
     this.logger = log.createChild(module, { sessionId: this.id });
     loggerSessionIdNames.set(this.id, options.sessionName);
     this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
 
+    const providedOptions = { ...options };
     // set default script instance if not provided
     options.scriptInstanceMeta ??= {
       id: nanoid(),
@@ -201,28 +194,38 @@ export default class Session
       entrypoint: require.main?.filename ?? process.argv[1],
       startDate: this.createdTime,
     };
+    options.showChrome ??= env.showChrome ?? false;
+    options.showChromeInteractions ??= options.showChrome;
+    options.noChromeSandbox ??= env.noChromeSandbox;
+    options.disableGpu ??= env.disableGpu;
+    options.disableMitm ??= env.disableMitm;
+    options.disableDevtools ??= env.disableDevtools;
 
-    const providedOptions = { ...options };
     const { userProfile, userAgent } = options;
+    const customEmulatorConfig: IEmulatorOptions = {
+      userAgentSelector: userAgent ?? userProfile?.userAgentString,
+    };
 
-    this.plugins = new CorePlugins(
-      {
-        ...options,
-        userAgentSelector: userAgent ?? userProfile?.userAgentString,
-        deviceProfile: userProfile?.deviceProfile,
-        getSessionSummary: this.getSummary.bind(this),
-      },
-      this.logger,
-    );
-    this.configureHeaded(options);
-    this.plugins.configure(options);
+    this.agent = Core.pool.createAgent({
+      options,
+      customEmulatorConfig,
+      logger: this.logger,
+      deviceProfile: userProfile?.deviceProfile,
+      id: this.id,
+      commandMarker: this.commands,
+    });
+
+    this.plugins = new CorePlugins(this.agent, {
+      corePluginPaths: options.corePluginPaths,
+      dependencyMap: options.dependencyMap,
+      getSessionSummary: this.getSummary.bind(this),
+    });
 
     // should come after plugins can initiate
     this.recordSession(providedOptions);
 
     SessionsDb.find().recordSession(this);
 
-    this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.collectSnippet,
       this.getCollectedSnippets,
@@ -366,9 +369,10 @@ export default class Session
     return db.collectedElements.getByName(name);
   }
 
-  public async initialize(agent: Agent): Promise<void> {
+  public async openBrowser(): Promise<void> {
+    const agent = this.agent;
+    await agent.open();
     this.browserContext = agent.browserContext;
-    this.agent = agent;
     this.events.on(
       agent.browserContext.devtoolsSessionLogger,
       'devtools-message',
@@ -751,7 +755,7 @@ export default class Session
       this.browserEngine.fullVersion,
       this.createdTime,
       scriptInstanceMeta,
-      this.plugins.browserEmulator.deviceProfile,
+      this.emulationProfile.deviceProfile,
       optionsToStore,
     );
   }
@@ -791,8 +795,6 @@ ${data}`,
     options.geolocation ??= record.createSessionOptions?.geolocation;
     options.userProfile ??= record.createSessionOptions?.userProfile ?? {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
-    options.browserEmulatorId = record.browserEmulatorId;
-    options.humanEmulatorId = record.humanEmulatorId;
     return options;
   }
 
@@ -820,26 +822,12 @@ ${data}`,
     }
 
     if (!session) {
+      await Core.start({}, false);
       session = new Session(options);
       this.events.emit('new', { session });
 
       if (session.mode !== 'browserless') {
-        await Core.start({}, false);
-        const agent = await Core.pool.createAgent({
-          id: session.id,
-          browserEngine: session.browserEngine,
-          logger: session.logger,
-          hooks: session.plugins,
-          upstreamProxyUrl: session.options.upstreamProxyUrl,
-          commandMarker: session.commands,
-          showChrome: session.options.showChrome ?? env.showChrome,
-          noChromeSandbox: session.options.noChromeSandbox ?? env.noChromeSandbox,
-          disableIncognito: session.options.disableIncognito,
-          disableGpu: session.options.disableGpu ?? env.disableGpu,
-          disableMitm: session.options.disableMitm ?? env.disableMitm,
-          disableDevtools: session.options.disableDevtools ?? env.disableDevtools,
-        });
-        await session.initialize(agent);
+        await session.openBrowser();
       }
     }
     tab ??= await session.createTab();
