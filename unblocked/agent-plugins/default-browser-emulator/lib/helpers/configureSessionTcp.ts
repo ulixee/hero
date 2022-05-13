@@ -1,12 +1,12 @@
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
-import ITcpSettings from '@unblocked-web/emulator-spec/net/ITcpSettings';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import ITcpSettings from '@unblocked-web/specifications/agent/net/ITcpSettings';
 import getTcpSettingsForOs from '../utils/getTcpSettingsForOs';
 
 export default function configureSessionTcp(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   settings: ITcpSettings,
 ): void {
-  const { operatingSystemName, operatingSystemVersion } = emulatorProfile.userAgentOption;
+  const { operatingSystemName, operatingSystemVersion } = emulationProfile.userAgentOption;
   const tcpSettings = getTcpSettingsForOs(operatingSystemName, operatingSystemVersion);
   if (tcpSettings) {
     settings.tcpTtl = tcpSettings.ttl;

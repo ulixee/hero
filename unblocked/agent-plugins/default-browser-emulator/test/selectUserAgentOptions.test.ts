@@ -7,7 +7,7 @@ import BrowserEngineOptions from '../lib/BrowserEngineOptions';
 const dataLoader = new DataLoader(`${__dirname}/..`);
 const browserEngineOptions = new BrowserEngineOptions(
   dataLoader,
-  process.env.HERO_DEFAULT_BROWSER_ID,
+  process.env.UBK_DEFAULT_BROWSER_ID ?? process.env.ULX_DEFAULT_BROWSER_ID,
 );
 const userAgentOptions = new UserAgentOptions(dataLoader, browserEngineOptions);
 

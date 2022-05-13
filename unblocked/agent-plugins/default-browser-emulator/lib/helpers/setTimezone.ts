@@ -1,11 +1,11 @@
-import IDevtoolsSession from '@unblocked-web/emulator-spec/browser/IDevtoolsSession';
-import IEmulatorProfile from "@unblocked-web/emulator-spec/emulator/IEmulatorProfile";
+import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+import IEmulationProfile from "@unblocked-web/specifications/plugin/IEmulationProfile";
 
 export default async function setTimezone(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   devtools: IDevtoolsSession,
 ): Promise<void> {
-  const { timezoneId } = emulatorProfile;
+  const { timezoneId } = emulationProfile;
   if (!timezoneId) return;
   try {
     await devtools.send('Emulation.setTimezoneOverride', { timezoneId });

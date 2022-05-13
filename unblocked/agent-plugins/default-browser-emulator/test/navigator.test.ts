@@ -1,14 +1,14 @@
 import * as Fs from 'fs';
 import { inspect } from 'util';
-import * as Helpers from '@unblocked-web/sa-testing/helpers';
-import { Browser } from '@unblocked-web/secret-agent';
+import * as Helpers from '@unblocked-web/agent-testing/helpers';
+import { Browser } from '@unblocked-web/agent';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
-import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
-import { TestLogger } from '@unblocked-web/sa-testing';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import { TestLogger } from '@unblocked-web/agent-testing';
 import DomExtractor = require('./DomExtractor');
 
 const logger = TestLogger.forTest(module);

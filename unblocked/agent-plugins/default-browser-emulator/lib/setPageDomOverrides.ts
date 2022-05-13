@@ -1,4 +1,4 @@
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import IBrowserData from '../interfaces/IBrowserData';
 import DomOverridesBuilder from './DomOverridesBuilder';
 

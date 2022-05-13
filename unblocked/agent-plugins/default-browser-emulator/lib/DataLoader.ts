@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import IUserAgentOption from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
+import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import {
   IDataBrowserEngineOptions,
   IDataCore,

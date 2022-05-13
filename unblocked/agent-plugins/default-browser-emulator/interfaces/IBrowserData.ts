@@ -1,5 +1,5 @@
-import IUserAgentOption from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
-import IBrowserEngineOption from '@unblocked-web/emulator-spec/browser/IBrowserEngineOption';
+import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 
 export default interface IBrowserData
   extends Omit<IDataCore, 'browserEngineOptions' | 'userAgentOptions'> {

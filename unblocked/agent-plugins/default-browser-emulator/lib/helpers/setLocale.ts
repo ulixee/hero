@@ -1,11 +1,11 @@
-import IDevtoolsSession from '@unblocked-web/emulator-spec/browser/IDevtoolsSession';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default async function setLocale(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   devtools: IDevtoolsSession,
 ): Promise<void> {
-  const { locale } = emulatorProfile;
+  const { locale } = emulationProfile;
   if (!locale) return;
   try {
     await devtools.send('Emulation.setLocaleOverride', { locale });

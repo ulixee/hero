@@ -1,7 +1,7 @@
-import { Helpers, TestLogger } from '@unblocked-web/sa-testing';
-import { ITestKoaServer } from '@unblocked-web/sa-testing/helpers';
+import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
 import BrowserEmulator from '../index';
-import { Pool } from '@unblocked-web/secret-agent';
+import { Pool } from '@unblocked-web/agent';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
@@ -9,7 +9,7 @@ const logger = TestLogger.forTest(module);
 
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  pool = new Pool({ emulatorPlugins: [BrowserEmulator] });
+  pool = new Pool({ agentPlugins: [BrowserEmulator] });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
   koaServer = await Helpers.runKoaServer();

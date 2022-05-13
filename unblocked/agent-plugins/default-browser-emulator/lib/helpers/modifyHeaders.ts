@@ -1,19 +1,19 @@
-import IHttpHeaders from '@unblocked-web/emulator-spec/net/IHttpHeaders';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 import IUserAgentData from '../../interfaces/IUserAgentData';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default function modifyHeaders(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   data: IBrowserData,
   userAgentData: IUserAgentData,
   resource: IHttpResourceLoadDetails,
 ): boolean {
-  const userAgentString = emulatorProfile.userAgentOption.string;
-  const locale = emulatorProfile.locale;
-  const defaultOrder = getResourceHeaderDefaults(emulatorProfile, data.headers, resource);
+  const userAgentString = emulationProfile.userAgentOption.string;
+  const locale = emulationProfile.locale;
+  const defaultOrder = getResourceHeaderDefaults(emulationProfile, data.headers, resource);
   const headers = resource.requestHeaders;
 
   // if no default order, at least ensure connection and user-agent
@@ -98,7 +98,7 @@ export default function modifyHeaders(
 }
 
 function getResourceHeaderDefaults(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   headerProfiles: IDataHeaders,
   resource: IHttpResourceLoadDetails,
 ): Pick<IDataHeaderOrder, 'order' | 'orderKeys' | 'defaults'> {

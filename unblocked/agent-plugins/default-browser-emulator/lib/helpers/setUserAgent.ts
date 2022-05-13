@@ -1,9 +1,9 @@
-import IDevtoolsSession from '@unblocked-web/emulator-spec/browser/IDevtoolsSession';
+import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
 import IUserAgentData from '../../interfaces/IUserAgentData';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default async function setUserAgent(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   devtools: IDevtoolsSession,
   userAgentData: IUserAgentData,
 ): Promise<void> {
@@ -19,9 +19,9 @@ export default async function setUserAgent(
       }
     : undefined;
   await devtools.send('Emulation.setUserAgentOverride', {
-    userAgent: emulatorProfile.userAgentOption.string,
-    acceptLanguage: emulatorProfile.locale,
-    platform: emulatorProfile.userAgentOption.operatingSystemPlatform,
+    userAgent: emulationProfile.userAgentOption.string,
+    acceptLanguage: emulationProfile.locale,
+    platform: emulationProfile.userAgentOption.operatingSystemPlatform,
     userAgentMetadata,
   });
 }

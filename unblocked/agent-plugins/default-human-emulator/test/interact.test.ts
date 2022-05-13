@@ -1,23 +1,23 @@
-import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/sa-testing';
-import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import HumanEmulator from '..';
-import { getLogo, ITestKoaServer } from '@unblocked-web/sa-testing/helpers';
+import { getLogo, ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
 import {
   getClientRectFnName,
   getNodePointerFnName,
-} from '@unblocked-web/emulator-spec/browser/IJsPathFunctions';
+} from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
 import { IElementRect } from '@unblocked-web/js-path';
-import { LoadStatus, LocationStatus } from '@unblocked-web/emulator-spec/browser/Location';
-import { Agent, Pool } from '@unblocked-web/secret-agent';
-import { PageHooks } from '@unblocked-web/sa-testing/browserUtils';
-import { IEmulatorConfig } from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import { LoadStatus, LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { Agent, Pool } from '@unblocked-web/agent';
+import { PageHooks } from '@unblocked-web/agent-testing/browserUtils';
+import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeAll(async () => {
   pool = new Pool({
     defaultBrowserEngine: BrowserUtils.defaultBrowserEngine,
-    emulatorPlugins: [HumanEmulator],
+    agentPlugins: [HumanEmulator],
   });
   Helpers.onClose(() => pool.close(), true);
   await pool.start();
@@ -35,7 +35,7 @@ beforeEach(Helpers.beforeEach);
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach);
 
-async function createAgent(configuration?: IEmulatorConfig): Promise<Agent> {
+async function createAgent(configuration?: IEmulationOptions): Promise<Agent> {
   const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
   Helpers.needsClosing.push(agent);
   if (configuration) {

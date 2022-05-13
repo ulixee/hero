@@ -1,4 +1,4 @@
-import IUserAgentOption from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
+import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import UserAgentPatternSelector from '../UserAgentSelector';
 import UserAgentOptions from '../UserAgentOptions';
 

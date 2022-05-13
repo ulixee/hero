@@ -1,6 +1,6 @@
-import { Helpers, TestLogger } from '@unblocked-web/sa-testing';
-import RequestSession from '@unblocked-web/sa-mitm/handlers/RequestSession';
-import MitmServer from '@unblocked-web/sa-mitm/lib/MitmProxy';
+import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import RequestSession from '@unblocked-web/agent-mitm/handlers/RequestSession';
+import MitmServer from '@unblocked-web/agent-mitm/lib/MitmProxy';
 import lookupPublicIp, { IpLookupServices } from '../lib/helpers/lookupPublicIp';
 
 afterAll(Helpers.afterAll);

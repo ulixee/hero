@@ -1,4 +1,4 @@
-import { IWorker } from '@unblocked-web/emulator-spec/browser/IWorker';
+import { IWorker } from '@unblocked-web/specifications/agent/browser/IWorker';
 import IBrowserData from '../interfaces/IBrowserData';
 import DomOverridesBuilder from './DomOverridesBuilder';
 

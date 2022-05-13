@@ -1,11 +1,11 @@
 import BrowserEmulator from '../index';
-import { Helpers, TestLogger } from '@unblocked-web/sa-testing/index';
-import { ITestKoaServer } from '@unblocked-web/sa-testing/helpers';
-import Pool from '@unblocked-web/secret-agent/lib/Pool';
+import { Helpers, TestLogger } from '@unblocked-web/agent-testing/index';
+import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import Pool from '@unblocked-web/agent/lib/Pool';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IUserAgentOption from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
-import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
+import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 
 const logger = TestLogger.forTest(module);
 
@@ -13,7 +13,7 @@ let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  pool = new Pool({ emulatorPlugins: [BrowserEmulator] });
+  pool = new Pool({ agentPlugins: [BrowserEmulator] });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
   koaServer = await Helpers.runKoaServer();
@@ -34,16 +34,16 @@ describe('emulator', () => {
       const page = await agent.newPage();
       await page.goto(koaServer.baseUrl);
       Helpers.needsClosing.push(page);
-      const userAgentOption = agent.emulatorProfile.userAgentOption;
+      const userAgentOption = agent.emulationProfile.userAgentOption;
       firstUserAgentOption = userAgentOption;
-      firstBrowserEngine = agent.emulatorProfile.browserEngine;
+      firstBrowserEngine = agent.emulationProfile.browserEngine;
       expect(await page.evaluate(`navigator.userAgent`)).toBe(userAgentOption.string);
       expect(await page.evaluate(`navigator.platform`)).toBe(
         userAgentOption.operatingSystemPlatform,
       );
       expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en-US', 'en']);
       expect(await page.evaluate('screen.height')).toBe(
-        agent.emulatorProfile.viewport?.screenHeight,
+        agent.emulationProfile.viewport?.screenHeight,
       );
       await agent.close();
     }
@@ -100,10 +100,10 @@ describe('emulator', () => {
       Helpers.needsClosing.push(agent);
       const page = await agent.newPage();
       Helpers.needsClosing.push(page);
-      firstUserAgentOption = agent.emulatorProfile.userAgentOption;
-      firstBrowserEngine = agent.emulatorProfile.browserEngine;
+      firstUserAgentOption = agent.emulationProfile.userAgentOption;
+      firstBrowserEngine = agent.emulationProfile.browserEngine;
       expect(await page.evaluate(`navigator.userAgent`)).toContain(
-        agent.emulatorProfile.userAgentOption.string,
+        agent.emulationProfile.userAgentOption.string,
       );
       await agent.close();
     }

@@ -2,7 +2,7 @@ import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrow
 import DataLoader from './DataLoader';
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IUserAgentOption, { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
+import IUserAgentOption, { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';
 import BrowserEngineOptions from './BrowserEngineOptions';

@@ -6,26 +6,26 @@ import {
   IMousePositionXY,
   InteractionCommand,
   isMousePositionXY,
-} from '@unblocked-web/emulator-spec/interact/IInteractions';
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IInteractionsHelper, {
   IRectLookup,
-} from '@unblocked-web/emulator-spec/interact/IInteractionsHelper';
-import IPoint from '@unblocked-web/emulator-spec/browser/IPoint';
+} from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
+import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
 import generateVector from './generateVector';
-import IMouseResult from '@unblocked-web/emulator-spec/interact/IMouseResult';
+import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
 import logger from '@ulixee/commons/lib/Logger';
-import IEmulatorPlugin, {
-  EmulatorPluginClassDecorator,
-} from '@unblocked-web/emulator-spec/emulator/IEmulatorPlugin';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IAgentPlugin, {
+  AgentPluginClassDecorator,
+} from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 const { log } = logger(module);
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
-@EmulatorPluginClassDecorator
-export default class DefaultHumanEmulator implements IEmulatorPlugin {
+@AgentPluginClassDecorator
+export default class DefaultHumanEmulator implements IAgentPlugin {
   public static overshootSpread = 2;
   public static overshootRadius = 5;
   public static overshootThreshold = 250;
@@ -44,7 +44,7 @@ export default class DefaultHumanEmulator implements IEmulatorPlugin {
   private millisPerCharacter: number;
   private readonly logger: IBoundLog;
 
-  constructor(options?: IEmulatorProfile) {
+  constructor(options?: IEmulationProfile) {
     this.logger = options?.logger ?? log.createChild(module);
   }
 

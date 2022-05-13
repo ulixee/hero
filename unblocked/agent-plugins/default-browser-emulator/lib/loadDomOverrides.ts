@@ -2,10 +2,10 @@ import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
 import IUserAgentData from '../interfaces/IUserAgentData';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default function loadDomOverrides(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   data: IBrowserData,
   userAgentData: IUserAgentData,
 ): DomOverridesBuilder {
@@ -13,13 +13,13 @@ export default function loadDomOverrides(
 
   domOverrides.add('Error.captureStackTrace');
   domOverrides.add('Error.constructor');
-  const deviceProfile = emulatorProfile.deviceProfile;
+  const deviceProfile = emulationProfile.deviceProfile;
 
   domOverrides.add('navigator.deviceMemory', { memory: deviceProfile.deviceMemory });
   domOverrides.add('navigator', {
-    userAgentString: emulatorProfile.userAgentOption.string,
-    platform: emulatorProfile.userAgentOption.operatingSystemPlatform,
-    headless: emulatorProfile.browserEngine.isHeaded !== true,
+    userAgentString: emulationProfile.userAgentOption.string,
+    platform: emulationProfile.userAgentOption.operatingSystemPlatform,
+    headless: emulationProfile.browserEngine.isHeaded !== true,
     pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
     userAgentData,
   });

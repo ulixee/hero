@@ -8,17 +8,17 @@
     "build": "pwd && yarn && yarn tsc && cd ./build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
     "build:js-path": "cd js-path && pwd && yarn && yarn build",
-    "build:spec": "cd emulator-spec && pwd && yarn && yarn build",
-    "build:sa": "cd secret-agent && pwd && yarn && yarn build",
-    "build:all": "yarn build:js-path && yarn build:spec && yarn build:sa && yarn build",
+    "build:spec": "cd specifications && pwd && yarn && yarn build",
+    "build:agent": "cd agent && pwd && yarn && yarn build",
+    "build:all": "yarn build:js-path && yarn build:spec && yarn build:agent && yarn build",
     "copy:build": "cross-env OUT_DIR=./build node copyfiles.js && node prepare-build.js",
     "copy:dist": "cross-env OUT_DIR=./build-dist node copyfiles.js && node prepare-dist.js",
     "tsc": "tsc -b -i tsconfig.json && yarn copy:build",
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
-    "watch:all": "concurrently -n jspath,spec,plugins,sa \"cd js-path && yarn watch\" \"cd emulator-spec && yarn watch\" \"yarn watch\" \"cd secret-agent && yarn watch\"",
+    "watch:all": "concurrently -n jspath,spec,plugins,agent \"cd js-path && yarn watch\" \"cd specifications && yarn watch\" \"yarn watch\" \"cd agent && yarn watch\"",
     "test": "yarn copy:build && yarn test:build",
-    "test:build": "cd ./build && cross-env SA_DATA_DIR=.data-test NODE_ENV=test jest",
-    "test:all": "yarn copy:build && cross-env SA_DATA_DIR=.data-test NODE_ENV=test jest",
+    "test:build": "cd ./build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
+    "test:all": "yarn copy:build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
     "lint": "eslint --cache ./"
   },
   "repository": "git@github.com:ulixee/ulixee.git",
@@ -70,9 +70,9 @@
   },
   "workspaces": {
     "packages": [
-      "secret-agent/build/*",
+      "agent/build/*",
       "agent-plugins/*",
-      "emulator-spec/build",
+      "specifications/build",
       "js-path/build"
     ],
     "nohoist": []

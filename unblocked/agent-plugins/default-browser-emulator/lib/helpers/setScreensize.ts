@@ -1,13 +1,13 @@
-import IDevtoolsSession, { Protocol } from '@unblocked-web/emulator-spec/browser/IDevtoolsSession';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import IDevtoolsSession, { Protocol } from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default async function setScreensize(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   page: IPage,
   devtools: IDevtoolsSession,
 ): Promise<void> {
-  const { viewport } = emulatorProfile;
+  const { viewport } = emulationProfile;
   if (!viewport) return;
 
   const promises: Promise<any>[] = [];
@@ -19,7 +19,7 @@ export default async function setScreensize(
     mobile: false,
   };
 
-  if (emulatorProfile.browserEngine.isHeaded && viewport.screenWidth) {
+  if (emulationProfile.browserEngine.isHeaded && viewport.screenWidth) {
     promises.push(
       page.devtoolsSession.send('Browser.getWindowForTarget').then(({ windowId, bounds }) => {
         if (bounds.width === viewport.screenWidth && bounds.height === viewport.screenHeight) {

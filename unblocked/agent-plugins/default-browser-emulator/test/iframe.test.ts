@@ -1,11 +1,11 @@
-import { Helpers, TestLogger } from '@unblocked-web/sa-testing';
-import { InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
-import { ITestKoaServer } from '@unblocked-web/sa-testing/helpers';
+import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
 import BrowserEmulator from '../index';
-import Pool from '@unblocked-web/secret-agent/lib/Pool';
-import Agent from '@unblocked-web/secret-agent/lib/Agent';
-import Page from '@unblocked-web/secret-agent/lib/Page';
-import { LoadStatus } from '@unblocked-web/emulator-spec/browser/Location';
+import Pool from '@unblocked-web/agent/lib/Pool';
+import Agent from '@unblocked-web/agent/lib/Agent';
+import Page from '@unblocked-web/agent/lib/Page';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
@@ -14,7 +14,7 @@ const logger = TestLogger.forTest(module);
 
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  pool = new Pool({ emulatorPlugins: [BrowserEmulator] });
+  pool = new Pool({ agentPlugins: [BrowserEmulator] });
   Helpers.onClose(() => pool.close(), true);
   await pool.start();
   koaServer = await Helpers.runKoaServer();
@@ -167,7 +167,7 @@ test('should override before iframe.src using javascript', async () => {
     document.body.appendChild(iframe);
   })()`);
 
-  await expect(complete).resolves.toBe(agent.emulatorProfile.userAgentOption.string);
+  await expect(complete).resolves.toBe(agent.emulationProfile.userAgentOption.string);
 });
 
 test('should emulate contentWindow features', async () => {
@@ -221,7 +221,7 @@ test('should handle a removed frame', async () => {
     }
   })()`);
   await page.close();
-  expect(navigatorPlatform).toBe(agent.emulatorProfile.userAgentOption.operatingSystemPlatform);
+  expect(navigatorPlatform).toBe(agent.emulationProfile.userAgentOption.operatingSystemPlatform);
 });
 
 // only run this test manually

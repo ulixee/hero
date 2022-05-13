@@ -1,4 +1,4 @@
-import { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
+import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import { IDataUserAgentOption } from '../interfaces/IBrowserData';
 
 const compareVersions = require('compare-versions');

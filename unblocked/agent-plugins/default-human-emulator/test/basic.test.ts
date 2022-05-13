@@ -1,9 +1,9 @@
-import { IInteractionStep, InteractionCommand } from '@unblocked-web/emulator-spec/interact/IInteractions';
+import { IInteractionStep, InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import HumanEmulator from '../index';
-import * as rectUtils from '@unblocked-web/secret-agent/lib/rectUtils';
-import IInteractionsHelper from '@unblocked-web/emulator-spec/interact/IInteractionsHelper';
+import * as rectUtils from '@unblocked-web/agent/lib/rectUtils';
+import IInteractionsHelper from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
 
 const { log } = Log(module);
 

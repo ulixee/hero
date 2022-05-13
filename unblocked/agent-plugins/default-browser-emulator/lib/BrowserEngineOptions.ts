@@ -1,5 +1,5 @@
-import { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
-import IBrowserEngineOption from '@unblocked-web/emulator-spec/browser/IBrowserEngineOption';
+import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 import DataLoader from './DataLoader';
 
 type IBrowserEngineOptionAndVersion = IBrowserEngineOption & { version: IVersion };

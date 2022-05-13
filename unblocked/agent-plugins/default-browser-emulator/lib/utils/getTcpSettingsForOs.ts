@@ -1,4 +1,4 @@
-import { IVersion } from '@unblocked-web/emulator-spec/emulator/IUserAgentOption';
+import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
 
 export default function getTcpSettingsForOs(
   name: string,

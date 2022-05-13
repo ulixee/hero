@@ -125,9 +125,9 @@ module.exports = {
   ignorePatterns: [
     'node_modules',
     '**/test/assets/**',
-    'emulator-spec',
+    'specifications',
     'js-path',
-    'secret-agent',
+    'agent',
     'build',
     'build-dist',
     '**/babel.config.js',

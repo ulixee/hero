@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import * as os from 'os';
-import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
+import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 import { defaultScreen } from '../Viewports';
 
 let sessionDirCounter = 0;

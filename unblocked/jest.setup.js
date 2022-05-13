@@ -2,8 +2,8 @@ const fs = require('fs');
 const rmSync = 'rmSync' in fs ? 'rmSync' : 'rmdirSync';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const CertificateManager = require('@unblocked-web/sa-mitm-socket/lib/CertificateGenerator').default;
-const dataDir = process.env.SA_DATA_DIR ?? `${__dirname}/.data-test`;
+const CertificateManager = require('@unblocked-web/agent-mitm-socket/lib/CertificateGenerator').default;
+const dataDir = process.env.UBK_DATA_DIR ?? `${__dirname}/.data-test`;
 
 module.exports = async () => {
   try {

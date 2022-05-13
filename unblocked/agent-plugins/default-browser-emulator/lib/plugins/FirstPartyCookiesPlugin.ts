@@ -7,18 +7,18 @@ import {
   getPublicSuffix,
   permuteDomain,
 } from 'tough-cookie';
-import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import SameSiteContext from '@ulixee/commons/interfaces/SameSiteContext';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import DomOverridesBuilder from '../DomOverridesBuilder';
-import { IHooksProvider } from '@unblocked-web/emulator-spec/hooks/IHooks';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { EmulatorPluginClassDecorator } from '@unblocked-web/emulator-spec/emulator/IEmulatorPlugin';
+import { AgentPluginClassDecorator } from '@unblocked-web/specifications/plugin/IAgentPlugin';
 
-@EmulatorPluginClassDecorator
+@AgentPluginClassDecorator
 export default class FirstPartyCookiesPlugin implements IHooksProvider {
   public static id = 'FirstPartyCookiesPlugin';
 
@@ -40,8 +40,8 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
 
   private readonly logger: IBoundLog;
 
-  constructor(readonly emulatorProfile: IEmulatorProfile) {
-    this.logger = emulatorProfile.logger?.createChild(module);
+  constructor(readonly emulationProfile: IEmulationProfile) {
+    this.logger = emulationProfile.logger?.createChild(module);
   }
 
   public onLoadUserProfileCookies(cookies, storage): void {
@@ -282,7 +282,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
   }
 
   private isMinimumVersion(minor: number, patch = 0): boolean {
-    const { browserVersion } = this.emulatorProfile.userAgentOption;
+    const { browserVersion } = this.emulationProfile.userAgentOption;
     return Number(browserVersion.minor) >= minor && Number(browserVersion.patch) >= patch;
   }
 }

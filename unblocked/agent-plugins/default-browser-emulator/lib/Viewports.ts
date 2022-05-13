@@ -1,4 +1,4 @@
-import IViewport from '@unblocked-web/emulator-spec/browser/IViewport';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 import { IDataWindowFraming } from '../interfaces/IBrowserData';
 
 const defaultWindowFraming = {

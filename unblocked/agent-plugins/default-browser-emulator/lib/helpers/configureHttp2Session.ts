@@ -1,10 +1,10 @@
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
-import IHttp2ConnectSettings from '@unblocked-web/emulator-spec/net/IHttp2ConnectSettings';
-import IHttpResourceLoadDetails from '@unblocked-web/emulator-spec/net/IHttpResourceLoadDetails';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import IHttp2ConnectSettings from '@unblocked-web/specifications/agent/net/IHttp2ConnectSettings';
+import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import IBrowserData from '../../interfaces/IBrowserData';
 
 export default function configureHttp2Session(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   data: IBrowserData,
   resource: IHttpResourceLoadDetails,
   settings: IHttp2ConnectSettings,

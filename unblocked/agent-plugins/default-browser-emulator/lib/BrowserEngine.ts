@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
-import IBrowserEngine from '@unblocked-web/emulator-spec/browser/IBrowserEngine';
-import IBrowserEngineOption from '@unblocked-web/emulator-spec/browser/IBrowserEngineOption';
+import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 import ChromeApp from '@ulixee/chrome-app';
 
 export default class BrowserEngine implements IBrowserEngine {

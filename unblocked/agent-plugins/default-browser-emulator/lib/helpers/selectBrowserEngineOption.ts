@@ -1,4 +1,4 @@
-import IBrowserEngineOption from '@unblocked-web/emulator-spec/browser/IBrowserEngineOption';
+import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 import { IDataBrowserEngineOptions } from '../../interfaces/IBrowserData';
 import { defaultBrowserEngine } from '../../index';
 

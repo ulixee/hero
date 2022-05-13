@@ -1,4 +1,4 @@
-import { Helpers } from '@unblocked-web/sa-testing';
+import { Helpers } from '@unblocked-web/agent-testing';
 import DefaultBrowserEmulator, { defaultBrowserEngine } from '../index';
 
 afterAll(Helpers.afterAll);

@@ -1,12 +1,12 @@
 import { assert } from '@ulixee/commons/lib/utils';
-import { IPage } from '@unblocked-web/emulator-spec/browser/IPage';
-import IEmulatorProfile from '@unblocked-web/emulator-spec/emulator/IEmulatorProfile';
+import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default function setActiveAndFocused(
-  emulatorProfile: IEmulatorProfile,
+  emulationProfile: IEmulationProfile,
   page: IPage,
 ): Promise<any> {
-  const location = emulatorProfile.geolocation;
+  const location = emulationProfile.geolocation;
   if (!location) return;
 
   assert(Math.abs(location.latitude) <= 90, 'Latitude must be in a range from -90 to 90');

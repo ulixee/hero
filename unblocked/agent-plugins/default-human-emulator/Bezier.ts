@@ -1,4 +1,4 @@
-import IPoint from '@unblocked-web/emulator-spec/browser/IPoint';
+import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
 import curveLength from './curveLength';
 
 // class extract from https://github.com/Pomax/bezierjs
