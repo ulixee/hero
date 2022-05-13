@@ -71,7 +71,7 @@
   "workspaces": {
     "packages": [
       "secret-agent/build/*",
-      "emulator-plugins/*",
+      "agent-plugins/*",
       "emulator-spec/build",
       "js-path/build"
     ],

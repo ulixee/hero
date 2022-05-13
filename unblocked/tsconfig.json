@@ -24,7 +24,7 @@
   },
   "references": [
     {
-      "path": "emulator-plugins/default-browser-emulator/injected-scripts/tsconfig.json"
+      "path": "agent-plugins/default-browser-emulator/injected-scripts/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
@@ -38,7 +38,7 @@
     "**/emulator-spec",
     "**/js-path",
     "**/node_modules",
-    "emulator-plugins/default-browser-emulator/injected-scripts",
+    "agent-plugins/default-browser-emulator/injected-scripts",
     "docs",
     "**/*.d.ts"
   ]
