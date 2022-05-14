@@ -55,9 +55,7 @@ export default class Core {
     Pick<
       Pool['EventTypes'],
       'browser-has-no-open-windows' | 'browser-launched' | 'all-browsers-closed'
-    > & {
-      'session-created': { session: Session };
-    }
+    >
   >();
 
   public static readonly connections: ConnectionToClient[] = [];
@@ -149,8 +147,7 @@ export default class Core {
       Core.dataDir = options.dataDir;
     }
     this.networkDb = new NetworkDb();
-    if (options.defaultAgentPlugins)
-      this.defaultAgentPlugins = options.defaultAgentPlugins;
+    if (options.defaultAgentPlugins) this.defaultAgentPlugins = options.defaultAgentPlugins;
 
     this.pool = new Pool({
       certificateStore: this.networkDb.certificates,

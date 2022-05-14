@@ -194,12 +194,17 @@ export default class Session
       entrypoint: require.main?.filename ?? process.argv[1],
       startDate: this.createdTime,
     };
-    options.showChrome ??= env.showChrome ?? false;
-    options.showChromeInteractions ??= options.showChrome;
+    // add env vars
+    options.showChrome ??= env.showChrome;
     options.noChromeSandbox ??= env.noChromeSandbox;
     options.disableGpu ??= env.disableGpu;
     options.disableMitm ??= env.disableMitm;
     options.disableDevtools ??= env.disableDevtools;
+
+    Session.events.emit('new', { session: this });
+    // if no settings for chrome visiblity, default to headless
+    options.showChrome ??= false;
+    options.showChromeInteractions ??= options.showChrome;
 
     const { userProfile, userAgent } = options;
     const customEmulatorConfig: IEmulatorOptions = {
@@ -249,15 +254,6 @@ export default class Session
       id: this.id,
       options: { ...this.options },
     };
-  }
-
-  public configureHeaded(
-    options: Pick<ISessionCreateOptions, 'showChrome' | 'showChromeInteractions'>,
-  ): void {
-    this.options.showChrome = options.showChrome ?? false;
-    this.options.showChromeInteractions = options.showChromeInteractions ?? options.showChrome;
-
-    this.browserEngine.isHeaded = this.options.showChrome;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -824,7 +820,6 @@ ${data}`,
     if (!session) {
       await Core.start({}, false);
       session = new Session(options);
-      this.events.emit('new', { session });
 
       if (session.mode !== 'browserless') {
         await session.openBrowser();
