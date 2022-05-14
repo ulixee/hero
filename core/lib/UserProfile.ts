@@ -150,28 +150,31 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
 </html>`,
       });
 
-      for (const frame of page.frames) {
-        if (frame === page.mainFrame) {
-          // no loader is set, so need to have special handling
-          if (!frame.activeLoader.lifecycle.load) {
-            await frame.waitOn('frame-lifecycle', x => x.name === 'load');
+      await Promise.all(
+        page.frames.map(async frame => {
+          if (frame === page.mainFrame) {
+            // no loader is set, so need to have special handling
+            if (!frame.activeLoader.lifecycle.load) {
+              await frame.waitOn('frame-lifecycle', x => x.name === 'load');
+            }
+            return;
           }
-          continue;
-        }
-        await frame.waitForLifecycleEvent('DOMContentLoaded');
+          await frame.waitForLifecycleEvent('DOMContentLoaded');
 
-        await frame.evaluate(
-          `(async function() {
+          await frame.evaluate(
+            `(async function() {
             while (!document.querySelector("body.ready")) {
               await new Promise(resolve => setTimeout(resolve, 20));
             }
           })()`,
-          true,
-          {
-            shouldAwaitExpression: true,
-          },
-        );
-      }
+            false,
+            {
+              shouldAwaitExpression: true,
+              returnByValue: true
+            },
+          );
+        }),
+      );
 
       // clear out frame state
       await page.navigate('about:blank');
