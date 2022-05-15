@@ -29,7 +29,7 @@ We'd love your help improving Unblocked tools. Please don't hesitate to send a p
 
 All `Unblocked` projects use eslint for code standards and ensure lint + test are run before allowing any pushes. 
 
-This project has a [code of conduct](docs/main/Contribute/code-of-conduct.md). By interacting with this repository, organization, or community you agree to abide by its terms.
+This project has a [code of conduct](CODE_OF_CONDUCT.md). By interacting with this repository, organization, or community you agree to abide by its terms.
 
 
 ## License
