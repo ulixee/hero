@@ -1,14 +1,14 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import { InternalPropertiesSymbol } from './internal';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
 interface IEventType {
   message: (message: IWebsocketMessage) => void;
@@ -27,11 +27,16 @@ const propertyKeys: (keyof WebsocketResource)[] = [
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
 export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
+  public readonly url: string;
+  public readonly documentUrl: string;
+  public readonly type = 'Websocket' as IResourceType;
+  public readonly isRedirect: boolean;
+  public readonly request: ResourceRequest;
+  public readonly response: ResourceResponse;
+
   #awaitedPath: AwaitedPath;
   readonly #coreTabPromise: Promise<CoreTab>;
   readonly #resourceMeta: IResourceMeta;
-  readonly request: ResourceRequest;
-  readonly response: ResourceResponse;
 
   get [InternalPropertiesSymbol](): {
     coreTabPromise: Promise<CoreTab>;
@@ -40,7 +45,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     return {
       coreTabPromise: this.#coreTabPromise,
       resourceMeta: this.#resourceMeta,
-    }
+    };
   }
 
   constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
@@ -55,22 +60,9 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     this.#awaitedPath = new AwaitedPath(null, 'resources', String(resourceMeta.id));
     this.#coreTabPromise = coreTabPromise;
     this.#resourceMeta = resourceMeta;
-  }
-
-  public get url(): string {
-    return this.#resourceMeta.url;
-  }
-
-  public get documentUrl(): string {
-    return this.#resourceMeta.documentUrl;
-  }
-
-  public get type(): IResourceType {
-    return 'Websocket';
-  }
-
-  public get isRedirect(): boolean {
-    return this.#resourceMeta.isRedirect ?? false;
+    this.url = resourceMeta.url;
+    this.documentUrl = resourceMeta.documentUrl;
+    this.isRedirect = resourceMeta.isRedirect ?? false;
   }
 
   public get messages(): Promise<IWebsocketMessage[]> {

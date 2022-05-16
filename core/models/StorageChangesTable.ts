@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import { IPuppetStorageEvents } from '@ulixee/hero-interfaces/IPuppetDomStorageTracker';
+import { IDomStorageEvents } from '@unblocked-web/agent/lib/DomStorageTracker';
 
 export default class StorageChangesTable extends SqliteTable<IStorageChangesEntry> {
   private changesByTabIdAndTime: {
@@ -27,7 +27,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
   public insert(
     tabId: number,
     frameId: number,
-    entry: IPuppetStorageEvents['dom-storage-updated'] & { type: IStorageChangesEntry['type'] },
+    entry: IDomStorageEvents['dom-storage-updated'] & { type: IStorageChangesEntry['type'] },
   ): void {
     this.queuePendingInsert([
       tabId,
@@ -90,8 +90,8 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
 }
 
 export interface IStorageChangesEntry {
-  type: 'cookie' | IPuppetStorageEvents['dom-storage-updated']['type'];
-  action: IPuppetStorageEvents['dom-storage-updated']['action'];
+  type: 'cookie' | IDomStorageEvents['dom-storage-updated']['type'];
+  action: IDomStorageEvents['dom-storage-updated']['action'];
   securityOrigin: string;
   tabId: number;
   timestamp: number;

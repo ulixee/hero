@@ -2,19 +2,24 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import SessionDb from '../dbs/SessionDb';
 import { IEventRecord } from '../models/AwaitedEventsTable';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import ICommandMarker from '@unblocked-web/agent/interfaces/ICommandMarker';
 
-export default class Commands extends TypedEventEmitter<{
-  start: ICommandMeta;
-  finish: ICommandMeta;
-  pause: void;
-  resume: void;
-}> {
+export default class Commands
+  extends TypedEventEmitter<{
+    start: ICommandMeta;
+    finish: ICommandMeta;
+    pause: void;
+    resume: void;
+  }>
+  implements ICommandMarker
+{
   public readonly history: ICommandMeta[] = [];
+
   public get last(): ICommandMeta | undefined {
     if (this.history.length === 0) return;
     return this.history[this.history.length - 1];
@@ -43,9 +48,16 @@ export default class Commands extends TypedEventEmitter<{
   private listenersById = new Map<string, IRemoteListenerDetails>();
   private listenerIdCounter = 0;
   private commandLockPromise: Resolvable<void>;
+  private defaultWaitForLocationCommandId = 0;
 
   constructor(readonly db: SessionDb) {
     super();
+  }
+
+  public getStartingCommandIdFor(marker: 'waitForLocation'): number {
+    if (marker === 'waitForLocation') {
+      return this.defaultWaitForLocationCommandId;
+    }
   }
 
   public waitForCommandLock(): Promise<void> {
@@ -113,6 +125,21 @@ export default class Commands extends TypedEventEmitter<{
     });
     this.db.commands.insert(commandMeta);
     this.emit('start', commandMeta);
+  }
+
+  public willRunCommand(newCommand: ICommandMeta): void {
+    // if this is a goto, set this to the "waitForLocation(change/reload)" command marker
+    if (newCommand.name === 'goto') {
+      this.defaultWaitForLocationCommandId = newCommand.id;
+    }
+    // handle cases like waitForLocation two times in a row
+    if (!newCommand.name.startsWith('waitFor') || newCommand.name === 'waitForLocation') {
+      // find the last "waitFor" command that is not followed by another waitFor
+      const last = this.last;
+      if (last && last.name.startsWith('waitFor') && last.name !== 'waitForMillis') {
+        this.defaultWaitForLocationCommandId = newCommand.id;
+      }
+    }
   }
 
   public onFinished(commandMeta: ICommandMeta, result: any, endNavigationId: number): void {

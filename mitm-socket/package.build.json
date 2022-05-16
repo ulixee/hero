@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "postinstall": "node install.js",
-    "build": "cross-env SA_REBUILD_MITM_SOCKET=1 node install.js"
-  }
-}

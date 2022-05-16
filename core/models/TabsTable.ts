@@ -1,15 +1,8 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 
 export default class TabsTable extends SqliteTable<ITabsRecord> {
-  public get nextId(): number {
-    this.#idCounter += 1;
-    return this.#idCounter;
-  }
-
-  #idCounter = 0;
-
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Tabs', [
       ['id', 'INTEGER'],

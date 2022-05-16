@@ -1,7 +1,6 @@
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import { IFrameNavigationEvents } from '@ulixee/hero-core/lib/FrameNavigations';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
+import { ContentPaint } from '@unblocked-web/specifications/agent/browser/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -9,6 +8,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import Log from '@ulixee/commons/lib/Logger';
+import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
 
 const { log } = Log(module);
 

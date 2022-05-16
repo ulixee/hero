@@ -1,10 +1,10 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
-import IResourceResponse from '@ulixee/hero-interfaces/IResourceResponse';
-import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
+import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 
 const propertyKeys: (keyof ResourceResponse)[] = [
   'headers',
@@ -21,6 +21,17 @@ const propertyKeys: (keyof ResourceResponse)[] = [
 ];
 
 export default class ResourceResponse {
+  public readonly url: string;
+  public readonly timestamp: Date;
+  public readonly headers: IHttpHeaders;
+  public readonly trailers?: IHttpHeaders;
+  public readonly browserServedFromCache?: IHttpResourceLoadDetails['browserServedFromCache'];
+  public readonly browserLoadFailure?: string;
+  public readonly browserLoadedTime?: Date;
+  public readonly remoteAddress: string;
+  public readonly statusCode: number;
+  public readonly statusMessage?: string;
+
   #coreTab: Promise<CoreTab>;
   #resourceId?: number;
   #response: IResourceResponse;
@@ -29,39 +40,20 @@ export default class ResourceResponse {
     this.#coreTab = coreTab;
     this.#response = response;
     this.#resourceId = resourceId;
-  }
-
-  public get browserServedFromCache(): null | IHttpResourceLoadDetails['browserServedFromCache'] {
-    return this.#response?.browserServedFromCache;
-  }
-
-  public get browserLoadFailure(): string {
-    return this.#response?.browserLoadFailure;
-  }
-
-  public get headers(): IResourceHeaders {
-    return this.#response?.headers;
-  }
-
-  public get url(): string {
-    return this.#response?.url;
-  }
-
-  public get timestamp(): Date {
-    const timestamp = this.#response?.timestamp;
-    return timestamp ? new Date(timestamp) : null;
-  }
-
-  public get remoteAddress(): string {
-    return this.#response?.remoteAddress;
-  }
-
-  public get statusCode(): number {
-    return this.#response?.statusCode;
-  }
-
-  public get statusMessage(): string {
-    return this.#response?.statusMessage;
+    if (response) {
+      this.url = response.url;
+      this.timestamp = response.timestamp ? new Date(response.timestamp) : null;
+      this.headers = response.headers;
+      this.trailers = response.trailers;
+      this.browserServedFromCache = response.browserServedFromCache;
+      this.browserLoadedTime = response.browserLoadedTime
+        ? new Date(response.browserLoadedTime)
+        : null;
+      this.browserLoadFailure = response.browserLoadFailure;
+      this.statusCode = response.statusCode;
+      this.statusMessage = response.statusMessage;
+      this.remoteAddress = response.remoteAddress;
+    }
   }
 
   public get buffer(): Promise<Buffer> {

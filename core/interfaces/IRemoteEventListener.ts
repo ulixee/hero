@@ -1,4 +1,4 @@
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 
 export type IRemoteEmitFn = (listenerId: string, ...eventArgs: any[]) => void;
 

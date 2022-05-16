@@ -60,9 +60,9 @@ test('records a single resource for failed mitm requests', async () => {
 
   const waitForEmptyKeyCheck = new Resolvable<void>();
   const didEmit = new Resolvable<void>();
-  const originalEmit = tab.puppetPage.emit.bind(tab.puppetPage);
+  const originalEmit = tab.page.emit.bind(tab.page);
   // @ts-ignore
-  jest.spyOn(tab.puppetPage.networkManager, 'emit').mockImplementation((evt, args) => {
+  jest.spyOn(tab.page.networkManager, 'emit').mockImplementation((evt, args) => {
     // eslint-disable-next-line promise/always-return,promise/catch-or-return,@typescript-eslint/no-floating-promises
     waitForEmptyKeyCheck.promise.then(() => {
       originalEmit(evt as any, args);

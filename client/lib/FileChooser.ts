@@ -1,6 +1,7 @@
-import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
+import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
 import * as Fs from 'fs';
-import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
+import AwaitedPath  from 'awaited-dom/base/AwaitedPath';
 import { createHTMLInputElement } from 'awaited-dom/impl/create';
 import { IHTMLInputElement } from 'awaited-dom/base/interfaces/official';
 import * as Path from 'path';

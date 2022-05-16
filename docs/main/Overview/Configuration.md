@@ -27,7 +27,7 @@ Configures the storage location for files created by Core.
 - Session Databases
 - Man-in-the-middle network certificates
 
-`Environmental variable`: `HERO_DATA_DIR=/your-absolute-dir-path`
+`Environmental variable`: `ULX_DATA_DIR=/your-absolute-dir-path`
 
 Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/hero/advanced/connection-to-core).
 
@@ -79,14 +79,6 @@ Configures a proxy url to route traffic through for a given Hero. This function 
 
 An upstream proxy url should be a fully formatted url to the proxy. If your proxy is socks5, start it with `socks5://`, http `http://` or `https://` as needed. An upstream proxy url can optionally include the user authentication parameters in the url. It will be parsed out and used as the authentication.
 
-### Browsers Emulator Id <div class="specs"><i>Hero</i></div>
-
-Configures which [BrowserEmulator](/docs/hero/plugins/browser-emulators) to use in a given Hero.
-
-### Human Emulator Id <div class="specs"><i>Hero</i></div>
-
-Configures which [HumanEmulator](/docs/hero/plugins/human-emulators) to use in a Hero instance.
-
 ## Core Configuration
 
 Configuration for Core should be performed before initialization.
@@ -100,5 +92,6 @@ Update existing settings.
 - options `object` Accepts any of the following:
   - maxConcurrentClientCount `number` defaults to `10`. Limit concurrent Hero sessions running at any given time.
   - dataDir `string` defaults to `os.tmpdir()/.ulixee`. Directory to store session databases and mitm certificates.
+  - defaultAgentPlugins `IAgentPluginClass[]`. A list of Unblocked Agent plugin classes to be installed by default in new Agents.
 
 #### **Returns**: `Promise`

@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
@@ -7,10 +7,10 @@ import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import { URL } from 'url';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
-import IResourceType from '@ulixee/hero-interfaces/IResourceType';
-import MitmRequestAgent from '@ulixee/hero-mitm/lib/MitmRequestAgent';
-import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import MitmRequestAgent from '@unblocked-web/agent-mitm/lib/MitmRequestAgent';
+import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -69,7 +69,7 @@ describe('UserProfile cookie tests', () => {
     const cookiesBefore = await tab3.session.exportUserProfile();
     expect(cookiesBefore.cookies).toHaveLength(1);
     expect(cookiesBefore.userAgentString).toBe(profile.userAgentString);
-    expect(tab3.session.plugins.browserEmulator.userAgentString).toBe(profile.userAgentString);
+    expect(tab3.session.meta.userAgentString).toBe(profile.userAgentString);
     expect(cookiesBefore.deviceProfile).toEqual(profile.deviceProfile);
 
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
@@ -103,7 +103,7 @@ describe('UserProfile cookie tests', () => {
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
+      await tab.page.frames[1].waitForLifecycleEvent('load');
 
       profile = await tab.session.exportUserProfile();
       expect(profile.cookies).toHaveLength(3);
@@ -231,7 +231,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
       },
     };
     for (let i = 0; i < 100; i += 1) {
-      storage[`https://${(i === 1 ? 'D' : 'd')}omain${i}.com`] = {
+      storage[`https://${i === 1 ? 'D' : 'd'}omain${i}.com`] = {
         indexedDB: [],
         localStorage: [
           ['1', '2'],
@@ -255,7 +255,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await tab.waitForLoad('PaintingStable');
     await expect(tab.getJsValue('localStorage.getItem("test")')).resolves.toBe('1');
     await expect(tab.getJsValue('sessionStorage.getItem("test")')).resolves.toBe('2');
-  });
+  }, 30e3);
 
   it("should keep profile information for sites that aren't loaded in a session", async () => {
     const meta = await connection.createSession({
@@ -428,7 +428,7 @@ localStorage.setItem('cross', '1');
 
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
       await tab.waitForLoad('PaintingStable');
-      await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
+      await tab.page.frames[1].waitForLifecycleEvent('load');
       profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);

@@ -18,11 +18,11 @@ import {
   INodeList,
 } from 'awaited-dom/base/interfaces/official';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import { KeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import IResourceType, { ResourceType } from '@ulixee/hero-interfaces/IResourceType';
-import { InteractionCommand, MouseButton } from '@ulixee/hero-interfaces/IInteractions';
+import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import IResourceType, { ResourceType } from '@unblocked-web/specifications/agent/net/IResourceType';
+import { InteractionCommand, MouseButton } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
-import { LoadStatus, LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';

@@ -1,6 +1,6 @@
 import { createSession, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { Helpers } from '@ulixee/hero-testing';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import Core from '@ulixee/hero-core';
 import DomStateGenerator from '../lib/DomStateGenerator';
 import DomStateAssertions from '../lib/DomStateAssertions';

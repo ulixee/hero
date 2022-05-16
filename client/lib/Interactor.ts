@@ -9,11 +9,11 @@ import {
   InteractionCommand as CoreCommand,
   isMousePositionXY,
   MouseButton,
-} from '@ulixee/hero-interfaces/IInteractions';
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { IKeyboardKeyCode } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { IKeyboardKeyCode } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
 import IInteractions, {
   Command,
   ICommand,
@@ -22,7 +22,7 @@ import IInteractions, {
 } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { isAwaitedNode } from './SetupAwaitedHandler';
-import { IKeyboardShortcut } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
+import { IKeyboardShortcut } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 

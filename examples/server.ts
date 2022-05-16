@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import Core, { GlobalPool } from '@ulixee/hero-core';
+import Core  from '@ulixee/hero-core';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
@@ -13,8 +13,8 @@ import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
     server.close();
     process.exit();
   };
-  GlobalPool.events.on('browser-has-no-open-windows', ({ puppet }) => puppet.close());
-  GlobalPool.events.on('all-browsers-closed', () => Core.shutdown());
+  Core.events.on('browser-has-no-open-windows', ({ browser }) => browser.close());
+  Core.events.on('all-browsers-closed', () => Core.shutdown());
 })().catch(error => {
   console.log('ERROR starting core', error);
   process.exit(1);

@@ -6,7 +6,7 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -18,9 +18,9 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { INodeVisibility } from '@unblocked-web/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
@@ -77,6 +77,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   #frameEnvironments: FrameEnvironment[];
   #coreTabPromise: Promise<CoreTab>;
 
+  get #coreTabOrReject(): Promise<CoreTab> {
+    return this.#coreTabPromise.then(x => {
+      if (x instanceof Error) throw x;
+      return x;
+    });
+  }
+
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     return {
       coreTabPromise: this.#coreTabPromise,
@@ -106,11 +113,11 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public get tabId(): Promise<number> {
-    return this.#coreTabPromise.then(x => x.tabId);
+    return this.#coreTabOrReject.then(x => x.tabId);
   }
 
   public get lastCommandId(): Promise<number> {
-    return this.#coreTabPromise.then(x => x.commandQueue.lastCommandId);
+    return this.#coreTabOrReject.then(x => x.commandQueue.lastCommandId);
   }
 
   public get url(): Promise<string> {
@@ -194,7 +201,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
-    const coreTab = await this.#coreTabPromise;
+    const coreTab = await this.#coreTabOrReject;
     const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
   }

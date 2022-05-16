@@ -1,5 +1,5 @@
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
-import IPluginType, { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import { IPluginType, PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 
 export default function extractPlugins<T = IPluginClass>(obj: any, pluginType?: IPluginType): T[] {
   const Plugins: T[] = [];
@@ -27,7 +27,5 @@ function isPluginMatch(PotentialPlugin: any, pluginType?: IPluginType): boolean 
   }
   if (PotentialPlugin.type === PluginTypes.ClientPlugin) return true;
   if (PotentialPlugin.type === PluginTypes.CorePlugin) return true;
-  if (PotentialPlugin.type === PluginTypes.BrowserEmulator) return true;
-  if (PotentialPlugin.type === PluginTypes.HumanEmulator) return true;
   return false;
 }

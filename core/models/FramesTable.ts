@@ -5,12 +5,6 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   public frameDomNodePathsById: { [frameId: number]: string } = {};
   public framesById: { [frameId: number]: { parentId: number; domNodeId: number } } = {};
 
-  public get nextId(): number {
-    this.#idCounter += 1;
-    return this.#idCounter;
-  }
-
-  #idCounter = 0;
   #mainFrameIds = new Set<number>();
   #tabIdByFrameId = new Map<number, number>();
   #mainFrameIdByTabId = new Map<number, Set<number>>();

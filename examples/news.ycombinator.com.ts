@@ -1,6 +1,6 @@
 import Hero from '@ulixee/hero-fullstack';
 
-// process.env.HERO_SHOW_CHROME = 'true';
+// process.env.ULX_SHOW_CHROME = 'true';
 
 async function run() {
   const hero = new Hero({ userAgent: '~ chrome = 89' });

@@ -7,17 +7,17 @@ import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import PuppetLaunchError from '@ulixee/hero-puppet/lib/PuppetLaunchError';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
-import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
 import FrameEnvironment from '../lib/FrameEnvironment';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
+import BrowserLaunchError from '@unblocked-web/agent/errors/BrowserLaunchError';
+
 const version = require('../package.json');
 
 const { log } = Log(module);
@@ -131,7 +131,7 @@ export default class ConnectionToClient
     this.isClosing = false;
     await Core.start(options, false);
     return {
-      maxConcurrency: GlobalPool.maxConcurrentClientCount,
+      maxConcurrency: Core.pool.maxConcurrentAgents,
     };
   }
 
@@ -272,7 +272,11 @@ export default class ConnectionToClient
   }
 
   private isLaunchError(error: Error): boolean {
-    return error instanceof PuppetLaunchError || error.name === 'DependenciesMissingError';
+    return (
+      error instanceof BrowserLaunchError ||
+      error.name === 'BrowserLaunchError' ||
+      error.name === 'DependenciesMissingError'
+    );
   }
 
   private serializeToMetadata(data: any): any {

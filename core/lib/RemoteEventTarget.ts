@@ -1,6 +1,6 @@
 import { IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import Session from './Session';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Logger from '@ulixee/commons/lib/Logger';

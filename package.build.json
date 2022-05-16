@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test:build": "cross-env NODE_ENV=test HERO_DATA_DIR=.data-test jest"
+    "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest"
   },
   "devDependencies": {
     "jest": "^27.0.6",

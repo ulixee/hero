@@ -1,22 +1,19 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
-import Interactor from '../lib/Interactor';
+import Interactor from '@unblocked-web/agent/lib/Interactor';
+import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  Core.use(
-    class BasicHumanEmulator extends HumanEmulator {
-      static id = 'basic';
-    },
-  );
+  // remove the human emulator
+  Core.defaultAgentPlugins = [DefaultBrowserEmulator];
   await Core.start();
   connectionToClient = Core.addConnection();
   await connectionToClient.connect();
@@ -72,7 +69,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
     {
       const { session, tab } = await createSession({ sessionKeepAlive: true });
       sessionId = session.id;
-      firstTabPageId = tab.puppetPage.id;
+      firstTabPageId = tab.page.id;
 
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionResumeSessionStart`);
@@ -96,7 +93,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
       });
 
       expect(session.id).not.toBe(sessionId);
-      expect(tab.puppetPage.id).not.toBe(firstTabPageId);
+      expect(tab.page.id).not.toBe(firstTabPageId);
 
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionResumeSessionStart`);
@@ -150,7 +147,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
         },
       });
       sessionId = session.id;
-      firstTabPageId = tab.puppetPage.id;
+      firstTabPageId = tab.page.id;
 
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionResumeSessionStartClosed`);
@@ -177,7 +174,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
 
       // should be a new session this time
       expect(session.id).not.toBe(sessionId);
-      expect(tab.puppetPage.id).not.toBe(firstTabPageId);
+      expect(tab.page.id).not.toBe(firstTabPageId);
 
       simulateScriptSendingCommandMeta(session, 1);
       await tab.goto(`${koaServer.baseUrl}/sessionResumeSessionStartClosed`);

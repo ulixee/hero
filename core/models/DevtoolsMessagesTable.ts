@@ -1,22 +1,13 @@
 // eslint-disable-next-line max-classes-per-file
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import type { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
-  private fetchRequestIdToNetworkId = new Map<string, string>();
   private pageIds = new IdAssigner();
   private workerIds = new IdAssigner();
   private frameIds = new IdAssigner();
   private requestIds = new IdAssigner();
-
-  private sentMessagesById: {
-    [id: number]: {
-      method: string;
-      frameId?: string;
-      requestId?: string;
-    };
-  } = {};
 
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DevtoolsMessages', [
@@ -35,55 +26,14 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
     ]);
   }
 
-  public insert(event: IPuppetContextEvents['devtools-message']): void {
+  public insert(event: DevtoolsSessionLogger['EventTypes']['devtools-message']): void {
     if (filteredEventMethods.has(event.method)) return;
     const params = event.params;
-    let frameId = event.frameId;
-    let requestId: string;
-    let pageId = event.pageTargetId;
-    if (params) {
-      frameId = frameId ?? params.frame?.id ?? params.frameId ?? params.context?.auxData?.frameId;
-
-      // translate Fetch.requestPaused networkId (which is what we use in other parts of the app
-      requestId =
-        this.fetchRequestIdToNetworkId.get(params.requestId) ??
-        params.networkId ??
-        params.requestId;
-      if (params.networkId) this.fetchRequestIdToNetworkId.set(params.requestId, params.networkId);
-
-      if (!pageId && params.targetInfo && params.targetInfo?.type === 'page') {
-        pageId = params.targetInfo.targetId;
-      }
-    }
-
-    let method = event.method;
-
-    if (event.direction === 'send') {
-      this.sentMessagesById[event.id] = {
-        method: event.method,
-        frameId,
-        requestId,
-      };
-    } else if (event.id) {
-      const sentMessage = this.sentMessagesById[event.id];
-      delete this.sentMessagesById[event.id];
-      if (sentMessage) {
-        method = sentMessage.method;
-        frameId ??= sentMessage.frameId;
-        requestId ??= sentMessage.requestId;
-      }
-    }
-
-    let result = event.result;
-
-    if (result) {
-      if (method === 'Page.captureScreenshot') {
-        result = { ...result, data: `[truncated ${result.data.length} chars]` };
-      }
-      if (method === 'Network.getResponseBody') {
-        result = { ...result, body: '[truncated]' };
-      }
-    }
+    const frameId = event.frameId;
+    const requestId = event.requestId;
+    const pageId = event.pageTargetId;
+    const method = event.method;
+    const result = event.result;
 
     function paramsStringifyFilter(key: string, value: any): any {
       if (
@@ -95,25 +45,9 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
         return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;
       }
 
-      if (key === 'data' && method === 'Page.screencastFrame') {
-        return `[truncated ${value.length} chars]`;
-      }
-
-      if (
-        key === 'source' &&
-        method === 'Page.addScriptToEvaluateOnNewDocument' &&
-        value?.length > 50
-      ) {
-        return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
-      }
-
-      if (key === 'body' && method === 'Fetch.fulfillRequest') {
-        return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
-      }
-
       if ((key === 'headers' || key === 'postData') && params.request) {
         // clean out post data (we have these in resources table)
-        return 'HERO_REMOVED_FOR_DB';
+        return 'ULX_REMOVED_FOR_DB';
       }
       return value;
     }

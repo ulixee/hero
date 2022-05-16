@@ -1,4 +1,4 @@
-import IResourceType from './IResourceType';
+import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 
 export default interface IResourceFilterProperties {
   url?: string | RegExp;

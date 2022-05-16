@@ -1,9 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus } from '@ulixee/hero-interfaces/Location';
-import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import Core, { Session } from '../index';
@@ -11,9 +10,15 @@ import Core, { Session } from '../index';
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  Core.use(
-    class BasicHumanEmulator extends HumanEmulator {
-      static id = 'basic';
+  Core.defaultAgentPlugins.push(
+    class BasicHumanEmulator {
+      async playInteractions(interactionGroups, runFn): Promise<void> {
+        for (const group of interactionGroups) {
+          for (const step of group) {
+            await runFn(step);
+          }
+        }
+      }
     },
   );
   connectionToClient = Core.addConnection();
@@ -39,9 +44,7 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'basic',
-    });
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
@@ -217,17 +220,17 @@ function sort() {
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
     const session = tab.session;
 
-    expect(tab.puppetPage.frames).toHaveLength(4);
-    await tab.puppetPage.frames[1].waitForLifecycleEvent('load');
-    await tab.puppetPage.frames[2].waitForLifecycleEvent('load');
-    // await tab.puppetPage.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
+    expect(tab.page.frames).toHaveLength(4);
+    await tab.page.frames[1].waitForLifecycleEvent('load');
+    await tab.page.frames[2].waitForLifecycleEvent('load');
+    // await tab.page.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
     await session.db.flush();
     const domChanges = session.db.domChanges.all();
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
-    await tab.frameEnvironmentsByPuppetId.get(tab.puppetPage.frames[3].id).isReady;
+    await tab.frameEnvironmentsByDevtoolsId.get(tab.page.frames[3].id).isReady;
 
     await session.db.flush();
     const frames = session.db.frames.all();
@@ -359,7 +362,6 @@ describe('basic Mouse Event tests', () => {
 </body>`;
     });
     const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'basic',
       viewport: {
         height: 800,
         width: 1000,

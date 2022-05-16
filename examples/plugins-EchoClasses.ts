@@ -35,7 +35,7 @@ export class EchoCorePlugin extends CorePlugin {
   static readonly id = 'echo-plugin';
 
   public onClientCommand(
-    { puppetPage }: IOnClientCommandMeta,
+    { page }: IOnClientCommandMeta,
     echo1: string,
     echo2: number,
     ...echoAny: any[]

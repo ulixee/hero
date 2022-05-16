@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import INavigation from '@ulixee/hero-interfaces/INavigation';
-import { LoadStatus } from '@ulixee/hero-interfaces/Location';
+import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import CommandTimeline from '../lib/CommandTimeline';
 
 afterAll(Helpers.afterAll);

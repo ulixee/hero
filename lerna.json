@@ -8,9 +8,6 @@
     "fullstack",
     "plugin-utils",
     "plugins/*",
-    "puppet",
-    "puppet-chrome",
-    "mitm",
     "testing",
     "timetravel"
   ],

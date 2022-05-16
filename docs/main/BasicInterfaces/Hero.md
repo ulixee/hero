@@ -80,7 +80,7 @@ const Hero = require('@ulixee/hero');
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
-  - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `HERO_SHOW_CHROME=true`. Default `false`.
+  - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
@@ -171,8 +171,6 @@ Retrieves metadata about the hero configuration:
 
 - sessionId `string`. The session identifier.
 - sessionName `string`. The unique session name that will be visible in Replay.
-- browserEmulatorId `string`. The id of the [Browser Emulator](/docs/hero/plugins/browser-emulators) in use.
-- humanEmulatorId `string`. The id of the [Human Emulator](/docs/hero/plugins/human-emulators) in use.
 - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
 - locale `string`. The configured locale in use (eg, en-US).
 - geolocation `IGeolocation`. The configured geolocation of the user (if set).

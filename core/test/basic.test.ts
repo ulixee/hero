@@ -1,11 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing/index';
-import Core, { GlobalPool } from '../index';
+import Core from '../index';
 import Session from '../lib/Session';
 
 const shutdownSpy = jest.spyOn(Core, 'shutdown');
-beforeEach(() => {
-  GlobalPool.maxConcurrentClientCount = 10;
-});
 afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
 
@@ -15,8 +12,8 @@ describe('basic Core tests', () => {
     Helpers.onClose(() => connection.disconnect());
     await connection.connect({ maxConcurrentClientCount: 5 });
 
-    expect(GlobalPool.maxConcurrentClientCount).toBe(5);
-    expect(GlobalPool.activeSessionCount).toBe(0);
+    expect(Core.pool.maxConcurrentAgents).toBe(5);
+    expect(Core.pool.activeAgentsCount).toBe(0);
 
     await Core.shutdown();
   });
@@ -27,11 +24,11 @@ describe('basic Core tests', () => {
     await connection.connect({ maxConcurrentClientCount: 2 });
     await connection.createSession();
 
-    expect(GlobalPool.maxConcurrentClientCount).toBe(2);
-    expect(GlobalPool.activeSessionCount).toBe(1);
+    expect(Core.pool.maxConcurrentAgents).toBe(2);
+    expect(Core.pool.activeAgentsCount).toBe(1);
 
     await Core.shutdown();
-    expect(GlobalPool.activeSessionCount).toBe(0);
+    expect(Core.pool.activeAgentsCount).toBe(0);
   });
 
   it('shuts down if connect set to be not persistent and Core.start not called', async () => {
@@ -52,7 +49,7 @@ describe('basic Core tests', () => {
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
     expect(connectionCloseSpy).toHaveBeenCalled();
     await Core.shutdown();
-    expect(GlobalPool.activeSessionCount).toBe(0);
+    expect(Core.pool.activeAgentsCount).toBe(0);
     Core.autoShutdownMillis = 30e3;
   });
 
@@ -74,7 +71,7 @@ describe('basic Core tests', () => {
     expect(shutdownSpy).toHaveBeenCalledTimes(0);
     expect(connectionCloseSpy).toHaveBeenCalledTimes(1);
     await Core.shutdown();
-    expect(GlobalPool.activeSessionCount).toBe(0);
+    expect(Core.pool.activeAgentsCount).toBe(0);
     Core.autoShutdownMillis = 30e3;
   });
 });

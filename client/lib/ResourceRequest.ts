@@ -1,9 +1,9 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
-import IResourceRequest from '@ulixee/hero-interfaces/IResourceRequest';
+import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IResourceRequest from '@unblocked-web/specifications/agent/net/IResourceRequest';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
-import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 
 const propertyKeys: (keyof ResourceRequest)[] = [
   'headers',
@@ -14,6 +14,12 @@ const propertyKeys: (keyof ResourceRequest)[] = [
 ];
 
 export default class ResourceRequest {
+  public readonly url: string;
+  public readonly timestamp: Date;
+  public readonly headers: IHttpHeaders;
+  public readonly trailers?: IHttpHeaders;
+  public readonly method: string;
+
   #request: IResourceRequest;
   #resourceId?: number;
   #coreTab: Promise<CoreTab>;
@@ -22,23 +28,12 @@ export default class ResourceRequest {
     this.#resourceId = resourceId;
     this.#request = request;
     this.#coreTab = coreTab;
-  }
-
-  public get headers(): IResourceHeaders {
-    return this.#request?.headers;
-  }
-
-  public get url(): string {
-    return this.#request?.url;
-  }
-
-  public get timestamp(): Date {
-    const timestamp = this.#request?.timestamp;
-    return timestamp ? new Date(timestamp) : null;
-  }
-
-  public get method(): string {
-    return this.#request?.method;
+    if (request) {
+      this.headers = request.headers;
+      this.url = request.url;
+      this.timestamp = request.timestamp ? new Date(request.timestamp) : null;
+      this.method = request.method;
+    }
   }
 
   public get postData(): Promise<Buffer> {

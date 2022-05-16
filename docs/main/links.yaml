@@ -33,8 +33,6 @@
   items:
     - Client Plugins
     - Core Plugins
-    - Browser Emulators
-    - Human Emulators
 - title: Contribute
   items:
     - How to contribute

@@ -1,8 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing';
-import MitmServer from '@ulixee/hero-mitm/lib/MitmProxy';
+import MitmServer from '@unblocked-web/agent-mitm/lib/MitmProxy';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as WebSocket from 'ws';
-import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
+import HttpUpgradeHandler from '@unblocked-web/agent-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { AddressInfo } from 'net';
@@ -28,7 +28,7 @@ describe('Websocket tests', () => {
 
     const receivedMessages: string[] = [];
     koaServer.server.on('upgrade', (request, socket, head) => {
-      wss.handleUpgrade(request, socket, head, async (ws: WebSocket) => {
+      wss.handleUpgrade(request, socket as any, head, async (ws: WebSocket) => {
         ws.on('message', msg => {
           receivedMessages.push(msg.toString());
           if (msg === 'Echo Message19') {

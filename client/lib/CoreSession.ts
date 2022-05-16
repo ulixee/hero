@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { IJsPath } from '@unblocked-web/js-path';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import * as readline from 'readline';
@@ -224,7 +224,7 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   private showSessionKeepAlivePrompt(message: string): void {
-    if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
+    if (/yes|1|true/i.test(process.env.ULX_CLI_NOPROMPT)) return;
 
     this.cliPrompt = readline.createInterface({
       input: process.stdin,

@@ -72,11 +72,11 @@ describe('basic Full Client tests', () => {
     await expect(hero.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
   });
 
-  it('runs goto with no document loaded', async () => {
+  it('can access the location with no document loaded', async () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
     const url = await hero.document.location.host;
-    expect(url).toBe(null);
+    expect(url).toBe('');
   });
 
   it('gets the resource back from a goto', async () => {

@@ -9,7 +9,7 @@ const isStandardBuild = !copyToDir.includes('dist');
 
 const workspaces = [];
 for (const packageGlob of pkg.workspaces.packages) {
-  if (packageGlob.startsWith('../')) continue;
+  if (packageGlob.startsWith('../') || packageGlob.includes('/build')) continue;
 
   let workspacePath = packageGlob;
   if (workspacePath.endsWith('/*')) {

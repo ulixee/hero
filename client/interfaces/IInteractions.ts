@@ -1,9 +1,9 @@
-import { IKeyboardKeyCode } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import { IKeyboardShortcut } from '@ulixee/hero-interfaces/IKeyboardShortcuts';
+import { IKeyboardKeyCode } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import { IKeyboardShortcut } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 import {
   IElementInteractVerification,
   IMousePositionXY,
-} from '@ulixee/hero-interfaces/IInteractions';
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 
 export type IInteraction = ICommand | ICommandDetailed;

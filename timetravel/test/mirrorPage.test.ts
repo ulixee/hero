@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session, Tab } from '@ulixee/hero-core';
 import ConnectionToClient from '@ulixee/hero-core/connections/ConnectionToClient';
@@ -58,17 +58,17 @@ describe('MirrorPage tests', () => {
     const tab = Session.getTab(meta);
     Helpers.needsClosing.push(tab.session);
     tab.session.options.showChromeInteractions = true;
-    await InjectedScripts.installInteractionScript(tab.puppetPage);
+    await InjectedScripts.installInteractionScript(tab.page);
     await tab.goto(`${koaServer.baseUrl}/domrecording`);
     await tab.waitForLoad('DomContentLoaded');
 
     const mirrorPage = await createMirrorPage(tab);
 
-    const sourceHtml = await tab.puppetPage.mainFrame.html();
+    const sourceHtml = await tab.page.mainFrame.outerHTML();
 
     await mirrorPage.load();
     {
-      const mirrorHtml = await mirrorPage.getHtml();
+      const mirrorHtml = await mirrorPage.outerHTML();
       expect(mirrorHtml).toBe(sourceHtml);
     }
 
@@ -77,13 +77,13 @@ describe('MirrorPage tests', () => {
       await tab.getJsValue(evaluateScript);
       await mirrorPage.load();
 
-      const sourceHtmlNext = await tab.puppetPage.mainFrame.html();
+      const sourceHtmlNext = await tab.page.mainFrame.outerHTML();
       htmlAtSteps.push({
         html: sourceHtmlNext,
         // @ts-ignore
         index: mirrorPage.domRecording.paintEvents.length - 1,
       });
-      const mirrorHtmlNext = await mirrorPage.getHtml();
+      const mirrorHtmlNext = await mirrorPage.outerHTML();
       // mirror page should not know about the hero-replay nodes
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
@@ -139,7 +139,7 @@ describe('MirrorPage tests', () => {
     htmlAtSteps.reverse();
     for (const { index, html } of htmlAtSteps) {
       await mirrorPage.load(index);
-      const mirrorHtml = await mirrorPage.page.mainFrame.html();
+      const mirrorHtml = await mirrorPage.page.mainFrame.outerHTML();
       expect(mirrorHtml).toBe(html);
     }
   });
@@ -184,7 +184,7 @@ describe('MirrorPage tests', () => {
 
     const mirrorPage = await createMirrorPage(tab);
 
-    const sourceHtml = await tab.puppetPage.mainFrame.html();
+    const sourceHtml = await tab.page.mainFrame.outerHTML();
 
     await mirrorPage.load();
 
@@ -193,7 +193,7 @@ describe('MirrorPage tests', () => {
       expect(changes).toHaveLength(21);
     }
 
-    const mirrorHtml = await mirrorPage.page.mainFrame.html();
+    const mirrorHtml = await mirrorPage.page.mainFrame.outerHTML();
     expect(mirrorHtml).toBe(sourceHtml);
 
     await tab.interact([
@@ -204,14 +204,14 @@ describe('MirrorPage tests', () => {
     ]);
     const newTab = await tab.waitForNewTab();
     await newTab.waitForLoad('PaintingStable');
-    const newTabHtml = await newTab.puppetPage.mainFrame.html();
+    const newTabHtml = await newTab.page.mainFrame.outerHTML();
     const pageChanges = await newTab.getDomChanges();
     expect(pageChanges.length).toBeGreaterThan(10);
 
     const newTabMirrorPage = await createMirrorPage(newTab);
     await newTabMirrorPage.load();
 
-    const mirrorNewTabHtml = await newTabMirrorPage.page.mainFrame.html();
+    const mirrorNewTabHtml = await newTabMirrorPage.page.mainFrame.outerHTML();
     expect(mirrorNewTabHtml).toBe(newTabHtml);
   }, 45e3);
 
@@ -239,10 +239,10 @@ describe('MirrorPage tests', () => {
     await tab.waitForLoad('DomContentLoaded');
     const mirrorPage = await createMirrorPage(tab);
 
-    const sourceHtml = await tab.puppetPage.mainFrame.html();
+    const sourceHtml = await tab.page.mainFrame.outerHTML();
 
     await mirrorPage.load();
-    const mirrorHtml = await mirrorPage.page.mainFrame.html();
+    const mirrorHtml = await mirrorPage.page.mainFrame.outerHTML();
     expect(mirrorHtml).toBe(sourceHtml);
 
     const lastCommandId = tab.lastCommandId;
@@ -257,8 +257,8 @@ describe('MirrorPage tests', () => {
     expect(changes.length).toBe(2);
     await mirrorPage.load();
 
-    const mirrorHtml2 = await mirrorPage.page.mainFrame.html();
-    const sourceHtml2 = await tab.puppetPage.mainFrame.html();
+    const mirrorHtml2 = await mirrorPage.page.mainFrame.outerHTML();
+    const sourceHtml2 = await tab.page.mainFrame.outerHTML();
     expect(mirrorHtml2).toBe(sourceHtml2);
   }, 45e3);
 });

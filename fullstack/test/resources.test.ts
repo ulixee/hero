@@ -74,7 +74,7 @@ describe('basic resource tests', () => {
     expect(resources2).toHaveLength(1);
     await expect(
       hero.waitForResource({ type: 'Fetch' }, { sinceCommandId }),
-    ).resolves.toStrictEqual(resources[0]);
+    ).resolves.toStrictEqual(resources2[0]);
 
     let counter = 0;
     const allResources = await hero.waitForResources(

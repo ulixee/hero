@@ -1,10 +1,12 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IDomStorage, { IDomStorageForOrigin } from '@ulixee/hero-interfaces/IDomStorage';
+import IDomStorage, {
+  IDomStorageForOrigin,
+} from '@unblocked-web/specifications/agent/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
+import Page from '@unblocked-web/agent/lib/Page';
 
 const { log } = Log(module);
 
@@ -14,7 +16,7 @@ export default class UserProfile {
 
     const exportedStorage: IDomStorage = { ...(session.options.userProfile?.storage ?? {}) };
     for (const tab of session.tabsById.values()) {
-      const page = tab.puppetPage;
+      const page = tab.page;
 
       for (const {
         origin,
@@ -48,8 +50,8 @@ export default class UserProfile {
     return {
       cookies,
       storage: exportedStorage,
-      userAgentString: session.plugins.browserEmulator.userAgentString,
-      deviceProfile: session.plugins.browserEmulator.deviceProfile,
+      userAgentString: session.emulationProfile.userAgentOption.string,
+      deviceProfile: session.emulationProfile.deviceProfile,
     } as IUserProfile;
   }
 
@@ -71,7 +73,7 @@ export default class UserProfile {
     return this;
   }
 
-  public static async installStorage(session: Session, page: IPuppetPage): Promise<void> {
+  public static async installStorage(session: Session, page: Page): Promise<void> {
     const { userProfile } = session;
     const domStorage: IDomStorage = {};
     const origins: string[] = [];
@@ -89,8 +91,11 @@ export default class UserProfile {
       sessionId,
       storageDomains: origins?.length,
     });
-
+    const browserContext = session.browserContext;
     try {
+      browserContext.resources.isCollecting = false;
+      page.storeEventsWithoutListeners = false;
+
       session.mitmRequestSession.interceptorHandlers = [
         {
           urls: origins,
@@ -114,7 +119,7 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
 
             let readyClass = 'ready';
             if (originStorage?.indexedDB?.length) {
-              readyClass ='';
+              readyClass = '';
               script += `\n\n 
              ${InjectedScripts.getIndexedDbStorageRestoreScript()}
              
@@ -145,30 +150,45 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
 </html>`,
       });
 
-      for (const frame of page.frames) {
-        if (frame === page.mainFrame) {
-          // no loader is set, so need to have special handling
-          if (!frame.activeLoader.lifecycle.load) {
-            await frame.waitOn('frame-lifecycle', x => x.name === 'load');
+      await Promise.all(
+        page.frames.map(async frame => {
+          if (frame === page.mainFrame) {
+            // no loader is set, so need to have special handling
+            if (!frame.activeLoader.lifecycle.load) {
+              await frame.waitOn('frame-lifecycle', x => x.name === 'load');
+            }
+            return;
           }
-          continue;
-        }
-        await frame.waitForLifecycleEvent('load');
+          await frame.waitForLifecycleEvent('DOMContentLoaded');
 
-        await frame.evaluate(
-          `(async function() {
+          await frame.evaluate(
+            `(async function() {
             while (!document.querySelector("body.ready")) {
               await new Promise(resolve => setTimeout(resolve, 20));
             }
           })()`,
-          true,
-          {
-            shouldAwaitExpression: true,
-          },
-        );
-      }
+            false,
+            {
+              shouldAwaitExpression: true,
+              returnByValue: true
+            },
+          );
+        }),
+      );
+
+      // clear out frame state
+      await page.navigate('about:blank');
+      await page.mainFrame.waitForLifecycleEvent('load');
+      page.storeEventsWithoutListeners = true;
+
+      page.domStorageTracker.isEnabled = true;
+      await page.domStorageTracker.initialize();
+      // run initialization after page is initialized
+      page.runPageScripts = true;
+      await browserContext.initializePage(page);
     } finally {
       session.mitmRequestSession.interceptorHandlers = interceptorHandlers;
+      browserContext.resources.isCollecting = true;
       log.stats('UserProfile.installedStorage', { sessionId, parentLogId });
     }
 

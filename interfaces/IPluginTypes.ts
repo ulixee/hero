@@ -1,13 +1,11 @@
-export enum PluginTypes {
-  ClientPlugin = 'ClientPlugin',
-  CorePlugin = 'CorePlugin',
-  BrowserEmulator = 'CorePlugin:BrowserEmulator',
-  HumanEmulator = 'CorePlugin:HumanEmulator',
-}
+const ClientPlugin = 'ClientPlugin';
+const CorePlugin = 'CorePlugin';
 
-type ValueOf<T> = T[keyof T];
+const PluginTypes = {
+  ClientPlugin,
+  CorePlugin,
+} as const;
 
-type IPluginType = ValueOf<PluginTypes>;
+type IPluginType = keyof typeof PluginTypes;
 
-export default IPluginType;
-
+export { PluginTypes, IPluginType };

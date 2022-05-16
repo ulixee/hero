@@ -1,30 +1,18 @@
 import { nanoid } from 'nanoid';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import RequestSession, {
-  IRequestSessionHttpErrorEvent,
-  IRequestSessionRequestEvent,
-  IRequestSessionResponseEvent,
   IResourceStateChangeEvent,
   ISocketEvent,
-} from '@ulixee/hero-mitm/handlers/RequestSession';
-import IPuppetContext, {
-  IPuppetContextEvents,
-  IPuppetPageOptions,
-} from '@ulixee/hero-interfaces/IPuppetContext';
+} from '@unblocked-web/agent-mitm/handlers/RequestSession';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { MitmProxy } from '@ulixee/hero-mitm/index';
-import IViewport from '@ulixee/hero-interfaces/IViewport';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
@@ -33,15 +21,23 @@ import CorePlugins from './CorePlugins';
 import Core from '../index';
 import SessionDb from '../dbs/SessionDb';
 import { ICommandableTarget } from './CommandRunner';
-import Resources from './Resources';
 import Commands from './Commands';
-import WebsocketMessages from './WebsocketMessages';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import Agent from '@unblocked-web/agent/lib/Agent';
+import Resources from '@unblocked-web/agent/lib/Resources';
+import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
+import Page from '@unblocked-web/agent/lib/Page';
+import env from '../env';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 
 const { log } = Log(module);
 
@@ -62,6 +58,10 @@ export default class Session
   }>
   implements ICommandableTarget, IRemoteEventListener
 {
+  public static events = new TypedEventEmitter<{
+    new: { session: Session };
+  }>();
+
   private static readonly byId: { [id: string]: Session } = {};
 
   public readonly id: string;
@@ -69,23 +69,7 @@ export default class Session
   public readonly plugins: CorePlugins;
 
   public get browserEngine(): IBrowserEngine {
-    return this.plugins.browserEngine;
-  }
-
-  public get viewport(): IViewport {
-    return this.options.viewport;
-  }
-
-  public get timezoneId(): string {
-    return this.options.timezoneId;
-  }
-
-  public get locale(): string {
-    return this.options.locale;
-  }
-
-  public get geolocation(): IGeolocation {
-    return this.options.geolocation;
+    return this.emulationProfile.browserEngine;
   }
 
   public get userProfile(): IUserProfile {
@@ -96,14 +80,28 @@ export default class Session
     return this.options.mode;
   }
 
+  public get viewport(): IViewport {
+    return this.emulationProfile.viewport;
+  }
+
   public readonly createdTime: number;
 
-  public readonly mitmRequestSession: RequestSession;
-  public browserContext?: IPuppetContext;
-  public resources: Resources;
+  public bypassResourceRegistrationForHost: URL;
+
+  public get mitmRequestSession(): RequestSession {
+    return this.agent.mitmRequestSession;
+  }
+
+  public browserContext?: BrowserContext;
   public commands: Commands;
-  public websocketMessages: WebsocketMessages;
   public readonly db: SessionDb;
+  public get resources(): Resources {
+    return this.browserContext.resources;
+  }
+
+  public get websocketMessages(): WebsocketMessages {
+    return this.browserContext.websocketMessages;
+  }
 
   public tabsById = new Map<number, Tab>();
 
@@ -111,23 +109,25 @@ export default class Session
     return this._isClosing;
   }
 
+  public get emulationProfile(): IEmulationProfile {
+    return this.agent?.emulationProfile;
+  }
+
   public get meta(): IHeroMeta {
-    const { plugins, viewport, locale, timezoneId, geolocation } = this;
+    const { viewport, locale, timezoneId, geolocation } = this.emulationProfile;
 
     const {
-      userAgentString,
+      string: userAgentString,
       operatingSystemPlatform,
       operatingSystemName,
       operatingSystemVersion,
       browserVersion,
       browserName,
-    } = this.plugins.browserEmulator;
+    } = this.emulationProfile.userAgentOption;
 
     return {
       sessionId: this.id,
       ...this.options,
-      browserEmulatorId: plugins.browserEmulator.id,
-      humanEmulatorId: plugins.humanEmulator.id,
       upstreamProxyUrl: this.options.upstreamProxyUrl,
       upstreamProxyIpMask: this.options.upstreamProxyIpMask,
       viewport,
@@ -161,18 +161,18 @@ export default class Session
   }
 
   public awaitedEventEmitter = new TypedEventEmitter<{ close: void }>();
+  public readonly agent: Agent;
 
   protected readonly logger: IBoundLog;
 
   private hasLoadedUserProfile = false;
   private commandRecorder: CommandRecorder;
-  private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
   private isResettingState = false;
   private readonly logSubscriptionId: number;
   private events = new EventSubscriber();
 
-  constructor(readonly options: ISessionCreateOptions) {
+  protected constructor(readonly options: ISessionCreateOptions) {
     super();
     this.createdTime = Date.now();
     this.id = this.getId(options.sessionId);
@@ -180,11 +180,13 @@ export default class Session
     Session.byId[id] = this;
     this.events.once(this, 'closed', () => delete Session.byId[id]);
     this.db = new SessionDb(this.id);
+    this.commands = new Commands(this.db);
 
     this.logger = log.createChild(module, { sessionId: this.id });
     loggerSessionIdNames.set(this.id, options.sessionName);
     this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
 
+    const providedOptions = { ...options };
     // set default script instance if not provided
     options.scriptInstanceMeta ??= {
       id: nanoid(),
@@ -192,38 +194,43 @@ export default class Session
       entrypoint: require.main?.filename ?? process.argv[1],
       startDate: this.createdTime,
     };
+    // add env vars
+    options.showChrome ??= env.showChrome;
+    options.noChromeSandbox ??= env.noChromeSandbox;
+    options.disableGpu ??= env.disableGpu;
+    options.disableMitm ??= env.disableMitm;
+    options.disableDevtools ??= env.disableDevtools;
 
-    const providedOptions = { ...options };
+    Session.events.emit('new', { session: this });
+    // if no settings for chrome visiblity, default to headless
+    options.showChrome ??= false;
+    options.showChromeInteractions ??= options.showChrome;
+
     const { userProfile, userAgent } = options;
+    const customEmulatorConfig: IEmulatorOptions = {
+      userAgentSelector: userAgent ?? userProfile?.userAgentString,
+    };
 
-    this.plugins = new CorePlugins(
-      {
-        ...options,
-        userAgentSelector: userAgent ?? userProfile?.userAgentString,
-        deviceProfile: userProfile?.deviceProfile,
-        getSessionSummary: this.getSummary.bind(this),
-      },
-      this.logger,
-    );
-    this.configureHeaded(options);
-    this.plugins.configure(options);
+    this.agent = Core.pool.createAgent({
+      options,
+      customEmulatorConfig,
+      logger: this.logger,
+      deviceProfile: userProfile?.deviceProfile,
+      id: this.id,
+      commandMarker: this.commands,
+    });
+
+    this.plugins = new CorePlugins(this.agent, {
+      corePluginPaths: options.corePluginPaths,
+      dependencyMap: options.dependencyMap,
+      getSessionSummary: this.getSummary.bind(this),
+    });
 
     // should come after plugins can initiate
     this.recordSession(providedOptions);
 
     SessionsDb.find().recordSession(this);
 
-    this.resources = new Resources(this);
-    this.mitmRequestSession = new RequestSession(
-      this.id,
-      this.plugins,
-      this.options.upstreamProxyUrl,
-      this.resources,
-    );
-    this.mitmRequestSession.respondWithHttpErrorStacks =
-      this.mode === 'development' && this.options.showChromeInteractions === true;
-    this.websocketMessages = new WebsocketMessages(this.db);
-    this.commands = new Commands(this.db);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.collectSnippet,
       this.getCollectedSnippets,
@@ -247,15 +254,6 @@ export default class Session
       id: this.id,
       options: { ...this.options },
     };
-  }
-
-  public configureHeaded(
-    options: Pick<ISessionCreateOptions, 'showChrome' | 'showChromeInteractions'>,
-  ): void {
-    this.options.showChrome = options.showChrome ?? false;
-    this.options.showChromeInteractions = options.showChromeInteractions ?? options.showChrome;
-
-    this.browserEngine.isHeaded = this.options.showChrome;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -367,48 +365,38 @@ export default class Session
     return db.collectedElements.getByName(name);
   }
 
-  public getMitmProxy(): { address: string; password?: string } {
-    return {
-      address: this.isolatedMitmProxy ? `localhost:${this.isolatedMitmProxy.port}` : null,
-      password: this.isolatedMitmProxy ? null : this.id,
-    };
-  }
-
-  public useIncognitoContext(): boolean {
-    return this.options.showChromeAlive !== true;
-  }
-
-  public async registerWithMitm(
-    sharedMitmProxy: MitmProxy,
-    doesPuppetSupportBrowserContextProxy: boolean,
-  ): Promise<void> {
-    let mitmProxy = sharedMitmProxy;
-    if (doesPuppetSupportBrowserContextProxy && this.useIncognitoContext()) {
-      this.isolatedMitmProxy = await MitmProxy.start(Core.dataDir);
-      mitmProxy = this.isolatedMitmProxy;
-    }
-
-    mitmProxy.registerSession(this.mitmRequestSession, !!this.isolatedMitmProxy);
-  }
-
-  public async initialize(context: IPuppetContext): Promise<void> {
-    this.browserContext = context;
-    this.events.on(context as any, 'devtools-message', this.onDevtoolsMessage.bind(this));
+  public async openBrowser(): Promise<void> {
+    const agent = this.agent;
+    await agent.open();
+    this.browserContext = agent.browserContext;
+    this.events.on(
+      agent.browserContext.devtoolsSessionLogger,
+      'devtools-message',
+      this.onDevtoolsMessage.bind(this),
+    );
     if (this.userProfile) {
       await UserProfile.installCookies(this);
     }
 
-    context.defaultPageInitializationFn = page =>
+    this.browserContext.defaultPageInitializationFn = page =>
       InjectedScripts.install(page, this.options.showChromeInteractions);
 
-    const requestSession = this.mitmRequestSession;
-    this.events.on(requestSession, 'request', this.onMitmRequest.bind(this));
-    this.events.on(requestSession, 'response', this.onMitmResponse.bind(this));
-    this.events.on(requestSession, 'http-error', this.onMitmError.bind(this));
+    const requestSession = agent.mitmRequestSession;
+    requestSession.bypassResourceRegistrationForHost = this.bypassResourceRegistrationForHost;
     this.events.on(requestSession, 'resource-state', this.onResourceStates.bind(this));
     this.events.on(requestSession, 'socket-close', this.onSocketClose.bind(this));
     this.events.on(requestSession, 'socket-connect', this.onSocketConnect.bind(this));
-    await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
+
+    const resources = this.browserContext.resources;
+    this.events.on(resources, 'change', this.onResource.bind(this));
+    this.events.on(resources, 'cookie-change', this.onCookieChange.bind(this));
+    this.events.on(resources, 'merge', this.onResourceNeedsMerge.bind(this));
+    this.events.on(resources, 'browser-loaded', this.onBrowserLoadedResource.bind(this));
+    this.events.on(resources, 'browser-requested', this.onBrowserRequestedResource.bind(this));
+
+    agent.mitmRequestSession.respondWithHttpErrorStacks =
+      this.mode === 'development' && this.options.showChromeInteractions === true;
+
     if (this.options.upstreamProxyIpMask) {
       this.db.session.updateConfiguration(this.meta);
     }
@@ -420,12 +408,22 @@ export default class Session
 
   public async createTab(): Promise<Tab> {
     if (this.mode === 'browserless') return null;
-    const page = await this.newPage({ groupName: 'session' });
+
+    let page: Page;
 
     // if first tab, install session storage
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
+      page = await this.browserContext.newPage({
+        groupName: 'session',
+        runPageScripts: false,
+        enableDomStorageTracker: false,
+      });
       await UserProfile.installStorage(this, page);
       this.hasLoadedUserProfile = true;
+    } else {
+      page = await this.browserContext.newPage({
+        groupName: 'session',
+      });
     }
 
     const first = this.tabsById.size === 0;
@@ -433,6 +431,7 @@ export default class Session
     this.recordTab(tab);
     this.registerTab(tab);
     await tab.isReady;
+
     if (first) this.db.session.updateConfiguration(this.meta);
     return tab;
   }
@@ -459,9 +458,9 @@ export default class Session
       for (const tab of this.tabsById.values()) {
         const clearPromises: Promise<void>[] = [];
         for (const frame of tab.frameEnvironmentsById.values()) {
-          const origin = frame.puppetFrame.securityOrigin;
+          const origin = frame.frame.securityOrigin;
           if (!securityOrigins.has(origin)) {
-            const promise = tab.puppetPage.devtoolsSession
+            const promise = tab.page.devtoolsSession
               .send('Storage.clearDataForOrigin', {
                 origin,
                 storageTypes: 'all',
@@ -497,17 +496,6 @@ export default class Session
     }
   }
 
-  public closeMitm(): void {
-    try {
-      this.mitmRequestSession.close();
-      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
-    } catch (error) {
-      log.error('Session.CloseMitmError', { error, sessionId: this.id });
-    }
-    this.websocketMessages.cleanup();
-    this.resources.cleanup();
-  }
-
   public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
     // if this session is set to keep alive and core isn't closing
     if (
@@ -531,7 +519,7 @@ export default class Session
     });
 
     await this.closeTabs();
-    this.closeMitm();
+    await this.agent.close();
 
     log.stats('Session.Closed', {
       sessionId: this.id,
@@ -639,69 +627,79 @@ export default class Session
     return sessionId ?? nanoid();
   }
 
-  private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {
+  private onResource(event: BrowserContext['resources']['EventTypes']['change']): void {
+    this.db.resources.insert(
+      event.tabId,
+      event.resource,
+      event.postData,
+      event.body,
+      event.requestProcessingDetails,
+      event.error,
+    );
+    if (event.type === 'mitm-response') {
+      this.tabsById.get(event.tabId)?.emit('resource', event.resource);
+    }
+  }
+
+  private onCookieChange(event: BrowserContext['resources']['EventTypes']['cookie-change']): void {
+    this.db.storageChanges.insert(event.tabId, event.frameId, {
+      type: 'cookie' as any,
+      action: event.action as any,
+      securityOrigin: event.url.origin,
+      key: event.cookie?.name,
+      value: event.cookie?.value,
+      meta: event.cookie,
+      timestamp: event.timestamp,
+    });
+  }
+
+  private onResourceNeedsMerge(event: BrowserContext['resources']['EventTypes']['merge']): void {
+    this.db.resources.mergeWithExisting(
+      event.resourceId,
+      event.existingResource,
+      event.newResourceDetails,
+      event.requestProcessingDetails,
+      event.error,
+    );
+  }
+
+  private onBrowserLoadedResource(
+    event: BrowserContext['resources']['EventTypes']['browser-loaded'],
+  ): void {
+    this.db.resources.updateReceivedTime(event.resourceId, event.browserLoadedTime);
+  }
+
+  private onBrowserRequestedResource(
+    event: BrowserContext['resources']['EventTypes']['browser-requested'],
+  ): void {
+    this.db.resources.updateBrowserRequestId(event.resourceId, event);
+  }
+
+  private onDevtoolsMessage(event: DevtoolsSessionLogger['EventTypes']['devtools-message']): void {
     this.db.devtoolsMessages.insert(event);
   }
 
-  private onMitmRequest(event: IRequestSessionRequestEvent): void {
-    this.resources.onMitmRequest(event);
-  }
-
-  private onMitmResponse(event: IRequestSessionResponseEvent): void {
-    const defaultTab = this.getLastActiveTab();
-    const resource = this.resources.onMitmResponse(event, defaultTab);
-    const tab = this.tabsById.get(resource.tabId) ?? defaultTab;
-    if (!event.wasIntercepted) {
-      tab?.emit('resource', resource);
-    }
-    tab?.checkForResolvedNavigation(event.browserRequestId, resource);
-  }
-
-  private onMitmError(event: IRequestSessionHttpErrorEvent): void {
-    const { browserRequestId, request, resourceType, response } = event.request;
-    let tabId = this.resources.getBrowserRequestTabId(browserRequestId);
-    const url = request?.url;
-    const isDocument = resourceType === 'Document';
-    if (isDocument && !tabId) {
-      for (const tab of this.tabsById.values()) {
-        const isMatch = tab.frameWithPendingNavigation(browserRequestId, url, response?.url);
-        if (isMatch) {
-          tabId = tab.id;
-          break;
-        }
-      }
-    }
-
-    // record errors
-    const resource = this.resources.onMitmRequestError(tabId, event, event.error);
-
-    if (tabId && isDocument) {
-      const tab = this.tabsById.get(tabId);
-      tab?.checkForResolvedNavigation(browserRequestId, resource, event.error);
-    }
-  }
-
   private onResourceStates(event: IResourceStateChangeEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.resourceStates.insert(event.context.id, event.context.stateChanges);
   }
 
   private onSocketClose(event: ISocketEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.sockets.insert(event.socket);
   }
 
   private onSocketConnect(event: ISocketEvent): void {
+    if (!this.browserContext.resources.isCollecting) return;
     this.db.sockets.insert(event.socket);
   }
 
   private async onNewTab(
     parentTab: Tab,
-    page: IPuppetPage,
+    page: Page,
     openParams: { url: string; windowName: string } | null,
   ): Promise<Tab> {
-    const tab = Tab.create(this, page, parentTab?.id, {
-      ...openParams,
-      loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoader.id,
-    });
+    const tab = Tab.create(this, page, parentTab?.id, openParams);
     this.recordTab(tab, parentTab.id);
     this.registerTab(tab);
 
@@ -720,14 +718,9 @@ export default class Session
         this.emit('all-tabs-closed');
       }
     });
-    tab.puppetPage.popupInitializeFn = this.onNewTab.bind(this, tab);
+    tab.page.popupInitializeFn = this.onNewTab.bind(this, tab);
     this.emit('tab-created', { tab });
     return tab;
-  }
-
-  private async newPage(options?: IPuppetPageOptions): Promise<IPuppetPage> {
-    if (this._isClosing) throw new Error('Cannot create tab, shutting down');
-    return await this.browserContext.newPage(options);
   }
 
   private recordLog(entry: ILogEntry): void {
@@ -741,8 +734,8 @@ export default class Session
   private recordTab(tab: Tab, parentTabId?: number): void {
     this.db.tabs.insert(
       tab.id,
-      tab.puppetPage.id,
-      tab.puppetPage.devtoolsSession.id,
+      tab.page.id,
+      tab.page.devtoolsSession.id,
       this.viewport,
       parentTabId,
     );
@@ -758,7 +751,7 @@ export default class Session
       this.browserEngine.fullVersion,
       this.createdTime,
       scriptInstanceMeta,
-      this.plugins.browserEmulator.deviceProfile,
+      this.emulationProfile.deviceProfile,
       optionsToStore,
     );
   }
@@ -798,8 +791,6 @@ ${data}`,
     options.geolocation ??= record.createSessionOptions?.geolocation;
     options.userProfile ??= record.createSessionOptions?.userProfile ?? {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
-    options.browserEmulatorId = record.browserEmulatorId;
-    options.humanEmulatorId = record.humanEmulatorId;
     return options;
   }
 
@@ -827,7 +818,12 @@ ${data}`,
     }
 
     if (!session) {
-      session = await GlobalPool.createSession(options);
+      await Core.start({}, false);
+      session = new Session(options);
+
+      if (session.mode !== 'browserless') {
+        await session.openBrowser();
+      }
     }
     tab ??= await session.createTab();
 

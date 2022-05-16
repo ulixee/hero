@@ -1,7 +1,7 @@
-import { GlobalPool, Session } from '@ulixee/hero-core';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import Core, { Session } from '@ulixee/hero-core';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import Log from '@ulixee/commons/lib/Logger';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 
 const { log } = Log(module);
 
@@ -9,31 +9,30 @@ export default class MirrorContext {
   public static async createFromSessionDb(
     sessionId: string,
     headed = true,
-  ): Promise<IPuppetContext> {
+  ): Promise<BrowserContext> {
     const options = Session.restoreOptionsFromSessionRecord({}, sessionId);
     options.sessionResume = null;
     options.showChromeInteractions = headed;
     options.showChrome = headed;
 
-    const plugins = new CorePlugins(
-      {
-        humanEmulatorId: options.humanEmulatorId,
-        browserEmulatorId: options.browserEmulatorId,
-        userAgentSelector: options.userAgent,
-        deviceProfile: options?.userProfile?.deviceProfile,
-        getSessionSummary() {
-          return {
-            id: sessionId,
-            options,
-          };
-        },
-      },
-      log,
-    );
-    plugins.browserEngine.isHeaded = options.showChrome;
-    plugins.configure(options);
+    const logger = log.createChild(module, { sessionId });
 
-    const puppet = await GlobalPool.getPuppet(plugins, plugins.browserEngine);
-    return await puppet.newContext(plugins, log);
+    const agent = Core.pool.createAgent({
+      options,
+      logger,
+      deviceProfile: options?.userProfile?.deviceProfile,
+      id: sessionId,
+    });
+
+    new CorePlugins(agent, {
+      getSessionSummary() {
+        return {
+          id: sessionId,
+          options,
+        };
+      },
+    });
+
+    return await agent.open();
   }
 }
