@@ -38,7 +38,7 @@ const Hero = require('@ulixee/hero');
 })();
 ```
 
-Browse the [full API docs](https://ulixee.org/docs).
+Browse the [full API docs](https://docs.ulixee.org/hero).
 
 ## Contributing
 

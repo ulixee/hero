@@ -1,49 +1,35 @@
 # Introduction
 
-> Hero is a free and open source headless browser that's written in NodeJs, built on top of Chrome and [nearly impossible for websites to detect](https://github.com/ulixee/double-agent/).
+> Hero is a free and open source headless browser that's written in NodeJs, built on top of Chrome and [nearly impossible for websites to detect](https://github.com/unblocked-web/double-agent/).
 
-## Why Hero?
+Hero is a web browser built for scraping.
 
-- **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
-- **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
-- **Powered by Chrome** - The powerful Chrome engine sits under the hood, allowing for lightning fast rendering.
-- **Emulates any modern browser** - Browser emulators make it easy to disguise your script as practically any browser.
-- **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
+- [x] **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
+- [x] **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
+- [x] **Powered by Chrome** - The powerful Chrome engine sits under the hood, allowing for lightning fast rendering.
+- [x] **Emulates any modern browser** - Emulators make it easy to disguise your script as practically any browser.
+- [x] **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 
-## How It Works
-
-We started by challenging ourselves to create the ultimate scraper detection tool, which we coined [DoubleAgent](https://github.com/ulixee/double-agent/). Along the way we discovered 76,697 checks that any website can implement to [block practically all known scrapers](https://stateofscraping.org). Then we designed Hero to bypass detection by emulating real users.
-
-Hero uses Chrome as its core rendering engine under the hood, with DevTools Protocol as its glue layer.
-
-Instead of creating another complex puppeteer-like API that requires use of nested callbacks and running code in remote contexts, we designed the AwaitedDOM. AwaitedDOM is a W3C compliant DOM written for NodeJS that allows you to write scraper scripts as if you were inside the webpage.
+Check out our [website for more details](https://ulixee.org).
 
 ## Installation
 
-To use Hero in your project, install it with npm or yarn:
-
-```bash
-npm i --save @ulixee/hero-fullstack
+```shell script
+npm i --save @ulixee/hero
 ```
 
 or
 
-```bash
-yarn add @ulixee/hero-fullstack
+```shell script
+yarn add @ulixee/hero
 ```
 
-When you install Hero, it also downloads a recent version of Chrome and data files to emulate headed (visible UI) Chrome on Mac OS and Windows.
+## Usage
 
-More details about installation can be found on the [troubleshooting](/docs/help/troubleshooting) page.
-
-## Usage Example
-
-Hero's API should be familiar to web developers everywhere. We created a W3C compliant DOM library for Node, which allows you to use the exact same DOM selector and traversal commands as you do in modern web browsers like Chromium, Firefox, and Safari.
-
-For example, here's how you might extract the title and intro paragraph from example.org:
+Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-import Hero from '@ulixee/hero';
+const Hero = require('@ulixee/hero');
 
 (async () => {
   const hero = new Hero();
@@ -51,11 +37,19 @@ import Hero from '@ulixee/hero';
   const title = await hero.document.title;
   const intro = await hero.document.querySelector('p').textContent;
   await hero.close();
-  
-  const output = { title, intro };
-
-  console.log('Retrieved from https://example.org', output);
 })();
 ```
 
-As shown in the example above, window.document follows the standard DOM specification, but with a cool twist which we call the AwaitedDOM.
+Browse the [full API docs](https://docs.ulixee.org/hero).
+
+## Contributing
+
+See [how-to-contribute.md](/docs/main/Contribute/how-to-contribute.md) for ways to get started.
+
+This project has a [code of conduct](/docs/main/Contribute/code-of-conduct.md). By interacting with this repository, organization, or community you agree to abide by its terms.
+
+We'd love your help in making Hero a better tool. Please don't hesitate to send a pull request.
+
+## License
+
+[MIT](LICENSE.md)
