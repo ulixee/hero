@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero-core",
-  "version": "1.5.4",
+  "version": "2.0.0-alpha.1",
   "description": "The core browser API used to run Hero",
   "exports": {
     ".": {
@@ -16,17 +16,17 @@
     "./connections/*": "./connections/*.js"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.11",
-    "@ulixee/hero-interfaces": "1.5.4",
+    "@types/ua-parser-js": "^0.7.35",
+    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.1",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.1",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.1",
     "@unblocked-web/agent": "2.0.0-alpha.1",
-    "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.1",
     "@unblocked-web/agent-mitm": "2.0.0-alpha.1",
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.1",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.1",
-    "@ulixee/hero-plugin-utils": "1.5.4",
-    "@ulixee/hero-timetravel": "1.5.4",
-    "@types/ua-parser-js": "^0.7.35",
+    "@unblocked-web/js-path": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.1",
     "awaited-dom": "1.4.0",
     "better-sqlite3": "^7.5.1",
     "moment": "^2.24.1",
@@ -34,13 +34,13 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@ulixee/chrome-app": "1.0.2",
-    "@ulixee/hero": "1.5.4",
-    "@ulixee/hero-fullstack": "1.5.4",
-    "@ulixee/hero-plugin-utils": "1.5.4",
-    "@ulixee/hero-testing": "1.5.4",
     "@types/better-sqlite3": "^7.5.0",
     "@types/json-socket": "^0.1.17",
+    "@ulixee/chrome-app": "1.0.2",
+    "@ulixee/hero": "2.0.0-alpha.1",
+    "@ulixee/hero-fullstack": "2.0.0-alpha.1",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.1",
+    "@ulixee/hero-testing": "2.0.0-alpha.1",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"
   }

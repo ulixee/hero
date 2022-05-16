@@ -2041,6 +2041,26 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
+"@ulixee/commons@1.5.11":
+  version "1.5.11"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-1.5.11.tgz#5747c33a3946d543ae66242fab7f7753ea855909"
+  integrity sha512-96nND7jf3oN+gvIlTCDrOZnWA77EQRTEm5nU6AcXDmShm1cU6DLv8SKfMNCd/F0JQt/lW+L9wKHlNfaQn3Ea4A==
+  dependencies:
+    devtools-protocol "^0.0.981744"
+    https-proxy-agent "^5.0.0"
+    semver "^7.3.7"
+    source-map-js "^1.0.1"
+
+"@ulixee/commons@2.0.0-alpha.1":
+  version "2.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-2.0.0-alpha.1.tgz#9b14934f2afcd41cf50d711075e52e61dc2aefd1"
+  integrity sha512-MXkF2RnANKgpYcwVo6KE1KBM/SffQdVo7bUm9XqjdG4t6s71aEuXEFUid27l5Tq3VzDwcN9kFJ4dnxAY+rK86g==
+  dependencies:
+    devtools-protocol "^0.0.981744"
+    https-proxy-agent "^5.0.0"
+    semver "^7.3.7"
+    source-map-js "^1.0.1"
+
 "@unblocked-web/agent-mitm-socket@2.0.0-alpha.1":
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@unblocked-web/agent-mitm-socket/-/agent-mitm-socket-2.0.0-alpha.1.tgz#29340e8d55e9c5f006b1ba52ad46c9868d21deed"

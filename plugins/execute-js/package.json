@@ -1,17 +1,17 @@
 {
   "name": "@ulixee/execute-js-plugin",
-  "version": "1.5.4",
+  "version": "2.0.0-alpha.1",
   "description": "Plugin that allows executing javascript in the remote browser context",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/hero-interfaces": "1.5.4",
-    "@ulixee/hero-plugin-utils": "1.5.4"
+    "@ulixee/hero-interfaces": "2.0.0-alpha.1",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.1"
   },
   "devDependencies": {
-    "@ulixee/commons": "1.5.11",
-    "@ulixee/hero-core": "1.5.4",
-    "@ulixee/hero-fullstack": "1.5.4",
-    "@ulixee/execute-js-plugin": "1.5.4",
-    "@ulixee/hero-testing": "1.5.4"
+    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/execute-js-plugin": "2.0.0-alpha.1",
+    "@ulixee/hero-core": "2.0.0-alpha.1",
+    "@ulixee/hero-fullstack": "2.0.0-alpha.1",
+    "@ulixee/hero-testing": "2.0.0-alpha.1"
   }
 }

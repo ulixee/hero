@@ -1,8 +1,17 @@
 {
-  "scripts": {
-    "postinstall": "yarn workspace @ulixee/hero-mitm-socket postinstall"
-  },
   "devDependencies": {
     "lerna": "^4.0.0"
+  },
+  "workspaces": {
+    "packages": [
+      "client",
+      "core",
+      "fullstack",
+      "interfaces",
+      "testing",
+      "timetravel",
+      "plugin-utils",
+      "plugins/*"
+    ]
   }
 }

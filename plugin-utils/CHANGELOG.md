@@ -1,0 +1,23 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [2.0.0-alpha.1](https://github.com/ulixee/ulixee/compare/v1.5.4...v2.0.0-alpha.1) (2022-05-16)
+
+
+### Bug Fixes
+
+* **plugins:** handle chrome > 90 scroll animation ([7fc2cd2](https://github.com/ulixee/ulixee/commit/7fc2cd21d9ad4a3f61f9d049b3f7a927471266c1))
+* **puppet:** fix hang on puppet close ([64173dd](https://github.com/ulixee/ulixee/commit/64173dda9947e2b702e859277e60a05c5ed40b97))
+* **puppet:** turn off final screenshot for cast ([0a9f124](https://github.com/ulixee/ulixee/commit/0a9f12469a6f7261ee46de69c8f6949c6c485e1c))
+
+
+### Features
+
+* **client:** add serialized callstack ([7a87445](https://github.com/ulixee/ulixee/commit/7a87445a5ea772769cd5cf2df5528e9653bd12a8))
+* **client:** waitForPageState(states, options) ([dae7f24](https://github.com/ulixee/ulixee/commit/dae7f2446afd0716a6e2063088cb456f5f301029))
+* **core:** use local dir for page state ([d884e81](https://github.com/ulixee/ulixee/commit/d884e81448e7db9d6f8a1613f7cefe8c5449caed))
+* **hero:** automatic server port use ([0199338](https://github.com/ulixee/ulixee/commit/0199338b9cdad68c7e5acd036597bf8d3252c90c))
+* **puppet:** capture resource browser load time ([1ae520c](https://github.com/ulixee/ulixee/commit/1ae520ce4047e987011a1a5c50e03e89a630c74e))
+* unify plugin structure ([6b9138d](https://github.com/ulixee/ulixee/commit/6b9138d890b6fb845af057fef4f390522614978f))

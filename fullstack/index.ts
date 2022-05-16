@@ -35,8 +35,8 @@ import Hero from './lib/Hero';
 ShutdownHandler.exitOnSignal = false;
 
 if (process.env.NODE_ENV !== 'test') {
-  Core.pool.on('browser-has-no-open-windows', ({ browser }) => browser.close());
-  Core.pool.on('all-browsers-closed', () => Core.shutdown());
+  Core.events.on('browser-has-no-open-windows', ({ browser }) => browser.close());
+  Core.events.on('all-browsers-closed', () => Core.shutdown());
 }
 
 export {

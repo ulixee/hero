@@ -1,15 +1,5 @@
 {
-  "version": "1.5.4",
+  "version": "2.0.0-alpha.1",
   "npmClient": "yarn",
-  "packages": [
-    "client",
-    "core",
-    "interfaces",
-    "fullstack",
-    "plugin-utils",
-    "plugins/*",
-    "testing",
-    "timetravel"
-  ],
   "useWorkspaces": true
 }
