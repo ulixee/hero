@@ -272,12 +272,12 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.14.5"
 
-"@babel/runtime-corejs3@^7.13.10":
-  version "7.15.3"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.15.3.tgz#28754263988198f2a928c09733ade2fb4d28089d"
-  integrity sha512-30A3lP+sRL6ml8uhoJSs+8jwpKzbw8CqBvDc1laeptxPm5FahumJxirigcbD2qTs71Sonvj1cyZB0OKGAmxQ+A==
+"@babel/runtime-corejs3@^7.16.8":
+  version "7.17.9"
+  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.17.9.tgz#3d02d0161f0fbf3ada8e88159375af97690f4055"
+  integrity sha512-WxYHHUWF2uZ7Hp1K+D1xQgbgkGUfA+5UPOegEXGt2Y5SMog/rYCVaifLZDbw8UkNXozEqqrZTy6bglL7xTaCOw==
   dependencies:
-    core-js-pure "^3.16.0"
+    core-js-pure "^3.20.2"
     regenerator-runtime "^0.13.4"
 
 "@babel/template@^7.14.5", "@babel/template@^7.3.3":
@@ -2420,7 +2420,7 @@ balanced-match@^1.0.0:
 basic-auth-parser@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/basic-auth-parser/-/basic-auth-parser-0.0.2.tgz#ce9e71a77f23c1279eecd2659b2a46244c156e41"
-  integrity sha1-zp5xp38jwSee7NJlmypGJEwVbkE=
+  integrity sha512-Y7OBvWn+JnW45JWHLY6ybYub2k9cXCMrtCyO1Hds2s6eqClqWhPnOQpgXUPjAiMHj+A8TEPIQQ1dYENnJoBOHQ==
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
@@ -2442,7 +2442,7 @@ big.js@^5.2.2:
 binary@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/binary/-/binary-0.3.0.tgz#9f60553bc5ce8c3386f3b553cff47462adecaa79"
-  integrity sha1-n2BVO8XOjDOG87VTz/R0Yq3sqnk=
+  integrity sha512-D4H1y5KYwpJgK8wk1Cue5LLPgmwHKYSChkbspQg5JtVuR5ulGckxfR62H3AE9UDkdMC8yyXlqYihuz3Aqg2XZg==
   dependencies:
     buffers "~0.1.1"
     chainsaw "~0.1.0"
@@ -2493,7 +2493,7 @@ buffer-from@^1.0.0:
 buffers@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
-  integrity sha1-skV5w77U1tOWru5tmorn9Ugqt7s=
+  integrity sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ==
 
 builtins@^1.0.3:
   version "1.0.3"
@@ -2600,7 +2600,7 @@ caseless@~0.12.0:
 chainsaw@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/chainsaw/-/chainsaw-0.1.0.tgz#5eab50b28afe58074d0d58291388828b5e5fbc98"
-  integrity sha1-XqtQsor+WAdNDVgpE4iCi15fvJg=
+  integrity sha512-75kWfWt6MEKNC8xYXIdRpDehRYY/tNSgwKaJq+dbbDcxORuVrrQ+SEHoWsniVn9XPYfP4gmdWIeDk/4YNp1rNQ==
   dependencies:
     traverse ">=0.3.0 <0.4"
 
@@ -3006,10 +3006,10 @@ copyfiles@^2.4.1:
     untildify "^4.0.0"
     yargs "^16.1.0"
 
-core-js-pure@^3.16.0:
-  version "3.16.1"
-  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.16.1.tgz#b997df2669c957a5b29f06e95813a171f993592e"
-  integrity sha512-TyofCdMzx0KMhi84mVRS8rL1XsRk2SPUNz2azmth53iRN0/08Uim9fdhQTaZTG1LqaXHYVci4RDHka6WrXfnvg==
+core-js-pure@^3.20.2:
+  version "3.22.5"
+  resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.22.5.tgz#bdee0ed2f9b78f2862cda4338a07b13a49b6c9a9"
+  integrity sha512-8xo9R00iYD7TcV7OrC98GwxiUEAabVWO3dix+uyWjnYrx9fyASLlIX+f/3p5dW5qByaP2bcZ8X/T47s55et/tA==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -7344,11 +7344,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2, signal-exit@^3.0.3:
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
 simple-socks@^2.1.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/simple-socks/-/simple-socks-2.2.1.tgz#20523257c8308ce87c539c76744a1375973d7e63"
-  integrity sha512-0VVABn9mk7hnm+4s8w2Y2wJmyqE+Z+dDC+WUS8/2/B77QTNuh0GuuCEqCiSQDn0+SYA38q0/CXIWQDDN7AP0TQ==
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/simple-socks/-/simple-socks-2.2.2.tgz#dd1d333024b370f2ef11ac51e92f7536660afc2a"
+  integrity sha512-cNPMmtF+LidDOHlZUWJAtnM31QuL2fJO9hzJ4LedUaCpZfKXurPfFHKe1S/Z9QqyHV/dv5Y9igWpEtjIWOLmyA==
   dependencies:
-    "@babel/runtime-corejs3" "^7.13.10"
+    "@babel/runtime-corejs3" "^7.16.8"
     binary "^0.3.0"
 
 sisteransi@^1.0.5:
