@@ -18,7 +18,7 @@ import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation'
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
 import BrowserLaunchError from '@unblocked-web/agent/errors/BrowserLaunchError';
 
-const version = require('../package.json');
+const { version } = require('../package.json');
 
 const { log } = Log(module);
 
