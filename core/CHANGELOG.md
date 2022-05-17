@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.2](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-17)
+
+
+### Bug Fixes
+
+* **core:** server routing “Version” broken ([3853fd9](https://github.com/ulixee/ulixee/commit/3853fd9bd789eba5d737fcf8f86ab6e368781d74))
+
+
+
+
+
 # [2.0.0-alpha.1](https://github.com/ulixee/ulixee/compare/v1.5.4...v2.0.0-alpha.1) (2022-05-16)
 
 

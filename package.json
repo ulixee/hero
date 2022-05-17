@@ -82,12 +82,7 @@
       "testing",
       "timetravel",
       "plugin-utils",
-      "plugins/*",
-      "../build/commons",
-      "../../unblocked/agent/build/*",
-      "../../unblocked/build/agent-plugins/*",
-      "../../unblocked/specifications/build",
-      "../../unblocked/js-path/build"
+      "plugins/*"
     ]
   },
   "lint-staged": {
