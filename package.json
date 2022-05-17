@@ -4,7 +4,7 @@
   "description": "The Web Browser Built for Scraping",
   "scripts": {
     "prepare": "husky install",
-    "bump-version": "lerna version --conventional-commits --no-push --exact --force-publish",
+    "bump-version": "node versionBump.js patch",
     "build": "yarn && yarn tsc && cd build && yarn",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js",
@@ -82,7 +82,12 @@
       "testing",
       "timetravel",
       "plugin-utils",
-      "plugins/*"
+      "plugins/*",
+      "../build/commons",
+      "../../unblocked/agent/build/*",
+      "../../unblocked/build/agent-plugins/*",
+      "../../unblocked/specifications/build",
+      "../../unblocked/js-path/build"
     ]
   },
   "lint-staged": {
