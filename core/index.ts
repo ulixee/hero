@@ -115,7 +115,7 @@ export default class Core {
 
     this.utilityBrowserContext = this.pool
       .getBrowser(
-        DefaultBrowserEmulator.defaultBrowserEngine(),
+        DefaultBrowserEmulator.defaultBrowserEngine(), // eslint-disable-line import/no-named-as-default-member
         {},
         {
           showChrome: false,

@@ -7,7 +7,7 @@ modified.workspaces.packages = modified.workspaces.packages.filter(x => !x.start
 
 (async () => {
   try {
-    console.log('Removing external workspaces from package.json');
+    console.log('Removing external workspaces from package.json'); // eslint-disable-line no-console
     writeFileSync(`${__dirname}/package.json`, JSON.stringify(modified, null, 2));
     const child = spawn(
       `lerna`,
@@ -27,7 +27,7 @@ modified.workspaces.packages = modified.workspaces.packages.filter(x => !x.start
       child.once('error', reject);
     });
   } finally {
-    console.log('Restoring Package.json');
+    console.log('Restoring Package.json'); // eslint-disable-line no-console
     writeFileSync(`${__dirname}/package.json`, pkgJson);
   }
-})();
+})().catch(console.error);
