@@ -11,11 +11,11 @@ export default class ExecuteJsClientPlugin extends ClientPlugin {
   public static id = pluginId;
   public static coreDependencyIds = [pluginId];
 
-  public onHero(hero: Hero, sendToCore: ISendToCoreFn) {
+  public onHero(hero: Hero, sendToCore: ISendToCoreFn): void {
     hero.executeJs = this.executeJs.bind(this, sendToCore);
   }
 
-  public onTab(hero: Hero, tab: Tab, sendToCore: ISendToCoreFn) {
+  public onTab(hero: Hero, tab: Tab, sendToCore: ISendToCoreFn): void {
     tab.executeJs = this.executeJs.bind(this, sendToCore);
   }
 
@@ -23,7 +23,7 @@ export default class ExecuteJsClientPlugin extends ClientPlugin {
     hero: Hero,
     frameEnvironment: FrameEnvironment,
     sendToCore: ISendToCoreFn,
-  ) {
+  ): void {
     frameEnvironment.executeJs = this.executeJs.bind(this, sendToCore);
   }
 

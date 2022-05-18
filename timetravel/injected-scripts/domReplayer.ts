@@ -43,7 +43,7 @@ class DomReplayer {
   }
 
   public reset(): void {
-    this.paintEvents.length =0;
+    this.paintEvents.length = 0;
     this.loadedIndex = 0;
     this.pendingDelegatedEventsByChildNodeId = {};
     this.pendingDomChanges = [];
@@ -88,7 +88,7 @@ class DomReplayer {
     this.loadedIndex = index;
     if (window.repositionInteractElements) window.repositionInteractElements();
     if (!window.debugToConsole) {
-      console.clear();
+      console.clear(); // eslint-disable-line no-console
     }
   }
 

@@ -4,22 +4,22 @@
   "description": "The Web Browser Built for Scraping",
   "scripts": {
     "prepare": "husky install",
-    "bump-version": "node versionBump.js patch",
+    "bump-version": "ulx-repo-version-bump",
     "build": "yarn && yarn tsc && cd build && yarn",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
-    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",
     "build:dist-local": "yarn build:dist && cd build-dist && yarn",
     "build:docker": "yarn build:dist && docker build -t hero .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
-    "copy:dist": "cross-env OUT_DIR=build-dist node copyfiles.js",
-    "copy:build": "cross-env OUT_DIR=build node copyfiles.js",
-    "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node prepare-build.js",
+    "copy:dist": "ulx-repo-after-build --dist",
+    "copy:build": "ulx-repo-after-build",
+    "tsc": "tsc -b -i tsconfig.json && ulx-repo-after-build",
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json",
     "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest",
-    "test": "yarn copy:build && node ./prepare-build.js && cd build && yarn test:build",
+    "test": "ulx-repo-after-build && cd build && yarn test:build",
     "lint": "eslint --cache ./"
   },
   "repository": "git@github.com:ulixee/hero.git",
@@ -34,32 +34,17 @@
   },
   "homepage": "https://ulixee.org",
   "engines": {
-    "node": ">=13.2.0"
+    "node": ">=14.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
     "@types/jest": "^26.0.20",
-    "@types/node": "^14.17.9",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.1.0",
+    "@types/node": "^14.18.18",
+    "@ulixee/repo-tools": "^1.0.2",
     "awaited-dom": "1.4.0",
-    "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "decamelize": "^4.0.0",
-    "eslint": "^7.21.0",
-    "eslint-config-airbnb-typescript": "^14.0.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-import-resolver-typescript": "^2.5.0",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-jest": "^25.2.2",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-monorepo-cop": "^1.0.2",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^5.1.1",
-    "eslint-plugin-react": "^7.22.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "jest-environment-node": "^27.0.6",
@@ -68,8 +53,6 @@
     "lerna": "^4.0.0",
     "lint-staged": "^10.5.2",
     "noderdom-detached": "https://github.com/ulixee/noderdom-detached.git#dist",
-    "prettier": "^2.2.1",
-    "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",
     "typescript": "~4.5.5"
   },
@@ -88,6 +71,9 @@
       "../../unblocked/build/agent-plugins/*",
       "../../unblocked/specifications/build",
       "../../unblocked/js-path/build"
+    ],
+    "nohoist": [
+      "@ulixee/repo-tools"
     ]
   },
   "lint-staged": {
