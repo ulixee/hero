@@ -1,14 +1,19 @@
-import { IInteractionStep, InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import {
+  IInteractionStep,
+  InteractionCommand,
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import HumanEmulator from '../index';
 import * as rectUtils from '@unblocked-web/agent/lib/rectUtils';
 import IInteractionsHelper from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
+import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
 
 const { log } = Log(module);
 
-const logger = log as IBoundLog;
+const logger = TestLogger.forTest(module);
 
+beforeEach(Helpers.beforeEach);
 beforeAll(() => {
   HumanEmulator.maxDelayBetweenInteractions = 0;
   HumanEmulator.maxScrollDelayMillis = 0;
@@ -36,7 +41,7 @@ describe('typing', () => {
     let totalMillis = 0;
     await humanEmulator.playInteractions(
       groups,
-      async interactionStep => {
+      async (interactionStep) => {
         expect(interactionStep.keyboardKeyupDelay).toBeGreaterThanOrEqual(10);
         expect(interactionStep.keyboardKeyupDelay).toBeLessThanOrEqual(60);
 
@@ -69,7 +74,7 @@ describe('move', () => {
         command: 'move',
         mousePosition: [['document', 'querySelector', 'x']],
       },
-      async step => {
+      async (step) => {
         commands.push(step);
       },
       createInteractHelper({
@@ -99,7 +104,7 @@ describe('scroll', () => {
         command: 'scroll',
         mousePosition: [['document', 'querySelector', 'x']],
       },
-      async step => {
+      async (step) => {
         commands.push(step);
       },
       createInteractHelper({
@@ -127,7 +132,7 @@ describe('scroll', () => {
         command: 'scroll',
         mousePosition: [['document', 'querySelector', 'x']],
       },
-      async step => {
+      async (step) => {
         commands.push(step);
       },
       createInteractHelper({
@@ -155,7 +160,7 @@ describe('scroll', () => {
         command: 'scroll',
         mousePosition: [['document', 'querySelector', 'x']],
       },
-      async step => {
+      async (step) => {
         commands.push(step);
       },
       createInteractHelper({
@@ -173,7 +178,7 @@ describe('scroll', () => {
 
     expect(commands.length).toBeGreaterThan(2);
 
-    const scrolls = commands.filter(x => x.command === 'scroll');
+    const scrolls = commands.filter((x) => x.command === 'scroll');
     for (let i = 0; i < scrolls.length; i += 1) {
       const current = scrolls[i];
       const next = scrolls[i + 1];
@@ -205,7 +210,7 @@ function createInteractHelper(extras: Partial<IInteractionsHelper>): IInteractio
     },
     doesBrowserAnimateScrolling: true,
     scrollOffset: Promise.resolve({ x: 0, y: 0 }),
-    logger: log,
+    logger,
     createMousedownTrigger() {
       return Promise.resolve({
         nodeVisibility: { isVisible: true, isClickable: true },
