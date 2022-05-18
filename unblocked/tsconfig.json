@@ -1,26 +1,8 @@
 {
-  "compileOnSave": true,
+  "extends": "./node_modules/@ulixee/repo-tools/tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "incremental": true,
-    "target": "ES2020",
-    "module": "CommonJS",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "noImplicitAny": false,
-    "sourceMap": true,
-    "esModuleInterop": false,
-    "declaration": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "strictBindCallApply": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "skipDefaultLibCheck": true,
-    "downlevelIteration": true,
     "rootDir": ".",
-    "outDir": "./build",
-    "preserveSymlinks": false,
-    "experimentalDecorators": true
+    "outDir": "./build"
   },
   "references": [
     {
