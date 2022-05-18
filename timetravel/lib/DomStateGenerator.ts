@@ -329,7 +329,7 @@ export default class DomStateGenerator {
     for (const resource of resources) {
       const { frameId } = resource;
       if (!frameId) continue;
-      if (typeof resource.url !== 'string') console.log(resource);
+      if (typeof resource.url !== 'string') console.log(resource); // eslint-disable-line no-console
 
       this.sessionAssertions.recordAssertion(sessionId, frameId, {
         type: 'resource',
