@@ -1,3 +1,4 @@
+build
 .eslintrc.js
 *.config.js
 tsconfig*.json

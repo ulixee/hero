@@ -18,7 +18,7 @@ This repository is home to several of the projects needed to create an "unblocke
 - [JsPath][jspath]. A specification is provided for a method to serialize DOM nodes, properties and visibility information so it can be remotely queried.
 - [Agent][agent]. A basic automated engine that implements the full reference [Specifications][spec].
 - [Agent Plugins](./agent-plugins). Community plugins that enhance a browser to mask Browser, Network, User Interaction and Operating System "markers" that can be used to block web scrapers.
-- [DoubleAgent][double-agent]. A series of tests that can be run to analyze real Browsers on real machines, and then compare all the detected markers to an automated setup. _To be imported_
+- [DoubleAgent][double-agent]. A series of tests that can be run to analyze real Browsers on real machines, and then compare all the detected markers to an automated setup.
 - [Browser Vault][vault]. A data repository containing every version of the Chrome browser with auto-updating removed along with data Profiles of all measurable attributes of each Browser. _To be imported_
 - [Emulator Builder](./emulator-builder). A library to use the collected data from Browser Vault to "patch" runtime headless Chrome to match headed Chrome on a home Operating System. _To be imported_
 - [Mission Impossible](./mission-impossible). Real world measurement of what DOM Apis are being analyzed on the top websites, and how many are detecting and blocking the Unblocked Agent + Community Plugins. _To be imported_
