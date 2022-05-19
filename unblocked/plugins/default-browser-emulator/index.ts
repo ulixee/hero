@@ -1,6 +1,6 @@
-import IAgentPlugin, {
-  AgentPluginClassDecorator,
-} from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import IUnblockedPlugin, {
+  UnblockedPluginClassDecorator,
+} from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IDeviceProfile from '@unblocked-web/specifications/plugin/IDeviceProfile';
@@ -60,8 +60,8 @@ export interface IEmulatorOptions {
   userAgentSelector?: string;
 }
 
-@AgentPluginClassDecorator
-export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IAgentPlugin<T> {
+@UnblockedPluginClassDecorator
+export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUnblockedPlugin<T> {
   public readonly logger: IBoundLog;
   public readonly emulationProfile: IEmulationProfile<T>;
 

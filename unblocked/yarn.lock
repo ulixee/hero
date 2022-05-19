@@ -2016,10 +2016,10 @@
     semver "^7.3.7"
     source-map-js "^1.0.1"
 
-"@ulixee/repo-tools@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.0.tgz#0c8b9c139f13413b8b62b7c45da09dac55347361"
-  integrity sha512-VKygPudhDPwU5Z7AJ4z5TFIsaxK8Sas2MC+QjXDnrPjV5babf25W1tTB9El/3/0uKgew4eG2f23nKqJ3r/+rHg==
+"@ulixee/repo-tools@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.7.tgz#74448e3225a1730c1be5c77adfe52f1d02eb89ea"
+  integrity sha512-WdBloK6Ciz7VUBWHy/H5KYTeEsL6cU4tL4lvL0Sm/r8OiV6biE8qbVFtghg3AssBvoVFXT1utklpQurYUEPBnw==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.25.0"
     "@typescript-eslint/parser" "^5.25.0"
@@ -2029,7 +2029,7 @@
     eslint-config-prettier "^8.3.0"
     eslint-import-resolver-typescript "^2.5.0"
     eslint-plugin-eslint-comments "^3.2.0"
-    eslint-plugin-import "^2.25.2"
+    eslint-plugin-import "^2.25.4"
     eslint-plugin-jest "^25.2.2"
     eslint-plugin-jsx-a11y "^6.4.1"
     eslint-plugin-monorepo-cop "^1.0.2"
@@ -3609,7 +3609,7 @@ eslint-plugin-eslint-comments@^3.2.0:
     escape-string-regexp "^1.0.5"
     ignore "^5.0.5"
 
-eslint-plugin-import@^2.25.2:
+eslint-plugin-import@^2.25.4:
   version "2.26.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.26.0.tgz#f812dc47be4f2b72b478a021605a59fc6fe8b88b"
   integrity sha512-hYfi3FXaM8WPLf4S1cikh/r4IxnO6zrhZbEGz2b660EJRbuxgpDS5gkCuYgGWg2xxh2rBuIr4Pvhve/7c31koA==

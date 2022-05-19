@@ -17,7 +17,7 @@ let pool: Pool;
 beforeAll(async () => {
   pool = new Pool({
     defaultBrowserEngine: BrowserUtils.defaultBrowserEngine,
-    agentPlugins: [HumanEmulator],
+    plugins: [HumanEmulator],
   });
   Helpers.onClose(() => pool.close(), true);
   await pool.start();

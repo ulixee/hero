@@ -7,3 +7,6 @@
 [submodule "js-path"]
 	path = js-path
 	url = https://github.com/unblocked-web/js-path
+[submodule "double-agent"]
+	path = double-agent
+	url = https://github.com/unblocked-web/double-agent
