@@ -3,9 +3,9 @@
   "version": "2.0.0-alpha.2",
   "description": "Core interfaces used by Hero",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/commons": "2.0.0-alpha.2",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.2",
     "awaited-dom": "1.4.0",
     "devtools-protocol": "^0.0.981744"
   }

@@ -92,6 +92,6 @@ Update existing settings.
 - options `object` Accepts any of the following:
   - maxConcurrentClientCount `number` defaults to `10`. Limit concurrent Hero sessions running at any given time.
   - dataDir `string` defaults to `os.tmpdir()/.ulixee`. Directory to store session databases and mitm certificates.
-  - defaultAgentPlugins `IAgentPluginClass[]`. A list of Unblocked [Agent Plugin](https://github.com/unblocked-web/specifications) classes to be installed by default in new Agents.
+  - defaultUnblockedPlugins `IAgentPluginClass[]`. A list of [Unblocked Plugin](https://github.com/unblocked-web/specifications) classes to be installed by default in new Agents.
 
 #### **Returns**: `Promise`

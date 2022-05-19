@@ -10,7 +10,7 @@ import Core, { Session } from '../index';
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  Core.defaultAgentPlugins.push(
+  Core.defaultUnblockedPlugins.push(
     class BasicHumanEmulator {
       async playInteractions(interactionGroups, runFn): Promise<void> {
         for (const group of interactionGroups) {

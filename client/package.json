@@ -11,11 +11,11 @@
     "./lib/internal": "./lib/internal.js"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/commons": "2.0.0-alpha.2",
     "@ulixee/hero-interfaces": "2.0.0-alpha.2",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.2",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.2",
     "awaited-dom": "1.4.0",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"

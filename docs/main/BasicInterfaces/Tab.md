@@ -622,10 +622,10 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const { user, activeTab, document } = hero;
+const { activeTab } = hero;
 await activeTab.goto('http://example.com');
 
-await user.click(document.querySelector('a'));
+await activeTab.querySelector('a').$click();
 await activeTab.waitForLocation('change');
 
 const newUrl = await activeTab.url;

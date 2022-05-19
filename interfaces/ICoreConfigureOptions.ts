@@ -1,7 +1,7 @@
-import { IAgentPluginClass } from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 
 export default interface ICoreConfigureOptions {
   maxConcurrentClientCount?: number;
   dataDir?: string;
-  defaultAgentPlugins?: IAgentPluginClass[];
+  defaultUnblockedPlugins?: IUnblockedPluginClass[];
 }

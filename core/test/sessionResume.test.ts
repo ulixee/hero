@@ -13,7 +13,7 @@ let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
   // remove the human emulator
-  Core.defaultAgentPlugins = [DefaultBrowserEmulator];
+  Core.defaultUnblockedPlugins = [DefaultBrowserEmulator];
   await Core.start();
   connectionToClient = Core.addConnection();
   await connectionToClient.connect();
