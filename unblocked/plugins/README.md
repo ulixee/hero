@@ -1,6 +1,6 @@
-# Unblocked Agent Plugins
+# Unblocked Plugins
 
-Unblocked Agent Plugins is a set of plugins following the Unblocked Agent [Specifications][spec] to mask headless Chrome "markers" that can be detected by bot-blockers. Many of these evasions use auto-generated data from real Browser profiles generated with the [DoubleAgent][double-agent] project.
+Unblocked Plugins are a set of plugins following the Unblocked Agent [Specifications][spec] to mask headless Chrome "markers" that can be detected by bot-blockers. Many of these evasions use auto-generated data from real Browser profiles generated with the [DoubleAgent][double-agent] project.
 
 We would like to eventually port evasions from across the web to fit this specification.
 
