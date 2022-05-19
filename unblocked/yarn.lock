@@ -2016,10 +2016,10 @@
     semver "^7.3.7"
     source-map-js "^1.0.1"
 
-"@ulixee/repo-tools@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.6.tgz#8b4563ab7a1419e1d799dd7082c67eaf29bc9290"
-  integrity sha512-7SaCu0prZmYrz15eUkoMin5LpRubWsrnL1AnAEAe8hZUJSVdl9T3OwQKMYaXKPwF0ZoY5r3ynX52HttHrfjeCg==
+"@ulixee/repo-tools@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.7.tgz#74448e3225a1730c1be5c77adfe52f1d02eb89ea"
+  integrity sha512-WdBloK6Ciz7VUBWHy/H5KYTeEsL6cU4tL4lvL0Sm/r8OiV6biE8qbVFtghg3AssBvoVFXT1utklpQurYUEPBnw==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.25.0"
     "@typescript-eslint/parser" "^5.25.0"
