@@ -2,3 +2,7 @@ build
 .eslintrc.js
 *.config.js
 tsconfig*.json
+double-agent
+agent
+specifications
+js-path
