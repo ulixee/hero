@@ -1,0 +1,3 @@
+function thisIsATest() {
+  return true;
+}

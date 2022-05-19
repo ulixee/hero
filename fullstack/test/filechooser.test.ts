@@ -39,11 +39,11 @@ describe('Filechooser tests', () => {
     const input = await hero.document.querySelector('#files');
     await hero.click(input);
     const chooser = await hero.waitForFileChooser();
-    await chooser.chooseFiles(`${__dirname}/html/worker.js`);
+    await chooser.chooseFiles(`${__dirname}/html/test.js`);
 
     await expect(input.files.length).resolves.toBe(1);
     const body = await input.files.item(0).text();
-    const actualText = await Fs.promises.readFile(`${__dirname}/html/worker.js`, 'utf8');
+    const actualText = await Fs.promises.readFile(`${__dirname}/html/test.js`, 'utf8');
 
     expect(body).toBe(actualText);
     await expect(input.files.item(0).type).resolves.toBe('text/javascript');
