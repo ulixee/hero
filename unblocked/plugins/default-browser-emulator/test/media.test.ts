@@ -9,7 +9,7 @@ const logger = TestLogger.forTest(module);
 
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  pool = new Pool({ agentPlugins: [BrowserEmulator] });
+  pool = new Pool({ plugins: [BrowserEmulator] });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
   koaServer = await Helpers.runKoaServer();

@@ -39,7 +39,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
-    "@ulixee/repo-tools": "^1.0.0",
+    "@ulixee/repo-tools": "^1.0.6",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.17.9",
     "concurrently": "^6.2.1",
@@ -56,7 +56,7 @@
   "workspaces": {
     "packages": [
       "agent/build/*",
-      "agent-plugins/*",
+      "plugins/*",
       "specifications/build",
       "js-path/build"
     ],

@@ -10,15 +10,15 @@
     "@ulixee/chrome-98-0": "^4758.102.4",
     "@ulixee/chrome-app": "^1.0.2",
     "@ulixee/commons": "1.5.11",
-    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/specifications": "2.0.0-alpha.2",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.22"
   },
   "devDependencies": {
-    "@unblocked-web/agent": "2.0.0-alpha.1",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.1",
-    "@unblocked-web/agent-testing": "2.0.0-alpha.1",
+    "@unblocked-web/agent": "2.0.0-alpha.2",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.2",
+    "@unblocked-web/agent-testing": "2.0.0-alpha.2",
     "@types/tough-cookie": "^4.0.0",
     "source-map-loader": "^0.2.4"
   }

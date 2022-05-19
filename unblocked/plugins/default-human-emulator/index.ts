@@ -15,17 +15,17 @@ import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
 import generateVector from './generateVector';
 import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
 import logger from '@ulixee/commons/lib/Logger';
-import IAgentPlugin, {
-  AgentPluginClassDecorator,
-} from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import IUnblockedPlugin, {
+  UnblockedPluginClassDecorator,
+} from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 const { log } = logger(module);
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
-@AgentPluginClassDecorator
-export default class DefaultHumanEmulator implements IAgentPlugin {
+@UnblockedPluginClassDecorator
+export default class DefaultHumanEmulator implements IUnblockedPlugin {
   public static overshootSpread = 2;
   public static overshootRadius = 5;
   public static overshootThreshold = 250;

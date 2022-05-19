@@ -16,9 +16,9 @@ import DomOverridesBuilder from '../DomOverridesBuilder';
 import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { AgentPluginClassDecorator } from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import { UnblockedPluginClassDecorator } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 
-@AgentPluginClassDecorator
+@UnblockedPluginClassDecorator
 export default class FirstPartyCookiesPlugin implements IHooksProvider {
   public static id = 'FirstPartyCookiesPlugin';
 

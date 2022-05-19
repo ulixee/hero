@@ -7,7 +7,7 @@
   },
   "references": [
     {
-      "path": "agent-plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
     }
   ]
 }
