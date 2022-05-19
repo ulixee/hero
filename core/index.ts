@@ -22,21 +22,21 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
-import { IAgentPluginClass } from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 
 const { log } = Log(module);
 
 export { Tab, Session, LocationTrigger };
 
 export default class Core {
-  public static get defaultAgentPlugins(): IAgentPluginClass[] {
-    if (this.pool) return this.pool.agentPlugins;
-    return this._defaultAgentPlugins;
+  public static get defaultUnblockedPlugins(): IUnblockedPluginClass[] {
+    if (this.pool) return this.pool.plugins;
+    return this._defaultUnblockedPlugins;
   }
 
-  public static set defaultAgentPlugins(value) {
-    this._defaultAgentPlugins = value;
-    if (this.pool) this.pool.agentPlugins = value;
+  public static set defaultUnblockedPlugins(value) {
+    this._defaultUnblockedPlugins = value;
+    if (this.pool) this.pool.plugins = value;
   }
 
   public static get dataDir(): string {
@@ -74,7 +74,7 @@ export default class Core {
   private static autoShutdownTimer: NodeJS.Timer;
   private static didRegisterSignals = false;
   private static _dataDir: string = dataDir;
-  private static _defaultAgentPlugins: IAgentPluginClass[] = [
+  private static _defaultUnblockedPlugins: IUnblockedPluginClass[] = [
     DefaultBrowserEmulator,
     DefaultHumanEmulator,
   ];
@@ -147,14 +147,14 @@ export default class Core {
       Core.dataDir = options.dataDir;
     }
     this.networkDb = new NetworkDb();
-    if (options.defaultAgentPlugins) this.defaultAgentPlugins = options.defaultAgentPlugins;
+    if (options.defaultUnblockedPlugins) this.defaultUnblockedPlugins = options.defaultUnblockedPlugins;
 
     this.pool = new Pool({
       certificateStore: this.networkDb.certificates,
       dataDir: Core.dataDir,
       logger: log.createChild(module),
       maxConcurrentAgents: maxConcurrentClientCount,
-      agentPlugins: this.defaultAgentPlugins,
+      plugins: this.defaultUnblockedPlugins,
     });
 
     // @ts-ignore

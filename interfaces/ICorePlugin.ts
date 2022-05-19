@@ -1,12 +1,12 @@
 import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
-import IAgentPlugin from '@unblocked-web/specifications/plugin/IAgentPlugin';
+import IUnblockedPlugin from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import { PluginTypes } from './IPluginTypes';
 import ICorePluginCreateOptions from './ICorePluginCreateOptions';
 import ISessionCreateOptions from './ISessionCreateOptions';
 
-export default interface ICorePlugin extends ICorePluginMethods, IAgentPlugin {
+export default interface ICorePlugin extends ICorePluginMethods, IUnblockedPlugin {
   id: string;
   readonly sessionSummary?: ISessionSummary;
 }

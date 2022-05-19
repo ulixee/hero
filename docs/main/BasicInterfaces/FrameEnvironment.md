@@ -32,14 +32,13 @@ An identifier for the frameEnvironment.
 
 #### **Type**: `Promise<string>`
 
-
 ### frameEnvironment.isAllContentLoaded {#is-all-content-loaded}
+
 `True` if the "load" event has triggered in this frame.
 
 Wait for this event to trigger with [waitForLoad(AllContentLoaded)](#wait-for-load)
 
 #### **Type**: `Promise<boolean>`
-
 
 ### frameEnvironment.isDomContentLoaded {#is-dom-content-loaded}
 
@@ -53,12 +52,11 @@ Wait for this event to trigger with [waitForLoad(DomContentLoaded)](#wait-for-lo
 
 `True` if this frame has loaded visible content above the fold. Works on javascript-rendered pages.
 
-NOTE: if a frame has no visible content, this property will never return true. 
+NOTE: if a frame has no visible content, this property will never return true.
 
 Wait for this event to trigger with [waitForPaintingStable()](#wait-for-painting-stable)
 
 #### **Type**: `Promise<boolean>`
-
 
 ### frameEnvironment.lastCommandId {#lastCommandId}
 
@@ -260,9 +258,8 @@ Determines if an element is visible to an end user. This method checks whether a
 ### frameEnvironment.querySelector*(stringOrOptions)* {#query-selector}
 
 This is a shortcut for document.querySelector.
-    
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 ### frameEnvironment.querySelectorAll*(stringOrOptions)* {#query-selector-all}
 
@@ -275,6 +272,7 @@ This is a shortcut for document.querySelectorAll.
 This is a shortcut for document.evaluate(`selector`, document, `FIRST_ORDERED_NODE_TYPE` | `ANY_UNORDERED_NODE_TYPE`)
 
 #### **Arguments**:
+
 - selector `string`. An XPath selector that can return a single node result.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
@@ -287,6 +285,7 @@ This is a shortcut for document.evaluate(`selector`, document, `ORDERED_NODE_ITE
 NOTE: this API will iterate through the results to return an array of all matching nodes.
 
 #### **Arguments**:
+
 - selector `string`. An XPath selector that can return node results.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
@@ -315,7 +314,7 @@ Wait until a specific element is present in the dom.
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility). 
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility).
   - waitForHidden `boolean`. Wait until this element is hidden to a user (see [getComputedVisibility](#get-computed-visibility).
   - waitForClickable `boolean`. Wait until this element is visible to a user, int the viewport, and unobstructed (see [getComputedVisibility](#get-computed-visibility).
 
@@ -384,11 +383,11 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const { user, activeTab, document } = hero;
-await activeFrame.goto('http://example.com');
+await hero.goto('http://example.com');
 
-await user.click(document.querySelector('a'));
-await activeFrame.waitForLocation('change');
+const mainFrame = hero.activeTab.mainFrameEnvironment;
+await mainFrame.querySelector('a').$click();
+await mainFrame.waitForLocation('change');
 
-const newUrl = await activeFrame.url;
+const newUrl = await mainFrame.url;
 ```

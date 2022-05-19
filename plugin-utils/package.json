@@ -4,8 +4,8 @@
   "description": "Base classes to build hero plugins",
   "scripts": {},
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/commons": "2.0.0-alpha.2",
     "@ulixee/hero-interfaces": "2.0.0-alpha.2",
-    "@unblocked-web/specifications": "2.0.0-alpha.1"
+    "@unblocked-web/specifications": "2.0.0-alpha.2"
   }
 }

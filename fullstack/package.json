@@ -7,7 +7,7 @@
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.1",
+    "@ulixee/commons": "2.0.0-alpha.2",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.2",
     "@ulixee/hero": "2.0.0-alpha.2",
     "@ulixee/hero-core": "2.0.0-alpha.2",
@@ -17,10 +17,10 @@
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.2",
     "@ulixee/hero-testing": "2.0.0-alpha.2",
     "@ulixee/hero-timetravel": "2.0.0-alpha.2",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.1",
-    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.1",
-    "@unblocked-web/default-human-emulator": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.1",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.2",
+    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.2",
+    "@unblocked-web/default-human-emulator": "2.0.0-alpha.2",
+    "@unblocked-web/specifications": "2.0.0-alpha.2",
     "awaited-dom": "1.4.0",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",

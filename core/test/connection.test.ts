@@ -20,7 +20,7 @@ describe('basic connection tests', () => {
         // don't change launch args so it doesn't reuse a previous one
       }
     }
-    Core.defaultAgentPlugins = [CustomEmulator];
+    Core.defaultUnblockedPlugins = [CustomEmulator];
 
     logError.mockClear();
     validate.mockClear();
