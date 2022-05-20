@@ -40,13 +40,13 @@
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
     "@ulixee/repo-tools": "^1.0.7",
-    "@types/jest": "^26.0.20",
     "@types/node": "^14.17.9",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "husky": "^7.0.1",
-    "jest": "^27.0.6",
-    "jest-environment-node": "^27.0.6",
+    "@types/jest": "^27.5.1",
+    "jest": "^27.5.1",
+    "jest-environment-node": "^27.5.1",
     "jest-summary-reporter": "^0.0.2",
     "lerna": "^4.0.0",
     "lint-staged": "^10.5.2",
@@ -58,7 +58,8 @@
       "agent/build/*",
       "plugins/*",
       "specifications/build",
-      "js-path/build"
+      "js-path/build",
+      "../commons/build"
     ],
     "nohoist": []
   },
