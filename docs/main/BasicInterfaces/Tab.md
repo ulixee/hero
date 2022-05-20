@@ -210,7 +210,7 @@ By default, this command will find resources loaded since the current [mainFrame
 
 ### tab.flowCommand*(commandFn, exitState? | options?)* {#flow-command}
 
-A FlowCommand allows you define a "recovery" boundary in the case where an AwaitedDom error triggers a FlowHandler and modifies your page state. In some cases, you may wish to ensure that a series of commands are re-run instead of a single failing command. For instance, if you lose focus on a modal-window field in the middle of typing, you will want to run the logic that prompted the modal-window to show up.
+A FlowCommand allows you define a "recovery" boundary in the case where an AwaitedDOM error triggers a FlowHandler and modifies your page state. In some cases, you may wish to ensure that a series of commands are re-run instead of a single failing command. For instance, if you lose focus on a modal-window field in the middle of typing, you will want to run the logic that prompted the modal-window to show up.
 
 FlowCommands can define an `exitState`, which will be tested before moving on. An `exitState` is a [`State`](#wait-for-state) object or callback function defined the same as the parameter to [`waitForState`](#wait-for-state). If your function completes and the `exitState` cannot be satisfied, all FlowHandlers will be triggered and the function will try again (up to the `maxRetries` times provided in options).
 
@@ -223,11 +223,11 @@ FlowCommands can define an `exitState`, which will be tested before moving on. A
   });
 ```
 
-Flow Commands can be nested within each other. If nested commands cannot be completed due to AwaitedDom errors (interactions, dom errors, dom state timeouts), they will trigger the outer block to be re-tried.
+Flow Commands can be nested within each other. If nested commands cannot be completed due to AwaitedDOM errors (interactions, dom errors, dom state timeouts), they will trigger the outer block to be re-tried.
 
 #### **Arguments**:
 
-- commandFn `() => Promise<T>`. Your command function containing one or more Hero commands to retry on AwaitedDom errors (after resolving one or more FlowHandlers). Any returned value will be returned to the `tab.flowCommand` call.
+- commandFn `() => Promise<T>`. Your command function containing one or more Hero commands to retry on AwaitedDOM errors (after resolving one or more FlowHandlers). Any returned value will be returned to the `tab.flowCommand` call.
 - exitState `DomState | function(assert: IPageStateAssert): void`. Optional [State](#wait-for-state) object that must resolve before continuing your script execution. If false, FlowHandlers will be retried to determine if another pass should be made.
 - options `object`. Optional options to configure this flowCommand. This must be your second argument to `flowCommand`
   - exitState `DomState | function(assert: IPageStateAssert): void`. Optional [State](#wait-for-state) assertion. This parameter is used in place passing a [State](#wait-for-state) directly as a second parameter to `flowCommand`.
@@ -372,7 +372,7 @@ As an example, imagine you are interacting with a website that sometimes pops up
 10.  });
 ```
 
-Once registered, your `CookieModal` FlowHandler will be automatically checked anytime an AwaitedDom error occurs. These errors are things like: an element can't be found, an element interaction failed, or waiting for an element [State](#wait-for-state) timed out.
+Once registered, your `CookieModal` FlowHandler will be automatically checked anytime an AwaitedDOM error occurs. These errors are things like: an element can't be found, an element interaction failed, or waiting for an element [State](#wait-for-state) timed out.
 
 So, to continue our example, imagine your script is filling out a form field. As you go to click on the field, it can't be clicked because the `CookieModal` has displayed.
 
@@ -392,7 +392,7 @@ Now your script is no longer obstructed and will re-resume clicking on `#field1`
 
 You might find it useful to continue to accumulate FlowHandlers as you encounter edge cases in your script. In the default case, your individual commands will be retried when a FlowHandler can resolve your page state. In more advanced cases, you might find that you need to resume a "block" of activities. To handle these cases, we have [FlowCommands](#flow-commands).
 
-[FlowCommands](#flow-commands) are simply ways to group a series of commands together. When an AwaitedDom error occurs, a Flow Command will re-rerun the entire block. In the example above, your interaction might have many steps. You would want to ensure all steps are run when a failure is encountered.
+[FlowCommands](#flow-commands) are simply ways to group a series of commands together. When an AwaitedDOM error occurs, a Flow Command will re-rerun the entire block. In the example above, your interaction might have many steps. You would want to ensure all steps are run when a failure is encountered.
 
 ```js
 await hero.flowCommand(async () => {

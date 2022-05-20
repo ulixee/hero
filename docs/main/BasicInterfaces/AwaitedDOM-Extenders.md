@@ -1,10 +1,10 @@
-# DomExtenders
+# AwaitedDOM Extenders
 
-> Dom Extenders add functionality to the W3C spec AwaitedDom to make using Hero easier. All DomExtenders start with a $.
+> AwaitedDOM Extenders add functionality to the W3C spec DOM to make using Hero easier. All AwaitedDOM Extenders start with a $.
 
 ## Constructor
 
-DomExtenders cannot be constructed. They're additions added to the following Super classes and collections.
+AwaitedDOM Extenders cannot be constructed. They're additions added to the following Super classes and collections.
 
 #### Nodes: {#super-nodes}
 

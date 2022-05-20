@@ -96,7 +96,7 @@ function saveDoc(doc: IDoc, filePath: string) {
           '\n  await result.singleNodeResult === null; // null if not present' +
           '\n  await result.singleNodeResult.textContent; // gets text' +
           '\n ```';
-        p.overview += `\n\n\nNOTE: The returned SuperNode will behave like all AwaitedDom SuperNodes: nothing will be retrieved until you await the node or child property.
+        p.overview += `\n\n\nNOTE: The returned SuperNode will behave like all AwaitedDOM SuperNodes: nothing will be retrieved until you await the node or child property.
 ${example}
 `;
       }
@@ -108,7 +108,7 @@ ${example}
           '\n  await result.iterateNext() === null; // null if not present' +
           '\n  await result.iterateNext().textContent; // gets text' +
           '\n ```';
-        m.overview += `\n\n\nNOTE: The iterated SuperNodes will behave like all AwaitedDom SuperNodes: nothing will be retrieved until you await the node or child property.
+        m.overview += `\n\n\nNOTE: The iterated SuperNodes will behave like all AwaitedDOM SuperNodes: nothing will be retrieved until you await the node or child property.
 ${example}
 `;
       }

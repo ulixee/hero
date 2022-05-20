@@ -12,7 +12,8 @@
     - FrameEnvironment
     - Interactions
     - AwaitedDOM
-    - DomExtenders
+    - AwaitedDOM Extenders
+    - Flow
     #- DetachedDOM
 
 - title: Advanced

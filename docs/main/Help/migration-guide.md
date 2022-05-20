@@ -2,9 +2,9 @@
 
 If you're migrating a script from SecretAgent, you can expect to find:
 
-- a more developer-friendly set of APIs (like our [DomExtenders](/docs/basic-interfaces/dom-extenders))
+- a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](/docs/hero/basic-interfaces/awaited-dom-extenders))
 - a much better experience running in "headed" mode during development, while still supporting headless for production.
-- features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/basic-interfaces/tab#flow-handler))
+- features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/hero/basic-interfaces/flow))
 - a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/server; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/unblocked-web/unblocked) project.
 
 Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero')`.
