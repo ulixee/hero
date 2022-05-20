@@ -16,7 +16,7 @@ describe('Filechooser tests', () => {
     koaServer.post('/upload', koaServer.upload.single('file'), ctx => {
       ctx.body = 'Ok';
       expect(ctx.file).toBeTruthy();
-      expect(ctx.file.originalname).toBe('worker.js');
+      expect(ctx.file.originalname).toBe('test.js');
       expect(ctx.file.mimetype).toBe('text/javascript');
       didSubmit.resolve();
     });
