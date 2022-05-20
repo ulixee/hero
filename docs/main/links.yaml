@@ -12,7 +12,8 @@
     - FrameEnvironment
     - Interactions
     - AwaitedDOM
-    - DomExtenders
+    - AwaitedDOM Extenders
+    - Flow
     #- DetachedDOM
 
 - title: Advanced
@@ -43,3 +44,4 @@
     - Prerequisites
     - How to upgrade
     - Troubleshooting
+    - Migration Guide
