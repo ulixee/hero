@@ -65,12 +65,12 @@ If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have 
 
 ## Puppet
 
-To that end, the library that was formally passed into "Plugins" and "Human/Browser" Emulators has been merged with some parts of SecretAgent Core to form the [Unblocked Agent][agent]. The Unblocked Agent is now under it's own development lifecycle and has been put into a much tighter loop with DoubleAgent (aka, detection) development. We envision Hero as the home of scraper productivity tooling, and Unblocked as the home of the bot cat and mouse game.
+To that end, the library that was formally passed into "Plugins" and "Human/Browser" Emulators has been merged with some parts of SecretAgent Core to form the [Unblocked Agent][unblocked-agent]. The Unblocked Agent is now under it's own development lifecycle and has been put into a much tighter loop with DoubleAgent (aka, detection) development. We envision Hero as the home of scraper productivity tooling, and Unblocked as the home of the bot cat and mouse game.
 
 ## Replay
 
 If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new ChromeAlive! tooling. You can download the [Ulixee.app](https://github.com/ulixee/ulixee/releases/latest) install, or you can add `@ulixee/apps-chromealive-core` and `@ulixee/server` to your `devDependencies` and start a local server. This will add a bar to a headed version of Chrome when you're developing.
 
-[server]: https://docs.ulixee.org/server
+[server]: https://ulixee.org/docs/server
 [unblocked-plugin]: https://github.com/unblocked-web/specifications
-[agent]: https://github.com/unblocked-web/agent
+[unblocked-agent]: https://github.com/unblocked-web/agent
