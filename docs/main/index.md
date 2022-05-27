@@ -2,7 +2,7 @@
 
 > Hero is a free and open source headless browser that's written in NodeJs, built on top of Chrome, and designed for easy and reliable scraping.
 
-Some of the cool things about Hero:
+A few cool highlights about Hero:
 
 - [x] **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - [x] **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.

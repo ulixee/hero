@@ -1,6 +1,6 @@
 # Ulixee Hero
 
-Hero is a web browser built for scraping. 
+A few cool highlights about Hero:
 
 - [x] **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - [x] **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
