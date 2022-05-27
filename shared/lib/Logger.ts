@@ -228,7 +228,7 @@ function extractPathFromModule(module: NodeModule): string {
     .replace(/^(.*)[/\\]unblocked[/\\](.+)$/, '$2')
     .replace(/^(.*)[/\\]ulixee[/\\](.+)$/, '$2')
     .replace(/^(.*)[/\\]@ulixee[/\\](.+)$/, '$2')
-      .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
+    .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
     .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
 }
 
@@ -240,7 +240,6 @@ function isEnabled(name: string): boolean {
   if (name[name.length - 1] === '*') {
     return true;
   }
-
   for (const ns of logFilters.skip) {
     if (ns.test(name)) {
       logFilters.enabledNamesCache[name] = false;
@@ -271,15 +270,28 @@ function enable(namespaces: string): void {
       logFilters.skip.push(new RegExp('^' + part.slice(1) + '$'));
     } else {
       logFilters.active.push(new RegExp('^' + part + '$'));
-      if (part.includes('ubk:*') || part.includes('ubk*')) {
-        logFilters.active.push(/agent\/*/);
-      } else if (part === 'ubk') {
-        logFilters.active.push(/agent\/*/);
-        logFilters.skip.push(new RegExp('DevtoolsSessionLogger'));
-        logFilters.skip.push(new RegExp(/agent\/mitm*/));
 
+      if (part.includes('ubk:*') || part.includes('ubk*')) {
+        logFilters.active.push(/agent\/.*/);
+      } else if (part === 'ubk') {
+        logFilters.active.push(/agent\/.*/);
+        logFilters.skip.push(new RegExp('DevtoolsSessionLogger'));
+        logFilters.skip.push(new RegExp(/agent\/mitm.*/));
       } else if (part.includes('ubk:devtools')) {
         logFilters.active.push(new RegExp('DevtoolsSessionLogger'));
+      }
+
+      if (part.includes('ulx:*') || part.includes('ulx*')) {
+        logFilters.active.push(/^apps\/chromealive*/);
+        logFilters.active.push(/hero\/.*/);
+        logFilters.active.push(/net\/.*/);
+        logFilters.active.push(/databox\/.*/);
+      } else if (part.includes('hero')) {
+        logFilters.active.push(/^hero\/.*/);
+        logFilters.active.push(/net\/.*/);
+      } else if (part.includes('databox')) {
+        logFilters.active.push(/^databox\/.*/);
+        logFilters.active.push(/net\/.*/);
       }
     }
   }

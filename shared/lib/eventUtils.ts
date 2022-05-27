@@ -24,9 +24,7 @@ export function addEventListeners(
   });
 }
 
-export function removeEventListeners(
-  listeners: Array<IRegisteredEventListener>,
-): void {
+export function removeEventListeners(listeners: Array<IRegisteredEventListener>): void {
   for (const listener of listeners) {
     listener.emitter.off(listener.eventName, listener.handler);
   }
@@ -56,7 +54,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public storeEventsWithoutListeners = false;
   public EventTypes: T;
 
-  protected logger?: IBoundLog;
+  #logger?: IBoundLog;
 
   private pendingIdCounter = 0;
   private pendingWaitEventsById = new Map<number, IPendingWaitEvent>();
@@ -80,7 +78,11 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     }
   }
 
-  public setEventsToLog<K extends keyof T & (string | symbol)>(events: K[]): void {
+  public setEventsToLog<K extends keyof T & (string | symbol)>(
+    logger: IBoundLog,
+    events: K[],
+  ): void {
+    this.#logger = logger;
     this.eventsToLog = new Set<string | symbol>(events);
   }
 
@@ -103,13 +105,13 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       resolvable: promise,
       error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
     });
-    const messageId = this.logger?.stats(`waitOn:${eventType}`, {
+    const messageId = this.#logger?.stats?.(`waitOn:${eventType}`, {
       timeoutMillis,
     });
     const callbackFn = (result: T[K]): void => {
       // give the listeners a second to register
       if (!listenerFn || listenerFn.call(this, result)) {
-        this.logger?.stats(`waitOn.resolve:${eventType}`, {
+        this.#logger?.stats?.(`waitOn.resolve:${eventType}`, {
           parentLogId: messageId,
         });
         promise.resolve(result);
@@ -246,7 +248,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
           }
         }
       }
-      this.logger?.stats(`emit:${eventType}`, data);
+      this.#logger?.stats?.(`emit:${eventType}`, data);
     }
   }
 }

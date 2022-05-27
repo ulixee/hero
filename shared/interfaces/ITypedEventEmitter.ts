@@ -1,10 +1,4 @@
 export default interface ITypedEventEmitter<T> {
-  waitOn<K extends keyof T & (string | symbol)>(
-    eventType: K,
-    listenerFn?: (this: this, event?: T[K]) => boolean,
-    timeoutMillis?: number,
-  ): Promise<T[K]>;
-
   on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
