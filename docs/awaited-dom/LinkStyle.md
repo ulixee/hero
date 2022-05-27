@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> LinkStyle
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> LinkStyle
 
 <div class='overview'>The <code><strong>LinkStyle</strong></code> interface provides access to the <em>associated CSS style sheet</em> of a node.</div>
 

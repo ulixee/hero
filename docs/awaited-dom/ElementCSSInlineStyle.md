@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ElementCSSInlineStyle
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ElementCSSInlineStyle
 
 <div class='overview'></div>
 

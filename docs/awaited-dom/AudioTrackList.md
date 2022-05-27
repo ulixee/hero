@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> AudioTrackList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AudioTrackList
 
 <div class='overview'><span class="seoSummary">The <strong><code>AudioTrackList</code></strong> interface is used to represent a list of the audio tracks contained within a given HTML media element, with each track represented by a separate <code>AudioTrack</code> object in the list.</span></div>
 
@@ -14,7 +14,7 @@ The number of tracks in the list.
 
 ## Methods
 
-### .getTrackById*(id)* <div class="specs"><i>W3C</i></div> {#getTrackById}
+### .getTrackById *(id)* <div class="specs"><i>W3C</i></div> {#getTrackById}
 
 Returns the <code>AudioTrack</code> found within the <code>AudioTrackList</code> whose <code>id</code> matches the specified string. If no match is found, <code>null</code> is returned.
 

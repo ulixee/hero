@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Selection
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Selection
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -48,7 +48,7 @@ Returns a `string` describing the type of the current selection.
 
 ## Methods
 
-### .addRange*(range)* <div class="specs"><i>W3C</i></div> {#addRange}
+### .addRange *(range)* <div class="specs"><i>W3C</i></div> {#addRange}
 
 A <code>Range</code> object that will be added to the selection.
 
@@ -59,7 +59,7 @@ A <code>Range</code> object that will be added to the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .collapse*(node, offset?)* <div class="specs"><i>W3C</i></div> {#collapse}
+### .collapse *(node, offset?)* <div class="specs"><i>W3C</i></div> {#collapse}
 
 Collapses the current selection to a single point.
 
@@ -71,19 +71,19 @@ Collapses the current selection to a single point.
 
 #### **Returns**: `Promise<void>`
 
-### .collapseToEnd*()* <div class="specs"><i>W3C</i></div> {#collapseToEnd}
+### .collapseToEnd *()* <div class="specs"><i>W3C</i></div> {#collapseToEnd}
 
 Collapses the selection to the end of the last range in the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .collapseToStart*()* <div class="specs"><i>W3C</i></div> {#collapseToStart}
+### .collapseToStart *()* <div class="specs"><i>W3C</i></div> {#collapseToStart}
 
 Collapses the selection to the start of the first range in the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .containsNode*(node, allowPartialContainment?)* <div class="specs"><i>W3C</i></div> {#containsNode}
+### .containsNode *(node, allowPartialContainment?)* <div class="specs"><i>W3C</i></div> {#containsNode}
 
 Indicates if a certain node is part of the selection.
 
@@ -95,19 +95,19 @@ Indicates if a certain node is part of the selection.
 
 #### **Returns**: `Promise<boolean>`
 
-### .deleteFromDocument*()* <div class="specs"><i>W3C</i></div> {#deleteFromDocument}
+### .deleteFromDocument *()* <div class="specs"><i>W3C</i></div> {#deleteFromDocument}
 
 Deletes the selection's content from the document.
 
 #### **Returns**: `Promise<void>`
 
-### .empty*()* <div class="specs"><i>W3C</i></div> {#empty}
+### .empty *()* <div class="specs"><i>W3C</i></div> {#empty}
 
 Removes all ranges from the selection. This is an alias for <code>removeAllRanges()</code> — See <code>Selection.removeAllRanges()</code> for more details.
 
 #### **Returns**: `Promise<void>`
 
-### .extend*(node, offset?)* <div class="specs"><i>W3C</i></div> {#extend}
+### .extend *(node, offset?)* <div class="specs"><i>W3C</i></div> {#extend}
 
 Moves the focus of the selection to a specified point.
 
@@ -119,7 +119,7 @@ Moves the focus of the selection to a specified point.
 
 #### **Returns**: `Promise<void>`
 
-### .getRangeAt*(index)* <div class="specs"><i>W3C</i></div> {#getRangeAt}
+### .getRangeAt *(index)* <div class="specs"><i>W3C</i></div> {#getRangeAt}
 
 Returns a <code>Range</code> object representing one of the ranges currently selected.
 
@@ -130,7 +130,7 @@ Returns a <code>Range</code> object representing one of the ranges currently sel
 
 #### **Returns**: [`Range`](/docs/awaited-dom/range)
 
-### .modify*(alter, direction, granularity)* <div class="specs"><i>W3C</i></div> {#modify}
+### .modify *(alter, direction, granularity)* <div class="specs"><i>W3C</i></div> {#modify}
 
 Changes the current selection.
 
@@ -143,13 +143,13 @@ Changes the current selection.
 
 #### **Returns**: `Promise<void>`
 
-### .removeAllRanges*()* <div class="specs"><i>W3C</i></div> {#removeAllRanges}
+### .removeAllRanges *()* <div class="specs"><i>W3C</i></div> {#removeAllRanges}
 
 Removes all ranges from the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .removeRange*(range)* <div class="specs"><i>W3C</i></div> {#removeRange}
+### .removeRange *(range)* <div class="specs"><i>W3C</i></div> {#removeRange}
 
 Removes a range from the selection.
 
@@ -160,7 +160,7 @@ Removes a range from the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .selectAllChildren*(node)* <div class="specs"><i>W3C</i></div> {#selectAllChildren}
+### .selectAllChildren *(node)* <div class="specs"><i>W3C</i></div> {#selectAllChildren}
 
 Adds all the children of the specified node to the selection.
 
@@ -171,7 +171,7 @@ Adds all the children of the specified node to the selection.
 
 #### **Returns**: `Promise<void>`
 
-### .setBaseAndExtent*(anchorNode, anchorOffset, focusNode, focusOffset)* <div class="specs"><i>W3C</i></div> {#setBaseAndExtent}
+### .setBaseAndExtent *(anchorNode, anchorOffset, focusNode, focusOffset)* <div class="specs"><i>W3C</i></div> {#setBaseAndExtent}
 
 Sets the selection to be a range including all or parts of two specified DOM nodes, and any content located between them.
 
@@ -185,7 +185,7 @@ Sets the selection to be a range including all or parts of two specified DOM nod
 
 #### **Returns**: `Promise<void>`
 
-### .setPosition*(node, offset?)* <div class="specs"><i>W3C</i></div> {#setPosition}
+### .setPosition *(node, offset?)* <div class="specs"><i>W3C</i></div> {#setPosition}
 
 Collapses the current selection to a single point. This is an alias for <code>collapse()</code> — See <code>Selection.collapse()</code> for more details.
 
@@ -197,7 +197,7 @@ Collapses the current selection to a single point. This is an alias for <code>co
 
 #### **Returns**: `Promise<void>`
 
-### .toString*()* <div class="specs"><i>W3C</i></div> {#toString}
+### .toString *()* <div class="specs"><i>W3C</i></div> {#toString}
 
 Returns a string currently being represented by the selection object, i.e. the currently selected text.
 

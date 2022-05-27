@@ -1,6 +1,8 @@
 # Basic Concepts
 
-## Each Hero Instance Has a Unique User
+Hero is not the only programable browser library -- Puppeteer, Playwright, Selenium, and others all have their advantages. But when it comes to scraping, Hero was built to shine.
+
+## Each Hero Instance Is a Unique User
 
 - user-agent
 - ip address
@@ -13,7 +15,7 @@
 
 Note: IP addresses are set through upstreamProxyUrl on each Hero.
 
-## The DOM Has Finally Been Awaited
+## The DOM Has Been Awaited
 
 The easiest way to explain Dynamic DOM is with some comparison examples. Let's say you want to load a URL and loop through a list of items.
 

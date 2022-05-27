@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ParentNode
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ParentNode
 
 <div class='overview'><span class="seoSummary">The <code><strong>ParentNode</strong></code> mixin contains methods and properties that are common to all types of <code>Node</code> objects that can have children.</span> It's implemented by <code>Element</code>, <code>Document</code>, and <code>DocumentFragment</code> objects.</div>
 
@@ -32,7 +32,7 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
-### .querySelector*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
+### .querySelector *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
 Returns the first <code>Element</code> with the current element as root that matches the specified group of selectors.
 
@@ -43,7 +43,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### .querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
+### .querySelectorAll *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
 Returns a <code>NodeList</code> representing a list of elements with the current element as root that matches the specified group of selectors.
 

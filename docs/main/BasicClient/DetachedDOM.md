@@ -19,7 +19,7 @@ DetachedDOM stands alone outside the context of Hero or BrowserInstance. For exa
 const fs = require('fs');
 const { DetachedDOM } = require('@ulixee/hero');
 
-const html = fs.readFileSync('/docs/hero/basic-interfaces/saved.html', 'utf-8');
+const html = fs.readFileSync('/docs/hero/basic-client/saved.html', 'utf-8');
 const document = DetachedDOM.load(html);
 
 console.log(document.title);

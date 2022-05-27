@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> AbstractRange
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AbstractRange
 
 <div class='overview'><span class="seoSummary">The <strong><code>AbstractRange</code></strong>&nbsp;abstract interface is the base class upon which all DOM range types are defined. A&nbsp;<strong>range</strong>&nbsp;is an object that indicates the start and end points of a section of content&nbsp;within the document.</span></div>
 

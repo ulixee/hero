@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Animation
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Animation
 
 ## Unimplemented Specs
 

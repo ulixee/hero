@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> XPathEvaluator
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> XPathEvaluator
 
 <div class='overview'>The&nbsp;<code>XPathEvaluator</code> interface allows to compile and evaluate XPath expressions.</div>
 
@@ -6,7 +6,7 @@
 
 ## Methods
 
-### doc.createExpression*(expression, resolver?)* <div class="specs"><i>W3C</i></div> {#createExpression}
+### doc.createExpression *(expression, resolver?)* <div class="specs"><i>W3C</i></div> {#createExpression}
 
 Creates a parsed XPath expression with resolved namespaces.
 
@@ -18,7 +18,7 @@ Creates a parsed XPath expression with resolved namespaces.
 
 #### **Returns**: [`XPathExpression`](/docs/awaited-dom/x-path-expression)
 
-### doc.evaluate*(expression, contextNode, resolver?, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
+### doc.evaluate *(expression, contextNode, resolver?, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
 
 Evaluates an XPath expression string and returns a result of the specified type if possible.
 

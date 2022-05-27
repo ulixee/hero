@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SVGTransformList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SVGTransformList
 
 <div class='overview'>The <code>SVGTransformList</code> defines a list of <code>SVGTransform</code> objects.</div>
 

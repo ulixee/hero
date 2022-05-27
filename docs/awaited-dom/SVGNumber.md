@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SVGNumber
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SVGNumber
 
 <div class='overview'>The <strong><code>SVGNumber</code></strong> interface corresponds to the <code>&lt;number&gt;</code> basic data type.</div>
 

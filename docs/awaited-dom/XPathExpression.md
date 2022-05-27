@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> XPathExpression
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> XPathExpression
 
 <div class='overview'><span class="seoSummary">This interface is a compiled XPath expression that can be evaluated on a document or specific node to return information from its DOM tree.</span> This is useful when an expression will be reused in an application, because it is just compiled once and all namespace prefixes which occur within the expression are preresolved.</div>
 
@@ -6,7 +6,7 @@
 
 ## Methods
 
-### .evaluate*(contextNode, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
+### .evaluate *(contextNode, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
 
 Evaluates the XPath expression on the given node or document.
 

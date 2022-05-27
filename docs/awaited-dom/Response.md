@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Response
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Response
 
 <div class='overview'><span class="seoSummary">The <strong><code>Response</code></strong> interface of the Fetch API represents the response to a request.</span></div>
 
@@ -56,19 +56,19 @@ A `boolean` that indicates whether the body has been read.
 
 ## Methods
 
-### .arrayBuffer*()* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
+### .arrayBuffer *()* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
 
 Takes a <code>Response</code> stream and reads it to completion. It returns a promise that resolves with an <code>ArrayBuffer</code>.
 
 #### **Returns**: `Promise<ArrayBuffer>`
 
-### .json*()* <div class="specs"><i>W3C</i></div> {#json}
+### .json *()* <div class="specs"><i>W3C</i></div> {#json}
 
 Takes a <code>Response</code> stream and reads it to completion. It returns a promise that resolves with the result of parsing the body text as <code>JSON</code>.
 
 #### **Returns**: `Promise<any>`
 
-### .text*()* <div class="specs"><i>W3C</i></div> {#text}
+### .text *()* <div class="specs"><i>W3C</i></div> {#text}
 
 Takes a <code>Response</code> stream and reads it to completion. It returns a promise that resolves with a `string` (text). The response is <em>always</em> decoded using UTF-8.
 

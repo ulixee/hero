@@ -1,8 +1,8 @@
-# Session
+# Sessions
 
-> A Session tracks a single "scraping" session. It tracks and coordinates the [HumanEmulator](/docs/hero/plugins/human-emulators), [BrowserEmulator](/docs/hero/plugins/browser-emulators) and [Hero](/docs/hero/basic-interfaces/hero) that will be used.
+> A Session tracks and coordinates a single "scraping" session. It manages the fingerprints, browser settings, and plugins that [Hero](/docs/hero/basic-client/hero) uses.
 
-Sessions store data into a Sqlite database using a module called SessionState. This database tracks all the information needed to [TimeTravel](/docs/hero/advanced/timetravel).
+Hero's session logic is managed in the [Core](/docs/hero/advanced-concepts/client-vs-core), with only a minimal amount of session data exposed in the Client. All session data is stored in a Sqlite database using a module called SessionState. This database tracks all the information needed for many of Hero's advanced features, such as [TimeTravel](/docs/hero/advanced-client/timetravel).
 
 ### Default Database Location
 

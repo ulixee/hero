@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> DOMTokenList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMTokenList
 
 <div class='overview'><span class="seoSummary">The <code><strong>DOMTokenList</strong></code> interface represents a set of space-separated tokens. Such a set is returned by <code>Element.classList</code>, <code>HTMLLinkElement.relList</code>, <code>HTMLAnchorElement.relList</code>, <code>HTMLAreaElement.relList</code>, <code>HTMLIframeElement.sandbox</code>, or <code>HTMLOutputElement.htmlFor</code>. It is indexed beginning with <code>0</code> as with JavaScript <code>Array</code> objects. <code>DOMTokenList</code> is always case-sensitive.</span></div>
 
@@ -18,7 +18,7 @@ A stringifier property that returns the value of the list as a `string`.
 
 ## Methods
 
-### .add*(...tokens)* <div class="specs"><i>W3C</i></div> {#add}
+### .add *(...tokens)* <div class="specs"><i>W3C</i></div> {#add}
 
 Adds the specified&nbsp;<code><var>token</var></code>(s) to the list.
 
@@ -29,7 +29,7 @@ Adds the specified&nbsp;<code><var>token</var></code>(s) to the list.
 
 #### **Returns**: `Promise<void>`
 
-### .contains*(token)* <div class="specs"><i>W3C</i></div> {#contains}
+### .contains *(token)* <div class="specs"><i>W3C</i></div> {#contains}
 
 Returns <code>true</code> if the list contains the given <code><var>token</var></code>, otherwise <code>false</code>.
 
@@ -40,19 +40,19 @@ Returns <code>true</code> if the list contains the given <code><var>token</var><
 
 #### **Returns**: `Promise<boolean>`
 
-### .entries*()* <div class="specs"><i>W3C</i></div> {#entries}
+### .entries *()* <div class="specs"><i>W3C</i></div> {#entries}
 
 Returns an <code>iterator</code>, allowing you to go through all key/value pairs contained in this object.
 
 #### **Returns**: `Promise<>`
 
-### .forEach*()* <div class="specs"><i>W3C</i></div> {#forEach}
+### .forEach *()* <div class="specs"><i>W3C</i></div> {#forEach}
 
 Executes a provided <code><var>callback</var></code> function once per <code>DOMTokenList</code> element.
 
 #### **Returns**: `Promise<>`
 
-### .item*(index)* <div class="specs"><i>W3C</i></div> {#item}
+### .item *(index)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the item in the list by its <code><var>index</var></code>, or <code>undefined</code> if <code><var>index</var></code> is greater than or equal to the list's <code>length</code>.
 
@@ -63,13 +63,13 @@ Returns the item in the list by its <code><var>index</var></code>, or <code>unde
 
 #### **Returns**: `Promise<string>`
 
-### .keys*()* <div class="specs"><i>W3C</i></div> {#keys}
+### .keys *()* <div class="specs"><i>W3C</i></div> {#keys}
 
 Returns an <code>iterator</code>, allowing you to go through all keys of the key/value pairs contained in this object.
 
 #### **Returns**: `Promise<>`
 
-### .remove*(...tokens)* <div class="specs"><i>W3C</i></div> {#remove}
+### .remove *(...tokens)* <div class="specs"><i>W3C</i></div> {#remove}
 
 Removes the specified <code><var>token</var></code>(s) from the list.
 
@@ -80,7 +80,7 @@ Removes the specified <code><var>token</var></code>(s) from the list.
 
 #### **Returns**: `Promise<void>`
 
-### .replace*(token, newToken)* <div class="specs"><i>W3C</i></div> {#replace}
+### .replace *(token, newToken)* <div class="specs"><i>W3C</i></div> {#replace}
 
 Replaces&nbsp;<code><var>token</var></code> with&nbsp;<code><var>newToken</var></code>.
 
@@ -92,7 +92,7 @@ Replaces&nbsp;<code><var>token</var></code> with&nbsp;<code><var>newToken</var><
 
 #### **Returns**: `Promise<boolean>`
 
-### .supports*(token)* <div class="specs"><i>W3C</i></div> {#supports}
+### .supports *(token)* <div class="specs"><i>W3C</i></div> {#supports}
 
 Returns <code>true</code> if a given <code><var>token</var></code> is in the associated attribute's supported tokens.
 
@@ -103,7 +103,7 @@ Returns <code>true</code> if a given <code><var>token</var></code> is in the ass
 
 #### **Returns**: `Promise<boolean>`
 
-### .toggle*(token, force?)* <div class="specs"><i>W3C</i></div> {#toggle}
+### .toggle *(token, force?)* <div class="specs"><i>W3C</i></div> {#toggle}
 
 Removes&nbsp;<code><var>token</var></code> from the list if it exists, or adds <code><var>token</var></code> to the list if it doesn't. Returns a boolean indicating whether <code><var>token</var></code> is in the list after the operation.
 
@@ -115,7 +115,7 @@ Removes&nbsp;<code><var>token</var></code> from the list if it exists, or adds <
 
 #### **Returns**: `Promise<boolean>`
 
-### .values*()* <div class="specs"><i>W3C</i></div> {#values}
+### .values *()* <div class="specs"><i>W3C</i></div> {#values}
 
 Returns an <code>iterator</code>, allowing you to go through all values of the key/value pairs contained in this object.
 

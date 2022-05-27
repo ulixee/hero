@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> TimeRanges
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> TimeRanges
 
 <div class='overview'>The <code>TimeRanges</code> interface is used to represent a set of time ranges, primarily for the purpose of tracking which portions of media have been buffered when loading it for use by the <code>&lt;audio&gt;</code> and <code>&lt;video&gt;</code>&nbsp;elements.</div>
 
@@ -16,7 +16,7 @@ Returns an <code>unsigned long</code> representing the number of time ranges rep
 
 ## Methods
 
-### .end*(index)* <div class="specs"><i>W3C</i></div> {#end}
+### .end *(index)* <div class="specs"><i>W3C</i></div> {#end}
 
 Returns the time for the end of the specified range.
 
@@ -27,7 +27,7 @@ Returns the time for the end of the specified range.
 
 #### **Returns**: `Promise<number>`
 
-### .start*(index)* <div class="specs"><i>W3C</i></div> {#start}
+### .start *(index)* <div class="specs"><i>W3C</i></div> {#start}
 
 Returns the time for the start of the range with the specified index.
 

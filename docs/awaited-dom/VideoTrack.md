@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> VideoTrack
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> VideoTrack
 
 <div class='overview'><span class="seoSummary">The <code>VideoTrack</code> interface represents a single video track from a <code>&lt;video&gt;</code> element.</span> The most common use for accessing a <code>VideoTrack</code> object is to toggle its <code>selected</code> property in order to make it the active video track for its <code>&lt;video&gt;</code> element.</div>
 

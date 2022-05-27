@@ -4,33 +4,33 @@ A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying d
 
 ## Constructor
 
-A default tab is provided in each Hero instance. Navigate by using the [hero.goto](/docs/hero/basic-interfaces/hero#goto) method.
+A default tab is provided in each Hero instance. Navigate by using the [hero.goto](/docs/hero/basic-client/hero#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Hero instance. These can be discovered using the [hero.tabs](/docs/hero/basic-interfaces/hero#tabs) method, or waiting with [hero.waitForNewTab()](/docs/hero/basic-interfaces/hero#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Hero instance. These can be discovered using the [hero.tabs](/docs/hero/basic-client/hero#tabs) method, or waiting with [hero.waitForNewTab()](/docs/hero/basic-client/hero#wait-for-new-tab).
 
 ## Properties
 
 ### tab.cookieStorage {#cookie-storage}
 
-Returns a [CookieStorage](/docs/hero/advanced/cookie-storage) instance to get/set/delete cookies in the [mainFrameEnvironment](#main-frame-environment) of this tab.
+Returns a [CookieStorage](/docs/hero/advanced-client/cookie-storage) instance to get/set/delete cookies in the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
-Alias for [tab.mainFrameEnvironment.cookieStorage](/docs/hero/basic-interfaces/frame-environment#cookie-storage).
+Alias for [tab.mainFrameEnvironment.cookieStorage](/docs/hero/advanced-client/frame-environment#cookie-storage).
 
-#### **Type**: [`CookieStorage`](/docs/hero/advanced/cookie-storage)
+#### **Type**: [`CookieStorage`](/docs/hero/advanced-client/cookie-storage)
 
 ### tab.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document of the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
-Alias for [tab.mainFrameEnvironment.document](/docs/hero/basic-interfaces/frame-environment#document).
+Alias for [tab.mainFrameEnvironment.document](/docs/hero/advanced-client/frame-environment#document).
 
 #### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### tab.frameEnvironments {#frame-environments}
 
-Returns a list of [Frames](/docs/hero/basic-interfaces/frame-environment) loaded for this tab.
+Returns a list of [Frames](/docs/hero/advanced-client/frame-environment) loaded for this tab.
 
-#### **Type**: [`Promise<Frame[]>`](/docs/hero/basic-interfaces/frame-environment).
+#### **Type**: [`Promise<Frame[]>`](/docs/hero/advanced-client/frame-environment).
 
 ### tab.isAllContentLoaded {#is-all-content-loaded}
 
@@ -42,7 +42,7 @@ Wait for this event to trigger with [waitForLoad(AllContentLoaded)](#wait-for-lo
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [tab.mainFrameEnvironment.isAllContentLoaded](/docs/hero/basic-interfaces/frame-environment#is-all-content-loaded)
+Alias for [tab.mainFrameEnvironment.isAllContentLoaded](/docs/hero/advanced-client/frame-environment#is-all-content-loaded)
 
 ### tab.isDomContentLoaded {#is-dom-content-loaded}
 
@@ -52,7 +52,7 @@ Wait for this event to trigger with [waitForLoad(DomContentLoaded)](#wait-for-lo
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [tab.mainFrameEnvironment.isDomContentLoaded](/docs/hero/basic-interfaces/frame-environment#is-dom-content-loaded)
+Alias for [tab.mainFrameEnvironment.isDomContentLoaded](/docs/hero/advanced-client/frame-environment#is-dom-content-loaded)
 
 ### tab.isPaintingStable {#is-painting-stable}
 
@@ -62,7 +62,7 @@ Wait for this event to trigger with [waitForPaintingStable()](#wait-for-painting
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [tab.mainFrameEnvironment.isPaintingStable](/docs/hero/basic-interfaces/frame-environment#is-painting-stable)
+Alias for [tab.mainFrameEnvironment.isPaintingStable](/docs/hero/advanced-client/frame-environment#is-painting-stable)
 
 ### tab.lastCommandId {#lastCommandId}
 
@@ -74,21 +74,21 @@ An execution point that refers to a command run on this Hero instance (`waitForE
 
 Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
-Alias for [tab.mainFrameEnvironment.localStorage](/docs/hero/basic-interfaces/frame-environment#local-storage).
+Alias for [tab.mainFrameEnvironment.localStorage](/docs/hero/advanced-client/frame-environment#local-storage).
 
 #### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
 ### tab.mainFrameEnvironment {#main-frame-environment}
 
-Returns the [`FrameEnvironment`](/docs/hero/basic-interfaces/frame-environment) representing the primary content of the loaded tab.
+Returns the [`FrameEnvironment`](/docs/hero/advanced-client/frame-environment) representing the primary content of the loaded tab.
 
-#### **Type**: [`FrameEnvironment`](/docs/hero/basic-interfaces/frame-environment).
+#### **Type**: [`FrameEnvironment`](/docs/hero/advanced-client/frame-environment).
 
 ### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
 Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
-Alias for [tab.mainFrameEnvironment.sessionStorage](/docs/hero/basic-interfaces/frame-environment#session-storage).
+Alias for [tab.mainFrameEnvironment.sessionStorage](/docs/hero/advanced-client/frame-environment#session-storage).
 
 #### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
@@ -108,24 +108,24 @@ The url of the active tab.
 
 Returns a constructor for a [Request](/docs/awaited-dom/request) object in the [mainFrameEnvironment](#main-frame-environment).
 
-Alias for [tab.mainFrameEnvironment.Request](/docs/hero/basic-interfaces/frame-environment#request-type)
+Alias for [tab.mainFrameEnvironment.Request](/docs/hero/advanced-client/frame-environment#request-type)
 
 #### **Type**: [`Request`](/docs/awaited-dom/request)
 
 ## Methods
 
-### tab.close*()* {#close}
+### tab.close *()* {#close}
 
 Closes the current tab only (will close the whole Hero instance if there are no open tabs).
 
 #### **Returns**: `Promise`
 
-### tab.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
+### tab.fetch *(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
 Perform a native "fetch" request in the [mainFrameEnvironment](#main-frame-environment) context.
 
 NOTE: You can work around Cross Origin Request (CORS) issues or change your request "origin" by running fetch
-from a different [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment#fetch).
+from a different [FrameEnvironment](/docs/hero/advanced-client/frame-environment#fetch).
 
 #### **Arguments**:
 
@@ -134,7 +134,7 @@ from a different [FrameEnvironment](/docs/hero/basic-interfaces/frame-environmen
   - Inbound Body currently supports: `string`, `ArrayBuffer`, `null`.
   - Not supported: `Blob`, `FormData`, `ReadableStream`, `URLSearchParams`
 
-Alias for [tab.mainFrameEnvironment.fetch](/docs/hero/basic-interfaces/frame-environment#fetch)
+Alias for [tab.mainFrameEnvironment.fetch](/docs/hero/advanced-client/frame-environment#fetch)
 
 #### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
 
@@ -164,13 +164,13 @@ const response = await hero.fetch(postUrl, {
 });
 ```
 
-### tab.getFrameEnvironment*(frameElement)* {#get-frame-environment}
+### tab.getFrameEnvironment *(frameElement)* {#get-frame-environment}
 
-Get the [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to interface with the full environment of the given DOM element without cross-domain restrictions.
+Get the [FrameEnvironment](/docs/hero/advanced-client/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to interface with the full environment of the given DOM element without cross-domain restrictions.
 
-Alias for [FrameEnvironment.getFrameEnvironment](/docs/hero/basic-interfaces/frame-environment#get-frame-environment)
+Alias for [FrameEnvironment.getFrameEnvironment](/docs/hero/advanced-client/frame-environment#get-frame-environment)
 
-### tab.findResource*(filter, options)* {#find-resource}
+### tab.findResource *(filter, options)* {#find-resource}
 
 Find a specific image, stylesheet, script, websocket or other resource that has been received. This function will return the most recently received resource first.
 
@@ -180,16 +180,16 @@ By default, this command will find resources loaded since the current [mainFrame
 
 - filter `object` Match on "all" of the provided filters:
   - url `string | RegExp` A string or regex to match a url.
-  - type [`ResourceType`](/docs/hero/advanced/resource#type) A resource type to filter by.
+  - type [`ResourceType`](/docs/hero/advanced-client/resource#type) A resource type to filter by.
   - httpRequest `object`
     - statusCode `number` Http status code to filter by.
     - method `string` Http request method to filter by.
 - options `object` Accepts any of the following:
   - sinceCommandId `number`. A `commandId` from which to look for resources. Defaults to the last Http Navigation performed on the tab.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource)
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource)
 
-### tab.findResources*(filter, options)* {#find-resources}
+### tab.findResources *(filter, options)* {#find-resources}
 
 Find a collection of images, stylesheets, scripts, websockets or other resources that have been received. This function will return all matching resources.
 
@@ -199,16 +199,16 @@ By default, this command will find resources loaded since the current [mainFrame
 
 - filter `object` Match on "all" of the provided filters:
   - url `string | RegExp` A string or regex to match a url.
-  - type [`ResourceType`](/docs/hero/advanced/resource#type) A resource type to filter by.
+  - type [`ResourceType`](/docs/hero/advanced-client/resource#type) A resource type to filter by.
   - httpRequest `object`
     - statusCode `number` Http status code to filter by.
     - method `string` Http request method to filter by.
 - options `object` Accepts any of the following:
   - sinceCommandId `number`. A `commandId` from which to look for resources. Defaults to the last Http Navigation performed on the tab.
 
-#### **Returns**: [`Promise<Resource[]>`](/docs/hero/advanced/resource)
+#### **Returns**: [`Promise<Resource[]>`](/docs/hero/advanced-client/resource)
 
-### tab.flowCommand*(commandFn, exitState? | options?)* {#flow-command}
+### tab.flowCommand *(commandFn, exitState? | options?)* {#flow-command}
 
 A FlowCommand allows you define a "recovery" boundary in the case where an AwaitedDOM error triggers a FlowHandler and modifies your page state. In some cases, you may wish to ensure that a series of commands are re-run instead of a single failing command. For instance, if you lose focus on a modal-window field in the middle of typing, you will want to run the logic that prompted the modal-window to show up.
 
@@ -235,17 +235,17 @@ Flow Commands can be nested within each other. If nested commands cannot be comp
 
 #### **Returns**: `Promise<T>`
 
-### tab.focus*()* {#focus}
+### tab.focus *()* {#focus}
 
 Make this tab the `activeTab` within a browser, which directs many Hero methods to this tab.
 
 #### **Returns**: `Promise`
 
-### tab.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
+### tab.getComputedStyle *(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
 
-Perform a native `Window.getComputedStyle` request in the current main [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment) - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
+Perform a native `Window.getComputedStyle` request in the current main [FrameEnvironment](/docs/hero/advanced-client/frame-environment) - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
 
-Alias for [tab.mainFrameEnvironment.getComputedStyle](/docs/hero/basic-interfaces/frame-environment#computed-style).
+Alias for [tab.mainFrameEnvironment.getComputedStyle](/docs/hero/advanced-client/frame-environment#computed-style).
 
 #### **Arguments**:
 
@@ -262,14 +262,14 @@ const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
 ```
 
-### tab.getJsValue*(path)* {#get-js-value}
+### tab.getJsValue *(path)* {#get-js-value}
 
-Extract any publicly accessible javascript value from the current main [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment) context.
+Extract any publicly accessible javascript value from the current main [FrameEnvironment](/docs/hero/advanced-client/frame-environment) context.
 
 NOTE: This type of operation could potentially be snooped on by the hosting website as it must run in the main Javascript environment
 in order to access variables.
 
-Alias for [tab.mainFrameEnvironment.getJsValue](/docs/hero/basic-interfaces/frame-environment#get-js-value).
+Alias for [tab.mainFrameEnvironment.getJsValue](/docs/hero/advanced-client/frame-environment#get-js-value).
 
 #### **Arguments**:
 
@@ -282,7 +282,7 @@ await hero.goto('https://dataliberationfoundation.org');
 const navigatorAgent = await hero.activeTab.getJsValue(`navigator.userAgent`);
 ```
 
-### tab.goBack*(timeoutMs)* {#back}
+### tab.goBack *(timeoutMs)* {#back}
 
 Navigates to a previous url in the navigation history.
 
@@ -292,7 +292,7 @@ Navigates to a previous url in the navigation history.
 
 #### **Returns**: `Promise<string>` The new document url.
 
-### tab.goForward*(timeoutMs)* {#forward}
+### tab.goForward *(timeoutMs)* {#forward}
 
 Navigates forward in the navigation history stack.
 
@@ -302,7 +302,7 @@ Navigates forward in the navigation history stack.
 
 #### **Returns**: `Promise<string>` The new document url.
 
-### tab.goto*(locationHref, timeoutMs?)* {#goto}
+### tab.goto *(locationHref, timeoutMs?)* {#goto}
 
 Executes a navigation request for the document associated with the parent Hero instance.
 
@@ -311,9 +311,9 @@ Executes a navigation request for the document associated with the parent Hero i
 - locationHref `string` The location to navigate to.
 - timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource) The loaded resource representing this page.
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource) The loaded resource representing this page.
 
-### tab.getComputedVisibility*(node)* {#get-computed-visibility}
+### tab.getComputedVisibility *(node)* {#get-computed-visibility}
 
 Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether a node (or containing element) has:
 
@@ -323,7 +323,7 @@ Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is
 - no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
 - on the visible screen (not beyond the horizontal or vertical viewport)
 
-Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/basic-interfaces/frame-environment#get-computed-visibility).
+Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/advanced-client/frame-environment#get-computed-visibility).
 
 #### **Arguments**:
 
@@ -345,21 +345,21 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/basic-inte
   - hasDimensions `boolean`. The node has width and height.
   - isUnobstructedByOtherElements `boolean`. The node is not hidden or obscured > 50% by another element.
 
-### tab.querySelector*(stringOrOptions)* {#query-selector}
+### tab.querySelector *(stringOrOptions)* {#query-selector}
 
 This is a shortcut for mainFrame.document.querySelector.
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
-### tab.querySelectorAll*(stringOrOptions)* {#query-selector-all}
+### tab.querySelectorAll *(stringOrOptions)* {#query-selector-all}
 
 This is a shortcut for mainFrame.document.querySelectorAll.
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given patterns. Returns an empty list if a resultset is not found that satisfies the constraints.
 
-### tab.registerFlowHandler*(name, state, handlerFn)* {#register-flow-handler}
+### tab.registerFlowHandler *(name, state, handlerFn)* {#register-flow-handler}
 
-Register a [FlowHandler](/docs/hero/advanced/flow) on the given tab. A FlowHandler is a callback function that will be invoked anytime your Hero script encounters Awaited Dom errors. These can be used to correct your script flow.
+Register a [FlowHandler](/docs/hero/advanced-client/flow) on the given tab. A FlowHandler is a callback function that will be invoked anytime your Hero script encounters Awaited Dom errors. These can be used to correct your script flow.
 
 As an example, imagine you are interacting with a website that sometimes pops up an "Accept Cookies" modal. As you don't know "when" it might trigger, it can be difficult to know when to look for the modal. With a FlowHandler, you declare the [State](#wait-for-state) that should trigger the associated callback, and a function to dismiss the cookie popup.
 
@@ -412,7 +412,7 @@ await hero.flowCommand(async () => {
 
 #### **Returns**: `Promise<void>`
 
-### tab.reload*(timeoutMs?)* {#reload}
+### tab.reload *(timeoutMs?)* {#reload}
 
 Reload the currently loaded url.
 
@@ -420,9 +420,9 @@ Reload the currently loaded url.
 
 - timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource) The loaded resource representing this page.
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource) The loaded resource representing this page.
 
-### tab.takeScreenshot*(options?)* {#take-screenshot}
+### tab.takeScreenshot *(options?)* {#take-screenshot}
 
 Takes a screenshot of the current contents rendered in the browser.
 
@@ -435,13 +435,13 @@ Takes a screenshot of the current contents rendered in the browser.
 
 #### **Returns**: `Promise<Buffer>` Buffer with image bytes in base64.
 
-### tab.triggerFlowHandlers*()* {#trigger-flow-handler}
+### tab.triggerFlowHandlers *()* {#trigger-flow-handler}
 
 Check the state of all [FlowHandlers](#register-flow-handler) and trigger them to run if they match the current page state.
 
 #### **Returns**: `Promise<void>`
 
-### tab.validateState*(state)* {#validate-state}
+### tab.validateState *(state)* {#validate-state}
 
 Check a [State](#wait-for-state) defined as per `tab.waitForState` above. Instead of waiting, this method will check the state a single time and return a boolean if the state is valid.
 
@@ -451,11 +451,11 @@ Check a [State](#wait-for-state) defined as per `tab.waitForState` above. Instea
 
 #### **Returns**: `Promise<boolean>`
 
-### tab.waitForElement*(element,options)* {#wait-for-element}
+### tab.waitForElement *(element,options)* {#wait-for-element}
 
 Wait until a specific element is present in the dom of the [mainFrameEnvironment](#main-frame-environment).
 
-Alias for [tab.mainFrameEnvironment.waitForElement](/docs/hero/basic-interfaces/frame-environment#wait-for-element).
+Alias for [tab.mainFrameEnvironment.waitForElement](/docs/hero/advanced-client/frame-environment#wait-for-element).
 
 #### **Arguments**:
 
@@ -468,11 +468,11 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/hero/basic-interfaces/
 
 #### **Returns**: `Promise`
 
-### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
+### tab.waitForPaintingStable *(options)* {#wait-for-painting-stable}
 
 Wait for the [mainFrameEnvironment](#main-frame-environment) to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
 
-Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/hero/basic-interfaces/frame-environment#wait-for-painting-stable).
+Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/hero/advanced-client/frame-environment#wait-for-painting-stable).
 
 #### **Arguments**:
 
@@ -493,7 +493,7 @@ await activeTab.waitForElement(elem, {
 });
 ```
 
-### tab.waitForState*(state, options)* {#wait-for-state}
+### tab.waitForState *(state, options)* {#wait-for-state}
 
 Wait for a state to be loaded based on a series of conditions. This feature allows you to detect when many different conditions all resolve to true.
 
@@ -554,7 +554,7 @@ await hero.waitForState(assert => {
 
 #### **Returns**: `Promise<void>`
 
-### tab.waitForFileChooser*(options)* {#wait-for-file-chooser}
+### tab.waitForFileChooser *(options)* {#wait-for-file-chooser}
 
 Wait for a `file chooser` dialog to be prompted on the page. This is usually triggered by clicking on an `input` element with `type=file`.
 
@@ -564,13 +564,13 @@ Wait for a `file chooser` dialog to be prompted on the page. This is usually tri
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for load status changes. Default is to look back to the command preceding this command (eg, a click or interact event).
 
-#### **Returns**: [`Promise<FileChooser>`](/docs/hero/advanced/file-chooser)
+#### **Returns**: [`Promise<FileChooser>`](/docs/hero/advanced-client/file-chooser)
 
-### tab.waitForLoad*(status, options)* {#wait-for-load}
+### tab.waitForLoad *(status, options)* {#wait-for-load}
 
 Wait for the load status of the [mainFrameEnvironment](#main-frame-environment).
 
-Alias for [tab.mainFrameEnvironment.waitForLoad](/docs/hero/basic-interfaces/frame-environment#wait-for-load).
+Alias for [tab.mainFrameEnvironment.waitForLoad](/docs/hero/advanced-client/frame-environment#wait-for-load).
 
 #### **Arguments**:
 
@@ -595,11 +595,11 @@ The following are possible statuses and their meanings:
 | `AllContentLoaded`    | The page load event has triggered. NOTE: this does not ALWAYS trigger in browser.        |
 | `PaintingStable`      | The page has loaded the main content above the fold. Works on javascript-rendered pages. |
 
-### tab.waitForLocation*(trigger, options)* {#wait-for-location}
+### tab.waitForLocation *(trigger, options)* {#wait-for-location}
 
 Waits for a navigational change to document.location either because of a `reload` event or changes to the URL.
 
-Alias for [tab.mainFrameEnvironment.waitForLocation](/docs/hero/basic-interfaces/frame-environment#wait-for-location).
+Alias for [tab.mainFrameEnvironment.waitForLocation](/docs/hero/advanced-client/frame-environment#wait-for-location).
 
 #### **Arguments**:
 
@@ -608,7 +608,7 @@ Alias for [tab.mainFrameEnvironment.waitForLocation](/docs/hero/basic-interfaces
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for changes.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource) The resource representing this location change or reload.
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource) The resource representing this location change or reload.
 
 Location changes are triggered in one of two ways:
 
@@ -631,7 +631,7 @@ await activeTab.waitForLocation('change');
 const newUrl = await activeTab.url;
 ```
 
-### tab.waitForMillis*(millis)* {#wait-for-millis}
+### tab.waitForMillis *(millis)* {#wait-for-millis}
 
 Waits for the specified number of milliseconds.
 
@@ -641,24 +641,24 @@ Waits for the specified number of milliseconds.
 
 #### **Returns**: `Promise`
 
-### tab.waitForResource*(filter, options)* {#wait-for-resource}
+### tab.waitForResource *(filter, options)* {#wait-for-resource}
 
 Wait until a specific image, stylesheet, script, websocket or other resource URL has been received.
 
-By default, this command will find [Resources](/docs/hero/advanced/resource) loaded since the previous command.
+By default, this command will find [Resources](/docs/hero/advanced-client/resource) loaded since the previous command.
 
 #### **Arguments**:
 
 - filter `object` Accepts any of the following:
   - url `string | RegExp` A string or regex to match a url on
-  - type [`ResourceType`](/docs/hero/advanced/resource#type) A resource type to filter on
+  - type [`ResourceType`](/docs/hero/advanced-client/resource#type) A resource type to filter on
   - filterFn `function(resource: Resource): Promise<boolean>` A function to allow further filtering of returned resources. Return true to use a specific Resource, false to continue searching.
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `60,000`.
   - sinceCommandId `number`. A `commandId` from which to look for resources. Defaults to previous command.
   - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource)
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource)
 
 ```js
 const { activeTab } = hero;
@@ -678,24 +678,24 @@ const xhrAfterSubmit = await activeTab.waitForResource(
 );
 ```
 
-### tab.waitForResources*(filter, options)* {#wait-for-resources}
+### tab.waitForResources *(filter, options)* {#wait-for-resources}
 
 Wait for more than one image, stylesheet, script, websocket or other resources that have been received.
 
-By default, this command will find [Resources](/docs/hero/advanced/resource) loaded since the previous command.
+By default, this command will find [Resources](/docs/hero/advanced-client/resource) loaded since the previous command.
 
 #### **Arguments**:
 
 - filter `object` Accepts any of the following:
   - url `string | RegExp` A string or regex to match a url on
-  - type [`ResourceType`](/docs/hero/advanced/resource#type) A resource type to filter on
+  - type [`ResourceType`](/docs/hero/advanced-client/resource#type) A resource type to filter on
   - filterFn `function(resource: Resource, done: Callback): Promise<boolean>` A function to allow further filtering of returned resources. Return true to include a Resource, false to exclude. Calling `done` finishes execution.
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `60,000`.
   - sinceCommandId `number`. A `commandId` from which to look for resources. Defaults to previous command.
   - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`.
 
-#### **Returns**: [`Promise<Resource[]>`](/docs/hero/advanced/resource)
+#### **Returns**: [`Promise<Resource[]>`](/docs/hero/advanced-client/resource)
 
 ```js
 const { activeTab, document } = hero;
@@ -711,7 +711,7 @@ const allFetchResources = await activeTab.waitForResources({
 });
 ```
 
-### tab.xpathSelector*(selector, orderedResults)* {#xpath-selector}
+### tab.xpathSelector *(selector, orderedResults)* {#xpath-selector}
 
 This is a shortcut for mainFrame.document.evaluate(`selector`, document, `FIRST_ORDERED_NODE_TYPE` | `ANY_UNORDERED_NODE_TYPE`)
 
@@ -722,7 +722,7 @@ This is a shortcut for mainFrame.document.evaluate(`selector`, document, `FIRST_
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
-### tab.xpathSelectorAll*(selector, orderedResults)* {#xpath-selector-all}
+### tab.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
 
 This is a shortcut for mainFrame.document.evaluate(`selector`, document, `ORDERED_NODE_ITERATOR_TYPE` | `UNORDERED_NODE_ITERATOR_TYPE`).
 
@@ -737,7 +737,7 @@ NOTE: this API will iterate through the results to return an array of all matchi
 
 ## Events
 
-Hero's [EventTarget](/docs/hero/basic-interfaces/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/hero/basic-interfaces/event-target).
+Hero's [EventTarget](/docs/hero/basic-client/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/hero/basic-client/event-target).
 
 ### 'dialog' {#dialog}
 
@@ -745,7 +745,7 @@ Emitted when a dialog is prompted on the screen
 
 #### **Arguments in callback**:
 
-- [`Dialog`](/docs/hero/advanced/dialog)
+- [`Dialog`](/docs/hero/advanced-client/dialog)
 
 ### 'resource' {#resource-event}
 
@@ -753,4 +753,4 @@ Emitted for each resource request received by the webpage.
 
 #### **Arguments in callback**:
 
-- [`Resource`](/docs/hero/advanced/resource) | [`WebsocketResource`](/docs/hero/advanced/websocket-resource)
+- [`Resource`](/docs/hero/advanced-client/resource) | [`WebsocketResource`](/docs/hero/advanced-client/websocket-resource)

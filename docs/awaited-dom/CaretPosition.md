@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CaretPosition
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CaretPosition
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -18,7 +18,7 @@ Returns a <code>Node</code> containing the found node at the caret's position.
 
 ## Methods
 
-### .getClientRect*()* <div class="specs"><i>W3C</i></div> {#getClientRect}
+### .getClientRect *()* <div class="specs"><i>W3C</i></div> {#getClientRect}
 
 Needs content.
 

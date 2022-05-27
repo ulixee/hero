@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> GlobalEventHandlers
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> GlobalEventHandlers
 
 <div class='overview'><span class="seoSummary">The <strong><code>GlobalEventHandlers</code></strong> mixin describes the event handlers common to several interfaces like <code>HTMLElement</code>, <code>Document</code>, or <code>Window</code>.</span> Each of these interfaces can, of course, add more event handlers in addition to the ones listed below.</div>
 

@@ -5,19 +5,18 @@
     - Basic concepts
     - Configuration
 
-- title: Basic Interfaces
+- title: Basic Client
   items:
     - Hero
     - Tab
-    - FrameEnvironment
     - Interactions
     - AwaitedDOM
     - AwaitedDOM Extenders
     - Flow
-    #- DetachedDOM
 
-- title: Advanced
+- title: Advanced Client
   items:
+    - FrameEnvironment
     - UserProfile
     - CookieStorage
     - Dialog
@@ -27,17 +26,17 @@
     - ResourceResponse
     - WebsocketResource
     - ConnectionToCore
-    - Remote
-    - Session
-    - TimeTravel
+
 - title: Plugins
   items:
     - Client Plugins
     - Core Plugins
-- title: Contribute
+
+- title: Advanced Concepts
   items:
-    - How to contribute
-    - Code of conduct
+    - Client vs Core
+    - Sessions
+    - TimeTravel
 
 - title: Help
   items:
