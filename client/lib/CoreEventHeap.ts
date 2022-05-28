@@ -125,10 +125,6 @@ export default class CoreEventHeap {
       });
   }
 
-  private shouldIncludeCallSite(): boolean {
-    return this.connection.commandQueue.mode !== 'production';
-  }
-
   private generateListenerHandle(
     jsPath: IJsPath | null,
     type: string,

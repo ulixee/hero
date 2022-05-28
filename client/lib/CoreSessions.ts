@@ -1,5 +1,9 @@
 import Queue from '@ulixee/commons/lib/Queue';
 import CoreSession from './CoreSession';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 export default class CoreSessions {
   public set concurrency(value: number) {
@@ -10,14 +14,35 @@ export default class CoreSessions {
   private readonly queue: Queue;
   private readonly sessionTimeoutMillis: number;
 
-  constructor(concurrency?: number, sessionTimeoutMillis?: number) {
+  constructor(
+    readonly connection: ConnectionToHeroCore,
+    concurrency?: number,
+    sessionTimeoutMillis?: number,
+  ) {
     this.queue = new Queue('AGENT QUEUE');
-    this.queue.concurrency = concurrency ?? 1;
+    this.queue.concurrency = concurrency ?? 10;
     this.sessionTimeoutMillis = sessionTimeoutMillis;
   }
 
-  public waitForAvailable(callbackFn: () => Promise<any>): Promise<void> {
-    return this.queue.run(callbackFn, this.sessionTimeoutMillis);
+  public create(options: ISessionCreateOptions): Promise<CoreSession> {
+    const sessionResolvable = new Resolvable<CoreSession>();
+    void this.queue
+      .run<void>(async () => {
+        const sessionMeta = await this.connection.commandQueue.run<ISessionMeta>(
+          'Core.createSession',
+          options,
+        );
+        const coreSession = new CoreSession(sessionMeta, this.connection, options);
+        const id = coreSession.sessionId;
+        this.sessionsById.set(id, coreSession);
+        coreSession.once('close', () => this.sessionsById.delete(id));
+
+        sessionResolvable.resolve(coreSession);
+        // wait for close before "releasing" this slot
+        await new Promise(resolve => coreSession.once('close', resolve));
+      }, this.sessionTimeoutMillis)
+      .catch(sessionResolvable.reject);
+    return sessionResolvable.promise;
   }
 
   public get size(): number {
@@ -43,13 +68,5 @@ export default class CoreSessions {
       session.close(true).catch(() => null);
     }
     return hasSessions;
-  }
-
-  public track(coreSession: CoreSession): void {
-    this.sessionsById.set(coreSession.sessionId, coreSession);
-  }
-
-  public untrack(sessionId: string): void {
-    this.sessionsById.delete(sessionId);
   }
 }

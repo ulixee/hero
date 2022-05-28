@@ -542,7 +542,7 @@ export default class Hero extends AwaitedEventTarget<{
   #getCoreSessionOrReject(): Promise<CoreSession> {
     if (!this.#coreSessionPromise) {
       this.#coreSessionPromise = this.#connectionToCore
-        .createSession(this.#options, this)
+        .createSession(this.#options)
         .then(session => {
           if (session instanceof CoreSession) this.#initializeClientPlugins(this.#clientPlugins);
           return session;

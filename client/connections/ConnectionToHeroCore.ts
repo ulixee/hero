@@ -1,6 +1,5 @@
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
@@ -8,7 +7,6 @@ import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 import { IHeroCreateOptions } from '../index';
-import Hero from '../lib/Hero';
 import { scriptInstance } from '../lib/internal';
 import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
@@ -33,6 +31,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     this.options = options ?? { isPersistent: true };
     this.commandQueue = new CoreCommandQueue(null, scriptInstance.mode, this, null);
     this.coreSessions = new CoreSessions(
+      this,
       this.options.maxConcurrency,
       this.options.instanceTimeoutMillis,
     );
@@ -56,28 +55,11 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
 
   public async createSession(
     options: Omit<ISessionCreateOptions, 'sessionId'> & Pick<IHeroCreateOptions, 'sessionId'>,
-    hero: Hero,
   ): Promise<CoreSession> {
     try {
       if (options.sessionId) options.sessionId = await options.sessionId;
 
-      let restoreMode: CoreCommandQueue['mode'];
-      if (this.commandQueue.mode !== options.mode) {
-        restoreMode = this.commandQueue.mode;
-        this.commandQueue.mode = options.mode;
-      }
-      const sessionMeta = await this.commandQueue.run<ISessionMeta>('Core.createSession', options);
-      if (restoreMode) {
-        this.commandQueue.mode = restoreMode;
-      }
-      const coreSession = new CoreSession(
-        { ...sessionMeta, sessionName: options.sessionName },
-        this,
-        hero,
-        options.mode,
-      );
-      this.coreSessions.track(coreSession);
-      return coreSession;
+      return await this.coreSessions.create(options as ISessionCreateOptions);
     } catch (error) {
       if (error instanceof DisconnectedError && this.disconnectPromise) return null;
       throw error;
@@ -86,10 +68,6 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
 
   public getSession(sessionId: string): CoreSession {
     return this.coreSessions.get(sessionId);
-  }
-
-  public untrackSession(coreSession: CoreSession): void {
-    this.coreSessions.untrack(coreSession.sessionId);
   }
 
   public async logUnhandledError(error: Error): Promise<void> {
