@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSStyleDeclaration
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSStyleDeclaration
 
 <div class='overview'>The <strong><code>CSSStyleDeclaration</code></strong> interface represents an object that is a CSS declaration block, and exposes style information and various style-related methods and properties.</div>
 
@@ -32,7 +32,7 @@ The containing <code>CSSRule</code>.
 
 ## Methods
 
-### .getPropertyPriority*(property)* <div class="specs"><i>W3C</i></div> {#getPropertyPriority}
+### .getPropertyPriority *(property)* <div class="specs"><i>W3C</i></div> {#getPropertyPriority}
 
 Returns the optional priority, "important".
 
@@ -43,7 +43,7 @@ Returns the optional priority, "important".
 
 #### **Returns**: `Promise<string>`
 
-### .getPropertyValue*(property)* <div class="specs"><i>W3C</i></div> {#getPropertyValue}
+### .getPropertyValue *(property)* <div class="specs"><i>W3C</i></div> {#getPropertyValue}
 
 Returns the property value given a property name.
 
@@ -54,7 +54,7 @@ Returns the property value given a property name.
 
 #### **Returns**: `Promise<string>`
 
-### .item*(index)* <div class="specs"><i>W3C</i></div> {#item}
+### .item *(index)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns a property name.
 
@@ -65,7 +65,7 @@ Returns a property name.
 
 #### **Returns**: `Promise<string>`
 
-### .removeProperty*(property)* <div class="specs"><i>W3C</i></div> {#removeProperty}
+### .removeProperty *(property)* <div class="specs"><i>W3C</i></div> {#removeProperty}
 
 Removes a property from the CSS declaration block.
 
@@ -76,7 +76,7 @@ Removes a property from the CSS declaration block.
 
 #### **Returns**: `Promise<string>`
 
-### .setProperty*(property, value, priority?)* <div class="specs"><i>W3C</i></div> {#setProperty}
+### .setProperty *(property, value, priority?)* <div class="specs"><i>W3C</i></div> {#setProperty}
 
 Modifies an existing CSS property or creates a new CSS property in the declaration block.
 

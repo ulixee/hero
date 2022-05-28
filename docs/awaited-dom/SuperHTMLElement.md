@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SuperHTMLElement
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SuperHTMLElement
 
 <div class='overview'>The <strong><code>HTMLElement</code></strong> interface represents any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it.</div>
 

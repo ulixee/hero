@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Comment
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Comment
 
 <div class='overview'><span class="seoSummary">The <code><strong>Comment</strong></code> interface represents textual notations within markup; although it is generally not visually shown, such comments are available to be read in the source view.</span> Comments are represented in HTML and XML as content between '<code>&lt;!--</code>' and '<code>--&gt;</code>'. In XML, the character sequence '<code>--</code>' cannot be used within a comment.</div>
 
@@ -177,7 +177,7 @@ Returns the <code>Element</code> immediately prior to this node in its parent's 
 
 ## Methods
 
-### node.substringData*(offset, count)* <div class="specs"><i>W3C</i></div> {#substringData}
+### node.substringData *(offset, count)* <div class="specs"><i>W3C</i></div> {#substringData}
 
 Returns a `string` containing the part of <code>CharacterData.data</code> of the specified length and starting at the specified offset.
 
@@ -189,7 +189,7 @@ Returns a `string` containing the part of <code>CharacterData.data</code> of the
 
 #### **Returns**: `Promise<string>`
 
-### node.compareDocumentPosition*(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
+### node.compareDocumentPosition *(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
 
 Compares the position of the current node against another node in any other document.
 
@@ -200,7 +200,7 @@ Compares the position of the current node against another node in any other docu
 
 #### **Returns**: `Promise<number>`
 
-### node.contains*(other)* <div class="specs"><i>W3C</i></div> {#contains}
+### node.contains *(other)* <div class="specs"><i>W3C</i></div> {#contains}
 
 Returns a `boolean` value indicating whether or not a node is a descendant of the calling node.
 
@@ -211,7 +211,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 
 #### **Returns**: `Promise<boolean>`
 
-### node.getRootNode*(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
+### node.getRootNode *(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
 
 Returns the context object's root which optionally includes the shadow root if it is available.&nbsp;
 
@@ -225,13 +225,13 @@ Returns the context object's root which optionally includes the shadow root if i
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
-### node.hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
+### node.hasChildNodes *()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
 Returns a `boolean` indicating whether or not the element has any child nodes.
 
 #### **Returns**: `Promise<boolean>`
 
-### node.isDefaultNamespace*(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
+### node.isDefaultNamespace *(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
 
 Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a value of&nbsp;<code>true</code>&nbsp;if the namespace is the default namespace on the given node or&nbsp;<code>false</code>&nbsp;if not.
 
@@ -242,7 +242,7 @@ Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a 
 
 #### **Returns**: `Promise<boolean>`
 
-### node.isEqualNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
+### node.isEqualNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
 
 Returns a `boolean` which indicates whether or not two nodes are of the same type and all their defining data points match.
 
@@ -253,7 +253,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 
 #### **Returns**: `Promise<boolean>`
 
-### node.isSameNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
+### node.isSameNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
 
 Returns a `boolean` value indicating whether or not the two nodes are the same (that is, they reference the same object).
 
@@ -264,7 +264,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 
 #### **Returns**: `Promise<boolean>`
 
-### node.lookupNamespaceURI*(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
+### node.lookupNamespaceURI *(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
 
 Accepts a prefix and returns the namespace URI associated with it on the given node if found (and&nbsp;<code>null</code>&nbsp;if not). Supplying&nbsp;<code>null</code>&nbsp;for the prefix will return the default namespace.
 
@@ -275,7 +275,7 @@ Accepts a prefix and returns the namespace URI associated with it on the given n
 
 #### **Returns**: `Promise<string>`
 
-### node.lookupPrefix*(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
+### node.lookupPrefix *(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
 
 Returns a&nbsp;`string` containing the prefix for a given namespace URI, if present, and&nbsp;<code>null</code>&nbsp;if not. When multiple prefixes are possible, the result is implementation-dependent.
 
@@ -286,7 +286,7 @@ Returns a&nbsp;`string` containing the prefix for a given namespace URI, if pres
 
 #### **Returns**: `Promise<string>`
 
-### node.normalize*()* <div class="specs"><i>W3C</i></div> {#normalize}
+### node.normalize *()* <div class="specs"><i>W3C</i></div> {#normalize}
 
 Clean up all the text nodes under this element (merge adjacent, remove empty).
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSRule
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSRule
 
 <div class='overview'>The <strong><code>CSSRule</code></strong> interface represents a single CSS rule. There are several types of rules, listed in the <a href="#Type_constants">Type constants</a> section below.</div>
 

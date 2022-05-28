@@ -46,7 +46,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ### node.$isClickable {#is-clickable}
 
-Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/hero/basic-interfaces/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/hero/basic-client/tab#get-computed-visibility).
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
@@ -58,7 +58,7 @@ await hero.querySelector('.element').$isClickable;
 
 ### node.$isVisible {#is-visible}
 
-Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/hero/basic-interfaces/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/hero/basic-client/tab#get-computed-visibility).
 
 NOTE: this does not mean the node is scrolled into view.
 
@@ -72,7 +72,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Methods
 
-### node.$clearInputText*()* {#clear-value}
+### node.$clearInputText *()* {#clear-value}
 
 Clears out the value of an input field by performing a Focus, Select All, and Backspace.
 
@@ -80,7 +80,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<void>`
 
-### node.$click*(verification)* {#click}
+### node.$click *(verification)* {#click}
 
 A normal DOM node has a `click()` API on it, but it does not trigger human-like behavior or mouse events resembling the actions of a normal user. For that reason, it can be detected if a given website is looking for it.
 
@@ -90,11 +90,11 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Arguments**:
 
-- verification `elementAtPath` | `exactElement` | `none`. Default `elementAtPath`. Determines what [verification](/docs/hero/basic-interfaces/interactions#click-verification) should be used in this operation. A verification determines how to recover from the node disappearing from the DOM during execution.
+- verification `elementAtPath` | `exactElement` | `none`. Default `elementAtPath`. Determines what [verification](/docs/hero/basic-client/interactions#click-verification) should be used in this operation. A verification determines how to recover from the node disappearing from the DOM during execution.
 
 #### **Returns**: `Promise<void>`
 
-### node.$type*(...typeInteractions)* {#type}
+### node.$type *(...typeInteractions)* {#type}
 
 Perform a typing interaction on the given node. This is a shortcut for `focusing` on an input and then performing `keyboard` operations using the [Human Emulator](/docs/hero/plugins/human-emulators) functionality.
 
@@ -110,7 +110,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<void>`
 
-### node.$waitForExists*(options?)* {#wait-for-exists}
+### node.$waitForExists *(options?)* {#wait-for-exists}
 
 Wait for the given Node "Path" to exist in the DOM. Returns the resolved SuperElement.
 
@@ -127,7 +127,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<ISuperElement>`
 
-### node.$waitForClickable*(options?)* {#wait-for-clickable}
+### node.$waitForClickable *(options?)* {#wait-for-clickable}
 
 Wait for the given Node "Path" to be clickable in the DOM (visible, scrolled into the viewport and unobstructed).
 
@@ -142,7 +142,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<ISuperElement>`
 
-### node.$waitForHidden*(options?)* {#wait-for-hidden}
+### node.$waitForHidden *(options?)* {#wait-for-hidden}
 
 Wait for the given Node "Path" to be unavailable in the DOM (not visible in the DOM or does not exist).
 
@@ -157,11 +157,11 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<ISuperElement>`
 
-### node.$waitForVisible*(options?)* {#wait-for-visible}
+### node.$waitForVisible *(options?)* {#wait-for-visible}
 
 Wait for the given Node "Path" to be visible in the DOM.
 
-Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/hero/basic-interfaces/tab#get-computed-visibility)
+Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/hero/basic-client/tab#get-computed-visibility)
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
@@ -172,7 +172,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 #### **Returns**: `Promise<ISuperElement>`
 
-### node.$xpathSelector*(selector)* {#xpathSelector}
+### node.$xpathSelector *(selector)* {#xpathSelector}
 
 Perform an XPath query with this node provided as the "ContextScope". NOTE: you still need to start your XPath with a '.' to indicate you wish to find nested XPaths.
 
@@ -192,7 +192,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Collection Methods
 
-### nodeList.$map*(iteratorFn)* {#map}
+### nodeList.$map *(iteratorFn)* {#map}
 
 Adds syntactic sugar to run an `Array.map` on the results and await all results. This can be useful to transform results.
 
@@ -200,7 +200,7 @@ Attached to NodeCollections ([see list](#super-collections)).
 
 #### **Returns**: `Promise<T[]>`
 
-### nodeList.$reduce*(iteratorFn, initialValue)* {#reduce}
+### nodeList.$reduce *(iteratorFn, initialValue)* {#reduce}
 
 Adds syntactic sugar to run an `Array.reduce` on the results and await a reduced result. This can be useful to transform results.
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SuperElement
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SuperElement
 
 <div class='overview'><span class="seoSummary"><strong><code>Element</code></strong> is the most general base class from which all element objects (i.e. objects that represent elements) in a <code>Document</code> inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from <code>Element</code>.</span> For example, the <code>HTMLElement</code> interface is the base interface for HTML elements, while the <code>SVGElement</code> interface is the basis for all SVG elements. Most functionality is specified further down the class hierarchy.</div>
 

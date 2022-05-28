@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> OffscreenCanvas
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> OffscreenCanvas
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -18,7 +18,7 @@ The width of the offscreen canvas.
 
 ## Methods
 
-### .convertToBlob*(options?)* <div class="specs"><i>W3C</i></div> {#convertToBlob}
+### .convertToBlob *(options?)* <div class="specs"><i>W3C</i></div> {#convertToBlob}
 
 Creates a <code>Blob</code> object representing the image contained in the canvas.
 
@@ -38,7 +38,7 @@ Creates a <code>Blob</code> object representing the image contained in the canva
 
 #### **Returns**: `Promise<Blob>`
 
-### .transferToImageBitmap*()* <div class="specs"><i>W3C</i></div> {#transferToImageBitmap}
+### .transferToImageBitmap *()* <div class="specs"><i>W3C</i></div> {#transferToImageBitmap}
 
 Creates an <code>ImageBitmap</code> object from the most recently rendered image of the <code>OffscreenCanvas</code>.
 

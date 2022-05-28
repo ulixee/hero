@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> VideoTrackList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> VideoTrackList
 
 <div class='overview'><span class="seoSummary">The <strong><code>VideoTrackList</code></strong> interface is used to represent a list of the video tracks contained within a <code>&lt;video&gt;</code> element, with each track represented by a separate <code>VideoTrack</code> object in the list.</span></div>
 
@@ -20,7 +20,7 @@ The index of the currently selected track, if any, or <code>−1</code> otherwis
 
 ## Methods
 
-### .getTrackById*(id)* <div class="specs"><i>W3C</i></div> {#getTrackById}
+### .getTrackById *(id)* <div class="specs"><i>W3C</i></div> {#getTrackById}
 
 Returns the <code>VideoTrack</code> found within the <code>VideoTrackList</code> whose <code>id</code> matches the specified string. If no match is found, <code>null</code> is returned.
 

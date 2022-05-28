@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSStyleSheet
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSStyleSheet
 
 <div class='overview'><span class="seoSummary">The <strong><code>CSSStyleSheet</code></strong> interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet.</span> It inherits properties and methods from its parent, <code>StyleSheet</code>.</div>
 
@@ -27,7 +27,7 @@ If this stylesheet is imported into the document using an <code>@import</code> r
 
 ## Methods
 
-### .deleteRule*(index)* <div class="specs"><i>W3C</i></div> {#deleteRule}
+### .deleteRule *(index)* <div class="specs"><i>W3C</i></div> {#deleteRule}
 
 Deletes the rule at the specified index into the stylesheet's rule list.
 
@@ -38,7 +38,7 @@ Deletes the rule at the specified index into the stylesheet's rule list.
 
 #### **Returns**: `Promise<void>`
 
-### .insertRule*(rule, index?)* <div class="specs"><i>W3C</i></div> {#insertRule}
+### .insertRule *(rule, index?)* <div class="specs"><i>W3C</i></div> {#insertRule}
 
 Inserts a new rule at the specified position in the stylesheet, given the textual representation of the rule.
 

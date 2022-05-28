@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Document
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Document
 
 <div class='overview'><span class="seoSummary">The <strong><code>Document</code></strong> interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree.</span> The DOM tree includes elements such as <code>&lt;body&gt;</code> and <code>&lt;table&gt;</code>, among many others. It provides functionality globally to the document, like how to obtain the page's URL and create new elements in the document.</div>
 
@@ -381,19 +381,19 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
-### doc.exitFullscreen*()* <div class="specs"><i>W3C</i></div> {#exitFullscreen}
+### doc.exitFullscreen *()* <div class="specs"><i>W3C</i></div> {#exitFullscreen}
 
 Requests that the element on this document which is currently being presented in full-screen mode be taken out of full-screen mode, restoring the previous state of the screen.
 
 #### **Returns**: `Promise<void>`
 
-### doc.exitPointerLock*()* <div class="specs"><i>W3C</i></div> {#exitPointerLock}
+### doc.exitPointerLock *()* <div class="specs"><i>W3C</i></div> {#exitPointerLock}
 
 Release the pointer lock.
 
 #### **Returns**: `Promise<void>`
 
-### doc.getElementsByClassName*(classNames)* <div class="specs"><i>W3C</i></div> {#getElementsByClassName}
+### doc.getElementsByClassName *(classNames)* <div class="specs"><i>W3C</i></div> {#getElementsByClassName}
 
 Returns a list of elements with the given class name.
 
@@ -404,7 +404,7 @@ Returns a list of elements with the given class name.
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### doc.getElementsByName*(elementName)* <div class="specs"><i>W3C</i></div> {#getElementsByName}
+### doc.getElementsByName *(elementName)* <div class="specs"><i>W3C</i></div> {#getElementsByName}
 
 Returns a list of elements with the given name.
 
@@ -415,7 +415,7 @@ Returns a list of elements with the given name.
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
-### doc.getElementsByTagName*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
+### doc.getElementsByTagName *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
 
 Returns a list of elements with the given tag name.
 
@@ -426,7 +426,7 @@ Returns a list of elements with the given tag name.
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### doc.getElementsByTagNameNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
+### doc.getElementsByTagNameNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
 
 Returns a list of elements with the given tag name and namespace.
 
@@ -438,13 +438,13 @@ Returns a list of elements with the given tag name and namespace.
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### doc.hasFocus*()* <div class="specs"><i>W3C</i></div> {#hasFocus}
+### doc.hasFocus *()* <div class="specs"><i>W3C</i></div> {#hasFocus}
 
 Returns <code>true</code> if the focus is currently located anywhere inside the specified document.
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.compareDocumentPosition*(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
+### doc.compareDocumentPosition *(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
 
 Compares the position of the current node against another node in any other document.
 
@@ -455,7 +455,7 @@ Compares the position of the current node against another node in any other docu
 
 #### **Returns**: `Promise<number>`
 
-### doc.contains*(other)* <div class="specs"><i>W3C</i></div> {#contains}
+### doc.contains *(other)* <div class="specs"><i>W3C</i></div> {#contains}
 
 Returns a `boolean` value indicating whether or not a node is a descendant of the calling node.
 
@@ -466,7 +466,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.getRootNode*(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
+### doc.getRootNode *(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
 
 Returns the context object's root which optionally includes the shadow root if it is available.&nbsp;
 
@@ -480,13 +480,13 @@ Returns the context object's root which optionally includes the shadow root if i
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
-### doc.hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
+### doc.hasChildNodes *()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
 Returns a `boolean` indicating whether or not the element has any child nodes.
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.isDefaultNamespace*(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
+### doc.isDefaultNamespace *(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
 
 Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a value of&nbsp;<code>true</code>&nbsp;if the namespace is the default namespace on the given node or&nbsp;<code>false</code>&nbsp;if not.
 
@@ -497,7 +497,7 @@ Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a 
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.isEqualNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
+### doc.isEqualNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
 
 Returns a `boolean` which indicates whether or not two nodes are of the same type and all their defining data points match.
 
@@ -508,7 +508,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.isSameNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
+### doc.isSameNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
 
 Returns a `boolean` value indicating whether or not the two nodes are the same (that is, they reference the same object).
 
@@ -519,7 +519,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 
 #### **Returns**: `Promise<boolean>`
 
-### doc.lookupNamespaceURI*(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
+### doc.lookupNamespaceURI *(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
 
 Accepts a prefix and returns the namespace URI associated with it on the given node if found (and&nbsp;<code>null</code>&nbsp;if not). Supplying&nbsp;<code>null</code>&nbsp;for the prefix will return the default namespace.
 
@@ -530,7 +530,7 @@ Accepts a prefix and returns the namespace URI associated with it on the given n
 
 #### **Returns**: `Promise<string>`
 
-### doc.lookupPrefix*(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
+### doc.lookupPrefix *(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
 
 Returns a&nbsp;`string` containing the prefix for a given namespace URI, if present, and&nbsp;<code>null</code>&nbsp;if not. When multiple prefixes are possible, the result is implementation-dependent.
 
@@ -541,13 +541,13 @@ Returns a&nbsp;`string` containing the prefix for a given namespace URI, if pres
 
 #### **Returns**: `Promise<string>`
 
-### doc.normalize*()* <div class="specs"><i>W3C</i></div> {#normalize}
+### doc.normalize *()* <div class="specs"><i>W3C</i></div> {#normalize}
 
 Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### **Returns**: `Promise<void>`
 
-### doc.caretPositionFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#caretPositionFromPoint}
+### doc.caretPositionFromPoint *(x, y)* <div class="specs"><i>W3C</i></div> {#caretPositionFromPoint}
 
 Returns a <code>CaretPosition</code> object containing the DOM node containing the caret, and caret's character offset within that node.
 
@@ -559,7 +559,7 @@ Returns a <code>CaretPosition</code> object containing the DOM node containing t
 
 #### **Returns**: [`CaretPosition`](/docs/awaited-dom/caret-position)
 
-### doc.elementFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#elementFromPoint}
+### doc.elementFromPoint *(x, y)* <div class="specs"><i>W3C</i></div> {#elementFromPoint}
 
 Returns the topmost element at the specified coordinates.
 
@@ -571,13 +571,13 @@ Returns the topmost element at the specified coordinates.
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### doc.getSelection*()* <div class="specs"><i>W3C</i></div> {#getSelection}
+### doc.getSelection *()* <div class="specs"><i>W3C</i></div> {#getSelection}
 
 Returns a <code>Selection</code> object representing the range of text selected by the user, or the current position of the caret.
 
 #### **Returns**: [`Selection`](/docs/awaited-dom/selection)
 
-### doc.getElementById*(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
+### doc.getElementById *(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
 
 Needs content.
 
@@ -588,7 +588,7 @@ Needs content.
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### doc.querySelector*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
+### doc.querySelector *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
 Returns the first <code>Element</code> with the current element as root that matches the specified group of selectors.
 
@@ -599,7 +599,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### doc.querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
+### doc.querySelectorAll *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
 Returns a <code>NodeList</code> representing a list of elements with the current element as root that matches the specified group of selectors.
 
@@ -610,7 +610,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
-### doc.createExpression*(expression, resolver?)* <div class="specs"><i>W3C</i></div> {#createExpression}
+### doc.createExpression *(expression, resolver?)* <div class="specs"><i>W3C</i></div> {#createExpression}
 
 Creates a parsed XPath expression with resolved namespaces.
 
@@ -622,7 +622,7 @@ Creates a parsed XPath expression with resolved namespaces.
 
 #### **Returns**: [`XPathExpression`](/docs/awaited-dom/x-path-expression)
 
-### doc.evaluate*(expression, contextNode, resolver?, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
+### doc.evaluate *(expression, contextNode, resolver?, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
 
 Evaluates an XPath expression string and returns a result of the specified type if possible.
 

@@ -4,7 +4,7 @@ A FrameEnvironment represents a browsing context which allows you to interact wi
 
 ## Constructor
 
-Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/hero/basic-interfaces/tab#frame-environments) array.
+Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/hero/basic-client/tab#frame-environments) array.
 
 ## Properties
 
@@ -12,13 +12,13 @@ Frames cannot be constructed in Hero. They're made available through the [tab.fr
 
 Returns child FrameEnvironments for this frame.
 
-#### **Type**: Promise<[`FrameEnvironment`](/docs/hero/basic-interfaces/tab#frame-environments)[]>
+#### **Type**: Promise<[`FrameEnvironment`](/docs/hero/basic-client/tab#frame-environments)[]>
 
 ### frameEnvironment.cookieStorage {#cookie-storage}
 
-Returns a [CookieStorage](/docs/hero/advanced/cookie-storage) instance to get/set/delete cookies.
+Returns a [CookieStorage](/docs/hero/advanced-client/cookie-storage) instance to get/set/delete cookies.
 
-#### **Type**: [`CookieStorage`](/docs/hero/advanced/cookie-storage)
+#### **Type**: [`CookieStorage`](/docs/hero/advanced-client/cookie-storage)
 
 ### frameEnvironment.document <div class="specs"><i>W3C</i></div> {#document}
 
@@ -113,7 +113,7 @@ const response = await fetch(request);
 
 ## Methods
 
-### frameEnvironment.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
+### frameEnvironment.fetch *(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
 Perform a native "fetch" request in the current frame environment.
 
@@ -154,15 +154,15 @@ const response = await mainFrame.fetch(postUrl, {
 });
 ```
 
-### frameEnvironment.getFrameEnvironment*(frameElement)* {#get-frame-environment}
+### frameEnvironment.getFrameEnvironment *(frameElement)* {#get-frame-environment}
 
-Get the [FrameEnvironment](/docs/hero/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
+Get the [FrameEnvironment](/docs/hero/advanced-client/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
 
 #### **Arguments**:
 
 - element [`SuperElement`](/docs/awaited-dom/super-element) A frame or iframe element loaded in this frame environment (ie, a direct child element of this frame document).
 
-#### **Returns**: [`Promise<Frame>`](/docs/hero/basic-interfaces/frame-environment)
+#### **Returns**: [`Promise<Frame>`](/docs/hero/advanced-client/frame-environment)
 
 ```js
 await hero.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe');
@@ -174,7 +174,7 @@ const iframe = await hero.getFrameEnvironment(iframeElement);
 const h4 = await iframe.document.querySelector('h4').textContent; // should be something like HTML demo: <iframe>
 ```
 
-### frameEnvironment.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
+### frameEnvironment.getComputedStyle *(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
 
 Perform a native `Window.getComputedStyle` request in the current frame context - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
 
@@ -193,7 +193,7 @@ const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
 ```
 
-### frameEnvironment.getComputedVisibility*(element)* {#get-computed-visibility}
+### frameEnvironment.getComputedVisibility *(element)* {#get-computed-visibility}
 
 Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether a node (or containing element) has:
 
@@ -203,7 +203,7 @@ Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is
 - no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
 - on the visible screen (not beyond the horizontal or vertical viewport)
 
-Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/basic-interfaces/frame-environment#get-computed-visibility).
+Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/advanced-client/frame-environment#get-computed-visibility).
 
 #### **Arguments**:
 
@@ -225,7 +225,7 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/basic-inte
   - hasDimensions `boolean`. The node has width and height.
   - isUnobstructedByOtherElements `boolean`. The node is not hidden or obscured > 50% by another element.
 
-### frameEnvironment.getJsValue*(path)* {#get-js-value}
+### frameEnvironment.getJsValue *(path)* {#get-js-value}
 
 Extract any publicly accessible javascript value from the FrameEnvironment.
 
@@ -240,7 +240,7 @@ await hero.goto('https://dataliberationfoundation.org');
 const navigatorAgent = await hero.activeFrame.getJsValue(`navigator.userAgent`);
 ```
 
-### frameEnvironment.isElementVisible*(element)* {#is-element-visible}
+### frameEnvironment.isElementVisible *(element)* {#is-element-visible}
 
 Determines if an element is visible to an end user. This method checks whether an element has:
 
@@ -255,19 +255,19 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
-### frameEnvironment.querySelector*(stringOrOptions)* {#query-selector}
+### frameEnvironment.querySelector *(stringOrOptions)* {#query-selector}
 
 This is a shortcut for document.querySelector.
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
-### frameEnvironment.querySelectorAll*(stringOrOptions)* {#query-selector-all}
+### frameEnvironment.querySelectorAll *(stringOrOptions)* {#query-selector-all}
 
 This is a shortcut for document.querySelectorAll.
 
 #### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given selector. Returns an empty list if a resultset is not found.
 
-### frameEnvironment.xpathSelector*(selector, orderedResults)* {#xpath-selector}
+### frameEnvironment.xpathSelector *(selector, orderedResults)* {#xpath-selector}
 
 This is a shortcut for document.evaluate(`selector`, document, `FIRST_ORDERED_NODE_TYPE` | `ANY_UNORDERED_NODE_TYPE`)
 
@@ -278,7 +278,7 @@ This is a shortcut for document.evaluate(`selector`, document, `FIRST_ORDERED_NO
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
-### frameEnvironment.xpathSelectorAll*(selector, orderedResults)* {#xpath-selector-all}
+### frameEnvironment.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
 
 This is a shortcut for document.evaluate(`selector`, document, `ORDERED_NODE_ITERATOR_TYPE` | `UNORDERED_NODE_ITERATOR_TYPE`).
 
@@ -291,7 +291,7 @@ NOTE: this API will iterate through the results to return an array of all matchi
 
 #### **Returns**: Promise<Array<[`SuperNode`](/docs/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
 
-### frameEnvironment.waitForPaintingStable*(options)* {#wait-for-painting-stable}
+### frameEnvironment.waitForPaintingStable *(options)* {#wait-for-painting-stable}
 
 Wait for the page to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
 
@@ -305,7 +305,7 @@ NOTE: this method should NOT be called in a Frame Document that has no visible e
 
 #### **Returns**: `Promise<void>`
 
-### frameEnvironment.waitForElement*(element,options)* {#wait-for-element}
+### frameEnvironment.waitForElement *(element,options)* {#wait-for-element}
 
 Wait until a specific element is present in the dom.
 
@@ -331,7 +331,7 @@ await activeFrame.waitForElement(elem, {
 });
 ```
 
-### frameEnvironment.waitForLoad*(status, options)* {#wait-for-load}
+### frameEnvironment.waitForLoad *(status, options)* {#wait-for-load}
 
 Wait for the load status to occur on a page.
 
@@ -358,7 +358,7 @@ The following are possible statuses and their meanings:
 | `AllContentLoaded`    | The page load event has triggered. NOTE: this does not ALWAYS trigger in browser.        |
 | `PaintingStable`      | The page has loaded the main content above the fold. Works on javascript-rendered pages. |
 
-### frameEnvironment.waitForLocation*(trigger, options)* {#wait-for-location}
+### frameEnvironment.waitForLocation *(trigger, options)* {#wait-for-location}
 
 Waits for a navigational change to document.location either because of a `reload` event or changes to the URL.
 
@@ -369,7 +369,7 @@ Waits for a navigational change to document.location either because of a `reload
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for changes.
 
-#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced/resource) The resource representing this location change or reload.
+#### **Returns**: [`Promise<Resource>`](/docs/hero/advanced-client/resource) The resource representing this location change or reload.
 
 Location changes are triggered in one of two ways:
 

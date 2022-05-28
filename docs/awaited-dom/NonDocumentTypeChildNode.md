@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NonDocumentTypeChildNode
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> NonDocumentTypeChildNode
 
 <div class='overview'>The <code><strong>NonDocumentTypeChildNode</strong></code> interface contains methods that are particular to <code>Node</code> objects that can have a parent, but not suitable for <code>DocumentType</code>.</div>
 

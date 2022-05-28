@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> FontFaceSetLoadEvent
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> FontFaceSetLoadEvent
 
 <div class='overview'></div>
 

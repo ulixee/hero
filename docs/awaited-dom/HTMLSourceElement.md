@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLSourceElement
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLSourceElement
 
 <div class='overview'>The <strong><code>HTMLSourceElement</code></strong> interface provides special properties (beyond the regular <code>HTMLElement</code> object interface it also has available to it by inheritance) for manipulating <code>&lt;source&gt;</code> elements.</div>
 
@@ -489,13 +489,13 @@ Returns the <code>&lt;slot&gt;</code> the node is inserted in.
 
 ## Methods
 
-### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
+### elem.click *()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
 
 #### **Returns**: `Promise<void>`
 
-### elem.closest*(selectors)* <div class="specs"><i>W3C</i></div> {#closest}
+### elem.closest *(selectors)* <div class="specs"><i>W3C</i></div> {#closest}
 
 Returns the <code>Element</code> which is the closest ancestor of the current element (or the current element itself) which matches the selectors given in parameter.
 
@@ -507,7 +507,7 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
+### elem.getAttribute *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
 
@@ -518,13 +518,13 @@ Retrieves the value of the named attribute from the current node and returns it 
 
 #### **Returns**: `Promise<string>`
 
-### elem.getAttributeNames*()* <div class="specs"><i>W3C</i></div> {#getAttributeNames}
+### elem.getAttributeNames *()* <div class="specs"><i>W3C</i></div> {#getAttributeNames}
 
 Returns an array of attribute names from the current element.
 
 #### **Returns**: `Promise<Iterable,string>`
 
-### elem.getAttributeNode*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttributeNode}
+### elem.getAttributeNode *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttributeNode}
 
 Retrieves the node representation of the named attribute from the current node and returns it as an <code>Attr</code>.
 
@@ -535,7 +535,7 @@ Retrieves the node representation of the named attribute from the current node a
 
 #### **Returns**: `Promise<Attr>`
 
-### elem.getAttributeNodeNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getAttributeNodeNS}
+### elem.getAttributeNodeNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getAttributeNodeNS}
 
 Retrieves the node representation of the attribute with the specified name and namespace, from the current node and returns it as an <code>Attr</code>.
 
@@ -547,7 +547,7 @@ Retrieves the node representation of the attribute with the specified name and n
 
 #### **Returns**: `Promise<Attr>`
 
-### elem.getAttributeNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getAttributeNS}
+### elem.getAttributeNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getAttributeNS}
 
 Retrieves the value of the attribute with the specified name and namespace, from the current node and returns it as an <code>Object</code>.
 
@@ -559,19 +559,19 @@ Retrieves the value of the attribute with the specified name and namespace, from
 
 #### **Returns**: `Promise<string>`
 
-### elem.getBoundingClientRect*()* <div class="specs"><i>W3C</i></div> {#getBoundingClientRect}
+### elem.getBoundingClientRect *()* <div class="specs"><i>W3C</i></div> {#getBoundingClientRect}
 
 Returns the size of an element and its position relative to the viewport.
 
 #### **Returns**: `Promise<DOMRect>`
 
-### elem.getClientRects*()* <div class="specs"><i>W3C</i></div> {#getClientRects}
+### elem.getClientRects *()* <div class="specs"><i>W3C</i></div> {#getClientRects}
 
 Returns a collection of rectangles that indicate the bounding rectangles for each line of text in a client.
 
 #### **Returns**: `Promise<DOMRectList>`
 
-### elem.getElementsByClassName*(classNames)* <div class="specs"><i>W3C</i></div> {#getElementsByClassName}
+### elem.getElementsByClassName *(classNames)* <div class="specs"><i>W3C</i></div> {#getElementsByClassName}
 
 Returns a live <code>HTMLCollection</code> that contains all descendants of the current element that possess the list of classes given in the parameter.
 
@@ -582,7 +582,7 @@ Returns a live <code>HTMLCollection</code> that contains all descendants of the 
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### elem.getElementsByTagName*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
+### elem.getElementsByTagName *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
 
 Returns a live <code>HTMLCollection</code> containing all descendant elements, of a particular tag name, from the current element.
 
@@ -593,7 +593,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### elem.getElementsByTagNameNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
+### elem.getElementsByTagNameNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
 
 Returns a live <code>HTMLCollection</code> containing all descendant elements, of a particular tag name and namespace, from the current element.
 
@@ -605,7 +605,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
 
 #### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
-### elem.hasAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#hasAttribute}
+### elem.hasAttribute *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#hasAttribute}
 
 Returns a `boolean` indicating if the element has the specified attribute or not.
 
@@ -616,7 +616,7 @@ Returns a `boolean` indicating if the element has the specified attribute or not
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.hasAttributeNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#hasAttributeNS}
+### elem.hasAttributeNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#hasAttributeNS}
 
 Returns a `boolean` indicating if the element has the specified attribute, in the specified namespace, or not.
 
@@ -628,13 +628,13 @@ Returns a `boolean` indicating if the element has the specified attribute, in th
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.hasAttributes*()* <div class="specs"><i>W3C</i></div> {#hasAttributes}
+### elem.hasAttributes *()* <div class="specs"><i>W3C</i></div> {#hasAttributes}
 
 Returns a `boolean` indicating if the element has one or more HTML attributes present.
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.hasPointerCapture*(pointerId)* <div class="specs"><i>W3C</i></div> {#hasPointerCapture}
+### elem.hasPointerCapture *(pointerId)* <div class="specs"><i>W3C</i></div> {#hasPointerCapture}
 
 Indicates whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
 
@@ -645,7 +645,7 @@ Indicates whether the element on which it is invoked has pointer capture for the
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.matches*(selectors)* <div class="specs"><i>W3C</i></div> {#matches}
+### elem.matches *(selectors)* <div class="specs"><i>W3C</i></div> {#matches}
 
 Returns a `boolean` indicating whether or not the element would be selected by the specified selector string.
 
@@ -656,7 +656,7 @@ Returns a `boolean` indicating whether or not the element would be selected by t
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.requestFullscreen*(options?)* <div class="specs"><i>W3C</i></div> {#requestFullscreen}
+### elem.requestFullscreen *(options?)* <div class="specs"><i>W3C</i></div> {#requestFullscreen}
 
 Asynchronously asks the browser to make the element full-screen.
 
@@ -667,13 +667,13 @@ Asynchronously asks the browser to make the element full-screen.
 
 #### **Returns**: `Promise<void>`
 
-### elem.requestPointerLock*()* <div class="specs"><i>W3C</i></div> {#requestPointerLock}
+### elem.requestPointerLock *()* <div class="specs"><i>W3C</i></div> {#requestPointerLock}
 
 Allows to asynchronously ask for the pointer to be locked on the given element.
 
 #### **Returns**: `Promise<void>`
 
-### elem.scrollIntoView*(arg?)* <div class="specs"><i>W3C</i></div> {#scrollIntoView}
+### elem.scrollIntoView *(arg?)* <div class="specs"><i>W3C</i></div> {#scrollIntoView}
 
 Scrolls the page until the element gets into the view.
 
@@ -702,7 +702,7 @@ Scrolls the page until the element gets into the view.
 
 #### **Returns**: `Promise<void>`
 
-### elem.compareDocumentPosition*(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
+### elem.compareDocumentPosition *(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
 
 Compares the position of the current node against another node in any other document.
 
@@ -713,7 +713,7 @@ Compares the position of the current node against another node in any other docu
 
 #### **Returns**: `Promise<number>`
 
-### elem.contains*(other)* <div class="specs"><i>W3C</i></div> {#contains}
+### elem.contains *(other)* <div class="specs"><i>W3C</i></div> {#contains}
 
 Returns a `boolean` value indicating whether or not a node is a descendant of the calling node.
 
@@ -724,7 +724,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.getRootNode*(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
+### elem.getRootNode *(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
 
 Returns the context object's root which optionally includes the shadow root if it is available.&nbsp;
 
@@ -738,13 +738,13 @@ Returns the context object's root which optionally includes the shadow root if i
 
 #### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
-### elem.hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
+### elem.hasChildNodes *()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
 Returns a `boolean` indicating whether or not the element has any child nodes.
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.isDefaultNamespace*(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
+### elem.isDefaultNamespace *(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
 
 Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a value of&nbsp;<code>true</code>&nbsp;if the namespace is the default namespace on the given node or&nbsp;<code>false</code>&nbsp;if not.
 
@@ -755,7 +755,7 @@ Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a 
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.isEqualNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
+### elem.isEqualNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
 
 Returns a `boolean` which indicates whether or not two nodes are of the same type and all their defining data points match.
 
@@ -766,7 +766,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.isSameNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
+### elem.isSameNode *(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
 
 Returns a `boolean` value indicating whether or not the two nodes are the same (that is, they reference the same object).
 
@@ -777,7 +777,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 
 #### **Returns**: `Promise<boolean>`
 
-### elem.lookupNamespaceURI*(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
+### elem.lookupNamespaceURI *(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
 
 Accepts a prefix and returns the namespace URI associated with it on the given node if found (and&nbsp;<code>null</code>&nbsp;if not). Supplying&nbsp;<code>null</code>&nbsp;for the prefix will return the default namespace.
 
@@ -788,7 +788,7 @@ Accepts a prefix and returns the namespace URI associated with it on the given n
 
 #### **Returns**: `Promise<string>`
 
-### elem.lookupPrefix*(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
+### elem.lookupPrefix *(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
 
 Returns a&nbsp;`string` containing the prefix for a given namespace URI, if present, and&nbsp;<code>null</code>&nbsp;if not. When multiple prefixes are possible, the result is implementation-dependent.
 
@@ -799,25 +799,25 @@ Returns a&nbsp;`string` containing the prefix for a given namespace URI, if pres
 
 #### **Returns**: `Promise<string>`
 
-### elem.normalize*()* <div class="specs"><i>W3C</i></div> {#normalize}
+### elem.normalize *()* <div class="specs"><i>W3C</i></div> {#normalize}
 
 Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### **Returns**: `Promise<void>`
 
-### elem.blur*()* <div class="specs"><i>W3C</i></div> {#blur}
+### elem.blur *()* <div class="specs"><i>W3C</i></div> {#blur}
 
 Needs content.
 
 #### **Returns**: `Promise<void>`
 
-### elem.focus*()* <div class="specs"><i>W3C</i></div> {#focus}
+### elem.focus *()* <div class="specs"><i>W3C</i></div> {#focus}
 
 Needs content.
 
 #### **Returns**: `Promise<void>`
 
-### elem.querySelector*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
+### elem.querySelector *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
 Returns the first <code>Element</code> with the current element as root that matches the specified group of selectors.
 
@@ -828,7 +828,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
 #### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
-### elem.querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
+### elem.querySelectorAll *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
 Returns a <code>NodeList</code> representing a list of elements with the current element as root that matches the specified group of selectors.
 

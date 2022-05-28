@@ -2,7 +2,7 @@
 
 > FileChoosers represent a prompt to input one or more file.
 
-The FileChooser class is initiated by clicking on a file input. This class will be return by calling [`tab.waitForFileChooser`](/docs/hero/basic-interfaces/tab#wait-for-file-chooser).
+The FileChooser class is initiated by clicking on a file input. This class will be return by calling [`tab.waitForFileChooser`](/docs/hero/basic-client/tab#wait-for-file-chooser).
 
 ## Properties
 

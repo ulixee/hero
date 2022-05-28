@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSRuleList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSRuleList
 
 <div class='overview'>A <code>CSSRuleList</code> is an (indirect-modify only) array-like object containing an ordered collection of <code>CSSRule</code> objects.</div>
 
@@ -12,7 +12,7 @@ Returns the number of items in the collection.
 
 ## Methods
 
-### .item*(index)* <div class="specs"><i>W3C</i></div> {#item}
+### .item *(index)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the specific node at the given zero-based index into the list. Returns null if the index is out of range.
 

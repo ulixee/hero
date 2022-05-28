@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SuperText
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SuperText
 
 <div class='overview'><span class="seoSummary">The <strong><code>Text</code></strong> interface represents the textual content of <code>Element</code> or <code>Attr</code>. </span></div>
 

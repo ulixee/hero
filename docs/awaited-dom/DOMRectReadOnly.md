@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> DOMRectReadOnly
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMRectReadOnly
 
 <div class='overview'>The <strong><code>DOMRectReadOnly</code></strong> interface specifies the standard properties used by <code>DOMRect</code> to define a rectangle whose properties are immutable.</div>
 

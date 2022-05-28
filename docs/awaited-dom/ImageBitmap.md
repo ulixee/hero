@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ImageBitmap
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ImageBitmap
 
 <div class='overview'>The <code><strong>ImageBitmap</strong></code> interface represents a bitmap image which can be drawn to a <code>&lt;canvas&gt;</code> without undue latency. It can be created from a variety of source objects using the <code>createImageBitmap()</code> factory method. <code>ImageBitmap</code> provides an asynchronous and resource efficient pathway to prepare textures for rendering in WebGL.</div>
 
@@ -18,7 +18,7 @@ Is an <code>unsigned</code> <code>long</code> representing the width, in CSS pix
 
 ## Methods
 
-### .close*()* <div class="specs"><i>W3C</i></div> {#close}
+### .close *()* <div class="specs"><i>W3C</i></div> {#close}
 
 
  <p>Disposes of all graphical resources associated with an <code>ImageBitmap</code>.</p>

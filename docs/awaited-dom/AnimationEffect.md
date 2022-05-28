@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> AnimationEffect
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AnimationEffect
 
 <div class='overview'></div>
 

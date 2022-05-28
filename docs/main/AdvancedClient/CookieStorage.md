@@ -4,7 +4,7 @@ The CookieStorage class allows you to get set and remove cookies from the main f
 
 ## Constructor
 
-CookieStorage cannot be instantiated. You must retrieve a cookieStorage instance from a [Tab](/docs/hero/basic-interfaces/tab):
+CookieStorage cannot be instantiated. You must retrieve a cookieStorage instance from a [Tab](/docs/hero/basic-client/tab):
 
 ```js
 const cookieStorage = hero.activeTab.cookieStorage;
@@ -20,7 +20,7 @@ Returns the number of cookies for the current tab origin;
 
 ## Methods
 
-### cookieStorage.getItems*()*
+### cookieStorage.getItems *()*
 
 Gets all cookies for the current tab origin as `Cookie` objects.
 
@@ -37,7 +37,7 @@ Gets all cookies for the current tab origin as `Cookie` objects.
 
 #### **Returns**: [`Promise<Cookie[]>`](#cookie)
 
-### cookieStorage.getItem*(keyName)*
+### cookieStorage.getItem *(keyName)*
 
 Gets the cookie with the given `name` equal to `keyName`.
 
@@ -47,7 +47,7 @@ Gets the cookie with the given `name` equal to `keyName`.
 
 #### **Returns**: [`Promise<Cookie[]>`](#cookie)
 
-### cookieStorage.key*(index)*
+### cookieStorage.key *(index)*
 
 An integer representing the number of the key you want to get the name of. This is a zero-based index. NOTE: key is equivalent to the `name` of a cookie.
 
@@ -67,7 +67,7 @@ function forEachKey(callback) {
 }
 ```
 
-### cookieStorage.removeItem*(keyName)*
+### cookieStorage.removeItem *(keyName)*
 
 Removes a cookie with the given `keyName`.
 
@@ -77,7 +77,7 @@ Removes a cookie with the given `keyName`.
 
 #### **Returns**: `Promise<boolean>`
 
-### cookieStorage.setItem*(keyName, value, options)*
+### cookieStorage.setItem *(keyName, value, options)*
 
 Sets a cookie for the currently loaded origin.
 

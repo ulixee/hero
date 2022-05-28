@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SVGStringList
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SVGStringList
 
 <div class='overview'>The <code>SVGStringList</code> defines a list of `string` objects.</div>
 

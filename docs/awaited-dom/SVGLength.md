@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SVGLength
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SVGLength
 
 <div class='overview'>The <code>SVGLength</code> interface correspond to the &lt;length&gt; basic data type.</div>
 

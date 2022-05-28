@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> MediaError
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> MediaError
 
 <div class='overview'><span class="seoSummary">The <code><strong>MediaError</strong></code> interface represents an error which occurred while handling media in an HTML media element based on <code>HTMLMediaElement</code>, such as <code>&lt;audio&gt;</code> or <code>&lt;video&gt;</code>.</span></div>
 

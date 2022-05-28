@@ -16,7 +16,7 @@ Browsers will be saved to a shared location on each OS. Each browser version wil
 
 ### Debugging Logs
 
-By default, Hero logs everything to a [Session](/docs/hero/advanced/session) database that is created per Hero instance. The SessionLogs table contains all debug logs.
+By default, Hero logs everything to a [Session](/docs/hero/advanced-concepts/sessions) database that is created per Hero instance. The SessionLogs table contains all debug logs.
 
 To output logs to the console during operation, you can set the environmental variable `DEBUG=true`.
 

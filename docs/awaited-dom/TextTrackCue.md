@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> TextTrackCue
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> TextTrackCue
 
 <div class='overview'><span class="seoSummary"><code><strong>TextTrackCue</strong></code> is an abstract class which is used as the basis for the various derived cue types, such as <code>VTTCue</code>; you will instead work with those derived types.</span> These cues represent a string of text that is presented for some duration of time during the performance of a <code>TextTrack</code>. The cue includes the start time (the time at which the text will be displayed) and the end time (the time at which it will be removed from the display), as well as other information.</div>
 

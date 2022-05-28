@@ -69,7 +69,7 @@ Fs.writeFileSync(awaitedDOMIndexPath2, awaitedDOMBase);
 
 function saveDoc(doc: IDoc, filePath: string) {
   const markup: any[] = [
-    { h1: `[AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ${doc.name}` },
+    { h1: `[AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ${doc.name}` },
   ];
   const variableName = doc.variableName || '';
 
@@ -140,7 +140,7 @@ ${example}
         })
         .join(', ');
       markup.push({
-        h3: `${variableName}.${m.name}*(${args})* <div class="specs"><i>W3C</i></div> {#${m.name}}`,
+        h3: `${variableName}.${m.name} *(${args})* <div class="specs"><i>W3C</i></div> {#${m.name}}`,
       });
       markup.push({ html: cleanupHTML(m.overview || 'Needs content.') });
       if (m.parameters.length) {

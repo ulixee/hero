@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Blob
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Blob
 
 <div class='overview'>The <strong><code>Blob</code></strong> object represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a <code>ReadableStream</code> so its methods can be used for processing the data.</div>
 
@@ -20,13 +20,13 @@ A string indicating the MIME&nbsp;type of the data contained in the <code>Blob</
 
 ## Methods
 
-### .arrayBuffer*()* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
+### .arrayBuffer *()* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
 
 Returns a promise that resolves with an <code>ArrayBuffer</code> containing the entire contents of the <code>Blob</code> as binary data.
 
 #### **Returns**: `Promise<ArrayBuffer>`
 
-### .slice*(start?, end?, contentType?)* <div class="specs"><i>W3C</i></div> {#slice}
+### .slice *(start?, end?, contentType?)* <div class="specs"><i>W3C</i></div> {#slice}
 
 Returns a new <code>Blob</code> object containing the data in the specified range of bytes of the blob on which it's called.
 
@@ -39,7 +39,7 @@ Returns a new <code>Blob</code> object containing the data in the specified rang
 
 #### **Returns**: `Promise<Blob>`
 
-### .text*()* <div class="specs"><i>W3C</i></div> {#text}
+### .text *()* <div class="specs"><i>W3C</i></div> {#text}
 
 Returns a promise that resolves with a `string` containing the entire contents of the <code>Blob</code> interpreted as UTF-8 text.
 

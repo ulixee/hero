@@ -1,6 +1,6 @@
 # Ulixee Hero
 
-Hero is a web browser built for scraping. 
+A few cool highlights about Hero:
 
 - [x] **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - [x] **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
@@ -42,9 +42,9 @@ Browse the [full API docs](https://docs.ulixee.org/hero).
 
 ## Contributing
 
-See [how-to-contribute.md](docs/main/Contribute/how-to-contribute.md) for ways to get started.
+See [How to Contribute](//ulixee.org/how-to-contribute) for ways to get started.
 
-This project has a [code of conduct](docs/main/Contribute/code-of-conduct.md). By interacting with this repository, organization, or community you agree to abide by its terms.
+This project has a [Code of Conduct](//ulixee.org/code-of-conduct). By interacting with this repository, organization, or community you agree to abide by its terms.
 
 We'd love your help in making Hero a better tool. Please don't hesitate to send a pull request.
 

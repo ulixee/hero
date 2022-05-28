@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SuperNode
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SuperNode
 
 <div class='overview'><span class="seoSummary"><strong><code>Node</code></strong> is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way.</span></div>
 

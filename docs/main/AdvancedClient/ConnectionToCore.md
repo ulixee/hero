@@ -21,11 +21,11 @@ const { Hero: FullHero } = require('@ulixee');
 There are 2 built-in connections in Hero:
 
 - `Default` - instantiates and connects to a locally install Hero `Core` (used by `@ulixee/hero-fullstack`)
-- `RemoteConnectionToCore` - takes a host to dial over a Websocket. See more [here](/docs/hero/advanced/remote)
+- `RemoteConnectionToCore` - takes a host to dial over a Websocket. See more [here](/docs/hero/advanced-concepts/client-vs-core)
 
 ### Configuration {#configuration}
 
-When you provide a connectionToCore to a [Hero](/docs/hero/basic-interfaces/hero) instance, Hero will accept either an `options` object or a `ConnectionToCore` instance.
+When you provide a connectionToCore to a [Hero](/docs/hero/basic-client/hero) instance, Hero will accept either an `options` object or a `ConnectionToCore` instance.
 
 ### Options {#options}
 
@@ -40,7 +40,7 @@ The provided settings configure the connection to `Core`. Note: some configurati
 
 ## Methods
 
-### connection.connect*()* {#connect}
+### connection.connect *()* {#connect}
 
 Initializes the connection to the specified core. You can use this function if you would like to pre-connect to your remote host and ensure connections are properly established before continuing.
 
@@ -48,7 +48,7 @@ NOTE: this will be automatically called when you pass in a connection to Hero.
 
 #### **Returns**: `Promise`
 
-### connection.disconnect*()* {#disconnect}
+### connection.disconnect *()* {#disconnect}
 
 Closes the connection and stops all pending requests.
 

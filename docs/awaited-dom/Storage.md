@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Storage
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Storage
 
 <div class='overview'>The <strong><code>Storage</code></strong> interface of the Web Storage API provides access to a particular domain's session or local storage. It allows, for example, the addition, modification, or deletion of stored data items.</div>
 
@@ -14,13 +14,13 @@ Returns an integer representing the number of data items stored in the <code>Sto
 
 ## Methods
 
-### .clear*()* <div class="specs"><i>W3C</i></div> {#clear}
+### .clear *()* <div class="specs"><i>W3C</i></div> {#clear}
 
 When invoked, will empty all keys out of the storage.
 
 #### **Returns**: `Promise<undefined>`
 
-### .getItem*(key)* <div class="specs"><i>W3C</i></div> {#getItem}
+### .getItem *(key)* <div class="specs"><i>W3C</i></div> {#getItem}
 
 When passed a key name, will return that key's value.
 
@@ -31,7 +31,7 @@ When passed a key name, will return that key's value.
 
 #### **Returns**: `Promise<string>`
 
-### .key*(index)* <div class="specs"><i>W3C</i></div> {#key}
+### .key *(index)* <div class="specs"><i>W3C</i></div> {#key}
 
 When passed a number <code>n</code>, this method will return the name of the nth key in the storage.
 
@@ -42,7 +42,7 @@ When passed a number <code>n</code>, this method will return the name of the nth
 
 #### **Returns**: `Promise<string>`
 
-### .removeItem*(key)* <div class="specs"><i>W3C</i></div> {#removeItem}
+### .removeItem *(key)* <div class="specs"><i>W3C</i></div> {#removeItem}
 
 When passed a key name, will remove that key from the storage.
 
@@ -53,7 +53,7 @@ When passed a key name, will remove that key from the storage.
 
 #### **Returns**: `Promise<undefined>`
 
-### .setItem*(key, value)* <div class="specs"><i>W3C</i></div> {#setItem}
+### .setItem *(key, value)* <div class="specs"><i>W3C</i></div> {#setItem}
 
 When passed a key name and value, will add that key to the storage, or update that key's value if it already exists.
 

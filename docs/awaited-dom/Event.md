@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Event
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Event
 
 <div class='overview'><span class="seoSummary">The <code><strong>Event</strong></code> interface represents an event which takes place in the DOM.</span></div>
 

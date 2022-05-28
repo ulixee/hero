@@ -12,7 +12,7 @@ Multiple Interactions can be passed through as multiple arguments:
 hero.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
-The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](/docs/hero/plugins/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
+The timing of Interactions are controlled by the [Unblocked Agent](https://github.com/unblocked-web/agents) and its [Plugins](https://github.com/unblocked-web/specifications), which powers the core browser engine underneath Hero. This allows for realistic-looking, human-like movements on the remote webpage.
 
 Interaction Commands fall into three broad categories:
 
@@ -68,7 +68,7 @@ During a normal interaction, the [`SuperElement`](/docs/awaited-dom/super-elemen
 
 - `exactElement`. This verification strategy checks that the original node is clicked. This works on most sites, but can fail on dynamic sites, or where data is updating the site (eg, a select list being updated by your type interactions).
 - `elementAtPath` Default Option. This verification approach will first check `exactElement`. If the original element is no longer attached or visible, it will re-check the full path to the [`SuperElement`](/docs/awaited-dom/super-element) and click on any refreshed node.
-- `none`. Do not verify clicks. This approach will scroll and click on the last known position of the element - eg, you ran [`hero.getComputedVisibility*(element)*`](/docs/hero/basic-interfaces/hero#get-computed-visibility) or `element.getBoundingClientRect()`. If the position hasn't been previously looked up, it will be looked up once during the interact command. The position of the element will be used to scroll, move the mouse and click.
+- `none`. Do not verify clicks. This approach will scroll and click on the last known position of the element - eg, you ran [`hero.getComputedVisibility *(element)*`](/docs/hero/basic-client/hero#get-computed-visibility) or `element.getBoundingClientRect()`. If the position hasn't been previously looked up, it will be looked up once during the interact command. The position of the element will be used to scroll, move the mouse and click.
 
 Verification strategies can be provided to click/doubleclick commands with a [`SuperElement`](/docs/awaited-dom/super-element) as the `MousePosition`. If you don't provide a verification strategy, `elementAtPath` will be used by default.
 

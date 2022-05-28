@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NamedNodeMap
+# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> NamedNodeMap
 
 <div class='overview'>The <code><strong>NamedNodeMap</strong></code> interface represents a collection of <code>Attr</code> objects. Objects inside a <code>NamedNodeMap</code> are not in any particular order, unlike <code>NodeList</code>, although they may be accessed by an index as in an array.</div>
 
@@ -14,7 +14,7 @@ Returns the amount of objects in the map.
 
 ## Methods
 
-### .getNamedItem*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getNamedItem}
+### .getNamedItem *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getNamedItem}
 
 Returns a <code>Attr</code>, corresponding to the given name.
 
@@ -25,7 +25,7 @@ Returns a <code>Attr</code>, corresponding to the given name.
 
 #### **Returns**: `Promise<Attr>`
 
-### .getNamedItemNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getNamedItemNS}
+### .getNamedItemNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getNamedItemNS}
 
 Returns a <code>Attr</code> identified by a namespace and related local name.
 
@@ -37,7 +37,7 @@ Returns a <code>Attr</code> identified by a namespace and related local name.
 
 #### **Returns**: `Promise<Attr>`
 
-### .item*(index)* <div class="specs"><i>W3C</i></div> {#item}
+### .item *(index)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the <code>Attr</code> at the given index, or <code>null</code> if the index is higher or equal to the number of nodes.
 

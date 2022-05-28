@@ -2,7 +2,7 @@
 
 > Websocket Resources are core websocket connections between a client and server.
 
-Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/basic-interfaces/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/basic-interfaces/tab#resource-event) or from the initial window document load. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
+Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/basic-client/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/basic-client/tab#resource-event) or from the initial window document load. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
 
 ## Properties
 
@@ -10,13 +10,13 @@ Instances of this class are associated with a resource returned from [`tab.waitF
 
 The Http Upgrade request used to create this Websocket.
 
-#### **Returns** [`ResourceRequest`](/docs/hero/advanced/resource-request)
+#### **Returns** [`ResourceRequest`](/docs/hero/advanced-client/resource-request)
 
 ### response
 
 A simulation of an HTTP response pieced together from the socket headers returned during a normal HTTP upgrade.
 
-#### **Returns** [`ResourceResponse`](/docs/hero/advanced/resource-response)
+#### **Returns** [`ResourceResponse`](/docs/hero/advanced-client/resource-response)
 
 ### url
 
