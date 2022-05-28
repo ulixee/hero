@@ -4,8 +4,9 @@ import { inspect } from 'util';
 import * as Path from 'path';
 import * as readline from 'readline';
 import Core from '@ulixee/hero-core';
-import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
 import MirrorContext from '@ulixee/hero-timetravel/lib/MirrorContext';
+import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
+import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 
 inspect.defaultOptions.depth = null;
 
@@ -18,13 +19,16 @@ inspect.defaultOptions.depth = null;
   if (!Path.isAbsolute(scriptEntrypoint)) {
     scriptEntrypoint = Path.resolve(process.cwd(), scriptEntrypoint);
   }
-  const connectionToCoreApi = new DirectConnectionToCoreApi();
+  const bridge = ConnectionToHeroApiClient.createBridge();
+  const connectionToCoreApi = new ConnectionToHeroApiCore(bridge.transportToCore);
 
-  const { session } = await connectionToCoreApi.run({
-    api: 'Session.find',
-    args: {
-      scriptEntrypoint,
-    },
+  const { session } = await connectionToCoreApi.sendRequest({
+    command: 'Session.find',
+    args: [
+      {
+        scriptEntrypoint,
+      },
+    ],
   });
 
   const context = await MirrorContext.createFromSessionDb(session.id, true);

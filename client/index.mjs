@@ -1,8 +1,7 @@
 import cjsImport from './index.js';
 
 const {
-  ConnectionToRemoteCoreServer,
-  ConnectionToCore,
+  ConnectionToHeroCore,
   InteractionCommand,
   MouseButton,
   IResourceType,
@@ -35,8 +34,7 @@ const {
 } = cjsImport;
 
 export {
-  ConnectionToRemoteCoreServer,
-  ConnectionToCore,
+  ConnectionToHeroCore,
   InteractionCommand,
   MouseButton,
   IResourceType,

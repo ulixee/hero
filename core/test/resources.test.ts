@@ -1,10 +1,10 @@
 import { Helpers } from '@ulixee/hero-testing';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Core, { Session } from '../index';
 import { stringToRegex } from '../lib/Tab';
 
-let connection: ConnectionToClient;
+let connection: ConnectionToHeroClient;
 beforeAll(() => {
   connection = Core.addConnection();
   Helpers.onClose(() => connection.disconnect(), true);

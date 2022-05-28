@@ -2,13 +2,13 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import SourceLoader from '@ulixee/commons/lib/SourceLoader';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Queue from '@ulixee/commons/lib/Queue';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { scriptInstance } from './internal';
-import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 
 export default class CoreCommandQueue {
   public static maxCommandRetries = 3;
@@ -48,12 +48,12 @@ export default class CoreCommandQueue {
 
   private readonly internalState: {
     queue: Queue;
-    commandsToRecord: ICoreRequestPayload['recordCommands'];
+    commandsToRecord: ICoreCommandRequestPayload['recordCommands'];
     interceptFn?: (meta: ISessionMeta, command: string, ...args: any[]) => any;
     interceptQueue?: Queue;
     lastCommand?: Pick<
-      ICoreRequestPayload,
-      'command' | 'commandId' | 'args' | 'callsite' | 'meta' | 'startDate'
+      ICoreCommandRequestPayload,
+      'command' | 'commandId' | 'args' | 'callsite' | 'meta' | 'startTime'
     >;
     retryingCommand?: CoreCommandQueue['internalState']['lastCommand'];
     commandRetryHandlerFns: ((
@@ -68,7 +68,7 @@ export default class CoreCommandQueue {
   private readonly commandCounter?: ICommandCounter;
   private readonly sessionMarker: string = '';
   private readonly meta: ISessionMeta;
-  private readonly connection: ConnectionToCore;
+  private readonly connection: ConnectionToHeroCore;
   private flushOnTimeout: NodeJS.Timeout;
   private flushes: Promise<any>[] = [];
 
@@ -79,7 +79,7 @@ export default class CoreCommandQueue {
   constructor(
     meta: (ISessionMeta & { sessionName: string }) | null,
     mode: ISessionCreateOptions['mode'],
-    connection: ConnectionToCore,
+    connection: ConnectionToHeroCore,
     commandCounter: ICommandCounter,
     internalState?: CoreCommandQueue['internalState'],
   ) {
@@ -136,7 +136,7 @@ export default class CoreCommandQueue {
   public record(command: { command: string; args: any[]; commandId?: number }): void {
     this.internalState.commandsToRecord.push({
       ...command,
-      startDate: new Date(),
+      startTime: Date.now(),
     });
     if (this.internalState.commandsToRecord.length > 1000) {
       this.flush().catch(() => null);
@@ -156,7 +156,7 @@ export default class CoreCommandQueue {
       meta: this.meta,
       command: 'Session.flush',
       commandId: this.nextCommandId,
-      startDate: new Date(),
+      startTime: Date.now(),
       args: [],
       recordCommands,
     });
@@ -175,7 +175,7 @@ export default class CoreCommandQueue {
       command,
       args,
       commandId,
-      startDate: new Date(),
+      startTime: Date.now(),
       callsite: scriptInstance.getScriptCallsite(),
       ...(this.internalState.commandMetadata ?? {}),
     });
@@ -185,7 +185,7 @@ export default class CoreCommandQueue {
     clearTimeout(this.flushOnTimeout);
     this.flushOnTimeout = null;
 
-    if (this.connection.isDisconnecting) {
+    if (this.connection.disconnectPromise) {
       return Promise.resolve(null);
     }
     for (const arg of args) {
@@ -208,7 +208,7 @@ export default class CoreCommandQueue {
     const commandPayload = {
       command,
       args,
-      startDate: new Date(),
+      startTime: Date.now(),
       commandId,
       callsite,
       ...(this.internalState.commandMetadata ?? {}),
@@ -232,7 +232,7 @@ export default class CoreCommandQueue {
         });
       })
       .catch(error => {
-        if (error instanceof DisconnectedFromCoreError) throw error;
+        if (error instanceof DisconnectedError) throw error;
 
         this.internalState.retryingCommand = commandPayload;
         return this.tryRetryCommand<T>(error);
@@ -278,20 +278,16 @@ export default class CoreCommandQueue {
   }
 
   private async sendRequest<T>(
-    payload: Omit<ICoreRequestPayload, 'meta' | 'messageId' | 'sendDate'>,
+    payload: Omit<ICoreCommandRequestPayload, 'meta' | 'messageId' | 'sendTime'>,
   ): Promise<T> {
-    if (this.connection.isDisconnecting) {
+    if (this.connection.disconnectPromise) {
       return Promise.resolve(null);
     }
 
-    const response = await this.connection.sendRequest({
+    return await this.connection.sendRequest({
       meta: this.meta,
       ...payload,
     });
-
-    if (response) {
-      return response.data;
-    }
   }
 
   private async tryRetryCommand<T>(error: Error): Promise<T> {

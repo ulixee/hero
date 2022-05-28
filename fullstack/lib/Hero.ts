@@ -1,17 +1,24 @@
-import DefaultHero, { IConnectionToCoreOptions } from '@ulixee/hero';
+import DefaultHero, { ConnectionToHeroCore, IConnectionToCoreOptions } from '@ulixee/hero';
+import TransportBridge from '@ulixee/net/lib/TransportBridge';
+import { Core } from '../index';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import ConnectionToCore from '@ulixee/hero/connections/ConnectionToCore';
-import IHeroCreateOptions from '@ulixee/hero/interfaces/IHeroCreateOptions';
-import ConnectionToLocalCore from './ConnectionToLocalCore';
+
+export const Settings = {
+  shouldSerializeDirectConnection: false,
+};
 
 export default class Hero extends DefaultHero {
-  constructor(options: IHeroCreateOptions = {}) {
-    super(options);
-  }
-
-  public static createConnectionToCore(options: IConnectionToCoreOptions): ConnectionToCore {
-    const connection = new ConnectionToLocalCore({ ...options });
+  static override createConnectionToCore(options: IConnectionToCoreOptions): ConnectionToHeroCore {
+    const connection = createDirectConnectionToCore(options);
     ShutdownHandler.register(() => connection.disconnect());
     return connection;
   }
+}
+
+export function createDirectConnectionToCore(
+  options: IConnectionToCoreOptions = {},
+): ConnectionToHeroCore {
+  const bridge = new TransportBridge(Settings.shouldSerializeDirectConnection, 'FULLSTACK');
+  Core.addConnection(bridge.transportToClient);
+  return new ConnectionToHeroCore(bridge.transportToCore, { ...options });
 }

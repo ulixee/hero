@@ -1,13 +1,13 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Core, { Session } from '../index';
 import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 
 let koaServer: ITestKoaServer;
-let connectionToClient: ConnectionToClient;
+let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
-  connectionToClient = Core.addConnection() as ConnectionToClient;
+  connectionToClient = Core.addConnection() as ConnectionToHeroClient;
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });

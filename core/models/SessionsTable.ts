@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { Session } from '../index';
 
 export default class SessionsTable extends SqliteTable<ISessionsRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'Sessions', [
       ['id', 'TEXT'],
       ['name', 'TEXT'],

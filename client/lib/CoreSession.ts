@@ -10,7 +10,7 @@ import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
@@ -44,7 +44,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   protected readonly meta: ISessionMeta;
 
-  private readonly connectionToCore: ConnectionToCore;
+  private readonly connectionToCore: ConnectionToHeroCore;
   private commandId = 0;
   private cliPrompt: ReadLine;
   private isClosing = false;
@@ -52,7 +52,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
-    connectionToCore: ConnectionToCore,
+    connectionToCore: ConnectionToHeroCore,
     hero: Hero,
     mode: ISessionCreateOptions['mode'],
   ) {

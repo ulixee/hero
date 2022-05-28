@@ -2,35 +2,34 @@ import '@ulixee/commons/lib/SourceMapSupport';
 import type {
   ISuperDocument,
   ISuperElement,
+  ISuperHTMLCollection,
+  ISuperHTMLElement,
   ISuperNode,
   ISuperNodeList,
-  ISuperHTMLCollection,
-  ISuperText,
   ISuperStyleSheet,
-  ISuperHTMLElement,
+  ISuperText,
 } from 'awaited-dom/base/interfaces/super';
 import {
   BlockedResourceType,
-  ConnectionToCore,
-  ConnectionToRemoteCoreServer,
+  ConnectionToHeroCore,
   FrameEnvironment,
+  IConnectionToCoreOptions,
+  IHeroCreateOptions,
   InteractionCommand,
+  IResourceType,
   KeyboardKey,
+  LoadStatus,
   LocationStatus,
   LocationTrigger,
   MouseButton,
   Node,
-  IResourceType,
   ResourceType,
   Tab,
-  LoadStatus,
   XPathResult,
-  IHeroCreateOptions,
-  IConnectionToCoreOptions,
 } from '@ulixee/hero';
 import Core from '@ulixee/hero-core';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import Hero from './lib/Hero';
+import Hero, { createDirectConnectionToCore } from './lib/Hero';
 
 ShutdownHandler.exitOnSignal = false;
 
@@ -40,9 +39,9 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 export {
+  createDirectConnectionToCore,
   Core,
-  ConnectionToRemoteCoreServer,
-  ConnectionToCore,
+  ConnectionToHeroCore,
   InteractionCommand,
   MouseButton,
   IResourceType,

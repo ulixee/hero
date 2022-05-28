@@ -1,20 +1,22 @@
 import { Helpers } from '@ulixee/hero-testing';
-import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import Core, { Session } from '../index';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
+import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 
 let koaServer: ITestKoaServer;
-let connection: ConnectionToClient;
+let connection: ConnectionToHeroClient;
 const onEventFn = jest.fn();
 
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
-  connection = Core.addConnection();
+  const transport = new EmittingTransportToClient();
+  connection = Core.addConnection(transport);
   Helpers.onClose(() => connection.disconnect(), true);
-  connection.on('message', payload => {
-    if ((payload as ICoreEventPayload).listenerId) {
+  transport.on('outbound', payload => {
+    if ((payload as ICoreListenerPayload).listenerId) {
       onEventFn(payload);
     }
   });

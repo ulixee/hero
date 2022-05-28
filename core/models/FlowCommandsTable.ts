@@ -2,7 +2,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class FlowCommandsTable extends SqliteTable<IFlowCommandsRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'FlowCommands', [
       ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
       ['parentId', 'INTEGER'],

@@ -2,7 +2,7 @@ import Hero from '@ulixee/hero-fullstack';
 import { ClientPlugin } from '@ulixee/hero-plugin-utils';
 
 export default class ClientHelloPlugin extends ClientPlugin {
-  static readonly id = 'client-hello-plugin';
+  static override readonly id = 'client-hello-plugin';
 
   async onHero(hero, sendToCore) {
     console.log('Hello Hero %s', await hero.sessionId);

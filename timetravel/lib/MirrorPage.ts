@@ -21,6 +21,7 @@ import Queue from '@ulixee/commons/lib/Queue';
 import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
 import Page from '@unblocked-web/agent/lib/Page';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 
 const { log } = Log(module);
 
@@ -48,6 +49,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   private isLoadedDocumentDirty = false;
   private subscribeToTab: Tab;
   private loadQueue = new Queue(null, 1);
+  private logger: IBoundLog;
 
   private get useIsolatedContext(): boolean {
     return this.page.installJsPathIntoIsolatedContext;
@@ -335,7 +337,10 @@ export default class MirrorPage extends TypedEventEmitter<{
           return frame;
         }
       } catch (error) {
-        this.logger.warn('Error matching frame nodeId to environment', { error });
+        log.warn('Error matching frame nodeId to environment', {
+          error,
+          sessionId: this.sessionId,
+        });
         // just keep looking?
       }
     }

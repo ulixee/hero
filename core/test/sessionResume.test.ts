@@ -3,14 +3,14 @@ import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import Core, { Tab } from '../index';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Session from '../lib/Session';
 import Interactor from '@unblocked-web/agent/lib/Interactor';
 import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;
-let connectionToClient: ConnectionToClient;
+let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
   // remove the human emulator
   Core.defaultUnblockedPlugins = [DefaultBrowserEmulator];
@@ -216,8 +216,8 @@ describe('sessionResume tests when resume location is sessionStart', () => {
 function simulateScriptSendingCommandMeta(session: Session, id: number): void {
   session.commands.nextCommandMeta = {
     commandId: id,
-    startDate: new Date(),
-    sendDate: new Date(),
+    startTime: Date.now(),
+    sendTime: Date.now(),
   };
 }
 

@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
 
 export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'MouseEvents', [
       ['tabId', 'INTEGER'],
       ['frameId', 'INTEGER'],

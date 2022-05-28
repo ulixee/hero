@@ -1,5 +1,5 @@
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import IConnectionToCoreOptions from './IConnectionToCoreOptions';
 
 export default interface IHeroCreateOptions
@@ -11,5 +11,5 @@ export default interface IHeroCreateOptions
   > {
   name?: string;
   sessionId?: string | Promise<string>;
-  connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
+  connectionToCore?: IConnectionToCoreOptions | ConnectionToHeroCore;
 }

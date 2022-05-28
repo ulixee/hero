@@ -4,7 +4,7 @@ import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import Core from '../index';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Session from '../lib/Session';
 import { URL } from 'url';
 import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
@@ -13,7 +13,7 @@ import MitmRequestAgent from '@unblocked-web/agent-mitm/lib/MitmRequestAgent';
 import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
 
 let koaServer: ITestKoaServer;
-let connection: ConnectionToClient;
+let connection: ConnectionToHeroClient;
 beforeAll(async () => {
   connection = Core.addConnection();
   await connection.connect();

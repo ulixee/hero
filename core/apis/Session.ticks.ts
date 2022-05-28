@@ -13,7 +13,6 @@ import { IMouseEventRecord } from '../models/MouseEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
-import ICoreApi from '../interfaces/ICoreApi';
 import sessionTabsApi, { ISessionTab } from './Session.tabs';
 import { ISessionRecord } from '../models/SessionTable';
 import CommandFormatter from '../lib/CommandFormatter';
@@ -270,12 +269,7 @@ function addTick(
   return newTick;
 }
 
-export interface ISessionTicksApi extends ICoreApi {
-  args: ISessionTicksArgs;
-  result: ISessionTicksResult;
-}
-
-export interface ISessionTicksArgs {
+interface ISessionTicksArgs {
   sessionId: string;
   timelineRange?: [startTime: number, endTime?: number];
   includeInteractionEvents?: boolean;
@@ -283,7 +277,7 @@ export interface ISessionTicksArgs {
   includePaintEvents?: boolean;
 }
 
-export interface ISessionTicksResult {
+interface ISessionTicksResult {
   tabDetails: ITabDetails[];
 }
 

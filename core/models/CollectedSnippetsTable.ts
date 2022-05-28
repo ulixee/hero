@@ -4,7 +4,7 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 
 export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippet> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'CollectedSnippets', [
       ['name', 'TEXT'],
       ['value', 'TEXT'],

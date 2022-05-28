@@ -4,7 +4,7 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class AwaitedEventsTable extends SqliteTable<IEventRecord> {
   private idCounter = 0;
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'AwaitedEvents',

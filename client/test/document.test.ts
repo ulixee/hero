@@ -5,55 +5,42 @@ import { getState as getElementState } from 'awaited-dom/base/official-klasses/E
 import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
 import { getNodePointerFnName } from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
 import { Helpers } from '@ulixee/hero-testing';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import Hero from '../index';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import MockConnectionToCore from './_MockConnectionToCore';
 
 afterAll(Helpers.afterAll);
 
 describe('document tests', () => {
   it('runs querySelector', async () => {
-    const outgoing = jest.fn(
-      async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-        const { command, args } = payload;
-        await new Promise(resolve => setTimeout(resolve, 5));
-        if (command === 'Core.createSession') {
+    const connectionToCore = new MockConnectionToCore(async payload => {
+      const { command, args, messageId: responseId } = payload;
+      await new Promise(resolve => setTimeout(resolve, 5));
+      if (command === 'Core.createSession') {
+        return {
+          responseId,
+          data: { tabId: 'tab-id', sessionId: 'session-id' },
+        };
+      }
+      if (command === 'FrameEnvironment.execJsPath') {
+        const [jsPath] = args as any;
+        const lastPath = jsPath[jsPath.length - 1];
+        if (lastPath && lastPath[0] === getNodePointerFnName) {
           return {
-            data: { tabId: 'tab-id', sessionId: 'session-id' },
+            responseId,
+            data: {
+              value: null,
+              nodePointer: { id: 1 },
+            } as IExecJsPathResult,
           };
         }
-       if (command === 'FrameEnvironment.execJsPath') {
-          const [jsPath] = args;
-          const lastPath = jsPath[jsPath.length - 1];
-          if (lastPath && lastPath[0] === getNodePointerFnName) {
-            return {
-              data: {
-                value: null,
-                nodePointer: { id: 1 },
-              } as IExecJsPathResult,
-            };
-          }
-        }
-      },
-    );
-
-    class Piper extends ConnectionToCore {
-      async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
-        const data = await outgoing(payload);
-
-        this.onMessage({
-          responseId: payload.messageId,
-          data: data?.data,
-          ...(data ?? {}),
-        });
       }
+      return {
+        responseId,
+        data: {},
+      };
+    });
 
-      protected createConnection = () => Promise.resolve(null);
-      protected destroyConnection = () => Promise.resolve(null);
-    }
-
-    const hero = new Hero({ connectionToCore: new Piper() });
+    const hero = new Hero({ connectionToCore: connectionToCore });
     Helpers.needsClosing.push(hero);
 
     const element = hero.document.querySelector('h1');
@@ -66,7 +53,7 @@ describe('document tests', () => {
 
     await hero.close();
 
-    const outgoingCommands = outgoing.mock.calls;
+    const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;
     expect(outgoingCommands.map(x => x[0].command)).toMatchObject([
       'Core.connect',
       'Core.createSession',

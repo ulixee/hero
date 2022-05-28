@@ -1,6 +1,5 @@
 import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import SessionDb from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionResourceApi(args: ISessionResourceArgs): ISessionResourceResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
@@ -26,17 +25,12 @@ export default function sessionResourceApi(args: ISessionResourceArgs): ISession
   };
 }
 
-export interface ISessionResourceApi extends ICoreApi {
-  args: ISessionResourceArgs;
-  result: ISessionResourceResult;
-}
-
-export interface ISessionResourceArgs {
+interface ISessionResourceArgs {
   sessionId: string;
   resourceId: number;
 }
 
-export interface ISessionResourceResult {
+interface ISessionResourceResult {
   resource: ISessionResourceDetails;
 }
 

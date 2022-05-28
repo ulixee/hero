@@ -1,34 +1,38 @@
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import Hero from '../index';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import MockConnectionToCore from './_MockConnectionToCore';
 
 const sessionMeta = {
   tabId: 1,
   sessionId: 'session-id',
 };
 
-let testConnection: ConnectionToCore;
-let spy: jest.SpyInstance;
+let testConnection: MockConnectionToCore;
 beforeEach(() => {
-  class TestConnection extends ConnectionToCore {
-    async internalSendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
-      if (command === 'Core.createSession') {
-        this.onMessage({ data: sessionMeta, responseId: messageId });
-      } else if (command === 'Events.addEventListener') {
-        this.onMessage({ data: { listenerId: 'listener-id' }, responseId: messageId });
-      } else {
-        this.onMessage({ data: {}, responseId: messageId });
-      }
+  testConnection = new MockConnectionToCore(message => {
+    const { command, messageId } = message;
+    if (command === 'Core.createSession') {
+      return { data: sessionMeta, responseId: messageId };
+    } else if (command === 'Events.addEventListener') {
+      return {
+        data: { listenerId: 'listener-id' },
+        responseId: messageId,
+      };
+    } else {
+      return { data: {}, responseId: messageId };
     }
-
-    protected createConnection = () => Promise.resolve(null);
-    protected destroyConnection = () => Promise.resolve(null);
-  }
-  testConnection = new TestConnection();
-  spy = jest.spyOn<any, any>(testConnection, 'internalSendRequest');
+  });
 });
+
+function fakeEvent(eventType: string, listenerId: string, ...data: any[]): void {
+  testConnection.fakeEvent({
+    meta: sessionMeta,
+    eventType,
+    listenerId,
+    data,
+  });
+}
 
 describe('events', () => {
   it('receives close event', async () => {
@@ -38,15 +42,15 @@ describe('events', () => {
     await hero.on('close', () => {
       isClosed = true;
     });
-
-    testConnection.onMessage({
-      meta: { sessionId: 'session-id' },
+    testConnection.fakeEvent({
+      meta: { sessionId: sessionMeta.sessionId },
+      eventType: 'close',
       listenerId: 'listener-id',
-      eventArgs: [],
+      data: [],
     });
     await hero.close();
 
-    const outgoingCommands = spy.mock.calls;
+    const outgoingCommands = testConnection.outgoingSpy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
       'Core.createSession',
@@ -68,39 +72,22 @@ describe('events', () => {
 
     await hero.activeTab.on('resource', onResourceFn);
 
-    testConnection.onMessage({
-      meta: sessionMeta,
-      listenerId: 'listener-id',
-      eventArgs: [
-        {
-          id: 1,
-        } as IResourceMeta,
-      ],
-    });
-    testConnection.onMessage({
-      meta: sessionMeta,
-      listenerId: 'listener-id',
-      eventArgs: [
-        {
-          id: 2,
-        } as IResourceMeta,
-      ],
-    });
+    fakeEvent('resource', 'listener-id', {
+      id: 1,
+    } as IResourceMeta);
+    fakeEvent('resource', 'listener-id', {
+      id: 2,
+    } as IResourceMeta);
 
     // need to wait since events are handled on a promise resolution
     await new Promise(setImmediate);
     expect(eventCount).toBe(2);
 
     await hero.activeTab.off('resource', onResourceFn);
-    testConnection.onMessage({
-      meta: sessionMeta,
-      listenerId: 'listener-id',
-      eventArgs: [
-        {
-          id: 3,
-        } as IResourceMeta,
-      ],
-    });
+
+    fakeEvent('resource', 'listener-id', {
+      id: 3,
+    } as IResourceMeta);
     expect(eventCount).toBe(2);
   });
 });

@@ -27,7 +27,7 @@ yarn add @ulixee/hero
 Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-const Hero = require('@ulixee/hero');
+const Hero = require('@ulixee/hero-fulstack');
 
 (async () => {
   const hero = new Hero();
@@ -38,7 +38,7 @@ const Hero = require('@ulixee/hero');
 })();
 ```
 
-Browse the [full API docs](https://docs.ulixee.org/hero).
+Browse the [full API docs](https://ulixee.org/docs/hero).
 
 ## Contributing
 

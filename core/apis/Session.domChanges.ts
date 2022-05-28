@@ -1,6 +1,5 @@
 import SessionDb from '../dbs/SessionDb';
 import { IDomChangeRecord } from '../models/DomChangesTable';
-import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionDomChangesApi(
   args: ISessionDomChangesArgs,
@@ -33,15 +32,10 @@ export default function sessionDomChangesApi(
   return result;
 }
 
-export interface ISessionDomChangesApi extends ICoreApi {
-  args: ISessionDomChangesArgs;
-  result: ISessionDomChangesResult;
-}
-
-export interface ISessionDomChangesArgs {
+interface ISessionDomChangesArgs {
   sessionId: string;
 }
 
-export interface ISessionDomChangesResult {
+interface ISessionDomChangesResult {
   domChangesByTabId: { [tabId: number]: IDomChangeRecord[] };
 }

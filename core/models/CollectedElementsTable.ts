@@ -7,7 +7,7 @@ export default class CollectedElementsTable extends SqliteTable<
   ICollectedElement & { id?: number }
 > {
   private idCounter = 0;
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'CollectedElements',

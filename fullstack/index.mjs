@@ -3,7 +3,6 @@ import cjsImport from './index.js';
 const {
   Hero,
   Core,
-  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
@@ -16,12 +15,13 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  createDirectConnectionToCore,
 } = cjsImport;
 
 export {
   Hero,
   Core,
-  ConnectionToRemoteCoreServer,
+  createDirectConnectionToCore,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,

@@ -2,7 +2,7 @@ import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session, Tab } from '@ulixee/hero-core';
-import ConnectionToClient from '@ulixee/hero-core/connections/ConnectionToClient';
+import ConnectionToHeroClient from '@ulixee/hero-core/connections/ConnectionToHeroClient';
 import InjectedScripts from '@ulixee/hero-core/lib/InjectedScripts';
 import DomChangesTable from '@ulixee/hero-core/models/DomChangesTable';
 import { inspect } from 'util';
@@ -12,7 +12,7 @@ import MirrorNetwork from '../lib/MirrorNetwork';
 
 inspect.defaultOptions.depth = 5;
 let koaServer: ITestKoaServer;
-let connectionToClient: ConnectionToClient;
+let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);

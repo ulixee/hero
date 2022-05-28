@@ -10,7 +10,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
 
   private hasLoadedCounts = false;
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'StorageChanges', [
       ['tabId', 'INTEGER'],
       ['securityOrigin', 'TEXT'],

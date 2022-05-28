@@ -132,11 +132,11 @@ export default class Tab
     this.page = page;
     this.parentTabId = parentTabId;
     this.createdAtCommandId = session.commands.lastId;
-    this.setEventsToLog(['child-tab-created', 'close', 'dialog', 'websocket-message']);
     this.logger = log.createChild(module, {
       tabId: this.id,
       sessionId: session.id,
     });
+    this.setEventsToLog(this.logger, ['child-tab-created', 'close', 'dialog', 'websocket-message']);
 
     for (const frame of page.frames) {
       const frameEnvironment = new FrameEnvironment(this, frame);

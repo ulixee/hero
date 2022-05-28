@@ -1,7 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session } from '../index';
-import DirectConnectionToCoreApi from '../connections/DirectConnectionToCoreApi';
+import ConnectionToHeroApiClient from '../connections/ConnectionToHeroApiClient';
+import ConnectionToHeroApiCore from '../connections/ConnectionToHeroApiCore';
+import { ConnectionToCore } from '@ulixee/net';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -23,6 +25,11 @@ function addMe() {
 });
 afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
+
+function createConnectionToApiCore(): ConnectionToHeroApiCore {
+  const bridge = ConnectionToHeroApiClient.createBridge();
+  return new ConnectionToCore(bridge.transportToCore);
+}
 
 describe('basic Apis tests', () => {
   let sessionId: string;
@@ -51,43 +58,43 @@ describe('basic Apis tests', () => {
   });
 
   it('can get a session from apis', async () => {
-    const connection = new DirectConnectionToCoreApi();
+    const connection = createConnectionToApiCore();
 
-    const result = await connection.run({
-      api: 'Session.find',
-      args: { scriptEntrypoint: 'testEntrypoint.js' },
+    const result = await connection.sendRequest({
+      command: 'Session.find',
+      args: [{ scriptEntrypoint: 'testEntrypoint.js' }],
     });
     expect(result.session).toBeTruthy();
     expect(result.session.id).toBe(sessionId);
   });
 
   it('can search for sessions by command', async () => {
-    const connection = new DirectConnectionToCoreApi();
+    const connection = createConnectionToApiCore();
 
-    const result = await connection.run({
-      api: 'Sessions.search',
-      args: { commandArg: 'api-test' },
+    const result = await connection.sendRequest({
+      command: 'Sessions.search',
+      args: [{ commandArg: 'api-test' }],
     });
     expect(result.sessions).toHaveLength(1);
     expect(result.sessions[0].id).toBe(sessionId);
   });
 
   it('can get the tabs for a session', async () => {
-    const connection = new DirectConnectionToCoreApi();
+    const connection = createConnectionToApiCore();
 
-    const result = await connection.run({
-      api: 'Session.tabs',
-      args: { sessionId },
+    const result = await connection.sendRequest({
+      command: 'Session.tabs',
+      args: [{ sessionId }],
     });
     expect(result.tabs).toHaveLength(1);
   });
 
   it('can get the ticks for a session', async () => {
-    const connection = new DirectConnectionToCoreApi();
+    const connection = createConnectionToApiCore();
 
-    const result = await connection.run({
-      api: 'Session.ticks',
-      args: { sessionId },
+    const result = await connection.sendRequest({
+      command: 'Session.ticks',
+      args: [{ sessionId }],
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(4);
@@ -98,16 +105,18 @@ describe('basic Apis tests', () => {
   });
 
   it('can get the ticks for a session and include details', async () => {
-    const connection = new DirectConnectionToCoreApi();
+    const connection = createConnectionToApiCore();
 
-    const result = await connection.run({
-      api: 'Session.ticks',
-      args: {
-        sessionId,
-        includePaintEvents: true,
-        includeInteractionEvents: true,
-        includeCommands: true,
-      },
+    const result = await connection.sendRequest({
+      command: 'Session.ticks',
+      args: [
+        {
+          sessionId,
+          includePaintEvents: true,
+          includeInteractionEvents: true,
+          includeCommands: true,
+        },
+      ],
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].paintEvents.length).toBeGreaterThanOrEqual(1);

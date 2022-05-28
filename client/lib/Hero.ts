@@ -50,19 +50,19 @@ import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
-import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnvironment';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import './DomExtender';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -104,7 +104,7 @@ export default class Hero extends AwaitedEventTarget<{
 
   readonly #options: ISessionOptions;
   readonly #clientPlugins: IClientPlugin[] = [];
-  readonly #connectionToCore: ConnectionToCore;
+  readonly #connectionToCore: ConnectionToHeroCore;
   readonly #didAutoCreateConnection: boolean = false;
   #coreSessionPromise: Promise<CoreSession | Error>;
   #tabs: Tab[];
@@ -217,10 +217,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   public get coreHost(): Promise<string> {
-    return this.#connectionToCore?.hostOrError.then(x => {
-      if (x instanceof Error) throw x;
-      return x;
-    });
+    return Promise.resolve(this.#connectionToCore?.transport.host);
   }
 
   public get Request(): typeof Request {
@@ -240,7 +237,7 @@ export default class Hero extends AwaitedEventTarget<{
           await this.#connectionToCore.disconnect();
         }
       } catch (error) {
-        if (!(error instanceof DisconnectedFromCoreError)) return reject(error);
+        if (!(error instanceof DisconnectedError)) return reject(error);
       }
       resolve();
     }));

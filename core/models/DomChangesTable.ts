@@ -5,7 +5,7 @@ import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChan
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   public countByTimestamp = new Map<number, number>();
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'INTEGER'],
       ['documentNavigationId', 'INTEGER'],
@@ -81,7 +81,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     };
   }
 
-  public all(): IDomChangeRecord[] {
+  public override all(): IDomChangeRecord[] {
     this.countByTimestamp.clear();
     const records: IDomChangeRecord[] = [];
     const pending = this.findPendingRecords(Boolean);
