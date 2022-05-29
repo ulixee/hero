@@ -9,7 +9,6 @@
     },
     "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
-    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
     "./dbs": "./dbs",
     "./dbs/*": "./dbs/*.js",
     "./models/*": "./models/*.js",

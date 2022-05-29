@@ -28,15 +28,7 @@ import {
   XPathResult,
 } from '@ulixee/hero';
 import Core from '@ulixee/hero-core';
-import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import Hero, { createDirectConnectionToCore } from './lib/Hero';
-
-ShutdownHandler.exitOnSignal = false;
-
-if (process.env.NODE_ENV !== 'test') {
-  Core.events.on('browser-has-no-open-windows', ({ browser }) => browser.close());
-  Core.events.on('all-browsers-closed', () => Core.shutdown());
-}
 
 export {
   createDirectConnectionToCore,
