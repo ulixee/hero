@@ -186,7 +186,7 @@ export default class CoreCommandQueue {
     this.flushOnTimeout = null;
 
     if (this.connection.disconnectPromise) {
-      return Promise.resolve(null);
+      throw new DisconnectedError(this.connection.transport.host);
     }
     for (const arg of args) {
       if (Array.isArray(arg)) {

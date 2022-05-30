@@ -562,6 +562,7 @@ export default class Hero extends AwaitedEventTarget<{
 
     return this.#coreSessionPromise.then(coreSession => {
       if (coreSession instanceof CoreSession) return coreSession;
+      if (coreSession === null) return null;
       throw coreSession;
     });
   }
