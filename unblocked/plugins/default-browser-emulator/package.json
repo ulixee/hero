@@ -9,7 +9,7 @@
   "dependencies": {
     "@ulixee/chrome-98-0": "^4758.102.4",
     "@ulixee/chrome-app": "^1.0.2",
-    "@ulixee/commons": "2.0.0-alpha.2",
+    "@ulixee/commons": "2.0.0-alpha.3",
     "@unblocked-web/specifications": "2.0.0-alpha.2",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
