@@ -7,8 +7,8 @@
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.2",
-    "@ulixee/net": "2.0.0-alpha.2",
+    "@ulixee/commons": "2.0.0-alpha.3",
+    "@ulixee/net": "2.0.0-alpha.3",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.3",
     "@ulixee/hero": "2.0.0-alpha.3",
     "@ulixee/hero-core": "2.0.0-alpha.3",

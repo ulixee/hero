@@ -10,7 +10,7 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
-    "@ulixee/commons": "2.0.0-alpha.2",
+    "@ulixee/commons": "2.0.0-alpha.3",
     "@ulixee/hero-core": "2.0.0-alpha.3",
     "@ulixee/hero-interfaces": "2.0.0-alpha.3",
     "@unblocked-web/agent-mitm-socket": "2.0.0-alpha.2",

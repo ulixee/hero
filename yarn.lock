@@ -2266,6 +2266,24 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
+"@ulixee/commons@2.0.0-alpha.2":
+  version "2.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-2.0.0-alpha.2.tgz#cf7d36df8d78fd95954385ce6a94f7a1aac3023d"
+  integrity sha512-meLXHBiqlINUsXWoZWn3Eh7Hxbj72ckJY8P8JU3UzBoG09od9Mt2Zp4YOymwc3hxS9MnWZIS+2Xk6Ud/6iUezg==
+  dependencies:
+    devtools-protocol "^0.0.981744"
+    https-proxy-agent "^5.0.0"
+    semver "^7.3.7"
+    source-map-js "^1.0.1"
+
+"@ulixee/net@2.0.0-alpha.3":
+  version "2.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@ulixee/net/-/net-2.0.0-alpha.3.tgz#4641df7daa4548c429a50a623fb5671c6f06f597"
+  integrity sha512-fsy1mhZesc7lKPmMeB3/8ssvCtn7nlZmOX+FjZCwEWA7La0mb24ZnO2qphytQEYPlQ6B1ULB86IHtzzKBCQSPQ==
+  dependencies:
+    "@ulixee/commons" "2.0.0-alpha.3"
+    ws "^7.4.6"
+
 "@ulixee/repo-tools@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.7.tgz#74448e3225a1730c1be5c77adfe52f1d02eb89ea"
