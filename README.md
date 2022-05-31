@@ -13,13 +13,13 @@ Check out our [website for more details](https://ulixee.org).
 ## Installation
 
 ```shell script
-npm i --save @ulixee/hero
+npm i --save @ulixee/hero-fullstack
 ```
 
 or
 
 ```shell script
-yarn add @ulixee/hero
+yarn add @ulixee/hero-fullstack
 ```
 
 ## Usage
