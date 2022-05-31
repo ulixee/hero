@@ -1,17 +1,12 @@
 import ISessionMeta from './ISessionMeta';
+import type ICoreRequestPayload from '@ulixee/net/interfaces/ICoreRequestPayload';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
-export default interface ICoreRequestPayload {
-  messageId: string;
+export default interface ICoreCommandRequestPayload extends ICoreRequestPayload<any, any> {
   meta?: ISessionMeta;
-  command: string;
-  commandId?: number;
   callsite?: ISourceCodeLocation[];
-  startDate: Date;
-  sendDate: Date;
   retryNumber?: number;
   activeFlowHandlerId?: number;
   flowCommandId?: number;
-  args: any[];
-  recordCommands?: Omit<ICoreRequestPayload, 'meta' | 'messageId' | 'sendDate'>[];
+  recordCommands?: Omit<ICoreCommandRequestPayload, 'meta' | 'messageId' | 'sendTime'>[];
 }

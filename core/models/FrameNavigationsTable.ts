@@ -9,7 +9,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
 
   private allNavigationsById = new Map<number, INavigation>();
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'FrameNavigations',

@@ -10,7 +10,7 @@ import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
@@ -18,8 +18,12 @@ import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import { IOutputChangeToRecord } from '../interfaces/ICoreSession';
 import Hero from './Hero';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 
-export default class CoreSession implements IJsPathEventTarget {
+export default class CoreSession
+  extends TypedEventEmitter<{ close: void }>
+  implements IJsPathEventTarget
+{
   public tabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
@@ -44,27 +48,27 @@ export default class CoreSession implements IJsPathEventTarget {
 
   protected readonly meta: ISessionMeta;
 
-  private readonly connectionToCore: ConnectionToCore;
+  private readonly connectionToCore: ConnectionToHeroCore;
   private commandId = 0;
   private cliPrompt: ReadLine;
   private isClosing = false;
-  private shutdownPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
+  private closingPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
 
   constructor(
-    sessionMeta: ISessionMeta & { sessionName: string },
-    connectionToCore: ConnectionToCore,
-    hero: Hero,
-    mode: ISessionCreateOptions['mode'],
+    sessionMeta: ISessionMeta,
+    connectionToCore: ConnectionToHeroCore,
+    options: ISessionCreateOptions,
   ) {
+    super();
+    const { sessionName, mode } = options;
     this.mode = mode;
-    const { sessionId, sessionName } = sessionMeta;
+    const { sessionId } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.meta = {
       sessionId,
     };
     this.connectionToCore = connectionToCore;
-    this.hero = hero;
     loggerSessionIdNames.set(sessionId, sessionName);
     this.commandQueue = new CoreCommandQueue(
       { sessionId, sessionName },
@@ -158,15 +162,15 @@ export default class CoreSession implements IJsPathEventTarget {
   // END OF PRIVATE APIS FOR DATABOX ///////////////////////////////////////////////////////////////
 
   public async close(force = false): Promise<void> {
-    await this.shutdownPromise;
+    await this.closingPromise;
     if (this.isClosing) return;
 
     try {
       this.isClosing = true;
       this.closeCliPrompt();
-      this.shutdownPromise = this.doClose(force);
-      const result = await this.shutdownPromise;
-      this.shutdownPromise = null;
+      this.closingPromise = this.doClose(force);
+      const result = await this.closingPromise;
+      this.closingPromise = null;
       if (result?.didKeepAlive === true) {
         this.isClosing = false;
         const didClose = new Promise(resolve => this.addEventListener(null, 'close', resolve));
@@ -174,7 +178,7 @@ export default class CoreSession implements IJsPathEventTarget {
         await didClose;
       }
     } finally {
-      process.nextTick(() => this.connectionToCore.untrackSession(this));
+      this.emit('close');
       loggerSessionIdNames.delete(this.sessionId);
     }
   }

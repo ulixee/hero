@@ -2,7 +2,7 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class OutputTable extends SqliteTable<IOutputChangeRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Output',

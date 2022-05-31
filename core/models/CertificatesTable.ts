@@ -4,7 +4,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   private readonly getQuery: Statement;
   private pemByHost = new Map<string, ICertificateRecord>();
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'CertificatesV3',

@@ -1,5 +1,4 @@
 import SessionDb from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionTabsApi(args: ISessionTabsArgs): ISessionTabsResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
@@ -36,16 +35,11 @@ export default function sessionTabsApi(args: ISessionTabsArgs): ISessionTabsResu
   return result;
 }
 
-export interface ISessionTabsApi extends ICoreApi {
-  args: ISessionTabsArgs;
-  result: ISessionTabsResult;
-}
-
-export interface ISessionTabsArgs {
+interface ISessionTabsArgs {
   sessionId: string;
 }
 
-export interface ISessionTabsResult {
+interface ISessionTabsResult {
   tabs: ISessionTab[];
 }
 

@@ -6,7 +6,7 @@ import { IOnClientCommandMeta } from '@ulixee/hero-interfaces/ICorePlugin';
 import { ISendToCoreFn } from '@ulixee/hero-interfaces/IClientPlugin';
 
 export class EchoClientPlugin extends ClientPlugin {
-  static readonly id = 'echo-plugin';
+  static override readonly id = 'echo-plugin';
   static coreDependencyIds = [EchoClientPlugin.id];
 
   public onHero(hero: Hero, sendToCore: ISendToCoreFn): void {
@@ -32,7 +32,7 @@ export class EchoClientPlugin extends ClientPlugin {
 }
 
 export class EchoCorePlugin extends CorePlugin {
-  static readonly id = 'echo-plugin';
+  static override readonly id = 'echo-plugin';
 
   public onClientCommand(
     { page }: IOnClientCommandMeta,

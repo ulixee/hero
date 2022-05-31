@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
 
 export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'ScrollEvents', [
       ['tabId', 'INTEGER'],
       ['frameId', 'INTEGER'],

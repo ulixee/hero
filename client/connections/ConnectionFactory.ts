@@ -3,32 +3,33 @@ import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeServerConfig from '@ulixee/commons/config/servers';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
-import ConnectionToCore from './ConnectionToCore';
-import ConnectionToRemoteCoreServer from './ConnectionToRemoteCoreServer';
+import ConnectionToHeroCore from './ConnectionToHeroCore';
+import { WsTransportToCore } from '@ulixee/net';
 
 const { version } = require('../package.json');
 
 const { log } = Log(module);
 
-export type ICreateConnectionToCoreFn = (options: IConnectionToCoreOptions) => ConnectionToCore;
+export type ICreateConnectionToCoreFn = (options: IConnectionToCoreOptions) => ConnectionToHeroCore;
 
 export default class ConnectionFactory {
   public static hasLocalServerPackage = false;
 
   public static createConnection(
-    options: IConnectionToCoreOptions | ConnectionToCore,
+    options: IConnectionToCoreOptions | ConnectionToHeroCore,
     overrideCreateConnectionToCoreFn?: ICreateConnectionToCoreFn,
-  ): ConnectionToCore {
-    if (options instanceof ConnectionToCore) {
+  ): ConnectionToHeroCore {
+    if (options instanceof ConnectionToHeroCore) {
       // NOTE: don't run connect on an instance
       return options;
     }
 
-    let connection: ConnectionToCore;
+    let connection: ConnectionToHeroCore;
     if (overrideCreateConnectionToCoreFn) {
       connection = overrideCreateConnectionToCoreFn(options);
     } else if (options.host) {
-      connection = new ConnectionToRemoteCoreServer(options);
+      const transport = new WsTransportToCore(options.host);
+      connection = new ConnectionToHeroCore(transport);
     } else {
       const serverHost =
         UlixeeConfig.load()?.serverHost ??
@@ -36,7 +37,8 @@ export default class ConnectionFactory {
         UlixeeServerConfig.global.getVersionHost(version);
 
       if (serverHost) {
-        connection = new ConnectionToRemoteCoreServer({ ...options, host: serverHost, version });
+        const transport = new WsTransportToCore(serverHost);
+        connection = new ConnectionToHeroCore(transport, { ...options, version });
       } else if (UlixeeServerConfig.global.hasServers()) {
         if (this.hasLocalServerPackage) {
           // If servers are launched, but none compatible, propose installing server locally

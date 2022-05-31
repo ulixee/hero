@@ -9,7 +9,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
   private frameIds = new IdAssigner();
   private requestIds = new IdAssigner();
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'DevtoolsMessages', [
       ['send', 'INTEGER'],
       ['pageNumber', 'INTEGER'],

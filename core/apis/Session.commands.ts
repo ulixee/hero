@@ -2,7 +2,6 @@ import CommandTimeline from '@ulixee/hero-timetravel/lib/CommandTimeline';
 import SessionDb from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
-import ICoreApi from '../interfaces/ICoreApi';
 import Session from '../lib/Session';
 
 export default function sessionCommandsApi(args: ISessionCommandsArgs): ISessionCommandsResult {
@@ -22,15 +21,10 @@ export function loadCommandTimeline(args: ISessionCommandsArgs): CommandTimeline
   return CommandTimeline.fromDb(sessionDb);
 }
 
-export interface ISessionCommandsApi extends ICoreApi {
-  args: ISessionCommandsArgs;
-  result: ISessionCommandsResult;
-}
-
-export interface ISessionCommandsArgs {
+interface ISessionCommandsArgs {
   sessionId: string;
 }
 
-export interface ISessionCommandsResult {
+interface ISessionCommandsResult {
   commands: ICommandWithResult[];
 }

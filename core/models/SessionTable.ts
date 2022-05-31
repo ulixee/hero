@@ -9,7 +9,7 @@ import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 export default class SessionTable extends SqliteTable<ISessionRecord> {
   private id: string;
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Session',

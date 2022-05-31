@@ -1,6 +1,5 @@
 import * as Fs from 'fs';
 import SessionDb from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 import CommandFormatter from '../lib/CommandFormatter';
 
 export default function sessionsSearchApi(args: ISessionsSearchArgs): ISessionsSearchResult {
@@ -59,16 +58,12 @@ export default function sessionsSearchApi(args: ISessionsSearchArgs): ISessionsS
   return results;
 }
 
-export interface ISessionsSearchApi extends ICoreApi {
-  args: ISessionsSearchArgs;
-  result: ISessionsSearchResult;
-}
-
-export interface ISessionsSearchArgs {
+interface ISessionsSearchArgs {
   commandArg?: string;
   devtoolsKey?: string;
 }
-export interface ISessionsSearchResult {
+
+interface ISessionsSearchResult {
   sessions: {
     id: string;
     name: string;

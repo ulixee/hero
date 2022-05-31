@@ -3,7 +3,7 @@ import { ILogEntry } from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'SessionLogs', [
       ['id', 'INTEGER'],
       ['timestamp', 'DATETIME'],

@@ -1,5 +1,4 @@
 import SessionDb, { ISessionFindArgs, ISessionFindResult } from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionFindApi(lookup: ISessionFindArgs): ISessionFindResult {
   const sessionLookup = SessionDb.find(lookup);
@@ -17,7 +16,3 @@ export default function sessionFindApi(lookup: ISessionFindArgs): ISessionFindRe
   return sessionLookup;
 }
 
-export interface ISessionFindApi extends ICoreApi {
-  args: ISessionFindArgs;
-  result: ISessionFindResult;
-}

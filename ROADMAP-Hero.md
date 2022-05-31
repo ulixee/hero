@@ -3,10 +3,8 @@ Hero 2.0 pulls over the best features of SecretAgent, including the ability to a
 
 Remaining items before Stable Release:
 
-- Add hero.pause() command for pause script in the midst of execution.
 - Fix Chrome 95+ TLS Signature (ALPS extension). The signature is currently invalid.
-- Fix IFrames so they don't create duplicate devtools execution context in Timetravel
-- Update to lastest version of Chrome
+- Update to latest version of Chrome
 
 ## 2.11 - Improve Reactivity
 Hero 2.11 further refines the concept of FlowHandlers and State. We want to enhance FlowHandlers with fine grained control, as well as introducing Element State.

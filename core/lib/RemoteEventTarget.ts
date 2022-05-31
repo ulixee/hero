@@ -1,7 +1,7 @@
 import { IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import Session from './Session';
 import { IJsPath } from '@unblocked-web/js-path';
-import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Logger from '@ulixee/commons/lib/Logger';
 
@@ -13,10 +13,8 @@ export default class RemoteEventTarget {
     private session: Session,
     private target: IRemoteEventListener,
     private meta: ISessionMeta,
-    private onCoreEvent: (event: ICoreEventPayload) => void,
-  ) {
-    this.emitCoreEvent = this.emitCoreEvent.bind(this);
-  }
+    private onCoreEvent: (event: ICoreListenerPayload) => void,
+  ) {}
 
   close(): void {
     for (const id of this.listeners) {
@@ -35,7 +33,7 @@ export default class RemoteEventTarget {
   ): Promise<{ listenerId: string }> {
     const result = await this.target.addRemoteEventListener(
       type,
-      this.emitCoreEvent,
+      this.emitCoreEvent.bind(this, type),
       jsPath,
       options,
     );
@@ -48,7 +46,7 @@ export default class RemoteEventTarget {
     return this.target.removeRemoteEventListener(listenerId, options);
   }
 
-  private emitCoreEvent(listenerId: string, ...eventArgs: any[]): void {
+  private emitCoreEvent(eventType: string, listenerId: string, ...data: any[]): void {
     if (this.session?.isClosing) {
       if (this.session.commands.getRemoteEventListener(listenerId)?.type !== 'close') {
         log.stats('Canceling event broadcast. Session is closing', {
@@ -62,8 +60,9 @@ export default class RemoteEventTarget {
 
     this.onCoreEvent({
       meta: this.meta,
+      eventType,
       listenerId,
-      eventArgs,
+      data,
       lastCommandId: this.session.commands.lastId,
     });
   }

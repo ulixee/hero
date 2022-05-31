@@ -4,7 +4,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class CommandsTable extends SqliteTable<ICommandMeta> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Commands',

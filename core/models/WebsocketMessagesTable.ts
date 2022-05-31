@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { IWebsocketMessage } from '@unblocked-web/agent/lib/WebsocketMessages';
 
 export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessageRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'WebsocketMessages', [
       ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
       ['resourceId', 'INTEGER'],

@@ -9,7 +9,7 @@ import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
-import ConnectionToClient from './connections/ConnectionToClient';
+import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
@@ -23,6 +23,8 @@ import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
 import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
+import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 
 const { log } = Log(module);
 
@@ -58,7 +60,7 @@ export default class Core {
     >
   >();
 
-  public static readonly connections: ConnectionToClient[] = [];
+  public static readonly connections: ConnectionToHeroClient[] = [];
 
   public static corePluginsById: { [id: string]: ICorePluginClass } = {};
 
@@ -82,9 +84,10 @@ export default class Core {
   private static networkDb: NetworkDb;
   private static utilityBrowserContext: Promise<BrowserContext>;
 
-  public static addConnection(): ConnectionToClient {
-    const connection = new ConnectionToClient();
-    connection.on('close', () => {
+  public static addConnection(transportToClient?: ITransportToClient<any>): ConnectionToHeroClient {
+    transportToClient ??= new EmittingTransportToClient();
+    const connection = new ConnectionToHeroClient(transportToClient);
+    connection.on('disconnected', () => {
       const idx = this.connections.indexOf(connection);
       if (idx >= 0) this.connections.splice(idx, 1);
       this.checkForAutoShutdown();
@@ -147,7 +150,8 @@ export default class Core {
       Core.dataDir = options.dataDir;
     }
     this.networkDb = new NetworkDb();
-    if (options.defaultUnblockedPlugins) this.defaultUnblockedPlugins = options.defaultUnblockedPlugins;
+    if (options.defaultUnblockedPlugins)
+      this.defaultUnblockedPlugins = options.defaultUnblockedPlugins;
 
     this.pool = new Pool({
       certificateStore: this.networkDb.certificates,

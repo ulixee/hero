@@ -9,7 +9,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   #tabIdByFrameId = new Map<number, number>();
   #mainFrameIdByTabId = new Map<number, Set<number>>();
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Frames',
@@ -54,7 +54,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
     return this.#mainFrameIds;
   }
 
-  public all(): IFrameRecord[] {
+  public override all(): IFrameRecord[] {
     const all = super.all();
     for (const frame of all) {
       this.recordDomNodePath(frame);

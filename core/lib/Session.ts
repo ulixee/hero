@@ -94,7 +94,7 @@ export default class Session
 
   public browserContext?: BrowserContext;
   public commands: Commands;
-  public readonly db: SessionDb;
+  public db: SessionDb;
   public get resources(): Resources {
     return this.browserContext.resources;
   }

@@ -9,7 +9,6 @@
     },
     "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
-    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
     "./dbs": "./dbs",
     "./dbs/*": "./dbs/*.js",
     "./models/*": "./models/*.js",
@@ -18,6 +17,7 @@
   "dependencies": {
     "@types/ua-parser-js": "^0.7.35",
     "@ulixee/commons": "2.0.0-alpha.2",
+    "@ulixee/net": "2.0.0-alpha.2",
     "@ulixee/hero-interfaces": "2.0.0-alpha.3",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.3",
     "@ulixee/hero-timetravel": "2.0.0-alpha.3",

@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { FocusEventType, IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
 
 export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'FocusEvents', [
       ['tabId', 'INTEGER'],
       ['frameId', 'INTEGER'],

@@ -13,7 +13,7 @@
       "path": "timetravel/injected-scripts/tsconfig.dist.json"
     }
   ],
-  "include": ["**/*.ts", "**/*.js", "**/*.json"],
+  "include": ["./**/*.ts", "**/*.js", "**/*.json"],
   "exclude": [
     "*jest*",
     "**/tsconfig*.json",

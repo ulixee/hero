@@ -3,7 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 
 export default class TabsTable extends SqliteTable<ITabsRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(db, 'Tabs', [
       ['id', 'INTEGER'],
       ['parentId', 'INTEGER'],

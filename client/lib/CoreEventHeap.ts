@@ -2,10 +2,10 @@ import { IJsPath } from '@unblocked-web/js-path';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Log from '@ulixee/commons/lib/Logger';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import { scriptInstance } from './internal';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 
 const { log } = Log(module);
 
@@ -13,7 +13,7 @@ type IListenerFn = (...args: any[]) => void;
 type IInterceptorFn = (...args: any[]) => any;
 
 export default class CoreEventHeap {
-  private readonly connection: ConnectionToCore;
+  private readonly connection: ConnectionToHeroCore;
   private readonly listenerFnById: Map<string, IListenerFn> = new Map();
   private readonly listenerIdByHandle: Map<string, string> = new Map();
   private readonly eventInterceptors: Map<string, IInterceptorFn[]> = new Map();
@@ -23,7 +23,7 @@ export default class CoreEventHeap {
 
   constructor(
     meta: ISessionMeta | null,
-    connection: ConnectionToCore,
+    connection: ConnectionToHeroCore,
     commandCounter: ICommandCounter,
   ) {
     this.meta = meta;
@@ -48,26 +48,28 @@ export default class CoreEventHeap {
     type: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    extras?: Partial<ICoreRequestPayload>,
+    extras?: Partial<ICoreCommandRequestPayload>,
   ): Promise<void> {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
 
+    extras ??= {};
+    extras.callsite ??= scriptInstance.getScriptCallsite();
+
     const subscriptionPromise = this.connection.sendRequest({
       commandId: this.commandCounter.nextCommandId,
       meta: this.meta,
-      startDate: new Date(),
+      startTime: Date.now(),
       command: 'Events.addEventListener',
       args: [jsPath, type, options],
-      ...(extras ?? {}),
-      callsite: extras?.callsite ?? scriptInstance.getScriptCallsite(),
+      ...extras,
     });
 
     const registered = new Resolvable<void>();
     this.pendingRegistrations = this.pendingRegistrations.then(() => registered.promise);
     try {
       const response = await subscriptionPromise;
-      const { listenerId } = response.data;
+      const { listenerId } = response;
 
       const wrapped = this.wrapHandler(type, listenerFn);
       this.listenerFnById.set(listenerId, wrapped);
@@ -82,21 +84,23 @@ export default class CoreEventHeap {
     type: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    extras?: Partial<ICoreRequestPayload>,
+    extras?: Partial<ICoreCommandRequestPayload>,
   ): void {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);
     if (!listenerId) return;
 
+    extras ??= {};
+    extras.callsite ??= scriptInstance.getScriptCallsite();
+
     this.connection
       .sendRequest({
         commandId: this.commandCounter.nextCommandId,
         meta: this.meta,
-        startDate: new Date(),
+        startTime: Date.now(),
         command: 'Events.removeEventListener',
         args: [listenerId, options],
-        ...(extras ?? {}),
-        callsite: extras?.callsite ?? scriptInstance.getScriptCallsite(),
+        ...extras,
       })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
@@ -119,10 +123,6 @@ export default class CoreEventHeap {
       .catch(error => {
         log.error('incomingEvent Error: ', { error, sessionId: this.meta?.sessionId });
       });
-  }
-
-  private shouldIncludeCallSite(): boolean {
-    return this.connection.commandQueue.mode !== 'production';
   }
 
   private generateListenerHandle(

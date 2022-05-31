@@ -26,14 +26,12 @@ import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/spec
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
-import ConnectionToRemoteCoreServer from './connections/ConnectionToRemoteCoreServer';
-import ConnectionToCore from './connections/ConnectionToCore';
+import ConnectionToHeroCore from './connections/ConnectionToHeroCore';
 
 export default Hero;
 
 export {
-  ConnectionToRemoteCoreServer,
-  ConnectionToCore,
+  ConnectionToHeroCore,
   InteractionCommand,
   MouseButton,
   IResourceType,

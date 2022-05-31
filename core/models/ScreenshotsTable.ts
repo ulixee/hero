@@ -9,7 +9,7 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
   private hasLoadedCounts = false;
   private lastImageByTab: { [tabId: number]: Buffer } = {};
 
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Screenshots',

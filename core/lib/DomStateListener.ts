@@ -9,6 +9,7 @@ import Tab from './Tab';
 import CommandRunner from './CommandRunner';
 import Log from '@ulixee/commons/lib/Logger';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 
 const { log } = Log(module);
 
@@ -55,6 +56,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
   private runAgainTime = 0;
   private watchedFrameIds = new Set<number>();
   private events = new EventSubscriber();
+  private readonly logger: IBoundLog;
 
   constructor(
     public readonly jsPathId: string,

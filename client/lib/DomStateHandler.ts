@@ -5,12 +5,12 @@ import { IJsPath } from '@unblocked-web/js-path';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
 import CoreTab from './CoreTab';
-import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState, { IStateAndAssertion } from '@ulixee/hero-interfaces/IDomState';
 import IDomStateListenArgs, { IRawCommand } from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import IFlowCommand from '../interfaces/IFlowCommand';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 
 let counter = 0;
 
@@ -135,7 +135,7 @@ export default class DomStateHandler {
       return success;
     } catch (error) {
       timer.clear();
-      if (!(error instanceof DisconnectedFromCoreError)) {
+      if (!(error instanceof DisconnectedError)) {
         waitError = error;
         throw error;
       }

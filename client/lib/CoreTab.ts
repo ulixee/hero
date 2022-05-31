@@ -14,7 +14,7 @@ import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { createResource } from './Resource';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { createDialog } from './Dialog';
 import CoreSession from './CoreSession';
@@ -28,7 +28,7 @@ import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { scriptInstance } from './internal';
 import FlowCommands from './FlowCommands';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
 export default class CoreTab implements IJsPathEventTarget {
@@ -47,12 +47,12 @@ export default class CoreTab implements IJsPathEventTarget {
   protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly flowCommands = new FlowCommands(this);
   private readonly flowHandlers: IFlowHandler[] = [];
-  private readonly connection: ConnectionToCore;
+  private readonly connection: ConnectionToHeroCore;
   private readonly mainFrameId: number;
 
   constructor(
     meta: ISessionMeta & { sessionName: string },
-    connection: ConnectionToCore,
+    connection: ConnectionToHeroCore,
     coreSession: CoreSession,
   ) {
     const { tabId, sessionId, frameId, sessionName } = meta;
@@ -311,7 +311,7 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    extras?: Partial<ICoreRequestPayload>,
+    extras?: Partial<ICoreCommandRequestPayload>,
   ): Promise<void> {
     if (this.commandQueue.commandMetadata) {
       extras ??= {};
@@ -325,7 +325,7 @@ export default class CoreTab implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
     options?: any,
-    extras?: Partial<ICoreRequestPayload>,
+    extras?: Partial<ICoreCommandRequestPayload>,
   ): Promise<void> {
     if (this.commandQueue.commandMetadata) {
       extras ??= {};

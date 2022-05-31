@@ -5,7 +5,7 @@ import { IExecuteJsArgs } from './IExecuteJsArgs';
 const { name: pluginId } = require('../package.json');
 
 export default class ExecuteJsCorePlugin extends CorePlugin {
-  public static id = pluginId;
+  public static override id = pluginId;
 
   public async onClientCommand(
     { frame, page }: IOnClientCommandMeta,

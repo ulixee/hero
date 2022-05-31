@@ -1,5 +1,4 @@
 import SessionDb from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 import SessionsDb, { ISessionsFindRelatedResult } from '../dbs/SessionsDb';
 
 export default function sessionsFindRelatedApi(
@@ -13,11 +12,6 @@ export default function sessionsFindRelatedApi(
   return sessionsDb.findRelatedSessions(session);
 }
 
-export interface ISessionsFindRelatedApi extends ICoreApi {
-  args: ISessionsFindRelatedArgs;
-  result: ISessionsFindRelatedResult;
-}
-
-export interface ISessionsFindRelatedArgs {
+interface ISessionsFindRelatedArgs {
   sessionId: string;
 }

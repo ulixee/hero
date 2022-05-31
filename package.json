@@ -68,6 +68,7 @@
       "plugins/*",
       "../commons/build",
       "../../commons/build",
+      "../../net/build",
       "../../unblocked/agent/build/*",
       "../../unblocked/build/plugins/*",
       "../../unblocked/specifications/build",

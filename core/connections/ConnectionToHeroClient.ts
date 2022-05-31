@@ -1,10 +1,8 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
@@ -14,22 +12,27 @@ import Core from '../index';
 import FrameEnvironment from '../lib/FrameEnvironment';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import RemoteEvents from '../lib/RemoteEvents';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
 import BrowserLaunchError from '@unblocked-web/agent/errors/BrowserLaunchError';
+import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
+import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
+import Commands from '../lib/Commands';
+import IConnectionToClient, {
+  IConnectionToClientEvents,
+} from '@ulixee/net/interfaces/IConnectionToClient';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 
 const { version } = require('../package.json');
 
 const { log } = Log(module);
 
-export default class ConnectionToClient
-  extends TypedEventEmitter<{
-    close: { fatalError?: Error };
-    message: ICoreResponsePayload | ICoreEventPayload;
-  }>
-  implements ICommandableTarget
+export default class ConnectionToHeroClient
+  extends TypedEventEmitter<IConnectionToClientEvents>
+  implements IConnectionToClient<any, {}>, ICommandableTarget
 {
-  public isClosing = false;
+  public disconnectPromise: Promise<void>;
   public isPersistent = true;
   public autoShutdownMillis = 500;
 
@@ -37,29 +40,19 @@ export default class ConnectionToClient
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private hasActiveCommand = false;
 
-  constructor() {
+  constructor(readonly transport: ITransportToClient<any>) {
     super();
-    this.emitMessage = this.emitMessage.bind(this);
+    transport.on('message', message => this.handleRequest(message));
+    transport.once('disconnected', error => this.disconnect(error));
+    this.sendEvent = this.sendEvent.bind(this);
     this.checkForAutoShutdown = this.checkForAutoShutdown.bind(this);
     this.disconnectIfInactive = this.disconnectIfInactive.bind(this);
   }
 
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
-  public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const {
-      commandId,
-      startDate,
-      sendDate,
-      messageId,
-      command,
-      meta,
-      recordCommands,
-      callsite,
-      retryNumber,
-      activeFlowHandlerId,
-      flowCommandId,
-    } = payload;
+  public async handleRequest(payload: ICoreCommandRequestPayload): Promise<void> {
+    const { messageId, command, meta, recordCommands, ...nextCommandMeta } = payload;
     const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
 
     // json converts args to null which breaks undefined argument handlers
@@ -68,21 +61,13 @@ export default class ConnectionToClient
     let data: any;
     try {
       this.hasActiveCommand = true;
-      if (recordCommands) await this.recordCommands(meta, sendDate, recordCommands);
-      data = await this.executeCommand(command, args, meta, {
-        commandId,
-        startDate,
-        sendDate,
-        callsite,
-        retryNumber,
-        activeFlowHandlerId,
-        flowCommandId,
-      });
+      if (recordCommands) await this.recordCommands(meta, payload.sendTime, recordCommands);
+      data = await this.executeCommand(command, args, meta, nextCommandMeta);
 
       // make sure to get tab metadata
       data = this.serializeToMetadata(data);
     } catch (error) {
-      const isClosing = session?.isClosing || this.isClosing;
+      const isClosing = session?.isClosing || !!this.disconnectPromise;
       // if we're closing, don't emit errors
       let shouldSkipLogging = isClosing && error instanceof CanceledPromiseError;
 
@@ -95,10 +80,10 @@ export default class ConnectionToClient
         }
       }
 
-      const isChildProcess = !!process.send;
       const isLaunchError = this.isLaunchError(error);
+      const isDirect = this.transport instanceof EmittingTransportToClient;
 
-      if ((isChildProcess === false && shouldSkipLogging === false) || isLaunchError) {
+      if ((isDirect === false && shouldSkipLogging === false) || isLaunchError) {
         log.error('ConnectionToClient.HandleRequestError', {
           error,
           sessionId: meta?.sessionId,
@@ -110,11 +95,11 @@ export default class ConnectionToClient
       this.hasActiveCommand = false;
     }
 
-    const response: ICoreResponsePayload = {
+    const response: ICoreResponsePayload<any, any> = {
       responseId: messageId,
       data,
     };
-    this.emit('message', response);
+    await this.transport.send(response);
   }
 
   public async connect(
@@ -128,7 +113,7 @@ export default class ConnectionToClient
         );
       }
     }
-    this.isClosing = false;
+    this.disconnectPromise = null;
     await Core.start(options, false);
     return {
       maxConcurrency: Core.pool.maxConcurrentAgents,
@@ -150,19 +135,25 @@ export default class ConnectionToClient
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
-    if (this.isClosing) return;
-    this.isClosing = true;
-    const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
-    clearTimeout(this.autoShutdownTimer);
-    const closeAll: Promise<any>[] = [];
-    for (const id of this.sessionIdToRemoteEvents.keys()) {
-      const session = Session.get(id);
-      if (session) closeAll.push(session.close(true).catch(err => err));
+    if (this.disconnectPromise) return this.disconnectPromise;
+    const resolvable = new Resolvable<void>();
+    this.disconnectPromise = resolvable.promise;
+    try {
+      const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
+      clearTimeout(this.autoShutdownTimer);
+      const closeAll: Promise<any>[] = [];
+      for (const id of this.sessionIdToRemoteEvents.keys()) {
+        const session = Session.get(id);
+        if (session) closeAll.push(session.close(true).catch(err => err));
+      }
+
+      await Promise.all([...closeAll, this.transport.disconnect?.(fatalError)]);
+      this.isPersistent = false;
+      this.emit('disconnected', fatalError);
+      log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
+    } finally {
+      resolvable.resolve();
     }
-    await Promise.all(closeAll);
-    this.isPersistent = false;
-    this.emit('close', { fatalError });
-    log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
   }
 
   public isActive(): boolean {
@@ -178,16 +169,22 @@ export default class ConnectionToClient
     );
   }
 
+  public sendEvent(message: ICoreListenerPayload): void {
+    void this.transport
+      .send(message)
+      .catch(error => log.error('ERROR sending message', { error, message, sessionId: null }));
+  }
+
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async createSession(options: ISessionCreateOptions = {}): Promise<ISessionMeta> {
-    if (this.isClosing) throw new Error('Connection closed');
+    if (this.disconnectPromise) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
 
     const { session, tab } = await Session.create(options);
     const sessionId = session.id;
     if (!this.sessionIdToRemoteEvents.has(sessionId)) {
-      const remoteEvents = new RemoteEvents(session, this.emitMessage);
+      const remoteEvents = new RemoteEvents(session, this.sendEvent);
       this.sessionIdToRemoteEvents.set(sessionId, remoteEvents);
       session.once('closing', () => this.sessionIdToRemoteEvents.delete(sessionId));
       session.once('closed', this.checkForAutoShutdown);
@@ -197,24 +194,20 @@ export default class ConnectionToClient
 
   /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 
-  private emitMessage(message: ConnectionToClient['EventTypes']['message']): void {
-    this.emit('message', message);
-  }
-
   private async recordCommands(
     meta: ISessionMeta,
-    sendDate: Date,
-    recordCommands: ICoreRequestPayload['recordCommands'],
+    sendTime: number,
+    recordCommands: ICoreCommandRequestPayload['recordCommands'],
   ): Promise<void> {
     if (!recordCommands.length) return;
 
     const promises: Promise<any>[] = [];
-    for (const { command, args, commandId, startDate } of recordCommands) {
+    for (const { command, args, commandId, startTime } of recordCommands) {
       const cleanArgs = args.map(x => (x === null ? undefined : x));
       const promise = this.executeCommand(command, cleanArgs, meta, {
         commandId,
-        startDate,
-        sendDate,
+        startTime,
+        sendTime,
       }).catch(error => {
         log.warn('RecordingCommandsFailed', {
           sessionId: meta.sessionId,
@@ -231,15 +224,7 @@ export default class ConnectionToClient
     command: string,
     args: any[],
     meta: ISessionMeta,
-    commandMeta: {
-      commandId: number;
-      startDate: Date;
-      sendDate: Date;
-      callsite?: ISourceCodeLocation[];
-      retryNumber?: number;
-      activeFlowHandlerId?: number;
-      flowCommandId?: number;
-    },
+    commandMeta: Commands['nextCommandMeta'],
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);
     const tab = Session.getTab(meta);
@@ -299,7 +284,7 @@ export default class ConnectionToClient
   private serializeError(error: Error): object {
     if (this.isLaunchError(error)) {
       return new Error(
-        'CoreServer needs further setup to launch the browserEmulator. See server logs.',
+        'Ulixee Server needs further setup to launch the browserEmulator. See server logs.',
       );
     }
     if (error instanceof Error) return error;

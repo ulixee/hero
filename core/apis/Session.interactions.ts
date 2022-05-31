@@ -2,7 +2,6 @@ import SessionDb from '../dbs/SessionDb';
 import { IMouseEventRecord, MouseEventType } from '../models/MouseEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
-import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionInteractionsApi(
   args: ISessionInteractionsArgs,
@@ -31,12 +30,7 @@ export default function sessionInteractionsApi(
   };
 }
 
-export interface ISessionInteractionsApi extends ICoreApi {
-  args: ISessionInteractionsArgs;
-  result: ISessionInteractionsResult;
-}
-
-export interface ISessionInteractionsArgs {
+interface ISessionInteractionsArgs {
   sessionId: string;
   mouseEventsFilter?: MouseEventType[];
 }

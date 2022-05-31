@@ -1,7 +1,6 @@
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as Fs from 'fs';
 import SessionDb from '../dbs/SessionDb';
-import ICoreApi from '../interfaces/ICoreApi';
 import CommandFormatter from '../lib/CommandFormatter';
 
 export default function sessionsFindWithErrorsApi(): ISessionsFindWithErrorsResult {
@@ -77,11 +76,7 @@ export default function sessionsFindWithErrorsApi(): ISessionsFindWithErrorsResu
   return results;
 }
 
-export interface ISessionsFindWithErrorsApi extends ICoreApi {
-  result: ISessionsFindWithErrorsResult;
-}
-
-export interface ISessionsFindWithErrorsResult {
+interface ISessionsFindWithErrorsResult {
   sessions: {
     id: string;
     name: string;

@@ -5,9 +5,9 @@ import { IEventRecord } from '../models/AwaitedEventsTable';
 import { IJsPath } from '@unblocked-web/js-path';
 import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ICommandMarker from '@unblocked-web/agent/interfaces/ICommandMarker';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 
 export default class Commands
   extends TypedEventEmitter<{
@@ -35,15 +35,16 @@ export default class Commands
 
   public requiresScriptRestart = false;
 
-  public nextCommandMeta: {
-    commandId: number;
-    startDate: Date;
-    sendDate: Date;
-    callsite?: ISourceCodeLocation[];
-    retryNumber?: number;
-    activeFlowHandlerId?: number;
-    flowCommandId?: number;
-  };
+  public nextCommandMeta: Pick<
+    ICoreCommandRequestPayload,
+    | 'startTime'
+    | 'sendTime'
+    | 'activeFlowHandlerId'
+    | 'flowCommandId'
+    | 'commandId'
+    | 'callsite'
+    | 'retryNumber'
+  >;
 
   private listenersById = new Map<string, IRemoteListenerDetails>();
   private listenerIdCounter = 0;
@@ -97,8 +98,8 @@ export default class Commands
     if (this.nextCommandMeta) {
       const {
         commandId,
-        sendDate,
-        startDate,
+        startTime,
+        sendTime,
         callsite,
         retryNumber,
         activeFlowHandlerId,
@@ -106,8 +107,8 @@ export default class Commands
       } = this.nextCommandMeta;
       this.nextCommandMeta = null;
       if (commandId) commandMeta.id = commandId;
-      commandMeta.clientSendDate = sendDate?.getTime();
-      commandMeta.clientStartDate = startDate?.getTime();
+      commandMeta.clientSendDate = sendTime;
+      commandMeta.clientStartDate = startTime;
       commandMeta.callsite = callsite;
       commandMeta.retryNumber = retryNumber;
       commandMeta.activeFlowHandlerId = activeFlowHandlerId;

@@ -9,6 +9,7 @@ import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import Log from '@ulixee/commons/lib/Logger';
 import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 
 const { log } = Log(module);
 
@@ -18,6 +19,7 @@ export default class TimelineWatch extends TypedEventEmitter<{
   private closeTimer: IResolvablePromise;
   private readonly events = new EventSubscriber();
   private extendTimelineUntilTimestamp: number;
+  private logger: IBoundLog;
 
   constructor(
     readonly heroSession: Session,

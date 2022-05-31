@@ -7,7 +7,7 @@ import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import IResourceProcessingDetails from '@unblocked-web/agent/interfaces/IResourceProcessingDetails';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'Resources',

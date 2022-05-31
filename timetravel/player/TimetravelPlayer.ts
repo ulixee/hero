@@ -2,13 +2,13 @@ import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ConnectionToCoreApi from '@ulixee/hero-core/connections/ConnectionToCoreApi';
 import { ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { Session } from '@ulixee/hero-core';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import TabPlaybackController from './TabPlaybackController';
 import MirrorNetwork from '../lib/MirrorNetwork';
-import DirectConnectionToCoreApi from '@ulixee/hero-core/connections/DirectConnectionToCoreApi';
+import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
+import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
@@ -64,7 +64,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
 
   private constructor(
     readonly sessionId: string,
-    readonly connection: ConnectionToCoreApi,
+    readonly connection: ConnectionToHeroApiCore,
     readonly loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
     private timelineRange?: [startTime: number, endTime?: number],
     readonly debugLogging = false,
@@ -246,15 +246,17 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   private async load(): Promise<void> {
-    const ticksResult = await this.connection.run({
-      api: 'Session.ticks',
-      args: {
-        sessionId: this.sessionId,
-        includeCommands: true,
-        includeInteractionEvents: true,
-        includePaintEvents: true,
-        timelineRange: this.timelineRange,
-      },
+    const ticksResult = await this.connection.sendRequest({
+      command: 'Session.ticks',
+      args: [
+        {
+          sessionId: this.sessionId,
+          includeCommands: true,
+          includeInteractionEvents: true,
+          includePaintEvents: true,
+          timelineRange: this.timelineRange,
+        },
+      ],
     });
 
     if (this.debugLogging) {
@@ -283,9 +285,9 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       this.activeTabId ??= tabDetails.tab.id;
     }
 
-    const resourcesResult = await this.connection.run({
-      api: 'Session.resources',
-      args: { sessionId: this.sessionId, omitWithoutResponse: true, omitNonHttpGet: true },
+    const resourcesResult = await this.connection.sendRequest({
+      command: 'Session.resources',
+      args: [{ sessionId: this.sessionId, omitWithoutResponse: true, omitNonHttpGet: true }],
     });
 
     this.mirrorNetwork.setResources(resourcesResult.resources, this.getResourceDetails.bind(this));
@@ -296,12 +298,14 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   private async getResourceDetails(resourceId: number): Promise<ISessionResourceDetails> {
-    const { resource } = await this.connection.run({
-      api: 'Session.resource',
-      args: {
-        sessionId: this.sessionId,
-        resourceId,
-      },
+    const { resource } = await this.connection.sendRequest({
+      command: 'Session.resource',
+      args: [
+        {
+          sessionId: this.sessionId,
+          resourceId,
+        },
+      ],
     });
     return resource;
   }
@@ -310,9 +314,12 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     heroSessionId: string,
     loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
     timelineRange?: [startTime: number, endTime: number],
-    connectionToCoreApi?: ConnectionToCoreApi,
+    connectionToCoreApi?: ConnectionToHeroApiCore,
   ): TimetravelPlayer {
-    connectionToCoreApi ??= new DirectConnectionToCoreApi();
+    if (!connectionToCoreApi) {
+      const bridge = ConnectionToHeroApiClient.createBridge();
+      connectionToCoreApi = new ConnectionToHeroApiCore(bridge.transportToCore);
+    }
     return new TimetravelPlayer(heroSessionId, connectionToCoreApi, loadIntoContext, timelineRange);
   }
 }

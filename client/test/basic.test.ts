@@ -1,51 +1,36 @@
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { Helpers } from '@ulixee/hero-testing';
-import Hero, { ConnectionToRemoteCoreServer } from '../index';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import Hero from '../index';
 import { scriptInstance } from '../lib/internal';
 import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeServerConfig from '@ulixee/commons/config/servers';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
+import MockConnectionToCore from './_MockConnectionToCore';
 
 const pkg = require('../package.json');
 
 afterAll(Helpers.afterAll);
 
-jest
-  .spyOn(ConnectionToRemoteCoreServer.prototype, 'connect')
-  .mockImplementation(() => Promise.resolve(null));
-class MockedConnectionToCore extends ConnectionToCore {
-  public outgoing = jest.fn(async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-    const { command } = payload;
-    if (command === 'Core.createSession') {
-      return {
-        data: { tabId: 'tab-id', sessionId: 'session-id' },
-      };
-    }
-  });
-
-  async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
-    const response = await this.outgoing(payload);
-    this.onMessage({
+const defaultMockedPayload = payload => {
+  if (payload.command === 'Core.createSession') {
+    return {
       responseId: payload.messageId,
-      data: response?.data ?? {},
-      ...(response ?? {}),
-    });
+      data: { tabId: 'tab-id', sessionId: 'session-id' },
+    };
   }
-
-  protected createConnection = () => Promise.resolve(null);
-  protected destroyConnection = () => Promise.resolve(null);
-}
+  return {
+    responseId: payload.messageId,
+    data: {},
+  };
+};
 
 describe('basic Hero tests', () => {
   it('creates and closes a hero', async () => {
-    const connectionToCore = new MockedConnectionToCore();
+    const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
     const hero = await new Hero({ connectionToCore });
     await hero.close();
 
-    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+    const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
       'Core.createSession',
@@ -54,7 +39,7 @@ describe('basic Hero tests', () => {
   });
 
   it('emits commandId events', async () => {
-    const connectionToCore = new MockedConnectionToCore();
+    const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
     const hero = await new Hero({ connectionToCore });
     const events = [];
 
@@ -64,7 +49,7 @@ describe('basic Hero tests', () => {
 
     await hero.close();
 
-    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+    const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
       'Core.createSession',
@@ -81,11 +66,11 @@ describe('basic Hero tests', () => {
   });
 
   it('includes callsites for commands', async () => {
-    const connectionToCore = new MockedConnectionToCore();
+    const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
     const hero = await new Hero({ connectionToCore });
     await hero.close();
 
-    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+    const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;
 
     // Core.connect doesn't run over a command queue, so never gets callsites
     expect(outgoingCommands.filter(c => c[0].callsite)).toHaveLength(2);
@@ -98,7 +83,7 @@ describe('Connection tests', function () {
     await UlixeeServerConfig.global.setVersionHost('1', 'localhost:8080');
 
     const connectionToCore = ConnectionFactory.createConnection({});
-    await expect(connectionToCore.hostOrError).resolves.toBe('ws://localhost:8000');
+    expect(connectionToCore.transport.host).toBe('ws://localhost:8000');
   });
   it('connects to a started server if the version is compatible', async () => {
     UlixeeConfig.global.serverHost = null;
@@ -106,7 +91,7 @@ describe('Connection tests', function () {
     const next = VersionUtils.nextVersion(version);
     await UlixeeServerConfig.global.setVersionHost(next, 'localhost:8081');
     const connectionToCore = ConnectionFactory.createConnection({});
-    await expect(connectionToCore.hostOrError).resolves.toBe('ws://localhost:8081');
+    expect(connectionToCore.transport.host).toBe('ws://localhost:8081');
   });
   it('should inform a user if a server needs to be started', async () => {
     const version = pkg.version;

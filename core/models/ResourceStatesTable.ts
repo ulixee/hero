@@ -7,7 +7,7 @@ const resourceStates = Object.keys(ResourceState).filter(
 ) as ResourceStates[];
 
 export default class ResourceStatesTable extends SqliteTable<IResourceStatesRecord> {
-  constructor(readonly db: SqliteDatabase) {
+  constructor(db: SqliteDatabase) {
     super(
       db,
       'ResourceStates',

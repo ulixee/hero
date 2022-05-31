@@ -8,7 +8,7 @@ import { IExecuteJsArgs } from './IExecuteJsArgs';
 const { name: pluginId } = require('../package.json');
 
 export default class ExecuteJsClientPlugin extends ClientPlugin {
-  public static id = pluginId;
+  public static override id = pluginId;
   public static coreDependencyIds = [pluginId];
 
   public onHero(hero: Hero, sendToCore: ISendToCoreFn): void {

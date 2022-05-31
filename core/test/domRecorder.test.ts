@@ -3,12 +3,12 @@ import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Loca
 import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import ConnectionToClient from '../connections/ConnectionToClient';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
-let connectionToClient: ConnectionToClient;
+let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
   Core.defaultUnblockedPlugins.push(
     class BasicHumanEmulator {
