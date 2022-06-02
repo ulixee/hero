@@ -6,7 +6,7 @@
 
 Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `hero.use()`.
 
-We recommend using the CorePlugin base class provided by @ulixee/hero-plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to hero, which outputs to the browser's console.
+We recommend using the CorePlugin base class provided by `@ulixee/hero-plugin-utils`, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to hero, which outputs to the browser's console.
 
 ```javascript
 import { ClientPlugin, CorePlugin } from '@ulixee/hero-plugin-utils';
@@ -22,7 +22,7 @@ export class ClientHelloPlugin extends ClientPlugin {
 export class CoreHelloPlugin extends CorePlugin {
   static readonly id = 'hello-plugin';
 
-  onClientCommand({ puppetPage }, name) {
+  onClientCommand({ page }, name) {
     `Hello ${name}`);
   }
 }
@@ -38,6 +38,18 @@ import hero from '@ulixee/hero';
 hero.use(require.resolve('./HelloPlugin'));
 
 await hero.hello('World');
+```
+
+NOTE: you can also register a plugin "directly" in Hero-Core. You do need to understand the [Client vs Core](/docs/advanced-concepts/client-vs-core) separation. Wherever your `Core` process is going to be initialized, you can add code to tap into `@ulixee/hero-core`.
+
+```javascript
+import HeroCore from '@ulixee/hero-core';
+import CorePlugin from './HelloPlugin'
+
+// run before main code (or during initialization)
+HeroCore.use(CorePlugin);
+
+(function main() { // your code here
 ```
 
 The rest of this page documents the various functionalities you can add to your class.
@@ -72,7 +84,9 @@ This tells Hero that the plugin is a CorePlugin. It must always be set.
 
 ## Instance Method Hooks
 
-The following methods are optional. Add them to your plugin as needed.
+The following methods are optional. Add them to your plugin as needed. 
+
+NOTE: Many of these API calls allow you to tap into the underlying [Unblocked Plugin](https://github.com/unblocked-web/unblocked/plugins) Specification ([spec](https://github.com/unblocked-web/specifications)). You can find detailed documentation in the two projects listed above.
 
 ### configure<em>(config)</em>
 
@@ -114,7 +128,9 @@ This method is called every time a ClientPlugin calls sendToCore to this plugin'
 
 #### **Arguments**:
 
-- meta `OnClientCommandMeta`. This object currently has a single property - puppetPage.
+- meta `OnClientCommandMeta`. 
+  - page `IPage`. The given Unblocked Agent `Page`.
+  - frame `IFrame`. The given Unblocked Agent `Frame` if applicable.
 - args: `any[]`. Whatever args the ClientPlugin passed through sendToCore.
 
 #### **Returns** `Promise` | `void`
@@ -167,13 +183,13 @@ Callbacks on each cookie set, and to return the valid list of cookies. This call
 
 #### **Returns** `Promise` | `void`
 
-### onNewPuppetPage<em>(page: IPuppetPage)</em>
+### onNewPage<em>(page: IPage)</em>
 
 This is called every time a new page/iframe is loaded. Use this hook to modify the DOM environment (i.e., to emulate various browser features) before a website loads.
 
 #### **Returns** `Promise`
 
-### onNewPuppetWorker<em>(worker: IPuppetWorker)</em>
+### onNewWorker<em>(worker: IWorker)</em>
 
 This is called every time a new worker is loaded within a page. Use this hook to modify the DOM environment (i.e., to emulate various browser features) before a website loads.
 

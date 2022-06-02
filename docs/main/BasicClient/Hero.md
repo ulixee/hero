@@ -3,7 +3,7 @@
 This is the primary class to interact with Hero. The following is a simple example:
 
 ```js
-const Hero = require('@ulixee/hero');
+const Hero = require('@ulixee/hero-fullstack');
 
 (async () => {
   const hero = new Hero();
@@ -42,7 +42,7 @@ You can optionally await an instance (or constructor) to cause the connection to
 Note: If you provide a `name` that has already been used to name another instance then a counter will be appended to your string to ensure its uniqueness. However, it's only unique within a single NodeJs process (i.e., rerunning your script will reset the counter).
 
 ```js
-const Hero = require('@ulixee/hero');
+const Hero = require('@ulixee/hero-fullstack');
 
 (async () => {
   // connection established here
@@ -324,7 +324,7 @@ If an array is passed, then any client plugins found in the array are registered
 Also, if a string is passed -- regardless of whether it's an npm package or absolute path -- the same will also be registered in Core (however, the same is not true for arrays or objects). For example, you can easily register a Core plugin directly from Client:
 
 ```javascript
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 const hero = new Hero();
 hero.use('@ulixee/tattle-plugin');
@@ -335,7 +335,7 @@ The following three examples all work:
 Use an already-imported plugin:
 
 ```javascript
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
 
 const hero = new Hero();
@@ -345,7 +345,7 @@ hero.use(ExecuteJsPlugin);
 Use an NPM package name (if it's publicly available):
 
 ```javascript
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 const hero = new Hero();
 hero.use('@ulixee/execute-js-plugin');
@@ -354,7 +354,7 @@ hero.use('@ulixee/execute-js-plugin');
 Use an absolute path to file that exports one or more plugins:
 
 ```javascript
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 const hero = new Hero();
 hero.use(require.resolve('./CustomPlugins'));

@@ -2,12 +2,12 @@
 
 If you're migrating a script from SecretAgent, you can expect to find:
 
-- a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](/docs/hero/basic-interfaces/awaited-dom-extenders))
+- a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](/docs/hero/basic-client/awaited-dom-extenders))
 - a much better experience running in "headed" mode during development, while still supporting headless for production.
-- features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/hero/basic-interfaces/flow))
+- features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/hero/basic-client/flow))
 - a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/server; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/unblocked-web/unblocked) project.
 
-Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero')`.
+Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero-fullstack')`.
 
 ```typescript
 import { Agent } from 'secret-agent';
@@ -27,7 +27,7 @@ run().catch(error => console.log(error));
 ```
 
 ```typescript
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 async function run() {
   const hero = new Hero();
@@ -47,9 +47,13 @@ run().catch(error => console.log(error));
 
 If you were using the default "Agent" from `const agent = require('secret-agent')`, you'll need to move to a mode of constructing a Hero object for each session.
 
+## Client Library
+
 ## Server Setup
 
 If you use a Client/Server Setup, you'll find that we moved the `Server` module out of Hero, and into [@ulixee/server][server]. You get the same functionality out of the box - a Server you can install on a machine and your DOM, interactions and other commands all serialize seamlessly.
+
+To avoid installing the whole Chrome infrastructure on your client side, you can use the light client - `npm i @ulixee/hero`. It's the equivalent of `@secret-agent/client`.
 
 ## Handlers
 
@@ -67,9 +71,14 @@ If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have 
 
 To that end, the library that was formally passed into "Plugins" and "Human/Browser" Emulators has been merged with some parts of SecretAgent Core to form the [Unblocked Agent][unblocked-agent]. The Unblocked Agent is now under it's own development lifecycle and has been put into a much tighter loop with DoubleAgent (aka, detection) development. We envision Hero as the home of scraper productivity tooling, and Unblocked as the home of the bot cat and mouse game.
 
+## Plugins
+
+If you wrote a Core Plugin, you'll notice that the API callbacks have changed slightly. Callbacks and variables no longer have "puppet" in the name, since they're now part of [Unblocked Agent][unblocked-agent].
+
 ## Replay
 
 If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new ChromeAlive! tooling. You can download the [Ulixee.app](https://github.com/ulixee/ulixee/releases/latest) install, or you can add `@ulixee/apps-chromealive-core` and `@ulixee/server` to your `devDependencies` and start a local server. This will add a bar to a headed version of Chrome when you're developing.
+
 
 [server]: https://ulixee.org/docs/server
 [unblocked-plugin]: https://github.com/unblocked-web/specifications

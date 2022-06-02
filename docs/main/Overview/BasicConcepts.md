@@ -24,7 +24,7 @@ The easiest way to explain Dynamic DOM is with some comparison examples. Let's s
 Here's how you would do it with Hero:
 
 ```js
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 const { document } = hero;
 
@@ -67,7 +67,7 @@ When used in a simple example as show above, Puppeteer's approach seems okay. Ho
 When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. Hero allows you to [turn off](/docs/overview/configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
 
 ```js
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 const hero = new Hero({
   blockedResourceTypes: ['All'],

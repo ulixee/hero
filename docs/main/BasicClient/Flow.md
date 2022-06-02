@@ -22,11 +22,11 @@ NOTE: If the "flow" cannot be resumed, a FlowHandler should throw an error to in
 
 ### When a Flow Handler will Trigger
 
-FlowHandlers are automatically checked anytime an AwaitedDOM error occurs. These errors are things like: an element can't be found, an element interaction failed, or waiting for an element [State](/docs/hero/basic-interfaces/tab#wait-for-state) timed out.
+FlowHandlers are automatically checked anytime an AwaitedDOM error occurs. These errors are things like: an element can't be found, an element interaction failed, or waiting for an element [State](/docs/hero/basic-client/tab#wait-for-state) timed out.
 
 ### Flow Commands
 
-[FlowCommands](/docs/hero/basic-interfaces/tab#flow-commands) are ways to group a series of commands together that should be re-run as a unit when an AwaitedDOM error occurs. This is often useful in more complicated Flow scenarios: eg, where a Form validation has failed that requires re-typing information for an autocomplete list, or the Tab has redirected to an error page and the flow needs to restart. You would want to ensure all steps are run when a failure is encountered.
+[FlowCommands](/docs/hero/basic-client/tab#flow-commands) are ways to group a series of commands together that should be re-run as a unit when an AwaitedDOM error occurs. This is often useful in more complicated Flow scenarios: eg, where a Form validation has failed that requires re-typing information for an autocomplete list, or the Tab has redirected to an error page and the flow needs to restart. You would want to ensure all steps are run when a failure is encountered.
 
 ```js
 await hero.flowCommand(async () => {

@@ -13,7 +13,7 @@ A few cool highlights about Hero:
 ## Installation
 
 ```shell script
-npm i --save @ulixee/hero
+npm i --save @ulixee/hero-fullstack
 ```
 
 or
@@ -27,7 +27,7 @@ yarn add @ulixee/hero
 Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-const Hero = require('@ulixee/hero');
+const Hero = require('@ulixee/hero-fullstack');
 
 (async () => {
   const hero = new Hero();
