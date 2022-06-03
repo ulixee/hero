@@ -19,7 +19,7 @@ npm i --save @ulixee/hero-fullstack
 or
 
 ```shell script
-yarn add @ulixee/hero
+yarn add @ulixee/hero-fullstack
 ```
 
 ## Usage
