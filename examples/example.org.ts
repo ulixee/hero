@@ -1,6 +1,7 @@
-import Hero from '@ulixee/hero-fullstack';
+import Hero from '@ulixee/hero';
 import { LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 
+// NOTE: You need to start a Ulixee Server to run this example
 async function run() {
   const hero = new Hero();
   await hero.goto('https://example.org/');
@@ -28,7 +29,6 @@ async function run() {
   console.log('-------------------------------------');
 
   await hero.close();
-
 }
 
 run().catch(error => console.log(error));

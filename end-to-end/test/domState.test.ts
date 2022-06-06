@@ -1,6 +1,5 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Hero from '../index';
 import DomState from '@ulixee/hero/lib/DomState';
 
 let koaServer: ITestKoaServer;

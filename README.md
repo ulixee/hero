@@ -13,13 +13,13 @@ Check out our [website for more details](https://ulixee.org).
 ## Installation
 
 ```shell script
-npm i --save @ulixee/hero-fullstack
+npm i --save @ulixee/hero-playground
 ```
 
 or
 
 ```shell script
-yarn add @ulixee/hero-fullstack
+yarn add @ulixee/hero-playground
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ yarn add @ulixee/hero-fullstack
 Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-const Hero = require('@ulixee/hero-fullstack');
+const Hero = require('@ulixee/hero-playground');
 
 (async () => {
   const hero = new Hero();

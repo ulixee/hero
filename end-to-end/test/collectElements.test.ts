@@ -1,5 +1,4 @@
-import { Helpers } from '@ulixee/hero-testing';
-import Hero from '..';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import { InternalPropertiesSymbol } from '@ulixee/hero/lib/internal';
 import { awaitedPathState } from '@ulixee/hero/lib/DomExtender';
 import { ISuperElement, ISuperNodeList } from 'awaited-dom/base/interfaces/super';

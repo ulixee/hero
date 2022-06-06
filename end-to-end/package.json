@@ -1,11 +1,8 @@
 {
-  "name": "@ulixee/hero-fullstack",
+  "name": "@ulixee/hero-end-to-end",
   "version": "2.0.0-alpha.3",
-  "description": "The fullstack Hero (client + core)",
-  "exports": {
-    "import": "./index.mjs",
-    "require": "./index.cjs"
-  },
+  "description": "End to end Hero tests",
+  "private": true,
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.3",
     "@ulixee/net": "2.0.0-alpha.3",

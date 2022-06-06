@@ -1,7 +1,11 @@
-import Hero, { Core } from '@ulixee/hero-fullstack';
+import Core from '@ulixee/hero-core';
+import Hero from '@ulixee/hero'
 import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
 
 Core.use(ExecuteJsPlugin);
+
+// NOTE: You need to start a Ulixee Server **in this same process** to run this example
+import './server'
 
 (async function main() {
   const hero = new Hero();

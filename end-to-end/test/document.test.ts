@@ -1,11 +1,10 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import { XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { FrameEnvironment, LocationStatus } from '@ulixee/hero';
 import Dialog from '@ulixee/hero/lib/Dialog';
 import HTMLIFrameElement from 'awaited-dom/impl/official-klasses/HTMLIFrameElement';
 import HTMLHeadingElement from 'awaited-dom/impl/official-klasses/HTMLHeadingElement';
-import Hero from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {

@@ -1,3 +1,4 @@
 import * as Helpers from './helpers';
+import TestHero from './TestHero';
 
-export { Helpers };
+export { Helpers, TestHero as Hero };

@@ -1,6 +1,5 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import Resource from '@ulixee/hero/lib/Resource';
-import Hero from '../index';
 
 let koaServer;
 beforeAll(async () => {

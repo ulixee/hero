@@ -1,6 +1,6 @@
-import Hero from '@ulixee/hero-fullstack';
+import Hero from '@ulixee/hero';
 
-// process.env.ULX_SHOW_CHROME = 'true';
+// NOTE: You need to start a Ulixee Server to run this example
 
 async function run() {
   const hero = new Hero({ userAgent: '~ chrome = 89' });

@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import MitmServer from '@unblocked-web/agent-mitm/lib/MitmProxy';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as WebSocket from 'ws';
@@ -6,7 +6,7 @@ import HttpUpgradeHandler from '@unblocked-web/agent-mitm/handlers/HttpUpgradeHa
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { AddressInfo } from 'net';
-import Hero, { Core } from '../index';
+import Core from '@ulixee/hero-core';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {

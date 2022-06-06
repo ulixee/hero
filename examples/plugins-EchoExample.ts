@@ -1,5 +1,9 @@
-import Hero, { Core } from '@ulixee/hero-fullstack';
+import Core from '@ulixee/hero-core';
+import Hero from '@ulixee/hero';
 import * as Path from 'path';
+
+// NOTE: You need to start a Ulixee Server **in this same process** to run this example
+import './server';
 
 async function run() {
   // For security, need to explicitly activate dynamic loading to allow Core to load a random path.
@@ -20,6 +24,7 @@ async function run() {
     result,
   });
   await hero.close();
+  await Core.shutdown();
 }
 
 run().catch(error => console.log(error));

@@ -1,5 +1,7 @@
+// NOTE: You need to start a Ulixee Server to run this example
+
 import Queue from 'p-queue';
-import Hero from '@ulixee/hero-fullstack';
+import Hero from '@ulixee/hero';
 
 (async () => {
   let cost = '0';

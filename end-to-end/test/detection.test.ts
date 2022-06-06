@@ -1,9 +1,9 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
-import { Session } from '@ulixee/hero-core';
+import { Session } from '@ulixee/hero-core/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Hero, { LocationStatus } from '../index';
+import { LocationStatus } from '@ulixee/hero';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 
@@ -417,7 +417,6 @@ describe('Proxy detections', () => {
     );
     expect(result).toBe('ok');
   });
-
 
   test('should not reveal recursion errors for getPrototypeOf of a getter', async () => {
     const hero = new Hero();
