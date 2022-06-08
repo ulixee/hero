@@ -1,7 +1,7 @@
 import { Helpers, Hero } from '@ulixee/hero-testing';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
-import { Session } from '@ulixee/hero-core/index';
+import { Session } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { LocationStatus } from '@ulixee/hero';
 

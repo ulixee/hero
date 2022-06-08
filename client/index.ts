@@ -20,17 +20,19 @@ import {
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
 import IResourceType, { ResourceType } from '@unblocked-web/specifications/agent/net/IResourceType';
-import { InteractionCommand, MouseButton } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { InteractionCommand, MouseButton,  } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
+import { Command } from './interfaces/IInteractions';
 import { Hero, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
 import ConnectionToHeroCore from './connections/ConnectionToHeroCore';
 
 export default Hero;
 
 export {
+  Command,
   ConnectionToHeroCore,
   InteractionCommand,
   MouseButton,

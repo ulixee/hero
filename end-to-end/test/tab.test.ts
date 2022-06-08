@@ -1,5 +1,5 @@
 import { Hero, Helpers } from '@ulixee/hero-testing';
-import { Command } from '@ulixee/hero/interfaces/IInteractions';
+import { Command } from '@ulixee/hero';
 import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
 import * as os from 'os';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';

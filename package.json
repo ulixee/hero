@@ -39,22 +39,22 @@
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
-    "@types/jest": "^27.5.1",
+    "@types/jest": "^28.1.0",
     "@types/node": "^14.18.18",
-    "@ulixee/repo-tools": "^1.0.7",
+    "@ulixee/repo-tools": "^1.0.9",
     "awaited-dom": "1.4.0",
     "cross-env": "^7.0.3",
     "decamelize": "^4.0.0",
     "husky": "^7.0.1",
-    "jest": "^27.5.1",
-    "jest-environment-node": "^27.5.1",
+    "jest": "^28.1.0",
+    "jest-environment-node": "^28.1.0",
     "jest-summary-reporter": "^0.0.2",
     "json2md": "^1.7.0",
     "lerna": "^4.0.0",
     "lint-staged": "^10.5.2",
     "noderdom-detached": "https://github.com/ulixee/noderdom-detached.git#dist",
     "shx": "^0.3.3",
-    "typescript": "~4.5.5"
+    "typescript": "~4.7.3"
   },
   "workspaces": {
     "packages": [
