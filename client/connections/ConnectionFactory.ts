@@ -38,16 +38,16 @@ export default class ConnectionFactory {
         if (this.hasLocalServerPackage) {
           // If servers are launched, but none compatible, propose installing server locally
           throw new Error(
-            `Your Ulixee Server is not started. From your project, run:\n\nnpx ulixee-start-server`,
+            `Your Ulixee Server is not started. From your project, run:\n\nnpx @ulixee/server start`,
           );
         }
 
         // If servers are launched, but none compatible, propose installing server locally
         throw new Error(`Your script is using version ${version} of Hero. A compatible Ulixee Server was not found on localhost. You can fix this by installing and running server in your project:
 
-npm i --save-dev @ulixee/server @ulixee/apps-chromealive-core
+npm install --save-dev @ulixee/server @ulixee/apps-chromealive-core
 
-npx ulixee-start-server
+npx @ulixee/server start
         `);
       }
     }
