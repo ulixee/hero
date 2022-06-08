@@ -49,7 +49,7 @@ import Tab, { createTab, getCoreTab } from './Tab';
 import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
-import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
+import ConnectionFactory from '../connections/ConnectionFactory';
 import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnvironment';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
@@ -99,7 +99,6 @@ export default class Hero extends AwaitedEventTarget<{
   close: () => void;
   command: (name: string, commandId: number, args: any[]) => void;
 }> {
-  public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
 
   readonly #options: ISessionOptions;
@@ -147,7 +146,6 @@ export default class Hero extends AwaitedEventTarget<{
 
     this.#connectionToCore = ConnectionFactory.createConnection(
       connectionToCore ?? { isPersistent: false },
-      (this.constructor as any).createConnectionToCore,
     );
 
     this.#didAutoCreateConnection = this.#connectionToCore !== connectionToCore;

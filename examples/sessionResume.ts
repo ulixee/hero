@@ -1,3 +1,5 @@
+// NOTE: You need to start a Ulixee Server to run this example
+
 import Hero from '@ulixee/hero';
 import * as Fs from 'fs';
 

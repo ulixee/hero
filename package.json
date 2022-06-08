@@ -60,7 +60,7 @@
     "packages": [
       "client",
       "core",
-      "fullstack",
+      "end-to-end",
       "interfaces",
       "testing",
       "timetravel",

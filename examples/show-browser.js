@@ -1,4 +1,6 @@
-const Hero = require('@ulixee/hero-fullstack');
+// NOTE: You need to start a Ulixee Server to run this example
+
+const Hero = require('@ulixee/hero');
 
 //process.env.ULX_SHOW_CHROME = 'true';
 

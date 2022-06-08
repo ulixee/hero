@@ -1,7 +1,6 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Hero, Helpers } from '@ulixee/hero-testing';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as Fs from 'fs';
-import Hero from '../index';
 
 let koaServer;
 beforeAll(async () => {

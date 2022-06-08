@@ -10,14 +10,11 @@ const { version } = require('../package.json');
 
 const { log } = Log(module);
 
-export type ICreateConnectionToCoreFn = (options: IConnectionToCoreOptions) => ConnectionToHeroCore;
-
 export default class ConnectionFactory {
   public static hasLocalServerPackage = false;
 
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToHeroCore,
-    overrideCreateConnectionToCoreFn?: ICreateConnectionToCoreFn,
   ): ConnectionToHeroCore {
     if (options instanceof ConnectionToHeroCore) {
       // NOTE: don't run connect on an instance
@@ -25,9 +22,7 @@ export default class ConnectionFactory {
     }
 
     let connection: ConnectionToHeroCore;
-    if (overrideCreateConnectionToCoreFn) {
-      connection = overrideCreateConnectionToCoreFn(options);
-    } else if (options.host) {
+    if (options.host) {
       const transport = new WsTransportToCore(options.host);
       connection = new ConnectionToHeroCore(transport);
     } else {
@@ -43,7 +38,7 @@ export default class ConnectionFactory {
         if (this.hasLocalServerPackage) {
           // If servers are launched, but none compatible, propose installing server locally
           throw new Error(
-            `Your Ulixee Server is not started. From your project, run:\n\n./node_modules/.bin/ulixee-start-server`,
+            `Your Ulixee Server is not started. From your project, run:\n\nnpx ulixee-start-server`,
           );
         }
 
@@ -52,7 +47,7 @@ export default class ConnectionFactory {
 
 npm i --save-dev @ulixee/server @ulixee/apps-chromealive-core
 
-./node_modules/.bin/ulixee-start-server
+npx ulixee-start-server
         `);
       }
     }

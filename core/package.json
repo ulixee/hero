@@ -38,7 +38,6 @@
     "@types/json-socket": "^0.1.17",
     "@ulixee/chrome-app": "1.0.2",
     "@ulixee/hero": "2.0.0-alpha.3",
-    "@ulixee/hero-fullstack": "2.0.0-alpha.3",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.3",
     "@ulixee/hero-testing": "2.0.0-alpha.3",
     "http-proxy-agent": "^4.0.1",

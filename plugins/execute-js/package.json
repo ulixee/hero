@@ -10,8 +10,8 @@
   "devDependencies": {
     "@ulixee/commons": "2.0.0-alpha.3",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.3",
+    "@ulixee/hero": "2.0.0-alpha.3",
     "@ulixee/hero-core": "2.0.0-alpha.3",
-    "@ulixee/hero-fullstack": "2.0.0-alpha.3",
     "@ulixee/hero-testing": "2.0.0-alpha.3"
   }
 }

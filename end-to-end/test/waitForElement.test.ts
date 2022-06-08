@@ -1,7 +1,6 @@
-import { Helpers } from '@ulixee/hero-testing';
+import { Hero, Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import Hero from '../index';
 import Tab from '@ulixee/hero/lib/Tab';
 
 let koaServer: ITestKoaServer;

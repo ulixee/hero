@@ -104,7 +104,11 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
   protected async beforeDisconnect(): Promise<void> {
     const hasSessions = this.coreSessions?.size > 0;
     this.commandQueue.stop(new DisconnectedFromCoreError(this.transport.host));
-    this.coreSessions.stop(new DisconnectedFromCoreError(this.transport.host));
+    this.coreSessions.stop(
+      !this.transport.isConnected
+        ? new Error(`No host connection was established (${this.transport.host})`)
+        : new DisconnectedFromCoreError(this.transport.host),
+    );
 
     if (!this.connectPromise) return;
 

@@ -12,14 +12,28 @@ A few cool highlights about Hero:
 
 ## Installation
 
-```shell script
-npm i --save @ulixee/hero-fullstack
+To get started using Hero in your project, we have a "playground" that allows you to run examples out of the box. It can be installed using the following commands:
+
+```bash
+npm i --save @ulixee/hero-playground
 ```
 
 or
 
-```shell script
-yarn add @ulixee/hero-fullstack
+```bash
+yarn add @ulixee/hero-playground
+```
+
+You can drop the "-playground" whenever you want and use Hero directly (the core functionality is exactly the same). Just make sure your Ulixee development environment is setup and ready to go, such as making sure [`@ulixee/server`](/docs/server) is installed and running:
+
+```bash
+npm i --save @ulixee/hero
+```
+
+or
+
+```bash
+yarn add @ulixee/hero
 ```
 
 ## Usage
@@ -27,7 +41,7 @@ yarn add @ulixee/hero-fullstack
 Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-const Hero = require('@ulixee/hero-fullstack');
+const Hero = require('@ulixee/hero-playground');
 
 (async () => {
   const hero = new Hero();

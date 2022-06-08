@@ -6,21 +6,19 @@ When you install Hero, it comes ready to run locally with a Chrome engine and cl
 
 ```javascript
 const { Hero: BaseHero } = require('@ulixee/hero');
-const { Hero: FullHero } = require('@ulixee/hero-fullstack');
+const { Hero: PlaygroundHero } = require('@ulixee/hero-playground');
 
 (async () => {
-  const local = new FullHero(); // connects to full, local installation
+  // starts a Hero Core and automatically connects
+  const local = new PlaygroundHero();
+  // dials a Remote Core
   const remote = new BaseHero({
     ConnectionToHeroCore: new ConnectionToHeroCore.remote('192.168.1.1:3444'),
   });
 })().catch(console.log);
 ```
 
-
-Connections take "transports" that allow it to run over different types of connections and protocols. There are 2 types of protocols used in Hero:
-
-- `Direct` - instantiates and connects to a locally install Hero `Core` (used by `@ulixee/hero-fullstack`)
-- `WsTransportToCore` - takes a host to dial over a Websocket. See more [here](/docs/hero/advanced-concepts/client-vs-core)
+Connections take "transports" that allow it to run over different types of connections and protocols. Hero uses WebSockets as the default transport (`WsTransportToCore`). Find more details [here](/docs/hero/advanced-concepts/client-vs-core).
 
 ### Configuration {#configuration}
 
@@ -39,7 +37,7 @@ The provided settings configure the connection to `Core`. Note: some configurati
 
 ## Methods
 
-### connection.connect *()* {#connect}
+### connection.connect _()_ {#connect}
 
 Initializes the connection to the specified core. You can use this function if you would like to pre-connect to your remote host and ensure connections are properly established before continuing.
 
@@ -47,7 +45,7 @@ NOTE: this will be automatically called when you pass in a connection to Hero.
 
 #### **Returns**: `Promise`
 
-### connection.disconnect *()* {#disconnect}
+### connection.disconnect _()_ {#disconnect}
 
 Closes the connection and stops all pending requests.
 
