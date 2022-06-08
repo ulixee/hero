@@ -7,6 +7,7 @@ const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
 const logFilters = {
   active: [] as RegExp[],
   skip: [] as RegExp[],
+  namespaces: { active: new Set<string>(), inactive: new Set<string>() },
   enabledNamesCache: {} as { [namespace: string]: boolean },
 };
 
@@ -234,27 +235,56 @@ function extractPathFromModule(module: NodeModule): string {
 
 /// LOG FILTERING //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function isEnabled(name: string): boolean {
-  if (name in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[name];
+export function registerNamespaceMapping(
+  onNamespaceFn: (namespace: string, active: RegExp[], skip: RegExp[]) => void,
+): void {
+  for (const ns of logFilters.namespaces.active) {
+    onNamespaceFn(ns, logFilters.active, logFilters.skip);
+  }
+}
 
-  if (name[name.length - 1] === '*') {
+registerNamespaceMapping((ns, active, skip) => {
+  if (ns.includes('ubk:*') || ns.includes('ubk*')) {
+    active.push(/agent\/.*/);
+  } else if (ns === 'ubk') {
+    active.push(/agent\/.*/);
+    skip.push(/DevtoolsSessionLogger/, /agent\/mitm.*/);
+  } else if (ns.includes('ubk:devtools')) {
+    active.push(/DevtoolsSessionLogger/);
+  }
+});
+
+registerNamespaceMapping((ns, active) => {
+  if (ns.includes('ulx:*') || ns.includes('ulx*')) {
+    active.push(/^apps\/chromealive*/, /hero\/.*/, /net\/.*/, /databox\/.*/);
+  } else if (ns.includes('hero')) {
+    active.push(/^hero\/.*/, /net\/.*/);
+  } else if (ns.includes('databox')) {
+    active.push(/^databox\/.*/, /net\/.*/);
+  }
+});
+
+function isEnabled(modulePath: string): boolean {
+  if (modulePath in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[modulePath];
+
+  if (modulePath[modulePath.length - 1] === '*') {
     return true;
   }
   for (const ns of logFilters.skip) {
-    if (ns.test(name)) {
-      logFilters.enabledNamesCache[name] = false;
+    if (ns.test(modulePath)) {
+      logFilters.enabledNamesCache[modulePath] = false;
       return false;
     }
   }
 
   for (const ns of logFilters.active) {
-    if (ns.test(name)) {
-      logFilters.enabledNamesCache[name] = true;
+    if (ns.test(modulePath)) {
+      logFilters.enabledNamesCache[modulePath] = true;
       return true;
     }
   }
 
-  logFilters.enabledNamesCache[name] = false;
+  logFilters.enabledNamesCache[modulePath] = false;
   return false;
 }
 
@@ -267,32 +297,10 @@ function enable(namespaces: string): void {
     part = part.replace(/\*/g, '.*?');
 
     if (part[0] === '-') {
-      logFilters.skip.push(new RegExp('^' + part.slice(1) + '$'));
+      logFilters.namespaces.inactive.add(part); // .push(new RegExp('^' + part.slice(1) + '$'));
     } else {
-      logFilters.active.push(new RegExp('^' + part + '$'));
-
-      if (part.includes('ubk:*') || part.includes('ubk*')) {
-        logFilters.active.push(/agent\/.*/);
-      } else if (part === 'ubk') {
-        logFilters.active.push(/agent\/.*/);
-        logFilters.skip.push(new RegExp('DevtoolsSessionLogger'));
-        logFilters.skip.push(new RegExp(/agent\/mitm.*/));
-      } else if (part.includes('ubk:devtools')) {
-        logFilters.active.push(new RegExp('DevtoolsSessionLogger'));
-      }
-
-      if (part.includes('ulx:*') || part.includes('ulx*')) {
-        logFilters.active.push(/^apps\/chromealive*/);
-        logFilters.active.push(/hero\/.*/);
-        logFilters.active.push(/net\/.*/);
-        logFilters.active.push(/databox\/.*/);
-      } else if (part.includes('hero')) {
-        logFilters.active.push(/^hero\/.*/);
-        logFilters.active.push(/net\/.*/);
-      } else if (part.includes('databox')) {
-        logFilters.active.push(/^databox\/.*/);
-        logFilters.active.push(/net\/.*/);
-      }
+      logFilters.namespaces.active.add(part);
+      // logFilters.active.push(new RegExp('^' + part + '$'));
     }
   }
 }

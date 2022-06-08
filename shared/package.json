@@ -16,7 +16,8 @@
     "devtools-protocol": "^0.0.981744",
     "https-proxy-agent": "^5.0.0",
     "semver": "^7.3.7",
-    "source-map-js": "^1.0.1"
+    "source-map-js": "^1.0.1",
+    "bech32": "^2.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.5.0",

@@ -44,6 +44,21 @@ export class SourceMapSupport {
     return source;
   }
 
+  static getSourceFilePaths(filename: string): string[] {
+    this.sourceMapCache[filename] ??= this.retrieveSourceMap(filename);
+    if (!this.sourceMapCache[filename].map) return [filename];
+
+    const sourcesByMappingSource = new Map<string, string>();
+    const sourceMap = this.sourceMapCache[filename];
+    sourceMap.map.eachMapping(mapping => {
+      if (!sourcesByMappingSource.has(mapping.source)) {
+        const resolvedPath = this.resolvePath(sourceMap.url, mapping.source);
+        sourcesByMappingSource.set(mapping.source, resolvedPath);
+      }
+    });
+    return [...sourcesByMappingSource.values()];
+  }
+
   static getOriginalSourcePosition(
     position: ISourceCodeLocation,
   ): ISourceCodeLocation & { name?: string } {
@@ -65,6 +80,44 @@ export class SourceMapSupport {
     }
 
     return position;
+  }
+
+  static retrieveSourceMap(source: string): { url: string; map: SourceMapConsumer; rawMap?: any } {
+    const fileData = SourceLoader.getFileContents(source, false);
+
+    // Find the *last* sourceMappingURL to avoid picking up sourceMappingURLs from comments, strings, etc.
+    let sourceMappingURL: string;
+    let sourceMapData: string;
+
+    let match: RegExpMatchArray;
+    while ((match = sourceMapUrlRegex.exec(fileData))) {
+      sourceMappingURL = match[1];
+    }
+
+    if (sourceMappingURL) {
+      if (sourceMapDataUrlRegex.test(sourceMappingURL)) {
+        const rawData = sourceMappingURL.slice(sourceMappingURL.indexOf(',') + 1);
+        sourceMapData = Buffer.from(rawData, 'base64').toString();
+        sourceMappingURL = source;
+      } else {
+        sourceMappingURL = this.resolvePath(source, sourceMappingURL);
+        sourceMapData = SourceLoader.getFileContents(sourceMappingURL);
+      }
+    }
+
+    if (!sourceMapData) {
+      return {
+        url: null,
+        map: null,
+      };
+    }
+
+    const rawData = JSON.parse(sourceMapData);
+    return {
+      url: sourceMappingURL,
+      map: new SourceMapConsumer(rawData),
+      rawMap: rawData,
+    };
   }
 
   private static prepareStackTrace(error: Error, stack: NodeJS.CallSite[]): string {
@@ -109,43 +162,6 @@ export class SourceMapSupport {
       processedStack.unshift(`\n    at ${frame.toString()}`);
     }
     return errorString + processedStack.join('');
-  }
-
-  private static retrieveSourceMap(source: string): { url: string; map: SourceMapConsumer } {
-    const fileData = SourceLoader.getFileContents(source, false);
-
-    // Find the *last* sourceMappingURL to avoid picking up sourceMappingURLs from comments, strings, etc.
-    let sourceMappingURL: string;
-    let sourceMapData: string;
-
-    let match: RegExpMatchArray;
-    while ((match = sourceMapUrlRegex.exec(fileData))) {
-      sourceMappingURL = match[1];
-    }
-
-    if (sourceMappingURL) {
-      if (sourceMapDataUrlRegex.test(sourceMappingURL)) {
-        const rawData = sourceMappingURL.slice(sourceMappingURL.indexOf(',') + 1);
-        sourceMapData = Buffer.from(rawData, 'base64').toString();
-        sourceMappingURL = source;
-      } else {
-        sourceMappingURL = this.resolvePath(source, sourceMappingURL);
-        sourceMapData = SourceLoader.getFileContents(sourceMappingURL);
-      }
-    }
-
-    if (!sourceMapData) {
-      return {
-        url: null,
-        map: null,
-      };
-    }
-
-    const rawData = JSON.parse(sourceMapData);
-    return {
-      url: sourceMappingURL,
-      map: new SourceMapConsumer(rawData),
-    };
   }
 
   private static resolvePath(base: string, relative: string): string {
