@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.4](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
+
+
+### Bug Fixes
+
+* empty null rejection on early hero terminate ([6159a79](https://github.com/ulixee/ulixee/commit/6159a7904c649c1cdb152004d96cd0baef96ff74))
+* update command for server start ([6a422ec](https://github.com/ulixee/ulixee/commit/6a422ec1fe6583ac247b417d84aeb27831076942))
+
+
+
+
+
 # [2.0.0-alpha.3](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/hero

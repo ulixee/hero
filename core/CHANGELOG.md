@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.4](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
+
+
+### Features
+
+* no automatic shutdown of hero for connection ([65ed29d](https://github.com/ulixee/ulixee/commit/65ed29d4f4ffa775df00821619f77006cb87bd32))
+
+
+
+
+
 # [2.0.0-alpha.3](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/hero-core

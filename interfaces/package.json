@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero-interfaces",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.4",
   "description": "Core interfaces used by Hero",
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.4",

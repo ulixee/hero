@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.4](https://github.com/ulixee/hero/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
+
+
+### Bug Fixes
+
+* empty null rejection on early hero terminate ([6159a79](https://github.com/ulixee/hero/commit/6159a7904c649c1cdb152004d96cd0baef96ff74))
+* small tweaks to wording ([2daf218](https://github.com/ulixee/hero/commit/2daf21863691ed720bd320783f4eeadb208ac516))
+* tests ([27e1966](https://github.com/ulixee/hero/commit/27e1966c636f47519ed5d1ccc22273c1215855c1))
+* update command for server start ([6a422ec](https://github.com/ulixee/hero/commit/6a422ec1fe6583ac247b417d84aeb27831076942))
+
+
+### Features
+
+* fixed some documentation ([09f3b41](https://github.com/ulixee/hero/commit/09f3b4156b874d67dd7aeabf9a3a9cf0f0d3032c))
+* migration guide ([efb587a](https://github.com/ulixee/hero/commit/efb587a815865fa786a3aed496bb11c56adba6e5))
+* no automatic shutdown of hero for connection ([65ed29d](https://github.com/ulixee/hero/commit/65ed29d4f4ffa775df00821619f77006cb87bd32))
+* updated docs for website ([fd4b025](https://github.com/ulixee/hero/commit/fd4b025e9d2ec735a646d924599c97e3a2b30377))
+
+
+
+
+
 # [2.0.0-alpha.3](https://github.com/ulixee/hero/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/hero-monorepo
