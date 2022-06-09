@@ -61,7 +61,6 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
 }
 
 if (args.pdfViewerEnabled && 'pdfViewerEnabled' in self.navigator) {
-  // @ts-expect-error
   proxyGetter(self.navigator, 'pdfViewerEnabled', () => args.pdfViewerEnabled, true);
 }
 

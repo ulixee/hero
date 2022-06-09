@@ -194,7 +194,7 @@ function proxyFunction<T, K extends keyof T>(
 ) {
   const descriptorInHierarchy = getDescriptorInHierarchy(thisObject, functionName);
   if (!descriptorInHierarchy) {
-    throw new Error(`Could not find descriptor for function: ${functionName}`);
+    throw new Error(`Could not find descriptor for function: ${String(functionName)}`);
   }
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
 
@@ -220,7 +220,7 @@ function proxyGetter<T, K extends keyof T>(
 ) {
   const descriptorInHierarchy = getDescriptorInHierarchy(thisObject, propertyName);
   if (!descriptorInHierarchy) {
-    throw new Error(`Could not find descriptor for getter: ${propertyName}`);
+    throw new Error(`Could not find descriptor for getter: ${String(propertyName)}`);
   }
 
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
@@ -250,7 +250,7 @@ function proxySetter<T, K extends keyof T>(
 ) {
   const descriptorInHierarchy = getDescriptorInHierarchy(thisObject, propertyName);
   if (!descriptorInHierarchy) {
-    throw new Error(`Could not find descriptor for setter: ${propertyName}`);
+    throw new Error(`Could not find descriptor for setter: ${String(propertyName)}`);
   }
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
   descriptor.set = internalCreateFnProxy(
