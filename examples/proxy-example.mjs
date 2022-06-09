@@ -5,6 +5,8 @@ import Hero from '@ulixee/hero';
 (async () => {
   const hero = new Hero({
     upstreamProxyUrl: `socks5://${process.env.PROXY_PASS}@proxy-nl.privateinternetaccess.com:1080`,
+    showChrome: true,
+    sessionKeepAlive: true,
   });
   await hero.goto('https://whatsmyip.com/');
   await hero.waitForPaintingStable();

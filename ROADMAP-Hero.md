@@ -16,7 +16,7 @@ Hero 2.11 further refines the concept of FlowHandlers and State. We want to enha
 
 ## Better Query Selectors
 When writing Query Selectors in Hero, there is often a need to find one of many elements that is Visible or “In Viewport”. In a reactive website, the same “element” criteria might be swapped in and out of the page many times. We would like to improve interactions with these types of elements.
-- Super Selectors (ability to do things like “:isVisible” or :isHidden) [IN PROGRESS]
+- Super Selectors (ability to do things like “:isVisible” or :isHidden)
 - Live Query Selectors by Default
 
 ## More Robust Networking Layer

@@ -290,7 +290,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       JSON.stringify(meta.request.headers ?? {}),
       JSON.stringify(meta.request.trailers ?? {}),
       meta.request.timestamp,
-      postData,
+      postData?.toString(),
       extras.redirectedToUrl,
       meta.response?.statusCode,
       meta.response?.statusMessage,

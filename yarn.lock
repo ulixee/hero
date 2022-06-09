@@ -2333,31 +2333,6 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
-"@ulixee/repo-tools@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.7.tgz#74448e3225a1730c1be5c77adfe52f1d02eb89ea"
-  integrity sha512-WdBloK6Ciz7VUBWHy/H5KYTeEsL6cU4tL4lvL0Sm/r8OiV6biE8qbVFtghg3AssBvoVFXT1utklpQurYUEPBnw==
-  dependencies:
-    "@typescript-eslint/eslint-plugin" "^5.25.0"
-    "@typescript-eslint/parser" "^5.25.0"
-    copyfiles "^2.4.1"
-    eslint "^7.21.0"
-    eslint-config-airbnb-typescript "^17.0.0"
-    eslint-config-prettier "^8.3.0"
-    eslint-import-resolver-typescript "^2.5.0"
-    eslint-plugin-eslint-comments "^3.2.0"
-    eslint-plugin-import "^2.25.4"
-    eslint-plugin-jest "^25.2.2"
-    eslint-plugin-jsx-a11y "^6.4.1"
-    eslint-plugin-monorepo-cop "^1.0.2"
-    eslint-plugin-prettier "^4.0.0"
-    eslint-plugin-promise "^5.1.1"
-    eslint-plugin-react "^7.22.0"
-    eslint-plugin-react-hooks "^4.2.0"
-    prettier "^2.2.1"
-    pretty-quick "^3.1.0"
-    typescript "^4.5.5"
-
 "@ulixee/repo-tools@^1.0.9":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.9.tgz#2775853d650da43645a6d8b8f3ce8ff90b40567d"
@@ -8400,7 +8375,7 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.5.5, typescript@^4.7.2, typescript@~4.7.3:
+typescript@^4.7.2, typescript@~4.7.3:
   version "4.7.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.3.tgz#8364b502d5257b540f9de4c40be84c98e23a129d"
   integrity sha512-WOkT3XYvrpXx4vMMqlD+8R8R37fZkjyLGlxavMc4iB8lrl8L0DeTcHbYgw/v0N/z9wAFsgBhcsF0ruoySS22mA==

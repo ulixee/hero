@@ -1,3 +1,10 @@
 {
-  "exports": null
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    },
+    "./lib/*": "./lib/*.js",
+    "./interfaces/*": "./interfaces/*.js"
+  }
 }
