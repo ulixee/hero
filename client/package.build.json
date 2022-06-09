@@ -5,6 +5,7 @@
       "require": "./index.cjs"
     },
     "./lib/*": "./lib/*.js",
+    "./connections/*": "./connections/*.js",
     "./interfaces/*": "./interfaces/*.js"
   }
 }
