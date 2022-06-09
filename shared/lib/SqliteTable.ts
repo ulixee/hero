@@ -112,7 +112,7 @@ export default abstract class SqliteTable<T> {
       }
     }
     const definitions = this.columns.map(x => {
-      let columnDef = `${x[0]} ${x[1]}`;
+      let columnDef = `${String(x[0])} ${x[1]}`;
       if (x.length > 2) columnDef = `${columnDef} ${x[2]}`;
       return columnDef;
     });

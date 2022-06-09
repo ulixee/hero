@@ -105,13 +105,13 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       resolvable: promise,
       error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
     });
-    const messageId = this.#logger?.stats?.(`waitOn:${eventType}`, {
+    const messageId = this.#logger?.stats?.(`waitOn:${String(eventType)}`, {
       timeoutMillis,
     });
     const callbackFn = (result: T[K]): void => {
       // give the listeners a second to register
       if (!listenerFn || listenerFn.call(this, result)) {
-        this.#logger?.stats?.(`waitOn.resolve:${eventType}`, {
+        this.#logger?.stats?.(`waitOn.resolve:${String(eventType)}`, {
           parentLogId: messageId,
         });
         promise.resolve(result);
@@ -140,7 +140,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return listeners;
   }
 
-  public on<K extends keyof T & (string | symbol)>(
+  public override on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
     includeUnhandledEvents = false,
@@ -149,14 +149,14 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
-  public off<K extends keyof T & (string | symbol)>(
+  public override off<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
   ): this {
     return super.off(eventType, listenerFn);
   }
 
-  public once<K extends keyof T & (string | symbol)>(
+  public override once<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
     includeUnhandledEvents = false,
@@ -165,7 +165,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
-  public emit<K extends keyof T & (string | symbol)>(
+  public override emit<K extends keyof T & (string | symbol)>(
     eventType: K,
     event?: T[K],
     sendInitiator?: object,
@@ -181,7 +181,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     else return super.emit(eventType, event);
   }
 
-  public addListener<K extends keyof T & (string | symbol)>(
+  public override addListener<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
     includeUnhandledEvents = false,
@@ -189,14 +189,14 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return this.on(eventType, listenerFn, includeUnhandledEvents);
   }
 
-  public removeListener<K extends keyof T & (string | symbol)>(
+  public override removeListener<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
   ): this {
     return super.removeListener(eventType, listenerFn);
   }
 
-  public prependListener<K extends keyof T & (string | symbol)>(
+  public override prependListener<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => void,
     includeUnhandledEvents = false,
@@ -205,7 +205,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
-  public prependOnceListener<K extends keyof T & (string | symbol)>(
+  public override prependOnceListener<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => void,
     includeUnhandledEvents = false,
@@ -248,7 +248,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
           }
         }
       }
-      this.#logger?.stats?.(`emit:${eventType}`, data);
+      this.#logger?.stats?.(`emit:${String(eventType)}`, data);
     }
   }
 }
