@@ -25,7 +25,7 @@ This repository is home to several of the projects needed to create an "unblocke
 
 ## Contributing
 
-We'd love your help improving Unblocked tools. Please don't hesitate to send a pull request. The best starting place is to add an evasion to the Unblocked [Plugins](./plugins) or to add detections to [DoubleAgent][double-agent]
+We'd love your help improving Unblocked tools. Please don't hesitate to send a pull request. The best starting place is to add an evasion to the Unblocked [Plugins](./plugins) or to add detections to [DoubleAgent][double-agent].
 
 All `Unblocked` projects use eslint for code standards and ensure lint + test are run before allowing any pushes. 
 

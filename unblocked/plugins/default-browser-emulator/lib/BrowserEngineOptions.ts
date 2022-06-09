@@ -29,7 +29,7 @@ export default class BrowserEngineOptions {
         throw new Error(`The Default Browser Engine specified in your environment is not installed\n\n
 -------- reinstall the browser in your working directory -------
         
-                yarn add @ulixee/${defaultBrowserId}
+                npm install @ulixee/${defaultBrowserId}
         
 ----------------------------------------------------------------
       `);

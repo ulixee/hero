@@ -59,7 +59,7 @@ export default function modifyHeaders(
       // if header is an Sec- header, trust Chrome
     } else if (value && lowerName.startsWith('sec-')) {
       // keep given value
-    } else if (!value && lowerName === 'sec-ch-ua-platform') {
+    } else if (lowerName === 'sec-ch-ua-platform') {
       // must align to user platform! (eg, "Windows")
       value = `"${userAgentData.platform}"`;
     } else if (value && lowerName === 'accept' && isXhr) {
