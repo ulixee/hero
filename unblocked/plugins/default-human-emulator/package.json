@@ -4,12 +4,12 @@
   "description": "Default human emulator based on Xetera/ghost-cursor",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.3",
+    "@ulixee/commons": "2.0.0-alpha.4",
     "@unblocked-web/specifications": "2.0.0-alpha.2"
   },
   "devDependencies": {
-    "@unblocked-web/agent": "2.0.0-alpha.2",
-    "@unblocked-web/agent-testing": "2.0.0-alpha.2",
+    "@unblocked-web/agent": "2.0.0-alpha.3",
+    "@unblocked-web/agent-testing": "2.0.0-alpha.3",
     "@unblocked-web/js-path": "2.0.0-alpha.1"
   }
 }
