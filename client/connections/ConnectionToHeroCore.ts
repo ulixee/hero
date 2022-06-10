@@ -14,6 +14,7 @@ import ITransportToCore from '@ulixee/net/interfaces/ITransportToCore';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 const { log } = Log(module);
 
@@ -105,7 +106,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     const hasSessions = this.coreSessions?.size > 0;
     this.commandQueue.stop(new DisconnectedFromCoreError(this.transport.host));
     this.coreSessions.stop(
-      !this.transport.isConnected
+      !this.transport.isConnected && !this.connectPromise
         ? new Error(`No host connection was established (${this.transport.host})`)
         : new DisconnectedFromCoreError(this.transport.host),
     );
@@ -128,7 +129,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
           args: [this.disconnectError],
         },
         2e3,
-      );
+      ).catch(err => err);
     }
   }
 

@@ -102,7 +102,7 @@ export default class ConnectionToHeroClient
     try {
       await this.transport.send(response);
     } catch (err) {
-      if (err instanceof CanceledPromiseError && String(err).includes('Websocket was not open')) return;
+      if (err instanceof CanceledPromiseError || String(err).includes('Websocket was not open')) return;
       throw err;
     }
   }

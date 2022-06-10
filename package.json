@@ -4,7 +4,6 @@
   "description": "The Web Browser Built for Scraping",
   "scripts": {
     "prepare": "husky install",
-    "bump-version": "ulx-repo-version-bump",
     "build": "yarn && yarn tsc && cd build && yarn",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",
@@ -20,7 +19,9 @@
     "clean": "tsc -b --clean  tsconfig.json",
     "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest",
     "test": "ulx-repo-after-build && cd build && yarn test:build",
-    "lint": "eslint --cache ./"
+    "lint": "eslint --cache ./",
+    "version": "ulx-repo-version-check fix",
+    "version:bump": "ulx-repo-version-bump"
   },
   "repository": "git@github.com:ulixee/hero.git",
   "author": "Data Liberation Foundation",
