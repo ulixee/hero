@@ -14,14 +14,14 @@ beforeEach(() => {
     const { command, messageId } = message;
     if (command === 'Core.createSession') {
       return { data: sessionMeta, responseId: messageId };
-    } else if (command === 'Events.addEventListener') {
+    } if (command === 'Events.addEventListener') {
       return {
         data: { listenerId: 'listener-id' },
         responseId: messageId,
       };
-    } else {
+    } 
       return { data: {}, responseId: messageId };
-    }
+    
   });
 });
 

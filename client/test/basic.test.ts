@@ -1,10 +1,10 @@
 import { Helpers } from '@ulixee/hero-testing';
-import Hero from '../index';
-import { scriptInstance } from '../lib/internal';
 import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeServerConfig from '@ulixee/commons/config/servers';
-import ConnectionFactory from '../connections/ConnectionFactory';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
+import Hero from '../index';
+import { scriptInstance } from '../lib/internal';
+import ConnectionFactory from '../connections/ConnectionFactory';
 import MockConnectionToCore from './_MockConnectionToCore';
 
 const pkg = require('../package.json');
@@ -77,7 +77,7 @@ describe('basic Hero tests', () => {
   });
 });
 
-describe('Connection tests', function () {
+describe('Connection tests', () => {
   it('connects to a configured server over a started server', async () => {
     UlixeeConfig.global.serverHost = 'localhost:8000';
     await UlixeeServerConfig.global.setVersionHost('1', 'localhost:8080');

@@ -4,13 +4,13 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IJsPath } from '@unblocked-web/js-path';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
-import CoreTab from './CoreTab';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState, { IStateAndAssertion } from '@ulixee/hero-interfaces/IDomState';
 import IDomStateListenArgs, { IRawCommand } from '@ulixee/hero-interfaces/IDomStateListenArgs';
-import IFlowCommand from '../interfaces/IFlowCommand';
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
+import IFlowCommand from '../interfaces/IFlowCommand';
+import CoreTab from './CoreTab';
 
 let counter = 0;
 
@@ -206,7 +206,7 @@ export default class DomStateHandler {
   private async createAssertionSets(): Promise<IStateAndAssertion<any>[]> {
     const assertionSets: IStateAndAssertion<any>[] = [];
 
-    this.domState.all(function assert(statePromise, assertion) {
+    this.domState.all((statePromise, assertion) => {
       assertionSets.push([Promise.resolve(statePromise).catch(err => err), assertion]);
     });
 
@@ -238,7 +238,7 @@ export default class DomStateHandler {
       async () => {
         const runCommands: Promise<any>[] = [];
         // trigger a run so we can see commands that get triggered
-        result = this.domState.all(function assert(statePromise) {
+        result = this.domState.all((statePromise) => {
           runCommands.push(Promise.resolve(statePromise).catch(() => null));
         });
         await Promise.all(runCommands);

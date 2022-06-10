@@ -13,6 +13,18 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import Agent from '@unblocked-web/agent/lib/Agent';
+import Resources from '@unblocked-web/agent/lib/Resources';
+import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
+import Page from '@unblocked-web/agent/lib/Page';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
@@ -25,19 +37,7 @@ import Commands from './Commands';
 import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import { IOutputChangeRecord } from '../models/OutputTable';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import Agent from '@unblocked-web/agent/lib/Agent';
-import Resources from '@unblocked-web/agent/lib/Resources';
-import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
-import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
-import Page from '@unblocked-web/agent/lib/Page';
 import env from '../env';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
-import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
 
 const { log } = Log(module);
 
@@ -545,7 +545,9 @@ export default class Session
     setImmediate(db => {
       try {
         db.close();
-      } catch (e) {}
+      } catch (e) {
+        /* no-op */
+      }
     }, this.db);
   }
 

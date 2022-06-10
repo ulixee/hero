@@ -1,9 +1,9 @@
 import Queue from '@ulixee/commons/lib/Queue';
-import CoreSession from './CoreSession';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
+import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
+import CoreSession from './CoreSession';
 
 export default class CoreSessions {
   public set concurrency(value: number) {

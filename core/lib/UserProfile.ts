@@ -4,9 +4,9 @@ import IDomStorage, {
 } from '@unblocked-web/specifications/agent/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
 import { assert } from '@ulixee/commons/lib/utils';
+import Page from '@unblocked-web/agent/lib/Page';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
-import Page from '@unblocked-web/agent/lib/Page';
 
 const { log } = Log(module);
 

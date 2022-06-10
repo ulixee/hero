@@ -28,6 +28,19 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
+import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
+import FrameNavigationsObserver from '@unblocked-web/agent/lib/FrameNavigationsObserver';
+import Page from '@unblocked-web/agent/lib/Page';
+import { IWebsocketMessage } from '@unblocked-web/agent/lib/WebsocketMessages';
+import { injectedSourceUrl } from '@unblocked-web/default-browser-emulator/lib/DomOverridesBuilder';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
@@ -35,26 +48,13 @@ import Session from './Session';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import { ICommandableTarget } from './CommandRunner';
 import DomStateListener from './DomStateListener';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
-import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import { IMouseEventRecord } from '../models/MouseEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
-import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import Core from '../index';
-import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
-import FrameNavigationsObserver from '@unblocked-web/agent/lib/FrameNavigationsObserver';
-import Page from '@unblocked-web/agent/lib/Page';
-import { IWebsocketMessage } from '@unblocked-web/agent/lib/WebsocketMessages';
-import { injectedSourceUrl } from '@unblocked-web/default-browser-emulator/lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -349,9 +349,9 @@ export default class Tab
   ): Promise<Buffer | IWebsocketMessage[]> {
     if (propertyPath === 'response.buffer') {
       return await this.session.db.resources.getResourceBodyById(resourceId, true);
-    } else if (propertyPath === 'request.postData') {
+    } if (propertyPath === 'request.postData') {
       return this.session.db.resources.getResourcePostDataById(resourceId);
-    } else if (propertyPath === 'messages') {
+    } if (propertyPath === 'messages') {
       return this.session.websocketMessages.getMessages(resourceId);
     }
   }

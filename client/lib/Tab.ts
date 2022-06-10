@@ -23,6 +23,8 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@unblocked-web/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import * as Util from 'util';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -36,9 +38,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
-import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
-import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 
 const awaitedPathState = StateMachine<

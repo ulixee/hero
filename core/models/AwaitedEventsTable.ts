@@ -23,7 +23,8 @@ export default class AwaitedEventsTable extends SqliteTable<IEventRecord> {
   }
 
   public insert(eventRecord: Omit<IEventRecord, 'id'>): void {
-    const id = (this.idCounter += 1);
+    this.idCounter += 1;
+    const id = this.idCounter;
     (eventRecord as IEventRecord).id = id;
     this.queuePendingInsert([
       id,

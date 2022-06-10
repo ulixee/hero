@@ -1,9 +1,9 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { ConnectionToCore } from '@ulixee/net';
 import Core, { Session } from '../index';
 import ConnectionToHeroApiClient from '../connections/ConnectionToHeroApiClient';
 import ConnectionToHeroApiCore from '../connections/ConnectionToHeroApiCore';
-import { ConnectionToCore } from '@ulixee/net';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {

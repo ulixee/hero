@@ -9,15 +9,9 @@ import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
-import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
-import Session from './lib/Session';
-import Tab from './lib/Tab';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import { dataDir } from './env';
-import NetworkDb from './dbs/NetworkDb';
 import Pool from '@unblocked-web/agent/lib/Pool';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import SessionsDb from './dbs/SessionsDb';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
@@ -25,6 +19,12 @@ import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
 import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
+import SessionsDb from './dbs/SessionsDb';
+import NetworkDb from './dbs/NetworkDb';
+import { dataDir } from './env';
+import Tab from './lib/Tab';
+import Session from './lib/Session';
+import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
 
 const { log } = Log(module);
 

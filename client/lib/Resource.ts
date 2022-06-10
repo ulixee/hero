@@ -114,7 +114,7 @@ export default class Resource {
         if (!filter.filterFn) {
           done();
           return true;
-        } else if (filter.filterFn(resource)) {
+        } if (filter.filterFn(resource)) {
           done();
           return true;
         }

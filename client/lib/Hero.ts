@@ -30,12 +30,16 @@ import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import filterPlugins from '@ulixee/hero-plugin-utils/lib/utils/filterPlugins';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import {
   IElementInteractVerification,
   IMousePositionXY,
   isMousePositionXY,
 } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -53,16 +57,12 @@ import ConnectionFactory from '../connections/ConnectionFactory';
 import FrameEnvironment, { getCoreFrameEnvironmentForPosition } from './FrameEnvironment';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import DomState from './DomState';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
-import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import './DomExtender';
-import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],

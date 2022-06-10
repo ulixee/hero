@@ -1,8 +1,14 @@
-import { IInteractionGroups, isMousePositionXY } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import {
+  IInteractionGroups,
+  isMousePositionXY,
+} from '@unblocked-web/specifications/agent/interact/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { ILoadStatus, ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
-import { IJsPath , INodeVisibility , INodePointer } from '@unblocked-web/js-path';
-import AwaitedPath  from 'awaited-dom/base/AwaitedPath';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+} from '@unblocked-web/specifications/agent/browser/Location';
+import { IJsPath, INodeVisibility, INodePointer } from '@unblocked-web/js-path';
+import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
@@ -182,13 +188,11 @@ export default class CoreFrameEnvironment {
       );
     } catch (error) {
       if (error instanceof TimeoutError) {
-        const state = waitForHidden
-          ? 'be hidden'
-          : waitForClickable
-          ? 'be clickable'
-          : waitForVisible
-          ? 'be visible'
-          : 'exist';
+        let state: string;
+        if (waitForHidden) state = 'be hidden';
+        else if (waitForClickable) state = 'be clickable';
+        else if (waitForVisible) state = 'be visible';
+        else state = 'exist';
         throw new TimeoutError(`Timeout waiting for element to ${state}`);
       }
       throw error;

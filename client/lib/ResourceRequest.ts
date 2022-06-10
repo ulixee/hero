@@ -1,9 +1,9 @@
 import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import IResourceRequest from '@unblocked-web/specifications/agent/net/IResourceRequest';
 import * as Util from 'util';
-import CoreTab from './CoreTab';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
+import CoreTab from './CoreTab';
 
 const propertyKeys: (keyof ResourceRequest)[] = [
   'headers',

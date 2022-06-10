@@ -1,6 +1,6 @@
 import IDomState from '@ulixee/hero-interfaces/IDomState';
-import DomState from '../lib/DomState';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import DomState from '../lib/DomState';
 
 export default interface IFlowHandler {
   id?: number;

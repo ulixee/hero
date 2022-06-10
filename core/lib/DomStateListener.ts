@@ -5,11 +5,11 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IJsPath } from '@unblocked-web/js-path';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import { createHash } from 'crypto';
-import Tab from './Tab';
-import CommandRunner from './CommandRunner';
 import Log from '@ulixee/commons/lib/Logger';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import CommandRunner from './CommandRunner';
+import Tab from './Tab';
 
 const { log } = Log(module);
 
@@ -158,7 +158,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
   public addAssertionBatch(batch: IDomStateAssertionBatch): string {
     let batchId = batch.id;
     for (const id of this.batchAssertionsById.keys()) {
-      if (id.endsWith(batch.id + '.json')) {
+      if (id.endsWith(`${batch.id  }.json`)) {
         batchId = id;
         break;
       }

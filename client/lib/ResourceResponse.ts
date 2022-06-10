@@ -3,8 +3,8 @@ import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
 import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
 import * as Util from 'util';
-import CoreTab from './CoreTab';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import CoreTab from './CoreTab';
 
 const propertyKeys: (keyof ResourceResponse)[] = [
   'headers',

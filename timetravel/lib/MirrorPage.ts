@@ -14,7 +14,6 @@ import DomChangesTable, {
 import Log from '@ulixee/commons/lib/Logger';
 import * as fs from 'fs';
 import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import MirrorNetwork from './MirrorNetwork';
 import { Tab } from '@ulixee/hero-core';
 import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
 import Queue from '@ulixee/commons/lib/Queue';
@@ -22,6 +21,7 @@ import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
 import Page from '@unblocked-web/agent/lib/Page';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import MirrorNetwork from './MirrorNetwork';
 
 const { log } = Log(module);
 

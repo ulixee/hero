@@ -27,18 +27,18 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import Session from './Session';
-import Tab, { ITabEventParams } from './Tab';
-import CommandRecorder from './CommandRecorder';
 import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
 import { ISerializable } from '@unblocked-web/agent/lib/JsPath';
 import Frame from '@unblocked-web/agent/lib/Frame';
+import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
+import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import Session from './Session';
+import Tab, { ITabEventParams } from './Tab';
+import CommandRecorder from './CommandRecorder';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import { ICommandableTarget } from './CommandRunner';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 
 const { log } = Log(module);
 

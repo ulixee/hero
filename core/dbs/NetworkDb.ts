@@ -2,8 +2,8 @@ import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import Log from '@ulixee/commons/lib/Logger';
-import CertificatesTable from '../models/CertificatesTable';
 import * as fs from 'fs';
+import CertificatesTable from '../models/CertificatesTable';
 import Core from '../index';
 
 const { log } = Log(module);

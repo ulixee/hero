@@ -1,8 +1,8 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Core, { Session } from '../index';
-import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToHeroClient;

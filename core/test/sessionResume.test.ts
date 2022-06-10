@@ -2,11 +2,11 @@ import { Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import Interactor from '@unblocked-web/agent/lib/Interactor';
+import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 import Core, { Tab } from '../index';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Session from '../lib/Session';
-import Interactor from '@unblocked-web/agent/lib/Interactor';
-import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 
 const playInteractionSpy = jest.spyOn(Interactor.prototype, 'play');
 let koaServer: ITestKoaServer;

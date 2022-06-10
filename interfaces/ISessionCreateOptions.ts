@@ -1,7 +1,7 @@
+import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import IUserProfile from './IUserProfile';
 import ISessionOptions from './ISessionOptions';
 import IScriptInstanceMeta from './IScriptInstanceMeta';
-import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default interface ISessionCreateOptions extends ISessionOptions, IEmulationOptions {
   sessionId?: string;

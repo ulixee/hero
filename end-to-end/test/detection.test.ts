@@ -342,7 +342,7 @@ describe('Proxy detections', () => {
         return '"apiFunction instanceof apiFunction" failed to throw';
       } catch (error) {
         if (!hasValidStack(error, '    at Function.[Symbol.hasInstance]')) {
-          return 'expect Function.[Symbol.hasInstance]. Was ' + error.stack.split('\n')[1];
+          return `expect Function.[Symbol.hasInstance]. Was ${error.stack.split('\n')[1]}`;
         }
       }
       return 'ok';
@@ -350,15 +350,14 @@ describe('Proxy detections', () => {
 
     getChainCycleLie(apiFunction, method = 'setPrototypeOf') {
       try {
-        if (method == 'setPrototypeOf') {
-          return Object.setPrototypeOf(apiFunction, Object.create(apiFunction)) + '';
-        } else {
-          apiFunction.__proto__ = apiFunction;
-          return apiFunction++ + '... no failure';
+        if (method === 'setPrototypeOf') {
+          return `${Object.setPrototypeOf(apiFunction, Object.create(apiFunction))}`;
         }
+        // eslint-disable-next-line no-proto
+        apiFunction.__proto__ = apiFunction;
+        return `${apiFunction++}... no failure`;
       } catch (error) {
-        if (error.name !== 'TypeError')
-          return 'Not TypeError - ' + error.name + ':' + error.message;
+        if (error.name !== 'TypeError') return `Not TypeError - ${error.name}:${error.message}`;
         if (error.message !== `Cyclic __proto__ value`) return 'Not cyclic __proto__';
 
         const targetStackLine = ((error.stack || '').split('\n') || [])[1];
@@ -366,7 +365,7 @@ describe('Proxy detections', () => {
           method === '__proto__' &&
           !targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`)
         ) {
-          return 'Stack doesnt have "at Function.set __proto__ [as __proto__]": ' + error.stack;
+          return `Stack doesnt have "at Function.set __proto__ [as __proto__]": ${error.stack}`;
         }
       }
       return 'ok';
@@ -462,14 +461,14 @@ describe('Proxy detections', () => {
           return 'setPrototypeOf should have failed';
         }
       } catch (error) {
-        return 'failed setting prototype ' + error.message;
+        return `failed setting prototype ${error.message}`;
       }
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         '123' in apiFunction;
         return 'ok';
       } catch (error) {
-        return 'Error checking "123 in fn":' + error.message;
+        return `Error checking "123 in fn":${error.message}`;
       }
     }
     const result: string = await page.evaluate(

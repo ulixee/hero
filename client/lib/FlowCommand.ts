@@ -1,11 +1,11 @@
-import CoreTab from './CoreTab';
-import DomStateHandler from './DomStateHandler';
-import IFlowCommand from '../interfaces/IFlowCommand';
-import CoreCommandQueue from './CoreCommandQueue';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
+import CoreTab from './CoreTab';
+import DomStateHandler from './DomStateHandler';
+import IFlowCommand from '../interfaces/IFlowCommand';
+import CoreCommandQueue from './CoreCommandQueue';
 
 export default class FlowCommand<T= void> implements IFlowCommand {
   public retryNumber = 0;

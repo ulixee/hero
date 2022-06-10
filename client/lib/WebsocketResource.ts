@@ -3,12 +3,12 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import * as Util from 'util';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import { InternalPropertiesSymbol } from './internal';
-import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 
 interface IEventType {
   message: (message: IWebsocketMessage) => void;

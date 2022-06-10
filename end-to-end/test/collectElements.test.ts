@@ -88,10 +88,10 @@ describe('basic collect Element tests', () => {
 
     for (let i = 0; i < 25; i += 1) {
       await hero.getJsValue(`add('Text ${i}')`);
-      await collectElement(hero.document.querySelector('li:last-child'), 'item' + i);
+      await collectElement(hero.document.querySelector('li:last-child'), `item${  i}`);
     }
     for (let i = 0; i < 25; i += 1) {
-      const valid = await coreSession.getCollectedElements(sessionId, 'item' + i);
+      const valid = await coreSession.getCollectedElements(sessionId, `item${  i}`);
       expect(valid).toHaveLength(1);
       expect(valid[0].outerHTML).toBe(`<li>Text ${i}</li>`);
     }

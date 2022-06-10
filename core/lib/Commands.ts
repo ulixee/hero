@@ -1,13 +1,13 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import SessionDb from '../dbs/SessionDb';
-import { IEventRecord } from '../models/AwaitedEventsTable';
 import { IJsPath } from '@unblocked-web/js-path';
-import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ICommandMarker from '@unblocked-web/agent/interfaces/ICommandMarker';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
+import { IEventRecord } from '../models/AwaitedEventsTable';
+import SessionDb from '../dbs/SessionDb';
 
 export default class Commands
   extends TypedEventEmitter<{
@@ -121,8 +121,8 @@ export default class Commands
     commandMeta.runStartDate = startDate;
     this.history.push(commandMeta);
     this.history.sort((a, b) => {
-      if (a.id !== b.id) return a.id - b.id;
-      if (a.retryNumber !== b.retryNumber) return a.retryNumber - b.retryNumber;
+      if (a.id === b.id) return a.retryNumber - b.retryNumber;
+      return a.id - b.id;
     });
     this.db.commands.insert(commandMeta);
     this.emit('start', commandMeta);

@@ -1,8 +1,8 @@
-import FlowCommand from './FlowCommand';
-import CoreTab from './CoreTab';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState from '@ulixee/hero-interfaces/IDomState';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
+import CoreTab from './CoreTab';
+import FlowCommand from './FlowCommand';
 
 export default class FlowCommands {
   private readonly flowCommands: FlowCommand<any>[] = [];

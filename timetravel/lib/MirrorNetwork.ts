@@ -6,8 +6,8 @@ import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import { Protocol } from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
-import Fetch = Protocol.Fetch;
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import Fetch = Protocol.Fetch;
 
 interface IMirrorNetworkConfig {
   headersFilter?: (string | RegExp)[];

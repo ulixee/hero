@@ -14,6 +14,7 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import { IKeyboardShortcut } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 import IInteractions, {
   Command,
   ICommand,
@@ -22,7 +23,6 @@ import IInteractions, {
 } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { isAwaitedNode } from './SetupAwaitedHandler';
-import { IKeyboardShortcut } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 

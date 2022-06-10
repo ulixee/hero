@@ -48,6 +48,7 @@ class DomReplayer {
     this.pendingDelegatedEventsByChildNodeId = {};
     this.pendingDomChanges = [];
     this.frameContentWindows = new WeakMap();
+    // eslint-disable-next-line no-restricted-globals
     location.href = 'about:blank';
   }
 

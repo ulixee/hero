@@ -6,23 +6,23 @@ import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions
 import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import Session from '../lib/Session';
-import Tab from '../lib/Tab';
-import Core from '../index';
-import FrameEnvironment from '../lib/FrameEnvironment';
-import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
-import RemoteEvents from '../lib/RemoteEvents';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
 import BrowserLaunchError from '@unblocked-web/agent/errors/BrowserLaunchError';
 import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
-import Commands from '../lib/Commands';
 import IConnectionToClient, {
   IConnectionToClientEvents,
 } from '@ulixee/net/interfaces/IConnectionToClient';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Commands from '../lib/Commands';
+import RemoteEvents from '../lib/RemoteEvents';
+import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
+import FrameEnvironment from '../lib/FrameEnvironment';
+import Core from '../index';
+import Tab from '../lib/Tab';
+import Session from '../lib/Session';
 
 const { version } = require('../package.json');
 

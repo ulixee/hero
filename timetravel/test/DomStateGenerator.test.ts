@@ -157,7 +157,7 @@ describe('domStateGenerator', () => {
 
   test('can track storage changes', async () => {
     koaServer.get('/storage', ctx => {
-      ctx.set('set-cookie', 'test=' + ctx.query.state);
+      ctx.set('set-cookie', `test=${  ctx.query.state}`);
       ctx.body = `
   <body>
     <h1>Storage Page</h1>

@@ -1,6 +1,12 @@
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
+import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
+import ITransportToCore from '@ulixee/net/interfaces/ITransportToCore';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
+import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -8,13 +14,6 @@ import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 import { IHeroCreateOptions } from '../index';
 import { scriptInstance } from '../lib/internal';
-import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
-import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
-import ITransportToCore from '@ulixee/net/interfaces/ITransportToCore';
-import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
-import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
-import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 const { log } = Log(module);
 

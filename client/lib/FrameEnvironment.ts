@@ -30,6 +30,7 @@ import {
 } from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@unblocked-web/js-path';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
+import { IMousePositionXY } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
@@ -38,7 +39,6 @@ import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab, { getCoreTab } from './Tab';
 import Resource, { createResource } from './Resource';
-import { IMousePositionXY } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { InternalPropertiesSymbol } from './internal';
 
 const awaitedPathState = StateMachine<
@@ -248,6 +248,7 @@ export default class FrameEnvironment {
     );
     const nodes: ISuperNode[] = [];
     let node: ISuperNode;
+    // eslint-disable-next-line no-cond-assign
     while ((node = await results.iterateNext())) {
       nodes.push(node);
     }

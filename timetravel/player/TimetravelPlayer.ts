@@ -5,13 +5,13 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { Session } from '@ulixee/hero-core';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
-import TabPlaybackController from './TabPlaybackController';
-import MirrorNetwork from '../lib/MirrorNetwork';
 import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
 import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import MirrorNetwork from '../lib/MirrorNetwork';
+import TabPlaybackController from './TabPlaybackController';
 
 const { log } = Log(module);
 
@@ -70,10 +70,10 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     readonly debugLogging = false,
   ) {
     super();
-    this.sessionOptions = Object.assign(
-      {},
-      Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId),
-    );
+    this.sessionOptions = {
+      
+      ...Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId),
+    };
     this.sessionOptions.mode = 'timetravel';
   }
 

@@ -3,12 +3,12 @@ import SourceLoader from '@ulixee/commons/lib/SourceLoader';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Queue from '@ulixee/commons/lib/Queue';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { scriptInstance } from './internal';
-import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 
 export default class CoreCommandQueue {
   public static maxCommandRetries = 3;

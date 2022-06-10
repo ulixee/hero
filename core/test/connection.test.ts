@@ -1,10 +1,10 @@
 import { Hero, Helpers } from '@ulixee/hero-testing';
-import Core from '..';
 import { Log } from '@ulixee/commons/lib/Logger';
 import DefaultBrowserEmulator from '@unblocked-web/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
 import ChromeApp from '@ulixee/chrome-app/index';
 import BrowserEngine from '@unblocked-web/default-browser-emulator/lib/BrowserEngine';
+import Core from '..';
 
 const validate = jest.spyOn(BrowserEngine.prototype, 'verifyLaunchable');
 const logError = jest.spyOn(Log.prototype, 'error');

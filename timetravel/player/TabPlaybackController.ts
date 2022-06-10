@@ -1,10 +1,10 @@
 import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
-import MirrorPage from '../lib/MirrorPage';
-import MirrorNetwork from '../lib/MirrorNetwork';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import Page from '@unblocked-web/agent/lib/Page';
+import MirrorNetwork from '../lib/MirrorNetwork';
+import MirrorPage from '../lib/MirrorPage';
 
 export default class TabPlaybackController {
   public get id(): number {

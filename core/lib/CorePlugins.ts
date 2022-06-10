@@ -7,9 +7,9 @@ import ICorePlugin, {
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import Core from '../index';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import Agent from '@unblocked-web/agent/lib/Agent';
+import Core from '../index';
 
 interface IOptionsCreate {
   dependencyMap?: IDependencyMap;

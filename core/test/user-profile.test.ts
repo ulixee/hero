@@ -3,14 +3,14 @@ import { InteractionCommand } from '@unblocked-web/specifications/agent/interact
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import Core from '../index';
-import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
-import Session from '../lib/Session';
 import { URL } from 'url';
 import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import MitmRequestAgent from '@unblocked-web/agent-mitm/lib/MitmRequestAgent';
 import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
+import Session from '../lib/Session';
+import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
+import Core from '../index';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToHeroClient;

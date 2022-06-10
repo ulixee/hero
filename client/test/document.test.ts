@@ -40,7 +40,7 @@ describe('document tests', () => {
       };
     });
 
-    const hero = new Hero({ connectionToCore: connectionToCore });
+    const hero = new Hero({ connectionToCore });
     Helpers.needsClosing.push(hero);
 
     const element = hero.document.querySelector('h1');

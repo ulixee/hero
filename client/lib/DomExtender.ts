@@ -15,14 +15,14 @@ import { IElementInteractVerification } from '@unblocked-web/specifications/agen
 import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
 import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
 import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
+import { createSuperNode } from 'awaited-dom/impl/create';
+import { KeyboardShortcuts } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Interactor from './Interactor';
-import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
-import { createSuperNode } from 'awaited-dom/impl/create';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
-import { KeyboardShortcuts } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 import { scriptInstance } from './internal';
 
 const awaitedPathState = StateMachine<

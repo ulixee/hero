@@ -2,9 +2,9 @@ import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeServerConfig from '@ulixee/commons/config/servers';
+import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToHeroCore from './ConnectionToHeroCore';
-import { WsTransportToCore } from '@ulixee/net';
 
 const { version } = require('../package.json');
 
@@ -79,4 +79,6 @@ npx @ulixee/server start
 try {
   require.resolve('@ulixee/server');
   ConnectionFactory.hasLocalServerPackage = true;
-} catch (error) {}
+} catch (error) {
+  /* no-op */
+}

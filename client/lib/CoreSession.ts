@@ -6,19 +6,19 @@ import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import * as readline from 'readline';
 import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import { IOutputChangeToRecord } from '../interfaces/ICoreSession';
 import Hero from './Hero';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 
 export default class CoreSession
   extends TypedEventEmitter<{ close: void }>

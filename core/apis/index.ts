@@ -1,3 +1,6 @@
+import { IApiSpec } from '@ulixee/net/interfaces/IApiHandlers';
+import ICoreRequestPayload from '@ulixee/net/interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
 import sessionCommandsApi from './Session.commands';
 import sessionDomChangesApi from './Session.domChanges';
 import sessionInteractionsApi from './Session.interactions';
@@ -9,9 +12,6 @@ import sessionFindApi from './Session.find';
 import sessionsFindRelatedApi from './Sessions.findRelated';
 import sessionsFindWithErrorsApi from './Sessions.findWithErrors';
 import sessionsSearchApi from './Sessions.search';
-import { IApiSpec } from '@ulixee/net/interfaces/IApiHandlers';
-import ICoreRequestPayload from '@ulixee/net/interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
 
 const heroApiHandlers = {
   'Session.commands': sessionCommandsApi,

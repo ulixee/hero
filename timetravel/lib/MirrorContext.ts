@@ -24,6 +24,7 @@ export default class MirrorContext {
       id: sessionId,
     });
 
+    // eslint-disable-next-line no-new
     new CorePlugins(agent, {
       getSessionSummary() {
         return {

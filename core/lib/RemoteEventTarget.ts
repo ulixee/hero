@@ -1,9 +1,9 @@
-import { IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import Session from './Session';
 import { IJsPath } from '@unblocked-web/js-path';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Logger from '@ulixee/commons/lib/Logger';
+import Session from './Session';
+import { IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 
 const { log } = Logger(module);
 

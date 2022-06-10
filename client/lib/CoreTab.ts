@@ -9,6 +9,12 @@ import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScr
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -21,15 +27,9 @@ import CoreSession from './CoreSession';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import IFlowHandler from '../interfaces/IFlowHandler';
 import DomStateHandler from './DomStateHandler';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import DomState from './DomState';
-import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
-import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
-import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { scriptInstance } from './internal';
 import FlowCommands from './FlowCommands';
-import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
-import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 
 export default class CoreTab implements IJsPathEventTarget {
   private static waitForStateCommandPlaceholder = 'waitForState';
