@@ -5,51 +5,6 @@ import { IBoundLog } from '../interfaces/ILog';
 import { createPromise } from './utils';
 import IPendingWaitEvent, { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
 
-export function addEventListener(
-  emitter: EventEmitter,
-  eventName: string | symbol,
-  handler: (...args: any[]) => void,
-): IRegisteredEventListener {
-  emitter.on(eventName, handler);
-  return { emitter, eventName, handler };
-}
-
-export function addEventListeners(
-  emitter: EventEmitter,
-  registrations: [string | symbol, (...args: any[]) => void, boolean?][],
-): IRegisteredEventListener[] {
-  return registrations.map(([eventName, handler]) => {
-    emitter.on(eventName, handler);
-    return { emitter, eventName, handler };
-  });
-}
-
-export function removeEventListeners(listeners: Array<IRegisteredEventListener>): void {
-  for (const listener of listeners) {
-    listener.emitter.off(listener.eventName, listener.handler);
-  }
-  listeners.length = 0;
-}
-
-export function addTypedEventListener<T, K extends keyof T & (string | symbol)>(
-  emitter: TypedEventEmitter<T>,
-  eventName: K,
-  handler: (this: TypedEventEmitter<T>, event?: T[K], initiator?: any) => any,
-  includeUnhandledEvents?: boolean,
-): IRegisteredEventListener {
-  emitter.on(eventName, handler, includeUnhandledEvents);
-  return { emitter, eventName, handler };
-}
-
-export function addTypedEventListeners<T, K extends keyof T & (string | symbol)>(
-  emitter: TypedEventEmitter<T>,
-  registrations: [K, (this: TypedEventEmitter<T>, event?: T[K]) => any, boolean?][],
-): IRegisteredEventListener[] {
-  return registrations.map(([eventName, handler, includeUnhandled]) => {
-    emitter.on(eventName, handler, includeUnhandled);
-    return { emitter, eventName, handler };
-  });
-}
 export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
   public storeEventsWithoutListeners = false;
   public EventTypes: T;
@@ -178,7 +133,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     }
     this.logEvent(eventType, event);
     if (sendInitiator) return super.emit(eventType, event, sendInitiator);
-    else return super.emit(eventType, event);
+    return super.emit(eventType, event);
   }
 
   public override addListener<K extends keyof T & (string | symbol)>(

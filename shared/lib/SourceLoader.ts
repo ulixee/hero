@@ -1,7 +1,7 @@
-import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
-import { SourceMapSupport } from './SourceMapSupport';
 import { URL } from 'url';
 import * as fs from 'fs';
+import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
+import { SourceMapSupport } from './SourceMapSupport';
 
 export default class SourceLoader {
   private static sourceLines: { [source: string]: string[] } = {};

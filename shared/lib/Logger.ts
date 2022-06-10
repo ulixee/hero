@@ -5,6 +5,7 @@ import ILog, { ILogData } from '../interfaces/ILog';
 const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
 
 const logFilters = {
+  envValue: null as string,
   active: [] as RegExp[],
   skip: [] as RegExp[],
   namespaces: { active: new Set<string>(), inactive: new Set<string>() },
@@ -165,7 +166,13 @@ export function translateToPrintable(
 
 const logLevels = { stats: 0, info: 1, warn: 2, error: 3 };
 
-let logCreator = (module: NodeModule): { log: ILog } => {
+declare global {
+  function UlixeeLogCreator(module: NodeModule): {
+    log: ILog;
+  };
+}
+
+global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
   const log: ILog = new Log(module);
 
   return {
@@ -174,7 +181,7 @@ let logCreator = (module: NodeModule): { log: ILog } => {
 };
 
 export default function logger(module: NodeModule): ILogBuilder {
-  return logCreator(module);
+  return global.UlixeeLogCreator(module);
 }
 
 let idCounter = 0;
@@ -203,7 +210,7 @@ class LogEvents {
 export { Log, LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
-  logCreator = builder;
+  global.UlixeeLogCreator = builder;
 }
 
 export interface ILogEntry {
@@ -238,6 +245,7 @@ function extractPathFromModule(module: NodeModule): string {
 export function registerNamespaceMapping(
   onNamespaceFn: (namespace: string, active: RegExp[], skip: RegExp[]) => void,
 ): void {
+  loadNamespaces(process.env.DEBUG);
   for (const ns of logFilters.namespaces.active) {
     onNamespaceFn(ns, logFilters.active, logFilters.skip);
   }
@@ -267,28 +275,30 @@ function isEnabled(modulePath: string): boolean {
   return false;
 }
 
-function enable(namespaces: string): void {
-  const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+function loadNamespaces(namespaces: string): void {
+  if (logFilters.envValue === namespaces) return;
+
+  namespaces ??= '';
+  logFilters.envValue = namespaces;
+  const split = namespaces.split(/[\s,]+/).map(x => x.trim());
 
   for (const part of split) {
     if (!part) continue;
 
     if (part[0] === '-') {
-      logFilters.namespaces.inactive.add(part);
+      logFilters.namespaces.inactive.add(part.slice(1));
     } else {
       logFilters.namespaces.active.add(part);
     }
   }
 }
 
-enable(process.env.DEBUG);
-
 registerNamespaceMapping((ns, active, skip) => {
   if (ns.includes('ubk:*') || ns.includes('ubk*')) {
     active.push(/agent\/.*/);
   } else if (ns === 'ubk') {
     active.push(/agent\/.*/);
-    skip.push(/DevtoolsSessionLogger/, /agent\/mitm.*/);
+    skip.push(/DevtoolsSessionLogger/, /agent[/-]mitm.*/);
   } else if (ns.includes('ubk:devtools')) {
     active.push(/DevtoolsSessionLogger/);
   }
@@ -296,10 +306,10 @@ registerNamespaceMapping((ns, active, skip) => {
 
 registerNamespaceMapping((ns, active) => {
   if (ns.includes('ulx:*') || ns.includes('ulx*')) {
-    active.push(/^apps\/chromealive*/, /hero\/.*/, /net\/.*/, /databox\/.*/);
+    active.push(/^apps[/-]chromealive*/, /hero[/-].*/, /net\/.*/, /databox[/-].*/);
   } else if (ns.includes('hero')) {
-    active.push(/^hero\/.*/, /net\/.*/);
+    active.push(/^hero[/-].*/, /net\/.*/);
   } else if (ns.includes('databox')) {
-    active.push(/^databox\/.*/, /net\/.*/);
+    active.push(/^databox[/-].*/, /net\/.*/);
   }
 });

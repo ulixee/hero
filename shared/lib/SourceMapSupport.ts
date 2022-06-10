@@ -90,6 +90,7 @@ export class SourceMapSupport {
     let sourceMapData: string;
 
     let match: RegExpMatchArray;
+    // eslint-disable-next-line no-cond-assign
     while ((match = sourceMapUrlRegex.exec(fileData))) {
       sourceMappingURL = match[1];
     }
@@ -123,7 +124,7 @@ export class SourceMapSupport {
   private static prepareStackTrace(error: Error, stack: NodeJS.CallSite[]): string {
     const name = error.name ?? error[Symbol.toStringTag] ?? error.constructor?.name ?? 'Error';
     const message = error.message ?? '';
-    const errorString = name + ': ' + message;
+    const errorString = `${name}: ${message}`;
 
     // track fn name as we go backwards through stack
     const processedStack = [];
@@ -219,10 +220,10 @@ function CallSiteToString(
     }
     const lineNumber = this.getLineNumber();
     if (lineNumber != null) {
-      fileLocation += ':' + lineNumber;
+      fileLocation += `:${lineNumber}`;
       const columnNumber = this.getColumnNumber();
       if (columnNumber) {
-        fileLocation += ':' + columnNumber;
+        fileLocation += `:${columnNumber}`;
       }
     }
   }
@@ -236,7 +237,7 @@ function CallSiteToString(
     if (isPromiseAny || isPromiseAll) {
       line += isPromiseAll ? 'Promise.all (index ' : 'Promise.any (index ';
       const promiseIndex = this.getPromiseIndex();
-      line += promiseIndex + ')';
+      line += `${promiseIndex})`;
     }
   }
   const functionName = this.getFunctionName();
@@ -247,21 +248,21 @@ function CallSiteToString(
     const typeName = this.getTypeName();
     const methodName = this.getMethodName();
     if (functionName) {
-      if (typeName && functionName.indexOf(typeName) != 0) {
-        line += typeName + '.';
+      if (typeName && functionName.indexOf(typeName) !== 0) {
+        line += `${typeName}.`;
       }
       line += functionName;
       if (
         methodName &&
-        functionName.indexOf('.' + methodName) != functionName.length - methodName.length - 1
+        functionName.indexOf(`.${methodName}`) !== functionName.length - methodName.length - 1
       ) {
-        line += ' [as ' + methodName + ']';
+        line += ` [as ${methodName}]`;
       }
     } else {
-      line += typeName + '.' + (methodName || '<anonymous>');
+      line += `${typeName}.${methodName || '<anonymous>'}`;
     }
   } else if (isConstructor) {
-    line += 'new ' + (functionName || '<anonymous>');
+    line += `new ${functionName || '<anonymous>'}`;
   } else if (functionName) {
     line += functionName;
   } else {
@@ -269,7 +270,7 @@ function CallSiteToString(
     addSuffix = false;
   }
   if (addSuffix) {
-    line += ' (' + fileLocation + ')';
+    line += ` (${fileLocation})`;
   }
   return line;
 }

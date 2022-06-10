@@ -1,7 +1,7 @@
-import { SourceMapSupport } from '../lib/SourceMapSupport';
 import { SourceMapGenerator } from 'source-map-js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SourceMapSupport } from '../lib/SourceMapSupport';
 import SourceLoader from '../lib/SourceLoader';
 
 let counter = 0;
@@ -13,7 +13,7 @@ beforeEach(() => {
   counter += 1;
 });
 
-it('normal throw', function () {
+it('normal throw', () => {
   const { full, inline } = createStackTraces(createMultiLineSourceMap(), [
     'throw new Error("test");',
   ]);
@@ -21,12 +21,12 @@ it('normal throw', function () {
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
     );
   }
 });
 
-it('throw inside function', function () {
+it('throw inside function', () => {
   const { full, inline } = createStackTraces(createMultiLineSourceMap(), [
     'function foo() {',
     '  throw new Error("test");',
@@ -36,14 +36,14 @@ it('throw inside function', function () {
 
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
-    expect(stack[1]).toMatch(/^    at foo \((?:.*[/\\])?line2\.js:1002:102\)$/);
+    expect(stack[1]).toMatch(/^ {4}at foo \((?:.*[/\\])?line2\.js:1002:102\)$/);
     expect(stack[2]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line4\.js:1004:104\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line4\.js:1004:104\)$/,
     );
   }
 });
 
-it('throw inside function inside function', function () {
+it('throw inside function inside function', () => {
   const { full, inline } = createStackTraces(createMultiLineSourceMap(), [
     'function foo() {',
     '  function bar() {',
@@ -56,15 +56,15 @@ it('throw inside function inside function', function () {
 
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
-    expect(stack[1]).toMatch(/^    at bar \((?:.*[/\\])?line3\.js:1003:103\)$/);
-    expect(stack[2]).toMatch(/^    at foo \((?:.*[/\\])?line5\.js:1005:105\)$/);
+    expect(stack[1]).toMatch(/^ {4}at bar \((?:.*[/\\])?line3\.js:1003:103\)$/);
+    expect(stack[2]).toMatch(/^ {4}at foo \((?:.*[/\\])?line5\.js:1005:105\)$/);
     expect(stack[3]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line7\.js:1007:107\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line7\.js:1007:107\)$/,
     );
   }
 });
 
-it('native function', function () {
+it('native function', () => {
   const sourceMap = createEmptySourceMap();
   sourceMap.addMapping({
     generated: { line: 1, column: 0 },
@@ -82,7 +82,7 @@ it('native function', function () {
   }
 });
 
-it('function constructor', function () {
+it('function constructor', () => {
   const { full, inline } = createStackTraces(createMultiLineSourceMap(), [
     'throw new Function(")");',
   ]);
@@ -92,18 +92,18 @@ it('function constructor', function () {
   }
 });
 
-it('throw with empty source map', function () {
+it('throw with empty source map', () => {
   const { full, inline } = createStackTraces(createEmptySourceMap(), ['throw new Error("test");']);
 
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.generated-\d+(?:-inline)?\.js:1:\d+\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.generated-\d+(?:-inline)?\.js:1:\d+\)$/,
     );
   }
 });
 
-it('throw with source map with gap', function () {
+it('throw with source map with gap', () => {
   const { full, inline } = createStackTraces(createSourceMapWithGap(), [
     'throw new Error("test");',
   ]);
@@ -111,12 +111,12 @@ it('throw with source map with gap', function () {
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.generated-\d+(?:-inline)?\.js:1:\d+\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.generated-\d+(?:-inline)?\.js:1:\d+\)$/,
     );
   }
 });
 
-it('finds the last sourceMappingURL', function () {
+it('finds the last sourceMappingURL', () => {
   const { full, inline } = createStackTraces(createMultiLineSourceMapWithSourcesContent(), [
     '//# sourceMappingURL=missing.map.js', // NB: createStackTraces adds another source mapping.
     'throw new Error("test");',
@@ -125,12 +125,12 @@ it('finds the last sourceMappingURL', function () {
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?original\.js:1002:5\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?original\.js:1002:5\)$/,
     );
   }
 });
 
-it('maps original name from source', function () {
+it('maps original name from source', () => {
   const sourceMap = createEmptySourceMap();
   sourceMap.addMapping({
     generated: { line: 2, column: 8 },
@@ -152,9 +152,9 @@ it('maps original name from source', function () {
 
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: test');
-    expect(stack[1]).toMatch(/^    at myOriginalName \((?:.*[/\\])?\.original2.js:1000:11\)$/);
+    expect(stack[1]).toMatch(/^ {4}at myOriginalName \((?:.*[/\\])?\.original2.js:1000:11\)$/);
     expect(stack[2]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.original2.js:1002:2\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?\.original2.js:1002:2\)$/,
     );
   }
 });
@@ -163,24 +163,25 @@ it('maps original name from source', function () {
  * `createStackTraces` but appends a charset to the
  * source mapping url.
  */
-it('finds source maps with charset specified', function () {
+it('finds source maps with charset specified', () => {
   const sourceMap = createMultiLineSourceMap();
 
   const file = `./.generated-${counter}.js`;
   fs.writeFileSync(
     path.join(__dirname, file),
-    'exports.test = function() {' +
+    `${'exports.test = function() {' +
       'throw new Error("test");' +
-      '};//@ sourceMappingURL=data:application/json;charset=utf8;base64,' +
-      Buffer.from(sourceMap.toString()).toString('base64'),
+      '};//@ sourceMappingURL=data:application/json;charset=utf8;base64,'}${ 
+      Buffer.from(sourceMap.toString()).toString('base64')}`,
   );
   try {
+    // eslint-disable-next-line import/no-dynamic-require
     require(file).test();
   } catch (e) {
     const stack = e.stack.split(/\r\n|\n/);
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
     );
   }
   fs.unlinkSync(path.join(__dirname, file));
@@ -190,24 +191,25 @@ it('finds source maps with charset specified', function () {
  * `createStackTraces` but appends some code and a
  * comment to the source mapping url.
  */
-it('allows code/comments after sourceMappingURL', function () {
+it('allows code/comments after sourceMappingURL', () => {
   const sourceMap = createMultiLineSourceMap();
   const file = `./.generated-${counter}.js`;
   fs.writeFileSync(
     path.join(__dirname, file),
-    'exports.test = function() {' +
+    `${'exports.test = function() {' +
       'throw new Error("test");' +
-      '};//# sourceMappingURL=data:application/json;base64,' +
-      Buffer.from(sourceMap.toString()).toString('base64') +
-      '\n// Some comment below the sourceMappingURL\nvar foo = 0;',
+      '};//# sourceMappingURL=data:application/json;base64,'}${ 
+      Buffer.from(sourceMap.toString()).toString('base64') 
+      }\n// Some comment below the sourceMappingURL\nvar foo = 0;`,
   );
   try {
+    // eslint-disable-next-line import/no-dynamic-require
     require(file).test();
   } catch (e) {
     const stack = e.stack.split(/\r\n|\n/);
     expect(stack[0]).toBe('Error: test');
     expect(stack[1]).toMatch(
-      /^    at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
+      /^ {4}at Object\.<anonymous>\.exports\.test \((?:.*[/\\])?line1\.js:1001:101\)$/,
     );
   }
   fs.unlinkSync(path.join(__dirname, file));
@@ -236,7 +238,7 @@ function createMultiLineSourceMap(): SourceMapGenerator {
     sourceMap.addMapping({
       generated: { line: i, column: 0 },
       original: { line: 1000 + i, column: 99 + i },
-      source: 'line' + i + '.js',
+      source: `line${  i  }.js`,
     });
   }
   return sourceMap;
@@ -251,7 +253,7 @@ function createMultiLineSourceMapWithSourcesContent(): SourceMapGenerator {
       original: { line: 1000 + i, column: 4 },
       source: 'original.js',
     });
-    original += '    line ' + i + '\n';
+    original += `    line ${  i  }\n`;
   }
   sourceMap.setSourceContent('original.js', original);
   return sourceMap;
@@ -265,12 +267,13 @@ function createStackTraces(
   fs.writeFileSync(`${__dirname}/.generated-${counter}.js.map`, sourceMap.toString());
   fs.writeFileSync(
     `${__dirname}/.generated-${counter}.js`,
-    'exports.test = function() {' +
-      source.join('\n') +
-      `};//@ sourceMappingURL=.generated-${counter}.js.map`,
+    `exports.test = function() {${ 
+      source.join('\n') 
+      }};//@ sourceMappingURL=.generated-${counter}.js.map`,
   );
   const response = { full: null, inline: null };
   try {
+    // eslint-disable-next-line import/no-dynamic-require
     require(`./.generated-${counter}`).test();
   } catch (e) {
     response.full = e.stack.split(/\r\n|\n/);
@@ -281,12 +284,13 @@ function createStackTraces(
   // Check again with an inline source map (in a data URL)
   fs.writeFileSync(
     `${__dirname}/.generated-${counter}-inline.js`,
-    'exports.test = function() {' +
-      source.join('\n') +
-      '};//@ sourceMappingURL=data:application/json;base64,' +
-      Buffer.from(sourceMap.toString()).toString('base64'),
+    `exports.test = function() {${ 
+      source.join('\n') 
+      }};//@ sourceMappingURL=data:application/json;base64,${ 
+      Buffer.from(sourceMap.toString()).toString('base64')}`,
   );
   try {
+    // eslint-disable-next-line import/no-dynamic-require
     require(`./.generated-${counter}-inline`).test();
   } catch (e) {
     response.inline = e.stack.split(/\r\n|\n/);

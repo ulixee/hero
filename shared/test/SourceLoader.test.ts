@@ -2,7 +2,7 @@ import { getCallsite } from '../lib/utils';
 import SourceLoader from '../lib/SourceLoader';
 import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
 
-it('can lookup source code', function () {
+it('can lookup source code', () => {
   let callsite: ISourceCodeLocation[];
   // run code like this so we can see the true load (?? will be translated by typescript)
   function loadCallsite() {

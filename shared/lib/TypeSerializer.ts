@@ -134,7 +134,7 @@ export default class TypeSerializer {
       }
       // @ts-ignore
       if (value instanceof CSSStyleDeclaration) {
-        const isNumber = new RegExp(/^\d+$/);
+        const isNumber = /^\d+$/;
         const result = {};
         for (const key of Object.keys(value)) {
           if (isNumber.test(key)) continue;
