@@ -3,10 +3,10 @@
   "version": "2.0.0-alpha.4",
   "description": "The interface to playback and examine previous Hero sessions",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.4",
+    "@ulixee/commons": "2.0.0-alpha.5",
     "@ulixee/hero-core": "2.0.0-alpha.4",
     "@ulixee/hero-interfaces": "2.0.0-alpha.4",
-    "@unblocked-web/agent": "2.0.0-alpha.3",
+    "@unblocked-web/agent": "2.0.0-alpha.4",
     "@unblocked-web/specifications": "2.0.0-alpha.2",
     "nanoid": "^3.1.30"
   },

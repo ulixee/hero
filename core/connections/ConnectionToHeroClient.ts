@@ -99,7 +99,12 @@ export default class ConnectionToHeroClient
       responseId: messageId,
       data,
     };
-    await this.transport.send(response);
+    try {
+      await this.transport.send(response);
+    } catch (err) {
+      if (err instanceof CanceledPromiseError && String(err).includes('Websocket was not open')) return;
+      throw err;
+    }
   }
 
   public async connect(
