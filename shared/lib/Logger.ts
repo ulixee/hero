@@ -243,27 +243,6 @@ export function registerNamespaceMapping(
   }
 }
 
-registerNamespaceMapping((ns, active, skip) => {
-  if (ns.includes('ubk:*') || ns.includes('ubk*')) {
-    active.push(/agent\/.*/);
-  } else if (ns === 'ubk') {
-    active.push(/agent\/.*/);
-    skip.push(/DevtoolsSessionLogger/, /agent\/mitm.*/);
-  } else if (ns.includes('ubk:devtools')) {
-    active.push(/DevtoolsSessionLogger/);
-  }
-});
-
-registerNamespaceMapping((ns, active) => {
-  if (ns.includes('ulx:*') || ns.includes('ulx*')) {
-    active.push(/^apps\/chromealive*/, /hero\/.*/, /net\/.*/, /databox\/.*/);
-  } else if (ns.includes('hero')) {
-    active.push(/^hero\/.*/, /net\/.*/);
-  } else if (ns.includes('databox')) {
-    active.push(/^databox\/.*/, /net\/.*/);
-  }
-});
-
 function isEnabled(modulePath: string): boolean {
   if (modulePath in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[modulePath];
 
@@ -291,17 +270,36 @@ function isEnabled(modulePath: string): boolean {
 function enable(namespaces: string): void {
   const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
 
-  for (let part of split) {
+  for (const part of split) {
     if (!part) continue;
 
-    part = part.replace(/\*/g, '.*?');
-
     if (part[0] === '-') {
-      logFilters.namespaces.inactive.add(part); // .push(new RegExp('^' + part.slice(1) + '$'));
+      logFilters.namespaces.inactive.add(part);
     } else {
       logFilters.namespaces.active.add(part);
-      // logFilters.active.push(new RegExp('^' + part + '$'));
     }
   }
 }
+
 enable(process.env.DEBUG);
+
+registerNamespaceMapping((ns, active, skip) => {
+  if (ns.includes('ubk:*') || ns.includes('ubk*')) {
+    active.push(/agent\/.*/);
+  } else if (ns === 'ubk') {
+    active.push(/agent\/.*/);
+    skip.push(/DevtoolsSessionLogger/, /agent\/mitm.*/);
+  } else if (ns.includes('ubk:devtools')) {
+    active.push(/DevtoolsSessionLogger/);
+  }
+});
+
+registerNamespaceMapping((ns, active) => {
+  if (ns.includes('ulx:*') || ns.includes('ulx*')) {
+    active.push(/^apps\/chromealive*/, /hero\/.*/, /net\/.*/, /databox\/.*/);
+  } else if (ns.includes('hero')) {
+    active.push(/^hero\/.*/, /net\/.*/);
+  } else if (ns.includes('databox')) {
+    active.push(/^databox\/.*/, /net\/.*/);
+  }
+});

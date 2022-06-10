@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/commons",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Common utilities for Ulixee",
   "license": "MIT",
   "scripts": {
