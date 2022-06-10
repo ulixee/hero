@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.5](https://github.com/ulixee/hero/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2022-06-10)
+
+
+### Bug Fixes
+
+* expose connections for test ([59433ea](https://github.com/ulixee/hero/commit/59433eadbb0d0f598cd3274c2b8d8c3fdf804119))
+
+
+
+
+
 # [2.0.0-alpha.4](https://github.com/ulixee/hero/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
 
 

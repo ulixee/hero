@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero-core",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "The core browser API used to run Hero",
   "exports": {
     ".": {
@@ -17,9 +17,9 @@
   "dependencies": {
     "@types/ua-parser-js": "^0.7.35",
     "@ulixee/commons": "2.0.0-alpha.5",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.4",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.4",
-    "@ulixee/hero-timetravel": "2.0.0-alpha.4",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.5",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.5",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.5",
     "@ulixee/net": "2.0.0-alpha.5",
     "@unblocked-web/agent": "2.0.0-alpha.4",
     "@unblocked-web/agent-mitm": "2.0.0-alpha.4",
@@ -37,9 +37,9 @@
     "@types/better-sqlite3": "^7.5.0",
     "@types/json-socket": "^0.1.17",
     "@ulixee/chrome-app": "1.0.2",
-    "@ulixee/hero": "2.0.0-alpha.4",
+    "@ulixee/hero": "2.0.0-alpha.5",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.4",
-    "@ulixee/hero-testing": "2.0.0-alpha.4",
+    "@ulixee/hero-testing": "2.0.0-alpha.5",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"
   }
