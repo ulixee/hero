@@ -1,4 +1,3 @@
-import BrowserEmulator from '../index';
 import { Helpers, TestLogger } from '@unblocked-web/agent-testing/index';
 import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
 import Pool from '@unblocked-web/agent/lib/Pool';
@@ -6,6 +5,7 @@ import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import BrowserEmulator from '../index';
 
 const logger = TestLogger.forTest(module);
 

@@ -14,6 +14,9 @@ import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import { IWorker } from '@unblocked-web/specifications/agent/browser/IWorker';
 import IHttp2ConnectSettings from '@unblocked-web/specifications/agent/net/IHttp2ConnectSettings';
 import IHttpSocketAgent from '@unblocked-web/specifications/agent/net/IHttpSocketAgent';
+import IBrowserLaunchArgs from '@unblocked-web/specifications/agent/browser/IBrowserLaunchArgs';
+import IBrowser from '@unblocked-web/specifications/agent/browser/IBrowser';
+import Log from '@ulixee/commons/lib/Logger';
 import Viewports from './lib/Viewports';
 import BrowserEngine from './lib/BrowserEngine';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
@@ -41,9 +44,6 @@ import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
 import IUserAgentData from './interfaces/IUserAgentData';
 import UserAgentOptions from './lib/UserAgentOptions';
 import BrowserEngineOptions from './lib/BrowserEngineOptions';
-import IBrowserLaunchArgs from '@unblocked-web/specifications/agent/browser/IBrowserLaunchArgs';
-import IBrowser from '@unblocked-web/specifications/agent/browser/IBrowser';
-import Log from '@ulixee/commons/lib/Logger';
 
 // Configuration to rotate out the default browser id. Used for testing different browsers via cli
 const defaultBrowserId = process.env.ULX_DEFAULT_BROWSER_ID ?? process.env.UBK_DEFAULT_BROWSER_ID;

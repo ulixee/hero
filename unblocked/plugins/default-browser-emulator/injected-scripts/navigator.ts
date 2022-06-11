@@ -14,7 +14,7 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
   function checkThisArg(thisArg, customMessage = ''): TypeError {
     // @ts-expect-error
     if (Object.getPrototypeOf(thisArg) !== NavigatorUAData.prototype) {
-      return new TypeError(customMessage + 'Illegal invocation');
+      return new TypeError(`${customMessage  }Illegal invocation`);
     }
   }
 

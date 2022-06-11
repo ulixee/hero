@@ -1,8 +1,8 @@
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
 import IUserAgentData from '../interfaces/IUserAgentData';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default function loadDomOverrides(
   emulationProfile: IEmulationProfile,

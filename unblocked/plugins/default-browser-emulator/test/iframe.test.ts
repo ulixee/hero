@@ -1,11 +1,11 @@
 import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
 import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
-import BrowserEmulator from '../index';
 import Pool from '@unblocked-web/agent/lib/Pool';
 import Agent from '@unblocked-web/agent/lib/Agent';
 import Page from '@unblocked-web/agent/lib/Page';
 import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import BrowserEmulator from '../index';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
