@@ -26,7 +26,9 @@ export default class UlixeeServerConfig {
       let serverModulePath: string;
       try {
         serverModulePath = require.resolve('@ulixee/server');
-      } catch (err) {}
+      } catch (err) {
+        /* no-op */
+      }
       this.hostByVersion[version] = {
         host,
         nodePath: process.execPath,
