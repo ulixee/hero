@@ -3,7 +3,6 @@ Hero 2.0 pulls over the best features of SecretAgent, including the ability to a
 
 Remaining items before Stable Release:
 
-- Fix Chrome 95+ TLS Signature (ALPS extension). The signature is currently invalid.
 - Update to latest version of Chrome
 
 ## 2.11 - Improve Reactivity
