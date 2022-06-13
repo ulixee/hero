@@ -9,6 +9,17 @@ import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import { IEventRecord } from '../models/AwaitedEventsTable';
 import SessionDb from '../dbs/SessionDb';
 
+export type ICommandPresetMeta = Pick<
+  ICoreCommandRequestPayload,
+  | 'startTime'
+  | 'sendTime'
+  | 'activeFlowHandlerId'
+  | 'flowCommandId'
+  | 'commandId'
+  | 'callsite'
+  | 'retryNumber'
+>;
+
 export default class Commands
   extends TypedEventEmitter<{
     start: ICommandMeta;
@@ -35,16 +46,8 @@ export default class Commands
 
   public requiresScriptRestart = false;
 
-  public nextCommandMeta: Pick<
-    ICoreCommandRequestPayload,
-    | 'startTime'
-    | 'sendTime'
-    | 'activeFlowHandlerId'
-    | 'flowCommandId'
-    | 'commandId'
-    | 'callsite'
-    | 'retryNumber'
-  >;
+  // holder - will be cleared out to work around async
+  public presetMeta: ICommandPresetMeta;
 
   private listenersById = new Map<string, IRemoteListenerDetails>();
   private listenerIdCounter = 0;
@@ -84,6 +87,7 @@ export default class Commands
     startNavigationId: number,
     commandName: string,
     args: any[],
+    presetCommandMeta: ICommandPresetMeta,
   ): ICommandMeta {
     const commandMeta = {
       id: this.history.length + 1,
@@ -95,7 +99,7 @@ export default class Commands
       startNavigationId,
     } as ICommandMeta;
 
-    if (this.nextCommandMeta) {
+    if (presetCommandMeta) {
       const {
         commandId,
         startTime,
@@ -104,8 +108,7 @@ export default class Commands
         retryNumber,
         activeFlowHandlerId,
         flowCommandId,
-      } = this.nextCommandMeta;
-      this.nextCommandMeta = null;
+      } = presetCommandMeta;
       if (commandId) commandMeta.id = commandId;
       commandMeta.clientSendDate = sendTime;
       commandMeta.clientStartDate = startTime;

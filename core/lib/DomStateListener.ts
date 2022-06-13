@@ -80,7 +80,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
 
     const commands = tab.session.commands;
     // make sure to clear out any meta
-    commands.nextCommandMeta = null;
+    commands.presetMeta = null;
     this.startingCommandId = commands.lastId;
     this.commandStartTime = commands.last.runStartDate;
 

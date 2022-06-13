@@ -598,8 +598,8 @@ export default class Session
     for (const tab of this.tabsById.values()) {
       await tab.flushDomChanges();
     }
-    // run after command completes
-    setImmediate(() => this.emit('kept-alive', result));
+    // give listeners a chance to modify message before publishing to clients
+    this.emit('kept-alive', result);
     return result;
   }
 
@@ -610,7 +610,7 @@ export default class Session
       // create a new tab
     }
     Object.assign(this.options, options);
-    this.commands.nextCommandMeta = null;
+    this.commands.presetMeta = null;
     this.emit('resumed');
   }
 
@@ -805,8 +805,9 @@ ${data}`,
 
     // try to resume session. Modify options to match if not active.
     const resumeSessionId = options?.sessionResume?.sessionId;
+    const resumeLocation = options.sessionResume?.startLocation;
     if (resumeSessionId) {
-      if (options.sessionResume.startLocation === 'currentLocation') {
+      if (resumeLocation !== 'sessionStart') {
         session = Session.get(resumeSessionId);
         if (session) {
           await session.resume(options);
@@ -828,6 +829,14 @@ ${data}`,
       }
     }
     tab ??= await session.createTab();
+
+    if (resumeLocation === 'sessionStart') {
+      const newId = session.id;
+      if (newId !== resumeSessionId) {
+        // Bind the new session close to the original one if it's still open
+        Session.get(resumeSessionId)?.once('closed', () => Session.get(newId)?.close(true));
+      }
+    }
 
     return { session, tab, isSessionResume };
   }

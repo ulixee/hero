@@ -45,11 +45,13 @@ export default class CommandRecorder {
     const { session, owner } = this;
     if (session === null) return;
     const commands = session.commands;
+    // retrieve before any async loop deferrals
+    const meta = commands.presetMeta;
+    session.commands.presetMeta = null;
 
     const shouldWait =
       !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(commandFn.name);
     if (shouldWait) await commands.waitForCommandLock();
-
 
     let tabId = this.tabId;
     const frameId = this.frameId;
@@ -68,6 +70,7 @@ export default class CommandRecorder {
       frame?.navigations?.top?.id,
       commandFn.name,
       args,
+      meta,
     );
 
     commands.willRunCommand(commandMeta);

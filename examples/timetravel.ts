@@ -19,6 +19,7 @@ inspect.defaultOptions.depth = null;
   if (!Path.isAbsolute(scriptEntrypoint)) {
     scriptEntrypoint = Path.resolve(process.cwd(), scriptEntrypoint);
   }
+  await Core.start();
   const bridge = ConnectionToHeroApiClient.createBridge();
   const connectionToCoreApi = new ConnectionToHeroApiCore(bridge.transportToCore);
 
@@ -39,7 +40,7 @@ inspect.defaultOptions.depth = null;
     null,
     connectionToCoreApi,
   );
-  const startTab = await player.goto(100);
+  const startTab = await player.goto(0);
 
   readline.createInterface({
     input: process.stdin,
