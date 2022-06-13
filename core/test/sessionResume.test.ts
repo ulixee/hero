@@ -214,7 +214,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
 });
 
 function simulateScriptSendingCommandMeta(session: Session, id: number): void {
-  session.commands.nextCommandMeta = {
+  session.commands.presetMeta = {
     commandId: id,
     startTime: Date.now(),
     sendTime: Date.now(),

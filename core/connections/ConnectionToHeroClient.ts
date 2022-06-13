@@ -16,7 +16,7 @@ import IConnectionToClient, {
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import Commands from '../lib/Commands';
+import { ICommandPresetMeta } from '../lib/Commands';
 import RemoteEvents from '../lib/RemoteEvents';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
 import FrameEnvironment from '../lib/FrameEnvironment';
@@ -229,7 +229,7 @@ export default class ConnectionToHeroClient
     command: string,
     args: any[],
     meta: ISessionMeta,
-    commandMeta: Commands['nextCommandMeta'],
+    commandMeta: ICommandPresetMeta,
   ): Promise<any> {
     const session = Session.get(meta?.sessionId);
     const tab = Session.getTab(meta);
@@ -245,7 +245,7 @@ export default class ConnectionToHeroClient
     });
 
     if (session && commandMeta) {
-      session.commands.nextCommandMeta = commandMeta;
+      session.commands.presetMeta = commandMeta;
     }
 
     return await commandRunner.runFn();

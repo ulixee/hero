@@ -598,8 +598,8 @@ export default class Session
     for (const tab of this.tabsById.values()) {
       await tab.flushDomChanges();
     }
-    // run after command completes
-    setImmediate(() => this.emit('kept-alive', result));
+    // give listeners a chance to modify message before publishing to clients
+    this.emit('kept-alive', result);
     return result;
   }
 
@@ -610,7 +610,7 @@ export default class Session
       // create a new tab
     }
     Object.assign(this.options, options);
-    this.commands.nextCommandMeta = null;
+    this.commands.presetMeta = null;
     this.emit('resumed');
   }
 
