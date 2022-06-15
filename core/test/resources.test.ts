@@ -90,3 +90,8 @@ test('should convert a url with special chars into a valid regex', () => {
   const regexp = stringToRegex('https://fonts.com?family=Open+Sans:300,300i');
   expect('https://fonts.com?family=Open+Sans:300,300i'.match(regexp)).toBeTruthy();
 });
+
+test('should convert a url with wildcards into a valid regex', () => {
+  const regexp = stringToRegex('https://www.skyscanner.com/g/conductor/v1/fps3/search/*');
+  expect('https://www.skyscanner.com/g/conductor/v1/fps3/search/1234'.match(regexp)).toBeTruthy();
+});

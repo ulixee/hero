@@ -1032,6 +1032,6 @@ export interface ITabEventParams {
 }
 
 export function stringToRegex(str: string): RegExp {
-  const escaped = str.replace(/[-[/\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const escaped = str.replace(/\/\*/g,'/.*').replace(/[-[/\]{}()+?.,\\^$|#\s]/g, '\\$&');
   return new RegExp(escaped);
 }
