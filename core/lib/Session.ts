@@ -785,13 +785,15 @@ ${data}`,
     }
 
     const record = db.session.get();
+    if (record.createSessionOptions) {
+      Object.assign(options, record.createSessionOptions);
+    }
     options.userAgent = record.userAgentString;
     options.locale = record.locale;
     options.timezoneId = record.timezoneId;
     options.viewport = record.viewport;
 
-    options.geolocation ??= record.createSessionOptions?.geolocation;
-    options.userProfile ??= record.createSessionOptions?.userProfile ?? {};
+    options.userProfile ??= {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
     return options;
   }

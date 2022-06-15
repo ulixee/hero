@@ -17,9 +17,6 @@ const resumeSessionId = Fs.existsSync(sessionIdPath)
       startLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation
       sessionId: resumeSessionId,
     },
-    connectionToCore: {
-      host: `ws://localhost:1337`, // NOTE: you need to start your own Ulixee server
-    },
   });
   const sessionId = await hero.sessionId;
   Fs.writeFileSync(sessionIdPath, sessionId);

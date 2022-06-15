@@ -139,9 +139,11 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       if (change.action === DomActionType.newDocument) {
         const isMainframe = mainFrameIds.has(frameId);
         let doctype = null;
-        for (let x = 1; x <= 2; x += 1) {
+        // can get iframes and other things before the doctype comes through
+        for (let x = 1; x <= 100; x += 1) {
           const next = domChangeRecords[i + x];
-          if (next?.nodeType === 10) {
+          if (!next) break;
+          if (next.nodeType === 10 && next.frameId === frameId) {
             doctype = next.textContent;
             break;
           }
