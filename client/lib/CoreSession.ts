@@ -11,6 +11,7 @@ import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
 import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -50,6 +51,7 @@ export default class CoreSession
 
   private readonly connectionToCore: ConnectionToHeroCore;
   private commandId = 0;
+  private cliPromptMessage: string;
   private cliPrompt: ReadLine;
   private isClosing = false;
   private closingPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
@@ -174,6 +176,7 @@ export default class CoreSession
       if (result?.didKeepAlive === true) {
         this.isClosing = false;
         const didClose = new Promise(resolve => this.addEventListener(null, 'close', resolve));
+        await this.watchRelaunchLogs();
         this.showSessionKeepAlivePrompt(result.message);
         await didClose;
       }
@@ -227,7 +230,17 @@ export default class CoreSession
     }
   }
 
+  private async watchRelaunchLogs(): Promise<void> {
+    await this.addEventListener(null, 'rerun-stdout', msg => process.stdout.write(msg));
+    await this.addEventListener(null, 'rerun-stderr', msg => process.stderr.write(msg));
+    await this.addEventListener(null, 'rerun-kept-alive', () => {
+      // eslint-disable-next-line no-console
+      console.log(this.cliPromptMessage);
+    });
+  }
+
   private showSessionKeepAlivePrompt(message: string): void {
+    this.cliPromptMessage = `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`;
     if (/yes|1|true/i.test(process.env.ULX_CLI_NOPROMPT)) return;
 
     this.cliPrompt = readline.createInterface({
@@ -238,10 +251,7 @@ export default class CoreSession
     readline.emitKeypressEvents(process.stdin);
     process.stdin.setEncoding('utf8');
     if (process.stdin.isTTY) process.stdin.setRawMode(true);
-
-    this.cliPrompt.setPrompt(
-      `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`,
-    );
+    this.cliPrompt.setPrompt(this.cliPromptMessage);
 
     process.stdin.on('keypress', async (chunk, key) => {
       if (
@@ -256,7 +266,7 @@ export default class CoreSession
         }
       }
     });
-    process.once('beforeExit', () => this.closeCliPrompt());
+    ShutdownHandler.register(() => this.closeCliPrompt());
     this.cliPrompt.prompt(true);
   }
 }

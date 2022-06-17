@@ -160,7 +160,13 @@ export default class Session
     };
   }
 
-  public awaitedEventEmitter = new TypedEventEmitter<{ close: void }>();
+  public awaitedEventEmitter = new TypedEventEmitter<{
+    close: void;
+    'rerun-stderr': string;
+    'rerun-stdout': string;
+    'rerun-kept-alive': void;
+  }>();
+
   public readonly agent: Agent;
 
   protected readonly logger: IBoundLog;
@@ -840,12 +846,23 @@ ${data}`,
     }
     tab ??= await session.createTab();
 
-    if (resumeLocation === 'sessionStart') {
-      const newId = session.id;
-      if (newId !== resumeSessionId) {
+    if (resumeSessionId) {
+      if (resumeLocation === 'sessionStart' && session.id !== resumeSessionId) {
+        const newId = session.id;
+
+        const resumed = Session.get(resumeSessionId);
         // Bind the new session close to the original one if it's still open
-        Session.get(resumeSessionId)?.once('closed', () => Session.get(newId)?.close(true));
+        if (resumed) {
+          resumed.events.once(resumed, 'closed', () => Session.get(newId)?.close(true));
+        }
       }
+      // Broadcast new event kept-alive to the original session
+      session.events.on(session, 'kept-alive', () => {
+        const resumed = Session.get(resumeSessionId);
+        if (resumed) {
+          resumed.awaitedEventEmitter.emit('rerun-kept-alive');
+        }
+      });
     }
 
     return { session, tab, isSessionResume };
