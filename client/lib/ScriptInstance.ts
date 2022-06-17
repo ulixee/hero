@@ -31,6 +31,8 @@ export default class ScriptInstance {
       workingDirectory: process.cwd(),
       entrypoint: this.entrypoint,
       startDate: this.startDate,
+      execPath: process.execPath,
+      execArgv: process.execArgv,
     };
   }
 
