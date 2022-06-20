@@ -245,9 +245,9 @@ export default class CoreCommandQueue {
           const lastLine = callsite[0];
           if (lastLine) {
             try {
-              const code = SourceLoader.getSource(lastLine)?.code;
-              if (code) {
-                error.stack = `\n\n  --->  ${code.trim()}\n\n\n${error.stack}`;
+              const code = SourceLoader.getSource(lastLine)?.code?.trim();
+              if (code && !error.stack.includes(code)) {
+                error.stack = `\n\n  --->  ${code}\n\n\n${error.stack}`;
               }
             } catch (_) {
               // drown if we can't read the source code

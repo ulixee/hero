@@ -349,9 +349,11 @@ export default class Tab
   ): Promise<Buffer | IWebsocketMessage[]> {
     if (propertyPath === 'response.buffer') {
       return await this.session.db.resources.getResourceBodyById(resourceId, true);
-    } if (propertyPath === 'request.postData') {
+    }
+    if (propertyPath === 'request.postData') {
       return this.session.db.resources.getResourcePostDataById(resourceId);
-    } if (propertyPath === 'messages') {
+    }
+    if (propertyPath === 'messages') {
       return this.session.websocketMessages.getMessages(resourceId);
     }
   }
@@ -1032,6 +1034,6 @@ export interface ITabEventParams {
 }
 
 export function stringToRegex(str: string): RegExp {
-  const escaped = str.replace(/\/\*/g,'/.*').replace(/[-[/\]{}()+?.,\\^$|#\s]/g, '\\$&');
+  const escaped = str.replace(/\/\*/g, '/.*').replace(/[-[/\]{}()+?.,\\^$|#\s]/g, '\\$&');
   return new RegExp(escaped);
 }

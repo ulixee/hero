@@ -63,7 +63,7 @@ export default class TimelineWatch extends TypedEventEmitter<{
       const promises: Promise<any>[] = [];
       for (const tab of this.heroSession.tabsById.values()) {
         if (!tab.navigations.hasLoadStatus(status)) {
-          this.logger.info('Waiting for load status before session close', {
+          this.logger.info('Delaying session close until page has load status.', {
             status,
             tabId: tab.id,
           });
@@ -82,7 +82,7 @@ export default class TimelineWatch extends TypedEventEmitter<{
       : 0;
     let delayPromise: Promise<void>;
     if (delay > 0) {
-      this.logger.info(`Waiting for ${delay}ms since last command`);
+      this.logger.info(`Delaying session close for ${delay}ms after last command.`);
       delayPromise = new Promise<void>(resolve => setTimeout(resolve, delay));
     }
     if (loadPromise || delayPromise) {
