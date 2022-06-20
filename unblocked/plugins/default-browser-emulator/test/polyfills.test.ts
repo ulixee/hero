@@ -4,9 +4,9 @@ import * as Helpers from '@unblocked-web/agent-testing/helpers';
 import { ITestHttpServer } from '@unblocked-web/agent-testing/helpers';
 import { defaultBrowserEngine } from '@unblocked-web/agent-testing/browserUtils';
 import { Browser } from '@unblocked-web/agent';
-import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import { TestLogger } from '@unblocked-web/agent-testing';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 let browser: Browser;

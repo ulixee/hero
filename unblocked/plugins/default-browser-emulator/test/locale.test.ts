@@ -1,7 +1,7 @@
-import BrowserEmulator from '../index';
 import Pool from '@unblocked-web/agent/lib/Pool';
 import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
 import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import BrowserEmulator from '../index';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;

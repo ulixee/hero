@@ -1,9 +1,9 @@
 import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
+import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 import IUserAgentData from '../../interfaces/IUserAgentData';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 
 export default function modifyHeaders(
   emulationProfile: IEmulationProfile,
@@ -28,6 +28,10 @@ export default function modifyHeaders(
         newHeaders[header] = userAgentString;
       } else {
         newHeaders[header] = value;
+      }
+      if (lower === 'sec-ch-ua-platform') {
+        // must align to user platform! (eg, "Windows")
+        newHeaders[header] = `"${userAgentData.platform}"`;
       }
     }
     if (!hasKeepAlive && !resource.isServerHttp2) {

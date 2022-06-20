@@ -1,8 +1,8 @@
-import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrowserData';
-import DataLoader from './DataLoader';
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import IUserAgentOption, { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import DataLoader from './DataLoader';
+import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrowserData';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';
 import BrowserEngineOptions from './BrowserEngineOptions';
@@ -126,6 +126,12 @@ export default class UserAgentOptions {
       osVersionMinor = undefined;
     }
 
+    let operatingSystemPlatform: string;
+
+    if (operatingSystemName === 'mac-os') operatingSystemPlatform = 'MacIntel';
+    else if (operatingSystemName === 'windows') operatingSystemPlatform = 'Win32';
+    else operatingSystemPlatform = 'Linux';
+
     this.parsedCached[userAgentString] = {
       browserName,
       browserVersion: {
@@ -135,12 +141,7 @@ export default class UserAgentOptions {
         build: browserVersionBuild,
       },
       operatingSystemName,
-      operatingSystemPlatform:
-        operatingSystemName === 'mac-os'
-          ? 'MacIntel'
-          : operatingSystemName === 'windows'
-          ? 'Win32'
-          : 'Linux',
+      operatingSystemPlatform,
       operatingSystemVersion: {
         major: osVersionMajor,
         minor: osVersionMinor,

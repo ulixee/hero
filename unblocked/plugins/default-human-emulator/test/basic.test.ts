@@ -4,10 +4,10 @@ import {
 } from '@unblocked-web/specifications/agent/interact/IInteractions';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import HumanEmulator from '../index';
 import * as rectUtils from '@unblocked-web/agent/lib/rectUtils';
 import IInteractionsHelper from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
 import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import HumanEmulator from '../index';
 
 const { log } = Log(module);
 

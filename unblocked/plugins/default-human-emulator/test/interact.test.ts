@@ -1,6 +1,5 @@
 import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/agent-testing';
 import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import HumanEmulator from '..';
 import { getLogo, ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
 import {
   getClientRectFnName,
@@ -11,6 +10,7 @@ import { LoadStatus, LocationStatus } from '@unblocked-web/specifications/agent/
 import { Agent, Pool } from '@unblocked-web/agent';
 import { PageHooks } from '@unblocked-web/agent-testing/browserUtils';
 import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import HumanEmulator from '..';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;

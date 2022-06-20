@@ -12,13 +12,13 @@ import IInteractionsHelper, {
   IRectLookup,
 } from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
 import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
-import generateVector from './generateVector';
 import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
 import logger from '@ulixee/commons/lib/Logger';
 import IUnblockedPlugin, {
   UnblockedPluginClassDecorator,
 } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import generateVector from './generateVector';
 
 const { log } = logger(module);
 

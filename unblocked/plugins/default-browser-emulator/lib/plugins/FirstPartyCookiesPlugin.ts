@@ -12,11 +12,11 @@ import SameSiteContext from '@ulixee/commons/interfaces/SameSiteContext';
 import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import DomOverridesBuilder from '../DomOverridesBuilder';
 import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { UnblockedPluginClassDecorator } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+import DomOverridesBuilder from '../DomOverridesBuilder';
 
 @UnblockedPluginClassDecorator
 export default class FirstPartyCookiesPlugin implements IHooksProvider {

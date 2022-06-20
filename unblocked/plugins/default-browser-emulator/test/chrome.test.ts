@@ -3,10 +3,10 @@ import * as Path from 'path';
 import * as Helpers from '@unblocked-web/agent-testing/helpers';
 import { inspect } from 'util';
 import { Browser } from '@unblocked-web/agent';
-import BrowserEmulator from '../index';
-import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import Page from '@unblocked-web/agent/lib/Page';
 import { TestLogger } from '@unblocked-web/agent-testing';
+import BrowserEmulator from '../index';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 let chrome;

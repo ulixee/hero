@@ -1,6 +1,6 @@
 import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
-import IUserAgentData from '../../interfaces/IUserAgentData';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import IUserAgentData from '../../interfaces/IUserAgentData';
 
 export default async function setUserAgent(
   emulationProfile: IEmulationProfile,
