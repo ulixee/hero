@@ -844,7 +844,7 @@ export default class Tab
   private onPageCallback(event: IPageEvents['page-callback-triggered']): void {
     if (event.name === InjectedScripts.PageEventsCallbackName) {
       const { frameId, payload } = event;
-      if (!frameId || !this.frameEnvironmentsByDevtoolsId.has(frameId)) {
+      if (!frameId || !this.frameEnvironmentsById.has(frameId)) {
         log.warn('DomRecorder.bindingCalledBeforeExecutionTracked', {
           sessionId: this.sessionId,
           payload,
@@ -852,7 +852,7 @@ export default class Tab
         return;
       }
 
-      this.frameEnvironmentsByDevtoolsId.get(frameId).onPageRecorderEvents(JSON.parse(payload));
+      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(JSON.parse(payload));
     }
   }
 
@@ -940,10 +940,9 @@ export default class Tab
   private onPageError(event: IPageEvents['page-error']): void {
     const { error, frameId } = event;
     this.logger.info('Window.pageError', { error, frameId });
-    const translatedFrameId = this.translateDevtoolsFrameId(frameId);
     this.session.db.pageLogs.insert(
       this.id,
-      translatedFrameId,
+      frameId,
       `events.page-error`,
       error.stack || String(error),
       new Date(),
@@ -952,21 +951,13 @@ export default class Tab
 
   private onConsole(event: IPageEvents['console']): void {
     const { frameId, type, message, location } = event;
-    const translatedFrameId = this.translateDevtoolsFrameId(frameId);
 
     let level = 'info';
     if (message.startsWith('ERROR:') && message.includes(injectedSourceUrl)) {
       level = 'error';
     }
     this.logger[level]('Window.console', { message });
-    this.session.db.pageLogs.insert(
-      this.id,
-      translatedFrameId,
-      type,
-      message,
-      new Date(),
-      location,
-    );
+    this.session.db.pageLogs.insert(this.id, frameId, type, message, new Date(), location);
   }
 
   private onTargetCrashed(event: IPageEvents['crashed']): void {

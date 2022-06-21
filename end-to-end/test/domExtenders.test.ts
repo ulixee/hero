@@ -86,8 +86,9 @@ describe('basic DomExtender tests', () => {
 </html>`;
     });
     await hero.goto(`${koaServer.baseUrl}/domextender-iframe-test`);
-    await hero.waitForPaintingStable();
+    await hero.activeTab.waitForLoad('AllContentLoaded');
     await expect(hero.querySelector('h1').textContent).resolves.toBe('Page Title');
+
     await expect(
       hero.querySelector('#frame1').$contentDocument.querySelector('h1').textContent,
     ).resolves.toBe('Frame Title');

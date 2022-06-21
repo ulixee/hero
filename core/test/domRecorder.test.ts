@@ -289,7 +289,7 @@ function clickIt() {
     await tab.session.close();
   });
 
-  it('supports recording closed shadow dom roots', async () => {
+  it.skip('supports recording closed shadow dom roots', async () => {
     koaServer.get('/test5', ctx => {
       ctx.body = `<body>
 <script>
