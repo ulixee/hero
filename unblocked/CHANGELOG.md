@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.5](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2022-06-28)
+
+
+### Bug Fixes
+
+* **browser:** disable oopif ([1be7831](https://github.com/ulixee/ulixee/commit/1be7831d4373d433ef5e7d9b282c3306c898e0e5))
+* update lint and fix the issues ([da13726](https://github.com/ulixee/ulixee/commit/da13726fa4bd6791e1c9f3a32580dea09bd89572))
+
+
+### Features
+
+* implement addDomOverrides from spec ([0f76ead](https://github.com/ulixee/ulixee/commit/0f76eadea61c16d40e14ffceeec276a4b65c0071))
+
+
+
+
+
 # [2.0.0-alpha.4](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-10)
 
 
