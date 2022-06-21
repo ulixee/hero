@@ -174,6 +174,13 @@ export default class Session
 
   protected constructor(readonly options: ISessionCreateOptions) {
     super();
+
+    ['showChrome', 'showChromeAlive', 'showChromeInteractions', 'sessionKeepAlive'].forEach(k => {
+      if (!(k in options)) return;
+      const v = options[k];
+      options[k] = Boolean(typeof v === 'string' ? JSON.parse(v.toLowerCase()) : v);
+    });
+
     this.createdTime = Date.now();
     this.id = this.getId(options.sessionId);
     const id = this.id;
@@ -202,6 +209,7 @@ export default class Session
     options.disableDevtools ??= env.disableDevtools;
 
     Session.events.emit('new', { session: this });
+
     // if no settings for chrome visiblity, default to headless
     options.showChrome ??= false;
     options.showChromeInteractions ??= options.showChrome;
