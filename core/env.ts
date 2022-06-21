@@ -15,5 +15,5 @@ export const dataDir = process.env.ULX_DATA_DIR || Path.join(Os.tmpdir(), '.ulix
 
 function booleanOrUndefined(envValue): boolean | undefined {
   if (envValue === undefined) return undefined;
-  return Boolean(JSON.parse(envValue ?? 'false'));
+  return Boolean(typeof envValue === 'string' ? JSON.parse(envValue.toLowerCase()) : envValue);
 }

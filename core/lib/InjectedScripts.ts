@@ -37,7 +37,7 @@ ${heroIncludes}
 ${pageScripts.domStorage}
 })();`;
 
-export const showInteractionScript = `(function installInteractionsScript() {
+const showInteractionScript = `(function installInteractionsScript() {
 const exports = {}; // workaround for ts adding an exports variable
 
 window.selfFrameIdPath = '';

@@ -67,7 +67,6 @@
       "timetravel",
       "plugin-utils",
       "plugins/*",
-      "../commons/build",
       "../../commons/build",
       "../../net/build",
       "../../unblocked/agent/build/*",
