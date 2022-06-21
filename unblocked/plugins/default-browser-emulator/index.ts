@@ -17,6 +17,7 @@ import IHttpSocketAgent from '@unblocked-web/specifications/agent/net/IHttpSocke
 import IBrowserLaunchArgs from '@unblocked-web/specifications/agent/browser/IBrowserLaunchArgs';
 import IBrowser from '@unblocked-web/specifications/agent/browser/IBrowser';
 import Log from '@ulixee/commons/lib/Logger';
+import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
 import Viewports from './lib/Viewports';
 import BrowserEngine from './lib/BrowserEngine';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
@@ -89,7 +90,11 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     // set default device profile options
     emulationProfile.deviceProfile ??= {};
     configureDeviceProfile(this.deviceProfile);
-    this.domOverridesBuilder = loadDomOverrides(this.emulationProfile, this.data, this.userAgentData);
+    this.domOverridesBuilder = loadDomOverrides(
+      this.emulationProfile,
+      this.data,
+      this.userAgentData,
+    );
   }
 
   configure(emulationProfile: IEmulationProfile<T>): void {
@@ -151,6 +156,23 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
 
   public onNewBrowser(browser: IBrowser, options: IBrowserLaunchArgs): void {
     configureBrowserLaunchArgs(browser.engine, options);
+  }
+
+  public addDomOverride(
+    runOn: 'page' | 'worker',
+    script: string,
+    args: Record<string, any> & { callbackName?: string },
+    callback?: (data: string, frame: IFrame) => any,
+  ): boolean {
+    if (runOn === 'page') {
+      this.domOverridesBuilder.addPageScript(script, args, callback);
+    } else {
+      if (callback) {
+        throw new Error("Sorry, we can't add a callback function to a Worker environment.");
+      }
+      this.domOverridesBuilder.addWorkerScript(script, args);
+    }
+    return true;
   }
 
   public onNewPage(page: IPage): Promise<any> {

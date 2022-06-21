@@ -71,7 +71,6 @@ export default function loadDomOverrides(
   domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
   domOverrides.add('console.debug');
   domOverrides.add('HTMLIFrameElement.prototype');
-  domOverrides.add('Element.prototype.attachShadow');
 
   domOverrides.add('window.outerWidth', {
     frameBorderWidth: data.windowFraming.frameBorderWidth,

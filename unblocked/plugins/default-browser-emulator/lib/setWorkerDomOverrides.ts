@@ -7,12 +7,15 @@ export default function setWorkerDomOverrides(
   data: IBrowserData,
   worker: IWorker,
 ): Promise<any[]> {
-  const scripts = domOverrides.build([
+  const script = domOverrides.build('worker', [
     'Error.captureStackTrace',
     'Error.constructor',
     'navigator.deviceMemory',
     'navigator',
     'WebGLRenderingContext.prototype.getParameter',
   ]);
-  return Promise.all(scripts.map(x => worker.evaluate(x.script, true)));
+  if (script.callbacks.length) {
+    throw new Error("Workers can't create callbacks");
+  }
+  return worker.evaluate(script.script, true);
 }
