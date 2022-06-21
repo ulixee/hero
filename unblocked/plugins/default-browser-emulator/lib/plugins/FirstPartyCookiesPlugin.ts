@@ -102,9 +102,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
       }),
     ];
 
-    for (const script of scripts) {
-      promises.push(page.addNewDocumentScript(script.script, false));
-    }
+    promises.push(page.addNewDocumentScript(scripts.script, false));
 
     return Promise.all(promises);
   }

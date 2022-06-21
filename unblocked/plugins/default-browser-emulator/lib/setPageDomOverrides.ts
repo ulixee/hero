@@ -7,11 +7,13 @@ export default async function setPageDomOverrides(
   data: IBrowserData,
   page: IPage,
 ): Promise<void> {
-  const scripts = domOverrides.build();
+  const script = domOverrides.build('page');
   const promises: Promise<any>[] = [];
-  for (const script of scripts) {
-    // overrides happen in main frame
-    promises.push(page.addNewDocumentScript(script.script, false));
+  for (const { name, fn } of script.callbacks) {
+    promises.push(page.addPageCallback(name, fn, false));
   }
+  // overrides happen in main frame
+  promises.push(page.addNewDocumentScript(script.script, false));
+
   await Promise.all(promises);
 }
