@@ -670,7 +670,7 @@ await hero.querySelector('#submit').$click(button);
 
 const xhrAfterSubmit = await activeTab.waitForResource(
   {
-    type: 'Xhr',
+    type: 'XHR',
   },
   {
     sinceCommandId: lastCommandId,

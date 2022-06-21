@@ -25,6 +25,7 @@ import Page from '@unblocked-web/agent/lib/Page';
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
 import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
+import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
@@ -424,6 +425,19 @@ export default class Session
     if (this.mode === 'browserless') return null;
 
     let page: Page;
+
+    // register dom script before page is initialized
+    this.agent.plugins.addDomOverride(
+      'page',
+      InjectedScripts.ShadowDomPiercerScript,
+      { callbackName: 'onShadowDomPushedCallbackFn' },
+      (data, frame: IFrame) => {
+        const tab = this.tabsById.get(frame.page.tabId);
+        if (tab) {
+          void tab.frameEnvironmentsById.get(frame.frameId)?.onShadowDomPushed(data);
+        }
+      },
+    );
 
     // if first tab, install session storage
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
@@ -829,6 +843,7 @@ ${data}`,
           await session.resume(options);
           tab = session.getLastActiveTab();
           isSessionResume = true;
+          session.logger.info('Continuing session', { options });
         }
       }
       if (!session) {
@@ -853,6 +868,7 @@ ${data}`,
         const resumed = Session.get(resumeSessionId);
         // Bind the new session close to the original one if it's still open
         if (resumed) {
+          resumed.logger.info('Session resumed from start.', { options });
           resumed.events.once(resumed, 'closed', () => Session.get(newId)?.close(true));
         }
       }

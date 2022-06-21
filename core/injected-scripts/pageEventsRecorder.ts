@@ -10,6 +10,9 @@ declare global {
   interface Window {
     extractDomChanges(): PageRecorderResultSet;
     flushPageRecorder(): PageRecorderResultSet;
+    checkForShadowRoot(
+      path: { localName: string; id: string; index: number; hasShadowHost: boolean }[],
+    ): void;
     listenToInteractionEvents(): void;
     trackElement(element: Element): void;
     doNotTrackElement(element: Element): void;
@@ -136,7 +139,19 @@ class PageEventsRecorder {
       return;
     }
     isStarted = true;
-    this.serializeDocument(Date.now());
+    const stamp = Date.now();
+    if (!this.didSerializeDocument) {
+      // preload with a document
+      this.pushChange(
+        DomActionType.newDocument,
+        {
+          id: -1,
+          textContent: this.location,
+        },
+        stamp,
+      );
+    }
+    this.serializeDocument(stamp);
     this.observer.observe(document, {
       attributes: true,
       childList: true,
@@ -220,6 +235,47 @@ class PageEventsRecorder {
 
   public checkForAllPropertyChanges() {
     this.getPropertyChanges(Date.now());
+  }
+
+  public checkForShadowRoot(
+    path: { localName: string; id: string; index: number; hasShadowHost: boolean }[],
+  ): void {
+    const timestamp = Date.now();
+    const buildMap = new Map();
+    let element: Element = document.body;
+    for (let i = 0; i < path.length; i += 1) {
+      const { localName, index, id, hasShadowHost } = path[i];
+      if (localName === 'body') continue;
+      let queryBody: ParentNode = element;
+      if (hasShadowHost) {
+        queryBody = element.shadowRoot;
+        if (!queryBody) {
+          return;
+        }
+        // make sure we're watching this
+        this.serializeShadowRoot(element, timestamp, buildMap);
+      }
+      const children = Array.from(queryBody.children);
+
+      element = children[index];
+      if (!element || element.id !== id || element.localName !== localName) {
+        element = children.find(x => (x.id === id || !id) && x.localName === localName);
+      }
+      if (!element) {
+        const matches = children.filter(x => x.localName === localName);
+        if (matches.length === 1) element = matches[0];
+      }
+
+      if (!element || element.localName !== localName) {
+        console.warn(
+          `Element not found at step (step: ${i}) "${localName}#${id}[${index}]"`,
+          JSON.stringify(path, null, 2),
+          queryBody,
+        );
+        return;
+      }
+    }
+    this.serializeShadowRoot(element, timestamp, buildMap);
   }
 
   public get pageResultset(): PageRecorderResultSet {
@@ -547,21 +603,29 @@ class PageEventsRecorder {
     }
 
     for (const element of [node, ...node.childNodes] as Element[]) {
-      const shadowRoot = element.shadowRoot;
-      if (shadowRoot && !NodeTracker.has(shadowRoot)) {
-        const serial = this.serializeNode(shadowRoot);
-        if (!serial) continue;
-        serial.parentNodeId = NodeTracker.getNodeId(element);
-        this.pushChange(DomActionType.added, serial, changeTime);
-        this.serializeChildren(shadowRoot, changeTime, addedNodes);
-        this.observer.observe(shadowRoot, {
-          attributes: true,
-          childList: true,
-          subtree: true,
-          characterData: true,
-        });
-      }
+      this.serializeShadowRoot(element, changeTime, addedNodes);
     }
+  }
+
+  private serializeShadowRoot(
+    element: Element,
+    changeTime: number,
+    addedNodes: Map<Node, INodeData>,
+  ): void {
+    const shadowRoot = element.shadowRoot;
+    if (!shadowRoot || NodeTracker.has(shadowRoot)) return;
+
+    const serial = this.serializeNode(shadowRoot);
+    if (!serial) return;
+    serial.parentNodeId = NodeTracker.getNodeId(element);
+    this.pushChange(DomActionType.added, serial, changeTime);
+    this.serializeChildren(shadowRoot, changeTime, addedNodes);
+    this.observer.observe(shadowRoot, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
   }
 
   private serializeNode(node: Node): INodeData {
@@ -673,6 +737,7 @@ const recorder = new PageEventsRecorder();
 window.extractDomChanges = () => recorder.extractChanges();
 window.trackElement = element => recorder.trackElement(element);
 window.flushPageRecorder = () => recorder.flushAndReturnLists();
+window.checkForShadowRoot = host => recorder.checkForShadowRoot(host);
 window.listenToInteractionEvents = () => recorder.listenToInteractionEvents();
 window.doNotTrackElement = element => recorder.doNotTrackElement(element);
 
