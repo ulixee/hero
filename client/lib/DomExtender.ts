@@ -1,6 +1,5 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
-import type {} from 'awaited-dom/base/interfaces/official';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
@@ -16,8 +15,9 @@ import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
 import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
 import { KeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
 import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
-import { createSuperNode } from 'awaited-dom/impl/create';
+import { createSuperDocument, createSuperNode } from 'awaited-dom/impl/create';
 import { KeyboardShortcuts } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
+import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -35,6 +35,7 @@ interface IBaseExtendNode {
   $exists: Promise<boolean>;
   $isClickable: Promise<boolean>;
   $hasFocus: Promise<boolean>;
+  $contentDocument: SuperDocument;
   $clearInputText(): Promise<void>;
   $click(verification?: IElementInteractVerification): Promise<void>;
   $type(...typeInteractions: ITypeInteraction[]): Promise<void>;
@@ -71,7 +72,7 @@ declare module 'awaited-dom/base/interfaces/official' {
 
 type INodeExtensionFns = Omit<
   IBaseExtendNode,
-  '$isClickable' | '$isVisible' | '$exists' | '$hasFocus'
+  '$isClickable' | '$isVisible' | '$exists' | '$hasFocus' | '$contentDocument'
 >;
 const NodeExtensionFns: INodeExtensionFns = {
   async $click(verification: IElementInteractVerification = 'elementAtPath'): Promise<void> {
@@ -176,6 +177,18 @@ const NodeExtensionGetters: INodeExtensionGetters = {
   async $hasFocus(): Promise<boolean> {
     const coreFrame = await getCoreFrame(this);
     return coreFrame.isFocused(this);
+  },
+  $contentDocument(): SuperDocument {
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const frameJsPath = awaitedPath.toJSON();
+    const frameAwaitedPath = new AwaitedPath(null, 'document');
+    return createSuperDocument<IAwaitedOptions>(frameAwaitedPath, {
+      coreFrame: awaitedOptions.coreFrame
+        .then(x => {
+          return Promise.all([x.coreTab, x.getChildFrameEnvironment(frameJsPath)]);
+        })
+        .then(([coreTab, frameMeta]) => coreTab.getCoreFrameForMeta(frameMeta)),
+    }) as SuperDocument;
   },
 };
 

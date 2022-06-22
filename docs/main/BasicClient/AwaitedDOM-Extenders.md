@@ -19,6 +19,18 @@ AwaitedDOM Extenders cannot be constructed. They're additions added to the follo
 
 ## Properties
 
+### node.$contentDocument {#content-document}
+
+Accesses a child frames ContentDocument **bypassing** cross-origin restrictions. This can be really nice when you are accessing frame querySelectors on different domains. The native javascript sandboxes do not have this privilege.
+
+Attached to IFrame Elements ([see list](#super-nodes)).
+
+```js
+await hero.querySelector('frame').$contentDocument.querySelector('button').$click();
+```
+
+#### **Returns**: `SuperDocument`
+
 ### node.$exists {#exists}
 
 Checks if a given node is valid and retrievable in the DOM. This API is used mostly to determine if a querySelector can be resolved.

@@ -26,7 +26,7 @@
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.4",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.4",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.2",
+    "@unblocked-web/specifications": "2.0.0-alpha.3",
     "awaited-dom": "1.4.0",
     "better-sqlite3": "^7.5.1",
     "moment": "^2.24.1",
@@ -38,7 +38,7 @@
     "@types/json-socket": "^0.1.17",
     "@ulixee/chrome-app": "1.0.2",
     "@ulixee/hero": "2.0.0-alpha.6",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.4",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.6",
     "@ulixee/hero-testing": "2.0.0-alpha.6",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"

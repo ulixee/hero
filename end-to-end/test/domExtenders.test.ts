@@ -1,5 +1,6 @@
 import { Hero, Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { Session } from '@ulixee/hero-core';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -60,6 +61,37 @@ describe('basic DomExtender tests', () => {
     const hero = await openBrowser(`/domextender-clear`);
     await expect(hero.querySelector('#field').$clearInputText()).resolves.toBe(undefined);
     await expect(hero.querySelector('#field').value).resolves.toBe('');
+  });
+
+  it('can penetrate cross-domain iframes', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+    const session = Session.get(await hero.sessionId);
+    session.agent.mitmRequestSession.interceptorHandlers.push({
+      urls: ['https://ulixee.org/iframe'],
+      handlerFn(url, type, request, response) {
+        response.end(`<html lang='en'>
+<body>
+<h1>Frame Title</h1>
+</body>
+</html>`);
+        return true;
+      },
+    });
+    koaServer.get('/domextender-iframe-test', async ctx => {
+      ctx.body = `<html lang='en'>
+<body><h1>Page Title</h1>
+<iframe id='frame1' src='https://ulixee.org/iframe'></iframe>
+</body>
+</html>`;
+    });
+    await hero.goto(`${koaServer.baseUrl}/domextender-iframe-test`);
+    await hero.activeTab.waitForLoad('AllContentLoaded');
+    await expect(hero.querySelector('h1').textContent).resolves.toBe('Page Title');
+
+    await expect(
+      hero.querySelector('#frame1').$contentDocument.querySelector('h1').textContent,
+    ).resolves.toBe('Frame Title');
   });
 });
 

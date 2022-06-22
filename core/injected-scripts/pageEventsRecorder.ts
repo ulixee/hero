@@ -117,7 +117,7 @@ class PageEventsRecorder {
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
 
-    if (this.location !== 'about:blank') {
+    if (document) {
       // preload with a document
       const newDocument = {
         id: -1,

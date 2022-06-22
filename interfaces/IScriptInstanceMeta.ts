@@ -3,4 +3,6 @@ export default interface IScriptInstanceMeta {
   entrypoint: string;
   startDate: number;
   workingDirectory: string;
+  execPath?: string;
+  execArgv?: string[];
 }
