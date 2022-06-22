@@ -130,6 +130,7 @@ export default class FrameEnvironment
       frame.interactor.beforeEachInteractionStep = this.beforeEachInteractionStep.bind(this);
       frame.interactor.afterInteractionGroups = this.afterInteractionGroups.bind(this);
     }
+    frame.interactor.afterEachInteractionStep = this.afterEachInteractionStep.bind(this);
 
     // give tab time to setup
     process.nextTick(() => this.listen());
@@ -200,6 +201,18 @@ export default class FrameEnvironment
 
   public afterInteractionGroups(): Promise<void> {
     this.tab.mainFrameEnvironment.setInteractionDisplay(false);
+    return Promise.resolve();
+  }
+
+  public afterEachInteractionStep(interaction: IInteractionStep, startTime: number): Promise<void> {
+    this.session.db.interactions.insert(
+      this.tab.id,
+      this.id,
+      this.session.commands.lastId,
+      interaction,
+      startTime,
+      Date.now(),
+    );
     return Promise.resolve();
   }
 
@@ -470,6 +483,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       // no op if it fails
     }
     return false;
+  }
+
+  public async onShadowDomPushed(payload:string): Promise<void> {
+    await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, true);
   }
 
   public onPageRecorderEvents(results: PageRecorderResultSet): boolean {

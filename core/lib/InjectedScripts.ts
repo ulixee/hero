@@ -12,6 +12,10 @@ const pageScripts = {
     `${__dirname}/../injected-scripts/pageEventsRecorder.js`,
     'utf8',
   ),
+  shadowDomPiercer: fs.readFileSync(
+    `${__dirname}/../injected-scripts/domOverride_openShadowRoots.js`,
+    'utf8',
+  ),
 };
 const pageEventsCallbackName = '__heroPageListenerCallback';
 
@@ -60,6 +64,7 @@ export const CorePageInjectedScript = heroIncludes;
 export default class InjectedScripts {
   public static Fetcher = `HERO.Fetcher`;
   public static PageEventsCallbackName = pageEventsCallbackName;
+  public static ShadowDomPiercerScript = pageScripts.shadowDomPiercer;
 
   public static install(page: IPage, showInteractions = false): Promise<any> {
     if (page[installedSymbol]) return;
@@ -72,7 +77,10 @@ export default class InjectedScripts {
     ]);
   }
 
-  public static installInteractionScript(page: IPage, isolatedFromWebPage = true): Promise<{ identifier: string }> {
+  public static installInteractionScript(
+    page: IPage,
+    isolatedFromWebPage = true,
+  ): Promise<{ identifier: string }> {
     return page.addNewDocumentScript(showInteractionScript, isolatedFromWebPage);
   }
 

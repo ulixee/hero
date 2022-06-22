@@ -289,7 +289,7 @@ function clickIt() {
     await tab.session.close();
   });
 
-  it.skip('supports recording closed shadow dom roots', async () => {
+  it('supports recording closed shadow dom roots', async () => {
     koaServer.get('/test5', ctx => {
       ctx.body = `<body>
 <script>
@@ -303,7 +303,7 @@ customElements.define('image-list', class extends HTMLElement {
 
   addImage() {
     const img = document.createElement('img');
-    const isClosed = !!this.shadowRoot && this.closedShadow.mode === 'closed';
+    const isClosed = !this.shadowRoot && this.closedShadow.mode === 'closed';
     img.alt = ' new image ' + (isClosed ? 'is closed ' : '');
     this.closedShadow.appendChild(img)
   }
@@ -336,6 +336,45 @@ customElements.define('image-list', class extends HTMLElement {
 
     expect(shadowImg.tagName).toBe('IMG');
     expect(shadowImg.attributes.alt).toBe(' new image is closed ');
+    await tab.session.close();
+  });
+
+  it('supports recording delayed shadow dom roots', async () => {
+    koaServer.get('/delayed-shadow', ctx => {
+      ctx.body = `<body>
+<div id="image"></div>
+<a onclick="addImage()">Add image</a>
+
+<script>
+function addImage() {
+   const root = document.querySelector('#image').attachShadow({ mode: 'open'});
+  const img = document.createElement('img');
+  img.alt = 'Delayed';
+  root.appendChild(img);  
+}
+</script>
+</body>`;
+    });
+    const meta = await connectionToClient.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/delayed-shadow`);
+    await tab.waitForLoad('DomContentLoaded');
+
+    await Helpers.waitForElement(['document', ['querySelector', 'a']], tab.mainFrameEnvironment);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
+
+    await tab.waitForMillis(100);
+
+    const changes = await tab.getDomChanges();
+    expect(changes.find(x => x.action === DomActionType.added && x.nodeType === 40)).toBeTruthy();
+
+    const shadowRoot = changes.find(x => x.action === DomActionType.added && x.nodeType === 40);
+    expect(changes.find(x => x.nodeId === shadowRoot.parentNodeId).tagName).toBe('DIV');
+    const shadowImg = changes.find(x => x.parentNodeId === shadowRoot.nodeId);
+
+    expect(shadowImg.tagName).toBe('IMG');
+    expect(shadowImg.attributes.alt).toBe('Delayed');
     await tab.session.close();
   });
 });
