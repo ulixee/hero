@@ -10,6 +10,7 @@ import MockConnectionToCore from './_MockConnectionToCore';
 const pkg = require('../package.json');
 
 afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 const defaultMockedPayload = payload => {
   if (payload.command === 'Core.createSession') {
@@ -81,18 +82,23 @@ describe('Connection tests', () => {
   it('connects to a configured server over a started server', async () => {
     UlixeeConfig.global.serverHost = 'localhost:8000';
     await UlixeeServerConfig.global.setVersionHost('1', 'localhost:8080');
+    Helpers.onClose(() => UlixeeServerConfig.global.setVersionHost('1', null));
 
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8000');
   });
+
   it('connects to a started server if the version is compatible', async () => {
     UlixeeConfig.global.serverHost = null;
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeServerConfig.global.setVersionHost(next, 'localhost:8081');
+    Helpers.onClose(() => UlixeeServerConfig.global.setVersionHost(next, null));
+
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8081');
   });
+
   it('should inform a user if a server needs to be started', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
@@ -102,6 +108,7 @@ describe('Connection tests', () => {
       'Ulixee Server is not started',
     );
   });
+
   it('should inform a user if a server needs to be installed', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
