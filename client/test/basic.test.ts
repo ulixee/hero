@@ -79,10 +79,11 @@ describe('basic Hero tests', () => {
 });
 
 describe('Connection tests', () => {
+  jest.spyOn(UlixeeServerConfig.global, 'save').mockImplementation(() => Promise.resolve())
+
   it('connects to a configured server over a started server', async () => {
     UlixeeConfig.global.serverHost = 'localhost:8000';
     await UlixeeServerConfig.global.setVersionHost('1', 'localhost:8080');
-    Helpers.onClose(() => UlixeeServerConfig.global.setVersionHost('1', null));
 
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8000');
@@ -93,7 +94,6 @@ describe('Connection tests', () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeServerConfig.global.setVersionHost(next, 'localhost:8081');
-    Helpers.onClose(() => UlixeeServerConfig.global.setVersionHost(next, null));
 
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8081');
