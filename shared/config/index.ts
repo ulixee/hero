@@ -31,11 +31,6 @@ export default class UlixeeConfig {
     }
   }
 
-  public async setGlobalDefaults(): Promise<void> {
-    this.serverHost ??= 'localhost:1337';
-    await this.save();
-  }
-
   public save(): Promise<void> {
     return safeOverwriteFile(this.configPath, JSON.stringify(this.getData(), null, 2));
   }
@@ -52,9 +47,10 @@ export default class UlixeeConfig {
     if (!this.cachedConfigObjects[key]) {
       const directory = this.findConfigDirectory(runtimeLocation);
       if (directory === this.globalConfigDirectory) return UlixeeConfig.global;
-      if (!this.isCacheEnabled) return new UlixeeConfig(directory);
+      const config = new UlixeeConfig(directory);
+      if (this.isCacheEnabled) this.cachedConfigObjects[key] = config;
 
-      this.cachedConfigObjects[key] = new UlixeeConfig(directory);
+      return config;
     }
     return this.cachedConfigObjects[key];
   }
@@ -64,9 +60,9 @@ export default class UlixeeConfig {
     const key = this.getLocationKey(runtimeLocation);
     if (!this.cachedConfigLocations[key]) {
       const configDirectory = this.traverseDirectories(runtimeLocation);
-      if (!this.isCacheEnabled) return configDirectory;
+      if (this.isCacheEnabled) this.cachedConfigLocations[key] = configDirectory;
 
-      this.cachedConfigLocations[key] = configDirectory;
+      return configDirectory;
     }
 
     return this.cachedConfigLocations[key];

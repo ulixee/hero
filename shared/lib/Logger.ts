@@ -257,6 +257,8 @@ function isEnabled(modulePath: string): boolean {
   if (modulePath[modulePath.length - 1] === '*') {
     return true;
   }
+  if (logFilters.namespaces.active.has('*')) return true;
+
   for (const ns of logFilters.skip) {
     if (ns.test(modulePath)) {
       logFilters.enabledNamesCache[modulePath] = false;
@@ -299,7 +301,7 @@ registerNamespaceMapping((ns, active, skip) => {
   } else if (ns === 'ubk') {
     active.push(/agent\/.*/);
     skip.push(/DevtoolsSessionLogger/, /agent[/-]mitm.*/);
-  } else if (ns.includes('ubk:devtools')) {
+  } else if (ns.includes('ubk:devtools') || ns === '*') {
     active.push(/DevtoolsSessionLogger/);
   }
 });
