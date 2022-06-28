@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
+
+
+### Bug Fixes
+
+* **client:** disable tests global config overwrite ([7762be3](https://github.com/ulixee/ulixee/commit/7762be32766880e4564f7196b8d4a74ecfe5992f))
+* **core:** fix unblocked references ([edabadd](https://github.com/ulixee/ulixee/commit/edabadd08738875234afc9735e0ad81c31bc5c95))
+* **hero:** cleanup changes to global config ([3e37b93](https://github.com/ulixee/ulixee/commit/3e37b931ad2117505ec73fc173034e9e4c2e70c2))
+
+
+### Features
+
+* **client:** $contentDocument AwaitedDOM extender ([d4bacbf](https://github.com/ulixee/ulixee/commit/d4bacbfa56086e60f72b80a9b5284a0d4bb678c8))
+* **client:** add stdout/stderr piping on relaunch ([bcf5bb5](https://github.com/ulixee/ulixee/commit/bcf5bb57feccd506bfd8a5ce71f4994728a361d6))
+* **client:** include script process exec details ([0103151](https://github.com/ulixee/ulixee/commit/010315147b7c10f9b02884042b1d07dfcb83b340))
+
+
+
+
+
 # [2.0.0-alpha.6](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero

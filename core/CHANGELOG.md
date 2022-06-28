@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
+
+
+### Bug Fixes
+
+* **core:** allow * as wildcard for resource filter ([0784b20](https://github.com/ulixee/ulixee/commit/0784b20881fa20c4c8f477e3e07cf761b6bcfdd3))
+* **core:** fix unblocked references ([edabadd](https://github.com/ulixee/ulixee/commit/edabadd08738875234afc9735e0ad81c31bc5c95))
+* **core:** handle command meta out of band ([11b46fd](https://github.com/ulixee/ulixee/commit/11b46fdcaf683d8c890d6beed2e582ff3b4f3882))
+* **core:** resumed session should close original ([77042c8](https://github.com/ulixee/ulixee/commit/77042c8bb7df1dfeb7b49fc8f36fe643ca85914e))
+* options passed into Session should parse strings into booleans ([3990f84](https://github.com/ulixee/ulixee/commit/3990f84faa88287eb0ba13153cbac1567528d8ca))
+* **timetravel:** allow more leeway to find doctype ([d537d28](https://github.com/ulixee/ulixee/commit/d537d2811dbdfe82c21202accbfd5b611675a1fb))
+
+
+### Features
+
+* **client:** $contentDocument AwaitedDOM extender ([d4bacbf](https://github.com/ulixee/ulixee/commit/d4bacbfa56086e60f72b80a9b5284a0d4bb678c8))
+* **client:** add stdout/stderr piping on relaunch ([bcf5bb5](https://github.com/ulixee/ulixee/commit/bcf5bb57feccd506bfd8a5ce71f4994728a361d6))
+* **core:** shadow dom recorder ([5860b7c](https://github.com/ulixee/ulixee/commit/5860b7ccae96afb79f585e0bba76b4bb9590763b))
+
+
+
+
+
 # [2.0.0-alpha.6](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero-core
