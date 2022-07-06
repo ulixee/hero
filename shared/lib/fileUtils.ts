@@ -13,6 +13,7 @@ export async function existsAsync(path: string): Promise<boolean> {
 
 export async function readFileAsJson<T>(path: string): Promise<T> {
   const buffer = await Fs.readFile(path, 'utf8');
+  if (!buffer) return null;
   return JSON.parse(buffer) as T;
 }
 

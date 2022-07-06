@@ -55,11 +55,14 @@ export default class UlixeeConfig {
     return this.cachedConfigObjects[key];
   }
 
-  public static findConfigDirectory(runtimeLocation?: IRuntimeLocation): string {
+  public static findConfigDirectory(
+    runtimeLocation?: IRuntimeLocation,
+    defaultToGlobal = true,
+  ): string {
     runtimeLocation = this.useRuntimeLocationDefaults(runtimeLocation);
     const key = this.getLocationKey(runtimeLocation);
     if (!this.cachedConfigLocations[key]) {
-      const configDirectory = this.traverseDirectories(runtimeLocation);
+      const configDirectory = this.traverseDirectories(runtimeLocation, defaultToGlobal);
       if (this.isCacheEnabled) this.cachedConfigLocations[key] = configDirectory;
 
       return configDirectory;
@@ -79,12 +82,15 @@ export default class UlixeeConfig {
     return `${runtimeLocation.workingDirectory}_${runtimeLocation.entrypoint}`;
   }
 
-  private static traverseDirectories(runtimeLocation: IRuntimeLocation): string {
+  private static traverseDirectories(
+    runtimeLocation: IRuntimeLocation,
+    defaultToGlobal: boolean,
+  ): string {
     const { entrypoint, workingDirectory } = runtimeLocation;
     // look up hierarchy from the entrypoint of the script
     let currentPath = Path.dirname(entrypoint);
     do {
-      const upDirectory = Path.normalize(Path.join(currentPath, '..'));
+      const upDirectory = Path.dirname(currentPath);
       if (upDirectory === currentPath) break;
       currentPath = upDirectory;
 
@@ -95,6 +101,7 @@ export default class UlixeeConfig {
     const configPath = this.hasConfigDirectory(workingDirectory);
     if (configPath) return configPath;
 
+    if (!defaultToGlobal) return null;
     // global directory is the working directory
     return this.globalConfigDirectory;
   }
