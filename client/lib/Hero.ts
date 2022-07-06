@@ -11,7 +11,10 @@ import Response from 'awaited-dom/impl/official-klasses/Response';
 import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import { ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+} from '@unblocked-web/specifications/agent/browser/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
@@ -471,6 +474,10 @@ export default class Hero extends AwaitedEventTarget<{
 
   public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<Resource> {
     return this.activeTab.waitForLocation(trigger, options);
+  }
+
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
+    return this.activeTab.waitForLoad(status, options);
   }
 
   public waitForMillis(millis: number): Promise<void> {

@@ -68,7 +68,10 @@ async function readStoreData(store: IDBObjectStore) {
       const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
       if (cursor) {
         const key = store.keyPath === null ? cursor.key : undefined;
-        const value = cursor.value;
+        let value = cursor.value;
+        if (typeof value === 'object') {
+          value = { ...value };
+        }
         data.push(TypeSerializer.stringify({ key, value }));
         cursor.continue();
       } else {

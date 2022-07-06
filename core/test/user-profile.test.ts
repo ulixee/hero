@@ -526,7 +526,10 @@ describe('UserProfile IndexedDb tests', () => {
         tab.mainFrameEnvironment,
       );
 
-      await expect(tab.session.exportUserProfile()).resolves.toBeTruthy();
+      const profile = await tab.session.exportUserProfile();
+      expect(profile).toBeTruthy();
+      expect(profile.storage[koaServer.baseUrl]).toBeTruthy()
+      expect(profile.storage[koaServer.baseUrl].indexedDB).toHaveLength(0)
     }
   });
 

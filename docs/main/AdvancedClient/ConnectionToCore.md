@@ -13,7 +13,7 @@ const { Hero: PlaygroundHero } = require('@ulixee/hero-playground');
   const local = new PlaygroundHero();
   // dials a Remote Core
   const remote = new BaseHero({
-    ConnectionToHeroCore: new ConnectionToHeroCore.remote('192.168.1.1:3444'),
+    ConnectionToHeroCore: ConnectionToHeroCore.remote('192.168.1.1:3444'),
   });
 })().catch(console.log);
 ```
