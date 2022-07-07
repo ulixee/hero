@@ -42,7 +42,7 @@ export default class UserProfile {
           );
           originStorage.localStorage = liveData.localStorage;
           originStorage.sessionStorage = liveData.sessionStorage;
-          originStorage.indexedDB = liveData.indexedDB;
+          originStorage.indexedDB = liveData.indexedDB.filter(Boolean);
         }
       }
     }
@@ -78,6 +78,13 @@ export default class UserProfile {
     const domStorage: IDomStorage = {};
     const origins: string[] = [];
     for (const [origin, storage] of Object.entries(userProfile.storage)) {
+      if (
+        storage.indexedDB.length === 0 &&
+        storage.sessionStorage.length === 0 &&
+        storage.localStorage.length === 0
+      ) {
+        continue;
+      }
       const og = origin.toLowerCase();
       origins.push(og);
       domStorage[og] = storage;
@@ -140,15 +147,24 @@ ${script}
           },
         },
       ];
-      await page.devtoolsSession.send('Page.setDocumentContent', {
-        frameId: page.mainFrame.id,
-        html: `<html>
+
+      const isSecure = origins[0].startsWith('https://');
+      const storageRestoreDomain = `http${isSecure ? 's' : ''}://restore-hero-dom.org`;
+      session.mitmRequestSession.interceptorHandlers.push({
+        urls: [storageRestoreDomain],
+        handlerFn(url, type, req, res) {
+          res.end(`
 <body>
 <h1>Restoring Dom Storage</h1>
 ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
 </body>
-</html>`,
+</html>`);
+          return true;
+        },
       });
+      // clear out frame state
+      await page.navigate(storageRestoreDomain);
+      await page.waitForLoad('DomContentLoaded');
 
       await Promise.all(
         page.frames.map(async frame => {
@@ -170,11 +186,13 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
             false,
             {
               shouldAwaitExpression: true,
-              returnByValue: true
+              returnByValue: true,
             },
           );
         }),
       );
+
+      page.mainFrame.navigations.reset();
 
       // clear out frame state
       await page.navigate('about:blank');
