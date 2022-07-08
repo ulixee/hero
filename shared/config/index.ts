@@ -19,6 +19,7 @@ export default class UlixeeConfig {
   private static cachedConfigObjects: { [cwd_entrypoint: string]: UlixeeConfig } = {};
 
   public serverHost?: string;
+  public databoxOutDir?: string;
 
   private get configPath(): string {
     return Path.join(this.directoryPath, 'config.json');
@@ -28,6 +29,9 @@ export default class UlixeeConfig {
     if (Fs.existsSync(this.configPath)) {
       const data = JSON.parse(Fs.readFileSync(this.configPath, 'utf8'));
       this.serverHost = data.serverHost;
+      if (data.databoxOutDir) {
+        this.databoxOutDir = Path.isAbsolute(data.databoxOutDir) ? data.databoxOutDir : Path.resolve(this.directoryPath, data.databoxOutDir);
+      }
     }
   }
 
@@ -38,6 +42,7 @@ export default class UlixeeConfig {
   private getData(): IUlixeeConfig {
     return {
       serverHost: this.serverHost,
+      databoxOutDir: this.databoxOutDir,
     };
   }
 
@@ -113,7 +118,8 @@ export default class UlixeeConfig {
 }
 
 export interface IUlixeeConfig {
-  serverHost: string;
+  serverHost?: string;
+  databoxOutDir?: string
 }
 
 export interface IRuntimeLocation {
