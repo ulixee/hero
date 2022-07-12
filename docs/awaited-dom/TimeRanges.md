@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> TimeRanges
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> TimeRanges
 
 <div class='overview'>The <code>TimeRanges</code> interface is used to represent a set of time ranges, primarily for the purpose of tracking which portions of media have been buffered when loading it for use by the <code>&lt;audio&gt;</code> and <code>&lt;video&gt;</code>&nbsp;elements.</div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Blob
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Blob
 
 <div class='overview'>The <strong><code>Blob</code></strong> object represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a <code>ReadableStream</code> so its methods can be used for processing the data.</div>
 

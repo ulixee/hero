@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Location
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Location
 
 <div class='overview'>The <strong><code>Location</code></strong> interface represents the location (URL) of the object it is linked to. Changes done on it are reflected on the object it relates to. Both the <code>Document</code> and <code>Window</code> interface have such a linked <code>Location</code>, accessible via <code>Document.location</code> and <code>Window.location</code> respectively.</div>
 

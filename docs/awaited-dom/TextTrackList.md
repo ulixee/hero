@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> TextTrackList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> TextTrackList
 
 <div class='overview'><span class="seoSummary">The <strong><code>TextTrackList</code></strong> interface is used to represent a list of the text tracks defined by the <code>&lt;track&gt;</code> element, with each track represented by a separate <code>textTrack</code> object in the list.</span></div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> OffscreenCanvas
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> OffscreenCanvas
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -42,7 +42,7 @@ Creates a <code>Blob</code> object representing the image contained in the canva
 
 Creates an <code>ImageBitmap</code> object from the most recently rendered image of the <code>OffscreenCanvas</code>.
 
-#### **Returns**: [`ImageBitmap`](/docs/awaited-dom/image-bitmap)
+#### **Returns**: [`ImageBitmap`](/docs/hero/awaited-dom/image-bitmap)
 
 ## Unimplemented Specs
 

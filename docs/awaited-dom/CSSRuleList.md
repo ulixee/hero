@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSRuleList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> CSSRuleList
 
 <div class='overview'>A <code>CSSRuleList</code> is an (indirect-modify only) array-like object containing an ordered collection of <code>CSSRule</code> objects.</div>
 
@@ -21,4 +21,4 @@ Returns the specific node at the given zero-based index into the list. Returns n
 
  - index `number`. Needs content.
 
-#### **Returns**: [`CSSRule`](/docs/awaited-dom/css-rule)
+#### **Returns**: [`CSSRule`](/docs/hero/awaited-dom/css-rule)

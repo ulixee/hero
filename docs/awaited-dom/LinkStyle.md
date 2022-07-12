@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> LinkStyle
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> LinkStyle
 
 <div class='overview'>The <code><strong>LinkStyle</strong></code> interface provides access to the <em>associated CSS style sheet</em> of a node.</div>
 
@@ -10,4 +10,4 @@
 
 Returns the <code>CSSStyleSheet</code> object associated with the given element, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperStyleSheet`](/docs/awaited-dom/super-style-sheet)
+#### **Type**: [`SuperStyleSheet`](/docs/hero/awaited-dom/super-style-sheet)

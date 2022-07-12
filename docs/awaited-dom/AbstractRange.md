@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AbstractRange
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> AbstractRange
 
 <div class='overview'><span class="seoSummary">The <strong><code>AbstractRange</code></strong>&nbsp;abstract interface is the base class upon which all DOM range types are defined. A&nbsp;<strong>range</strong>&nbsp;is an object that indicates the start and end points of a section of content&nbsp;within the document.</span></div>
 
@@ -16,7 +16,7 @@ A Boolean value which is&nbsp;<code>true</code>&nbsp;if the range is&nbsp;<stron
 
 The DOM <code>Node</code> in which the end of the range, as specified by the <code>endOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .endOffset <div class="specs"><i>W3C</i></div> {#endOffset}
 
@@ -28,7 +28,7 @@ An integer value indicating the offset, in characters, from the beginning of the
 
 The DOM <code>Node</code> in which the beginning of the range, as specified by the <code>startOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .startOffset <div class="specs"><i>W3C</i></div> {#startOffset}
 

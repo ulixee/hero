@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLHyperlinkElementUtils
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> HTMLHyperlinkElementUtils
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 

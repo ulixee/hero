@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Headers
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Headers
 
 <div class='overview'><span class="seoSummary">The <strong><code>Headers</code></strong> interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.</span> A <code>Headers</code> object has an associated header list, which is initially empty and consists of zero or more name and value pairs.  <span style="line-height: 19.0909080505371px;">You can add to this using methods like <code>append()</code> (see <a href="#Examples">Examples</a>.) </span>In all methods of this interface, header names are matched by case-insensitive byte sequence. </div>
 

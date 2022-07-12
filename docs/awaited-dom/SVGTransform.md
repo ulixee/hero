@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SVGTransform
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> SVGTransform
 
 <div class='overview'><code>SVGTransform</code> is the interface for one of the component transformations within an <code>SVGTransformList</code>; thus, an <code>SVGTransform</code> object corresponds to a single component (e.g., <code>scale(…)</code> or <code>matrix(…)</code>) within a <code>transform</code> attribute.</div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AudioTrack
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> AudioTrack
 
 <div class='overview'><span class="seoSummary">The <strong><code>AudioTrack</code></strong> interface represents a single audio track from one of the HTML media elements, <code>&lt;audio&gt;</code> or <code>&lt;video&gt;</code>. </span>The most common use for accessing an <code>AudioTrack</code> object is to toggle its <code>enabled</code> property in order to mute and unmute the track.</div>
 

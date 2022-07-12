@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMTokenList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> DOMTokenList
 
 <div class='overview'><span class="seoSummary">The <code><strong>DOMTokenList</strong></code> interface represents a set of space-separated tokens. Such a set is returned by <code>Element.classList</code>, <code>HTMLLinkElement.relList</code>, <code>HTMLAnchorElement.relList</code>, <code>HTMLAreaElement.relList</code>, <code>HTMLIframeElement.sandbox</code>, or <code>HTMLOutputElement.htmlFor</code>. It is indexed beginning with <code>0</code> as with JavaScript <code>Array</code> objects. <code>DOMTokenList</code> is always case-sensitive.</span></div>
 

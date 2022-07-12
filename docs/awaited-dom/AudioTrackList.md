@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> AudioTrackList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> AudioTrackList
 
 <div class='overview'><span class="seoSummary">The <strong><code>AudioTrackList</code></strong> interface is used to represent a list of the audio tracks contained within a given HTML media element, with each track represented by a separate <code>AudioTrack</code> object in the list.</span></div>
 
@@ -23,7 +23,7 @@ Returns the <code>AudioTrack</code> found within the <code>AudioTrackList</code>
 
  - id `string`. A `string` indicating the ID of the track to locate within the track list.
 
-#### **Returns**: [`AudioTrack`](/docs/awaited-dom/audio-track)
+#### **Returns**: [`AudioTrack`](/docs/hero/awaited-dom/audio-track)
 
 ## Unimplemented Specs
 

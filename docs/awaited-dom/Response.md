@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Response
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Response
 
 <div class='overview'><span class="seoSummary">The <strong><code>Response</code></strong> interface of the Fetch API represents the response to a request.</span></div>
 
@@ -10,7 +10,7 @@
 
 The <code>Headers</code> object associated with the response.
 
-#### **Type**: [`Headers`](/docs/awaited-dom/headers)
+#### **Type**: [`Headers`](/docs/hero/awaited-dom/headers)
 
 ### .ok <div class="specs"><i>W3C</i></div> {#ok}
 

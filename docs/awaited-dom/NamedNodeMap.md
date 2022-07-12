@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> NamedNodeMap
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> NamedNodeMap
 
 <div class='overview'>The <code><strong>NamedNodeMap</strong></code> interface represents a collection of <code>Attr</code> objects. Objects inside a <code>NamedNodeMap</code> are not in any particular order, unlike <code>NodeList</code>, although they may be accessed by an index as in an array.</div>
 

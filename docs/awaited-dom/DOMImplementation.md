@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMImplementation
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> DOMImplementation
 
 <div class='overview'>The <code><strong>DOMImplementation</strong></code> interface represents an object providing methods which are not dependent on any particular document. Such an object is returned by the <code>Document.implementation</code> property.</div>
 

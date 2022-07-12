@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CaretPosition
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> CaretPosition
 
 <div class='overview'><strong>This is an experimental technology</strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -14,7 +14,7 @@ Returns a <code>long</code> representing the character offset in the caret posit
 
 Returns a <code>Node</code> containing the found node at the caret's position.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ## Methods
 
@@ -22,4 +22,4 @@ Returns a <code>Node</code> containing the found node at the caret's position.
 
 Needs content.
 
-#### **Returns**: [`DOMRect`](/docs/awaited-dom/dom-rect)
+#### **Returns**: [`DOMRect`](/docs/hero/awaited-dom/dom-rect)

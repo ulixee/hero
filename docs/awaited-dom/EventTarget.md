@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> EventTarget
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> EventTarget
 
 <div class='overview'><strong><code>EventTarget</code></strong> is a DOM interface implemented by objects that can receive events and may have listeners for them.</div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Body
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Body
 
 <div class='overview'><span class="seoSummary">The <strong><code>Body</code></strong> mixin of the Fetch API represents the body of the response/request, allowing you to declare what its content type is and how it should be handled.</span></div>
 

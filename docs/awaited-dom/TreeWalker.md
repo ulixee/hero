@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> TreeWalker
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> TreeWalker
 
 <div class='overview'>The <strong><code>TreeWalker</code></strong> object represents the nodes of a document subtree and a position within them.</div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLFormControlsCollection
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> HTMLFormControlsCollection
 
 <div class='overview'><span class="seoSummary">The <strong><code>HTMLFormControlsCollection</code></strong> interface represents a <em>collection</em> of HTML <em>form control elements</em>. </span>It represents the lists returned by the <code>HTMLFormElement</code> interface's <code>elements</code> property and the <code>HTMLFieldSetElement</code> interface's&nbsp;<code>elements</code> property.</div>
 
@@ -34,4 +34,4 @@ Needs content.
 
  - index `number`. Needs content.
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)

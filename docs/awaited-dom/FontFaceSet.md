@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> FontFaceSet
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> FontFaceSet
 
 ## Unimplemented Specs
 

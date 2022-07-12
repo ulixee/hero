@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> MediaList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> MediaList
 
 <div class='overview'>The <code><strong>MediaList</strong></code> interface represents the media queries of a stylesheet, e.g. those set using a <code>&lt;link&gt;</code> element's <code>media</code> attribute.</div>
 

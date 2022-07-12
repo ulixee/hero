@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLFrameElement
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> HTMLFrameElement
 
 ## Properties
 

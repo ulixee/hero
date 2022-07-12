@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Storage
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Storage
 
 <div class='overview'>The <strong><code>Storage</code></strong> interface of the Web Storage API provides access to a particular domain's session or local storage. It allows, for example, the addition, modification, or deletion of stored data items.</div>
 

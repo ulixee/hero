@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> XMLSerializer
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> XMLSerializer
 
 <div class='overview'><span class="seoSummary">The <code>XMLSerializer</code> interface provides the <code>serializeToString()</code> method to construct an XML string representing a DOM tree.</span></div>
 
@@ -11,6 +11,6 @@ Returns the serialized subtree of a string.
 #### **Arguments**:
 
 
- - root [`Node`](/docs/awaited-dom/node). Needs content.
+ - root [`Node`](/docs/hero/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<string>`

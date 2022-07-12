@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSStyleSheet
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> CSSStyleSheet
 
 <div class='overview'><span class="seoSummary">The <strong><code>CSSStyleSheet</code></strong> interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet.</span> It inherits properties and methods from its parent, <code>StyleSheet</code>.</div>
 
@@ -17,13 +17,13 @@
  <p>To add or remove items in <code>cssRules</code>, use the&nbsp;<code>CSSStyleSheet</code>'s <code>insertRule()</code> and <code>deleteRule()</code> methods.</p>
  
 
-#### **Type**: [`CSSRuleList`](/docs/awaited-dom/css-rule-list)
+#### **Type**: [`CSSRuleList`](/docs/hero/awaited-dom/css-rule-list)
 
 ### .ownerRule <div class="specs"><i>W3C</i></div> {#ownerRule}
 
 If this stylesheet is imported into the document using an <code>@import</code> rule, the <code>ownerRule</code> property returns the corresponding <code>CSSImportRule</code>; otherwise, this property's value is <code>null</code>.
 
-#### **Type**: [`CSSRule`](/docs/awaited-dom/css-rule)
+#### **Type**: [`CSSRule`](/docs/hero/awaited-dom/css-rule)
 
 ## Methods
 

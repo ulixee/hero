@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMRect
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> DOMRect
 
 <div class='overview'><strong>Draft</strong><br>
     This page is not complete.</div>

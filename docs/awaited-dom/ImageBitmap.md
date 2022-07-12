@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ImageBitmap
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> ImageBitmap
 
 <div class='overview'>The <code><strong>ImageBitmap</strong></code> interface represents a bitmap image which can be drawn to a <code>&lt;canvas&gt;</code> without undue latency. It can be created from a variety of source objects using the <code>createImageBitmap()</code> factory method. <code>ImageBitmap</code> provides an asynchronous and resource efficient pathway to prepare textures for rendering in WebGL.</div>
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> XPathNSResolver
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> XPathNSResolver
 
 <div class='overview'>The&nbsp;<code>XPathNSResolver</code> interface permits prefix strings in an XPath expression to be properly bound to namespace URI strings.</div>
 

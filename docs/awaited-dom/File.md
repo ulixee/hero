@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> File
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> File
 
 <div class='overview'>The <strong><code>File</code></strong> interface provides information about files and allows JavaScript in a web page to access their content.</div>
 

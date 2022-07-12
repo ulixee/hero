@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> NodeList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> NodeList
 
 <div class='overview'><span class="seoSummary"><strong><code>NodeList</code></strong> objects are collections of nodes, usually returned by properties such as <code>Node.childNodes</code> and methods such as <code>document.querySelectorAll()</code>.</span></div>
 
@@ -33,7 +33,7 @@ Returns an item in the list by its index, or <code>null</code> if the index is o
 
  - index `number`. <code>index</code> is the index of the node to be fetched. The index is zero-based.
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .keys *()* <div class="specs"><i>W3C</i></div> {#keys}
 

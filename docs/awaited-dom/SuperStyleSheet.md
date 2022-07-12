@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> SuperStyleSheet
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> SuperStyleSheet
 
 <div class='overview'>An object implementing the <code>StyleSheet</code> interface represents a single style sheet. CSS style sheets will further implement the more specialized <code>CSSStyleSheet</code> interface.</div>
 

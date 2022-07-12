@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> VideoTrackList
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> VideoTrackList
 
 <div class='overview'><span class="seoSummary">The <strong><code>VideoTrackList</code></strong> interface is used to represent a list of the video tracks contained within a <code>&lt;video&gt;</code> element, with each track represented by a separate <code>VideoTrack</code> object in the list.</span></div>
 
@@ -29,7 +29,7 @@ Returns the <code>VideoTrack</code> found within the <code>VideoTrackList</code>
 
  - id `string`. A `string` indicating the ID of the track to locate within the track list.
 
-#### **Returns**: [`VideoTrack`](/docs/awaited-dom/video-track)
+#### **Returns**: [`VideoTrack`](/docs/hero/awaited-dom/video-track)
 
 ## Unimplemented Specs
 

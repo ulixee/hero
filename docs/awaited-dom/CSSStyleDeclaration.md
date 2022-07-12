@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> CSSStyleDeclaration
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> CSSStyleDeclaration
 
 <div class='overview'>The <strong><code>CSSStyleDeclaration</code></strong> interface represents an object that is a CSS declaration block, and exposes style information and various style-related methods and properties.</div>
 
@@ -28,7 +28,7 @@ The number of properties. See the <code>item()</code> method below.
 
 The containing <code>CSSRule</code>.
 
-#### **Type**: [`CSSRule`](/docs/awaited-dom/css-rule)
+#### **Type**: [`CSSRule`](/docs/hero/awaited-dom/css-rule)
 
 ## Methods
 

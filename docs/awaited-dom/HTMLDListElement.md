@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLDListElement
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> HTMLDListElement
 
 <div class='overview'>The <strong><code>HTMLDListElement</code></strong> interface provides special properties (beyond those of the regular <code>HTMLElement</code> interface it also has available to it by inheritance) for manipulating definition list (<code>&lt;dl&gt;</code>) elements.</div>
 
@@ -74,7 +74,7 @@ Returns a <code>double</code>, the distance from this element's left border to i
 
 Returns a <code>Element</code> that is the element from which all offset calculations are currently computed.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.offsetTop <div class="specs"><i>W3C</i></div> {#offsetTop}
 
@@ -110,13 +110,13 @@ Is a `boolean` representing the translation.
 
 Returns a <code>NamedNodeMap</code> object containing the assigned attributes of the corresponding HTML element.
 
-#### **Type**: [`NamedNodeMap`](/docs/awaited-dom/named-node-map)
+#### **Type**: [`NamedNodeMap`](/docs/hero/awaited-dom/named-node-map)
 
 ### elem.classList <div class="specs"><i>W3C</i></div> {#classList}
 
 Returns a <code>DOMTokenList</code> containing the list of class attributes.
 
-#### **Type**: [`DOMTokenList`](/docs/awaited-dom/dom-token-list)
+#### **Type**: [`DOMTokenList`](/docs/hero/awaited-dom/dom-token-list)
 
 ### elem.className <div class="specs"><i>W3C</i></div> {#className}
 
@@ -186,7 +186,7 @@ Is a `string` representing the markup of the element including its content. When
 
 Represents the part identifier(s) of the element (i.e. set using the <code>part</code> attribute), returned as a <code>DOMTokenList</code>.
 
-#### **Type**: [`DOMTokenList`](/docs/awaited-dom/dom-token-list)
+#### **Type**: [`DOMTokenList`](/docs/hero/awaited-dom/dom-token-list)
 
 ### elem.prefix <div class="specs"><i>W3C</i></div> {#prefix}
 
@@ -222,7 +222,7 @@ Returns a `number` representing the scroll view width of the element.
 
 Returns the open shadow root that is hosted by the element, or null if no open shadow root is present.
 
-#### **Type**: [`ShadowRoot`](/docs/awaited-dom/shadow-root)
+#### **Type**: [`ShadowRoot`](/docs/hero/awaited-dom/shadow-root)
 
 ### elem.slot <div class="specs"><i>W3C</i></div> {#slot}
 
@@ -246,13 +246,13 @@ Returns a `string` representing the base URL of the document containing the <cod
 
 Returns a live <code>NodeList</code> containing all the children of this node. <code>NodeList</code> being live means that if the children of the <code>Node</code> change, the <code>NodeList</code> object is automatically updated.
 
-#### **Type**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
+#### **Type**: [`SuperNodeList`](/docs/hero/awaited-dom/super-node-list)
 
 ### elem.firstChild <div class="specs"><i>W3C</i></div> {#firstChild}
 
 Returns a <code>Node</code> representing the first direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.isConnected <div class="specs"><i>W3C</i></div> {#isConnected}
 
@@ -264,13 +264,13 @@ A boolean indicating whether or not the Node is connected (directly or indirectl
 
 Returns a <code>Node</code> representing the last direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.nextSibling <div class="specs"><i>W3C</i></div> {#nextSibling}
 
 Returns a <code>Node</code> representing the next node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.nodeName <div class="specs"><i>W3C</i></div> {#nodeName}
 
@@ -357,25 +357,25 @@ Returns / Sets the value of the current node.
 
 Returns the <code>Document</code> that this node belongs to. If the node is itself a document, returns <code>null</code>.
 
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
 ### elem.parentElement <div class="specs"><i>W3C</i></div> {#parentElement}
 
 Returns an <code>Element</code> that is the parent of this node. If the node has no parent, or if that parent is not an <code>Element</code>, this property returns <code>null</code>.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.parentNode <div class="specs"><i>W3C</i></div> {#parentNode}
 
 Returns a <code>Node</code> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null</code>.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.previousSibling <div class="specs"><i>W3C</i></div> {#previousSibling}
 
 Returns a <code>Node</code> representing the previous node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
@@ -387,7 +387,7 @@ Returns / Sets the textual content of an element and all its descendants.
 
 The <code><strong>style</strong></code> property is used to get as well as set the <em>inline</em> style of an element. When getting, it returns a <code>CSSStyleDeclaration</code> object that contains a list of all styles properties for that element with values assigned for the attributes that are defined in the element's inline <code>style</code> attribute.
 
-#### **Type**: [`CSSStyleDeclaration`](/docs/awaited-dom/css-style-declaration)
+#### **Type**: [`CSSStyleDeclaration`](/docs/hero/awaited-dom/css-style-declaration)
 
 ### elem.contentEditable <div class="specs"><i>W3C</i></div> {#contentEditable}
 
@@ -423,13 +423,13 @@ Needs content.
 
 Returns the <code>Element</code> immediately following this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list following this node.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.previousElementSibling <div class="specs"><i>W3C</i></div> {#previousElementSibling}
 
 Returns the <code>Element</code> immediately prior to this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list prior to this node.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.childElementCount <div class="specs"><i>W3C</i></div> {#childElementCount}
 
@@ -441,25 +441,25 @@ Returns the number of children of this <code>ParentNode</code> which are element
 
 Returns a live <code>HTMLCollection</code> containing all of the <code>Element</code> objects that are children of this <code>ParentNode</code>, omitting all of its non-element nodes.
 
-#### **Type**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
+#### **Type**: [`SuperHTMLCollection`](/docs/hero/awaited-dom/super-html-collection)
 
 ### elem.firstElementChild <div class="specs"><i>W3C</i></div> {#firstElementChild}
 
 Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.lastElementChild <div class="specs"><i>W3C</i></div> {#lastElementChild}
 
 Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Type**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.assignedSlot <div class="specs"><i>W3C</i></div> {#assignedSlot}
 
 Returns the <code>&lt;slot&gt;</code> the node is inserted in.
 
-#### **Type**: [`HTMLSlotElement`](/docs/awaited-dom/html-slot-element)
+#### **Type**: [`HTMLSlotElement`](/docs/hero/awaited-dom/html-slot-element)
 
 ## Methods
 
@@ -479,7 +479,7 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
  - selectors `string`. <code><var>selectors</var></code> is a `string` containing a selector list.<br>
       ex: <code>p:hover, .toto + q</code>
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.getAttribute *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -554,7 +554,7 @@ Returns a live <code>HTMLCollection</code> that contains all descendants of the 
 
  - classNames `string`. A `string` containing one or more class names to match on, separated by whitespace.
 
-#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/hero/awaited-dom/super-html-collection)
 
 ### elem.getElementsByTagName *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
 
@@ -565,7 +565,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
 
  - qualifiedName `string`. <code>tagName</code> is the qualified name to look for. The special string <code>"*"</code> represents all elements. For compatibility with XHTML, lower-case should be used.
 
-#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/hero/awaited-dom/super-html-collection)
 
 ### elem.getElementsByTagNameNS *(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
 
@@ -577,7 +577,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
  - namespace `string`. <code>namespaceURI</code> is the namespace URI of elements to look for (see <code>Element.namespaceURI</code> and <code>Attr.namespaceURI</code>). For example, if you need to look for XHTML elements, use the XHTML namespace URI, <span class="nowiki"><code>http://www.w3.org/1999/xhtml</code></span>.
  - localName `string`. <code>localName</code> is either the local name of elements to look for or the special value <code>"*"</code>, which matches all elements (see <code>Element.localName</code> and <code>Attr.localName</code>).
 
-#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/hero/awaited-dom/super-html-collection)
 
 ### elem.hasAttribute *(qualifiedName)* <div class="specs"><i>W3C</i></div> {#hasAttribute}
 
@@ -683,7 +683,7 @@ Compares the position of the current node against another node in any other docu
 #### **Arguments**:
 
 
- - other [`Node`](/docs/awaited-dom/node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
+ - other [`Node`](/docs/hero/awaited-dom/node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
 
 #### **Returns**: `Promise<number>`
 
@@ -694,7 +694,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 #### **Arguments**:
 
 
- - other [`Node`](/docs/awaited-dom/node). Needs content.
+ - other [`Node`](/docs/hero/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -710,7 +710,7 @@ Returns the context object's root which optionally includes the shadow root if i
       <li><code>composed</code>: A `boolean` that indicates whether the shadow root should be returned (<code>false</code>, the default), or a root node beyond shadow root (<code>true</code>).</li>
      </ul>
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### elem.hasChildNodes *()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
@@ -736,7 +736,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 #### **Arguments**:
 
 
- - otherNode [`Node`](/docs/awaited-dom/node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
+ - otherNode [`Node`](/docs/hero/awaited-dom/node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -747,7 +747,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 #### **Arguments**:
 
 
- - otherNode [`Node`](/docs/awaited-dom/node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
+ - otherNode [`Node`](/docs/hero/awaited-dom/node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -800,7 +800,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid compound selector list supported by the browser; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### elem.querySelectorAll *(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
@@ -811,7 +811,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid CSS selector string; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
+#### **Returns**: [`SuperNodeList`](/docs/hero/awaited-dom/super-node-list)
 
 ## Unimplemented Specs
 

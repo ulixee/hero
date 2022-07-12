@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Range
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Range
 
 <div class='overview'>The <strong><code>Range</code></strong> interface represents a fragment of a document that can contain nodes and parts of text nodes.</div>
 
@@ -12,7 +12,7 @@
 
 Returns the deepest <code>Node</code> that contains the <code>startContainer</code> and <code>endContainer</code> nodes.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .collapsed <div class="specs"><i>W3C</i></div> {#collapsed}
 
@@ -24,7 +24,7 @@ A Boolean value which is&nbsp;<code>true</code>&nbsp;if the range is&nbsp;<stron
 
 The DOM <code>Node</code> in which the end of the range, as specified by the <code>endOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .endOffset <div class="specs"><i>W3C</i></div> {#endOffset}
 
@@ -36,7 +36,7 @@ An integer value indicating the offset, in characters, from the beginning of the
 
 The DOM <code>Node</code> in which the beginning of the range, as specified by the <code>startOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
+#### **Type**: [`SuperNode`](/docs/hero/awaited-dom/super-node)
 
 ### .startOffset <div class="specs"><i>W3C</i></div> {#startOffset}
 
@@ -50,13 +50,13 @@ An integer value indicating the offset, in characters, from the beginning of the
 
 Returns a <code>DocumentFragment</code> copying the nodes of a <code>Range</code>.
 
-#### **Returns**: [`DocumentFragment`](/docs/awaited-dom/document-fragment)
+#### **Returns**: [`DocumentFragment`](/docs/hero/awaited-dom/document-fragment)
 
 ### .cloneRange *()* <div class="specs"><i>W3C</i></div> {#cloneRange}
 
 Returns a <code>Range</code> object with boundary points identical to the cloned <code>Range</code>.
 
-#### **Returns**: [`Range`](/docs/awaited-dom/range)
+#### **Returns**: [`Range`](/docs/hero/awaited-dom/range)
 
 ### .collapse *(toStart?)* <div class="specs"><i>W3C</i></div> {#collapse}
 
@@ -84,7 +84,7 @@ Compares the boundary points of the <code>Range</code> with another <code>Range<
       <li><code>Range.START_TO_START</code> compares the start boundary-point of *sourceRange* to the start boundary-point of <code>Range</code>.</li>
      </ul>
      <p>If the value of the parameter is invalid, a <code>DOMException</code> with a <code>NotSupportedError</code>&nbsp;code is thrown.</p>
- - sourceRange [`Range`](/docs/awaited-dom/range). A <code>Range</code> to compare boundary points with the range.
+ - sourceRange [`Range`](/docs/hero/awaited-dom/range). A <code>Range</code> to compare boundary points with the range.
 
 #### **Returns**: `Promise<number>`
 
@@ -95,7 +95,7 @@ Returns -1, 0, or 1 indicating whether the point occurs before, inside, or after
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
  - offset `number`. An integer greater than or equal to zero representing the offset inside the *referenceNode*.
 
 #### **Returns**: `Promise<number>`
@@ -109,7 +109,7 @@ Returns a <code>DocumentFragment</code> created from a given string of code.
 
  - fragment `string`. Text that contains text and tags to be converted to a document fragment.
 
-#### **Returns**: [`DocumentFragment`](/docs/awaited-dom/document-fragment)
+#### **Returns**: [`DocumentFragment`](/docs/hero/awaited-dom/document-fragment)
 
 ### .deleteContents *()* <div class="specs"><i>W3C</i></div> {#deleteContents}
 
@@ -127,13 +127,13 @@ Releases the <code>Range</code> from use to improve performance.
 
 Moves contents of a <code>Range</code> from the document tree into a <code>DocumentFragment</code>.
 
-#### **Returns**: [`DocumentFragment`](/docs/awaited-dom/document-fragment)
+#### **Returns**: [`DocumentFragment`](/docs/hero/awaited-dom/document-fragment)
 
 ### .getBoundingClientRect *()* <div class="specs"><i>W3C</i></div> {#getBoundingClientRect}
 
 Returns a <code>DOMRect</code> object which bounds the entire contents of the <code>Range</code>; this would be the union of all the rectangles returned by <code>range.getClientRects()</code>.
 
-#### **Returns**: [`DOMRect`](/docs/awaited-dom/dom-rect)
+#### **Returns**: [`DOMRect`](/docs/hero/awaited-dom/dom-rect)
 
 ### .getClientRects *()* <div class="specs"><i>W3C</i></div> {#getClientRects}
 
@@ -148,7 +148,7 @@ Insert a <code>Node</code> at the start of a <code>Range</code>.
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to insert at the start of the <code>range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to insert at the start of the <code>range</code>.
 
 #### **Returns**: `Promise<void>`
 
@@ -159,7 +159,7 @@ Returns a <code>boolean</code> indicating whether the given node intersects the 
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -170,7 +170,7 @@ Returns a <code>boolean</code> indicating whether the given point is in the <cod
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to compare with the <code>Range</code>.
  - offset `number`. The offset into <code>Node</code> of the point to compare with the <code>Range</code>.
 
 #### **Returns**: `Promise<boolean>`
@@ -182,7 +182,7 @@ Sets the <code>Range</code> to contain the <code>Node</code> and its contents.
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to select within a <code>Range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to select within a <code>Range</code>.
 
 #### **Returns**: `Promise<void>`
 
@@ -193,7 +193,7 @@ Sets the <code>Range</code> to contain the contents of a <code>Node</code>.
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> whose contents will be selected within a <code>Range</code>.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> whose contents will be selected within a <code>Range</code>.
 
 #### **Returns**: `Promise<void>`
 
@@ -204,7 +204,7 @@ Sets the end position of a <code>Range</code>.
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> inside which the <code>Range</code> should end.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> inside which the <code>Range</code> should end.
  - offset `number`. An integer greater than or equal to zero representing the offset for the end of the <code>Range</code> from the start of <code>endNode</code>.
 
 #### **Returns**: `Promise<void>`
@@ -216,7 +216,7 @@ Sets the end position of a <code>Range</code> relative to another <code>Node</co
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to end the <code>Range</code> after.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to end the <code>Range</code> after.
 
 #### **Returns**: `Promise<void>`
 
@@ -227,7 +227,7 @@ Sets the end position of a <code>Range</code> relative to another <code>Node</co
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to end the <code>Range</code> before.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to end the <code>Range</code> before.
 
 #### **Returns**: `Promise<void>`
 
@@ -238,7 +238,7 @@ Sets the start position of a <code>Range</code>.
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> where the <code>Range</code> should start.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> where the <code>Range</code> should start.
  - offset `number`. An integer greater than or equal to zero representing the offset for the start of the <code>Range</code> from the start of <code>startNode</code>.
 
 #### **Returns**: `Promise<void>`
@@ -250,7 +250,7 @@ Sets the start position of a <code>Range</code> relative to another <code>Node</
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> to start the <code>Range</code> after.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> to start the <code>Range</code> after.
 
 #### **Returns**: `Promise<void>`
 
@@ -261,7 +261,7 @@ Sets the start position of a <code>Range</code> relative to another <code>Node</
 #### **Arguments**:
 
 
- - node [`Node`](/docs/awaited-dom/node). The <code>Node</code> before which the <code>Range</code> should start.
+ - node [`Node`](/docs/hero/awaited-dom/node). The <code>Node</code> before which the <code>Range</code> should start.
 
 #### **Returns**: `Promise<void>`
 
@@ -272,7 +272,7 @@ Moves content of a <code>Range</code> into a new <code>Node</code>.
 #### **Arguments**:
 
 
- - newParent [`Node`](/docs/awaited-dom/node). A <code>Node</code> with which to surround the contents.
+ - newParent [`Node`](/docs/hero/awaited-dom/node). A <code>Node</code> with which to surround the contents.
 
 #### **Returns**: `Promise<void>`
 

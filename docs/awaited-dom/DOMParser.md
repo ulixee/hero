@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> DOMParser
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> DOMParser
 
 <div class='overview'><span class="seoSummary">The <strong><code>DOMParser</code></strong> interface provides the ability to parse XML or HTML source code from a string into a DOM <code>Document</code>.</span></div>
 
@@ -14,4 +14,4 @@ Parse XML from a string
  - str `string`. Needs content.
  - type `SupportedType`. Needs content.
 
-#### **Returns**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Returns**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)

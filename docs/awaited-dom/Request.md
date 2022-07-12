@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> Request
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> Request
 
 ## Properties
 
@@ -24,7 +24,7 @@ Needs content.
 
 Needs content.
 
-#### **Type**: [`Headers`](/docs/awaited-dom/headers)
+#### **Type**: [`Headers`](/docs/hero/awaited-dom/headers)
 
 ### .integrity <div class="specs"><i>W3C</i></div> {#integrity}
 

@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> MediaStream
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> MediaStream
 
 <div class='overview'><span class="seoSummary">The <strong><code>MediaStream</code></strong> interface represents a stream of media content. A stream consists of several <strong>tracks</strong> such as video or audio tracks. Each track is specified as an instance of <code>MediaStreamTrack</code>.</span>You can obtain a MediaStream object either by using the constructor or by calling <code>MediaDevices.getUserMedia()</code>.</div>
 
@@ -24,7 +24,7 @@ A `string` containing 36 characters denoting a universally unique identifier (UU
 
 Returns a clone of the <code>MediaStream</code> object. The clone will, however, have a unique value for <code>id</code>.
 
-#### **Returns**: [`MediaStream`](/docs/awaited-dom/media-stream)
+#### **Returns**: [`MediaStream`](/docs/hero/awaited-dom/media-stream)
 
 ## Unimplemented Specs
 

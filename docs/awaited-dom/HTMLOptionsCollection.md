@@ -1,4 +1,4 @@
-# [AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> HTMLOptionsCollection
+# [AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> HTMLOptionsCollection
 
 <div class='overview'><em>This interface inherits the methods of its parent,&nbsp;<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection" title="The HTMLCollection interface represents a generic collection (array-like object similar to arguments) of elements (in document order) and offers methods and properties for selecting from the list."><code>HTMLCollection</code></a>.</em></div>
 
@@ -27,7 +27,7 @@ Returns the specific node at the given zero-based <code>index</code> into the li
 
  - index `number`. The position of the <code>Node</code> to be returned. Elements appear in an <code>HTMLCollection</code> in the same order in which they appear in the document's source.
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### .namedItem *(name)* <div class="specs"><i>W3C</i></div> {#namedItem}
 
@@ -38,7 +38,7 @@ Returns the specific node whose ID or, as a fallback, name matches the string sp
 
  - name `string`. Needs content.
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ### .item *(index)* <div class="specs"><i>W3C</i></div> {#item}
 
@@ -49,7 +49,7 @@ Needs content.
 
  - index `number`. Needs content.
 
-#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
+#### **Returns**: [`SuperElement`](/docs/hero/awaited-dom/super-element)
 
 ## Unimplemented Specs
 

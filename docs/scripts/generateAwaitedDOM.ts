@@ -31,8 +31,8 @@ json2md.converters.html = input => input;
 
 const awaitedDomDir = Path.resolve(__dirname, '../awaited-dom');
 const docsDir = Path.resolve(__dirname, '../main');
-const awaitedDOMBasePath = Path.join(docsDir, 'BasicInterfaces', 'AwaitedDOM.base.md');
-const awaitedDOMIndexPath1 = Path.join(docsDir, 'BasicInterfaces', 'AwaitedDOM.md');
+const awaitedDOMBasePath = Path.join(docsDir, 'BasicClient', 'AwaitedDOM.base.md');
+const awaitedDOMIndexPath1 = Path.join(docsDir, 'BasicClient', 'AwaitedDOM.md');
 const awaitedDOMIndexPath2 = Path.join(awaitedDomDir, 'index.md');
 
 const docsByTag: { [tag: string]: IDoc[] } = {};
@@ -54,7 +54,7 @@ Object.keys(docsByTag).forEach(tag => {
   if (!awaitedDOMBase.includes(placementToken)) return;
 
   const linksTable = extractLinksTable(docsByTag[tag], (doc: IDoc) => {
-    return [doc.name, `/docs/awaited-dom/${decamelize(doc.name, '-')}`];
+    return [doc.name, `/docs/hero/awaited-dom/${decamelize(doc.name, '-')}`];
   });
 
   const markup = [{ table: linksTable }];
@@ -69,7 +69,7 @@ Fs.writeFileSync(awaitedDOMIndexPath2, awaitedDOMBase);
 
 function saveDoc(doc: IDoc, filePath: string) {
   const markup: any[] = [
-    { h1: `[AwaitedDOM](/docs/basic-client/awaited-dom) <span>/</span> ${doc.name}` },
+    { h1: `[AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> ${doc.name}` },
   ];
   const variableName = doc.variableName || '';
 
@@ -226,7 +226,7 @@ function urlify(type: string) {
     docUrls.get(`Promise<${type}[]>`) ??
     docUrls.get(`${type}[]`);
   if (url) {
-    return `[\`${type}\`](/docs/awaited-dom/${url})`;
+    return `[\`${type}\`](/docs/hero/awaited-dom/${url})`;
   }
   return `\`${type}\``;
 }
