@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
 import ITypedEventEmitter from '../interfaces/ITypedEventEmitter';
-import IRegisteredEventListener from '../interfaces/IRegisteredEventListener';
 import { IBoundLog } from '../interfaces/ILog';
-import { createPromise } from './utils';
 import IPendingWaitEvent, { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
+import { createPromise } from './utils';
+import IRegisteredEventListener from '../interfaces/IRegisteredEventListener';
 
-export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
+export default class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
   public storeEventsWithoutListeners = false;
   public EventTypes: T;
 

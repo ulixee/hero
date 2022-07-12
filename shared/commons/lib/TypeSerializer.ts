@@ -59,22 +59,38 @@ export default class TypeSerializer {
     return object;
   }
 
-  public static stringify(object: any): string {
-    const final = TypeSerializer.replace(object);
+  public static stringify<T>(
+    object: T,
+    options?: { ignoreProperties?: (keyof T)[]; sortKeys?: boolean },
+  ): string {
+    const final = TypeSerializer.replace(object, options);
     return JSON.stringify(final);
   }
 
-  public static replace(object: any): object {
+  public static replace<T>(
+    object: T,
+    options?: { ignoreProperties?: (keyof T)[]; sortKeys?: boolean },
+  ): unknown {
     if (!object) return object;
+
     const replaced = this.replacer(null, object);
     if (replaced !== object || (typeof replaced === 'object' && '__type' in replaced)) {
       return replaced;
     }
+
     if (object && typeof object === Types.object) {
-      if (Array.isArray(object)) return object.map(x => this.replace(x));
-      const response = {};
-      for (const [key, value] of Object.entries(object)) {
-        response[key] = this.replace(value);
+      if (Array.isArray(object)) {
+        return object.map(x => this.replace(x));
+      }
+
+      const keys = Object.keys(object);
+      if (options?.sortKeys) keys.sort();
+      const response: any = {};
+      for (const key of keys) {
+        if (options?.ignoreProperties) {
+          if (options.ignoreProperties.includes(key as any)) continue;
+        }
+        response[key] = this.replace(object[key]);
       }
       return response;
     }

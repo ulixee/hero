@@ -298,6 +298,8 @@ function loadNamespaces(namespaces: string): void {
 registerNamespaceMapping((ns, active, skip) => {
   if (ns.includes('ubk:*') || ns.includes('ubk*')) {
     active.push(/agent\/.*/);
+  } else if (ns === 'ubk:mitm') {
+    active.push(/agent[/-]mitm.*/);
   } else if (ns === 'ubk') {
     active.push(/agent\/.*/);
     skip.push(/DevtoolsSessionLogger/, /agent[/-]mitm.*/);
