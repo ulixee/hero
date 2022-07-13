@@ -343,11 +343,15 @@ function createReplayItems() {
 
   showMoreUp = document.createElement('hero-overflow');
   showMoreUp.style.top = '0';
-  showMoreUp.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
+  const bar = document.createElement('hero-overflow-bar');
+  bar.textContent = '&nbsp;';
+  showMoreUp.appendChild(bar);
 
   showMoreDown = document.createElement('hero-overflow');
   showMoreDown.style.bottom = '0';
-  showMoreDown.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
+  const showMoreDownBar = document.createElement('hero-overflow-bar');
+  showMoreDownBar.textContent = '&nbsp;';
+  showMoreDown.appendChild(showMoreDownBar);
 
   const styleElement = document.createElement('style');
   styleElement.textContent = `
