@@ -5,6 +5,7 @@ import IDomStorage, {
 import Log from '@ulixee/commons/lib/Logger';
 import { assert } from '@ulixee/commons/lib/utils';
 import Page from '@unblocked-web/agent/lib/Page';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
 
@@ -36,13 +37,19 @@ export default class UserProfile {
 
         if (frame) {
           const databases = JSON.stringify(databaseNames);
-          const liveData = await frame.evaluate<IDomStorageForOrigin>(
-            `window.exportDomStorage(${databases})`,
-            true,
-          );
-          originStorage.localStorage = liveData.localStorage;
-          originStorage.sessionStorage = liveData.sessionStorage;
-          originStorage.indexedDB = liveData.indexedDB.filter(Boolean);
+          try {
+            const liveData = await frame.evaluate<IDomStorageForOrigin>(
+              `window.exportDomStorage(${databases})`,
+              true,
+            );
+            originStorage.localStorage = liveData.localStorage;
+            originStorage.sessionStorage = liveData.sessionStorage;
+            originStorage.indexedDB = liveData.indexedDB.filter(Boolean);
+          } catch (error) {
+            if (frame.isAttached && !(error instanceof CanceledPromiseError)) {
+              throw error;
+            }
+          }
         }
       }
     }
