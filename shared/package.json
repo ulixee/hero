@@ -1,7 +1,7 @@
 {
   "name": "@ulixee/shared-monorepo",
   "private": true,
-  "version": "2.0.0-alpha.6",
+  "version": "0.0.1",
   "description": "Shared Ulixee and Unblocked projects",
   "license": "MIT",
   "scripts": {
@@ -11,12 +11,12 @@
     "copy:dist": "ulx-repo-after-build --dist",
     "copy:build": "ulx-repo-after-build",
     "tsc": "tsc -b -i tsconfig.json && ulx-repo-after-build",
-    "watch": "tsc -b -w tsconfig.json",
+    "watch": "tsc -b -i -w tsconfig.json",
     "clean": "tsc -b --clean  tsconfig.json",
     "test": "yarn copy:build && yarn test:build",
     "test:build": "cd ./build && cross-env NODE_ENV=test jest",
     "lint": "eslint --cache ./",
-    "version": "ulx-repo-version-check fix",
+    "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"
   },
   "devDependencies": {

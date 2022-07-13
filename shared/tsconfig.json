@@ -4,7 +4,7 @@
     "rootDir": ".",
     "outDir": "./build"
   },
-  "include": ["**/*.ts", "*.json", ".eslintrc.js"],
+  "include": ["**/*.ts", "*.json", ".eslintrc.js", "*.js"],
   "exclude": [
     "**/tsconfig*.json",
     "build",
