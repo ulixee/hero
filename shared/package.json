@@ -1,26 +1,25 @@
 {
-  "name": "@ulixee/commons",
-  "version": "2.0.0-alpha.6",
-  "description": "Common utilities for Ulixee",
+  "name": "@ulixee/shared-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Shared Ulixee and Unblocked projects",
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "build": "pwd && yarn tsc && ulx-repo-after-build && cd ./build && yarn install -focus",
+    "build": "yarn && yarn tsc && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",
-    "tsc": "tsc -b -i tsconfig.json",
+    "copy:dist": "ulx-repo-after-build --dist",
+    "copy:build": "ulx-repo-after-build",
+    "tsc": "tsc -b -i tsconfig.json && ulx-repo-after-build",
     "watch": "tsc -b -i -w tsconfig.json",
-    "test": "cross-env NODE_ENV=test jest",
-    "lint": "eslint --cache ./"
-  },
-  "dependencies": {
-    "devtools-protocol": "^0.0.981744",
-    "https-proxy-agent": "^5.0.0",
-    "semver": "^7.3.7",
-    "source-map-js": "^1.0.1",
-    "bech32": "^2.0.0"
+    "clean": "tsc -b --clean  tsconfig.json",
+    "test": "yarn copy:build && yarn test:build",
+    "test:build": "cd ./build && cross-env NODE_ENV=test jest",
+    "lint": "eslint --cache ./",
+    "version:check": "ulx-repo-version-check fix",
+    "version:bump": "ulx-repo-version-bump"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.5.0",
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
     "@types/node": "^14.18.18",
@@ -30,6 +29,7 @@
     "jest": "^28.1.0",
     "jest-environment-node": "^28.1.0",
     "jest-summary-reporter": "^0.0.2",
+    "lerna": "^4.0.0",
     "husky": "^7.0.1",
     "lint-staged": "^10.5.2",
     "shx": "^0.3.3",
@@ -41,6 +41,12 @@
     ],
     "*.json": [
       "prettier --write"
+    ]
+  },
+  "workspaces": {
+    "packages": [
+      "commons",
+      "net"
     ]
   }
 }

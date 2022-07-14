@@ -1,3 +1,11 @@
 {
-  "devDependencies": {}
+  "scripts": {
+    "test:build": "cross-env NODE_ENV=test jest"
+  },
+  "devDependencies": {
+    "jest": "^28.1.0",
+    "jest-environment-node": "^28.1.0",
+    "jest-summary-reporter": "^0.0.2",
+    "cross-env": "^7.0.3"
+  }
 }

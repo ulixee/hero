@@ -1,0 +1,40 @@
+name: Test Matrix
+
+on:
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node-version: [14, 16]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Yarn build
+        run: yarn build
+
+      - name: Run Lint
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+        run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
+
+      - name: Run tests
+        run: yarn test

@@ -1,0 +1,17 @@
+{
+  "name": "@ulixee/commons",
+  "version": "2.0.0-alpha.8",
+  "private": true,
+  "description": "Common utilities for Ulixee",
+  "license": "MIT",
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "devtools-protocol": "^0.0.981744",
+    "https-proxy-agent": "^5.0.0",
+    "semver": "^7.3.7",
+    "source-map-js": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.5.0"
+  }
+}

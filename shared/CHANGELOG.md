@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.8](https://github.com/ulixee/commons/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-14)
+
+**Note:** Version bump only for package @ulixee/shared-monorepo
+
+
+
+
+
+# 2.0.0-alpha.7 (2022-07-13)
+
+
+### Bug Fixes
+
+* another lint issue ([21d03c5](https://github.com/ulixee/commons/commit/21d03c5321f712657697571a816d6e64feb45a81))
+* handle * logger ([0610dfa](https://github.com/ulixee/commons/commit/0610dfa3e306718e7088644189b076b41037fc0a))
+* readme ([1eac5ba](https://github.com/ulixee/commons/commit/1eac5bab9e860e3a414fab3c5242492c018afa8a))
+* scoped loggers ([b431cc7](https://github.com/ulixee/commons/commit/b431cc71d5878cd4172616cef8ab8066b137df15))
+
+
+### Features
+
+* add bech32m hasher ([65691e8](https://github.com/ulixee/commons/commit/65691e8ebe2f8cae841e45457fd4cc4ccdfbbab1))
+* added nvmrc file ([871c936](https://github.com/ulixee/commons/commit/871c936aaa5974a5021af054ab84b8c25213306c))
+* databoxesOutDir ([fdd4dd5](https://github.com/ulixee/commons/commit/fdd4dd51549677b29332ba0bc2ddbdc6fd24f61d))
+* find project path ([e3e84d1](https://github.com/ulixee/commons/commit/e3e84d19e6af38e533f536a4627a0dfe3f769006))
+
+
+
+
+
 # [2.0.0-alpha.3](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/commons

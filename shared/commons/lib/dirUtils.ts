@@ -19,6 +19,13 @@ export function getCacheDirectory(): string {
   throw new Error(`Unsupported platform: ${process.platform}`);
 }
 
+const homeDirReplace = new RegExp(os.homedir(), 'g');
+
+export function cleanHomeDir(str: string): string {
+  return str.replace(homeDirReplace, '~');
+}
+
+
 export function findProjectPathSync(startingDirectory: string): string {
   let last: string;
   let path = Path.resolve(startingDirectory);
