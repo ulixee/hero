@@ -20,7 +20,7 @@
     "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest",
     "test": "ulx-repo-after-build && cd build && yarn test:build",
     "lint": "eslint --cache ./",
-    "version": "ulx-repo-version-check fix",
+    "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"
   },
   "repository": "git@github.com:ulixee/hero.git",
@@ -67,8 +67,7 @@
       "timetravel",
       "plugin-utils",
       "plugins/*",
-      "../../commons/build",
-      "../../net/build",
+      "../../shared/build/*",
       "../../unblocked/agent/build/*",
       "../../unblocked/build/plugins/*",
       "../../unblocked/specifications/build",

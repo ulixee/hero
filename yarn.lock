@@ -2292,17 +2292,6 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
-"@ulixee/commons@2.0.0-alpha.5":
-  version "2.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-2.0.0-alpha.5.tgz#07116991c80dd8453d793193ba444a95d6ebe5df"
-  integrity sha512-xa0wRYmcUVNQDtRcdcTiiC4aGbuccp450rRXqHA8biOWY+g8ZadT3a40X/6/YOQgkC2pKopJrnGtju6V7qRvMQ==
-  dependencies:
-    bech32 "^2.0.0"
-    devtools-protocol "^0.0.981744"
-    https-proxy-agent "^5.0.0"
-    semver "^7.3.7"
-    source-map-js "^1.0.1"
-
 "@ulixee/repo-tools@1.0.11", "@ulixee/repo-tools@^1.0.11":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.11.tgz#57325e26adba2446a50c80c2cc7eddc7513b5c94"

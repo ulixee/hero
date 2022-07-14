@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.8](https://github.com/ulixee/hero/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-13)
+
+
+### Bug Fixes
+
+* **client** fix: the doneFn in waitForResource should support async ([715992](https://github.com/ulixee/ulixee/commit/71599287ac2352d6df2690f696fee3f0c9476a3d))
+* **core:** fix profile restore ([bd86f48](https://github.com/ulixee/hero/commit/bd86f48889448ba42b5331b0502af2f9ad9dc94f))
+* **core:** user profile failed w detached frame ([ada70f9](https://github.com/ulixee/hero/commit/ada70f9230d536b9e5cb785aeec3683bc7391fd6))
+* **docs:** awaited dom links wrong ([29df853](https://github.com/ulixee/hero/commit/29df853d2ae575dfcf631fd5437590320af654e1))
+
+
+
+
+
 # [2.0.0-alpha.7](https://github.com/ulixee/hero/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
 
 

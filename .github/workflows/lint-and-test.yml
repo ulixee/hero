@@ -20,21 +20,13 @@ jobs:
           node-version: 14
           cache: yarn
 
-      - name: (TEMP) Clone ulixee/commons
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/commons.git
+      - name: (TEMP) Clone ulixee/shared
+        run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
         working-directory: ../..
 
-      - name: (TEMP) Install ulixee/commons
+      - name: (TEMP) Install ulixee/shared
         run: yarn && yarn build
-        working-directory: ../../commons
-
-      - name: (TEMP) Clone ulixee/net
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/net.git
-        working-directory: ../..
-
-      - name: (TEMP) Install ulixee/net
-        run: yarn && yarn build
-        working-directory: ../../net
+        working-directory: ../../shared
 
       - name: (TEMP) Clone unblocked
         run: git clone --recurse-submodules -j8 https://github.com/unblockable/unblocked.git
@@ -100,21 +92,13 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: (TEMP) Clone ulixee/commons
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/commons.git
+      - name: (TEMP) Clone ulixee/shared
+        run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
         working-directory: ../..
 
-      - name: (TEMP) Install ulixee/commons
+      - name: (TEMP) Install ulixee/shared
         run: yarn && yarn build
-        working-directory: ../../commons
-
-      - name: (TEMP) Clone ulixee/net
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/net.git
-        working-directory: ../..
-
-      - name: (TEMP) Install ulixee/net
-        run: yarn && yarn build
-        working-directory: ../../net
+        working-directory: ../../shared
 
       - name: (TEMP) Clone unblocked
         run: git clone --recurse-submodules -j8 https://github.com/unblockable/unblocked.git

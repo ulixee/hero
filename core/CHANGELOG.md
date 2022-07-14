@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.8](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-13)
+
+
+### Bug Fixes
+
+* **core:** fix profile restore ([bd86f48](https://github.com/ulixee/ulixee/commit/bd86f48889448ba42b5331b0502af2f9ad9dc94f))
+* **core:** user profile failed w detached frame ([ada70f9](https://github.com/ulixee/ulixee/commit/ada70f9230d536b9e5cb785aeec3683bc7391fd6))
+
+
+
+
+
 # [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
 
 
