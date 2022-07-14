@@ -110,11 +110,13 @@ export default class Resource {
   ): Promise<Resource> {
     const allFilters = {
       ...filter,
-      filterFn(resource, done) {
+      async filterFn(resource, done) {
         if (!filter.filterFn) {
           done();
           return true;
-        } if (filter.filterFn(resource)) {
+        } 
+        const response = await filter.filterFn(resource);
+        if (response) {
           done();
           return true;
         }
