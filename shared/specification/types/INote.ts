@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { WalletSignatureSchema } from './IWalletSignature';
+import { AddressSignatureSchema } from './IAddressSignature';
 import { addressValidation, blockHeightValidation, hashValidation } from '../common';
 import NoteType from './NoteType';
 
@@ -10,8 +10,9 @@ export const NoteSchema = z.object({
   noteHash: hashValidation,
   type: z.nativeEnum(NoteType),
   effectiveBlockHeight: blockHeightValidation.optional(),
+  guaranteeBlockHeight: blockHeightValidation.optional(),
   timestamp: z.date(),
-  signature: WalletSignatureSchema,
+  signature: AddressSignatureSchema,
 });
 
 type INote = z.infer<typeof NoteSchema>;

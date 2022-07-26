@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { hashValidation } from '../common';
-import { WalletSignatureSchema } from './IWalletSignature';
+import { AddressSignatureSchema } from './IAddressSignature';
 
 export const GrantTransferSchema = z.object({
   coinageHash: hashValidation,
-  signature: WalletSignatureSchema,
+  signature: AddressSignatureSchema,
 });
 
 type IGrantTransfer = z.infer<typeof GrantTransferSchema>;

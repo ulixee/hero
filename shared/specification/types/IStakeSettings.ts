@@ -4,12 +4,12 @@ import {
   blockHeightValidation,
   centagonTokenValidation,
   hashValidation,
-  publicKeyValidation,
+  identityValidation,
 } from '../common';
 
 export const StakeSettingsSchema = z.object({
   centagons: centagonTokenValidation,
-  rootPublicKey: publicKeyValidation,
+  rootIdentity: identityValidation,
   stakeAddress: addressValidation,
   stableBlockHeight: blockHeightValidation,
   stableBlockHash: hashValidation,

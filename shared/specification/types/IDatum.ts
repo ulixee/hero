@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { publicKeyValidation, signatureValidation } from '../common';
+import { identityValidation, signatureValidation } from '../common';
 import { ProofOfKnowledgeSchema } from './IProofOfKnowedge';
 
 export const DatumSchema = z.object({
   finalResult: z.any(),
   proof: ProofOfKnowledgeSchema.array(),
   signature: signatureValidation,
-  publicKey: publicKeyValidation,
+  identity: identityValidation,
   lastUpdated: z.string(),
   isError: z.boolean(),
 });

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { hashValidation, publicKeyValidation } from '../common';
+import { hashValidation, identityValidation } from '../common';
 import { ArithmeticEncodingSchema } from './IArithmeticEncoding';
 
 export const DatumSettingsSchema = z.object({
@@ -10,7 +10,7 @@ export const DatumSettingsSchema = z.object({
 
 export const ApprovedSidechainSchema = z.object({
   url: z.string(),
-  rootPublicKey: publicKeyValidation,
+  rootIdentity: identityValidation,
 });
 
 export const BlockSettingsSchema = z.object({

@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { hashValidation, publicKeyValidation } from '../common';
+import { hashValidation, identityValidation } from '../common';
 
 export const MicronoteBatchDatumsSchema = z.object({
   micronoteBatchUrl: z.string().url(),
-  micronoteBatchPublicKey: publicKeyValidation,
-  jobMicronoteIdsHash: hashValidation,
-  jobsCount: z.number().nonnegative(),
+  micronoteBatchIdentity: identityValidation,
+  micronoteIdsHash: hashValidation,
+  micronotesCount: z.number().nonnegative(),
 });
 
 type IMicronoteBatchDatums = z.infer<typeof MicronoteBatchDatumsSchema>;

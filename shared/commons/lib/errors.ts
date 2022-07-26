@@ -23,12 +23,6 @@ class UlixeeError extends Error {
   }
 }
 
-class InsufficientResourcesError extends UlixeeError {
-  constructor(message, resourceType) {
-    super(message || 'Insufficient network resources', 'processing::resources', { resourceType });
-  }
-}
-
 class ValidationError extends UlixeeError {
   constructor(errors) {
     super('Invalid request', 'invalid::parameters', { errors });
@@ -63,7 +57,6 @@ export {
   APIError,
   UlixeeError,
   ValidationError,
-  InsufficientResourcesError,
   ClientError,
   UnapprovedSidechainError,
   MalformedRequestError,

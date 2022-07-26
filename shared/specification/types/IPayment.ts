@@ -2,9 +2,9 @@ import { z } from 'zod';
 import {
   blockHeightValidation,
   hashValidation,
+  identityValidation,
   micronoteIdValidation,
   micronoteTokenValidation,
-  publicKeyValidation,
   signatureValidation,
 } from '../common';
 
@@ -13,9 +13,9 @@ export const PaymentSchema = z.object({
   micronoteId: micronoteIdValidation,
   blockHeight: blockHeightValidation,
   micronoteBatchUrl: z.string().url(),
-  micronoteBatchPublicKey: publicKeyValidation,
+  micronoteBatchIdentity: identityValidation,
   micronoteSignature: signatureValidation,
-  sidechainPublicKey: publicKeyValidation,
+  sidechainIdentity: identityValidation,
   sidechainValidationSignature: signatureValidation,
   guaranteeBlockHash: hashValidation,
   guaranteeBlockHeight: blockHeightValidation,

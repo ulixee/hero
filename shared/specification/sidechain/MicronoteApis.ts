@@ -3,23 +3,23 @@ import {
   addressValidation,
   blockHeightValidation,
   hashValidation,
-  micronoteBatchSlugValidation,
+  identityValidation,
   micronoteIdValidation,
   micronoteTokenValidation,
-  publicKeyValidation,
   signatureValidation,
 } from '../common';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
-import { WalletSignatureSchema } from '../types/IWalletSignature';
+import { AddressSignatureSchema } from '../types/IAddressSignature';
+import { MicronoteBatchSchema } from '../types/IMicronoteBatch';
 
 export const MicronoteApiSchemas = {
   'Micronote.create': {
     args: z.object({
+      batchSlug: MicronoteBatchSchema.shape.batchSlug,
       address: addressValidation,
-      microgons: micronoteTokenValidation.lt(1000e6), // $1000 max = 1000*1M microgon max
+      microgons: micronoteTokenValidation.lte(1000e6), // $1000 max = 1000*1M microgon max
       fundsId: z.number().int().positive().optional(),
-      batchSlug: micronoteBatchSlugValidation,
-      signature: WalletSignatureSchema,
+      signature: AddressSignatureSchema,
       isAuditable: z.boolean().optional(),
     }),
     result: z.object({
@@ -27,29 +27,20 @@ export const MicronoteApiSchemas = {
       micronoteSignature: signatureValidation,
       blockHeight: blockHeightValidation,
       fundsId: z.number().int().positive(),
-      guaranteeBlockHash: hashValidation,
       guaranteeBlockHeight: blockHeightValidation,
       fundMicrogonsRemaining: micronoteTokenValidation,
     }),
   },
-  'Micronote.claim': {
-    args: z.object({
-      batchSlug: micronoteBatchSlugValidation,
-      id: micronoteIdValidation,
-      publicKey: publicKeyValidation,
-      tokenAllocation: z.record(addressValidation, micronoteTokenValidation),
-      signature: signatureValidation,
-    }),
-    result: z.object({
-      finalCost: z.number().nonnegative().int(),
-    }),
-  },
   'Micronote.lock': {
     args: z.object({
+      batchSlug: MicronoteBatchSchema.shape.batchSlug,
       id: micronoteIdValidation,
-      publicKey: publicKeyValidation,
+      identity: identityValidation,
       signature: signatureValidation,
-      batchSlug: micronoteBatchSlugValidation,
+      addresses: addressValidation
+        .array()
+        .optional()
+        .describe('Optional list of addresses to ensure can be paid with this Micronote'),
     }),
     result: z.object({
       accepted: z.boolean(),
@@ -57,11 +48,19 @@ export const MicronoteApiSchemas = {
       currentBlockHash: hashValidation,
     }),
   },
+  'Micronote.claim': {
+    args: z.object({
+      batchSlug: MicronoteBatchSchema.shape.batchSlug,
+      id: micronoteIdValidation,
+      identity: identityValidation,
+      tokenAllocation: z.record(addressValidation, micronoteTokenValidation),
+      signature: signatureValidation,
+    }),
+    result: z.object({
+      finalCost: z.number().nonnegative().int(),
+    }),
+  },
 };
-
-type ICreateMicronoteResponse = z.infer<typeof MicronoteApiSchemas['Micronote.create']['result']>;
-
-export { ICreateMicronoteResponse };
 
 type IMicronoteApis = IZodSchemaToApiTypes<typeof MicronoteApiSchemas>;
 export default IMicronoteApis;

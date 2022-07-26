@@ -1,7 +1,7 @@
 import INote from './types/INote';
 import IMerkleProof from './types/IMerkleProof';
-import IWalletOwnershipProof from './types/IWalletOwnershipProof';
-import IWalletSignature from './types/IWalletSignature';
+import IAddressOwnershipProof from './types/IAddressOwnershipProof';
+import IAddressSignature from './types/IAddressSignature';
 import IStakeSettings from './types/IStakeSettings';
 import IStakeSignature from './types/IStakeSignature';
 import ICoinage from './types/ICoinage';
@@ -36,8 +36,8 @@ export {
   ITransactionSourceSignatureData,
   TransactionType,
   IStakeSignature,
-  IWalletSignature,
-  IWalletOwnershipProof,
+  IAddressSignature,
+  IAddressOwnershipProof,
   TransactionError,
   IPayment,
 };

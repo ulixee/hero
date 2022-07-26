@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { blockHeightValidation, publicKeyValidation, signatureValidation } from '../common';
+import { blockHeightValidation, identityValidation, signatureValidation } from '../common';
 
 export const StakeSignatureSchema = z.object({
   signature: signatureValidation,
   blockHeight: blockHeightValidation,
-  rootPublicKey: publicKeyValidation,
+  rootIdentity: identityValidation,
 });
 
 type IStakeSignature = z.infer<typeof StakeSignatureSchema>;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { hashValidation, publicKeyValidation } from '../common';
+import { hashValidation, identityValidation } from '../common';
 
 export const AuthorizedSidechainTransferSchema = z.object({
   sidechainHash: hashValidation,
@@ -8,7 +8,7 @@ export const AuthorizedSidechainTransferSchema = z.object({
 
 export const AuthorizedSidechainSchema = z.object({
   sidechainHash: hashValidation,
-  rootPublicKey: publicKeyValidation,
+  rootIdentity: identityValidation,
   url: z.string().url(),
   transfer: AuthorizedSidechainTransferSchema.array().optional(), // optional - if rotating key/address
 });

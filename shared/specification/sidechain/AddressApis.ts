@@ -1,19 +1,19 @@
 import { z } from 'zod';
 import { addressValidation } from '../common';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
-import { WalletSignatureSchema } from '../types/IWalletSignature';
+import { AddressSignatureSchema } from '../types/IAddressSignature';
 
-export const WalletApiSchemas = {
-  'Wallet.register': {
+export const AddressApiSchemas = {
+  'Address.register': {
     args: z.object({
       address: addressValidation,
-      signature: WalletSignatureSchema,
+      signature: AddressSignatureSchema,
     }),
     result: z.object({
       success: z.boolean(),
     }),
   },
-  'Wallet.getBalance': {
+  'Address.getBalance': {
     args: z.object({
       address: addressValidation,
     }),
@@ -23,5 +23,5 @@ export const WalletApiSchemas = {
   },
 };
 
-type IWalletApis = IZodSchemaToApiTypes<typeof WalletApiSchemas>;
-export default IWalletApis;
+type IAddressApis = IZodSchemaToApiTypes<typeof AddressApiSchemas>;
+export default IAddressApis;

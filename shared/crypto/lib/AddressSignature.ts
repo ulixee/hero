@@ -1,18 +1,18 @@
-import { IWalletOwnershipProof, IWalletSignature } from '@ulixee/specification';
-import Keypair from '@ulixee/crypto/lib/Keypair';
+import { IAddressOwnershipProof, IAddressSignature } from '@ulixee/specification';
+import Identity from '@ulixee/crypto/lib/Identity';
 import MerkleTree from '@ulixee/crypto/lib/MerkleTree';
 import { sha3 } from '@ulixee/commons/lib/hashUtils';
 import { MerklePosition } from '@ulixee/specification/types/IMerkleProof';
-import IKeyringSettings from '../interfaces/IKeyringSettings';
-import KeyringTree from './KeyringTree';
-import Keyring from './Keyring';
+import IAddressSettings from '../interfaces/IAddressSettings';
+import AddressOwnersTree from './AddressOwnersTree';
+import Address from './Address';
 
-export default class KeyringSignature {
-  public get signatureSettings(): IWalletSignature['signatureSettings'] {
+export default class AddressSignature {
+  public get signatureSettings(): IAddressSignature['signatureSettings'] {
     return this.signature.signatureSettings;
   }
 
-  constructor(readonly treeRoot: Buffer, readonly signature: IWalletSignature) {}
+  constructor(readonly treeRoot: Buffer, readonly signature: IAddressSignature) {}
 
   public isValidSignaturePosition(isClaim: boolean): boolean {
     const proofsToRight = this.signatureSettings.settingsMerkleProofs.filter(
@@ -34,18 +34,18 @@ export default class KeyringSignature {
     return true;
   }
 
-  public isValidPublicKeyProof(owner: IWalletOwnershipProof): boolean {
+  public isValidWalletOwnershipProof(owner: IAddressOwnershipProof): boolean {
     const isValidProof = MerkleTree.verify(
       owner.ownershipMerkleProofs,
-      sha3(owner.publicKey),
+      sha3(owner.identity),
       this.treeRoot,
     );
     if (!isValidProof) return false;
 
-    const publicKeyIndices = this.signature.signatureSettings.publicKeyIndices;
-    if (publicKeyIndices && publicKeyIndices.length) {
+    const identityIndices = this.signature.signatureSettings.identityIndices;
+    if (identityIndices && identityIndices.length) {
       const index = MerkleTree.getLeafIndex(owner.ownershipMerkleProofs);
-      if (publicKeyIndices.includes(index) === false) {
+      if (identityIndices.includes(index) === false) {
         return false;
       }
     }
@@ -56,10 +56,10 @@ export default class KeyringSignature {
     // verify the signature count location
     return MerkleTree.verify(
       this.signatureSettings.settingsMerkleProofs,
-      KeyringTree.createLeaf(
+      AddressOwnersTree.createLeaf(
         this.signatureSettings.countRequired,
         this.signatureSettings.salt,
-        this.signatureSettings.publicKeyIndices,
+        this.signatureSettings.identityIndices,
       ),
       this.treeRoot,
     );
@@ -69,27 +69,27 @@ export default class KeyringSignature {
     const isValidSignatureSettings =
       this.isValidSignatureSettingsProof() && this.isValidSignaturePosition(isClaim);
     if (!isValidSignatureSettings) {
-      return 'Invalid signature required proof provided';
+      return 'Invalid RequiredSignatureSettings proof provided';
     }
 
     const signatures: Buffer[] = [];
-    const seenPublicKeys = new Set<string>();
+    const seenIdentities = new Set<string>();
     for (const signer of this.signature.signers) {
-      const publicKey = signer.publicKey.toString('hex');
-      if (seenPublicKeys.has(publicKey)) {
+      const identity = signer.identity;
+      if (seenIdentities.has(identity)) {
         continue;
       }
-      seenPublicKeys.add(publicKey);
-      const isValidPublicKey = this.isValidPublicKeyProof(signer);
-      if (isValidPublicKey === false) {
+      seenIdentities.add(identity);
+      const isValidIdentity = this.isValidWalletOwnershipProof(signer);
+      if (isValidIdentity === false) {
         return 'Invalid public key provided';
       }
 
       /**
        * verify signatures of each public key
        */
-      const isMatch = Keypair.verify(
-        signer.publicKey,
+      const isMatch = Identity.verify(
+        signer.identity,
         sha3(Buffer.concat([messageHash, ...signatures])),
         signer.signature,
       );
@@ -100,49 +100,52 @@ export default class KeyringSignature {
     }
 
     // ensure signatures are unique
-    if (seenPublicKeys.size < this.signatureSettings.countRequired) {
-      return `Insufficient public key signatures provided ${seenPublicKeys.size} vs ${this.signatureSettings.countRequired} required`;
+    if (seenIdentities.size < this.signatureSettings.countRequired) {
+      return `Insufficient public key signatures provided ${seenIdentities.size} vs ${this.signatureSettings.countRequired} required`;
     }
     return null;
   }
 
   public static buildSignatureSettings(
     addressTree: MerkleTree,
-    keyringSettings: IKeyringSettings,
+    addressSettings: IAddressSettings,
     isClaim = false,
-  ): IWalletSignature['signatureSettings'] {
+  ): IAddressSignature['signatureSettings'] {
     return {
       countRequired: isClaim
-        ? keyringSettings.claimSignatureSettings
-        : keyringSettings.transferSignatureSettings,
+        ? addressSettings.claimSignatureSettings
+        : addressSettings.transferSignatureSettings,
       settingsMerkleProofs: addressTree.getProofForIndex(isClaim ? -1 : -2), // notes are all transfers
-      salt: isClaim ? keyringSettings.claimSignatureSalt : keyringSettings.transferSignatureSalt,
-      publicKeyIndices: Keyring.getKeyIndices(keyringSettings, isClaim),
+      salt: isClaim ? addressSettings.claimSignatureSalt : addressSettings.transferSignatureSalt,
+      identityIndices: Address.getIdentityIndices(addressSettings, isClaim),
     };
   }
 
   public static create(
     hash: Buffer,
-    keypairs: Keypair[],
-    addressTree: MerkleTree,
-    keyringSettings: IKeyringSettings,
+    identities: Identity[],
+    addressOwnersTree: MerkleTree,
+    addressSettings: IAddressSettings,
     isClaim = false,
-  ): IWalletSignature {
+  ): IAddressSignature {
     const signatures: Buffer[] = [];
     return {
-      signers: keypairs.map(key => {
-        const publicKeyProof = KeyringTree.getPublicKeyProof(addressTree, key.publicKey);
-        const ownerProof: IWalletOwnershipProof = {
-          ownershipMerkleProofs: publicKeyProof,
-          publicKey: key.publicKey,
-          signature: key.sign(sha3(Buffer.concat([hash, ...signatures]))),
+      signers: identities.map(identity => {
+        const identityProof = AddressOwnersTree.getIdentityIsOwnerProof(
+          addressOwnersTree,
+          identity.bech32,
+        );
+        const ownerProof: IAddressOwnershipProof = {
+          ownershipMerkleProofs: identityProof,
+          identity: identity.bech32,
+          signature: identity.sign(sha3(Buffer.concat([hash, ...signatures]))),
         };
         signatures.push(ownerProof.signature);
         return ownerProof;
       }),
-      signatureSettings: KeyringSignature.buildSignatureSettings(
-        addressTree,
-        keyringSettings,
+      signatureSettings: AddressSignature.buildSignatureSettings(
+        addressOwnersTree,
+        addressSettings,
         isClaim,
       ),
     };
@@ -150,11 +153,11 @@ export default class KeyringSignature {
 
   public static verify(
     address: string,
-    signature: IWalletSignature,
+    signature: IAddressSignature,
     messageHash: Buffer,
     isClaim: boolean,
   ): string | null {
-    const root = Keyring.decodeAddress(address);
-    return new KeyringSignature(root, signature).isInvalid(messageHash, isClaim);
+    const root = Address.decodeAddress(address);
+    return new AddressSignature(root, signature).isInvalid(messageHash, isClaim);
   }
 }

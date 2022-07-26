@@ -9,6 +9,6 @@ enum NoteType {
   micronoteBatchRefund = 7,
   burn = 8,
   stakeCreate = 9,
-  stakeRefund = 10,
+  stakeRefund = 10
 }
 export default NoteType;

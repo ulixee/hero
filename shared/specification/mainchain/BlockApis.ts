@@ -17,7 +17,7 @@ export const BlockApiSchemas = {
       datumSummary: DatumSummarySchema,
       bitSampling: z.object({
         bitDatumHistories: BitDatumHistorySchema.array(),
-      }), // sampling of node jobs
+      }), // sampling of node datums created
     }),
     result: z.object({
       success: z.boolean(),

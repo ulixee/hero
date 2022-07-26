@@ -3,7 +3,7 @@ import { addressValidation, centagonTokenValidation, hashValidation } from '../c
 import LedgerType from './LedgerType';
 import TransactionType from './TransactionType';
 import { TransactionOutputSchema } from './ITransactionOutput';
-import { WalletSignatureSchema } from './IWalletSignature';
+import { AddressSignatureSchema } from './IAddressSignature';
 
 export const TransactionSourceSignatureDataSchema = z.object({
   version: z.string(),
@@ -13,7 +13,7 @@ export const TransactionSourceSignatureDataSchema = z.object({
   sourceTransactionOutputIndex: z.number().int().nonnegative(),
   sourceLedger: z.nativeEnum(LedgerType),
   address: addressValidation,
-  walletSignatureSettings: WalletSignatureSchema.shape.signatureSettings, // signatures by other multisig authors
+  addressSignatureSettings: AddressSignatureSchema.shape.signatureSettings, // signatures by other multisig authors
   centagons: centagonTokenValidation,
   coinageHash: hashValidation.optional(),
   outputs: TransactionOutputSchema.array(),

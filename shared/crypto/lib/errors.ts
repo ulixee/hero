@@ -7,14 +7,14 @@ export class InvalidSignatureError extends UlixeeError {
   }
 }
 
-export class UnreadableKeysError extends UlixeeError {
+export class UnreadableIdentityError extends UlixeeError {
   constructor(message) {
-    super(message, 'ERR_KEY_UNREADABLE');
+    super(message, 'ERR_IDENTITY_UNREADABLE');
   }
 }
 
-export class InvalidKeypairError extends UlixeeError {
+export class InvalidIdentityError extends UlixeeError {
   constructor(message) {
-    super(message, 'ERR_KEY_INVALID');
+    super(message, 'ERR_IDENTITY_INVALID');
   }
 }

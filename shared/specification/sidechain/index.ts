@@ -3,24 +3,27 @@ import IMicronoteBatchApis, { MicronoteBatchApiSchemas } from './MicronoteBatchA
 import INoteApis, { NoteApiSchemas } from './NoteApis';
 import IMicronoteApis, { MicronoteApiSchemas } from './MicronoteApis';
 import IFundingTransferApis, { FundingTransferApiSchemas } from './FundingTransferApis';
-import IWalletApis, { WalletApiSchemas } from './WalletApis';
+import IAddressApis, { AddressApiSchemas } from './AddressApis';
 import IStakeApis, { StakeApiSchemas } from './StakeApis';
+import ICreditApis, { CreditApiSchemas } from './CreditApis';
 
 const SidechainApiSchema = {
-  ...WalletApiSchemas,
+  ...AddressApiSchemas,
   ...FundingTransferApiSchemas,
   ...MicronoteApiSchemas,
   ...MicronoteBatchApiSchemas,
   ...NoteApiSchemas,
   ...StakeApiSchemas,
+  ...CreditApiSchemas,
 };
 
-export type ISidechainApiTypes = IWalletApis &
+export type ISidechainApiTypes = IAddressApis &
   IFundingTransferApis &
   IMicronoteApis &
   IMicronoteBatchApis &
   INoteApis &
-  IStakeApis;
+  IStakeApis &
+  ICreditApis;
 
 export type ISidechainApis = {
   [Api in keyof ISidechainApiTypes]: (

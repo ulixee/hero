@@ -7,7 +7,13 @@ import { IZodSchemaToApiTypes } from '../utils/IZodApi';
 const fundsIdValidation = z.number().int().positive();
 
 export const MicronoteBatchApiSchemas = {
-  'MicronoteBatch.get': { args: z.undefined().nullish(), result: MicronoteBatchSchema },
+  'MicronoteBatch.get': {
+    args: z.undefined().nullish(),
+    result: z.object({
+      active: MicronoteBatchSchema,
+      credit: MicronoteBatchSchema.optional(),
+    }),
+  },
   'MicronoteBatch.fund': {
     args: z.object({
       note: NoteSchema,
@@ -16,6 +22,19 @@ export const MicronoteBatchApiSchemas = {
     result: z.object({
       fundsId: fundsIdValidation,
     }),
+  },
+  'MicronoteBatch.activeFunds': {
+    args: z.object({
+      batchSlug: MicronoteBatchSchema.shape.batchSlug,
+      address: addressValidation,
+    }),
+    result: z
+      .object({
+        fundsId: fundsIdValidation,
+        microgonsRemaining: micronoteTokenValidation,
+        allowedRecipientAddresses: addressValidation.array(),
+      })
+      .array(),
   },
   'MicronoteBatch.findFund': {
     args: z.object({
@@ -26,12 +45,13 @@ export const MicronoteBatchApiSchemas = {
     result: z.object({
       fundsId: z.number().int().positive(),
       microgonsRemaining: micronoteTokenValidation,
+      allowedRecipientAddresses: addressValidation.array().optional(),
     }),
   },
   'MicronoteBatch.getFundSettlement': {
     args: z.object({
       fundIds: fundsIdValidation.array(),
-      batchAddress: addressValidation,
+      batchSlug: MicronoteBatchSchema.shape.batchSlug,
     }),
     result: z.object({
       isBatchSettled: z.boolean(),
@@ -39,8 +59,8 @@ export const MicronoteBatchApiSchemas = {
       settlements: z
         .object({
           fundsId: fundsIdValidation,
-          fundedCentagons: NoteSchema.shape.centagons,
-          settledCentagons: NoteSchema.shape.centagons,
+          fundedCentagons: z.bigint().refine(x => x >= 0),
+          settledCentagons: z.bigint().refine(x => x >= 0),
         })
         .array(),
     }),

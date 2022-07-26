@@ -196,7 +196,7 @@ export default class MerkleTree {
   }
 
   /**
-   * Get the index that the given proof correlates to.  NOTE: only works in a balanced tree
+   * Get the index that the given proof correlates to. NOTE: only works in a balanced tree
    * @param proof {IMerkleProof[]}
    */
   public static getLeafIndex(proof: IMerkleProof[]): number {

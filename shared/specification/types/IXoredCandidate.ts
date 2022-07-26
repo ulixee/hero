@@ -2,15 +2,15 @@ import { z } from 'zod';
 import {
   addressValidation,
   hashValidation,
+  identityValidation,
   micronoteTokenValidation,
-  publicKeyValidation,
   signatureValidation,
 } from '../common';
 import { StakeSignatureSchema } from './IStakeSignature';
 
 export const XoredCandidateSchema = z.object({
   nodeId: z.string(),
-  publicKey: publicKeyValidation,
+  identity: identityValidation,
   publicIp: z.string(),
   publicPort: z.number().int().positive(),
   reputation: z.number().int().nonnegative(),

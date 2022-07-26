@@ -6,26 +6,26 @@ import {
   addressValidation,
   blockHeightValidation,
   hashValidation,
-  publicKeyValidation,
+  identityValidation,
   signatureValidation,
 } from '../common';
 import { StakeSignatureSchema } from '../types/IStakeSignature';
-import { WalletSignatureSchema } from '../types/IWalletSignature';
+import { AddressSignatureSchema } from '../types/IAddressSignature';
 
 export const StakeApiSchemas = {
   'Stake.settings': { args: z.undefined().nullish(), result: StakeSettingsSchema },
   'Stake.create': {
     args: z.object({
       note: NoteSchema,
-      stakedPublicKey: publicKeyValidation,
+      stakedIdentity: identityValidation,
     }),
     result: StakeSignatureSchema,
   },
   'Stake.refund': {
     args: z.object({
       address: addressValidation,
-      stakedPublicKey: publicKeyValidation,
-      signature: WalletSignatureSchema,
+      stakedIdentity: identityValidation,
+      signature: AddressSignatureSchema,
     }),
     result: z.object({
       blockEndHeight: blockHeightValidation,
@@ -35,7 +35,7 @@ export const StakeApiSchemas = {
   },
   'Stake.signature': {
     args: z.object({
-      stakedPublicKey: publicKeyValidation,
+      stakedIdentity: identityValidation,
       signature: signatureValidation,
     }),
     result: StakeSignatureSchema,

@@ -1,11 +1,12 @@
 import { z } from 'zod';
-import { addressValidation, isHex, publicKeyValidation, signatureValidation } from '../common';
+import { addressValidation, identityValidation, isHex, signatureValidation } from '../common';
 
 export const MicronoteBatchSchema = z.object({
-  batchSlug: z.string().regex(isHex).length(10),
-  micronoteBatchPublicKey: publicKeyValidation,
+  batchSlug: z.string().regex(/^(?:credit_|micro_)(0x|0h)?[0-9A-F]+$/i).length(14),
+  isCreditBatch: z.boolean(),
+  micronoteBatchIdentity: identityValidation,
   micronoteBatchAddress: addressValidation,
-  sidechainPublicKey: publicKeyValidation,
+  sidechainIdentity: identityValidation,
   sidechainValidationSignature: signatureValidation,
 });
 
