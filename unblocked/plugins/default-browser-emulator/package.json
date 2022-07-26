@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/default-browser-emulator",
-  "version": "2.0.0-alpha.6",
+  "version": "2.0.0-alpha.7",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "bin": {
@@ -17,9 +17,9 @@
   },
   "devDependencies": {
     "@types/tough-cookie": "^4.0.0",
-    "@unblocked-web/agent": "2.0.0-alpha.6",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.6",
-    "@unblocked-web/agent-testing": "2.0.0-alpha.6",
+    "@unblocked-web/agent": "2.0.0-alpha.7",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.7",
+    "@unblocked-web/agent-testing": "2.0.0-alpha.7",
     "source-map-loader": "^0.2.4"
   }
 }
