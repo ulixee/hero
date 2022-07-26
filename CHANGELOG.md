@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.9](https://github.com/ulixee/hero/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-07-26)
+
+
+### Bug Fixes
+
+* the doneFn in waitForResource should support async ([c984443](https://github.com/ulixee/hero/commit/c9844433d76058ccdef6f308dbac15b5e986d981))
+
+
+
+
+
 # [2.0.0-alpha.8](https://github.com/ulixee/hero/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-13)
 
 
