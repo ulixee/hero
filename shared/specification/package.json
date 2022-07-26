@@ -1,0 +1,10 @@
+{
+  "name": "@ulixee/specification",
+  "version": "2.0.0-alpha.8",
+  "description": "",
+  "main": "./index.js",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.17.3"
+  }
+}

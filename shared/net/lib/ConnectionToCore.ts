@@ -133,7 +133,7 @@ export default class ConnectionToCore<
     return this.disconnectPromise;
   }
 
-  public async sendRequest<T extends keyof ICoreApiHandlers>(
+  public async sendRequest<T extends keyof ICoreApiHandlers & string>(
     payload: {
       command: T;
       args: IApiSpec<ICoreApiHandlers>[T]['args'];

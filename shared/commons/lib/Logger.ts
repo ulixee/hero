@@ -121,14 +121,22 @@ function translateValueToPrintable(value: any, depth = 0): any {
   if (value instanceof RegExp) {
     return `/${value.source}/${value.flags}`;
   }
-  if ((value as any).toJSON) {
-    return (value as any).toJSON();
+  if (value instanceof BigInt || typeof value === 'bigint') {
+    return `${value.toString()}n`;
   }
+  if (Buffer.isBuffer(value)) {
+    if ((value as Buffer).length <= 256) return `0x${value.toString('hex')}`;
+  }
+
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     return value;
   }
 
   if (depth > 2) return value;
+
+  if ((value as any).toJSON) {
+    return (value as any).toJSON();
+  }
 
   if (typeof value === 'object') {
     if (Array.isArray(value)) {
@@ -252,6 +260,7 @@ export function registerNamespaceMapping(
 }
 
 function isEnabled(modulePath: string): boolean {
+  if (process.env.ULX_DEBUG === '1' || process.env.ULX_DEBUG === 'true') return true;
   if (modulePath in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[modulePath];
 
   if (modulePath[modulePath.length - 1] === '*') {

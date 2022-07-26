@@ -61,10 +61,10 @@ export default class TypeSerializer {
 
   public static stringify<T>(
     object: T,
-    options?: { ignoreProperties?: (keyof T)[]; sortKeys?: boolean },
+    options?: { ignoreProperties?: (keyof T)[]; sortKeys?: boolean; format?: boolean },
   ): string {
     const final = TypeSerializer.replace(object, options);
-    return JSON.stringify(final);
+    return JSON.stringify(final, null, options?.format ? 2 : null);
   }
 
   public static replace<T>(
@@ -99,6 +99,7 @@ export default class TypeSerializer {
 
   private static replacer(_: string, value: any): any {
     if (value === null || value === undefined) return value;
+    if (value === true || value === false) return value;
 
     if (Number.isNaN(value)) {
       return { __type: Types.NaN };
@@ -114,7 +115,7 @@ export default class TypeSerializer {
 
     const type = typeof value;
     if (type === Types.boolean || type === Types.string || type === Types.number) return value;
-    if (type === Types.bigint) {
+    if (type === Types.bigint || value instanceof BigInt) {
       return { __type: Types.bigint, value: value.toString() };
     }
 

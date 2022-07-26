@@ -4,11 +4,17 @@
     "rootDir": ".",
     "outDir": "./build"
   },
-  "include": ["**/*.ts", "*.json", ".eslintrc.js", "*.js"],
+  "references": [
+    {
+      "path": "specification/tsconfig.json"
+    }
+  ],
+  "include": ["./**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
     "**/tsconfig*.json",
     "build",
     "build-dist",
+    "specification",
     "node_modules",
     "**/node_modules",
     "**/*.d.ts"
