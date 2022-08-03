@@ -18,7 +18,7 @@ export default class HttpTransportToClient<IClientApiSpec extends IApiHandlers, 
 {
   private static requestCounter = 1;
 
-  constructor(private request: IncomingMessage, private response: ServerResponse) {
+  constructor(public request: IncomingMessage, private response: ServerResponse) {
     super();
   }
 
