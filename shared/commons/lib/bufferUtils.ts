@@ -19,6 +19,13 @@ export function concatAsBuffer(...items: (string | number | Buffer)[]): Buffer {
   );
 }
 
+export function bufferReplacer(key: string, value: any): any {
+  if (value && Buffer.isBuffer(value)) {
+    return value.toString('hex');
+  }
+  return value;
+}
+
 export function encodeBuffer(digest: Buffer, prefix: string): string {
   const words = bech32m.toWords(digest);
   return bech32m.encode(prefix, words, 256);

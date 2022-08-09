@@ -1,20 +1,36 @@
-import { z } from 'zod';
-import { IZodApiSpec } from './IZodApi';
-import ApiHandler, { IApiDefinition } from './ApiHandler';
+import { IZodApiSpec, IZodHandlers, IZodSchemaToApiTypes } from './IZodApi';
+import ApiHandler from './ApiHandler';
 
-export default class ApiRouter<ApiSpec extends IZodApiSpec> {
-  public handlers: {
-    [Command in keyof ApiSpec]: (args: z.infer<ApiSpec[Command]['args']>) => Promise<z.infer<ApiSpec[Command]['result']>>;
-  } = {} as any;
+export default class ApiRouter<
+  ApiSpec extends IZodApiSpec,
+  IHandlers extends IZodHandlers<ApiSpec>,
+> {
+  public handlers: IHandlers = {} as any;
 
-  constructor(readonly schema: ApiSpec) {}
+  constructor(
+    readonly schema: ApiSpec,
+    handlers: ApiHandler<ApiSpec, keyof ApiSpec & string, IZodSchemaToApiTypes<ApiSpec>>[]
+  ) {
+    this.register(...handlers)
+  }
 
-  register<Command extends keyof IApiDefinition & string>(
+  register(
+    ...handlers: ApiHandler<ApiSpec, keyof ApiSpec & string, IZodSchemaToApiTypes<ApiSpec>>[]
+  ): ApiRouter<ApiSpec, IHandlers> {
+    for (const apiHandler of handlers) {
+      this.handlers[apiHandler.command] = apiHandler.handler.bind(apiHandler) as any;
+    }
+    return this;
+  }
+
+  registerHandler<Command extends keyof ApiSpec & string>(
     command: Command,
-    handler: (args: IApiDefinition[Command]['args']) => Promise<IApiDefinition[Command]['result']>,
-  ): ApiRouter<ApiSpec> {
-    const apiHandler = new ApiHandler(command, { handler });
-    this.handlers[command] = apiHandler.handler.bind(handler);
+    handler: IHandlers[Command],
+  ): ApiRouter<ApiSpec, IHandlers> {
+    const apiHandler = new ApiHandler(command as any, this.schema, {
+      handler,
+    });
+    this.handlers[command] = apiHandler.handler.bind(apiHandler) as any;
     return this;
   }
 }

@@ -10,12 +10,16 @@ import IConnectionToClient, { IConnectionToClientEvents } from '../interfaces/IC
 
 const { log } = Log(module);
 
-export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers, IEventSpec>
+export default class ConnectionToClient<
+    IClientApiHandlers extends IApiHandlers,
+    IEventSpec,
+    IHandlerMetadata = any,
+  >
   extends TypedEventEmitter<IConnectionToClientEvents>
   implements IConnectionToClient<IClientApiHandlers, IEventSpec>
 {
   public disconnectPromise: Promise<void>;
-  public handlerMetadata?: any;
+  public handlerMetadata?: IHandlerMetadata;
 
   private events = new EventSubscriber();
   constructor(
@@ -59,7 +63,8 @@ export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers,
       if (!handler) throw new Error(`Unknown api requested: ${String(command)}`);
       data = await handler(...args);
     } catch (error) {
-      log.error('Error running api', { error, sessionId: args[0]?.heroSessionId });
+      error.stack ??= error.message;
+      log.error(`Error running api`, { error, sessionId: args[0]?.heroSessionId });
       data = error;
     }
 

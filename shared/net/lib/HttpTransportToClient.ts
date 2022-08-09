@@ -18,8 +18,11 @@ export default class HttpTransportToClient<IClientApiSpec extends IApiHandlers, 
 {
   private static requestCounter = 1;
 
+  public remoteId: string;
+
   constructor(public request: IncomingMessage, private response: ServerResponse) {
     super();
+    this.remoteId = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
   }
 
   public send(

@@ -1,58 +1,49 @@
-import { IZodApiTypes } from './IZodApi';
+import { IZodApiSpec, IZodApiTypes, IZodSchemaToApiTypes } from './IZodApi';
 import ValidationError from './ValidationError';
 
 export default class ApiHandler<
-  APIs extends IApiDefinition,
-  Command extends keyof IApiDefinition & string,
+  APIs extends IZodApiSpec,
+  Command extends keyof APIs & string,
+  APISpec extends IZodSchemaToApiTypes<APIs>,
   IHandlerOptions = any,
 > {
-  public apiHandler: (
-    args: IApiDefinition[Command]['args'],
+  protected apiHandler: (
+    this: ApiHandler<APIs, Command, APISpec, IHandlerOptions>,
+    args: APISpec[Command]['args'],
     options?: IHandlerOptions,
-  ) => Promise<IApiDefinition[Command]['result']>;
+  ) => Promise<APISpec[Command]['result']>;
 
   protected validationSchema: IZodApiTypes | undefined;
 
   constructor(
     public readonly command: Command,
+    protected apiSchema: APIs,
     args: {
-      validationSchema?: IZodApiTypes;
-      handler: (
-        this: ApiHandler<APIs, Command, IHandlerOptions>,
-        args: IApiDefinition[Command]['args'],
-        options?: IHandlerOptions,
-      ) => Promise<IApiDefinition[Command]['result']>;
+      handler: ApiHandler<APIs, Command, APISpec, IHandlerOptions>['apiHandler'];
     },
   ) {
     this.apiHandler = args.handler.bind(this);
-    this.validationSchema = args.validationSchema;
+    this.validationSchema = apiSchema[command];
   }
 
   public async handler(
     rawArgs: unknown,
     options?: IHandlerOptions,
-  ): Promise<IApiDefinition[Command]['result']> {
+  ): Promise<APISpec[Command]['result']> {
     const args = this.validatePayload(rawArgs);
     return await this.apiHandler(args, options);
   }
 
-  public validatePayload(data: unknown): IApiDefinition[Command]['args'] {
-    if (!this.validationSchema) return;
+  public validatePayload(data: unknown): APISpec[Command]['args'] {
+    if (!this.validationSchema) return data;
     // NOTE: mutates `errors`
     const result = this.validationSchema.args.safeParse(data);
     if (result.success) return result.data;
 
-    const errorList = result.error.issues.map(x => `"${x.path.join('.')}": ${x.message}`);
 
-    throw new ValidationError(this.command, errorList);
+    throw ValidationError.fromZodValidation(
+      `The parameters for this command (${this.command}) are invalid.`,
+      result.error,
+    );
   }
 }
-
-export type IApiDefinition = {
-  [command: string]: IApi<any, any>;
-};
-
-export type IApi<ArgType extends object, ReturnType extends object> = {
-  args: ArgType;
-  result: ReturnType;
-};

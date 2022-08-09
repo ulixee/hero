@@ -23,41 +23,10 @@ class UlixeeError extends Error {
   }
 }
 
-class ValidationError extends UlixeeError {
-  constructor(errors) {
-    super('Invalid request', 'invalid::parameters', { errors });
-  }
-}
-
-class UnapprovedSidechainError extends UlixeeError {
-  constructor() {
-    super('Unapproved sidechain used', 'invalid::sidechain');
-  }
-}
-
 class APIError extends UlixeeError {
   constructor(readonly status, json) {
     super(json.message || 'Unexpected error', json.code, json);
   }
 }
 
-class ClientError extends UlixeeError {
-  constructor(code, message) {
-    super(message, code);
-  }
-}
-
-class MalformedRequestError extends UlixeeError {
-  constructor(message) {
-    super(message, 'invalid::request');
-  }
-}
-
-export {
-  APIError,
-  UlixeeError,
-  ValidationError,
-  ClientError,
-  UnapprovedSidechainError,
-  MalformedRequestError,
-};
+export { APIError, UlixeeError };

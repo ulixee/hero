@@ -1,9 +1,9 @@
-import { z } from 'zod';
-import IBlockApis, { BlockApiSchemas } from './BlockApis';
-import IBlockHeaderApis, { BlockHeaderApiSchemas } from './BlockHeaderApis';
-import ISidechainGovernanceApis, { SidechainGovernanceSchemas } from './SidechainGovernanceApis';
-import ICoinageApis, { CoinageApiSchemas } from './CoinageApis';
-import ITransactionApis, { TransactionApiSchemas } from './TransactionApis';
+import { BlockApiSchemas } from './BlockApis';
+import { BlockHeaderApiSchemas } from './BlockHeaderApis';
+import { SidechainGovernanceSchemas } from './SidechainGovernanceApis';
+import { CoinageApiSchemas } from './CoinageApis';
+import { TransactionApiSchemas } from './TransactionApis';
+import { IZodHandlers, IZodSchemaToApiTypes } from '../utils/IZodApi';
 
 const MainchainApiSchema = {
   ...BlockApiSchemas,
@@ -13,16 +13,8 @@ const MainchainApiSchema = {
   ...TransactionApiSchemas,
 };
 
-export type IMainchainApiTypes = IBlockApis &
-  IBlockHeaderApis &
-  ICoinageApis &
-  ISidechainGovernanceApis &
-  ITransactionApis;
+export type IMainchainApiTypes = IZodSchemaToApiTypes<typeof MainchainApiSchema>;
 
-export type IMainchainApis = {
-  [Api in keyof IMainchainApiTypes]: (
-    args: z.infer<typeof MainchainApiSchema[Api]['args']>,
-  ) => Promise<z.infer<typeof MainchainApiSchema[Api]['result']>>;
-};
+export type IMainchainApis = IZodHandlers<typeof MainchainApiSchema>;
 
 export default MainchainApiSchema;

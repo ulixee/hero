@@ -1,13 +1,15 @@
-import { z } from 'zod';
-import IMicronoteBatchApis, { MicronoteBatchApiSchemas } from './MicronoteBatchApis';
-import INoteApis, { NoteApiSchemas } from './NoteApis';
-import IMicronoteApis, { MicronoteApiSchemas } from './MicronoteApis';
-import IFundingTransferApis, { FundingTransferApiSchemas } from './FundingTransferApis';
-import IAddressApis, { AddressApiSchemas } from './AddressApis';
-import IStakeApis, { StakeApiSchemas } from './StakeApis';
-import ICreditApis, { CreditApiSchemas } from './CreditApis';
+import { MicronoteBatchApiSchemas } from './MicronoteBatchApis';
+import { NoteApiSchemas } from './NoteApis';
+import { MicronoteApiSchemas } from './MicronoteApis';
+import { FundingTransferApiSchemas } from './FundingTransferApis';
+import { AddressApiSchemas } from './AddressApis';
+import { StakeApiSchemas } from './StakeApis';
+import { CreditApiSchemas } from './CreditApis';
+import { SidechainSettingsApiSchemas } from './SidechainSettingsApis';
+import { IZodHandlers, IZodSchemaToApiTypes } from '../utils/IZodApi';
 
 const SidechainApiSchema = {
+  ...SidechainSettingsApiSchemas,
   ...AddressApiSchemas,
   ...FundingTransferApiSchemas,
   ...MicronoteApiSchemas,
@@ -17,18 +19,8 @@ const SidechainApiSchema = {
   ...CreditApiSchemas,
 };
 
-export type ISidechainApiTypes = IAddressApis &
-  IFundingTransferApis &
-  IMicronoteApis &
-  IMicronoteBatchApis &
-  INoteApis &
-  IStakeApis &
-  ICreditApis;
+export type ISidechainApiTypes = IZodSchemaToApiTypes<typeof SidechainApiSchema>;
 
-export type ISidechainApis = {
-  [Api in keyof ISidechainApiTypes]: (
-    args: z.infer<typeof SidechainApiSchema[Api]['args']>,
-  ) => Promise<z.infer<typeof SidechainApiSchema[Api]['result']>>;
-};
+export type ISidechainApis = IZodHandlers<typeof SidechainApiSchema>;
 
 export default SidechainApiSchema;

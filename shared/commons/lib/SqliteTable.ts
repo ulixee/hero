@@ -71,6 +71,14 @@ export default abstract class SqliteTable<T> {
     this.addRecordToPublish(record);
   }
 
+  protected objectToInsert(object: T): IRecord {
+    const record: IRecord = [];
+    for (const [key] of this.columns) {
+      record.push(object[key] as any);
+    }
+    return record;
+  }
+
   protected buildInsertStatement(): string {
     const keys = this.columns.map(x => x[0]);
     const params = keys.map(() => '?').join(', ');
