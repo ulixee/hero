@@ -1,10 +1,10 @@
-import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import IResourceProcessingDetails from '@unblocked-web/agent/interfaces/IResourceProcessingDetails';
+import { decompressBuffer } from '@ulixee/commons/lib/bufferUtils';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(db: SqliteDatabase) {
@@ -133,7 +133,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
 
     const buffer =
       'responseData' in record
-        ? await decodeBuffer(record.responseData, record.responseEncoding)
+        ? await decompressBuffer(record.responseData, record.responseEncoding)
         : null;
 
     return {
@@ -406,7 +406,7 @@ from ${this.tableName}${whereClause}`,
 
     const { responseData, responseEncoding } = record;
     if (!decompress) return responseData;
-    return await decodeBuffer(responseData, responseEncoding);
+    return await decompressBuffer(responseData, responseEncoding);
   }
 
   public static toResourceSummary(record: IResourcesRecord): IResourceSummary {

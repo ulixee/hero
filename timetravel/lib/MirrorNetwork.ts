@@ -1,5 +1,5 @@
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
+import { decompressBuffer } from '@ulixee/commons/lib/bufferUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
@@ -118,7 +118,7 @@ export default class MirrorNetwork {
     // Chrome Devtools has an upstream issue that gzipped responses don't work, so we have to do it.. :(
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1138839
     if (contentEncoding) {
-      body = await decodeBuffer(resource.body, contentEncoding);
+      body = await decompressBuffer(resource.body, contentEncoding);
       headers.splice(
         headers.findIndex(x => x.name === 'content-encoding'),
         1,

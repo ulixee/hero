@@ -6,6 +6,7 @@ import { WsTransportToClient } from '@ulixee/net';
 import { version } from '@ulixee/hero-core/package.json';
 import UlixeeServerConfig from '@ulixee/commons/config/servers';
 import { AddressInfo } from 'net';
+import { IncomingMessage } from 'http';
 
 /**
  * This is a simple CoreServer that you would probably not ever use beyond simple examples.
@@ -45,8 +46,8 @@ class CoreServer {
     }
   }
 
-  private handleWsConnection(ws: WebSocket): void {
-    const transport = new WsTransportToClient(ws);
+  private handleWsConnection(ws: WebSocket, req: IncomingMessage): void {
+    const transport = new WsTransportToClient(ws, req);
     const connection = Core.addConnection(transport);
     ShutdownHandler.register(() => connection.disconnect());
   }
