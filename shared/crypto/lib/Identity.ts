@@ -5,6 +5,7 @@ import {
   createPrivateKey,
   generateKeyPair,
   generateKeyPairSync,
+  KeyExportOptions,
   KeyObject,
   sign,
   verify,
@@ -65,15 +66,15 @@ export default class Identity {
   }
 
   public export(passphrase?: string, cipher?: string): string {
-    if (passphrase) {
-      cipher ??= Identity.defaultPkcsCipher;
-    }
-    return this.privateKey.export({
+    const options: KeyExportOptions<'pem'> = {
       type: 'pkcs8',
       format: 'pem',
-      cipher,
-      passphrase,
-    }) as string;
+    };
+    if (passphrase) {
+      options.passphrase = passphrase;
+      options.cipher = cipher ?? Identity.defaultPkcsCipher;
+    }
+    return this.privateKey.export(options) as string;
   }
 
   public toJSON(): string {

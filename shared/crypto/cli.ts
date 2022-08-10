@@ -56,10 +56,13 @@ export default function cliCommands(): Command {
       try {
         const { transferSignatures, claimSignatures, transferSalt, claimSalt } = args;
         const signersCount = signerPattern.length;
-        assert(signerPattern.length <= 6, 'A max of 6 signing Identities is allowed in an Address.');
+        assert(
+          signerPattern.length <= 6,
+          'A max of 6 signing Identities is allowed in an Address.',
+        );
         assert(signerPattern.length > 0, 'You must specify at least one key');
         assert(
-          signerPattern.match(/[TCU]+/i),
+          signerPattern.match(/^[TCU]{1,6}$/i),
           'Valid signer options are T=Transfer, C=Claim, U=Universal',
         );
         assert(
@@ -117,15 +120,15 @@ export default function cliCommands(): Command {
       '-f, --filename <path>',
       'Save this Identity to a filepath. If not specified, will be console logged.',
     )
-    .action(async ({ path, passphrase, cipher }) => {
+    .enablePositionalOptions(true)
+    .action(async ({ filename, passphraseCipher, passphrase }) => {
       const identity = await Identity.create();
 
-      if (path) {
-        await identity.save(path, { passphrase, cipher });
-        const finalPath = await this.lockfile.save(path);
-        console.log('Saved to %s', finalPath); // eslint-disable-line no-console
+      if (filename) {
+        await identity.save(filename, { passphrase, cipher: passphraseCipher });
+        console.log('Saved to %s', filename); // eslint-disable-line no-console
       } else {
-        console.log(identity.export(passphrase, cipher)); // eslint-disable-line no-console
+        console.log(identity.export(passphrase, passphraseCipher)); // eslint-disable-line no-console
       }
     });
 
