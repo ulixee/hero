@@ -11,7 +11,7 @@ export const MicronoteBatchApiSchemas = {
     args: z.undefined().nullish(),
     result: z.object({
       active: MicronoteBatchSchema,
-      credit: MicronoteBatchSchema.optional(),
+      giftCard: MicronoteBatchSchema.optional(),
     }),
   },
   'MicronoteBatch.fund': {

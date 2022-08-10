@@ -16,7 +16,7 @@ export const identityValidation = z
     'This is not a Ulixee identity (Bech32 encoded hash starting with "id1").',
   );
 
-export const creditIdValidation = z.string().length(32);
+export const giftCardIdValidation = z.string().length(32);
 
 export const hashValidation = z
   .instanceof(Buffer)

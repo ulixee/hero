@@ -4,7 +4,7 @@ import { MicronoteApiSchemas } from './MicronoteApis';
 import { FundingTransferApiSchemas } from './FundingTransferApis';
 import { AddressApiSchemas } from './AddressApis';
 import { StakeApiSchemas } from './StakeApis';
-import { CreditApiSchemas } from './CreditApis';
+import { GiftCardApiSchemas } from './GiftCardApis';
 import { SidechainSettingsApiSchemas } from './SidechainSettingsApis';
 import { IZodHandlers, IZodSchemaToApiTypes } from '../utils/IZodApi';
 
@@ -16,7 +16,7 @@ const SidechainApiSchema = {
   ...MicronoteBatchApiSchemas,
   ...NoteApiSchemas,
   ...StakeApiSchemas,
-  ...CreditApiSchemas,
+  ...GiftCardApiSchemas,
 };
 
 export type ISidechainApiTypes = IZodSchemaToApiTypes<typeof SidechainApiSchema>;

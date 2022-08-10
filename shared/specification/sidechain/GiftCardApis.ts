@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
 import {
   addressValidation,
-  creditIdValidation,
+  giftCardIdValidation,
   identityValidation,
   micronoteTokenValidation,
   signatureValidation,
@@ -10,33 +10,33 @@ import {
 import { AddressSignatureSchema } from '../types/IAddressSignature';
 import { MicronoteBatchSchema } from '../types/IMicronoteBatch';
 
-export const CreditApiSchemas = {
-  'Credit.create': {
+export const GiftCardApiSchemas = {
+  'GiftCard.create': {
     args: z.object({
       batchSlug: MicronoteBatchSchema.shape.batchSlug,
       microgons: micronoteTokenValidation,
-      allowedRecipientAddresses: z.array(addressValidation),
-      allowedRecipientSignatures: z.array(AddressSignatureSchema),
+      redeemableWithAddresses: z.array(addressValidation),
+      redeemableAddressSignatures: z.array(AddressSignatureSchema),
     }),
     result: z.object({
-      creditId: creditIdValidation,
+      giftCardId: giftCardIdValidation,
       sidechainIdentity: identityValidation,
       sidechainValidationSignature: signatureValidation,
     }),
   },
-  'Credit.claim': {
+  'GiftCard.claim': {
     args: z.object({
       batchSlug: MicronoteBatchSchema.shape.batchSlug,
-      creditId: creditIdValidation,
+      giftCardId: giftCardIdValidation,
       address: addressValidation,
     }),
     result: z.object({
       fundsId: z.number().int().positive(),
       microgons: micronoteTokenValidation,
-      allowedRecipientAddresses: z.array(addressValidation),
+      redeemableWithAddresses: z.array(addressValidation),
     }),
   },
 };
 
-type ICreditApis = IZodSchemaToApiTypes<typeof CreditApiSchemas>;
-export default ICreditApis;
+type IGiftCardApis = IZodSchemaToApiTypes<typeof GiftCardApiSchemas>;
+export default IGiftCardApis;

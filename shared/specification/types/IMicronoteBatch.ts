@@ -4,9 +4,9 @@ import { addressValidation, identityValidation, signatureValidation } from '../c
 export const MicronoteBatchSchema = z.object({
   batchSlug: z
     .string()
-    .regex(/^(?:credit_|micro_)(0x|0h)?[0-9A-F]+$/i)
+    .regex(/^(?:gifts_|micro_)[0-9A-F]+$/i)
     .length(14),
-  isCreditBatch: z.boolean(),
+  isGiftCardBatch: z.boolean(),
   micronoteBatchIdentity: identityValidation,
   micronoteBatchAddress: addressValidation,
   sidechainIdentity: identityValidation,

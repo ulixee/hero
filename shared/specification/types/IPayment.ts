@@ -13,7 +13,7 @@ export const PaymentSchema = z.object({
   micronoteId: micronoteIdValidation,
   blockHeight: blockHeightValidation,
   batchSlug: MicronoteBatchSchema.shape.batchSlug,
-  isCreditBatch: z.boolean(),
+  isGiftCardBatch: z.boolean(),
   micronoteBatchUrl: z.string().url(),
   micronoteBatchIdentity: identityValidation,
   micronoteSignature: signatureValidation,

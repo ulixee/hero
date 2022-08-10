@@ -52,9 +52,9 @@ export const DataboxApiSchemas = {
       maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
       averageTotalPricePerQuery: positiveInt.describe('Average total microgons paid for a query.'),
       maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
-      creditPaymentAddresses: addressValidation
+      giftCardPaymentAddresses: addressValidation
         .array()
-        .describe('The addresses this databox allows credit payments for (if any).'),
+        .describe('The addresses this databox allows gift card payments for (if any).'),
       basePricePerQuery: micronoteTokenValidation.describe('The databox base price per query'),
       computePricePerKb: micronoteTokenValidation.describe(
         'The current server price per kilobyte. NOTE: if a server is implementing surge pricing, this amount could vary.',

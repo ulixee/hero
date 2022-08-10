@@ -28,9 +28,9 @@ export const DataboxManifestSchema = z.object({
     .optional()
     .describe('Price per query if requiring payment'),
   paymentAddress: addressValidation.optional(),
-  creditsAddress: addressValidation
+  giftCardAddress: addressValidation
     .optional()
-    .describe('An address this Databox is accepting credits'),
+    .describe('An address this Databox is accepting gift cards'),
 });
 
 export type IVersionHistoryEntry = z.infer<
