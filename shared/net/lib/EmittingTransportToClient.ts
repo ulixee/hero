@@ -6,6 +6,8 @@ import IApiHandlers from '../interfaces/IApiHandlers';
 import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
 import ICoreEventPayload from '../interfaces/ICoreEventPayload';
 
+let counter = 0;
+
 export default class EmittingTransportToClient<
     IClientApiSpec extends IApiHandlers,
     IEventSpec = any,
@@ -23,6 +25,8 @@ export default class EmittingTransportToClient<
       }
     >
 {
+  remoteId = String((counter += 1));
+
   send(
     message: ICoreResponsePayload<IClientApiSpec, any> | ICoreEventPayload<IEventSpec, any>,
   ): Promise<void> {

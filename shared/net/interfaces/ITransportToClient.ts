@@ -11,6 +11,7 @@ export default interface ITransportToClient<
     | ICoreResponsePayload<IClientApiHandlers, any>
     | ICoreEventPayload<IEventSpec, any>,
 > extends ITypedEventEmitter<ITransportToClientEvents<IClientApiHandlers>> {
+  remoteId: string;
   send(message: OutMessagePayload): Promise<void>;
   disconnect?(fatalError?: Error): Promise<void> | void;
 }

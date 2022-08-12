@@ -3,6 +3,7 @@ import * as Path from 'path';
 import { getCacheDirectory } from '../lib/dirUtils';
 import { safeOverwriteFile } from '../lib/fileUtils';
 import { isSemverSatisfied } from '../lib/VersionUtils';
+import { isPortInUse } from '../lib/utils';
 
 export default class UlixeeServerConfig {
   public static global = new UlixeeServerConfig(Path.join(getCacheDirectory(), 'ulixee'));
@@ -50,6 +51,18 @@ export default class UlixeeServerConfig {
       }
     }
     return null;
+  }
+
+  public async checkLocalVersionHost(version: string, host: string): Promise<string> {
+    if (!host?.startsWith('localhost')) return host;
+
+    if (host?.startsWith('localhost')) {
+      if (!(await isPortInUse(host.split(':').pop()))) {
+        await UlixeeServerConfig.global.setVersionHost(version, null);
+        return null;
+      }
+    }
+    return host;
   }
 
   public save(): Promise<void> {

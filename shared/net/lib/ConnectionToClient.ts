@@ -10,11 +10,16 @@ import IConnectionToClient, { IConnectionToClientEvents } from '../interfaces/IC
 
 const { log } = Log(module);
 
-export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers, IEventSpec>
+export default class ConnectionToClient<
+    IClientApiHandlers extends IApiHandlers,
+    IEventSpec,
+    IHandlerMetadata = any,
+  >
   extends TypedEventEmitter<IConnectionToClientEvents>
   implements IConnectionToClient<IClientApiHandlers, IEventSpec>
 {
   public disconnectPromise: Promise<void>;
+  public handlerMetadata?: IHandlerMetadata;
 
   private events = new EventSubscriber();
   constructor(
@@ -23,14 +28,14 @@ export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers,
   ) {
     super();
 
-    this.events.on(transport, 'message', (message) => this.handleRequest(message));
-    this.events.once(transport, 'disconnected', (error) => this.disconnect(error));
+    this.events.on(transport, 'message', message => this.handleRequest(message));
+    this.events.once(transport, 'disconnected', error => this.disconnect(error));
   }
 
   public disconnect(error?: Error): Promise<void> {
     if (this.disconnectPromise) return this.disconnectPromise;
 
-    this.disconnectPromise = new Promise<void>(async (resolve) => {
+    this.disconnectPromise = new Promise<void>(async resolve => {
       await this.transport.disconnect?.();
       this.events.close();
       this.transport.emit('disconnected');
@@ -50,6 +55,7 @@ export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers,
     const { command, messageId } = apiRequest;
     let args: any[] = apiRequest.args ?? [];
     if (!Array.isArray(args)) args = [apiRequest.args];
+    if (this.handlerMetadata) args.push(this.handlerMetadata);
 
     let data: any;
     try {
@@ -57,7 +63,8 @@ export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers,
       if (!handler) throw new Error(`Unknown api requested: ${String(command)}`);
       data = await handler(...args);
     } catch (error) {
-      log.error('Error running api', { error, sessionId: args[0]?.heroSessionId });
+      error.stack ??= error.message;
+      log.error(`Error running api`, { error, sessionId: args[0]?.heroSessionId });
       data = error;
     }
 
@@ -71,7 +78,7 @@ export default class ConnectionToClient<IClientApiHandlers extends IApiHandlers,
   private sendMessage(
     message: ICoreResponsePayload<IClientApiHandlers, any> | ICoreEventPayload<IEventSpec, any>,
   ): void {
-    this.transport.send(message).catch((error) => {
+    this.transport.send(message).catch(error => {
       this.emit('send-error', error);
     });
   }

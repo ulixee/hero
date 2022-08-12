@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+import "../protos/Transaction.json";
+import "../protos/DatumSummary.json";
+
+service SidechainSnapshotService {
+    rpc get (GetSidechainSnapshotRequest) returns (GetSidechainSnapshotResponse) {}
+}
+
+message GetSidechainSnapshotRequest {
+    bytes prevBlockHash = 1;
+    bytes linkNonce = 2;
+    DatumSummary datumSummary = 3;
+    bytes signature = 4;
+}
+
+message ClosedMicronoteBatch {
+    bytes batchPublicKey = 1;
+    uint32 newNotesCount = 2;
+    bytes newNotesHash = 3;
+    string fundingMicrogons = 4;
+    string allocatedMicrogons = 5;
+    string revenueMicrogons = 6;
+    uint32 settledCentagons = 7;
+    uint32 settlementFeeCentagons = 8;
+    uint32 burnedCentagons = 9;
+    bytes burnNoteHash = 10;
+    uint32 micronotesCount = 11;
+    uint32 startBlockHeight = 12;
+    uint32 endBlockHeight = 13;
+    uint32 guaranteeBlockHeight = 14;
+    bytes burnSecurityTransactionHash = 15;
+}
+
+message Security {
+    bytes transactionHash = 1;
+    uint32 outputIndex = 2;
+    uint32 centagons = 3;
+}
+
+message AddressOwnershipProof {
+    bytes address = 1;
+    SignatureSettingsProof signatureSettings = 2;
+    repeated OwnershipProof owners = 3;
+}
+
+message AccountBalance {
+    bytes address = 1;
+    string centagons = 2;
+    uint32 guaranteeBlockHeight = 3;
+}
+
+message SidechainSnapshot {
+    bytes rootPublicKey = 1;
+    repeated Transaction burnTransactions = 2;
+    repeated Transaction transfersOut = 3;
+    repeated AccountBalance accounts = 4;
+    repeated ClosedMicronoteBatch closedMicronoteBatches = 5;
+    repeated Security securities = 6;
+    repeated AddressOwnershipProof securityAddressProofs = 7;
+    bytes snapshotHash = 8;
+    bytes signature = 9;
+}
+
+message GetSidechainSnapshotResponse {
+    SidechainSnapshot snapshot = 1;
+}

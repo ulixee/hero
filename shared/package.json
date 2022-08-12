@@ -45,8 +45,10 @@
   },
   "workspaces": {
     "packages": [
+      "net",
+      "crypto",
       "commons",
-      "net"
+      "specification"
     ]
   }
 }

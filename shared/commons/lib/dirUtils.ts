@@ -25,7 +25,6 @@ export function cleanHomeDir(str: string): string {
   return str.replace(homeDirReplace, '~');
 }
 
-
 export function findProjectPathSync(startingDirectory: string): string {
   let last: string;
   let path = Path.resolve(startingDirectory);

@@ -13,6 +13,12 @@ type IApi<T extends IAsyncFunc> = {
   result: IPromiseType<ReturnType<T>>;
 };
 
+export type IApiSchema = {
+  [command: string]: {
+    args: any;
+    result: any;
+  };
+};
 export type IApiSpec<Handlers extends IApiHandlers> = {
   [key in keyof Handlers]: IApi<Handlers[key]>;
 };

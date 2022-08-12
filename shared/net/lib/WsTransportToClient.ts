@@ -3,6 +3,7 @@ import * as WebSocket from 'ws';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { IncomingMessage } from 'http';
 import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
 import { sendWsCloseUnexpectedError, wsSend } from './WsUtils';
 import IApiHandlers from '../interfaces/IApiHandlers';
@@ -11,13 +12,15 @@ export default class WsTransportToClient<IClientApiSpec extends IApiHandlers, IE
   extends TypedEventEmitter<ITransportToClientEvents<IClientApiSpec>>
   implements ITransportToClient<IClientApiSpec, IEventSpec>
 {
+  public remoteId: string;
   private events = new EventSubscriber();
-  constructor(private webSocket: WebSocket) {
+  constructor(private webSocket: WebSocket, private request: IncomingMessage) {
     super();
     this.onMessage = this.onMessage.bind(this);
     this.events.on(webSocket, 'message', this.onMessage);
     this.events.on(webSocket, 'close', this.onClose);
     this.events.on(webSocket, 'error', this.onError);
+    this.remoteId = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
   }
 
   public async send(payload: any): Promise<void> {

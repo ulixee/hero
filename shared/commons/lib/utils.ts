@@ -1,3 +1,4 @@
+import * as net from 'net';
 import IResolvablePromise from '../interfaces/IResolvablePromise';
 import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
 import Resolvable from './Resolvable';
@@ -10,6 +11,27 @@ export function assert(value: unknown, message?: string, reject?): void {
   } else {
     throw error;
   }
+}
+
+export function isPortInUse(port: number | string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const client = new net.Socket();
+
+    let isInUse = true;
+    client.once('error', err => {
+      if ((err as any).code === 'ECONNREFUSED') {
+        isInUse = false;
+        resolve(isInUse);
+      } else {
+        reject(err);
+      }
+      client.removeAllListeners().end().destroy().unref();
+    });
+    client.connect(Number(port), () => {
+      resolve(isInUse);
+      client.removeAllListeners().end().destroy().unref();
+    });
+  });
 }
 
 // @deprecated - change case... can't remove due to hero dependency
