@@ -99,11 +99,15 @@ describe('user agent and platform', () => {
   const data = {
     ${propsToGet.map((x) => `'${x}': navigator.${x}`).join(',\n')}
   };
+  
+  navigator.userAgentData.getHighEntropyValues(['platformVersion', 'architecture', 'bitness', 'model', 'uaFullVersion'])
+  .then(extras => {
+    return fetch('${koaServer.baseUrl}/frame-xhr', {
+      method: 'POST',
+      body: JSON.stringify({...data, ...extras})
+    });
+  })
 
-  fetch('${koaServer.baseUrl}/frame-xhr', {
-   method: 'POST',
-   body: JSON.stringify(data)
-  });
 </script>
 </body></html>`;
     });
@@ -137,6 +141,12 @@ describe('user agent and platform', () => {
 
     for (const prop of propsToGet) {
       expect(`${prop}=${frameParams[prop]}`).toStrictEqual(`${prop}=${windowParams[prop]}`);
+    }
+    const extras = await page.evaluate(
+      `navigator.userAgentData.getHighEntropyValues(['platformVersion', 'architecture', 'bitness', 'model', 'uaFullVersion'])`,
+    );
+    for (const [prop, value] of Object.entries(extras)) {
+      expect(`${prop}=${frameParams[prop]}`).toStrictEqual(`${prop}=${value}`);
     }
   });
 

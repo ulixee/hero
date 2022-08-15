@@ -216,6 +216,9 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       brands: brandData,
       platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
       platformVersion,
+      architecture: 'x86',
+      model: '',
+      mobile: false,
     };
   }
 
