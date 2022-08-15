@@ -102,7 +102,8 @@ export default class ConnectionToHeroClient
     try {
       await this.transport.send(response);
     } catch (err) {
-      if (err instanceof CanceledPromiseError || String(err).includes('Websocket was not open')) return;
+      if (err instanceof CanceledPromiseError || String(err).includes('Websocket was not open'))
+        return;
       throw err;
     }
   }
@@ -288,9 +289,9 @@ export default class ConnectionToHeroClient
 
   private serializeError(error: Error): object {
     if (this.isLaunchError(error)) {
-      return new Error(
-        'Ulixee Server needs further setup to launch the browserEmulator. See server logs.',
-      );
+      const message = `Ulixee Server failed to launch Chrome - ${error.message}. See server logs for details.`;
+      error.stack = error.stack.replace(error.message, message);
+      error.message = message;
     }
     if (error instanceof Error) return error;
 
