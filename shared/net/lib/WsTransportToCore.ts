@@ -67,7 +67,7 @@ export default class WsTransportToCore<
     this.isDisconnecting = true;
     this.emit('disconnected');
     this.isConnected = false;
-    this.events.close();
+    this.events.close('error');
     const webSocket = this.webSocket;
     this.webSocket = null;
     if (isWsOpen(webSocket)) {
@@ -98,7 +98,7 @@ export default class WsTransportToCore<
 
       this.webSocket = webSocket;
       this.events.once(webSocket, 'close', this.disconnect);
-      this.events.once(webSocket, 'error', this.disconnect);
+      this.events.on(webSocket, 'error', this.disconnect);
       this.events.on(webSocket, 'message', this.onMessage);
     }
     const connectOrError = await this.connectPromise;
