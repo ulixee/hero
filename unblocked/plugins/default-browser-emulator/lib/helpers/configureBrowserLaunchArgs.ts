@@ -25,7 +25,7 @@ export function configureBrowserLaunchArgs(
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
     '--disable-site-isolation-trials',
-    '--disable-features=PaintHolding,Translate,IsolateOrigins,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,CertificateTransparencyComponentUpdater,Translate,IsolateOrigins,site-per-process,OutOfBlinkCors,AvoidUnnecessaryBeforeUnloadCheckSync', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-speech-api', // don't include speech apis since we aren't masking them yet
@@ -53,6 +53,8 @@ export function configureBrowserLaunchArgs(
     '--allow-running-insecure-content',
 
     `--window-size=${defaultScreen.width},${defaultScreen.height}`,
+
+    '--no-service-autorun',
 
     // don't leak private ip
     '--force-webrtc-ip-handling-policy=default_public_interface_only',

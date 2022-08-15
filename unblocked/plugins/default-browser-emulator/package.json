@@ -7,7 +7,7 @@
     "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
   },
   "dependencies": {
-    "@ulixee/chrome-98-0": "^4758.102.4",
+    "@ulixee/chrome-98-0": "^4758.102.6",
     "@ulixee/chrome-app": "^1.0.2",
     "@ulixee/commons": "2.0.0-alpha.8",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
