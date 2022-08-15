@@ -20,8 +20,6 @@
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.7",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
     "awaited-dom": "1.4.0",
-    "fpcollect": "^1.0.4",
-    "fpscanner": "^0.1.5",
     "ws": "^7.4.6"
   }
 }
