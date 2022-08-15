@@ -72,6 +72,7 @@ export default class ConnectionToCore<
         const connectError = await this.transport.connect?.();
         if (connectError) throw connectError;
 
+        // disconnected during connect
         if (this.hasActiveSessions() && this.disconnectPromise && !this.didAutoConnect) {
           throw new DisconnectedError(this.transport.host);
         }
@@ -175,6 +176,9 @@ export default class ConnectionToCore<
     }
   }
 
+  /**
+   * Override fn to control active sessions
+   */
   public hasActiveSessions(): boolean {
     return false;
   }
@@ -201,7 +205,7 @@ export default class ConnectionToCore<
         (responseError as any).isDisconnecting === true;
       delete (responseError as any).isDisconnecting;
 
-      if (isDisconnected) {
+      if (isDisconnected && !isBrowserLaunchError(responseError)) {
         responseError = new DisconnectedError(this.transport.host);
       }
       this.pendingMessages.reject(id, responseError);
@@ -236,4 +240,8 @@ export default class ConnectionToCore<
     await this.hooks.beforeDisconnectFn?.();
     this.isSendingDisconnect = false;
   }
+}
+
+function isBrowserLaunchError(error: Error): boolean {
+  return error.name === 'BrowserLaunchError' || error.name === 'DependenciesMissingError';
 }

@@ -24,6 +24,7 @@ export default class ShutdownHandler {
   private static registerSignals(): void {
     if (!this.isRegistered) {
       this.isRegistered = true;
+      process.once('beforeExit', code => ShutdownHandler.onSignal('beforeExit' as any, code));
       process.once('exit' as any, code => ShutdownHandler.onSignal('exit', code));
       process.once('SIGTERM', ShutdownHandler.onSignal.bind(this));
       process.once('SIGINT', ShutdownHandler.onSignal.bind(this));
