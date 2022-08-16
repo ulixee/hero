@@ -4,5 +4,10 @@
     "outDir": "./build-dist",
     "sourceMap": true,
     "inlineSourceMap": false
-  }
+  },
+  "references": [
+    {
+      "path": "specification/tsconfig.dist.json"
+    }
+  ]
 }

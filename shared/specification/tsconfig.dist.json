@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.dist.json",
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": ["**/*.ts", "*.ts", "package.json", ".eslintrc.js"],
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/build"]
+}
