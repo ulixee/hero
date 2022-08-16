@@ -4,20 +4,20 @@
   "description": "End to end Hero tests",
   "private": true,
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.9",
+    "@ulixee/commons": "2.0.0-alpha.10",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.10",
     "@ulixee/hero": "2.0.0-alpha.10",
     "@ulixee/hero-core": "2.0.0-alpha.10",
     "@ulixee/hero-interfaces": "2.0.0-alpha.10",
-    "@ulixee/net": "2.0.0-alpha.9"
+    "@ulixee/net": "2.0.0-alpha.10"
   },
   "devDependencies": {
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.10",
     "@ulixee/hero-testing": "2.0.0-alpha.10",
     "@ulixee/hero-timetravel": "2.0.0-alpha.10",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.8",
-    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.8",
-    "@unblocked-web/default-human-emulator": "2.0.0-alpha.8",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.9",
+    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.9",
+    "@unblocked-web/default-human-emulator": "2.0.0-alpha.9",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
     "awaited-dom": "1.4.0",
     "ws": "^7.4.6"
