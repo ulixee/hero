@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "The client interface for Hero",
   "exports": {
     ".": {
@@ -11,10 +11,10 @@
     "./lib/internal": "./lib/internal.js"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.8",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.9",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.9",
-    "@ulixee/net": "2.0.0-alpha.8",
+    "@ulixee/commons": "2.0.0-alpha.9",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.10",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.10",
+    "@ulixee/net": "2.0.0-alpha.9",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
     "awaited-dom": "1.4.0",
@@ -22,7 +22,7 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@ulixee/hero-core": "2.0.0-alpha.9",
-    "@ulixee/hero-testing": "2.0.0-alpha.9"
+    "@ulixee/hero-core": "2.0.0-alpha.10",
+    "@ulixee/hero-testing": "2.0.0-alpha.10"
   }
 }

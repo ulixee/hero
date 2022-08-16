@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero-core",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "The core browser API used to run Hero",
   "exports": {
     ".": {
@@ -16,15 +16,15 @@
   },
   "dependencies": {
     "@types/ua-parser-js": "^0.7.35",
-    "@ulixee/commons": "2.0.0-alpha.8",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.9",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.9",
-    "@ulixee/hero-timetravel": "2.0.0-alpha.9",
-    "@ulixee/net": "2.0.0-alpha.8",
-    "@unblocked-web/agent": "2.0.0-alpha.7",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.7",
-    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.7",
-    "@unblocked-web/default-human-emulator": "2.0.0-alpha.7",
+    "@ulixee/commons": "2.0.0-alpha.9",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.10",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.10",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.10",
+    "@ulixee/net": "2.0.0-alpha.9",
+    "@unblocked-web/agent": "2.0.0-alpha.8",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.8",
+    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.8",
+    "@unblocked-web/default-human-emulator": "2.0.0-alpha.8",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
     "awaited-dom": "1.4.0",
@@ -37,9 +37,9 @@
     "@types/better-sqlite3": "^7.5.0",
     "@types/json-socket": "^0.1.17",
     "@ulixee/chrome-app": "1.0.2",
-    "@ulixee/hero": "2.0.0-alpha.9",
+    "@ulixee/hero": "2.0.0-alpha.10",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.9",
-    "@ulixee/hero-testing": "2.0.0-alpha.9",
+    "@ulixee/hero-testing": "2.0.0-alpha.10",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"
   }

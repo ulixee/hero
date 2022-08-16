@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.10](https://github.com/ulixee/hero/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-16)
+
+
+### Bug Fixes
+
+* **core:** record websocket messages ([911f7d7](https://github.com/ulixee/hero/commit/911f7d7dd5136daf08fea2715034cd7118802de9))
+
+
+
+
+
 # [2.0.0-alpha.9](https://github.com/ulixee/hero/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-07-26)
 
 
