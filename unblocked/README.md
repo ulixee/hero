@@ -10,6 +10,10 @@ You can work with the project by:
 1. Cloning the repository and installing git submodules (you can add --recursive to your initial clone request).
 2. Run `yarn build:all`.
 
+## Questions
+
+Join us on the [Ulixee Discord](https://discord.gg/tMAycnemHU) for any questions or comments (it's a sister project). 
+
 ## Projects
 
 This repository is home to several of the projects needed to create an "unblocked" automated browser engine. We imagine a world where there are many participants sharing evasions and emulations for all the web features into a [single repository][agent]. They will live right next to an advanced bot blocking [detection engine][double-agent] that can analyze every facet of a web scraping session (TCP, TLS, HTTP, DOM, User Interactions, etc). A [vault][vault] contains all the information we have discovered about how to profile and analyze browser behavior. And an implementation of an [agent][agent] is provided that can run all the evasions and run unblocked.
