@@ -1,15 +1,15 @@
 {
   "name": "@unblocked-web/default-browser-emulator",
-  "version": "2.0.0-alpha.7",
+  "version": "2.0.0-alpha.8",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "bin": {
     "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
   },
   "dependencies": {
-    "@ulixee/chrome-98-0": "^4758.102.6",
+    "@ulixee/chrome-98-0": "^4758.109.6",
     "@ulixee/chrome-app": "^1.0.2",
-    "@ulixee/commons": "2.0.0-alpha.8",
+    "@ulixee/commons": "2.0.0-alpha.9",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
@@ -17,11 +17,11 @@
   },
   "devDependencies": {
     "@types/tough-cookie": "^4.0.0",
-    "@unblocked-web/agent": "2.0.0-alpha.7",
-    "@unblocked-web/agent-mitm": "2.0.0-alpha.7",
-    "@unblocked-web/agent-testing": "2.0.0-alpha.7",
-    "source-map-loader": "^0.2.4",
+    "@unblocked-web/agent": "2.0.0-alpha.8",
+    "@unblocked-web/agent-mitm": "2.0.0-alpha.8",
+    "@unblocked-web/agent-testing": "2.0.0-alpha.8",
     "fpcollect": "^1.0.4",
-    "fpscanner": "^0.1.5"
+    "fpscanner": "^0.1.5",
+    "source-map-loader": "^0.2.4"
   }
 }

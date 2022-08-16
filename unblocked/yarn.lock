@@ -1990,7 +1990,7 @@
     "@typescript-eslint/types" "5.30.6"
     eslint-visitor-keys "^3.3.0"
 
-"@ulixee/chrome-98-0@^4758.102.4":
+"@ulixee/chrome-98-0@^4758.109.6":
   version "4758.109.6"
   resolved "https://registry.yarnpkg.com/@ulixee/chrome-98-0/-/chrome-98-0-4758.109.6.tgz#d96ab324dbc79ab56df4ec69b04e672e5e2d0d05"
   integrity sha512-jPrzdeuDOurIn403cBBd0Rb5ZmvZ2FD2ejl6R6+lF6NUy7ul48KM87xC+/azgTM6Dlvjr9/Bd6+V3Mm9y4Ew7w==
