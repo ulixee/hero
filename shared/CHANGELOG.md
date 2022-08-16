@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.10](https://github.com/ulixee/shared/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-16)
+
+
+### Bug Fixes
+
+* **specification:** publishing broken ([88539ee](https://github.com/ulixee/shared/commit/88539ee5b8663d0c19b0518fb3b4ed218dd6dbbe))
+
+
+
+
+
 # [2.0.0-alpha.9](https://github.com/ulixee/shared/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-08-16)
 
 
