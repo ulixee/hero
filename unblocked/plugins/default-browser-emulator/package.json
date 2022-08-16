@@ -7,7 +7,7 @@
     "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
   },
   "dependencies": {
-    "@ulixee/chrome-98-0": "^4758.102.4",
+    "@ulixee/chrome-98-0": "^4758.102.6",
     "@ulixee/chrome-app": "^1.0.2",
     "@ulixee/commons": "2.0.0-alpha.8",
     "@unblocked-web/specifications": "2.0.0-alpha.3",
@@ -20,6 +20,8 @@
     "@unblocked-web/agent": "2.0.0-alpha.7",
     "@unblocked-web/agent-mitm": "2.0.0-alpha.7",
     "@unblocked-web/agent-testing": "2.0.0-alpha.7",
-    "source-map-loader": "^0.2.4"
+    "source-map-loader": "^0.2.4",
+    "fpcollect": "^1.0.4",
+    "fpscanner": "^0.1.5"
   }
 }

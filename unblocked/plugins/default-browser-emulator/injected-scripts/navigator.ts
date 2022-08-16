@@ -50,9 +50,11 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
       brands: Object.seal(Object.freeze(args.userAgentData.brands)),
       mobile: false,
     };
-    for (const key of argArray as string[]) {
-      if (key in args.userAgentData) {
-        props[key] = args.userAgentData[key];
+    if (argArray.length && Array.isArray(argArray[0])) {
+      for (const key of argArray[0]) {
+        if (key in args.userAgentData) {
+          props[key] = args.userAgentData[key];
+        }
       }
     }
 

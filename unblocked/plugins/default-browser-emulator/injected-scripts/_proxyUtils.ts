@@ -4,43 +4,7 @@
 let nativeToStringFunctionString = `${Function.toString}`;
 // when functions are re-bound to work around the loss of scope issue in chromium, they blow up their native toString
 const overriddenFns = new Map<Function, string>();
-
-const fnToStringDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, 'toString');
-const fnToStringProxy = internalCreateFnProxy(
-  Function.prototype.toString,
-  fnToStringDescriptor,
-  (target, thisArg, args) => {
-    if (overriddenFns.has(thisArg)) {
-      return overriddenFns.get(thisArg);
-    }
-    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
-    // if not indicates that we are doing a check across different windows
-    const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
-      thisArg.toString,
-    );
-    if (hasSameProto === false) {
-      // Pass the call on to the local Function.prototype.toString instead
-      return thisArg.toString(...(args ?? []));
-    }
-    try {
-      return target.apply(thisArg, args);
-    } catch (error) {
-      cleanErrorStack(error, (line, i) => {
-        if (line.includes('Object.toString') && i === 1) {
-          return line.replace('Object.toString', 'Function.toString');
-        }
-        return line;
-      });
-      throw error;
-    }
-  },
-);
-Object.defineProperty(Function.prototype, 'toString', {
-  ...fnToStringDescriptor,
-  value: fnToStringProxy,
-});
-
-/////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
+const proxyToTarget = new Map();
 
 // From puppeteer-stealth: this is to prevent someone snooping at Reflect calls
 const ReflectCached = {
@@ -56,7 +20,75 @@ const ReflectCached = {
 const ObjectCached = {
   setPrototypeOf: Object.setPrototypeOf.bind(Object),
   getPrototypeOf: Object.getPrototypeOf.bind(Object),
+  defineProperty: Object.defineProperty.bind(Object),
+  entries: Object.entries.bind(Object),
+  getOwnPropertyDescriptors: Object.getOwnPropertyDescriptors.bind(Object),
+  getOwnPropertyDescriptor: Object.getOwnPropertyDescriptor.bind(Object),
 };
+
+(function trackProxyInstances() {
+  if (typeof self === 'undefined') return;
+  const descriptor = ObjectCached.getOwnPropertyDescriptor(self, 'Proxy');
+  const toString = descriptor.value.toString();
+  descriptor.value = new Proxy(descriptor.value, {
+    construct(target: any, argArray: any[], newTarget: Function): object {
+      try {
+        const result = ReflectCached.construct(target, argArray, newTarget);
+        if (argArray?.length) proxyToTarget.set(result, argArray[0]);
+        return result;
+      } catch (err) {
+        throw cleanErrorStack(err);
+      }
+    },
+  });
+  overriddenFns.set(descriptor.value, toString);
+  ObjectCached.defineProperty(self, 'Proxy', descriptor);
+})();
+
+const fnToStringDescriptor = ObjectCached.getOwnPropertyDescriptor(Function.prototype, 'toString');
+const fnToStringProxy = internalCreateFnProxy(
+  Function.prototype.toString,
+  fnToStringDescriptor,
+  (target, thisArg, args) => {
+    if (overriddenFns.has(thisArg)) {
+      return overriddenFns.get(thisArg);
+    }
+    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
+    // if not indicates that we are doing a check across different windows
+    const hasSameProto = ObjectCached.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
+      thisArg.toString,
+    );
+    if (hasSameProto === false) {
+      // Pass the call on to the local Function.prototype.toString instead
+      return thisArg.toString(...(args ?? []));
+    }
+
+    try {
+      return target.apply(thisArg, args);
+    } catch (error) {
+      cleanErrorStack(error, (line, i) => {
+        if (i === 1 && line.includes('Object.toString')) {
+          const thisProto = ObjectCached.getPrototypeOf(thisArg);
+          if (
+            proxyToTarget.has(thisProto) &&
+            (overriddenFns.has(thisProto) || overriddenFns.has(target))
+          ) {
+            return line.replace('Object.toString', 'Function.toString');
+          }
+        }
+        return line;
+      });
+      throw error;
+    }
+  },
+);
+
+ObjectCached.defineProperty(Function.prototype, 'toString', {
+  ...fnToStringDescriptor,
+  value: fnToStringProxy,
+});
+
+/////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
 
 let isObjectSetPrototypeOf = false;
 const nativeToStringObjectSetPrototypeOfString = `${Object.setPrototypeOf}`;
@@ -114,7 +146,7 @@ function proxyConstructor<T, K extends keyof T>(
     newTarget?: T[K],
   ) => (T[K] extends new () => infer Z ? Z : never) | ProxyOverride,
 ) {
-  const descriptor = Object.getOwnPropertyDescriptor(owner, key);
+  const descriptor = ObjectCached.getOwnPropertyDescriptor(owner, key);
   const toString = descriptor.value.toString();
   descriptor.value = new Proxy(descriptor.value, {
     construct() {
@@ -130,7 +162,7 @@ function proxyConstructor<T, K extends keyof T>(
     },
   });
   overriddenFns.set(descriptor.value, toString);
-  Object.defineProperty(owner, key, descriptor);
+  ObjectCached.defineProperty(owner, key, descriptor);
 }
 
 function internalCreateFnProxy(
@@ -161,6 +193,7 @@ function internalCreateFnProxy(
           throw cleanErrorStack(err);
         }
       }
+
       return ReflectCached.get(target, p, receiver);
     },
     set(target: any, p: string | symbol, value: any, receiver: any): boolean {
@@ -198,7 +231,7 @@ function proxyFunction<T, K extends keyof T>(
   }
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
 
-  const fnProxy = internalCreateFnProxy(
+  descriptorOwner[functionName] = internalCreateFnProxy(
     descriptorOwner[functionName],
     descriptor,
     (target, thisArg, argArray) => {
@@ -207,8 +240,6 @@ function proxyFunction<T, K extends keyof T>(
       return defaultProxyApply([target, thisArg, argArray], overrideFnToUse);
     },
   );
-
-  descriptorOwner[functionName] = fnProxy;
   return thisObject[functionName];
 }
 
@@ -234,7 +265,7 @@ function proxyGetter<T, K extends keyof T>(
       return defaultProxyApply([target, thisArg, argArray], overrideFnToUse);
     },
   );
-  Object.defineProperty(descriptorOwner, propertyName, descriptor);
+  ObjectCached.defineProperty(descriptorOwner, propertyName, descriptor);
   return descriptor.get;
 }
 
@@ -268,7 +299,7 @@ function proxySetter<T, K extends keyof T>(
       return ReflectCached.apply(target, thisArg, argArray);
     },
   );
-  Object.defineProperty(descriptorOwner, propertyName, descriptor);
+  ObjectCached.defineProperty(descriptorOwner, propertyName, descriptor);
   return descriptor.set;
 }
 
@@ -283,8 +314,8 @@ function defaultProxyApply<T, K extends keyof T>(
         // @ts-expect-error
         if (result && result.then && result.catch) {
           // @ts-expect-error
-          return result.catch(err => {
-            throw cleanErrorStack(err)
+          return result.catch((err) => {
+            throw cleanErrorStack(err);
           });
         }
         return result;
@@ -300,9 +331,12 @@ function getDescriptorInHierarchy<T, K extends keyof T>(obj: T, prop: K) {
   let proto = obj;
   do {
     if (proto.hasOwnProperty(prop)) {
-      return { descriptorOwner: proto, descriptor: Object.getOwnPropertyDescriptor(proto, prop) };
+      return {
+        descriptorOwner: proto,
+        descriptor: ObjectCached.getOwnPropertyDescriptor(proto, prop),
+      };
     }
-    proto = Object.getPrototypeOf(proto);
+    proto = ObjectCached.getPrototypeOf(proto);
   } while (proto);
 
   return null;
@@ -320,7 +354,7 @@ function addDescriptorAfterProperty(
     console.log(`ERROR: Parent for property descriptor not found: ${path} -> ${propertyName}`);
     return;
   }
-  const descriptors = Object.getOwnPropertyDescriptors(owner);
+  const descriptors = ObjectCached.getOwnPropertyDescriptors(owner);
   // if already exists, don't add again
   if (descriptors[propertyName]) {
     return;
@@ -337,14 +371,14 @@ function addDescriptorAfterProperty(
   }
 
   let hasPassedProperty = false;
-  for (const [key, existingDescriptor] of Object.entries(descriptors)) {
+  for (const [key, existingDescriptor] of ObjectCached.entries(descriptors)) {
     if (hasPassedProperty) {
       // only way to reorder properties is to re-add them
       delete owner[key];
-      Object.defineProperty(owner, key, existingDescriptor);
+      ObjectCached.defineProperty(owner, key, existingDescriptor);
     }
     if (key === prevProperty) {
-      Object.defineProperty(owner, propertyName, descriptor);
+      ObjectCached.defineProperty(owner, propertyName, descriptor);
       hasPassedProperty = true;
     }
   }

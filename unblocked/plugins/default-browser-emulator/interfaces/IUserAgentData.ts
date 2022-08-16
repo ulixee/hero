@@ -5,4 +5,5 @@ export default interface IUserAgentData {
   uaFullVersion: string;
   architecture?: string;
   model?: string;
+  mobile?: boolean;
 }
