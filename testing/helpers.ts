@@ -63,6 +63,7 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
   const upload = KoaMulter(); // note you can pass `multer` options here
 
   koa.use(router.routes()).use(router.allowedMethods());
+  koa.on('error', error => log.warn('Koa error', { error } as any));
 
   const server = await new Promise<Server>(resolve => {
     const koaServer = koa

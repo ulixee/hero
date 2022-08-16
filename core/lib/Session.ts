@@ -667,7 +667,8 @@ export default class Session
       event.requestProcessingDetails,
       event.error,
     );
-    if (event.type === 'mitm-response') {
+    // don't broadcast intercepted resources
+    if (event.type === 'mitm-response' && !event.requestProcessingDetails.wasIntercepted) {
       this.tabsById.get(event.tabId)?.emit('resource', event.resource);
     }
   }

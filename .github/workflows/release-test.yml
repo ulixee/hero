@@ -1,0 +1,64 @@
+name: Release Test Matrix
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    name: Test ${{matrix.browser || 'chrome-98-0' }} (node ${{ matrix.node-version }}; ${{ matrix.os }})
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node-version: [14, 16]
+        include:
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-97-0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: yarn
+
+      - name: Build modules
+        run: yarn --network-timeout 1000000 --verbose && yarn build --network-timeout 1000000 --verbose
+
+      - name: Linux - Add Chrome Env
+        if: ${{ matrix.browser }}
+        working-directory: ./build
+        run: yarn add -W @ulixee/${{ matrix.browser }}
+
+      - name: Linux - Apt Install Chrome(s)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        working-directory: ./build
+        run: sudo $(npx install-browser-deps)
+
+      - name: Run tests
+        run: yarn jest --testTimeout=60000 --maxWorkers=2
+        working-directory: ./build
+        env:
+          NODE_ENV: test
+          ULX_DATA_DIR: .data
+          UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
+
+      - name: 'Tar files'
+        if: ${{ failure() }}
+        run: tar -cvf test-dbs.tar ./build/.data
+
+      - name: Upload Databases
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-dbs-${{matrix.os}}-${{ matrix.node-version }}
+          path: test-dbs.tar
+          retention-days: 1

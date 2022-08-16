@@ -476,6 +476,8 @@ export default class Tab
   public onResource(x: ITabEventParams['resource']): void {
     if (!x) return;
 
+    x.response ??= {} as any;
+
     const resourceSummary: IResourceSummary = {
       id: x.id,
       frameId: x.frameId,

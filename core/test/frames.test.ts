@@ -15,6 +15,7 @@ test('can wait for sub-frames to load', async () => {
   Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession();
   const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session)
   koaServer.get('/main', ctx => {
     ctx.body = `
         <body>
@@ -41,8 +42,6 @@ test('can wait for sub-frames to load', async () => {
   const subFrame = tab.frameEnvironmentsById.get(frameMeta.id);
 
   await expect(subFrame.waitForLoad('PaintingStable')).resolves.toBeTruthy();
-
-  await tab.close();
 });
 
 test('should allow query selectors in cross-domain frames', async () => {
@@ -51,18 +50,19 @@ test('should allow query selectors in cross-domain frames', async () => {
   const meta = await connection.createSession();
 
   const session = Session.get(meta.sessionId);
+  Helpers.needsClosing.push(session)
   const tab = Session.getTab(meta);
   koaServer.get('/iframePage', ctx => {
     ctx.body = `
         <body>
         <h1>Iframe Page</h1>
-<iframe src="http://framesy.org/page"></iframe>
+<iframe src="https://framesy.org/page"></iframe>
         </body>
       `;
   });
 
   session.mitmRequestSession.interceptorHandlers.push({
-    urls: ['http://framesy.org/page'],
+    urls: ['https://framesy.org'],
     handlerFn(url, type, request, response) {
       response.end(`<html lang="en"><body>
 <h1>Framesy Page</h1>
@@ -103,7 +103,7 @@ test('should allow query selectors in cross-domain frames', async () => {
       return env.toJSON();
     }),
   );
-  const innerFrameMeta = frames.find(x => x.url === 'http://framesy.org/page');
+  const innerFrameMeta = frames.find(x => x.url === 'https://framesy.org/page');
   const innerFrame = tab.frameEnvironmentsById.get(innerFrameMeta.id);
 
   const innerH1 = await innerFrame.execJsPath([
@@ -113,6 +113,4 @@ test('should allow query selectors in cross-domain frames', async () => {
     'textContent',
   ]);
   expect(innerH1.value).toBe('Framesy Page');
-
-  await tab.close();
 });
