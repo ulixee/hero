@@ -409,6 +409,7 @@ export default class Session
     this.events.on(resources, 'browser-loaded', this.onBrowserLoadedResource.bind(this));
     this.events.on(resources, 'browser-requested', this.onBrowserRequestedResource.bind(this));
 
+    this.events.on(this.websocketMessages, 'new', this.onWebsocketMessage.bind(this));
     agent.mitmRequestSession.respondWithHttpErrorStacks =
       this.mode === 'development' && this.options.showChromeInteractions === true;
 
@@ -669,6 +670,12 @@ export default class Session
     if (event.type === 'mitm-response') {
       this.tabsById.get(event.tabId)?.emit('resource', event.resource);
     }
+  }
+
+  private onWebsocketMessage(
+    event: BrowserContext['websocketMessages']['EventTypes']['new'],
+  ): void {
+    this.db.websocketMessages.insert(event.lastCommandId, event.message);
   }
 
   private onCookieChange(event: BrowserContext['resources']['EventTypes']['cookie-change']): void {
