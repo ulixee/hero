@@ -71,7 +71,7 @@ export default class TypeSerializer {
     object: T,
     options?: { ignoreProperties?: (keyof T)[]; sortKeys?: boolean },
   ): unknown {
-    if (!object) return object;
+    if (object === undefined || object === null) return object;
 
     const replaced = this.replacer(null, object);
     if (replaced !== object || (typeof replaced === 'object' && '__type' in replaced)) {
@@ -84,6 +84,7 @@ export default class TypeSerializer {
       }
 
       const keys = Object.keys(object);
+
       if (options?.sortKeys) keys.sort();
       const response: any = {};
       for (const key of keys) {

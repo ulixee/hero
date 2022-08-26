@@ -5,11 +5,11 @@ import { FundingTransferApiSchemas } from './FundingTransferApis';
 import { AddressApiSchemas } from './AddressApis';
 import { StakeApiSchemas } from './StakeApis';
 import { GiftCardApiSchemas } from './GiftCardApis';
-import { SidechainSettingsApiSchemas } from './SidechainSettingsApis';
+import { SidechainInfoApiSchemas } from './SidechainInfoApis';
 import { IZodHandlers, IZodSchemaToApiTypes } from '../utils/IZodApi';
 
 const SidechainApiSchema = {
-  ...SidechainSettingsApiSchemas,
+  ...SidechainInfoApiSchemas,
   ...AddressApiSchemas,
   ...FundingTransferApiSchemas,
   ...MicronoteApiSchemas,

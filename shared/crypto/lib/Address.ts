@@ -156,7 +156,7 @@ export default class Address {
     );
     if (address.bech32 !== bech32)
       throw new Error(
-        `Failed to load Address Address. Different key calculated. (calculated: ${address.bech32}, stored: ${bech32})`,
+        `Failed to load Address. Different key calculated. (calculated: ${address.bech32}, stored: ${bech32})`,
       );
     return address;
   }

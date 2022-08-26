@@ -7,13 +7,6 @@ import { IZodSchemaToApiTypes } from '../utils/IZodApi';
 const fundsIdValidation = z.number().int().positive();
 
 export const MicronoteBatchApiSchemas = {
-  'MicronoteBatch.get': {
-    args: z.undefined().nullish(),
-    result: z.object({
-      active: MicronoteBatchSchema,
-      giftCard: MicronoteBatchSchema.optional(),
-    }),
-  },
   'MicronoteBatch.fund': {
     args: z.object({
       note: NoteSchema,

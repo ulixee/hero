@@ -2,10 +2,13 @@ import { z } from 'zod';
 import { addressValidation, identityValidation, signatureValidation } from '../common';
 
 export const MicronoteBatchSchema = z.object({
+  batchHost: z.string().url(),
   batchSlug: z
     .string()
     .regex(/^(?:gifts_|micro_)[0-9A-F]+$/i)
     .length(14),
+  plannedClosingTime: z.date(),
+  stopNewNotesTime: z.date(),
   isGiftCardBatch: z.boolean(),
   micronoteBatchIdentity: identityValidation,
   micronoteBatchAddress: addressValidation,

@@ -105,9 +105,12 @@ export default class Identity {
 
   // CLASS METHODS ////////////////////////
 
-  public static loadFromFile(filepath: string, options?: { keyPassphrase?: string }): Identity {
+  public static loadFromFile(
+    filepath: string,
+    options?: { relativeToPath?: string; keyPassphrase?: string },
+  ): Identity {
     if (!path.isAbsolute(filepath)) {
-      filepath = path.join(process.cwd(), filepath);
+      filepath = path.join(options?.relativeToPath ?? process.cwd(), filepath);
     }
     const data = readFileSync(filepath, 'utf8');
     return this.loadFromPem(data, options);

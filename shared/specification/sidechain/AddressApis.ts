@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { addressValidation } from '../common';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
-import { AddressSignatureSchema } from '../types/IAddressSignature';
 
 export const AddressApiSchemas = {
   'Address.getBalance': {
@@ -15,7 +14,6 @@ export const AddressApiSchemas = {
   'Address.register': {
     args: z.object({
       address: addressValidation,
-      signature: AddressSignatureSchema,
     }),
     result: z.object({
       success: z.boolean(),
