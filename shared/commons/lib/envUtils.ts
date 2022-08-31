@@ -28,16 +28,16 @@ export function applyEnvironmentVariables(path: string, env: Record<string, stri
   const LineRegex =
     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/gm;
 
-  const StripSurroundingQuotesRegex = /^(['"`])([\s\S]*)\1$/gm;
 
-  let match = LineRegex.exec(lines);
-  while (match) {
+  let match: RegExpExecArray;
+  // eslint-disable-next-line no-cond-assign
+  while ((match = LineRegex.exec(lines))) {
     // eslint-disable-next-line prefer-const
     let [, key, value] = match;
 
     value = (value ?? '').trim();
 
-    // Check if double quoted before stripping
+    const StripSurroundingQuotesRegex = /^(['"`])([\s\S]*)\1$/gm;
     const isQuoted = StripSurroundingQuotesRegex.test(value);
 
     value = value.replace(StripSurroundingQuotesRegex, '$2');
@@ -52,7 +52,6 @@ export function applyEnvironmentVariables(path: string, env: Record<string, stri
     } else {
       env[key] = value;
     }
-    match = LineRegex.exec(lines);
   }
 }
 

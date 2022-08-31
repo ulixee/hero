@@ -6,6 +6,7 @@ import { AddressApiSchemas } from './AddressApis';
 import { StakeApiSchemas } from './StakeApis';
 import { GiftCardApiSchemas } from './GiftCardApis';
 import { SidechainInfoApiSchemas } from './SidechainInfoApis';
+import { RampApiSchemas } from './RampApis';
 import { IZodHandlers, IZodSchemaToApiTypes } from '../utils/IZodApi';
 
 const SidechainApiSchema = {
@@ -17,6 +18,7 @@ const SidechainApiSchema = {
   ...NoteApiSchemas,
   ...StakeApiSchemas,
   ...GiftCardApiSchemas,
+  ...RampApiSchemas,
 };
 
 export type ISidechainApiTypes = IZodSchemaToApiTypes<typeof SidechainApiSchema>;
