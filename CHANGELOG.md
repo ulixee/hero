@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.11](https://github.com/ulixee/hero/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-08-31)
+
+
+### Features
+
+* tweak docs for plugins ([354839d](https://github.com/ulixee/hero/commit/354839d5db9dad1d1932f652a96af797d97a6e4d))
+
+
+
+
+
 # [2.0.0-alpha.10](https://github.com/ulixee/hero/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-16)
 
 
