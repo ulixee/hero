@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+
+
+**Note:** Version bump only for package @unblocked-web/default-browser-emulator
+
+
+
+
+
 # [2.0.0-alpha.9](https://github.com/unblocked-web/unblocked/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-08-16)
 
 **Note:** Version bump only for package @unblocked-web/default-browser-emulator

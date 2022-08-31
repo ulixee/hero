@@ -2006,34 +2006,10 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.11.tgz#57325e26adba2446a50c80c2cc7eddc7513b5c94"
-  integrity sha512-dphJpK2cX2+stYyx7kYk+gzNQgJr38R4SaU0ztZNpOQoj/1LmMyJrzni6wE5zgv2a1Qeh5ZzXxYvz3hnkspyfQ==
-  dependencies:
-    "@typescript-eslint/eslint-plugin" "^5.27.1"
-    "@typescript-eslint/parser" "^5.27.1"
-    copyfiles "^2.4.1"
-    eslint "^8.17.0"
-    eslint-config-airbnb-base "^15.0.0"
-    eslint-config-airbnb-typescript "^17.0.0"
-    eslint-config-prettier "^8.5.0"
-    eslint-import-resolver-typescript "^2.7.1"
-    eslint-plugin-eslint-comments "^3.2.0"
-    eslint-plugin-import "^2.26.0"
-    eslint-plugin-jest "^26.5.3"
-    eslint-plugin-jsx-a11y "^6.5.1"
-    eslint-plugin-monorepo-cop "^1.0.2"
-    eslint-plugin-prettier "^4.0.0"
-    eslint-plugin-promise "^6.0.0"
-    prettier "^2.6.2"
-    pretty-quick "^3.1.0"
-    typescript "^4.7.2"
-
-"@ulixee/repo-tools@^1.0.11":
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.12.tgz#4701651cf3330a026927c68f45f6d22383c5e4bc"
-  integrity sha512-QGWJxonkWArUjrQcMRea2QdpxiKL8tb4wCbIFQTlLFTbB0VZiqGJsHToW38SclhumqiaCVrr8iZ2oMY2ZoNiug==
+"@ulixee/repo-tools@^1.0.15":
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.15.tgz#3f59b118b7ae864779d99f0ca6580b99a61722f4"
+  integrity sha512-SIg8FN4HlOdK5hMg8+BqwQJ45dLYt017jQDYJttDGpJeph4DnAv/xcYliNty9P88cLjNU425DKhpl7EHpYmgWA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.27.1"
     "@typescript-eslint/parser" "^5.27.1"
