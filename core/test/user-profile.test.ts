@@ -257,6 +257,40 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await expect(tab.getJsValue('sessionStorage.getItem("test")')).resolves.toBe('2');
   }, 30e3);
 
+  it('should be able to restore storage with the man-in-the-middle disabled', async () => {
+    const storage: IDomStorage = {
+      [`http://${koaServer.baseHost}`]: {
+        indexedDB: [],
+        localStorage: [['test', '1']],
+        sessionStorage: [['test', '2']],
+      },
+      [`https://domain.com`]: {
+        indexedDB: [],
+        localStorage: [
+          ['1', '2'],
+          ['test2', '1'],
+        ],
+        sessionStorage: [
+          ['1', '2'],
+          ['test2', '1'],
+        ],
+      },
+    };
+    const meta = await connection.createSession({
+      disableMitm: true,
+      userProfile: {
+        storage,
+      },
+    });
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+
+    await tab.goto(`${koaServer.baseUrl}`);
+    await tab.waitForLoad('PaintingStable');
+    await expect(tab.getJsValue('localStorage.getItem("test")')).resolves.toBe('1');
+    await expect(tab.getJsValue('sessionStorage.getItem("test")')).resolves.toBe('2');
+  }, 30e3);
+
   it("should keep profile information for sites that aren't loaded in a session", async () => {
     const meta = await connection.createSession({
       userProfile: {
@@ -528,8 +562,8 @@ describe('UserProfile IndexedDb tests', () => {
 
       const profile = await tab.session.exportUserProfile();
       expect(profile).toBeTruthy();
-      expect(profile.storage[koaServer.baseUrl]).toBeTruthy()
-      expect(profile.storage[koaServer.baseUrl].indexedDB).toHaveLength(0)
+      expect(profile.storage[koaServer.baseUrl]).toBeTruthy();
+      expect(profile.storage[koaServer.baseUrl].indexedDB).toHaveLength(0);
     }
   });
 

@@ -99,79 +99,79 @@ export default class UserProfile {
     if (!origins.length) return;
     const sessionId = session.id;
 
-    const interceptorHandlers = session.mitmRequestSession.interceptorHandlers;
-
     const parentLogId = log.info('UserProfile.installStorage', {
       sessionId,
       storageDomains: origins?.length,
     });
     const browserContext = session.browserContext;
+    const isSecure = origins.some(x => x.startsWith('https://'));
+    const storageRestoreDomain = `http${isSecure ? 's' : ''}://restore-hero-dom.org`;
     try {
       browserContext.resources.isCollecting = false;
       page.storeEventsWithoutListeners = false;
+      page.runPageScripts = true;
 
-      session.mitmRequestSession.interceptorHandlers = [
-        {
-          urls: origins,
-          handlerFn(url, type, req, res) {
-            let script = '';
-            const originStorage = domStorage[url.origin];
-            const sessionStorage = originStorage?.sessionStorage;
-            if (sessionStorage) {
-              script += `
+      // eslint-disable-next-line require-await,@typescript-eslint/require-await
+      await page.networkManager.setNetworkInterceptor(async ({ request, requestId }) => {
+        const url = new URL(request.url);
+
+        if (url.href.includes(storageRestoreDomain)) {
+          return {
+            responseCode: 200,
+            requestId,
+            responseHeaders: [{ name: 'Content-Type', value: 'text/html' }],
+            body: Buffer.from(`<html>
+<body>
+<h1>Restoring Dom Storage</h1>
+${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
+</body>
+</html>`).toString('base64'),
+          };
+        }
+        let script = '';
+        const originStorage = domStorage[url.origin];
+        const sessionStorage = originStorage?.sessionStorage;
+        if (sessionStorage) {
+          script += `
 for (const [key,value] of ${JSON.stringify(sessionStorage)}) {
   sessionStorage.setItem(key,value);
 }\n`;
-            }
-            const localStorage = originStorage?.localStorage;
-            if (localStorage) {
-              script += `\n
+        }
+        const localStorage = originStorage?.localStorage;
+        if (localStorage) {
+          script += `\n
 for (const [key,value] of ${JSON.stringify(localStorage)}) {
   localStorage.setItem(key,value);
 }\n`;
-            }
+        }
 
-            let readyClass = 'ready';
-            if (originStorage?.indexedDB?.length) {
-              readyClass = '';
-              script += `\n\n 
+        let readyClass = 'ready';
+        if (originStorage?.indexedDB?.length) {
+          readyClass = '';
+          script += `\n\n 
              ${InjectedScripts.getIndexedDbStorageRestoreScript()}
              
              const dbs = ${JSON.stringify(originStorage.indexedDB)};
              restoreUserStorage(dbs).then(() => {
                document.body.setAttribute('class', 'ready');
              });`;
-            }
+        }
 
-            res.end(`<html><body class="${readyClass}">
+        return {
+          responseCode: 200,
+          requestId,
+          body: Buffer.from(`<html><body class="${readyClass}">
 <h5>${url.origin}</h5>
 <script>
 ${script}
 </script>
-</body></html>`);
+</body></html>`).toString('base64'),
+        };
+      }, true);
 
-            return true;
-          },
-        },
-      ];
 
-      const isSecure = origins[0].startsWith('https://');
-      const storageRestoreDomain = `http${isSecure ? 's' : ''}://restore-hero-dom.org`;
-      session.mitmRequestSession.interceptorHandlers.push({
-        urls: [storageRestoreDomain],
-        handlerFn(url, type, req, res) {
-          res.end(`
-<body>
-<h1>Restoring Dom Storage</h1>
-${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
-</body>
-</html>`);
-          return true;
-        },
-      });
       // clear out frame state
       await page.navigate(storageRestoreDomain);
-      await page.waitForLoad('DomContentLoaded');
 
       await Promise.all(
         page.frames.map(async frame => {
@@ -202,6 +202,8 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
       page.mainFrame.navigations.reset();
 
       // clear out frame state
+      await page.networkManager.setNetworkInterceptor(null, false);
+      await page.networkManager.initialize();
       await page.navigate('about:blank');
       await page.mainFrame.waitForLifecycleEvent('load');
       page.storeEventsWithoutListeners = true;
@@ -212,7 +214,6 @@ ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
       page.runPageScripts = true;
       await browserContext.initializePage(page);
     } finally {
-      session.mitmRequestSession.interceptorHandlers = interceptorHandlers;
       browserContext.resources.isCollecting = true;
       log.stats('UserProfile.installedStorage', { sessionId, parentLogId });
     }
