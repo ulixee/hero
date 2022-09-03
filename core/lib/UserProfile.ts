@@ -120,12 +120,14 @@ export default class UserProfile {
             responseCode: 200,
             requestId,
             responseHeaders: [{ name: 'Content-Type', value: 'text/html' }],
-            body: Buffer.from(`<html>
+            body: Buffer.from(
+              `<html>
 <body>
 <h1>Restoring Dom Storage</h1>
 ${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
 </body>
-</html>`).toString('base64'),
+</html>`,
+            ).toString('base64'),
           };
         }
         let script = '';
@@ -160,18 +162,22 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
         return {
           responseCode: 200,
           requestId,
-          body: Buffer.from(`<html><body class="${readyClass}">
+          body: Buffer.from(
+            `<html><body class="${readyClass}">
 <h5>${url.origin}</h5>
 <script>
 ${script}
 </script>
-</body></html>`).toString('base64'),
+</body></html>`,
+          ).toString('base64'),
         };
       }, true);
 
-
       // clear out frame state
       await page.navigate(storageRestoreDomain);
+      while (page.frames.length <= origins.length) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
 
       await Promise.all(
         page.frames.map(async frame => {

@@ -69,7 +69,7 @@ async function readStoreData(store: IDBObjectStore) {
       if (cursor) {
         const key = store.keyPath === null ? cursor.key : undefined;
         let value = cursor.value;
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && !('toJSON' in value && typeof value.toJSON === 'function')) {
           value = { ...value };
         }
         data.push(TypeSerializer.stringify({ key, value }));

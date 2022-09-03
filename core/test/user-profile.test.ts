@@ -679,6 +679,7 @@ describe('UserProfile IndexedDb tests', () => {
       expect(db.objectStores[1].keyPath).not.toBeTruthy();
 
       expect(db.data.store1).toHaveLength(2);
+      expect(db.data.store2).toHaveLength(1);
     }
     {
       const meta = await connection.createSession({

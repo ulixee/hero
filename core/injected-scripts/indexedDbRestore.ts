@@ -1,41 +1,43 @@
 import type { IIndexedDB } from '@unblocked-web/specifications/agent/browser/IIndexedDB';
 
-async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
+async function restoreIndexedDb(restoreDBs: IIndexedDB[]): Promise<void> {
   if (!restoreDBs || !restoreDBs.length) return;
 
-  for (const restoreDB of restoreDBs) {
-    await new Promise<void>((resolve, reject) => {
-      const openDBRequest = indexedDB.open(restoreDB.name, restoreDB.version);
-      // only run changes when the db doesn't already exist
-      openDBRequest.onupgradeneeded = event => {
-        const request = event.target as IDBRequest<IDBDatabase>;
-        const db = request.result;
-        for (const objectStoreToRestore of restoreDB.objectStores) {
-          const objectStore = db.createObjectStore(objectStoreToRestore.name, {
-            autoIncrement: objectStoreToRestore.autoIncrement,
-            keyPath: objectStoreToRestore.keyPath,
-          });
-
-          for (const restoreIndex of objectStoreToRestore.indexes) {
-            objectStore.createIndex(restoreIndex.name, restoreIndex.keyPath, {
-              multiEntry: restoreIndex.multiEntry,
-              unique: restoreIndex.unique,
+  await Promise.all(
+    restoreDBs.map(restoreDB => {
+      return new Promise<void>((resolve, reject) => {
+        const openDBRequest = indexedDB.open(restoreDB.name, restoreDB.version);
+        // only run changes when the db doesn't already exist
+        openDBRequest.onupgradeneeded = event => {
+          const request = event.target as IDBRequest<IDBDatabase>;
+          const db = request.result;
+          for (const objectStoreToRestore of restoreDB.objectStores) {
+            const objectStore = db.createObjectStore(objectStoreToRestore.name, {
+              autoIncrement: objectStoreToRestore.autoIncrement,
+              keyPath: objectStoreToRestore.keyPath,
             });
+
+            for (const restoreIndex of objectStoreToRestore.indexes) {
+              objectStore.createIndex(restoreIndex.name, restoreIndex.keyPath, {
+                multiEntry: restoreIndex.multiEntry,
+                unique: restoreIndex.unique,
+              });
+            }
           }
-        }
-      };
-      openDBRequest.onsuccess = async event => {
-        const request = event.target as IDBRequest<IDBDatabase>;
-        try {
-          await restoreData(request.result, restoreDB);
-          resolve();
-        } catch (err) {
-          reject(err);
-        }
-      };
-      openDBRequest.onerror = reject;
-    });
-  }
+        };
+        openDBRequest.onsuccess = async event => {
+          const request = event.target as IDBRequest<IDBDatabase>;
+          try {
+            await restoreData(request.result, restoreDB);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        };
+        openDBRequest.onerror = reject;
+      });
+    }),
+  );
 }
 
 async function restoreData(db: IDBDatabase, restoreDB: IIndexedDB) {
