@@ -1,4 +1,4 @@
-type IAsyncFunc = (...args: any) => Promise<any> | any;
+export type IAsyncFunc = (...args: any) => Promise<any> | any;
 type IPromiseType<T> = T extends PromiseLike<infer U> ? U : T;
 type RestParameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : [];
 

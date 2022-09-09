@@ -12,7 +12,7 @@ export const BlockSchema = z.object({
   sharesLedger: TransactionSchema.array(), // all share trades must happen in the sharesLedger
   // these fields can be rolled off
   coinages: CoinageSchema.array(),
-  datumSummary: DatumSummarySchema.array(),
+  datumSummary: DatumSummarySchema,
   bitSampling: z.object({
     bitDatumHistories: BitDatumHistorySchema.array(),
   }),

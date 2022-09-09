@@ -10,6 +10,7 @@ export const MicronoteBatchSchema = z.object({
   plannedClosingTime: z.date(),
   stopNewNotesTime: z.date(),
   isGiftCardBatch: z.boolean(),
+  minimumFundingCentagons: z.bigint().refine(x => x >= 1n),
   micronoteBatchIdentity: identityValidation,
   micronoteBatchAddress: addressValidation,
   sidechainIdentity: identityValidation,

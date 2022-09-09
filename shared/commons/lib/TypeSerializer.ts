@@ -73,14 +73,14 @@ export default class TypeSerializer {
   ): unknown {
     if (object === undefined || object === null) return object;
 
-    const replaced = this.replacer(null, object);
+    const replaced = this.typeReplacer(null, object, { sortKeys: options?.sortKeys });
     if (replaced !== object || (typeof replaced === 'object' && '__type' in replaced)) {
       return replaced;
     }
 
     if (object && typeof object === Types.object) {
       if (Array.isArray(object)) {
-        return object.map(x => this.replace(x));
+        return object.map(x => this.replace(x, options));
       }
 
       const keys = Object.keys(object);
@@ -91,14 +91,14 @@ export default class TypeSerializer {
         if (options?.ignoreProperties) {
           if (options.ignoreProperties.includes(key as any)) continue;
         }
-        response[key] = this.replace(object[key]);
+        response[key] = this.replace(object[key], options);
       }
       return response;
     }
     return object;
   }
 
-  private static replacer(_: string, value: any): any {
+  private static typeReplacer(_: string, value: any, options?: { sortKeys?: boolean }): any {
     if (value === null || value === undefined) return value;
     if (value === true || value === false) return value;
 
@@ -130,15 +130,19 @@ export default class TypeSerializer {
 
     if (value instanceof Error) {
       const { name, message, stack, ...data } = value;
-      return { __type: Types.Error, value: { name, message, stack, ...data } };
+      const extras = this.replace(data, options) as object;
+      return { __type: Types.Error, value: { name, message, stack, ...extras } };
     }
 
     if (value instanceof Map) {
-      return { __type: Types.Map, value: [...value.entries()] };
+      return {
+        __type: Types.Map,
+        value: [...value.entries()].map(x => this.replace(x, options)),
+      };
     }
 
     if (value instanceof Set) {
-      return { __type: Types.Set, value: [...value] };
+      return { __type: Types.Set, value: [...value].map(x => this.replace(x, options)) };
     }
 
     if (this.isNodejs) {
@@ -217,10 +221,15 @@ export default class TypeSerializer {
       return new globalThis[arrayType](uint8Array.buffer, byteOffset, byteLength);
     }
     if (type === Types.RegExp) return new RegExp(value[0], value[1]);
-    if (type === Types.Map) return new Map(value);
-    if (type === Types.Set) return new Set(value);
+    if (type === Types.Map) {
+      return new Map(value);
+    }
+    if (type === Types.Set) {
+      return new Set(value);
+    }
     if (type === Types.Error) {
       const { name, message, stack, ...data } = value;
+      const extras = this.revive(data);
       let Constructor = this.errorTypes && this.errorTypes.get(name);
       if (!Constructor) {
         if (this.isNodejs) {
@@ -234,7 +243,7 @@ export default class TypeSerializer {
 
       const e = new Constructor(message);
       e.name = name;
-      Object.assign(e, data);
+      Object.assign(e, extras);
       if (stack) {
         e.stack = `${stack}\n${`------${stackMarker}`.padEnd(50, '-')}\n${startStack}`;
       }

@@ -39,7 +39,7 @@ class Log implements ILog {
     return this.log('warn', action, data);
   }
 
-  public error(action: string, data?: ILogData): number {
+  public error(action: string, data?: ILogData | { error: Error }): number {
     return this.log('error', action, data);
   }
 
@@ -78,7 +78,7 @@ class Log implements ILog {
     );
   }
 
-  private log(level: LogLevel, action: string, data?: ILogData): number {
+  private log(level: LogLevel, action: string, data?: ILogData | any): number {
     let logData: object;
     let sessionId: string = this.boundContext.sessionId;
     let parentId: number;
@@ -165,6 +165,12 @@ export function translateToPrintable(
       result.error = value;
       continue;
     }
+    if (key === 'error') {
+      result.error = new Error((value as any).message);
+      Object.assign(result.error, value);
+      continue;
+    }
+
     const printable = translateValueToPrintable(value);
     if (printable === null || printable === undefined) continue;
     printData[key] = printable;
@@ -243,6 +249,7 @@ function extractPathFromModule(module: NodeModule): string {
   return fullPath
     .replace(/^(.*)[/\\]unblocked[/\\](.+)$/, '$2')
     .replace(/^(.*)[/\\]ulixee[/\\](.+)$/, '$2')
+    .replace(/^(.*)[/\\]payments[/\\](.+)$/, '$2')
     .replace(/^(.*)[/\\]@ulixee[/\\](.+)$/, '$2')
     .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
     .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
@@ -319,7 +326,15 @@ registerNamespaceMapping((ns, active, skip) => {
 
 registerNamespaceMapping((ns, active) => {
   if (ns.includes('ulx:*') || ns.includes('ulx*')) {
-    active.push(/^apps[/-]chromealive*/, /hero[/-].*/, /net\/.*/, /databox[/-].*/);
+    active.push(
+      /^apps[/-]chromealive*/,
+      /hero[/-].*/,
+      /net\/.*/,
+      /databox[/-].*/,
+      /mainchain[/-].*/,
+      /sidechain[/-].*/,
+      /ramps[/-].*/,
+    );
   } else if (ns.includes('hero')) {
     active.push(/^hero[/-].*/, /net\/.*/);
   } else if (ns.includes('databox')) {

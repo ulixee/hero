@@ -28,7 +28,6 @@ export function applyEnvironmentVariables(path: string, env: Record<string, stri
   const LineRegex =
     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/gm;
 
-
   let match: RegExpExecArray;
   // eslint-disable-next-line no-cond-assign
   while ((match = LineRegex.exec(lines))) {
@@ -67,5 +66,10 @@ export function parseEnvInt(envvar: string): number | null {
 
 export function parseEnvBigint(envvar: string): bigint | null {
   if (!envvar) return null;
+  if (envvar.includes('e')) {
+    const [number, exp] = envvar.split('e');
+    const decimal = Number(`1${exp}`);
+    return BigInt(number) * BigInt(decimal);
+  }
   return BigInt(envvar);
 }

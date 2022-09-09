@@ -1,14 +1,14 @@
 import { IZodApiSpec, IZodApiTypes, IZodSchemaToApiTypes } from './IZodApi';
 import ValidationError from './ValidationError';
 
-export default class ApiHandler<
+export default class ValidatingApiHandler<
   APIs extends IZodApiSpec,
   Command extends keyof APIs & string,
   APISpec extends IZodSchemaToApiTypes<APIs>,
   IHandlerOptions = any,
 > {
   protected apiHandler: (
-    this: ApiHandler<APIs, Command, APISpec, IHandlerOptions>,
+    this: ValidatingApiHandler<APIs, Command, APISpec, IHandlerOptions>,
     args: APISpec[Command]['args'],
     options?: IHandlerOptions,
   ) => Promise<APISpec[Command]['result']>;
@@ -19,7 +19,7 @@ export default class ApiHandler<
     public readonly command: Command,
     protected apiSchema: APIs,
     args: {
-      handler: ApiHandler<APIs, Command, APISpec, IHandlerOptions>['apiHandler'];
+      handler: ValidatingApiHandler<APIs, Command, APISpec, IHandlerOptions>['apiHandler'];
     },
   ) {
     this.apiHandler = args.handler.bind(this);

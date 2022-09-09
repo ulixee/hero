@@ -7,7 +7,7 @@ export interface IBoundLog<Base = any> {
   stats<T extends Base>(action: string, data?: T): number;
   info<T extends Base>(action: string, data?: T): number;
   warn<T extends Base>(action: string, data?: T): number;
-  error<T extends Base>(action: string, data?: T): number;
+  error<T extends Base>(action: string, data?: T | { error: Error }): number;
   createChild(module, boundData?: any): IBoundLog;
 }
 

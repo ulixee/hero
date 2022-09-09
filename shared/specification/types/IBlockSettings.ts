@@ -23,6 +23,7 @@ export const BlockSettingsSchema = z.object({
   nextLinkTarget: ArithmeticEncodingSchema,
   height: z.number().int().nonnegative(),
   sidechains: ApprovedSidechainSchema.array(),
+  minimumMicronoteBurnPercent: z.number().int().nonnegative(),
 });
 
 type IBlockSettings = z.infer<typeof BlockSettingsSchema>;
