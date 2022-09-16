@@ -64,6 +64,18 @@ export function parseEnvInt(envvar: string): number | null {
   return parseInt(envvar, 10);
 }
 
+export function parseEnvPath(envvar: string, relativeTo?: string): string {
+  if (!envvar) return null;
+  if (Path.isAbsolute(envvar)) return envvar;
+  return Path.resolve(relativeTo ?? process.cwd(), envvar);
+}
+
+export function parseEnvBool(envvar: string): boolean {
+  if (envvar === '1' || envvar?.toLowerCase() === 'true' || envvar?.toLowerCase() === 'yes')
+    return true;
+  return false;
+}
+
 export function parseEnvBigint(envvar: string): bigint | null {
   if (!envvar) return null;
   if (envvar.includes('e')) {

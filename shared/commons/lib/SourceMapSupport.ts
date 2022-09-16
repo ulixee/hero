@@ -24,6 +24,9 @@ export class SourceMapSupport {
   }
 
   static install(): void {
+    // ts-node does it's own translations
+    if (process.execArgv?.includes('ts-node')) return;
+
     if (!Error[Symbol.for('source-map-support')]) {
       Error[Symbol.for('source-map-support')] = true;
       Error.prepareStackTrace = this.prepareStackTrace.bind(this);
@@ -125,7 +128,6 @@ export class SourceMapSupport {
     const name = error.name ?? error[Symbol.toStringTag] ?? error.constructor?.name ?? 'Error';
     const message = error.message ?? '';
     const errorString = `${name}: ${message}`;
-
     // track fn name as we go backwards through stack
     const processedStack = [];
     let containingFnName: string = null;
@@ -135,7 +137,7 @@ export class SourceMapSupport {
         containingFnName = null;
       } else {
         const filename = frame.getFileName() || (frame as any).getScriptNameOrSourceURL();
-        if (filename) {
+        if (filename && !filename.endsWith('.ts')) {
           const position = this.getOriginalSourcePosition({
             filename,
             line: frame.getLineNumber(),
