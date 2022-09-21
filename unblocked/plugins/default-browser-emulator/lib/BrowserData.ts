@@ -1,5 +1,8 @@
 import * as Fs from 'fs';
 import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import { convertMacOsVersionString } from '@unblocked-web/real-user-agents/lib/OsUtils';
+import getLocalOperatingSystemMeta from '@unblocked-web/real-user-agents/lib/getLocalOperatingSystemMeta';
+import { findClosestVersionMatch } from '@unblocked-web/real-user-agents/lib/VersionUtils';
 import IBrowserData, {
   IDataBrowserConfig,
   IDataClienthello,
@@ -12,8 +15,6 @@ import IBrowserData, {
   IDataWindowNavigator,
 } from '../interfaces/IBrowserData';
 import DataLoader, { loadData } from './DataLoader';
-import getLocalOperatingSystemMeta from './utils/getLocalOperatingSystemMeta';
-import { convertMacOsVersionString, findClosestVersionMatch } from './VersionUtils';
 
 const localOsMeta = getLocalOperatingSystemMeta();
 

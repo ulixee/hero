@@ -11,12 +11,14 @@
     "build:js-path": "cd js-path && pwd && yarn && yarn build",
     "build:spec": "cd specifications && pwd && yarn && yarn build",
     "build:agent": "cd agent && pwd && yarn && yarn build",
-    "build:all": "yarn build:js-path && yarn build:spec && yarn build:agent && yarn build",
+    "build:uas": "cd real-user-agents && pwd && yarn && yarn build",
+    "build:prof": "cd browser-profiler && pwd && yarn && yarn build",
+    "build:all": "yarn build:js-path && yarn build:spec && yarn build:agent && yarn build:uas && yarn build:da && yarn build:prof && yarn build",
     "copy:build": "ulx-repo-after-build",
     "copy:dist": "ulx-repo-after-build --dist",
-    "tsc": "tsc -b -i tsconfig.json && yarn copy:build",
+    "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node adjustPaths.js",
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
-    "watch:all": "concurrently -n jspath,spec,plugins,agent,da \"cd js-path && yarn watch\" \"cd specifications && yarn watch\" \"yarn watch\" \"cd agent && yarn watch\" \"cd double-agent && yarn watch\"",
+    "watch:all": "concurrently -n jspath,spec,plugins,agent,da,prof \"cd js-path && yarn watch\" \"cd specifications && yarn watch\" \"yarn watch\" \"cd agent && yarn watch\" \"cd double-agent && yarn watch\" \"cd browser-profiler && yarn watch\"",
     "test": "yarn copy:build && yarn test:build",
     "test:build": "cd ./build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
     "test:all": "yarn copy:build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
@@ -41,7 +43,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
-    "@ulixee/repo-tools": "^1.0.15",
+    "@ulixee/repo-tools": "^1.0.17",
     "@types/node": "^14.17.9",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
@@ -58,10 +60,16 @@
   "workspaces": {
     "packages": [
       "agent/build/*",
-      "plugins/*",
       "specifications/build",
       "js-path/build",
-      "../shared/build/*"
+      "browser-profiler/build/*",
+      "real-user-agents/build",
+      "double-agent/build/*",
+      "double-agent/build/collect/plugins/*",
+      "double-agent/build/analyze/plugins/*",
+      "../shared/build/*",
+      "plugins/*",
+      "browser-emulator-builder"
     ],
     "nohoist": []
   },

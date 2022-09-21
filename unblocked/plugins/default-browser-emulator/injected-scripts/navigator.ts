@@ -8,13 +8,17 @@ if (args.userAgentString) {
   );
 }
 
+if ('webdriver' in self.navigator) {
+  proxyGetter(self.navigator, 'webdriver', () => false, true);
+}
+
 if (args.userAgentData && 'userAgentData' in self.navigator) {
   // @ts-expect-error
   const userAgentData = self.navigator.userAgentData;
   function checkThisArg(thisArg, customMessage = ''): TypeError {
     // @ts-expect-error
     if (Object.getPrototypeOf(thisArg) !== NavigatorUAData.prototype) {
-      return new TypeError(`${customMessage  }Illegal invocation`);
+      return new TypeError(`${customMessage}Illegal invocation`);
     }
   }
 

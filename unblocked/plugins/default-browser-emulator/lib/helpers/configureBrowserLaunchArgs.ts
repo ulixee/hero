@@ -25,10 +25,9 @@ export function configureBrowserLaunchArgs(
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
     '--disable-site-isolation-trials',
-    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,CertificateTransparencyComponentUpdater,Translate,IsolateOrigins,site-per-process,OutOfBlinkCors,AvoidUnnecessaryBeforeUnloadCheckSync', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+    '--disable-features=PaintHolding,DestroyProfileOnBrowserClose,IsolateOrigins,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
-    '--disable-speech-api', // don't include speech apis since we aren't masking them yet
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
     '--disable-prompt-on-repost', // Reloading a page that came from a POST normally prompts the user.
     '--disable-renderer-backgrounding', // This disables non-foreground tabs from getting a lower process priority This doesn't (on its own) affect timers or painting behavior. karma-chrome-launcher#123
@@ -53,8 +52,6 @@ export function configureBrowserLaunchArgs(
     '--allow-running-insecure-content',
 
     `--window-size=${defaultScreen.width},${defaultScreen.height}`,
-
-    '--no-service-autorun',
 
     // don't leak private ip
     '--force-webrtc-ip-handling-policy=default_public_interface_only',

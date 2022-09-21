@@ -1,0 +1,72 @@
+[
+  {
+    "id": "chrome-105-0",
+    "name": "chrome",
+    "fullVersion": "105.0.5195.127",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-104-0",
+    "name": "chrome",
+    "fullVersion": "104.0.5112.102",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-103-0",
+    "name": "chrome",
+    "fullVersion": "103.0.5060.134",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-102-0",
+    "name": "chrome",
+    "fullVersion": "102.0.5005.115",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-101-0",
+    "name": "chrome",
+    "fullVersion": "101.0.4951.67",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-100-0",
+    "name": "chrome",
+    "fullVersion": "100.0.4896.127",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-99-0",
+    "name": "chrome",
+    "fullVersion": "99.0.4844.84",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-98-0",
+    "name": "chrome",
+    "fullVersion": "98.0.4758.109",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-97-0",
+    "name": "chrome",
+    "fullVersion": "97.0.4692.99",
+    "features": ["headless"],
+    "bypass": false
+  },
+  {
+    "id": "chrome-96-0",
+    "name": "chrome",
+    "fullVersion": "96.0.4664.110",
+    "features": ["headless"],
+    "bypass": false
+  }
+]
