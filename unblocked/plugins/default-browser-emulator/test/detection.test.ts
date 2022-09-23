@@ -8,7 +8,7 @@ import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 const logger = TestLogger.forTest(module);
-const browserVersion = BrowserEmulator.defaultBrowserEngine().fullVersion.split('.').shift();
+const browserVersion = BrowserEmulator.default().fullVersion.split('.').shift();
 let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeEach(Helpers.beforeEach);

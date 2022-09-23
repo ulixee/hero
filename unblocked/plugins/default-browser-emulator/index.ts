@@ -266,7 +266,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     return { browserEngine, userAgentOption };
   }
 
-  public static defaultBrowserEngine(): IBrowserEngine {
+  public static default(): IBrowserEngine {
     return new BrowserEngine(defaultBrowserEngine);
   }
 }
