@@ -81,6 +81,7 @@ export interface IDataHeaderOrder {
   originTypes: string[];
   method: string;
   order: string[];
+  isRedirect: boolean;
   defaults: { [header: string]: string[] };
   orderKeys?: Set<string>; // constructed as accessed
 }

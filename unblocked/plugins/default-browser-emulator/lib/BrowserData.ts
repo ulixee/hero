@@ -16,9 +16,9 @@ import IBrowserData, {
 } from '../interfaces/IBrowserData';
 import DataLoader, { loadData } from './DataLoader';
 
-const localOsMeta = getLocalOperatingSystemMeta();
 
 export default class BrowserData implements IBrowserData {
+  public static localOsMeta = getLocalOperatingSystemMeta();
   private readonly dataLoader: DataLoader;
   private readonly baseDataDir: string;
   private readonly osDataDir: string;
@@ -100,6 +100,7 @@ const polyfillFilesByDatadir: {
 
 function extractPolyfillFilename(dataDir: string): string {
   let filenameMap = polyfillFilesByDatadir[dataDir];
+  const localOsMeta = BrowserData.localOsMeta;
   if (!filenameMap) {
     filenameMap = {};
     polyfillFilesByDatadir[dataDir] = filenameMap;

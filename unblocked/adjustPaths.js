@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 let relativeDirectory = process.argv[2] || '/build';
+const isDist = relativeDirectory.includes('build-dist');
 // eslint-disable-next-line no-console
 console.log('Updating paths relative to %s', relativeDirectory);
 if (!relativeDirectory.startsWith('/')) relativeDirectory = `/${relativeDirectory}`;
@@ -14,7 +15,10 @@ function processDir(dir) {
     const stat = fs.lstatSync(fullpath);
     if (stat.isDirectory()) {
       processDir(fullpath);
-    } else if (stat.isFile() && fileOrDir === 'paths.json') {
+    } else if (stat.isFile() && isDist && fileOrDir === 'paths.dist.json') {
+      fs.copyFileSync(fullpath, fullpath.replace('paths.dist.json', 'paths.json'));
+      fs.unlinkSync(fullpath);
+    } else if (stat.isFile() && !isDist && fileOrDir === 'paths.json') {
       const pathsJson = JSON.parse(fs.readFileSync(fullpath, 'utf8'));
       if (pathsJson.__modified__) continue;
 

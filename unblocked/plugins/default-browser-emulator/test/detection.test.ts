@@ -8,7 +8,7 @@ import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 const logger = TestLogger.forTest(module);
-
+const browserVersion = BrowserEmulator.defaultBrowserEngine().fullVersion.split('.').shift();
 let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeEach(Helpers.beforeEach);
@@ -19,13 +19,13 @@ beforeAll(async () => {
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
   koaServer = await Helpers.runKoaServer();
-  koaServer.get('/fpCollect.min.js', (ctx) => {
+  koaServer.get('/fpCollect.min.js', ctx => {
     ctx.set('Content-Type', 'application/javascript');
     ctx.body = Fs.readFileSync(fpCollectPath, 'utf-8')
       .replace('module.exports = fpCollect;', '')
       .replace('const fpCollect = ', 'var fpCollect = ');
   });
-  koaServer.get('/collect', (ctx) => {
+  koaServer.get('/collect', ctx => {
     ctx.body = `
 <body>
 <h1>Collect test</h1>
@@ -72,8 +72,8 @@ afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
 test('should pass FpScanner', async () => {
-  const analyzePromise = new Promise((resolve) => {
-    koaServer.post('/analyze', async (ctx) => {
+  const analyzePromise = new Promise(resolve => {
+    koaServer.post('/analyze', async ctx => {
       let body = '';
       for await (const chunk of ctx.req) {
         body += chunk.toString();
@@ -97,6 +97,8 @@ test('should pass FpScanner', async () => {
   for (const key of Object.keys(results)) {
     const result = results[key];
     const isConsistent = result.consistent === fpscanner.CONSISTENT;
+    // webdriver is no longer removed from the dom as of Chrome 89, but fpscanner isn't updated
+    if (!isConsistent && result.name === 'WEBDRIVER') continue;
     // eslint-disable-next-line no-console
     if (!isConsistent) console.log('Not consistent', result);
     expect(isConsistent).toBe(true);
@@ -264,7 +266,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
     logger,
   });
   Helpers.needsClosing.push(agent);
-  koaServer.get('/marker', (ctx) => {
+  koaServer.get('/marker', ctx => {
     ctx.body = `
 <body>
 <h1>Marker Page</h1>
@@ -348,7 +350,7 @@ test('should not have too much recursion in prototype', async () => {
 
 describe('Proxy detections', () => {
   const ProxyDetections = {
-    checkInstanceof(apiFunction) {
+    checkInstanceof(apiFunction, chromeVersion) {
       const proxy = new Proxy(apiFunction, {});
 
       function hasValidStack(error, targetStack) {
@@ -364,8 +366,11 @@ describe('Proxy detections', () => {
         return '"proxy instanceof proxy" failed to throw';
       } catch (error) {
         // ---- FAILING HERE! -----
-
-        if (!hasValidStack(error, '    at Proxy.[Symbol.hasInstance]')) {
+        if (chromeVersion >= 102) {
+          if (!hasValidStack(error, '    at [Symbol.hasInstance]')) {
+            return 'expect [Symbol.hasInstance]';
+          }
+        } else if (!hasValidStack(error, '    at Proxy.[Symbol.hasInstance]')) {
           return 'expect Proxy.[Symbol.hasInstance]';
         }
       }
@@ -375,14 +380,18 @@ describe('Proxy detections', () => {
         apiFunction instanceof apiFunction;
         return '"apiFunction instanceof apiFunction" failed to throw';
       } catch (error) {
-        if (!hasValidStack(error, '    at Function.[Symbol.hasInstance]')) {
+        if (chromeVersion >= 102) {
+          if (!hasValidStack(error, '    at [Symbol.hasInstance]')) {
+            return 'expect [Symbol.hasInstance]';
+          }
+        } else if (!hasValidStack(error, '    at Function.[Symbol.hasInstance]')) {
           return `expect Function.[Symbol.hasInstance]. Was ${error.stack.split('\n')[1]}`;
         }
       }
       return 'ok';
     },
 
-    getChainCycleLie(apiFunction, method = 'setPrototypeOf') {
+    getChainCycleLie(apiFunction, chromeVersion, method = 'setPrototypeOf') {
       try {
         if (method === 'setPrototypeOf') {
           return `${Object.setPrototypeOf(apiFunction, Object.create(apiFunction))}`;
@@ -395,11 +404,14 @@ describe('Proxy detections', () => {
         if (error.message !== `Cyclic __proto__ value`) return 'Not cyclic __proto__';
 
         const targetStackLine = ((error.stack || '').split('\n') || [])[1];
-        if (
-          method === '__proto__' &&
-          !targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`)
-        ) {
-          return `Stack doesnt have "at Function.set __proto__ [as __proto__]": ${error.stack}`;
+        if (method === '__proto__') {
+          const targetStack =
+            chromeVersion >= 102
+              ? `    at set __proto__ [as __proto__]`
+              : `    at Function.set __proto__ [as __proto__]`;
+          if (chromeVersion >= 102 && !targetStackLine.startsWith(targetStack)) {
+            return `Stack doesnt have "${targetStack.trim()}": ${error.stack}`;
+          }
         }
       }
       return 'ok';
@@ -415,7 +427,7 @@ describe('Proxy detections', () => {
     await page.goto(`${koaServer.baseUrl}`);
     page.on('console', console.log);
     const result: string = await page.evaluate(
-      `(function ${ProxyDetections.checkInstanceof.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get);`,
+      `(function ${ProxyDetections.checkInstanceof.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get, ${browserVersion});`,
     );
     expect(result).toBe('ok');
   });
@@ -429,7 +441,7 @@ describe('Proxy detections', () => {
     await page.goto(`${koaServer.baseUrl}`);
     page.on('console', console.log);
     const result: string = await page.evaluate(
-      `(function ${ProxyDetections.checkInstanceof.toString()})(Permissions.prototype.query);`,
+      `(function ${ProxyDetections.checkInstanceof.toString()})(Permissions.prototype.query, ${browserVersion});`,
     );
     expect(result).toBe('ok');
   });
@@ -443,7 +455,7 @@ describe('Proxy detections', () => {
     await page.goto(`${koaServer.baseUrl}`);
 
     const result: string = await page.evaluate(
-      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query)`,
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query, ${browserVersion})`,
     );
     expect(result).toBe('ok');
   });
@@ -457,7 +469,7 @@ describe('Proxy detections', () => {
     await page.goto(`${koaServer.baseUrl}`);
 
     const result: string = await page.evaluate(
-      `(function ${ProxyDetections.getChainCycleLie.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get)`,
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Object.getOwnPropertyDescriptor(Navigator.prototype,'userAgent').get, ${browserVersion})`,
     );
     expect(result).toBe('ok');
   });
@@ -470,7 +482,7 @@ describe('Proxy detections', () => {
     const page = await agent.newPage();
     await page.goto(`${koaServer.baseUrl}`);
     const protoResult: string = await page.evaluate(
-      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query, '__proto__')`,
+      `(function ${ProxyDetections.getChainCycleLie.toString()})(Permissions.prototype.query, ${browserVersion}, '__proto__')`,
     );
     expect(protoResult).toBe('ok');
   });

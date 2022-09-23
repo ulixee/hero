@@ -35,8 +35,8 @@ export default class DomPolyfillJson {
         BrowserProfiler.extractMetaFromUserAgentId(userAgentId);
       for (const runtimeOsId of Object.keys(foundationDomsByOsId)) {
         const foundationDom = foundationDomsByOsId[runtimeOsId];
-        const polyfill = generatePolyfill(foundationDom, profile.data.https);
 
+        const polyfill = generatePolyfill(profile.data.https, foundationDom);
         // apply devtools, browserstack, headless indicator removes
         DomBridger.removeDevtoolsFromPolyfill(polyfill);
         DomBridger.removeBrowserstackFromPolyfill(polyfill);
@@ -57,7 +57,7 @@ export default class DomPolyfillJson {
 
       for (const runtimeOsId of Object.keys(dataByRuntimeOsId)) {
         const dataString = JSON.stringify(dataByRuntimeOsId[runtimeOsId], null, 2);
-        const domDiffsPath = Path.join(dataOsDir,  `dom-polyfill-when-runtime-${runtimeOsId}.json`);
+        const domDiffsPath = Path.join(dataOsDir, `dom-polyfill-when-runtime-${runtimeOsId}.json`);
         const byteSize = Buffer.byteLength(dataString, 'utf8');
 
         const { add, remove, modify } = dataByRuntimeOsId[runtimeOsId];

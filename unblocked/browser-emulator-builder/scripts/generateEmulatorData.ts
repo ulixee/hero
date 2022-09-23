@@ -1,4 +1,7 @@
 import BrowserProfiler from '@unblocked-web/browser-profiler';
+import * as stableChromeVersions from '@unblocked-web/real-user-agents/data/stableChromeVersions.json';
+import * as Fs from 'fs';
+import * as Path from 'path';
 import ConfigJson from '../lib/json-creators/Config';
 import ClienthelloJson from '../lib/json-creators/Clienthello';
 import CodecsJson from '../lib/json-creators/Codecs';
@@ -10,7 +13,7 @@ import WindowFramingJson from '../lib/json-creators/WindowFraming';
 import WindowNavigatorJson from '../lib/json-creators/WindowNavigator';
 import Http2SessionJson from '../lib/json-creators/Http2Session';
 import EmulatorData from '../lib/EmulatorData';
-import updateBrowserList from '../lib/updateBrowserList';
+import { emulatorDataDir } from '../paths';
 
 const userAgentIdsByBrowserId: { [browserId: string]: string[] } = {};
 
@@ -25,7 +28,8 @@ const forceRedoDom = process.argv[2] === 'force';
 const userAgentOptionsJson = new UserAgentOptionsJson();
 
 async function generate(): Promise<void> {
-  const chromeEngines = await updateBrowserList();
+  const chromeEngines = stableChromeVersions.slice(0, 10);
+
   for (const browserId of Object.keys(userAgentIdsByBrowserId)) {
     if (!browserId.startsWith('chrome') && !browserId.startsWith('safari')) continue;
 
@@ -74,6 +78,10 @@ async function generate(): Promise<void> {
     config.save(browserDir);
   }
 
+  await Fs.promises.writeFile(
+    Path.resolve(emulatorDataDir, `browserEngineOptions.json`),
+    JSON.stringify(chromeEngines, null, 2),
+  );
   userAgentOptionsJson.save(EmulatorData.emulatorsDirPath);
 }
 

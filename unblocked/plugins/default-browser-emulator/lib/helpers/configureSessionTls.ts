@@ -1,7 +1,7 @@
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import ITlsSettings from '@unblocked-web/specifications/agent/net/ITlsSettings';
 
-export default function configureSessionTcp(
+export default function configureSessionTls(
   emulationProfile: IEmulationProfile,
   settings: ITlsSettings,
 ): void {

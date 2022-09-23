@@ -1,11 +1,13 @@
 import * as Fs from 'fs';
 import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import * as Path from 'path';
 import {
   IDataBrowserEngineOptions,
   IDataCore,
   IDataUserAgentOptions,
 } from '../interfaces/IBrowserData';
 import BrowserData from './BrowserData';
+import { emulatorDataDir } from '../paths';
 
 export default class DataLoader implements IDataCore {
   public readonly baseDir: string;
@@ -17,9 +19,9 @@ export default class DataLoader implements IDataCore {
 
   private readonly osDataDirs = new Set<string>();
 
-  constructor(baseDir: string) {
-    this.baseDir = baseDir;
-    this.dataDir = `${baseDir}/data`;
+  constructor() {
+    this.baseDir = Path.join(__dirname, '..');
+    this.dataDir = emulatorDataDir;
     const browsers = Fs.readdirSync(this.dataDir);
     for (const browser of browsers) {
       if (browser.startsWith('as-') && Fs.statSync(`${this.dataDir}/${browser}`).isDirectory()) {

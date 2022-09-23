@@ -106,7 +106,7 @@ function getResourceHeaderDefaults(
   headerProfiles: IDataHeaders,
   resource: IHttpResourceLoadDetails,
 ): Pick<IDataHeaderOrder, 'order' | 'orderKeys' | 'defaults'> {
-  const { method, originType, requestHeaders: headers, resourceType } = resource;
+  const { method, originType, requestHeaders: headers, resourceType, isFromRedirect } = resource;
 
   let protocol = resource.isServerHttp2 ? 'http2' : 'https';
   if (!resource.isSSL) protocol = 'http';
@@ -125,6 +125,12 @@ function getResourceHeaderDefaults(
 
   if (defaultOrders.length > 1) {
     const filtered = defaultOrders.filter((x) => x.originTypes.includes(originType));
+    if (filtered.length) defaultOrders = filtered;
+  }
+
+  if (defaultOrders.length > 1) {
+    const isRedirect = isFromRedirect ?? false;
+    const filtered = defaultOrders.filter(x => x.isRedirect !== undefined && x.isRedirect === isRedirect);
     if (filtered.length) defaultOrders = filtered;
   }
 

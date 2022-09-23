@@ -49,7 +49,7 @@ import BrowserEngineOptions from './lib/BrowserEngineOptions';
 // Configuration to rotate out the default browser id. Used for testing different browsers via cli
 const defaultBrowserId = process.env.ULX_DEFAULT_BROWSER_ID ?? process.env.UBK_DEFAULT_BROWSER_ID;
 
-const dataLoader = new DataLoader(__dirname);
+const dataLoader = new DataLoader();
 const browserEngineOptions = new BrowserEngineOptions(dataLoader, defaultBrowserId);
 const userAgentOptions = new UserAgentOptions(dataLoader, browserEngineOptions);
 

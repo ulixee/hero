@@ -10,6 +10,7 @@ import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
 import DomExtractor = require('./DomExtractor');
+import { emulatorDataDir } from '../paths';
 
 const logger = TestLogger.forTest(module);
 
@@ -19,7 +20,7 @@ beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
   const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
-  const asOsDataDir = `${__dirname}/../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}`;
+  const asOsDataDir = `${emulatorDataDir}/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}`;
 
   const navigatorJsonPath = `${asOsDataDir}/window-navigator.json`;
   ({ navigator: navigatorConfig } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any);
@@ -71,7 +72,7 @@ test('it should override plugins in a browser window', async () => {
 })()`,
     false,
   );
-  expect(plugin1Mimes).toStrictEqual(pluginsData.mimeTypes.map((x) => x.type));
+  expect(plugin1Mimes).toStrictEqual(pluginsData.mimeTypes.map(x => x.type));
 
   const mimecount = await page.mainFrame.evaluate(`navigator.mimeTypes.length`, false);
   expect(mimecount).toBe(pluginsData.mimeTypes.length);
@@ -102,6 +103,11 @@ test('it should override userAgentData in a browser window', async () => {
   const httpServer = await Helpers.runHttpsServer((req, res) => {
     res.end('<html><head></head><body>Hi</body></html>');
   });
+  const brands: { version: string; brand: string }[] = [];
+  for (let i = 0; i < 3; i += 1) {
+    const { brand, version } = navigatorConfig.userAgentData.brands[i];
+    brands.push({ brand: brand._$value, version: version._$value });
+  }
   const context = await browser.newContext({
     logger,
     hooks: {
@@ -109,11 +115,7 @@ test('it should override userAgentData in a browser window', async () => {
         return page.addNewDocumentScript(
           getOverrideScript('navigator', {
             userAgentData: {
-              brands: [
-                { brand: ' Not A;Brand', version: '99' },
-                { brand: 'Chromium', version: '98' },
-                { brand: 'Google Chrome', version: '98' },
-              ],
+              brands,
               platform: 'macOS',
               mobile: false,
             },

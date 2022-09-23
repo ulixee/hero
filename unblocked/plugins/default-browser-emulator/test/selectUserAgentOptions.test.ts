@@ -4,7 +4,7 @@ import DefaultBrowserEmulator, { defaultBrowserEngine } from '../index';
 import UserAgentOptions from '../lib/UserAgentOptions';
 import BrowserEngineOptions from '../lib/BrowserEngineOptions';
 
-const dataLoader = new DataLoader(`${__dirname}/..`);
+const dataLoader = new DataLoader();
 const browserEngineOptions = new BrowserEngineOptions(
   dataLoader,
   process.env.UBK_DEFAULT_BROWSER_ID ?? process.env.ULX_DEFAULT_BROWSER_ID,

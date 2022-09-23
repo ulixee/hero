@@ -3,11 +3,8 @@
   "version": "2.0.0-alpha.10",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
-  "bin": {
-    "update-browser-emulator-data": "./bin/updateBrowserEmulatordData.js"
-  },
   "dependencies": {
-    "@ulixee/chrome-98-0": "^4758.109.6",
+    "@ulixee/chrome-105-0": "^5195.127.6",
     "@ulixee/chrome-app": "^1.0.2",
     "@ulixee/commons": "2.0.0-alpha.11",
     "@unblocked-web/real-user-agents": "1.0.0",

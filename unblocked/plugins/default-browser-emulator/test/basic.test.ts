@@ -6,9 +6,11 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 import BrowserEmulator from '../index';
+import BrowserData from '../lib/BrowserData';
 
 const logger = TestLogger.forTest(module);
 
+const tlsSpy = jest.spyOn(BrowserEmulator.prototype, 'onTlsConfiguration');
 let koaServer: ITestKoaServer;
 let pool: Pool;
 beforeEach(Helpers.beforeEach);
@@ -34,6 +36,8 @@ describe('emulator', () => {
       const page = await agent.newPage();
       await page.goto(koaServer.baseUrl);
       Helpers.needsClosing.push(page);
+      // confirm plugins are called
+      expect(tlsSpy).toHaveBeenCalledTimes(1);
       const userAgentOption = agent.emulationProfile.userAgentOption;
       firstUserAgentOption = userAgentOption;
       firstBrowserEngine = agent.emulationProfile.browserEngine;
@@ -74,7 +78,7 @@ describe('emulator', () => {
       Helpers.needsClosing.push(page);
       const headersPromise = new Resolvable<IncomingHttpHeaders>();
 
-      koaServer.get('/emulator-test', (ctx) => {
+      koaServer.get('/emulator-test', ctx => {
         headersPromise.resolve(ctx.req.headers);
         ctx.body = '<html><h1>test</h1></html>';
       });
@@ -120,7 +124,7 @@ describe('emulator', () => {
       const page = await agent.newPage();
       Helpers.needsClosing.push(page);
       const didRequest = new Resolvable<IncomingMessage>();
-      koaServer.get('/iframe', (ctx) => {
+      koaServer.get('/iframe', ctx => {
         didRequest.resolve(ctx.req);
         ctx.body = '';
       });
@@ -137,5 +141,21 @@ describe('emulator', () => {
       expect(request.headers['user-agent']).toBe('foobar');
       await agent.close();
     }
+  });
+
+  it('should be able to add windows variables', async () => {
+    BrowserData.localOsMeta = { name: 'mac-os', version: '12' };
+    const agent = pool.createAgent({
+      customEmulatorConfig: { userAgentSelector: '~ windows = 10' },
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    await page.goto(koaServer.baseUrl);
+    const descriptorsJson = await page.evaluate<string>(
+      'JSON.stringify(Object.getOwnPropertyDescriptors(Navigator.prototype))',
+    );
+    const descriptors = JSON.parse(descriptorsJson);
+    expect(descriptors.canShare).toBeTruthy();
   });
 });

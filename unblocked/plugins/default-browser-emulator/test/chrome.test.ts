@@ -8,6 +8,7 @@ import { TestLogger } from '@unblocked-web/agent-testing';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
+import { emulatorDataDir } from '../paths';
 
 let chrome;
 let prevProperty: string;
@@ -18,8 +19,8 @@ beforeAll(async () => {
   const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.14');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
   const windowChromePath = Path.resolve(
-    __dirname,
-    `../data/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-chrome.json`,
+    emulatorDataDir,
+    `as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-chrome.json`,
   );
   ({ chrome, prevProperty } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any);
   browser = new Browser(selectBrowserMeta.browserEngine);
@@ -43,7 +44,7 @@ test('it should mimic a chrome object', async () => {
   await page.addNewDocumentScript(script, false);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', (ev) => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const structure = JSON.parse(
@@ -53,6 +54,14 @@ test('it should mimic a chrome object', async () => {
     )) as any,
   ).window;
   if (debug) console.log(inspect(structure.chrome, false, null, true));
+
+  // these values are getting out of order in recreation, but that doesn't impact anything
+  expect(structure.chrome._$type).toBe(chrome._$type);
+  expect(structure.chrome._$flags).toBe(chrome._$flags);
+  delete structure.chrome._$type;
+  delete structure.chrome._$flags;
+  delete chrome._$type;
+  delete chrome._$flags;
 
   const structureJson = JSON.stringify(structure.chrome, (key, value) => {
     if (key === '_$value' || key === '_$invocation') return undefined;
@@ -82,7 +91,7 @@ test('it should update loadtimes and csi values', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', (ev) => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const loadTimes = JSON.parse(
