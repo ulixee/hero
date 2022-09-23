@@ -10,6 +10,9 @@ jobs:
     name: 'Update Emulator Profile Data'
     runs-on: ubuntu-latest
     steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
@@ -34,8 +37,8 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           repository: browser-emulator-builder/data
-          commit_message: "chore(browser-emulator-builder): automatic emulator data update"
+          commit_message: 'chore(browser-emulator-builder): automatic emulator data update'
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "chore(browser-emulator-builder): automatic update emulator data ref"
+          commit_message: 'chore(browser-emulator-builder): automatic update emulator data ref'
