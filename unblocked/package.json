@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "husky install",
     "bump-version": "ulx-repo-version-bump",
-    "build": "pwd && yarn && yarn tsc && cd ./build && yarn",
+    "build": "pwd && node modifyWorkspace.js && yarn && yarn tsc && cd ./build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
     "build:da": "cd double-agent && pwd && yarn && yarn build",
     "build:js-path": "cd js-path && pwd && yarn && yarn build",
@@ -13,7 +13,7 @@
     "build:agent": "cd agent && pwd && yarn && yarn build",
     "build:uas": "cd real-user-agents && pwd && yarn && yarn build",
     "build:prof": "cd browser-profiler && pwd && yarn && yarn build",
-    "build:all": "yarn build:js-path && yarn build:spec && yarn build:agent && yarn build:uas && yarn build:da && yarn build:prof && yarn build",
+    "build:all": "node modifyWorkspace.js pre && yarn build:js-path && yarn build:spec && yarn build:agent && yarn build:uas && yarn build:da && yarn build:prof && yarn build",
     "copy:build": "ulx-repo-after-build",
     "copy:dist": "ulx-repo-after-build --dist && shx cp -r \"browser-emulator-builder/data\" \"build-dist/plugins/default-browser-emulator\" && node adjustPaths.js build-dist",
     "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node adjustPaths.js",
@@ -62,14 +62,21 @@
       "agent/build/*",
       "specifications/build",
       "js-path/build",
-      "browser-profiler/build/*",
       "real-user-agents/build",
+      "../shared/build/*",
       "double-agent/build/*",
       "double-agent/build/collect/plugins/*",
       "double-agent/build/analyze/plugins/*",
-      "../shared/build/*",
       "plugins/*",
+      "browser-profiler/build/*",
       "browser-emulator-builder"
+    ],
+    "packages:preworkspaces": [
+      "agent/build/*",
+      "specifications/build",
+      "js-path/build",
+      "real-user-agents/build",
+      "../shared/build/*"
     ],
     "nohoist": []
   },
