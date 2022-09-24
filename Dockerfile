@@ -53,17 +53,17 @@ RUN cat /etc/*-release
 # we will automatically install dependencies
 RUN cd /app/ulixee && yarn \
     && $(npx install-browser-deps) \
-    && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
-    && mkdir -p /home/sagent/Downloads \
-    && mkdir -p /home/sagent/.cache \
-    && chown -R sagent:sagent /home/sagent \
-    && chown -R sagent:sagent /app/ulixee \
-    && mv ~/.cache/ulixee /home/sagent/.cache/ \
+    && groupadd -r hero && useradd -r -g hero -G audio,video hero \
+    && mkdir -p /home/hero/Downloads \
+    && mkdir -p /home/hero/.cache \
+    && chown -R hero:hero /home/hero \
+    && chown -R hero:hero /app/ulixee \
+    && mv ~/.cache/ulixee /home/hero/.cache/ \
     && chmod 777 /tmp \
-    && chmod -R 777 /home/sagent/.cache/ulixee
+    && chmod -R 777 /home/hero/.cache/ulixee
 
 # Add below to run as unprivileged user.
-USER sagent
+USER hero
 
 CMD node core/start;
 # To run this docker, please see /tools/docker/docker-run.sh
