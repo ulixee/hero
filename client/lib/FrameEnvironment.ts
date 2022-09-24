@@ -1,5 +1,3 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import * as Util from 'util';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
@@ -17,7 +15,11 @@ import {
   createSuperNodeList,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILoadStatus, ILocationTrigger, LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+  LocationStatus,
+} from '@unblocked-web/specifications/agent/browser/Location';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
@@ -50,21 +52,6 @@ interface ISharedInternalProperties {
   coreFramePromise: Promise<CoreFrameEnvironment>;
 }
 
-const propertyKeys: (keyof FrameEnvironment)[] = [
-  'frameId',
-  'url',
-  'isPaintingStable',
-  'isAllContentLoaded',
-  'isDomContentLoaded',
-  'name',
-  'parentFrameId',
-  'cookieStorage',
-  'localStorage',
-  'sessionStorage',
-  'document',
-  'Request',
-];
-
 export default class FrameEnvironment {
   #hero: Hero;
   #tab: Tab;
@@ -72,7 +59,7 @@ export default class FrameEnvironment {
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     return {
-      coreFramePromise: this.#coreFramePromise
+      coreFramePromise: this.#coreFramePromise,
     };
   }
 
@@ -288,10 +275,6 @@ export default class FrameEnvironment {
     return {
       type: this.constructor.name,
     };
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

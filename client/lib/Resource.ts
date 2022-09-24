@@ -1,11 +1,9 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
@@ -14,18 +12,6 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { InternalPropertiesSymbol } from './internal';
 import Tab, { getCoreTab } from './Tab';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-
-const propertyKeys: (keyof Resource)[] = [
-  'url',
-  'isRedirect',
-  'type',
-  'request',
-  'response',
-  'documentUrl',
-  'buffer',
-  'json',
-  'text',
-];
 
 export default class Resource {
   readonly #coreTabPromise: Promise<CoreTab>;
@@ -51,6 +37,7 @@ export default class Resource {
   constructor(coreTabPromise: Promise<CoreTab>, resourceMeta: IResourceMeta) {
     this.#coreTabPromise = coreTabPromise;
     this.#resourceMeta = resourceMeta;
+    this.id = resourceMeta.id;
     this.url = resourceMeta.url;
     this.documentUrl = resourceMeta.documentUrl;
     this.type = resourceMeta.type;
@@ -69,10 +56,6 @@ export default class Resource {
 
   public get json(): Promise<any> {
     return this.text.then(JSON.parse);
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 
   public static async findLatest(
@@ -114,7 +97,7 @@ export default class Resource {
         if (!filter.filterFn) {
           done();
           return true;
-        } 
+        }
         const response = await filter.filterFn(resource);
         if (response) {
           done();

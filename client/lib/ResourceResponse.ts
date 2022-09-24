@@ -1,24 +1,8 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
 import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import * as Util from 'util';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import CoreTab from './CoreTab';
-
-const propertyKeys: (keyof ResourceResponse)[] = [
-  'headers',
-  'url',
-  'timestamp',
-  'remoteAddress',
-  'statusCode',
-  'statusMessage',
-  'browserLoadFailure',
-  'browserServedFromCache',
-  'buffer',
-  'text',
-  'json',
-];
 
 export default class ResourceResponse {
   public readonly url: string;
@@ -68,10 +52,6 @@ export default class ResourceResponse {
 
   public get json(): Promise<any> {
     return this.text.then(JSON.parse);
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

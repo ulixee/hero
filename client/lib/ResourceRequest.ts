@@ -1,17 +1,7 @@
 import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
 import IResourceRequest from '@unblocked-web/specifications/agent/net/IResourceRequest';
-import * as Util from 'util';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import CoreTab from './CoreTab';
-
-const propertyKeys: (keyof ResourceRequest)[] = [
-  'headers',
-  'url',
-  'timestamp',
-  'method',
-  'postData',
-];
 
 export default class ResourceRequest {
   public readonly url: string;
@@ -40,10 +30,6 @@ export default class ResourceRequest {
     if (this.#request?.postData) return Promise.resolve(this.#request.postData);
     const id = this.#resourceId;
     return this.#coreTab.then(x => x.getResourceProperty(id, `request.postData`));
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

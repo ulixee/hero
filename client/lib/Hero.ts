@@ -1,6 +1,4 @@
-import * as Util from 'util';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -75,23 +73,6 @@ export const DefaultOptions = {
 export type ISessionOptions = Omit<ISessionCreateOptions, 'sessionId'> &
   Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;
 
-const propertyKeys: (keyof Hero)[] = [
-  'document',
-  'sessionId',
-  'meta',
-  'tabs',
-  'frameEnvironments',
-  'isAllContentLoaded',
-  'isDomContentLoaded',
-  'isPaintingStable',
-  'mainFrameEnvironment',
-  'coreHost',
-  'activeTab',
-  'sessionName',
-  'url',
-  'lastCommandId',
-  'Request',
-];
 
 interface ISharedInternalProperties {
   clientPlugins: IClientPlugin[];
@@ -538,10 +519,6 @@ export default class Hero extends AwaitedEventTarget<{
     return {
       type: this.constructor.name,
     };
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 
   #getCoreSessionOrReject(): Promise<CoreSession> {

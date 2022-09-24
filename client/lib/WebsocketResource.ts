@@ -1,8 +1,6 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
-import * as Util from 'util';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
@@ -13,16 +11,6 @@ import { InternalPropertiesSymbol } from './internal';
 interface IEventType {
   message: (message: IWebsocketMessage) => void;
 }
-
-const propertyKeys: (keyof WebsocketResource)[] = [
-  'url',
-  'request',
-  'response',
-  'messages',
-  'documentUrl',
-  'type',
-  'isRedirect',
-];
 
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
@@ -83,10 +71,6 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
 
   public get json(): Promise<any> {
     throw new Error(subscribeErrorMessage);
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

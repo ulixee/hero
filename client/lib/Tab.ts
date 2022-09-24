@@ -1,4 +1,3 @@
-import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
@@ -6,7 +5,10 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILoadStatus, ILocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+} from '@unblocked-web/specifications/agent/browser/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -22,7 +24,6 @@ import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScr
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@unblocked-web/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import * as Util from 'util';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';
 import CoreTab from './CoreTab';
@@ -54,22 +55,6 @@ interface IEventType {
   resource: (resource: Resource | WebsocketResource) => void;
   dialog: (dialog: Dialog) => void;
 }
-
-const propertyKeys: (keyof Tab)[] = [
-  'lastCommandId',
-  'tabId',
-  'url',
-  'isPaintingStable',
-  'isAllContentLoaded',
-  'isDomContentLoaded',
-  'cookieStorage',
-  'localStorage',
-  'sessionStorage',
-  'document',
-  'frameEnvironments',
-  'mainFrameEnvironment',
-  'Request',
-];
 
 export default class Tab extends AwaitedEventTarget<IEventType> {
   #hero: Hero;
@@ -372,10 +357,6 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return {
       type: this.constructor.name,
     };
-  }
-
-  public [Util.inspect.custom](): any {
-    return inspectInstanceProperties(this, propertyKeys as any);
   }
 
   async #getOrCreateFrameEnvironment(coreFrame: CoreFrameEnvironment): Promise<FrameEnvironment> {
