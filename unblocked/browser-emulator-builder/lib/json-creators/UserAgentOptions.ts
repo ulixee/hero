@@ -1,7 +1,8 @@
 import * as Fs from 'fs';
 import BrowserProfiler from '@unblocked-web/browser-profiler';
 import RealUserAgents from '@unblocked-web/real-user-agents';
-import IDomProfile from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
+import { IProfileDataByProtocol } from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
+import IBaseProfile from '@double-agent/collect/interfaces/IBaseProfile';
 
 interface IUserAgentOption {
   browserName: string;
@@ -24,12 +25,15 @@ export default class UserAgentOptionsJson {
   public add(browserId: string, browserEngineId: string, userAgentIds: string[]): void {
     for (const userAgentId of userAgentIds) {
       const { operatingSystemId } = BrowserProfiler.extractMetaFromUserAgentId(userAgentId);
-      const profile = BrowserProfiler.getProfile<IDomProfile>('browser-dom-environment', userAgentId);
-      const window = (profile.data as any).https.window;
+      const profile = BrowserProfiler.getProfile<IBaseProfile<IProfileDataByProtocol>>(
+        'browser-dom-environment',
+        userAgentId,
+      );
+      const window = profile.data.https.window;
       const operatingSystemPlatform = window.navigator.platform._$value;
       for (const userAgent of RealUserAgents.where({ browserId, operatingSystemId })) {
         for (const userAgentString of userAgent.strings) {
-          this.byUserAgentId[userAgentId] = this.byUserAgentId[userAgentId] || {
+          this.byUserAgentId[userAgentId] ??= {
             browserName: userAgent.browser.name.toLowerCase().replace(/[^a-z]+/, '-'),
             browserVersion: userAgent.browser.version,
             operatingSystemPlatform,

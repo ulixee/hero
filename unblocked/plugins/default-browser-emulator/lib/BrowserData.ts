@@ -10,12 +10,12 @@ import IBrowserData, {
   IDataDomPolyfill,
   IDataHeaders,
   IDataHttp2Settings,
+  IDataSpeechVoices,
   IDataWindowChrome,
   IDataWindowFraming,
   IDataWindowNavigator,
 } from '../interfaces/IBrowserData';
 import DataLoader, { loadData } from './DataLoader';
-
 
 export default class BrowserData implements IBrowserData {
   public static localOsMeta = getLocalOperatingSystemMeta();
@@ -62,6 +62,10 @@ export default class BrowserData implements IBrowserData {
 
   public get codecs(): IDataCodecs {
     return loadData(`${this.osDataDir}/codecs.json`);
+  }
+
+  public get speech(): IDataSpeechVoices {
+    return loadData(`${this.osDataDir}/browser-speech.json`);
   }
 
   public get http2Settings(): IDataHttp2Settings {

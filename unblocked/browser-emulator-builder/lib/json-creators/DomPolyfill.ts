@@ -7,6 +7,7 @@ import IDomPolyfill from '@unblocked-web/specifications/plugin/IDomPolyfill';
 import BrowserProfiler from '@unblocked-web/browser-profiler';
 import DomBridger from '@unblocked-web/browser-profiler-dom-bridger';
 import IBaseProfile from '@double-agent/collect/interfaces/IBaseProfile';
+import { gunzipSync } from 'zlib';
 import generatePolyfill from '../generatePolyfill';
 import Config from './Config';
 import EmulatorData from '../EmulatorData';
@@ -130,8 +131,8 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
     const [osId, browserId] = dirName.split('--');
     if (browserId !== forBrowserId) continue;
 
-    const startingDomPath = `${browserstackProfilesDir}/${dirName}/browser-dom-environment--https--1.json`;
-    const { data: dom } = JSON.parse(Fs.readFileSync(startingDomPath, 'utf8'));
+    const startingDomPath = `${browserstackProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
+    const { data: dom } = JSON.parse(gunzipSync(Fs.readFileSync(startingDomPath)).toString());
     domsByOsId[osId] = dom;
     domPathsByOsId[osId] = startingDomPath;
   }
@@ -143,8 +144,8 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
     if (osId !== 'linux') continue;
     if (features !== 'headed-devtools') continue;
 
-    const startingDomPath = `${localProfilesDir}/${dirName}/browser-dom-environment--https--1.json`;
-    const { data: dom } = JSON.parse(Fs.readFileSync(startingDomPath, 'utf8'));
+    const startingDomPath = `${localProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
+    const { data: dom } = JSON.parse(gunzipSync(Fs.readFileSync(startingDomPath)).toString());
     domsByOsId[osId] = dom;
     domPathsByOsId[osId] = startingDomPath;
   }
@@ -154,7 +155,7 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
 function formatBytes(bytes, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
 
-  const k = 1024;
+  const k = 1e3;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 

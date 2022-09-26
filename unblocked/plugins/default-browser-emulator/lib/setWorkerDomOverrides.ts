@@ -10,6 +10,7 @@ export default function setWorkerDomOverrides(
   const script = domOverrides.build('worker', [
     'Error.captureStackTrace',
     'Error.constructor',
+    'console.debug',
     'navigator.deviceMemory',
     'navigator',
     'WebGLRenderingContext.prototype.getParameter',

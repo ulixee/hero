@@ -13,6 +13,7 @@ export default interface IBrowserData
   domPolyfill: IDataDomPolyfill;
   windowBaseFraming: IDataWindowFraming;
   headers: IDataHeaders;
+  speech: IDataSpeechVoices;
 }
 
 export interface IDataBrowserConfig {
@@ -48,6 +49,16 @@ export interface IDataCodecs {
   videoSupport: any;
   webRtcAudioCodecs: any;
   webRtcVideoCodecs: any;
+}
+
+export interface IDataSpeechVoices {
+  voices: {
+    default: boolean;
+    lang: string;
+    localService: boolean;
+    name: string;
+    voiceURI: string;
+  }[];
 }
 
 export interface IDataHttp2Settings {

@@ -219,6 +219,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       architecture: 'x86',
       model: '',
       mobile: false,
+      wow64: false,
     };
   }
 

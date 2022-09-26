@@ -15,7 +15,10 @@ export default function loadDomOverrides(
   domOverrides.add('Error.constructor');
   const deviceProfile = emulationProfile.deviceProfile;
 
-  domOverrides.add('navigator.deviceMemory', { memory: deviceProfile.deviceMemory });
+  domOverrides.add('navigator.deviceMemory', {
+    memory: deviceProfile.deviceMemory,
+    maxHeapSize: deviceProfile.maxHeapSize,
+  });
   domOverrides.add('navigator', {
     userAgentString: emulationProfile.userAgentOption.string,
     platform: emulationProfile.userAgentOption.operatingSystemPlatform,

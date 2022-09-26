@@ -3,6 +3,7 @@ import BrowserProfiler from '@unblocked-web/browser-profiler';
 import { IProfileDataByProtocol } from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
 import * as Path from 'path';
 import IBaseProfile from '@double-agent/collect/interfaces/IBaseProfile';
+import { gunzipSync } from 'zlib';
 import Config from './Config';
 import EmulatorData from '../EmulatorData';
 
@@ -28,8 +29,8 @@ export default class WindowChromeJson {
           x.endsWith(`${config.browserId}--headed-devtools`),
         );
         if (headedLocalDom) {
-          const localDomPath = `${localProfilesDir}/${headedLocalDom}/browser-dom-environment--https--1.json`;
-          const { data } = JSON.parse(Fs.readFileSync(localDomPath, 'utf8'));
+          const localDomPath = `${localProfilesDir}/${headedLocalDom}/browser-dom-environment--https--1.json.gz`;
+          const { data } = JSON.parse(gunzipSync(Fs.readFileSync(localDomPath)).toString());
           localHeadedChromeProperty = data.window.chrome;
         }
       }

@@ -6,4 +6,5 @@ export default interface IUserAgentData {
   architecture?: string;
   model?: string;
   mobile?: boolean;
+  wow64?: boolean;
 }

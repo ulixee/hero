@@ -14,6 +14,7 @@ import WindowNavigatorJson from '../lib/json-creators/WindowNavigator';
 import Http2SessionJson from '../lib/json-creators/Http2Session';
 import EmulatorData from '../lib/EmulatorData';
 import { emulatorDataDir } from '../paths';
+import SpeechSynthesisJson from '../lib/json-creators/SpeechSynthesis';
 
 const userAgentIdsByBrowserId: { [browserId: string]: string[] } = {};
 
@@ -55,6 +56,9 @@ async function generate(): Promise<void> {
     if (config.browserEngineOption) {
       console.log('- Codecs');
       new CodecsJson(config, userAgentIds).save(browserDir);
+
+      console.log('- Speech');
+      new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
 
       console.log('- WindowChrome');
       new WindowChromeJson(config, userAgentIds).save(browserDir);
