@@ -75,6 +75,14 @@ export default function loadDomOverrides(
   domOverrides.add('console.debug');
   domOverrides.add('HTMLIFrameElement.prototype');
 
+  const locale = emulationProfile.locale ?? data.browserConfig.defaultLocale ?? '';
+  const voices = data.speech.voices?.map(x => {
+    x.default = locale.includes(x.lang);
+    return x;
+  });
+  if (voices?.length) {
+    domOverrides.add('speechSynthesis.getVoices', { voices });
+  }
   domOverrides.add('window.outerWidth', {
     frameBorderWidth: data.windowFraming.frameBorderWidth,
   });

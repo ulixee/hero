@@ -1,3 +1,4 @@
+import '@ulixee/commons/lib/SourceMapSupport';
 import BrowserProfiler from '@unblocked-web/browser-profiler';
 import * as stableChromeVersions from '@unblocked-web/real-user-agents/data/stableChromeVersions.json';
 import * as Fs from 'fs';
@@ -31,7 +32,9 @@ const userAgentOptionsJson = new UserAgentOptionsJson();
 async function generate(): Promise<void> {
   const chromeEngines = stableChromeVersions.slice(0, 10);
 
-  for (const browserId of Object.keys(userAgentIdsByBrowserId)) {
+  for (const browserId of Object.keys(userAgentIdsByBrowserId).sort(
+    (a, b) =>  Number(a.split('-').slice(1).join('.'))- Number(b.split('-').slice(1).join('.')),
+  )) {
     if (!browserId.startsWith('chrome') && !browserId.startsWith('safari')) continue;
 
     console.log('--------------------------------------------------');
