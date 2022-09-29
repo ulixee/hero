@@ -8,7 +8,7 @@
     "@ulixee/chrome-app": "^1.0.2",
     "@ulixee/commons": "2.0.0-alpha.11",
     "@unblocked-web/real-user-agents": "1.0.0",
-    "@unblocked-web/specifications": "2.0.0-alpha.4",
+    "@unblocked-web/specifications": "2.0.0-alpha.5",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.22"
