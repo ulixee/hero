@@ -31,6 +31,7 @@ describe('user agent and platform', () => {
     `userAgentData.mobile`,
     `userAgentData.platform`,
     `userAgentData.brands`,
+    'connection.rtt'
   ];
 
   it('should be able to configure a userAgent', async () => {
@@ -137,7 +138,7 @@ describe('user agent and platform', () => {
     }
 
     expect(agentMeta.string).toBe(windowParams.userAgent);
-    expect(agentMeta.operatingSystemPlatform).toBe(windowParams.platform);
+    expect(agent.emulationProfile.windowNavigatorPlatform).toBe(windowParams.platform);
 
     for (const prop of propsToGet) {
       expect(`${prop}=${frameParams[prop]}`).toStrictEqual(`${prop}=${windowParams[prop]}`);
@@ -199,7 +200,7 @@ describe('user agent and platform', () => {
     const page1WindowParams = await getParams();
 
     expect(agentMeta.string).toBe(page1WindowParams.userAgent);
-    expect(agentMeta.operatingSystemPlatform).toBe(page1WindowParams.platform);
+    expect(agent.emulationProfile.windowNavigatorPlatform).toBe(page1WindowParams.platform);
 
     await page.click('a');
 

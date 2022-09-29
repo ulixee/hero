@@ -1,5 +1,6 @@
 import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
+import ChromeApp from '@ulixee/chrome-app';
 import DataLoader from './DataLoader';
 
 type IBrowserEngineOptionAndVersion = IBrowserEngineOption & { version: IVersion };
@@ -57,7 +58,9 @@ export default class BrowserEngineOptions {
 You must install data files for "${engine.id}" to support emulating the browser.`);
         continue;
       }
-      const [major, minor, patch, build] = engine.fullVersion.split('.');
+
+      const [major, minor, patch, build] =
+        BrowserEngineOptions.latestFullVersion(engine).split('.');
       this.installedOptions.push({
         ...engine,
         version: {
@@ -72,5 +75,13 @@ You must install data files for "${engine.id}" to support emulating the browser.
     this.installedOptions.sort((a, b) => {
       return Number(b.version.major) - Number(a.version.major);
     });
+  }
+
+  public static latestFullVersion(option: IBrowserEngineOption): string {
+    let platform: string = ChromeApp.getOsPlatformName();
+    if (platform.startsWith('mac')) platform = 'mac';
+    if (platform.startsWith('win')) platform = 'win';
+    const latest = option.stablePatchesByOs[platform];
+    return `${option.majorVersion}.0.${option.buildVersion}.${latest[0]}`;
   }
 }

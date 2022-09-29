@@ -1,4 +1,3 @@
-import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 
 export default interface IBrowserData
@@ -71,16 +70,9 @@ export interface IDataHttp2Settings {
 export interface IDataCore {
   pkg: any;
   browserEngineOptions: IDataBrowserEngineOptions;
-  userAgentOptions: IDataUserAgentOptions;
 }
 
 export type IDataBrowserEngineOptions = IBrowserEngineOption[];
-export type IDataUserAgentOptions = IDataUserAgentOption[];
-
-export interface IDataUserAgentOption extends Omit<IUserAgentOption, 'string'> {
-  string?: string;
-  strings?: string[];
-}
 
 export interface IDataHeaders {
   [protocol: string]: {

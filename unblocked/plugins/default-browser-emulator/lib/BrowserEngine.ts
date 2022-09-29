@@ -2,6 +2,7 @@ import { existsSync } from 'fs';
 import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
 import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
 import ChromeApp from '@ulixee/chrome-app';
+import BrowserEngineOptions from './BrowserEngineOptions';
 
 export default class BrowserEngine implements IBrowserEngine {
   public name: string;
@@ -29,9 +30,8 @@ export default class BrowserEngine implements IBrowserEngine {
     this.name = browserEngineOption.name;
     this.fullVersion = this.engineFetcher.fullVersion;
 
-    const version = browserEngineOption.fullVersion.split('.').map(Number);
     // changes at version 90
-    this.doesBrowserAnimateScrolling = version[0] >= 91;
+    this.doesBrowserAnimateScrolling = browserEngineOption.majorVersion > 90;
     this.executablePath = this.engineFetcher.executablePath;
     this.executablePathEnvVar = this.engineFetcher.executablePathEnvVar;
     this.isInstalled = this.engineFetcher.isInstalled;
@@ -76,7 +76,7 @@ ${remedyMessage}`);
     } catch (err) {
       /* no op */
     }
-
-    return new ChromeApp(option.fullVersion);
+    const fullVersion = BrowserEngineOptions.latestFullVersion(option);
+    return new ChromeApp(fullVersion);
   }
 }

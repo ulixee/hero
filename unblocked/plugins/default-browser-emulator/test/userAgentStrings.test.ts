@@ -14,7 +14,7 @@ test('it should run uninstalled userAgent strings on the closest installed brows
   expect(userAgentOption.string).toBe(userAgent);
   expect(userAgentOption.browserVersion.major).toBe(defaultBrowserEngine.version.major);
   expect(browserMeta.browserEngine.fullVersion.split('.')[0]).toBe(
-    defaultBrowserEngine.fullVersion.split('.')[0],
+    defaultBrowserEngine.majorVersion.toString(),
   );
 });
 
@@ -25,7 +25,7 @@ test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async ()
   const userAgentOption = browserMeta.userAgentOption;
   expect(userAgentOption.string).toBe(userAgent);
   expect(browserMeta.browserEngine.fullVersion.split('.')[0]).toBe(
-    defaultBrowserEngine.fullVersion.split('.')[0],
+    defaultBrowserEngine.majorVersion.toString(),
   );
   expect(userAgentOption.browserVersion.major).toBe(defaultBrowserEngine.version.major);
   const osVersion = userAgentOption.operatingSystemVersion;
@@ -33,5 +33,5 @@ test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async ()
   if (Number(osVersion.major) === 10) {
     expect(Number(osVersion.minor)).toBeGreaterThan(15);
   }
-  expect(userAgentOption.operatingSystemPlatform).toBe('MacIntel');
+  expect(browserMeta.userAgentOption.operatingSystemName).toBe('mac-os');
 });

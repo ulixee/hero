@@ -1,5 +1,5 @@
 import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
-import { IDataUserAgentOption } from '../interfaces/IBrowserData';
+import UserAgent from '@unblocked-web/real-user-agents/lib/UserAgent';
 
 const compareVersions = require('compare-versions');
 
@@ -11,18 +11,15 @@ export default class UserAgentSelector {
     this.isMatch = this.isMatch.bind(this);
   }
 
-  isMatch(userAgentOption: IDataUserAgentOption): boolean {
+  isMatch(userAgent: UserAgent): boolean {
     if (!this.selectors.length) return true;
-
-    const browserVersion = this.convertToSemVer(userAgentOption.browserVersion);
-    const operatingSystemVersion = this.convertToSemVer(userAgentOption.operatingSystemVersion);
 
     for (const { name, matches } of this.selectors) {
       let version: string;
-      if (name === userAgentOption.browserName) {
-        version = browserVersion;
-      } else if (name === userAgentOption.operatingSystemName) {
-        version = operatingSystemVersion;
+      if (name === userAgent.browserName) {
+        version = userAgent.browserBaseVersion.filter(x => x !== null && x !== undefined).join('.');
+      } else if (name === userAgent.operatingSystemName) {
+        version = this.convertToSemVer(userAgent.operatingSystemVersion);
       } else {
         return false;
       }
@@ -68,17 +65,19 @@ export default class UserAgentSelector {
   }
 
   private convertToSemVer(version: IVersion): string {
-    return [version.major, version.minor, version.patch].filter(x => x !== undefined).join('.');
+    return [version.major, version.minor, version.patch]
+      .filter(x => x !== undefined && x !== null)
+      .join('.');
   }
 
   private cleanupName(name: string): string {
     name = name.trim();
-    if (name.startsWith('chrome')) return 'chrome';
-    if (name.startsWith('firefox')) return 'firefox';
-    if (name.startsWith('safari')) return 'safari';
-    if (name.startsWith('mac')) return 'mac-os';
-    if (name.startsWith('win')) return 'windows';
-    if (name.startsWith('linux')) return 'linux';
+    if (name.startsWith('chrome')) return 'Chrome';
+    if (name.startsWith('firefox')) return 'Firefox';
+    if (name.startsWith('safari')) return 'Safari';
+    if (name.startsWith('mac')) return 'Mac OS';
+    if (name.startsWith('win')) return 'Windows';
+    if (name.startsWith('linux')) return 'Linux';
     return name.split(' ')[0];
   }
 

@@ -43,7 +43,7 @@ describe('emulator', () => {
       firstBrowserEngine = agent.emulationProfile.browserEngine;
       expect(await page.evaluate(`navigator.userAgent`)).toBe(userAgentOption.string);
       expect(await page.evaluate(`navigator.platform`)).toBe(
-        userAgentOption.operatingSystemPlatform,
+        agent.emulationProfile.windowNavigatorPlatform,
       );
       expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en-US', 'en']);
       expect(await page.evaluate('screen.height')).toBe(
@@ -55,9 +55,9 @@ describe('emulator', () => {
       const agent = pool.createAgent({
         userAgentOption: {
           ...firstUserAgentOption,
-          operatingSystemPlatform: 'Windows',
           string: 'foobar',
         },
+        windowNavigatorPlatform: 'Windows',
         browserEngine: firstBrowserEngine,
         logger,
         options: {

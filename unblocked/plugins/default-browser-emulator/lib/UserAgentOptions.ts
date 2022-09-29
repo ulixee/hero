@@ -1,22 +1,20 @@
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import IUserAgentOption, { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import RealUserAgents from '@unblocked-web/real-user-agents';
+import UserAgent from '@unblocked-web/real-user-agents/lib/UserAgent';
+import findUaClientHintsPlatformVersion from '@unblocked-web/real-user-agents/lib/findUaClientHintsPlatformVersion';
 import DataLoader from './DataLoader';
-import { IDataUserAgentOption, IDataUserAgentOptions } from '../interfaces/IBrowserData';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';
 import BrowserEngineOptions from './BrowserEngineOptions';
 
 export default class UserAgentOptions {
   private static parsedCached: { [uaString: string]: IUserAgentOption } = {};
-  private installedUserAgentOptions: IDataUserAgentOptions;
-  private readonly defaultBrowserUserAgentOptions: IDataUserAgentOptions;
+  private installedUserAgentOptions: UserAgent[];
+  private readonly defaultBrowserUserAgentOptions: UserAgent[];
 
-  public get all(): IDataUserAgentOptions {
-    return this.dataLoader.userAgentOptions;
-  }
-
-  public get installedOptions(): IDataUserAgentOptions {
+  public get installedOptions(): UserAgent[] {
     if (!this.installedUserAgentOptions) {
       const enginesByNameVersion = new Set<string>();
       for (const engine of this.browserEngineOptions.installedOptions) {
@@ -24,9 +22,8 @@ export default class UserAgentOptions {
       }
 
       this.installedUserAgentOptions = [];
-      for (const userAgent of this.all) {
-        const id = `${userAgent.browserName}-${userAgent.browserVersion.major}-${userAgent.browserVersion.minor}`;
-        if (enginesByNameVersion.has(id)) {
+      for (const userAgent of RealUserAgents.all()) {
+        if (enginesByNameVersion.has(userAgent.browserId)) {
           this.installedUserAgentOptions.push(userAgent);
         }
       }
@@ -40,9 +37,7 @@ export default class UserAgentOptions {
   ) {
     const defaultBrowserEngine = browserEngineOptions.default;
     this.defaultBrowserUserAgentOptions = this.installedOptions.filter(
-      (x) =>
-        x.browserName === defaultBrowserEngine.name &&
-        x.browserVersion.major === defaultBrowserEngine.version.major,
+      x => x.browserId === defaultBrowserEngine.id,
     );
   }
 
@@ -64,7 +59,7 @@ export default class UserAgentOptions {
     const osId = createOsId(userAgent);
     if (
       !this.dataLoader.isInstalledBrowserAndOs(browserId, osId) ||
-      !this.browserEngineOptions.installedOptions.some((x) => x.id === browserId)
+      !this.browserEngineOptions.installedOptions.some(x => x.id === browserId)
     ) {
       userAgent = this.findClosestInstalled(userAgent);
       userAgent.string = userAgentString;
@@ -77,21 +72,18 @@ export default class UserAgentOptions {
   }
 
   public findClosestInstalled(userAgent: IUserAgentOption): IUserAgentOption {
-    let filteredOptions = this.installedOptions.filter(
-      (x) =>
-        x.browserName === userAgent.browserName &&
-        x.browserVersion.major === userAgent.browserVersion.major,
-    );
+    const id = createBrowserId(userAgent);
+    let filteredOptions = this.installedOptions.filter(x => x.browserId === id);
     // if none on this version, go to default
     if (!filteredOptions.length) filteredOptions = this.defaultBrowserUserAgentOptions;
 
     const withOs = filteredOptions.filter(
-      (x) => x.operatingSystemName === userAgent.operatingSystemName,
+      x => x.operatingSystemName === userAgent.operatingSystemName,
     );
 
     if (withOs.length) filteredOptions = withOs;
 
-    const withOsVersion = filteredOptions.filter((x) =>
+    const withOsVersion = filteredOptions.filter(x =>
       isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion, true),
     );
 
@@ -116,23 +108,17 @@ export default class UserAgentOptions {
 
     const [browserVersionMajor, browserVersionMinor, browserVersionPatch, browserVersionBuild] =
       uaBrowser.version.split('.');
-    const browserName = (uaBrowser.name || '').toLowerCase().replace(' ', '-');
+    const browserName = cleanName(uaBrowser.name || '');
 
     // eslint-disable-next-line prefer-const
     let [osVersionMajor, osVersionMinor, osVersionPatch] = uaOs.version.split('.');
-    const operatingSystemName = (uaOs.name || '').toLowerCase().replace(' ', '-');
+    const operatingSystemName = cleanName(uaOs.name || '');
     if (operatingSystemName === 'mac-os' && osVersionMajor === '10' && osVersionMinor === '16') {
       osVersionMajor = '11';
       osVersionMinor = undefined;
     }
 
-    let operatingSystemPlatform: string;
-
-    if (operatingSystemName === 'mac-os') operatingSystemPlatform = 'MacIntel';
-    else if (operatingSystemName === 'windows') operatingSystemPlatform = 'Win32';
-    else operatingSystemPlatform = 'Linux';
-
-    this.parsedCached[userAgentString] = {
+    const ua: IUserAgentOption = {
       browserName,
       browserVersion: {
         major: browserVersionMajor ?? '1',
@@ -141,35 +127,48 @@ export default class UserAgentOptions {
         build: browserVersionBuild,
       },
       operatingSystemName,
-      operatingSystemPlatform,
       operatingSystemVersion: {
         major: osVersionMajor,
         minor: osVersionMinor,
         patch: osVersionPatch,
       },
+      uaClientHintsPlatformVersion: uaOs.version,
       string: userAgentString,
     };
+    if (browserName.toLowerCase() === 'chrome' && browserVersionMajor > 89) {
+      const platformVersions = findUaClientHintsPlatformVersion(createOsId(ua));
+      if (platformVersions.length) {
+        ua.uaClientHintsPlatformVersion = pickRandom(platformVersions);
+      }
+    }
+
+    this.parsedCached[userAgentString] = ua;
     return this.parsedCached[userAgentString];
   }
 
-  private static random(dataUserAgentOptions: IDataUserAgentOptions): IUserAgentOption {
-    const dataUserAgentOption = pickRandom<IDataUserAgentOption>(dataUserAgentOptions);
+  private static random(dataUserAgentOptions: UserAgent[]): IUserAgentOption {
+    const dataUserAgentOption = pickRandom(dataUserAgentOptions);
     return this.convertToUserAgentOption(dataUserAgentOption);
   }
 
-  private static convertToUserAgentOption(
-    dataUserAgentOption: IDataUserAgentOption,
-  ): IUserAgentOption {
+  private static convertToUserAgentOption(agent: UserAgent): IUserAgentOption {
+    let patch = agent.browserBaseVersion[3];
+    const [major, minor, build] = agent.browserBaseVersion.map(String);
+    if (agent.stablePatchVersions.length) {
+      patch = pickRandom(agent.stablePatchVersions);
+    }
+    const uaClientHintsPlatformVersion = pickRandom(agent.uaClientHintsPlatformVersions);
+
     const userAgent = {
-      ...dataUserAgentOption,
-      browserVersion: { ...dataUserAgentOption.browserVersion },
-      operatingSystemVersion: { ...dataUserAgentOption.operatingSystemVersion },
-      strings: undefined,
-      string: pickRandom(dataUserAgentOption.strings),
+      browserName: cleanName(agent.browserName),
+      browserVersion: { major, minor, build, patch: String(patch) },
+      operatingSystemName: cleanName(agent.operatingSystemName),
+      operatingSystemVersion: { ...agent.operatingSystemVersion },
+      uaClientHintsPlatformVersion,
+      string: UserAgent.parse(agent, patch, uaClientHintsPlatformVersion),
     } as IUserAgentOption;
 
     const parsed = this.parse(userAgent.string);
-    userAgent.browserVersion.build ??= parsed.browserVersion.build;
 
     if (this.canTrustOsVersionForAgentString(parsed)) {
       userAgent.operatingSystemVersion = parsed.operatingSystemVersion;
@@ -203,14 +202,13 @@ export default class UserAgentOptions {
 
   private static replaceOperatingSystem(
     userAgent: IUserAgentOption,
-    dataUserAgentOptions: IDataUserAgentOptions,
+    dataUserAgentOptions: UserAgent[],
   ): void {
+    const browserId = createBrowserId(userAgent);
     const realOperatingSystem = dataUserAgentOptions.find(
-      (x) =>
-        x.browserName === userAgent.browserName &&
-        x.browserVersion.major === userAgent.browserVersion.major &&
-        x.browserVersion.minor === userAgent.browserVersion.minor &&
-        x.operatingSystemName === userAgent.operatingSystemName &&
+      x =>
+        x.browserId === browserId &&
+        cleanName(x.operatingSystemName) === userAgent.operatingSystemName &&
         isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion),
     );
     if (realOperatingSystem) {
@@ -236,4 +234,10 @@ function isLeftVersionGreater(a: IVersion, b: IVersion, allowEqual = false): boo
   }
 
   return false;
+}
+
+const cleanCache: { [name: string]: string } = {};
+function cleanName(name: string): string {
+  cleanCache[name] ??= name.toLowerCase().replace(/[^a-z]+/, '-');
+  return cleanCache[name];
 }

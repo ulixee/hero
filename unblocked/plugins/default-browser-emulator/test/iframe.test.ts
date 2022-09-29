@@ -221,7 +221,7 @@ test('should handle a removed frame', async () => {
     }
   })()`);
   await page.close();
-  expect(navigatorPlatform).toBe(agent.emulationProfile.userAgentOption.operatingSystemPlatform);
+  expect(navigatorPlatform).toBe(agent.emulationProfile.windowNavigatorPlatform);
 });
 
 // only run this test manually

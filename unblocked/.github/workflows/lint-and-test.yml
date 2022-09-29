@@ -17,6 +17,13 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node-version: [14, 16]
+        include:
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-100-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-96-0
 
     runs-on: ${{ matrix.os }}
 
@@ -43,9 +50,14 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
         if: ${{ matrix.os == 'windows-latest' }}
-        
+
       - name: Yarn build
         run: yarn build:all
+
+      - name: Linux - Add Chrome Env
+        if: ${{ matrix.browser }}
+        working-directory: ./build
+        run: yarn add -W @ulixee/${{ matrix.browser }}
 
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -58,6 +70,8 @@ jobs:
 
       - name: Run tests
         run: yarn test:all --testTimeout=60000 --maxWorkers=2
+        env:
+          UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
 
       - name: 'Tar files'
         if: ${{ failure() }}

@@ -8,7 +8,6 @@ import ClienthelloJson from '../lib/json-creators/Clienthello';
 import CodecsJson from '../lib/json-creators/Codecs';
 import DomPolyfillJson from '../lib/json-creators/DomPolyfill';
 import HeadersJson from '../lib/json-creators/Headers';
-import UserAgentOptionsJson from '../lib/json-creators/UserAgentOptions';
 import WindowChromeJson from '../lib/json-creators/WindowChrome';
 import WindowFramingJson from '../lib/json-creators/WindowFraming';
 import WindowNavigatorJson from '../lib/json-creators/WindowNavigator';
@@ -27,13 +26,11 @@ for (const userAgentId of BrowserProfiler.userAgentIds) {
 
 const forceRedoDom = process.argv[2] === 'force';
 
-const userAgentOptionsJson = new UserAgentOptionsJson();
-
 async function generate(): Promise<void> {
   const chromeEngines = stableChromeVersions.slice(0, 10);
 
   for (const browserId of Object.keys(userAgentIdsByBrowserId).sort(
-    (a, b) =>  Number(a.split('-').slice(1).join('.'))- Number(b.split('-').slice(1).join('.')),
+    (a, b) => Number(a.split('-').slice(1).join('.')) - Number(b.split('-').slice(1).join('.')),
   )) {
     if (!browserId.startsWith('chrome') && !browserId.startsWith('safari')) continue;
 
@@ -41,11 +38,9 @@ async function generate(): Promise<void> {
     console.log(`GENERATING ${browserId}`);
     const browserEngineId = EmulatorData.extractBrowserEngineId(browserId);
     const browserEngineOption = chromeEngines.find(x => x.id === browserEngineId);
-    const config = new ConfigJson(browserId, browserEngineId, browserEngineOption);
+    const config = new ConfigJson(browserId, browserEngineId, browserEngineOption as any);
     const userAgentIds = userAgentIdsByBrowserId[browserId];
     const browserDir = EmulatorData.getEmulatorDir(browserId);
-
-    userAgentOptionsJson.add(config.browserId, config.browserEngineId, userAgentIds);
 
     console.log('- Clienthello');
     new ClienthelloJson(config, userAgentIds).save(browserDir);
@@ -89,7 +84,6 @@ async function generate(): Promise<void> {
     Path.resolve(emulatorDataDir, `browserEngineOptions.json`),
     JSON.stringify(chromeEngines, null, 2),
   );
-  userAgentOptionsJson.save(EmulatorData.emulatorsDirPath);
 }
 
 generate().catch(console.error);

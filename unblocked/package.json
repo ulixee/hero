@@ -18,7 +18,7 @@
     "copy:dist": "ulx-repo-after-build --dist && shx cp -r \"browser-emulator-builder/data\" \"build-dist/plugins/default-browser-emulator\" && node adjustPaths.js build-dist",
     "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node adjustPaths.js",
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
-    "watch:all": "concurrently -n jspath,spec,plugins,agent,da,prof \"cd js-path && yarn watch\" \"cd specifications && yarn watch\" \"yarn watch\" \"cd agent && yarn watch\" \"cd double-agent && yarn watch\" \"cd browser-profiler && yarn watch\"",
+    "watch:all": "concurrently -n jspath,spec,plugins,agent,da,prof,uas \"cd js-path && yarn watch\" \"cd specifications && yarn watch\" \"yarn watch\" \"cd agent && yarn watch\" \"cd double-agent && yarn watch\" \"cd browser-profiler && yarn watch\" \"cd real-user-agents && yarn watch\"",
     "test": "yarn copy:build && yarn test:build",
     "test:build": "cd ./build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
     "test:all": "yarn copy:build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",

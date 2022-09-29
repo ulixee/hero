@@ -11,7 +11,7 @@
     "@unblocked-web/browser-profiler": "1.0.0",
     "@unblocked-web/browser-profiler-dom-bridger": "1.0.0",
     "@unblocked-web/real-user-agents": "1.0.0",
-    "@unblocked-web/specifications": "2.0.0-alpha.3",
+    "@unblocked-web/specifications": "2.0.0-alpha.4",
     "@double-agent/collect": "1.0.0",
     "@double-agent/collect-tls-clienthello": "1.0.0",
     "@double-agent/collect-browser-codecs": "1.0.0",

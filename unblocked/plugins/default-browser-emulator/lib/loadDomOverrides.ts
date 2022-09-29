@@ -1,4 +1,5 @@
 import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { pickRandom } from '@ulixee/commons/lib/utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
@@ -14,6 +15,7 @@ export default function loadDomOverrides(
   domOverrides.add('Error.captureStackTrace');
   domOverrides.add('Error.constructor');
   const deviceProfile = emulationProfile.deviceProfile;
+  const rtt = pickRandom([25, 50, 100]);
 
   domOverrides.add('navigator.deviceMemory', {
     memory: deviceProfile.deviceMemory,
@@ -21,10 +23,11 @@ export default function loadDomOverrides(
   });
   domOverrides.add('navigator', {
     userAgentString: emulationProfile.userAgentOption.string,
-    platform: emulationProfile.userAgentOption.operatingSystemPlatform,
+    platform: emulationProfile.windowNavigatorPlatform,
     headless: emulationProfile.browserEngine.isHeaded !== true,
     pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
     userAgentData,
+    rtt,
   });
 
   domOverrides.add('MediaDevices.prototype.enumerateDevices', {
@@ -75,7 +78,7 @@ export default function loadDomOverrides(
   domOverrides.add('console.debug');
   domOverrides.add('HTMLIFrameElement.prototype');
 
-  const locale = emulationProfile.locale ?? data.browserConfig.defaultLocale ?? '';
+  const locale = emulationProfile.locale;
   const voices = data.speech.voices?.map(x => {
     x.default = locale.includes(x.lang);
     return x;

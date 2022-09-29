@@ -79,7 +79,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   }
 
   protected readonly data: IBrowserData;
-  private readonly domOverridesBuilder: DomOverridesBuilder;
+  private domOverridesBuilder: DomOverridesBuilder;
   private readonly userAgentData: IUserAgentData;
 
   constructor(emulationProfile: IEmulationProfile<T>) {
@@ -90,14 +90,11 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     // set default device profile options
     emulationProfile.deviceProfile ??= {};
     configureDeviceProfile(this.deviceProfile);
-    this.domOverridesBuilder = loadDomOverrides(
-      this.emulationProfile,
-      this.data,
-      this.userAgentData,
-    );
   }
 
   configure(emulationProfile: IEmulationProfile<T>): void {
+    emulationProfile.windowNavigatorPlatform ??=
+      this.data.windowNavigator.navigator.platform._$value;
     emulationProfile.locale ??= this.data.browserConfig.defaultLocale;
     emulationProfile.viewport ??= Viewports.getDefault(
       this.data.windowBaseFraming,
@@ -109,6 +106,12 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       emulationProfile.upstreamProxyIpMask ??= {};
       emulationProfile.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
     }
+
+    this.domOverridesBuilder ??= loadDomOverrides(
+      this.emulationProfile,
+      this.data,
+      this.userAgentData,
+    );
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
@@ -200,14 +203,11 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
 
   protected getUserAgentData(): IUserAgentData {
     if (!this.data.windowNavigator.navigator.userAgentData) return null;
-    const { browserVersion, operatingSystemVersion } = this.emulationProfile.userAgentOption;
-    const uaFullVersion = `${browserVersion.major}.0.${browserVersion.patch}.${browserVersion.build}`;
-    const platformVersion = `${operatingSystemVersion.major}.${
-      operatingSystemVersion.minor ?? '0'
-    }.${operatingSystemVersion.build ?? '1'}`;
+    const { browserVersion, uaClientHintsPlatformVersion } = this.emulationProfile.userAgentOption;
+    const uaFullVersion = `${browserVersion.major}.0.${browserVersion.build}.${browserVersion.patch}`;
 
     const brands = this.data.windowNavigator.navigator.userAgentData.brands;
-    const brandData = [brands['0'], brands['1'], brands['2']].map((x) => ({
+    const brandData = [brands['0'], brands['1'], brands['2']].map(x => ({
       brand: x.brand._$value,
       version: x.version._$value,
     }));
@@ -215,7 +215,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       uaFullVersion,
       brands: brandData,
       platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
-      platformVersion,
+      platformVersion: uaClientHintsPlatformVersion,
       architecture: 'x86',
       model: '',
       mobile: false,
@@ -244,6 +244,11 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
         emulationProfile.browserEngine = browserEngine;
         emulationProfile.userAgentOption = userAgentOption;
       } catch (e) {
+        if (emulationProfile.customEmulatorConfig?.userAgentSelector) {
+          emulationProfile.logger?.error('Failed to instantiate a default browser engine.', {
+            error: e,
+          });
+        }
         return false;
       }
     }

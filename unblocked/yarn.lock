@@ -2128,14 +2128,6 @@
     pretty-quick "^3.1.0"
     typescript "^4.7.2"
 
-"@unblocked-web/specifications@2.0.0-alpha.3":
-  version "2.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@unblocked-web/specifications/-/specifications-2.0.0-alpha.3.tgz#e4dcd2c2798de87e9e7f521da03b432a3abe87bc"
-  integrity sha512-3YRX4ggGER8fNVhOvwdMvy++JMmel3Urc/J5WUAKj01kRqyh5Tv2byoj6EG14kABjN2Ygnfwlu+8F4b7fv1Xbw==
-  dependencies:
-    "@unblocked-web/js-path" "2.0.0-alpha.1"
-    devtools-protocol "^0.0.981744"
-
 "@vue/compiler-sfc@2.7.10":
   version "2.7.10"
   resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-2.7.10.tgz#3fe08e780053a3bbf41328c65ae5dfdee0385206"

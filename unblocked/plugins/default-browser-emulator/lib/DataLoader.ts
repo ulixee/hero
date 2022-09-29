@@ -1,11 +1,7 @@
 import * as Fs from 'fs';
 import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
 import * as Path from 'path';
-import {
-  IDataBrowserEngineOptions,
-  IDataCore,
-  IDataUserAgentOptions,
-} from '../interfaces/IBrowserData';
+import { IDataBrowserEngineOptions, IDataCore } from '../interfaces/IBrowserData';
 import BrowserData from './BrowserData';
 import { emulatorDataDir } from '../paths';
 
@@ -65,10 +61,6 @@ export default class DataLoader implements IDataCore {
 
   public get browserEngineOptions(): IDataBrowserEngineOptions {
     return loadData(`${this.dataDir}/browserEngineOptions.json`);
-  }
-
-  public get userAgentOptions(): IDataUserAgentOptions {
-    return loadData(`${this.dataDir}/userAgentOptions.json`);
   }
 
   public as(userAgentOption: IUserAgentOption): BrowserData {

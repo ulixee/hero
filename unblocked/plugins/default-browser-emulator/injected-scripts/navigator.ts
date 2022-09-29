@@ -12,6 +12,10 @@ if ('webdriver' in self.navigator) {
   proxyGetter(self.navigator, 'webdriver', () => false, true);
 }
 
+if ('NetworkInformation' in self) {
+  proxyGetter(NetworkInformation.prototype as any, 'rtt', () => args.rtt, false);
+}
+
 if (args.userAgentData && 'userAgentData' in self.navigator) {
   // @ts-expect-error
   const userAgentData = self.navigator.userAgentData;

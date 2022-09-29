@@ -21,7 +21,7 @@ export default async function setUserAgent(
   await devtools.send('Emulation.setUserAgentOverride', {
     userAgent: emulationProfile.userAgentOption.string,
     acceptLanguage: emulationProfile.locale,
-    platform: emulationProfile.userAgentOption.operatingSystemPlatform,
+    platform: userAgentData.platform,
     userAgentMetadata,
   });
 }
