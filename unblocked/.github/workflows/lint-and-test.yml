@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint-and-test:
-    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    name: Test node-${{ matrix.node-version }}, ${{ matrix.os }}, ${{matrix.browser || 'latest'}}
     timeout-minutes: 30
 
     strategy:
@@ -23,7 +23,7 @@ jobs:
             browser: chrome-100-0
           - node-version: 16.x
             os: ubuntu-latest
-            browser: chrome-96-0
+            browser: chrome-97-0
 
     runs-on: ${{ matrix.os }}
 
@@ -57,6 +57,11 @@ jobs:
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
         working-directory: ./build
+        run: yarn add -W @ulixee/${{ matrix.browser }}
+
+      - name: Linux - Add Chrome Env
+        if: ${{ matrix.browser }}
+        working-directory: ./agent/build
         run: yarn add -W @ulixee/${{ matrix.browser }}
 
       - name: Linux - Apt Install Chrome(s)

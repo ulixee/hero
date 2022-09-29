@@ -18,14 +18,10 @@ export default class BrowserEngineOptions {
       const id = defaultBrowserId.replace('@ulixee/', '');
       this.default = this.installedOptions.find(x => x.id === id);
       if (!this.default) {
-        if (this.browserIdsNeedingDataFiles.has(id)) {
-          throw new Error(`The Default Browser Engine specified in your environment does not have Emulation Data Files installed\n\n
--------- Install the data files in your working directory -------
-        
-         yarn update-browser-emulator-data ${defaultBrowserId}
-        
-----------------------------------------------------------------
-      `);
+        if (this.browserIdsNeedingDataFiles.has(id) || this.isInstalled(id)) {
+          throw new Error(
+            `The Default Browser Engine specified in your environment does not have Emulation Data Files installed. You'll need to generate data files for ${id}`,
+          );
         }
         throw new Error(`The Default Browser Engine specified in your environment is not installed\n\n
 -------- reinstall the browser in your working directory -------
