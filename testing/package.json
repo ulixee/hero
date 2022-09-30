@@ -17,7 +17,7 @@
     "@ulixee/net": "2.0.0-alpha.11",
     "@unblocked-web/agent-mitm-socket": "2.0.0-alpha.10",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.3",
+    "@unblocked-web/specifications": "2.0.0-alpha.5",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0",

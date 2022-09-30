@@ -6,6 +6,6 @@
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.11",
     "@ulixee/hero-interfaces": "2.0.0-alpha.11",
-    "@unblocked-web/specifications": "2.0.0-alpha.3"
+    "@unblocked-web/specifications": "2.0.0-alpha.5"
   }
 }

@@ -2028,6 +2028,13 @@
     "@typescript-eslint/types" "5.33.1"
     eslint-visitor-keys "^3.3.0"
 
+"@ulixee/chrome-105-0@^5195.127.6":
+  version "5195.127.6"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-105-0/-/chrome-105-0-5195.127.6.tgz#b1a3d2e91d5f982c0a2b3b6e7aa5a514cd265a0a"
+  integrity sha512-JCEkl2AW2r0SD3KaynWfQtHng/yycznxQz2KPo2PvgyrvbRPSA99YS/okCemZPXwF0OvX0Yvx+FqkTPS06Anbw==
+  dependencies:
+    "@ulixee/chrome-app" "^1.0.3"
+
 "@ulixee/chrome-98-0@^4758.109.6":
   version "4758.109.6"
   resolved "https://registry.yarnpkg.com/@ulixee/chrome-98-0/-/chrome-98-0-4758.109.6.tgz#d96ab324dbc79ab56df4ec69b04e672e5e2d0d05"
@@ -2053,10 +2060,10 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@^1.0.15":
-  version "1.0.15"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.15.tgz#3f59b118b7ae864779d99f0ca6580b99a61722f4"
-  integrity sha512-SIg8FN4HlOdK5hMg8+BqwQJ45dLYt017jQDYJttDGpJeph4DnAv/xcYliNty9P88cLjNU425DKhpl7EHpYmgWA==
+"@ulixee/repo-tools@^1.0.17":
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.17.tgz#f2e48d2030a569750b46e3057b91e9c468860cd4"
+  integrity sha512-D/9zaEgu1N6S9URNzDFqYUY6a4+TMREkP636Dcp8OQ5nc7SwDpuUE2Fg9vEoL0R4dWEkiCVXofJ9wZjCcBnm2g==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.27.1"
     "@typescript-eslint/parser" "^5.27.1"
@@ -2076,6 +2083,24 @@
     prettier "^2.6.2"
     pretty-quick "^3.1.0"
     typescript "^4.7.2"
+
+"@unblocked-web/real-user-agents@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@unblocked-web/real-user-agents/-/real-user-agents-1.0.0.tgz#7f4492c7988d4108ac6aa856c5d1bfee8647953b"
+  integrity sha512-djO4W+emkLr/3bNeF4h10OieKAZkTWYg89mhoGpIakkKDMHbqx02zwyplgim4Ckn3b4WceUCbjkZ/JClD/ELAg==
+  dependencies:
+    "@ulixee/commons" "2.0.0-alpha.11"
+    "@unblocked-web/specifications" "2.0.0-alpha.3"
+    compare-versions "^3.6.0"
+    ua-parser-js "^0.7.24"
+
+"@unblocked-web/specifications@2.0.0-alpha.3":
+  version "2.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@unblocked-web/specifications/-/specifications-2.0.0-alpha.3.tgz#e4dcd2c2798de87e9e7f521da03b432a3abe87bc"
+  integrity sha512-3YRX4ggGER8fNVhOvwdMvy++JMmel3Urc/J5WUAKj01kRqyh5Tv2byoj6EG14kABjN2Ygnfwlu+8F4b7fv1Xbw==
+  dependencies:
+    "@unblocked-web/js-path" "2.0.0-alpha.1"
+    devtools-protocol "^0.0.981744"
 
 "@vue/compiler-sfc@2.7.8":
   version "2.7.8"
@@ -7893,7 +7918,7 @@ typescript@^4.7.2, typescript@~4.7.3:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
   integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
 
-ua-parser-js@0.7.28, ua-parser-js@^0.7.18, ua-parser-js@^0.7.22:
+ua-parser-js@0.7.28, ua-parser-js@^0.7.18, ua-parser-js@^0.7.22, ua-parser-js@^0.7.24:
   version "0.7.28"
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.28.tgz#8ba04e653f35ce210239c64661685bf9121dec31"
   integrity sha512-6Gurc1n//gjp9eQNXjD9O3M/sMwVtN5S8Lv9bvOYBfKfDNiIIhqiyi01vMBO45u4zkDE420w/e0se7Vs+sIg+g==

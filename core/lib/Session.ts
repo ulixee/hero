@@ -115,13 +115,14 @@ export default class Session
   }
 
   public get meta(): IHeroMeta {
-    const { viewport, locale, timezoneId, geolocation } = this.emulationProfile;
+    const { viewport, locale, timezoneId, geolocation, windowNavigatorPlatform } =
+      this.emulationProfile;
 
     const {
       string: userAgentString,
-      operatingSystemPlatform,
       operatingSystemName,
       operatingSystemVersion,
+      uaClientHintsPlatformVersion,
       browserVersion,
       browserName,
     } = this.emulationProfile.userAgentOption;
@@ -137,7 +138,8 @@ export default class Session
       geolocation,
       userAgentString,
       operatingSystemName,
-      operatingSystemPlatform,
+      uaClientHintsPlatformVersion,
+      windowNavigatorPlatform,
       operatingSystemVersion: [
         operatingSystemVersion.major,
         operatingSystemVersion.minor,

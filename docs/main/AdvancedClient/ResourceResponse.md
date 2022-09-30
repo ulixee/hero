@@ -62,8 +62,6 @@ Load the underlying buffer returned by this network response.
 
 #### **Returns** `Promise<Buffer>`
 
-## Methods
-
 ### text<em>()</em>
 
 Convert the returned resource body to a string.

@@ -18,7 +18,7 @@
     "@unblocked-web/agent-mitm": "2.0.0-alpha.10",
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.10",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.10",
-    "@unblocked-web/specifications": "2.0.0-alpha.3",
+    "@unblocked-web/specifications": "2.0.0-alpha.5",
     "awaited-dom": "1.4.0",
     "ws": "^7.4.6"
   }

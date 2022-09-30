@@ -26,10 +26,10 @@
     "@unblocked-web/default-browser-emulator": "2.0.0-alpha.10",
     "@unblocked-web/default-human-emulator": "2.0.0-alpha.10",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/specifications": "2.0.0-alpha.3",
+    "@unblocked-web/specifications": "2.0.0-alpha.5",
     "awaited-dom": "1.4.0",
     "better-sqlite3": "^7.5.1",
-    "moment": "^2.24.1",
+    "moment": "^2.29.4",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },
