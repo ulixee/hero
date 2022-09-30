@@ -21,9 +21,9 @@ jobs:
 
       - name: Clone Profile Data
         run: git clone https://github.com/unblocked-web/browser-profile-data.git
-        working-directory: ../..
+        working-directory: ..
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'yarn'
