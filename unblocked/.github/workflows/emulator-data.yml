@@ -37,6 +37,7 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           repository: browser-emulator-builder/data
+          branch: main
           commit_message: 'chore(browser-emulator-builder): automatic emulator data update'
 
       - uses: stefanzweifel/git-auto-commit-action@v4
