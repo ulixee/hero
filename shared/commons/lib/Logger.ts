@@ -165,7 +165,7 @@ export function translateToPrintable(
       result.error = value;
       continue;
     }
-    if (key === 'error') {
+    if (key === 'error' && value) {
       result.error = new Error((value as any).message);
       Object.assign(result.error, value);
       continue;

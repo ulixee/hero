@@ -10,7 +10,7 @@ import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
 import ICoreEventPayload from '../interfaces/ICoreEventPayload';
 
-const Kb = 1024;
+const Kb = 1e3;
 
 export default class HttpTransportToClient<IClientApiSpec extends IApiHandlers, IEventSpec = any>
   extends TypedEventEmitter<ITransportToClientEvents<IClientApiSpec>>
@@ -44,7 +44,7 @@ export default class HttpTransportToClient<IClientApiSpec extends IApiHandlers, 
   }
 
   public async readRequest(
-    maxPayloadKb = 1024,
+    maxPayloadKb = 1e3,
     dontEmit = false,
   ): Promise<ICoreRequestPayload<any, any>> {
     const req = this.request;

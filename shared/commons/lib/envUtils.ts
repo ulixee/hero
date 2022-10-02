@@ -1,10 +1,11 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
+import * as Os from 'os';
 
 /**
  * Will load env files with this precedence (.env.defaults, .env.<NODE_ENV>, .env)
  */
-export function loadEnv(baseDir: string): void {
+export function loadEnv(baseDir: string, overwriteSetValues = false): void {
   const envName = process.env.NODE_ENV?.toLowerCase() ?? 'development';
   const env: Record<string, string> = {};
   for (const envFile of ['.env.defaults', `.env.${envName}`, '.env']) {
@@ -14,14 +15,14 @@ export function loadEnv(baseDir: string): void {
   }
   // don't overwrite already set variables
   for (const [key, value] of Object.entries(env)) {
-    if (!process.env[key]) process.env[key] = value;
+    if (process.env[key] && !overwriteSetValues) continue;
+    process.env[key] = value;
   }
 }
 
 // NOTE: imported from dotenv
 export function applyEnvironmentVariables(path: string, env: Record<string, string>): void {
   let lines = Fs.readFileSync(path, 'utf8');
-
   // Convert line breaks to same format
   lines = lines.replace(/\r\n?/gm, '\n');
 
@@ -66,6 +67,7 @@ export function parseEnvInt(envvar: string): number | null {
 
 export function parseEnvPath(envvar: string, relativeTo?: string): string {
   if (!envvar) return null;
+  if (envvar?.startsWith('~')) envvar = Path.join(Os.homedir(), envvar.slice(1));
   if (Path.isAbsolute(envvar)) return envvar;
   return Path.resolve(relativeTo ?? process.cwd(), envvar);
 }
