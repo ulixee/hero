@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.12](https://github.com/ulixee/hero/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
+
+
+### Bug Fixes
+
+* client printing incorrect properties ([04b67a7](https://github.com/ulixee/hero/commit/04b67a7bc37f6f9e2e76ba897f00dce611fa03a8)), closes [#152](https://github.com/ulixee/hero/issues/152)
+* **core:** restore user profile without mitm ([333a80c](https://github.com/ulixee/hero/commit/333a80ca62a1d8212df6b83db4df4df441333f24)), closes [#147](https://github.com/ulixee/hero/issues/147)
+* **core:** user profile not loading all frames ([d4f6ccc](https://github.com/ulixee/hero/commit/d4f6ccca2f2d56b430203eb341cd0647b8422f0c))
+* update client hints spec for hero meta ([0455bf9](https://github.com/ulixee/hero/commit/0455bf943e3203a72e12cc43b240874b4e9bd1b8))
+
+
+
+
+
 # [2.0.0-alpha.11](https://github.com/ulixee/hero/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-08-31)
 
 
