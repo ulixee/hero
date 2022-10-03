@@ -8,7 +8,7 @@ This is a Monorepo to work on the Browser Detect + Evade workflow of building an
 
 You can work with the project by:
 1. Cloning the repository and installing git submodules (you can add --recursive to your initial clone request).
-2. Run `yarn build:all`.
+2. Run `yarn build:all`. NOTE: you MUST run this command to build. The sub-projects have to be built-up individually in order by this command.
 
 ## Questions
 
