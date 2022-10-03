@@ -2,7 +2,7 @@ import Axios from 'axios';
 import * as webdriver from 'selenium-webdriver';
 import IBrowser from '@unblocked-web/real-user-agents/interfaces/IBrowser';
 import IOperatingSystem from '@unblocked-web/real-user-agents/interfaces/IOperatingSystem';
-import SeleniumRunner from '@double-agent/stacks/lib/SeleniumRunner';
+import SeleniumRunner from '@unblocked-web/double-agent-stacks/lib/SeleniumRunner';
 import IBrowserstackAgent from '../interfaces/IBrowserstackAgent';
 import env from '../env';
 

@@ -86,21 +86,7 @@
       "browser-profiler/*",
       "browser-emulator-builder"
     ],
-    "nohoist": [],
-    "packages:postworkspaces": [
-      "agent/build/*",
-      "specifications/build",
-      "js-path/build",
-      "real-user-agents/build",
-      "../shared/build/*",
-      "double-agent/build/*",
-      "double-agent/build/collect/plugins/*",
-      "double-agent/build/analyze/plugins/*",
-      "plugins/*",
-      "double-agent-stacks",
-      "browser-profiler/*",
-      "browser-emulator-builder"
-    ]
+    "nohoist": []
   },
   "lint-staged": {
     "*.ts": [

@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/default-browser-emulator",
-  "version": "2.0.0-alpha.10",
+  "version": "2.0.0-alpha.11",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "dependencies": {

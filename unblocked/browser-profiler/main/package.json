@@ -18,7 +18,7 @@
     "@double-agent/collect": "2.0.0-alpha.11",
     "@double-agent/config": "2.0.0-alpha.11",
     "@double-agent/runner": "2.0.0-alpha.11",
-    "@double-agent/stacks": "2.0.0-alpha.11",
+    "@unblocked-web/double-agent-stacks": "2.0.0-alpha.11",
     "@types/selenium-webdriver": "^4.1.5",
     "@ulixee/chrome-app": "^1.0.3",
     "@ulixee/commons": "2.0.0-alpha.12",

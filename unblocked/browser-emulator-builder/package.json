@@ -1,25 +1,25 @@
 {
   "name": "@unblocked-web/browser-emulator-builder",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.11",
   "private": true,
   "license": "MIT",
   "scripts": {
     "generate": "node ../build/browser-emulator-builder/scripts/generateEmulatorData"
   },
   "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.11",
+    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.11",
+    "@double-agent/collect": "2.0.0-alpha.11",
+    "@double-agent/collect-browser-codecs": "2.0.0-alpha.11",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.11",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.11",
+    "@double-agent/collect-http2-session": "2.0.0-alpha.11",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.11",
     "@ulixee/commons": "2.0.0-alpha.12",
     "@unblocked-web/browser-profiler": "2.0.0-alpha.11",
     "@unblocked-web/browser-profiler-dom-bridger": "2.0.0-alpha.11",
     "@unblocked-web/real-user-agents": "2.0.0-alpha.11",
     "@unblocked-web/specifications": "2.0.0-alpha.11",
-    "@double-agent/collect": "2.0.0-alpha.11",
-    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.11",
-    "@double-agent/collect-browser-codecs": "2.0.0-alpha.11",
-    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.11",
-    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.11",
-    "@double-agent/collect-http2-session": "2.0.0-alpha.11",
-    "@double-agent/analyze": "2.0.0-alpha.11",
-    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.11",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
