@@ -27,7 +27,7 @@ for (const userAgentId of BrowserProfiler.userAgentIds) {
 const forceRedoDom = process.argv[2] === 'force';
 
 async function generate(): Promise<void> {
-  const chromeEngines = stableChromeVersions.slice(0, 10);
+  const chromeEngines = stableChromeVersions.filter(x => x.majorVersion >= 94);
 
   for (const browserId of Object.keys(userAgentIdsByBrowserId).sort(
     (a, b) => Number(a.split('-').slice(1).join('.')) - Number(b.split('-').slice(1).join('.')),
