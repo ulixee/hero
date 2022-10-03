@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.12](https://github.com/ulixee/shared/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
+
+
+### Bug Fixes
+
+* **commons:** typeserializer not deep on map ([1f01a5c](https://github.com/ulixee/shared/commit/1f01a5c04d3c8318f44b0a5ac8509247313c7153))
+
+
+
+
+
 # [2.0.0-alpha.11](https://github.com/ulixee/shared/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-08-31)
 
 
