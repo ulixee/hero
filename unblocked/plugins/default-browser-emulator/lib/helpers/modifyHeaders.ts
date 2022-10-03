@@ -130,7 +130,7 @@ function getResourceHeaderDefaults(
 
   if (defaultOrders.length > 1) {
     const isRedirect = isFromRedirect ?? false;
-    const filtered = defaultOrders.filter(x => x.isRedirect !== undefined && x.isRedirect === isRedirect);
+    const filtered = defaultOrders.filter(x => (x.isRedirect ?? false) === isRedirect);
     if (filtered.length) defaultOrders = filtered;
   }
 
