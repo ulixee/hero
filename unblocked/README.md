@@ -28,9 +28,10 @@ This repository is home to several of the projects needed to create an "unblocke
 - [Agent][agent]. A basic automated engine that implements the full reference [Specifications][spec].
 - [Plugins](./plugins). Unblocked community plugins that enhance a browser to mask Browser, Network, User Interaction and Operating System "markers" that can be used to block web scrapers.
 - [DoubleAgent][double-agent]. A series of tests that can be run to analyze real Browsers on real machines, and then compare all the detected markers to an automated setup.
+- [DoubleAgent Stacks](./double-agent-stacks). Runners for common scraper stacks. This can also serve as a workflow example for your own stack.
 - [Real User Agents][real-user-agents]. A library that collects real Chromium releases and UserAgent strings collected from real browsers. This is used to generate UserAgent strings for various combinations of Browsers and Operating Systems.
 - [Browser Profile Data][profiles]. A data repository containing profiles of real browsers using BrowserStack, Dockers and Local Doms. Includes deep diffing various environments of Chrome (headed, headless, with devtools, browserstack, between runs, etc).
-- [Browser Profiler][./browser-profiler]. Profiler to automatically collect [Browser Profile Data][profiles]. Automation to recreate files is driven from Profile Data project.
+- [Browser Profiler](./browser-profiler). Profiler to automatically collect [Browser Profile Data][profiles]. Automation to recreate files is driven from Profile Data project.
 - [Emulator Builder](./browser-emulator-builder). A library to use the collected data from Browser Profile Data to "patch" runtime headless Chrome to match headed Chrome on a home Operating System.
 - [Mission Impossible](./mission-impossible). Real world measurement of what DOM Apis are being analyzed on the top websites, and how many are detecting and blocking the Unblocked Agent + Community Plugins. _To be imported_
 
