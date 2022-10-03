@@ -1,5 +1,5 @@
-import { Helpers, TestLogger } from '@unblocked-web/agent-testing/index';
-import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import { Helpers, TestLogger } from '@unblocked-web/plugins-testing/index';
+import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
 import Pool from '@unblocked-web/agent/lib/Pool';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';

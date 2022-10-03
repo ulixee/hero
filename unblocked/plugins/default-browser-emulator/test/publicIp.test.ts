@@ -1,4 +1,4 @@
-import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { Helpers, TestLogger } from '@unblocked-web/plugins-testing';
 import RequestSession from '@unblocked-web/agent-mitm/handlers/RequestSession';
 import MitmServer from '@unblocked-web/agent-mitm/lib/MitmProxy';
 import lookupPublicIp, { IpLookupServices } from '../lib/helpers/lookupPublicIp';

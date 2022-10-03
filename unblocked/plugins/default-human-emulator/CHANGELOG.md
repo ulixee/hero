@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.11](https://github.com/unblocked-web/unblocked/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-10-03)
+
+
+### Features
+
+* browser emulator generator ([badfa6e](https://github.com/unblocked-web/unblocked/commit/badfa6ed2397c2dd1dfcff78bd44cc5adca6a130))
+
+
+
+
+
 
 
 **Note:** Version bump only for package @unblocked-web/default-human-emulator

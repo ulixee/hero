@@ -11,3 +11,4 @@ build
 build-dist
 /.data-test
 /.eslintcache
+browserstack.err

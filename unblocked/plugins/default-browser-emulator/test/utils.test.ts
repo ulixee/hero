@@ -1,4 +1,4 @@
-import * as Helpers from '@unblocked-web/agent-testing/helpers';
+import * as Helpers from '@unblocked-web/plugins-testing/helpers';
 import { inspect } from 'util';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
@@ -78,7 +78,7 @@ test('should override a function and clean error stacks', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 

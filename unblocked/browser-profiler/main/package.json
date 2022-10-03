@@ -1,0 +1,38 @@
+{
+  "name": "@unblocked-web/browser-profiler",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "bin": {
+    "runLocal": "bin/runLocal.js"
+  },
+  "scripts": {
+    "downloadData": "node ../../build/browser-profiler/main/scripts/cloneData.js",
+    "cleanProfiles": "node -e 'require(\".../../build/browser-profiler/main/scripts/runBrowserstack.js\").cleanProfiles()'",
+    "profile:browserstack": "node -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstack.js\").default().catch(console.error)'",
+    "profile:dom-browserstack": "node -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstackDoms.js\").default()'",
+    "profile:dom-local": "node -e 'require(\"../../build/browser-profiler/main/scripts/runLocalDoms.js\").default()'"
+  },
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.11",
+    "@double-agent/config": "2.0.0-alpha.11",
+    "@double-agent/runner": "2.0.0-alpha.11",
+    "@unblocked-web/double-agent-stacks": "2.0.0-alpha.11",
+    "@types/selenium-webdriver": "^4.1.5",
+    "@ulixee/chrome-app": "^1.0.3",
+    "@ulixee/commons": "2.0.0-alpha.12",
+    "@unblocked-web/real-user-agents": "2.0.0-alpha.11",
+    "axios": "^0.27.2",
+    "chrome-launcher": "^0.13.4",
+    "chrome-remote-interface": "0.29.0",
+    "cross-env": "^7.0.3",
+    "lodash": "^4.17.20",
+    "node-fetch": "^2.6.1",
+    "p-queue": "^6.3.0",
+    "selenium-webdriver": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}

@@ -1,10 +1,10 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import * as Helpers from '@unblocked-web/agent-testing/helpers';
+import * as Helpers from '@unblocked-web/plugins-testing/helpers';
 import { inspect } from 'util';
 import { Browser } from '@unblocked-web/agent';
 import Page from '@unblocked-web/agent/lib/Page';
-import { TestLogger } from '@unblocked-web/agent-testing';
+import { TestLogger } from '@unblocked-web/plugins-testing';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
@@ -43,7 +43,7 @@ test('it should mimic a chrome object', async () => {
   }).script;
   await page.addNewDocumentScript(script, false);
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
@@ -90,7 +90,7 @@ test('it should update loadtimes and csi values', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 

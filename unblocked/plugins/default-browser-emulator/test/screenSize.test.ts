@@ -1,6 +1,6 @@
 import Pool from '@unblocked-web/agent/lib/Pool';
-import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
-import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import { Helpers, TestLogger } from '@unblocked-web/plugins-testing';
+import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
 import BrowserEmulator from '../index';
 import Viewports from '../lib/Viewports';
 

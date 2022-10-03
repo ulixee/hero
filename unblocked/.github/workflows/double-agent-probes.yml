@@ -1,0 +1,67 @@
+name: 'Update Probes'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  profiler:
+    name: 'Update Probes Data'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          repository: unblocked-web/browser-profile-data
+          path: browser-profiler-data
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          submodules: 'true'
+          path: unblocked
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Yarn build
+        run: yarn build
+
+      - name: Sync Path Patterns
+        working-directory: ./unblocked/double-agent
+        run: yarn workspace @double-agent/config sync
+
+      - name: Import Profiles
+        working-directory: ./unblocked
+        run: yarn workspace @unblocked-web/double-agent-stacks 0
+
+      - name: Create Probes
+        working-directory: ./unblocked
+        run: yarn workspace @unblocked-web/double-agent-stacks 1
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        id: probe-data-checkin
+        with:
+          repository: ./unblocked/double-agent/probe-data
+          branch: main
+          commit_message: "chore: automatic probe data"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: steps.probe-data-checkin.outputs.changes_detected == 'true'
+        with:
+          repository: ./unblocked/double-agent
+          branch: main
+          commit_message: "chore(double-agent): point at new probe data"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: steps.probe-data-checkin.outputs.changes_detected == 'true'
+        with:
+          repository: ./unblocked
+          branch: main
+          commit_message: "chore(probes): point at new double agent"
