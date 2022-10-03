@@ -43,7 +43,7 @@ test('it should mimic a chrome object', async () => {
   }).script;
   await page.addNewDocumentScript(script, false);
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
@@ -90,7 +90,7 @@ test('it should update loadtimes and csi values', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 

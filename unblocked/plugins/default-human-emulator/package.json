@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@unblocked-web/agent": "2.0.0-alpha.11",
+    "@unblocked-web/plugins-testing": "2.0.0-alpha.11",
     "@unblocked-web/js-path": "2.0.0-alpha.1"
   }
 }

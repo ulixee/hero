@@ -78,7 +78,7 @@ test('should override a function and clean error stacks', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 

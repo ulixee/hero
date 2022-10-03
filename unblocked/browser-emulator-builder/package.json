@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.12",
-    "@unblocked-web/browser-profiler": "1.0.0",
-    "@unblocked-web/browser-profiler-dom-bridger": "1.0.0",
+    "@unblocked-web/browser-profiler": "2.0.0-alpha.11",
+    "@unblocked-web/browser-profiler-dom-bridger": "2.0.0-alpha.11",
     "@unblocked-web/real-user-agents": "2.0.0-alpha.11",
     "@unblocked-web/specifications": "2.0.0-alpha.11",
     "@double-agent/collect": "2.0.0-alpha.11",
@@ -22,7 +22,9 @@
     "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.11",
     "lodash": "^4.17.20"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@unblocked-web/plugins-testing": "2.0.0-alpha.11"
+  },
   "engines": {
     "node": ">=12.0.0"
   }

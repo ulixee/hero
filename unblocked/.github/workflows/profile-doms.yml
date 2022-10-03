@@ -1,0 +1,44 @@
+name: 'Check for new dom profiles'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  doms:
+    name: 'Update Profiled Doms'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          repository: unblocked-web/browser-profile-data
+          path: browser-profiler-data
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          submodules: 'true'
+          path: unblocked
+
+      - name: Install unblocked
+        run: yarn build
+        working-directory: ./unblocked
+
+      - name: 'Collect new Browserstack Profiles'
+        run: yarn workspace @unblocked-web/browser-profiler profile:dom-browserstack
+        working-directory: ./unblocked
+        env:
+          BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ always() }}
+        with:
+          branch: main
+          repository: ./browser-profiler-data
+          commit_message: "chore(profiled-doms): automatic updates"

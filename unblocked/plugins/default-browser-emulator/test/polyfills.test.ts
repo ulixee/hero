@@ -1,7 +1,6 @@
-import * as http from 'http';
 import { inspect } from 'util';
 import * as Helpers from '@unblocked-web/plugins-testing/helpers';
-import { ITestHttpServer } from '@unblocked-web/plugins-testing/helpers';
+import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
 import { defaultBrowserEngine } from '@unblocked-web/plugins-testing/browserUtils';
 import { Browser } from '@unblocked-web/agent';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
@@ -10,7 +9,7 @@ import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 let browser: Browser;
-let httpServer: ITestHttpServer<http.Server>;
+let httpServer: ITestKoaServer
 let context: BrowserContext;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
@@ -20,7 +19,7 @@ beforeAll(async () => {
 
   context = await browser.newContext({ logger: TestLogger.forTest(module) });
   Helpers.onClose(() => context.close().catch(), true);
-  httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
+  httpServer = await Helpers.runHttpServer(true);
 });
 
 afterAll(Helpers.afterAll);
@@ -103,7 +102,7 @@ test('it should be able to add polyfills', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
@@ -143,7 +142,7 @@ test('it should be able to remove properties', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
@@ -172,7 +171,7 @@ test('it should be able to change properties', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
@@ -218,7 +217,7 @@ test('it should be able to change property order', async () => {
   );
   await new Promise(setImmediate);
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
 
@@ -265,7 +264,7 @@ test('it should be able to change window property order', async () => {
     false,
   );
   await Promise.all([
-    page.navigate(httpServer.url),
+    page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
   ]);
   const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];

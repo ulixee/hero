@@ -50,7 +50,7 @@ test('it should override plugins in a browser window', async () => {
     getOverrideScript('navigator.plugins', pluginsData).script,
     false,
   );
-  await page.goto(httpServer.url);
+  await page.goto(httpServer.baseUrl);
   await page.waitForLoad(LoadStatus.DomContentLoaded);
 
   const hasPlugins = await page.mainFrame.evaluate(

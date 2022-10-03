@@ -10,6 +10,7 @@ import * as net from 'net';
 import * as http2 from 'http2';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Logger from '@ulixee/commons/lib/Logger';
+import * as stream from 'stream';
 import { TestLogger } from './index';
 
 const { log } = Logger(module);
@@ -82,13 +83,16 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
   return router;
 }
 
+export const runHttpServer = runKoaServer;
+
+
 export async function runHttpsServer(
   handler: RequestListener,
   onlyCloseOnFinal = false,
 ): Promise<ITestHttpServer<https.Server>> {
   const options = {
-    key: Fs.readFileSync(`${__dirname}/certs/key.pem`),
-    cert: Fs.readFileSync(`${__dirname}/certs/cert.pem`),
+    key: Fs.readFileSync(`${__dirname}/assets/key.pem`),
+    cert: Fs.readFileSync(`${__dirname}/assets/cert.pem`),
   };
 
   const server = https.createServer(options, handler).listen(0).unref();
@@ -186,4 +190,12 @@ function destroyServerFn(
         setTimeout(resolve, 10);
       });
     });
+}
+
+export async function readableToBuffer(res: stream.Readable): Promise<Buffer> {
+  const buffer: Buffer[] = [];
+  for await (const data of res) {
+    buffer.push(data);
+  }
+  return Buffer.concat(buffer);
 }

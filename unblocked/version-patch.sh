@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for repo in "specifications" "real-user-agents" "agent" "double-agent" "browser-profiler"
+for repo in "specifications" "real-user-agents" "agent" "double-agent"
 do
   yarn version:check
   cd "$repo"
