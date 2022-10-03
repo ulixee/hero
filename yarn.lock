@@ -2060,10 +2060,10 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@^1.0.17":
-  version "1.0.17"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.17.tgz#f2e48d2030a569750b46e3057b91e9c468860cd4"
-  integrity sha512-D/9zaEgu1N6S9URNzDFqYUY6a4+TMREkP636Dcp8OQ5nc7SwDpuUE2Fg9vEoL0R4dWEkiCVXofJ9wZjCcBnm2g==
+"@ulixee/repo-tools@^1.0.20":
+  version "1.0.20"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.20.tgz#7b784eb6295f30dc8865175bc8e2784ae9bca412"
+  integrity sha512-j1dBE5DlwE25YR7G1qHQruY3qygJ/eUK8U/uqYskzFAgtMHFytzvEJX8KbbjHUicSK1g4E0sO0O2NeBwyCJmJg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.27.1"
     "@typescript-eslint/parser" "^5.27.1"
@@ -2084,23 +2084,15 @@
     pretty-quick "^3.1.0"
     typescript "^4.7.2"
 
-"@unblocked-web/real-user-agents@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@unblocked-web/real-user-agents/-/real-user-agents-1.0.0.tgz#7f4492c7988d4108ac6aa856c5d1bfee8647953b"
-  integrity sha512-djO4W+emkLr/3bNeF4h10OieKAZkTWYg89mhoGpIakkKDMHbqx02zwyplgim4Ckn3b4WceUCbjkZ/JClD/ELAg==
+"@unblocked-web/real-user-agents@2.0.0-alpha.11":
+  version "2.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/@unblocked-web/real-user-agents/-/real-user-agents-2.0.0-alpha.11.tgz#4a9c03c80a19c990299314299125d8fa9d57cd55"
+  integrity sha512-uGv25+Ff6JeSCxsZxSnDD0hJ6usn9SFudu69Q2Aq/yufkqnHCK1g4/5P20thIr6nAhm/kN+Duzxb672eGzioqQ==
   dependencies:
-    "@ulixee/commons" "2.0.0-alpha.11"
-    "@unblocked-web/specifications" "2.0.0-alpha.3"
+    "@ulixee/commons" "2.0.0-alpha.12"
+    "@unblocked-web/specifications" "2.0.0-alpha.11"
     compare-versions "^3.6.0"
     ua-parser-js "^0.7.24"
-
-"@unblocked-web/specifications@2.0.0-alpha.3":
-  version "2.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@unblocked-web/specifications/-/specifications-2.0.0-alpha.3.tgz#e4dcd2c2798de87e9e7f521da03b432a3abe87bc"
-  integrity sha512-3YRX4ggGER8fNVhOvwdMvy++JMmel3Urc/J5WUAKj01kRqyh5Tv2byoj6EG14kABjN2Ygnfwlu+8F4b7fv1Xbw==
-  dependencies:
-    "@unblocked-web/js-path" "2.0.0-alpha.1"
-    devtools-protocol "^0.0.981744"
 
 "@vue/compiler-sfc@2.7.8":
   version "2.7.8"

@@ -3,7 +3,7 @@ Hero 2.0 pulls over the best features of SecretAgent, including the ability to a
 
 Remaining items before Stable Release:
 
-- Update to latest version of Chrome
+[x] Update to latest version of Chrome
 
 ## 2.11 - Improve Reactivity
 Hero 2.11 further refines the concept of FlowHandlers and State. We want to enhance FlowHandlers with fine grained control, as well as introducing Element State.
@@ -21,7 +21,7 @@ When writing Query Selectors in Hero, there is often a need to find one of many 
 ## More Robust Networking Layer
 Some efforts of data extraction do not require a full browser environment. We’d like to improve this use case. In addition, as Chrome continues to evolve the web and http spec, it has been difficult to keep up using NodeJS as a network layer. For instance, http3 runs over UDP and Chrome continues to have limited proxying. We aim to consider other long term options.
 - Convert Man-in-the-Middle from NodeJs to Chrome’s network stack
-- Support for Quic
+- Support for QUIC
 - First class support for http calls
 - Better TCP control
 - Future proof https changes
