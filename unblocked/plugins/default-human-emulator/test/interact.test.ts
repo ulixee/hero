@@ -1,6 +1,7 @@
-import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/plugins-testing';
 import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import { getLogo, ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
+import { getLogo, ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
 import {
   getClientRectFnName,
   getNodePointerFnName,
@@ -8,8 +9,6 @@ import {
 import { IElementRect } from '@unblocked-web/js-path';
 import { LoadStatus, LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import { Agent, Pool } from '@unblocked-web/agent';
-import { PageHooks } from '@unblocked-web/agent-testing/browserUtils';
-import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
 import HumanEmulator from '..';
 
 let koaServer: ITestKoaServer;
@@ -35,18 +34,34 @@ beforeEach(Helpers.beforeEach);
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach);
 
-async function createAgent(configuration?: IEmulationOptions): Promise<Agent> {
+async function createAgent(configuration?: { viewport: IViewport }): Promise<Agent> {
   const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
   Helpers.needsClosing.push(agent);
   if (configuration) {
-    agent.hook(new PageHooks(configuration));
+    const { viewport } = configuration;
+    agent.hook({
+      onNewPage(page) {
+        return page.devtoolsSession
+          .send('Emulation.setDeviceMetricsOverride', {
+            width: viewport.width,
+            height: viewport.height,
+            deviceScaleFactor: 1,
+            positionX: viewport.positionX,
+            positionY: viewport.positionY,
+            screenWidth: viewport.screenWidth,
+            screenHeight: viewport.screenHeight,
+            mobile: false,
+          })
+          .catch(() => null);
+      },
+    });
   }
   return agent;
 }
 
 describe('basic interaction tests', () => {
   it('executes basic click command', async () => {
-    koaServer.get('/mouse', (ctx) => {
+    koaServer.get('/mouse', ctx => {
       ctx.body = `
       <body>
         <button>Test</button>
@@ -86,7 +101,7 @@ describe('basic interaction tests', () => {
   });
 
   it('can click an XY coordinate off screen', async () => {
-    koaServer.get('/point', (ctx) => {
+    koaServer.get('/point', ctx => {
       ctx.body = `<body>
         <div>
           <button style="margin-top:1500px">Test</button>
@@ -129,7 +144,7 @@ describe('basic interaction tests', () => {
   });
 
   it('executes basic type command', async () => {
-    koaServer.get('/input', (ctx) => {
+    koaServer.get('/input', ctx => {
       ctx.set('Content-Security-Policy', "script-src 'unsafe-eval'");
       ctx.body = `
       <body>
@@ -172,7 +187,7 @@ describe('basic interaction tests', () => {
   it('moves over a select box to simulate clicking an option', async () => {
     const agent = await createAgent();
     const page = await agent.newPage();
-    koaServer.get('/click-option', (ctx) => {
+    koaServer.get('/click-option', ctx => {
       ctx.body = `
       <body>
         <div style="margin-top:1500px">
@@ -208,7 +223,7 @@ describe('basic interaction tests', () => {
   });
 
   it('should be able to click elements off screen', async () => {
-    koaServer.get('/longpage', (ctx) => {
+    koaServer.get('/longpage', ctx => {
       ctx.body = `
       <body>
         <div style="height:500px">
@@ -274,7 +289,7 @@ describe('basic interaction tests', () => {
   }, 60e3);
 
   it('should scroll around obstructions', async () => {
-    koaServer.get('/obstructions', (ctx) => {
+    koaServer.get('/obstructions', ctx => {
       ctx.body = `
       <body>
         <button id="button-2" onclick="click2()" style="width: 150px; margin-top: 150px; height: 30px;display:block">Test 2</button>
@@ -337,14 +352,14 @@ describe('basic interaction tests', () => {
   }, 20e3);
 
   it('should be able to click elements that move on load', async () => {
-    koaServer.get('/img.png', async (ctx) => {
+    koaServer.get('/img.png', async ctx => {
       ctx.set('Content-Type', 'image/png');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
       ctx.body = getLogo();
     });
 
     // test putting next to an image that will only space after it loads
-    koaServer.get('/move-on-load', (ctx) => {
+    koaServer.get('/move-on-load', ctx => {
       ctx.body = `
       <body>
           <div style="height: 1800px"></div>
@@ -370,7 +385,7 @@ describe('basic interaction tests', () => {
     const interactor = page.mainFrame.interactor;
     const originalFn = interactor.lookupBoundingRect.bind(interactor);
     const lookupSpy = jest.spyOn(interactor, 'lookupBoundingRect');
-    lookupSpy.mockImplementationOnce(async (mousePosition) => {
+    lookupSpy.mockImplementationOnce(async mousePosition => {
       const data = await originalFn(mousePosition);
       data.y -= 500;
       return data;
@@ -389,7 +404,7 @@ describe('basic interaction tests', () => {
   });
 
   it('will not click the wrong element', async () => {
-    koaServer.get('/wrong-element', (ctx) => {
+    koaServer.get('/wrong-element', ctx => {
       ctx.body = `
       <body>
           <div style="position: relative; margin-top:1400px">
@@ -415,7 +430,7 @@ describe('basic interaction tests', () => {
 
     const mouseDown = page.mouse.down.bind(page.mouse);
     const mouseSpy = jest.spyOn(page.mouse, 'down');
-    mouseSpy.mockImplementationOnce(async (key) => {
+    mouseSpy.mockImplementationOnce(async key => {
       await page.evaluate('document.querySelector("#button-2").remove()');
       return await mouseDown(key);
     });
@@ -435,7 +450,7 @@ describe('basic interaction tests', () => {
 
   it('should be able to click elements that are replaced', async () => {
     // test putting next to an image that will only space after it loads
-    koaServer.get('/replace-node', (ctx) => {
+    koaServer.get('/replace-node', ctx => {
       ctx.body = `
       <body>
           <div id="app" style="height: 2700px">&nbsp;</div>
@@ -496,7 +511,7 @@ describe('basic interaction tests', () => {
   });
 
   it('should be able to click an element without verification', async () => {
-    koaServer.get('/no-verify', (ctx) => {
+    koaServer.get('/no-verify', ctx => {
       ctx.body = `
       <body>
           <div id="app" style="height: 2700px">&nbsp;</div>
@@ -548,7 +563,7 @@ describe('basic interaction tests', () => {
   }, 20e3);
 
   it('should cancel pending interactions after a page clears', async () => {
-    koaServer.get('/redirect-on-move', (ctx) => {
+    koaServer.get('/redirect-on-move', ctx => {
       ctx.body = `
       <body>
           <div style="height: 1000px"></div>

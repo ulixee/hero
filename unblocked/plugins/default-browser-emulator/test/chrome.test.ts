@@ -1,10 +1,10 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import * as Helpers from '@unblocked-web/agent-testing/helpers';
+import * as Helpers from '@unblocked-web/plugins-testing/helpers';
 import { inspect } from 'util';
 import { Browser } from '@unblocked-web/agent';
 import Page from '@unblocked-web/agent/lib/Page';
-import { TestLogger } from '@unblocked-web/agent-testing';
+import { TestLogger } from '@unblocked-web/plugins-testing';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');

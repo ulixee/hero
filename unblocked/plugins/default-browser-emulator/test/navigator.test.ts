@@ -1,10 +1,10 @@
 import * as Fs from 'fs';
 import { inspect } from 'util';
-import * as Helpers from '@unblocked-web/agent-testing/helpers';
+import * as Helpers from '@unblocked-web/plugins-testing/helpers';
 import { Browser } from '@unblocked-web/agent';
 import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
 import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
-import { TestLogger } from '@unblocked-web/agent-testing';
+import { TestLogger } from '@unblocked-web/plugins-testing';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';

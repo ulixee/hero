@@ -1,11 +1,11 @@
 import * as http from 'http';
 import { inspect } from 'util';
-import * as Helpers from '@unblocked-web/agent-testing/helpers';
-import { ITestHttpServer } from '@unblocked-web/agent-testing/helpers';
-import { defaultBrowserEngine } from '@unblocked-web/agent-testing/browserUtils';
+import * as Helpers from '@unblocked-web/plugins-testing/helpers';
+import { ITestHttpServer } from '@unblocked-web/plugins-testing/helpers';
+import { defaultBrowserEngine } from '@unblocked-web/plugins-testing/browserUtils';
 import { Browser } from '@unblocked-web/agent';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
-import { TestLogger } from '@unblocked-web/agent-testing';
+import { TestLogger } from '@unblocked-web/plugins-testing';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
