@@ -27,7 +27,6 @@ export default async function runBrowserstack(): Promise<void> {
   const queue = new Queue({ concurrency: 5 });
   ShutdownHandler.register(() => {
     queue.clear();
-    queue.pause();
   });
 
   for (const userAgentId of BrowserProfiler.userAgentIds) {
@@ -62,10 +61,11 @@ export default async function runBrowserstack(): Promise<void> {
     const browserStackAgent = await BrowserStack.createAgent(operatingSystem, browser);
     if (!browserStackAgent) continue;
 
-    void queue.add(() => createSecondDomProfile(browserStackAgent, userAgentId, domDir));
+    void queue.add(createSecondDomProfile.bind(this, browserStackAgent, userAgentId, domDir));
     totalCount += 1;
   }
 
+  console.log(`${totalCount} queued, wait for complete`, queue.size, queue.pending);
   await queue.onIdle();
 
   console.log(''.padEnd(100, '-'));

@@ -96,6 +96,7 @@ const browserstackSettings = {
   resolution: '1024x768',
   'browserstack.user': env.browserStackUser,
   'browserstack.key': env.browserStackKey,
+  'browserstack.idleTimeout': 300,
   'browserstack.safari.allowAllCookies': 'true',
   'browserstack.debug': 'true', // Enabling visual logs
   'browserstack.seleniumLogs': 'true',

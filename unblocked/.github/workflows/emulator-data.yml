@@ -1,9 +1,9 @@
-name: 'Update Emulator Profiles'
+name: 'Emulator Data'
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: '0 10 * * *'
+  schedule:
+    - cron: '0 10 * * *'
 
 jobs:
   profiler:
@@ -15,8 +15,9 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: main
-          submodules: 'true'
+          submodules: 'recursive'
 
       - name: Clone Profile Data
         run: git clone https://github.com/unblocked-web/browser-profile-data.git

@@ -1,9 +1,9 @@
-name: 'Check for new dom profiles'
+name: 'Profile:DOM'
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: '0 8 * * *'
+  schedule:
+    - cron: '0 8 * * *'
 
 jobs:
   doms:
@@ -16,13 +16,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+          token: ${{ secrets.PAT }}
           repository: unblocked-web/browser-profile-data
-          path: browser-profiler-data
+          path: browser-profile-data
 
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
-          submodules: 'true'
+          submodules: 'recursive'
           path: unblocked
 
       - name: Install unblocked
@@ -36,9 +37,17 @@ jobs:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
+      - name: 'Collect Local Doms'
+        run: yarn workspace @unblocked-web/browser-profiler profile:dom-local
+        working-directory: ./unblocked
+        env:
+          NODE_ENV: development
+          RUN_DOCKERS: true
+          RUN_LOCAL: false
+
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ always() }}
         with:
           branch: main
-          repository: ./browser-profiler-data
-          commit_message: "chore(profiled-doms): automatic updates"
+          repository: ./browser-profile-data
+          commit_message: 'chore(profiled-doms): automatic updates'
