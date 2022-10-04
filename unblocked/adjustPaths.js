@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-let relativeDirectory = process.argv[2] || '/build';
+let relativeDirectory = process.argv[2] || './build';
 const isDist = relativeDirectory.includes('build-dist');
 // eslint-disable-next-line no-console
 console.log('Updating paths relative to %s', relativeDirectory);

@@ -25,7 +25,7 @@
     "@unblocked-web/real-user-agents": "2.0.0-alpha.11",
     "commander": "^9.2.0",
     "puppeteer": "17.1.3",
-    "selenium-webdriver": "^4.4.0"
+    "selenium-webdriver": "4.4.0"
   },
   "devDependencies": {
     "@types/selenium-webdriver": "^4.1.5"
