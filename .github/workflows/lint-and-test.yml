@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test ${{matrix.browser || 'chrome-98-0' }} (node ${{ matrix.node-version }}; ${{ matrix.os }})
+    name: Test ${{matrix.browser || 'chrome-latest' }} (node ${{ matrix.node-version }}; ${{ matrix.os }})
     timeout-minutes: 30
 
     strategy:
