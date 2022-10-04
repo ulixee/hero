@@ -2,8 +2,8 @@ name: 'Update Emulator Profiles'
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 10 * * *'
+#  schedule:
+#    - cron: '0 10 * * *'
 
 jobs:
   profiler:

@@ -6,8 +6,8 @@ on:
       clearPlugins:
         description: 'Redo any plugin-ids (comma separated)'
         required: false
-  schedule:
-    - cron: '0 7 * * *'
+#  schedule:
+#    - cron: '0 7 * * *'
 
 jobs:
   profiler:

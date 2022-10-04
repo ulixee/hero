@@ -2,8 +2,8 @@ name: 'Local Doms'
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 9 * * *'
+#  schedule:
+#    - cron: '0 9 * * *'
 
 jobs:
   docker-doms:
