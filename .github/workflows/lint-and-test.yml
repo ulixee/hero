@@ -7,65 +7,8 @@ on:
       - '!gh-pages'
 
 jobs:
-  lint:
-    name: Lint
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 14
-          cache: yarn
-
-      - name: (TEMP) Clone ulixee/shared
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
-        working-directory: ../..
-
-      - name: (TEMP) Install ulixee/shared
-        run: yarn && yarn build
-        working-directory: ../../shared
-
-      - name: (TEMP) Clone unblocked
-        run: git clone --recurse-submodules -j8 https://github.com/unblockable/unblocked.git
-        working-directory: ../..
-
-      - name: (TEMP) Install unblocked
-        run: yarn build:all
-        working-directory: ../../unblocked
-
-      - name: (TEMP) Install unblocked
-        run: yarn build:all
-        working-directory: ../../unblocked
-
-      - name: Install Dependencies
-        run: yarn install --immutable --network-timeout 1000000
-        env:
-          HERO_SKIP_CHROME_DOWNLOAD: 1
-
-      - name: Run "build" step
-        run: NODE_OPTIONS=--max-old-space-size=4096 yarn tsc
-        env:
-          HERO_SKIP_CHROME_DOWNLOAD: 1
-
-      - name: Run  Lint
-        run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
-
-      - name: 'Tar files'
-        run: tar -cvf js_files.tar --exclude=node_modules --exclude=dist ./build
-
-      - name: Upload built Javascript files
-        uses: actions/upload-artifact@v2
-        with:
-          name: js-build
-          path: js_files.tar
-          retention-days: 1
-
   test:
     name: Test ${{matrix.browser || 'chrome-98-0' }} (node ${{ matrix.node-version }}; ${{ matrix.os }})
-    needs: lint
     timeout-minutes: 30
 
     strategy:
@@ -81,9 +24,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
@@ -92,36 +35,34 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: (TEMP) Clone ulixee/shared
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
+      - name: Clone ulixee/shared
+        run: git clone https://github.com/ulixee/shared.git
         working-directory: ../..
 
-      - name: (TEMP) Install ulixee/shared
-        run: yarn && yarn build
+      - name: Install ulixee/shared
+        run: yarn build
         working-directory: ../../shared
 
-      - name: (TEMP) Clone unblocked
-        run: git clone --recurse-submodules -j8 https://github.com/unblockable/unblocked.git
+      - name: Clone unblocked
+        run: git clone --recurse-submodules -j8 https://github.com/unblocked-web/unblocked.git
         working-directory: ../..
 
-      - name: (TEMP) Install unblocked
+      - name: Install unblocked
         run: yarn build:all
         working-directory: ../../unblocked
         env:
           UBK_MITM_MITM_SOCKET: 1
 
-      - name: Download built typescript files
-        uses: actions/download-artifact@v2
-        with:
-          name: js-build
-          path: .
-
-      - name: Untar files
-        run: tar -xf js_files.tar
+      - name: Relink shared
+        run: yarn
+        working-directory: ../../shared/build
 
       - name: Build modules
-        run: yarn --network-timeout 1000000 --verbose
-        working-directory: ./build
+        run: yarn build --network-timeout 1000000
+
+      - name: Run  Lint
+        if: ${{ matrix.os == 'ubuntu-latest' && !matrix.browser }}
+        run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
