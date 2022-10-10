@@ -4,14 +4,14 @@ import CollectedElements from "./CollectedElements";
 import CollectedResources from "./CollectedResources";
 import CollectedSnippets from "./CollectedSnippets";
 
-interface IHeroPastCreateOptions extends IHeroCreateOptions {
-  extractSessionId: string;
+interface IHeroExtractorCreateOptions extends IHeroCreateOptions {
+  previousSessionId: string;
 }
 
-export default class HeroPast {
+export default class HeroExtractor {
   #hero: Hero;
 
-  constructor(initializeOptions: IHeroPastCreateOptions) {
+  constructor(initializeOptions: IHeroExtractorCreateOptions) {
     this.#hero = new Hero(initializeOptions);
   }
 

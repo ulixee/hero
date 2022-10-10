@@ -1,7 +1,7 @@
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import Hero from './Hero';
-import HeroPast from './HeroPast';
+import HeroExtractor from './HeroExtractor';
 import Resource from './Resource';
 import ResourceRequest from './ResourceRequest';
 import ResourceResponse from './ResourceResponse';
@@ -13,7 +13,7 @@ export {
   Tab,
   FrameEnvironment,
   Hero,
-  HeroPast,
+  HeroExtractor,
   Resource,
   ResourceRequest,
   ResourceResponse,
