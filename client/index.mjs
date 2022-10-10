@@ -1,6 +1,7 @@
 import cjsImport from './index.js';
 
 const {
+  HeroPast,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
@@ -35,6 +36,7 @@ const {
 } = cjsImport;
 
 export {
+  HeroPast,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,

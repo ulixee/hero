@@ -96,6 +96,7 @@ export default class CoreFrameEnvironment {
     name: string,
     jsPath: IJsPath,
     waitForElement = false,
+    saveToDb = true,
   ): Promise<ICollectedElement[]> {
     return await this.commandQueue.run(
       'FrameEnvironment.collectElement',
@@ -103,6 +104,7 @@ export default class CoreFrameEnvironment {
       jsPath,
       Date.now(),
       waitForElement,
+      saveToDb,
     );
   }
 
