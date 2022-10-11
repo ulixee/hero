@@ -1,18 +1,19 @@
 import Hero from "./Hero";
-import IHeroCreateOptions from "../interfaces/IHeroCreateOptions";
+import IHeroExtractorCreateOptions from "../interfaces/IHeroExtractorCreateOptions";
 import CollectedElements from "./CollectedElements";
 import CollectedResources from "./CollectedResources";
 import CollectedSnippets from "./CollectedSnippets";
 
-interface IHeroExtractorCreateOptions extends IHeroCreateOptions {
-  previousSessionId: string;
-}
 
 export default class HeroExtractor {
   #hero: Hero;
 
   constructor(initializeOptions: IHeroExtractorCreateOptions) {
-    this.#hero = new Hero(initializeOptions);
+    if (initializeOptions.hero) {
+      this.#hero = initializeOptions.hero
+    } else {
+      this.#hero = new Hero(initializeOptions);
+    }
   }
 
   public get collectedElements(): CollectedElements {

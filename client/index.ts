@@ -24,6 +24,7 @@ import { InteractionCommand, MouseButton,  } from '@unblocked-web/specifications
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
+import IHeroExtractorCreateOptions from './interfaces/IHeroExtractorCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Command } from './interfaces/IInteractions';
 import { Hero, HeroExtractor, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
@@ -51,6 +52,7 @@ export {
   LocationStatus,
   LocationTrigger,
   IHeroCreateOptions,
+  IHeroExtractorCreateOptions,
   IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,
