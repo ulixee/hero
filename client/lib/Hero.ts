@@ -67,6 +67,7 @@ import CollectedElements from "./CollectedElements";
 import CollectedResources from "./CollectedResources";
 import CollectedSnippets from "./CollectedSnippets";
 import { isDomExtensionClass } from './DomExtender';
+import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],

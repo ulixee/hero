@@ -31,4 +31,8 @@ export default class HeroExtractor {
   public get sessionId(): Promise<string> {
     return this.#hero.sessionId;
   }
+
+  public close(): Promise<void> {
+    return this.#hero.close();
+  }
 }
