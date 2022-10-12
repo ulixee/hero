@@ -30,15 +30,15 @@ export default abstract class BaseRunner implements IRunner {
             return;
           }
           this.currentPage = page;
-          const step = `[${assignment.num ?? assignment.sessionId}.${counter}]`;
+          const step = `[${assignment.sessionId}.${counter}]`;
           await this.runPage(assignment, page, step);
           this.isFirst = false;
           counter += 1;
         }
       }
-      console.log(`[%s.✔] FINISHED ${assignment.id}`, assignment.num);
+      console.log(`[%s.✔] FINISHED ${assignment.id}`, assignment.sessionId);
     } catch (err) {
-      console.log('[%s.x] Error on %s', assignment.num, this.currentPage?.url, err);
+      console.log('[%s.x] Error on %s', assignment.sessionId, this.currentPage?.url, err);
       throw err;
     }
     console.log('--------------------------------------');
