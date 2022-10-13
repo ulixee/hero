@@ -254,6 +254,7 @@ export default class FrameEnvironment
     jsPath: IJsPath,
     timestamp: number,
     waitForElement = false,
+    saveToDb = true,
   ): Promise<ICollectedElement[]> {
     const { nodePointer } = await this.frame.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
@@ -298,7 +299,7 @@ export default class FrameEnvironment
 
     const promises: Promise<any>[] = [];
     for (const element of elements) {
-      const elementHtmlPromise = this.tab.onElementRequested(element);
+      const elementHtmlPromise = this.tab.onElementRequested(element, saveToDb);
       if (waitForElement) {
         promises.push(elementHtmlPromise);
       }

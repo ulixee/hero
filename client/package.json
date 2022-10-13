@@ -18,6 +18,7 @@
     "@unblocked-web/js-path": "2.0.0-alpha.1",
     "@unblocked-web/specifications": "2.0.0-alpha.11",
     "awaited-dom": "1.4.0",
+    "linkedom": "^0.14.11",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },

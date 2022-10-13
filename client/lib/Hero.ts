@@ -62,8 +62,12 @@ import DomState from './DomState';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
-import './DomExtender';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
+import CollectedElements from "./CollectedElements";
+import CollectedResources from "./CollectedResources";
+import CollectedSnippets from "./CollectedSnippets";
+import { isDomExtensionClass } from './DomExtender';
+import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -93,6 +97,10 @@ export default class Hero extends AwaitedEventTarget<{
   #tabs: Tab[];
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
+
+  #collectedElements: CollectedElements;
+  #collectedSnippets: CollectedSnippets;
+  #collectedResources: CollectedResources;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
@@ -206,7 +214,36 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.Request;
   }
 
+  public get collectedElements(): CollectedElements {
+    const coreSessionPromise = this.#getCoreSessionOrReject();
+    this.#collectedElements ??= new CollectedElements(coreSessionPromise, this.sessionId);
+    return this.#collectedElements;
+  }
+
+  public get collectedSnippets(): CollectedSnippets {
+    const coreSessionPromise = this.#getCoreSessionOrReject();
+    this.#collectedSnippets ??= new CollectedSnippets(coreSessionPromise, this.sessionId);
+    return this.#collectedSnippets;
+  }
+
+  public get collectedResources(): CollectedResources {
+    const coreSessionPromise = this.#getCoreSessionOrReject();
+    this.#collectedResources ??= new CollectedResources(coreSessionPromise, this.sessionId);
+    return this.#collectedResources;
+  }
+
   // METHODS
+
+  public async collect(name: string, value: any): Promise<void> {
+    if (value instanceof Resource || value instanceof WebsocketResource) {
+      await value.$collect(name);
+    } else if (isDomExtensionClass(value)) {
+      await value.$collect(name);
+    } else {
+      const coreSession = await this.#getCoreSessionOrReject();
+      await coreSession.collectSnippet(name, value);  
+    }
+  }
 
   public close(): Promise<void> {
     return (this.#isClosingPromise ??= new Promise(async (resolve, reject) => {

@@ -70,7 +70,6 @@ describe('Websocket tests', () => {
     await hero.waitForElement(hero.document.querySelector('h1'));
     await serverMessagePromise.promise;
     expect(receivedMessages).toHaveLength(20);
-
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
 
     const resource = await hero.waitForResource({ type: 'Websocket' });

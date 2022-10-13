@@ -497,13 +497,15 @@ export default class Tab
     this.mirrorNetwork.addResource(resourceSummary);
   }
 
-  public onElementRequested(collectedElement: ICollectedElement): Promise<ICollectedElement> {
+  public onElementRequested(collectedElement: ICollectedElement, saveToDb = true): Promise<ICollectedElement> {
     const resolvable = new Resolvable<ICollectedElement>();
     const resolveExisting = Promise.all(this.collectedElementsPendingHTML);
     this.collectedElementsPendingHTML.add(resolvable);
 
-    this.session.db.collectedElements.insert(collectedElement);
-
+    if (saveToDb) {
+      this.session.db.collectedElements.insert(collectedElement);
+    }
+    
     // Don't await this so promise explosions don't escape
     // eslint-disable-next-line promise/catch-or-return
     resolveExisting

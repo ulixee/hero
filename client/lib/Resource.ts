@@ -58,6 +58,10 @@ export default class Resource {
     return this.text.then(JSON.parse);
   }
 
+  public $collect(name: string): Promise<void> {
+    return this.#coreTabPromise.then(x => x.collectResource(name, this.#resourceMeta.id));
+  }
+
   public static async findLatest(
     tab: Tab,
     filter: IResourceFilterProperties,
