@@ -22,8 +22,11 @@ export const DataboxManifestSchema = z.object({
       'This is not a Databox scripthash (Bech32 encoded hash starting with "scr").',
     ),
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
-  runtimeName: z.string(),
-  runtimeVersion: z.string().describe('Version of the Databox Core Runtime'),
+  coreVersion: z.string().describe('Version of the Databox Core Runtime'),
+  corePlugins: z
+    .record(z.string())
+    .optional()
+    .describe('plugin dependencies required for execution'),
   pricePerQuery: micronoteTokenValidation
     .optional()
     .describe('Price per query if requiring payment'),

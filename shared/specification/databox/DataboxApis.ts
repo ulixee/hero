@@ -62,7 +62,7 @@ export const DataboxApiSchemas = {
       schema: z.any().optional().describe('A schema describing how to interact with this databox'),
     }),
   },
-  'Databox.run': {
+  'Databox.exec': {
     args: z.object({
       versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
       input: z.any().optional().describe('Optional input parameters for your databox'),
@@ -90,7 +90,7 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
   },
-  'Databox.runLocalScript': {
+  'Databox.execLocalScript': {
     args: z.object({
       scriptPath: z
         .string()
