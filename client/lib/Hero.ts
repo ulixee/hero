@@ -63,11 +63,10 @@ import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-import CollectedElements from "./CollectedElements";
-import CollectedResources from "./CollectedResources";
-import CollectedSnippets from "./CollectedSnippets";
+import CollectedElements from './CollectedElements';
+import CollectedResources from './CollectedResources';
+import CollectedSnippets from './CollectedSnippets';
 import { isDomExtensionClass } from './DomExtender';
-import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -241,7 +240,7 @@ export default class Hero extends AwaitedEventTarget<{
       await value.$collect(name);
     } else {
       const coreSession = await this.#getCoreSessionOrReject();
-      await coreSession.collectSnippet(name, value);  
+      await coreSession.collectSnippet(name, value);
     }
   }
 
