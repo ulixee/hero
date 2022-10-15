@@ -73,8 +73,8 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     throw new Error(subscribeErrorMessage);
   }
 
-  public $collect(name: string): Promise<void> {
-    return this.#coreTabPromise.then(x => x.collectResource(name, this.#resourceMeta.id));
+  public $detach(name: string): Promise<void> {
+    return this.#coreTabPromise.then(x => x.detachResource(name, this.#resourceMeta.id));
   }
 }
 

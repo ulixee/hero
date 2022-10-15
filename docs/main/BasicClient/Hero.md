@@ -31,9 +31,7 @@ Hero instances can have multiple [Tabs](/docs/hero/basic-client/tab), but only a
 
 Each Hero instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/hero/plugins/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
-## Constructor
-
-### new Hero *(options)* {#constructor}
+## Constructor {#constructor}
 
 Creates a new sandboxed browser instance with [unique user session and fingerprints](/docs/overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
 
@@ -256,6 +254,57 @@ Close a single Tab. The first opened Tab will become the focused tab.
 #### **Returns**: `Promise<void>`
 
 Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
+
+### hero.collect *(name, value)* {#collect}
+
+Collects a JSON-able snippet for later use in the script or in another future script through [HeroReplay](/docs/hero/basic-client/hero-replay).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.collect('time', new Date());
+const when = await hero.collectedSnippets.get('time');
+```
+To retrieve with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const when = await replay.collectedSnippets.get('time');
+```
+
+#### **Arguments**:
+
+- name `string`. The name you want to use to retrieve this value at a later time.
+- value `any`. The only constraint is the value must be JSON-able.
+
+#### **Returns**: `Promise<void>`
+
+
+### hero.detach *(elementOrResource, options?)* {#detach}
+
+Detaches an element or resource from AwaitedDOM to DetachedDOM. You can supply an optional name in the 2nd argument to store the element in detachedElemnts for later use in the script or in another future script using [HeroReplay](/docs/hero/basic-client/hero-replay).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.detach('title', hero.querySelector('h1'));
+const when = await hero.detachedElements.get('title');
+```
+
+To retrieve with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const when = await replay.detachedElements.get('title');
+```
+
+#### **Arguments**:
+
+- elementOrResource `AwaitedDOM`. This can be any AwaitedDOM element, collection of elements, or resource(s).
+- options `object`. Optional settings to apply to this extraction
+  - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
+
+#### **Returns**: `Promise<DetachedDOM>`
 
 ### hero.exportUserProfile *()* {#export-profile}
 

@@ -24,16 +24,18 @@ import { InteractionCommand, MouseButton,  } from '@unblocked-web/specifications
 import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LoadStatus, LocationStatus, LocationTrigger } from '@unblocked-web/specifications/agent/browser/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
-import IHeroExtractorCreateOptions from './interfaces/IHeroExtractorCreateOptions';
+import IHeroReplayCreateOptions from './interfaces/IHeroReplayCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Command } from './interfaces/IInteractions';
-import { Hero, HeroExtractor, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
+import { Hero, HeroReplay, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
 import ConnectionToHeroCore from './connections/ConnectionToHeroCore';
+import DetachedDOM from './lib/DetachedDOM';
 
 export default Hero;
 
 export {
-  HeroExtractor,
+  HeroReplay,
+  DetachedDOM,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
@@ -52,7 +54,7 @@ export {
   LocationStatus,
   LocationTrigger,
   IHeroCreateOptions,
-  IHeroExtractorCreateOptions,
+  IHeroReplayCreateOptions,
   IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,

@@ -25,7 +25,8 @@ import Interactor from './Interactor';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import { scriptInstance } from './internal';
 import { IExtractElementFn, IExtractElementOptions, IExtractElementsFn } from '../interfaces/IExtractElementFn';
-import CollectedElements from './CollectedElements';
+import DetachedElements from './DetachedElements';
+import DetachedDOM from './DetachedDOM';
 
 const awaitedPathState = StateMachine<
   any,
@@ -46,8 +47,7 @@ interface IBaseExtendNode {
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $xpathSelector(selector: string): ISuperNode;
-  $extract<T = any>(extractFn: IExtractElementFn<T>, options?: IExtractElementOptions): Promise<T>;
-  $collect(name: string): Promise<void>;
+  $detach(name?: string): Promise<globalThis.Element>;
 }
 
 interface IBaseExtendNodeList {
@@ -56,8 +56,7 @@ interface IBaseExtendNodeList {
     iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
     initial: T,
   ): Promise<T>;
-  $extract<T = any>(extractFn: IExtractElementsFn<T>, options?: IExtractElementOptions): Promise<T>;
-  $collect(name: string): Promise<void>;
+  $detach(name?: string): Promise<globalThis.Element[]>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -161,18 +160,11 @@ const NodeExtensionFns: INodeExtensionFns = {
     );
     return createSuperNode(newPath, awaitedOptions);
   },
-  async $extract<T = any>(extractFn: IExtractElementFn<T>, options: IExtractElementOptions = {}): Promise<T> {
+  async $detach(name: string): Promise<globalThis.Element> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const collectedElements = await coreFrame.collectElement(options.name, awaitedPath.toJSON(), true, false);
-    const frozenElement = CollectedElements.parseIntoFrozenDom(collectedElements[0].outerHTML);
-    const response = execExtractor(extractFn, frozenElement);
-    return response as unknown as T;
-  },
-  async $collect(name: string): Promise<void> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
-    const coreFrame = await awaitedOptions.coreFrame;
-    await coreFrame.collectElement(name, awaitedPath.toJSON());
+    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
+    return DetachedDOM.loadFragment(detachedElementsRaw[0].outerHTML);
   },
 };
 
@@ -232,18 +224,11 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     }
     return initial;
   },
-  async $extract<T = any>(extractFn: IExtractElementsFn<T>, options: IExtractElementOptions = {}): Promise<T> {
+  async $detach(name?: string): Promise<globalThis.Element[]> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const collectedElements = await coreFrame.collectElement(options.name, awaitedPath.toJSON(), true);
-    const frozenElements = collectedElements.map(x => CollectedElements.parseIntoFrozenDom(x.outerHTML));
-    const response = execExtractor(extractFn, frozenElements);
-    return response as unknown as T;
-  },
-  async $collect(name: string): Promise<void> {
-    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
-    const coreFrame = await awaitedOptions.coreFrame;
-    await coreFrame.collectElement(name, awaitedPath.toJSON());
+    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
+    return detachedElementsRaw.map(x => DetachedDOM.loadFragment(x.outerHTML));
   },
 };
 

@@ -1,4 +1,4 @@
-# Flow
+# Flow Handling
 
 > Flow is the definition of handlers around states a webpage can exist, and controls to restore your desired scraper script state.
 

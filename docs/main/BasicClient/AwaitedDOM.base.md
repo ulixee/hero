@@ -8,14 +8,6 @@ Many readonly properties and methods have been implemented. We haven't added DOM
 
 On each documented class, you can find a list of the unimplemented methods and properties at the bottom.
 
-## Introducing Supers
-
-Supers give you access to all properties and methods of dependent classes.
-
-[INTERFACES:Super]
-
-Some helpers are added to the Super classes to make using Hero more intuitive. Find a list [here](/docs/hero/basic-client/dom-extenders)
-
 ## Document Interfaces
 
 [INTERFACES:Document]

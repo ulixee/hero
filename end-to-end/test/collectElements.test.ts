@@ -26,14 +26,14 @@ describe('basic collect Element tests', () => {
     const [hero, coreSession] = await openBrowser(`/element-basic`);
     const sessionId = await hero.sessionId;
     const test1Element = await hero.document.querySelector('.test1');
-    await collectElement(test1Element, 'a');
-    await collectElement(test1Element.nextElementSibling, 'b');
+    await detachElement(test1Element, 'a');
+    await detachElement(test1Element.nextElementSibling, 'b');
 
-    const elementsA = await coreSession.getCollectedElements(sessionId, 'a');
+    const elementsA = await coreSession.getDetachedElements(sessionId, 'a');
     expect(elementsA).toHaveLength(1);
     expect(elementsA[0].outerHTML).toBe('<div class="test1">test 1</div>');
 
-    const elementsB = await coreSession.getCollectedElements(sessionId, 'b');
+    const elementsB = await coreSession.getDetachedElements(sessionId, 'b');
     expect(elementsB[0].outerHTML).toBe(`<div class="test2">
             <ul><li>Test 2</li></ul>
           </div>`);
@@ -56,9 +56,9 @@ describe('basic collect Element tests', () => {
     });
     const [hero, coreSession] = await openBrowser(`/element-list`);
     const sessionId = await hero.sessionId;
-    await collectElement(hero.document.querySelectorAll('.valid'), 'valid');
+    await detachElement(hero.document.querySelectorAll('.valid'), 'valid');
 
-    const valid = await coreSession.getCollectedElements(sessionId, 'valid');
+    const valid = await coreSession.getDetachedElements(sessionId, 'valid');
     expect(valid).toHaveLength(3);
     expect(valid[0].outerHTML).toBe('<li class="valid">Test 1</li>');
     expect(valid[1].outerHTML).toBe('<li class="valid">Test 4</li>');
@@ -88,10 +88,10 @@ describe('basic collect Element tests', () => {
 
     for (let i = 0; i < 25; i += 1) {
       await hero.getJsValue(`add('Text ${i}')`);
-      await collectElement(hero.document.querySelector('li:last-child'), `item${  i}`);
+      await detachElement(hero.document.querySelector('li:last-child'), `item${  i}`);
     }
     for (let i = 0; i < 25; i += 1) {
-      const valid = await coreSession.getCollectedElements(sessionId, `item${  i}`);
+      const valid = await coreSession.getDetachedElements(sessionId, `item${  i}`);
       expect(valid).toHaveLength(1);
       expect(valid[0].outerHTML).toBe(`<li>Text ${i}</li>`);
     }
@@ -121,8 +121,8 @@ describe('basic collect Element tests', () => {
     await newTab.focus();
     await newTab.waitForLoad('DomContentLoaded')
 
-    await collectElement(hero.document.querySelectorAll('.item'), 'items');
-    await expect(coreSession.getCollectedElements(null, 'items')).resolves.toHaveLength(3);
+    await detachElement(hero.document.querySelectorAll('.item'), 'items');
+    await expect(coreSession.getDetachedElements(null, 'items')).resolves.toHaveLength(3);
   });
 });
 
@@ -135,11 +135,11 @@ async function openBrowser(path: string): Promise<[Hero, CoreSession]> {
   return [hero, coreSession];
 }
 
-async function collectElement(
+async function detachElement(
   element: ISuperElement | ISuperNodeList,
   name: string,
 ): Promise<void> {
   const { awaitedPath, awaitedOptions } = awaitedPathState.getState(element);
   const coreFrame = await awaitedOptions.coreFrame;
-  await coreFrame.collectElement(name, awaitedPath.toJSON());
+  await coreFrame.detachElement(name, awaitedPath.toJSON());
 }

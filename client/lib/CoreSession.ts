@@ -7,9 +7,9 @@ import * as readline from 'readline';
 import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import CoreCommandQueue from './CoreCommandQueue';
@@ -150,15 +150,15 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getCollectedSnippets', sessionId, name);
   }
 
-  public async getCollectedElements(sessionId: string, name: string): Promise<ICollectedElement[]> {
-    return await this.commandQueue.run('Session.getCollectedElements', sessionId, name);
+  public async getDetachedElements(sessionId: string, name: string): Promise<IDetachedElement[]> {
+    return await this.commandQueue.run('Session.getDetachedElements', sessionId, name);
   }
 
-  public async getCollectedResources(
+  public async getDetachedResources(
     sessionId: string,
     name: string,
-  ): Promise<ICollectedResource[]> {
-    return await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
+  ): Promise<IDetachedResource[]> {
+    return await this.commandQueue.run('Session.getDetachedResources', sessionId, name);
   }
 
   // END OF PRIVATE APIS FOR DATABOX ///////////////////////////////////////////////////////////////

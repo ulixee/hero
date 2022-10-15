@@ -1,7 +1,7 @@
 import ICoreSession from '../interfaces/ICoreSession';
-import CollectedResource from './CollectedResource';
+import DetachedResource from './DetachedResource';
 
-export default class CollectedResources {
+export default class DetachedResources {
   readonly #coreSessionPromise: Promise<ICoreSession>;
   readonly #sessionIdPromise: Promise<string>;
 
@@ -19,21 +19,21 @@ export default class CollectedResources {
     );
   }
 
-  async get(name: string): Promise<CollectedResource> {
+  async get(name: string): Promise<DetachedResource> {
     const [coreSession, sessionId] = await Promise.all([
       this.#coreSessionPromise,
       this.#sessionIdPromise,
     ]);
-    const resources = await coreSession.getCollectedResources(sessionId, name);
-    return resources.length ? new CollectedResource(resources[0]) : null;
+    const resources = await coreSession.getDetachedResources(sessionId, name);
+    return resources.length ? new DetachedResource(resources[0]) : null;
   }
 
-  async getAll(name: string): Promise<CollectedResource[]> {
+  async getAll(name: string): Promise<DetachedResource[]> {
     const [coreSession, sessionId] = await Promise.all([
       this.#coreSessionPromise,
       this.#sessionIdPromise,
     ]);
-    const resources = await coreSession.getCollectedResources(sessionId, name);
-    return resources.map(x => new CollectedResource(x));
+    const resources = await coreSession.getDetachedResources(sessionId, name);
+    return resources.map(x => new DetachedResource(x));
   }
 }

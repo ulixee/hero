@@ -26,7 +26,7 @@ import INavigation from '@unblocked-web/specifications/agent/browser/INavigation
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
 import { ISerializable } from '@unblocked-web/agent/lib/JsPath';
 import Frame from '@unblocked-web/agent/lib/Frame';
@@ -136,7 +136,7 @@ export default class FrameEnvironment
     process.nextTick(() => this.listen());
     this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
-      this.collectElement,
+      this.detachElement,
       this.execJsPath,
       this.fetch,
       this.getChildFrameEnvironment,
@@ -249,20 +249,20 @@ export default class FrameEnvironment
     return this.toJSON();
   }
 
-  public async collectElement(
+  public async detachElement(
     name: string,
     jsPath: IJsPath,
     timestamp: number,
     waitForElement = false,
     saveToDb = true,
-  ): Promise<ICollectedElement[]> {
+  ): Promise<IDetachedElement[]> {
     const { nodePointer } = await this.frame.jsPath.getNodePointer(jsPath);
     await this.flushPageEventsRecorder();
     const navigation = this.navigations.lastHttpNavigationRequest;
     const commandId = this.session.commands.lastId;
     const domChangesTimestamp = this.lastDomChangeTimestamp;
 
-    const elements: ICollectedElement[] = [];
+    const elements: IDetachedElement[] = [];
     if (nodePointer.iterableItems && nodePointer.iterableIsNodePointers) {
       for (const item of nodePointer.iterableItems as INodePointer[]) {
         elements.push({

@@ -30,7 +30,7 @@ const { document } = hero;
 
 const elems = document.querySelectorAll('ul');
 for (const elem of await elems) {
-  db.query('SELECT FROM items WHERE id=?', [elem.id]);
+  console.log('SELECT FROM items WHERE id=?', [await elem.id]);
   // ^^ WORKS
 }
 ```
@@ -49,7 +49,7 @@ page.evaluate(
   (selector, db) => {
     const elems = document.querySelectorAll(selector);
     for (const elem of elems) {
-      db.query('SELECT FROM items WHERE id=?', [elem.id]);
+      console.log('SELECT FROM items WHERE id=?', [elem.id]);
       // ^^ BREAKS
     }
   },

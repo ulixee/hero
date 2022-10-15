@@ -1,16 +1,16 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import { formatJsPath } from '../lib/CommandFormatter';
 
-export default class CollectedElementsTable extends SqliteTable<
-  ICollectedElement & { id?: number }
+export default class DetachedElementsTable extends SqliteTable<
+  IDetachedElement & { id?: number }
 > {
   private idCounter = 0;
   constructor(db: SqliteDatabase) {
     super(
       db,
-      'CollectedElements',
+      'DetachedElements',
       [
         ['id', 'INTEGER', 'PRIMARY KEY'],
         ['name', 'TEXT'],
@@ -32,28 +32,28 @@ export default class CollectedElementsTable extends SqliteTable<
     this.defaultSortOrder = 'id';
   }
 
-  public insert(collectedElement: ICollectedElement): void {
+  public insert(detachedElement: IDetachedElement): void {
     this.idCounter += 1;
-    collectedElement.id = this.idCounter;
+    detachedElement.id = this.idCounter;
     this.queuePendingInsert([
-      collectedElement.id,
-      collectedElement.name,
-      collectedElement.timestamp,
-      collectedElement.tabId,
-      collectedElement.frameId,
-      collectedElement.frameNavigationId,
-      collectedElement.commandId,
-      collectedElement.nodePath ? formatJsPath(collectedElement.nodePath) : null,
-      collectedElement.documentUrl,
-      collectedElement.domChangesTimestamp,
-      collectedElement.nodePointerId,
-      collectedElement.nodeType,
-      collectedElement.nodePreview,
+      detachedElement.id,
+      detachedElement.name,
+      detachedElement.timestamp,
+      detachedElement.tabId,
+      detachedElement.frameId,
+      detachedElement.frameNavigationId,
+      detachedElement.commandId,
+      detachedElement.nodePath ? formatJsPath(detachedElement.nodePath) : null,
+      detachedElement.documentUrl,
+      detachedElement.domChangesTimestamp,
+      detachedElement.nodePointerId,
+      detachedElement.nodeType,
+      detachedElement.nodePreview,
       null,
     ]);
   }
 
-  public getByName(name: string): ICollectedElement[] {
+  public getByName(name: string): IDetachedElement[] {
     return this.db
       .prepare(`select * from ${this.tableName} where name=:name order by id asc`)
       .all({ name });
@@ -64,7 +64,7 @@ export default class CollectedElementsTable extends SqliteTable<
     return [...new Set(names.map(x => x.name))];
   }
 
-  public updateHtml(element: ICollectedElement): void {
+  public updateHtml(element: IDetachedElement): void {
     const pending = this.pendingInserts.find(x => x[0] === element.id);
     if (pending) {
       pending[7] = element.outerHTML;

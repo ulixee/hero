@@ -63,10 +63,12 @@ import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-import CollectedElements from './CollectedElements';
-import CollectedResources from './CollectedResources';
-import CollectedSnippets from './CollectedSnippets';
+import DetachedElements from "./DetachedElements";
+import DetachedResources from "./DetachedResources";
+import CollectedSnippets from "./CollectedSnippets";
 import { isDomExtensionClass } from './DomExtender';
+import IDetachElementOptions from '../interfaces/IDetachElementOptions';
+import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -97,9 +99,9 @@ export default class Hero extends AwaitedEventTarget<{
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
 
-  #collectedElements: CollectedElements;
+  #detachedElements: DetachedElements;
   #collectedSnippets: CollectedSnippets;
-  #collectedResources: CollectedResources;
+  #detachedResources: DetachedResources;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
@@ -213,10 +215,10 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.Request;
   }
 
-  public get collectedElements(): CollectedElements {
+  public get detachedElements(): DetachedElements {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedElements ??= new CollectedElements(coreSessionPromise, this.sessionId);
-    return this.#collectedElements;
+    this.#detachedElements ??= new DetachedElements(coreSessionPromise, this.sessionId);
+    return this.#detachedElements;
   }
 
   public get collectedSnippets(): CollectedSnippets {
@@ -225,22 +227,26 @@ export default class Hero extends AwaitedEventTarget<{
     return this.#collectedSnippets;
   }
 
-  public get collectedResources(): CollectedResources {
+  public get detachedResources(): DetachedResources {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedResources ??= new CollectedResources(coreSessionPromise, this.sessionId);
-    return this.#collectedResources;
+    this.#detachedResources ??= new DetachedResources(coreSessionPromise, this.sessionId);
+    return this.#detachedResources;
   }
 
   // METHODS
 
   public async collect(name: string, value: any): Promise<void> {
-    if (value instanceof Resource || value instanceof WebsocketResource) {
-      await value.$collect(name);
-    } else if (isDomExtensionClass(value)) {
-      await value.$collect(name);
+    const coreSession = await this.#getCoreSessionOrReject();
+    await coreSession.collectSnippet(name, value);  
+  }
+
+  public async detach(elementOrResource: any, options: IDetachElementOptions = {}): Promise<void> {
+    if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
+      await elementOrResource.$detach(options.name);
+    } else if (isDomExtensionClass(elementOrResource)) {
+      await elementOrResource.$detach(options.name);
     } else {
-      const coreSession = await this.#getCoreSessionOrReject();
-      await coreSession.collectSnippet(name, value);
+      throw new Error('The first argument must be an Element or Resource');
     }
   }
 

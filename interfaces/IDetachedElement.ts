@@ -1,6 +1,6 @@
 import { IJsPath } from '@unblocked-web/js-path';
 
-export default interface ICollectedElement {
+export default interface IDetachedElement {
   id?: number;
   name: string;
   frameId: number;

@@ -25,7 +25,7 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreTab from './CoreTab';
@@ -92,14 +92,14 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
-  public async collectElement(
+  public async detachElement(
     name: string,
     jsPath: IJsPath,
     waitForElement = false,
     saveToDb = true,
-  ): Promise<ICollectedElement[]> {
+  ): Promise<IDetachedElement[]> {
     return await this.commandQueue.run(
-      'FrameEnvironment.collectElement',
+      'FrameEnvironment.detachElement',
       name,
       jsPath,
       Date.now(),

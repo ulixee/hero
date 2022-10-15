@@ -1,14 +1,14 @@
 import Hero from "./Hero";
-import IHeroExtractorCreateOptions from "../interfaces/IHeroExtractorCreateOptions";
-import CollectedElements from "./CollectedElements";
-import CollectedResources from "./CollectedResources";
+import IHeroReplayCreateOptions from "../interfaces/IHeroReplayCreateOptions";
+import DetachedElements from "./DetachedElements";
+import DetachedResources from "./DetachedResources";
 import CollectedSnippets from "./CollectedSnippets";
 
 
-export default class HeroExtractor {
+export default class HeroReplay {
   #hero: Hero;
 
-  constructor(initializeOptions: IHeroExtractorCreateOptions) {
+  constructor(initializeOptions: IHeroReplayCreateOptions) {
     if (initializeOptions.hero) {
       this.#hero = initializeOptions.hero
     } else {
@@ -16,16 +16,16 @@ export default class HeroExtractor {
     }
   }
 
-  public get collectedElements(): CollectedElements {
-    return this.#hero.collectedElements;
+  public get detachedElements(): DetachedElements {
+    return this.#hero.detachedElements;
   }
 
   public get collectedSnippets(): CollectedSnippets {
     return this.#hero.collectedSnippets;
   }
 
-  public get collectedResources(): CollectedResources {
-    return this.#hero.collectedResources;
+  public get detachedResources(): DetachedResources {
+    return this.#hero.detachedResources;
   }
 
   public get sessionId(): Promise<string> {
