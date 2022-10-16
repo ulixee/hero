@@ -13,7 +13,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import Agent from '@unblocked-web/agent/lib/Agent';
@@ -54,7 +54,7 @@ export default class Session
     output: { changes: IOutputChangeRecord[] };
     'collected-asset': {
       type: 'resource' | 'snippet' | 'element';
-      asset: ICollectedSnippet | IDetachedElement | IDetachedResource;
+      asset: IDataSnippet | IDetachedElement | IDetachedResource;
     };
   }>
   implements ICommandableTarget, IRemoteEventListener
@@ -249,8 +249,8 @@ export default class Session
     SessionsDb.find().recordSession(this);
 
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
-      this.collectSnippet,
-      this.getCollectedSnippets,
+      this.setDataSnippet,
+      this.getDataSnippets,
       this.getDetachedElements,
       this.getDetachedResources,
       this.getCollectedAssetNames,
@@ -298,8 +298,8 @@ export default class Session
     return Promise.resolve(this.meta);
   }
 
-  public collectSnippet(name: string, value: any, timestamp: number): Promise<void> {
-    const asset = this.db.collectedSnippets.insert(name, value, timestamp, this.commands.lastId);
+  public setDataSnippet(key: string, value: any, timestamp: number): Promise<void> {
+    const asset = this.db.dataSnippets.insert(key, value, timestamp, this.commands.lastId);
     this.emit('collected-asset', { type: 'snippet', asset });
     return Promise.resolve();
   }
@@ -314,7 +314,7 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     const snippets = new Set<string>();
-    for (const snippet of db.collectedSnippets.all()) {
+    for (const snippet of db.dataSnippets.all()) {
       snippets.add(snippet.name);
     }
     const resources = new Set<string>();
@@ -331,14 +331,14 @@ export default class Session
     });
   }
 
-  public getCollectedSnippets(fromSessionId: string, name: string): Promise<ICollectedSnippet[]> {
+  public getDataSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    return Promise.resolve(db.collectedSnippets.getByName(name));
+    return Promise.resolve(db.dataSnippets.getByName(name));
   }
 
   public getDetachedResources(fromSessionId: string, name: string): Promise<IDetachedResource[]> {

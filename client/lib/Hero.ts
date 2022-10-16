@@ -65,10 +65,8 @@ import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 import DetachedElements from "./DetachedElements";
 import DetachedResources from "./DetachedResources";
-import CollectedSnippets from "./CollectedSnippets";
 import { isDomExtensionClass } from './DomExtender';
 import IDetachElementOptions from '../interfaces/IDetachElementOptions';
-import './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -100,7 +98,6 @@ export default class Hero extends AwaitedEventTarget<{
   #isClosingPromise: Promise<void>;
 
   #detachedElements: DetachedElements;
-  #collectedSnippets: CollectedSnippets;
   #detachedResources: DetachedResources;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
@@ -221,12 +218,6 @@ export default class Hero extends AwaitedEventTarget<{
     return this.#detachedElements;
   }
 
-  public get collectedSnippets(): CollectedSnippets {
-    const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedSnippets ??= new CollectedSnippets(coreSessionPromise, this.sessionId);
-    return this.#collectedSnippets;
-  }
-
   public get detachedResources(): DetachedResources {
     const coreSessionPromise = this.#getCoreSessionOrReject();
     this.#detachedResources ??= new DetachedResources(coreSessionPromise, this.sessionId);
@@ -234,11 +225,6 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   // METHODS
-
-  public async collect(name: string, value: any): Promise<void> {
-    const coreSession = await this.#getCoreSessionOrReject();
-    await coreSession.collectSnippet(name, value);  
-  }
 
   public async detach(elementOrResource: any, options: IDetachElementOptions = {}): Promise<void> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
@@ -295,6 +281,20 @@ export default class Hero extends AwaitedEventTarget<{
     const coreTab = await getCoreTab(tab);
     await coreTab.focusTab();
     this.#activeTab = tab;
+  }
+
+  public async getData<T = any>(key: string): Promise<T> {
+    const coreSession = await this.#getCoreSessionOrReject();
+
+    const snippets = await coreSession.getDataSnippets(coreSession.sessionId, key);
+    if (!snippets.length) return null;
+
+    return snippets[snippets.length-1].value as T;
+  }
+
+  public async setData(key: string, value: any): Promise<void> {
+    const coreSession = await this.#getCoreSessionOrReject();
+    await coreSession.setDataSnippet(key, value);  
   }
 
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {

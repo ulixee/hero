@@ -255,34 +255,10 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
 
-### hero.collect *(name, value)* {#collect}
-
-Collects a JSON-able snippet for later use in the script or in another future script through [HeroReplay](/docs/hero/basic-client/hero-replay).
-
-```js
-const hero = new Hero();
-await hero.goto('https://ulixee.org');
-await hero.collect('time', new Date());
-const when = await hero.collectedSnippets.get('time');
-```
-To retrieve with [HeroReplay](/docs/hero/basic-client/hero-replay):
-
-```js
-const replay = new HeroReplay({ /* previousSessionId */});
-const when = await replay.collectedSnippets.get('time');
-```
-
-#### **Arguments**:
-
-- name `string`. The name you want to use to retrieve this value at a later time.
-- value `any`. The only constraint is the value must be JSON-able.
-
-#### **Returns**: `Promise<void>`
-
 
 ### hero.detach *(elementOrResource, options?)* {#detach}
 
-Detaches an element or resource from AwaitedDOM to DetachedDOM. You can supply an optional name in the 2nd argument to store the element in detachedElemnts for later use in the script or in another future script using [HeroReplay](/docs/hero/basic-client/hero-replay).
+Detaches an element or resource from AwaitedDOM and converts it into DetachedDOM. You can supply an optional name in the 2nd argument to store the element in [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) for later use.
 
 ```js
 const hero = new Hero();
@@ -291,7 +267,7 @@ await hero.detach('title', hero.querySelector('h1'));
 const when = await hero.detachedElements.get('title');
 ```
 
-To retrieve with [HeroReplay](/docs/hero/basic-client/hero-replay):
+To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
 
 ```js
 const replay = new HeroReplay({ /* previousSessionId */});
@@ -324,6 +300,23 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 Alias for [Tab.focus()](/docs/hero/basic-client/tab#focus)
 
+### hero.getData *(key)* {#getData}
+
+Retrieves a value you previously stored with setData.
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.setData('time', new Date());
+const when = await hero.getData('time');
+```
+
+#### **Arguments**:
+
+- key `string`. The key you previously used to store the value.
+
+#### **Returns**: `Promise<any>`
+
 ### hero.interact *(interaction\[, interaction, ...])* {#interact}
 
 Executes a series of mouse and keyboard interactions.
@@ -335,6 +328,32 @@ Executes a series of mouse and keyboard interactions.
 #### **Returns**: `Promise`
 
 Refer to the [Interactions page](/docs/hero/basic-client/interactions) for details on how to construct an interaction.
+
+
+### hero.setData *(key, value)* {#setData}
+
+Stores a JSON-able value in the session database that can be retrieved later with [HeroReplay](/docs/hero/basic-client/hero-replay).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.setData('time', new Date());
+const when = await hero.getData('time');
+```
+To retrieve later with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const when = await replay.getData('time');
+```
+
+#### **Arguments**:
+
+- key `string`. The key you want to use to retrieve this value at a later time.
+- value `any`. The only constraint is the value must be JSON-able.
+
+#### **Returns**: `Promise<void>`
+
 
 ### hero.scrollTo *(mousePosition)* {#scroll-to}
 

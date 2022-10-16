@@ -2,7 +2,7 @@
 
 > HeroReplay is a specialized version of Hero that allows you to load and interact with previous Hero sessions without reloading the website and rerunning http traffic.
 
-This class is barebones for the moment -- it contians a small list of properties for retriving DetachedElements, DetachedResources and CollectedSnippets. Our long-term plans are to make this a full-fledged Hero just without the methods for trigging new http traffic. Instead, HeroReplay will have specialized methods for reloading and interacting with the DOM and resources from previous Hero sessions.
+This class is barebones for the moment -- it contains a small list of properties such as retrieving DetachedElements and DetachedResources. Our long-term plans are to make this a full-fledged tool for reloading and interacting with the DOM and resources from previous Hero sessions.
 
 ## Constructor
 
@@ -19,22 +19,33 @@ HeroReplay accepts the same initialization options as Hero with one extra requir
 
 DetachedElements object providing access to all elements with `$detach` called from this script.
 
-#### **Returns** [`DetachedElements`](/docs/databox/advanced-client/detached-elements)
+#### **Returns** [`DetachedElements`](/docs/hero/advanced-client/detached-elements)
 
 ### heroReplay.detachedResources
 
 DetachedResources object providing access to all resources collected from this script.
 
-#### **Returns** [`DetachedResources`](/docs/databox/advanced-client/detached-resources)
-
-### heroReplay.collectedSnippets
-
-CollectedSnippets object providing access to all snippets collected from this script.
-
-#### **Returns** [`CollectedSnippets`](/docs/databox/advanced-client/collected-snippets)
+#### **Returns** [`DetachedResources`](/docs/hero/advanced-client/detached-resources)
 
 ### heroReplay.sessionId
 
 Readonly unique sessionId for this Session.
 
 #### **Returns** `Promise<string>`
+
+## Methods
+
+### heroReplay.getData *(key)* {#getData}
+
+Retrieves a value you previously stored with [hero.setData](/docs/hero/basic-client/hero#setData).
+
+```js
+const heroReplay = new HeroReplay({/* previousSessionId */});
+const when = await heroReplay.getData('time');
+```
+
+#### **Arguments**:
+
+- key `string`. The key you previously used to store the value.
+
+#### **Returns**: `Promise<any>`

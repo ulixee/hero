@@ -28,7 +28,6 @@
     - ConnectionToCore
     - DetachedElements
     - DetachedResources
-    - CollectedSnippets
 
 - title: Advanced Concepts
   items:

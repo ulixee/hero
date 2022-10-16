@@ -2,7 +2,6 @@ import Hero from "./Hero";
 import IHeroReplayCreateOptions from "../interfaces/IHeroReplayCreateOptions";
 import DetachedElements from "./DetachedElements";
 import DetachedResources from "./DetachedResources";
-import CollectedSnippets from "./CollectedSnippets";
 
 
 export default class HeroReplay {
@@ -20,10 +19,6 @@ export default class HeroReplay {
     return this.#hero.detachedElements;
   }
 
-  public get collectedSnippets(): CollectedSnippets {
-    return this.#hero.collectedSnippets;
-  }
-
   public get detachedResources(): DetachedResources {
     return this.#hero.detachedResources;
   }
@@ -34,5 +29,9 @@ export default class HeroReplay {
 
   public close(): Promise<void> {
     return this.#hero.close();
+  }
+
+  public getData<T = any>(key: string): Promise<T> {
+    return this.#hero.getData<T>(key);
   }
 }

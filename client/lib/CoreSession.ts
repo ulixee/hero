@@ -8,7 +8,7 @@ import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
@@ -136,8 +136,8 @@ export default class CoreSession
     this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
   }
 
-  public async collectSnippet(name: string, value: any): Promise<void> {
-    await this.commandQueue.run('Session.collectSnippet', name, value, Date.now());
+  public async setDataSnippet(key: string, value: any): Promise<void> {
+    await this.commandQueue.run('Session.setDataSnippet', key, value, Date.now());
   }
 
   public async getCollectedAssetNames(
@@ -146,8 +146,8 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getCollectedAssetNames', sessionId);
   }
 
-  public async getCollectedSnippets(sessionId: string, name: string): Promise<ICollectedSnippet[]> {
-    return await this.commandQueue.run('Session.getCollectedSnippets', sessionId, name);
+  public async getDataSnippets(sessionId: string, name: string): Promise<IDataSnippet[]> {
+    return await this.commandQueue.run('Session.getDataSnippets', sessionId, name);
   }
 
   public async getDetachedElements(sessionId: string, name: string): Promise<IDetachedElement[]> {
