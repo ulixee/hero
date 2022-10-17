@@ -1,5 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class OutputTable extends SqliteTable<IOutputChangeRecord> {
   constructor(db: SqliteDatabase) {
@@ -18,9 +19,16 @@ export default class OutputTable extends SqliteTable<IOutputChangeRecord> {
   }
 
   public insert(record: IOutputChangeRecord): void {
-    record.value = JSON.stringify(record.value);
+    record.value = TypeSerializer.stringify(record.value);
     const { type, path, value, lastCommandId, timestamp } = record;
     this.queuePendingInsert([type, path, value, lastCommandId, timestamp]);
+  }
+
+  public override all(): IOutputChangeRecord[] {
+    return super.all().map(x => ({
+      ...x,
+      value: TypeSerializer.parse(x.value),
+    }));
   }
 }
 
