@@ -1,5 +1,6 @@
 // setup must go first
 import './lib/SetupAwaitedHandler';
+import './lib/DomExtender'
 import type {
   ISuperDocument,
   ISuperElement,
