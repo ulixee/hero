@@ -48,7 +48,8 @@
       "net",
       "crypto",
       "commons",
-      "specification"
+      "specification",
+      "schema"
     ]
   }
 }

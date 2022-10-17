@@ -1,0 +1,9 @@
+{
+  "name": "@ulixee/schema",
+  "version": "2.0.0-alpha.12",
+  "description": "A basic schema utility with static constraints to support secure type checking.",
+  "license": "MIT",
+  "dependencies": {
+    "moment": "^2.29.4"
+  }
+}
