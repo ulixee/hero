@@ -8,7 +8,7 @@ export interface IDateSchemaConfig extends IBaseConfig {
 }
 
 export default class DateSchema extends BaseSchema<Date, IDateSchemaConfig> {
-  readonly  typeName = 'date';
+  readonly typeName = 'date';
   future?: boolean;
   past?: boolean;
 
@@ -17,6 +17,7 @@ export default class DateSchema extends BaseSchema<Date, IDateSchemaConfig> {
     if (isDefined(config.future))
       assert(typeof config.future === 'boolean', 'future must be a boolean');
     if (isDefined(config.past)) assert(typeof config.past === 'boolean', 'past must be a boolean');
+    assert(!(config.past && config.future), "can't be both past and future");
   }
 
   protected validationLogic(value: any, path, tracker): void {

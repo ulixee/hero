@@ -22,6 +22,7 @@ export const DataboxManifestSchema = z.object({
       'This is not a Databox scripthash (Bech32 encoded hash starting with "scr").',
     ),
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
+  schemaInterface: z.string().optional().describe('A raw typescript schema for this Databox'),
   coreVersion: z.string().describe('Version of the Databox Core Runtime'),
   corePlugins: z
     .record(z.string())

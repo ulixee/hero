@@ -59,7 +59,7 @@ export const DataboxApiSchemas = {
       computePricePerKb: micronoteTokenValidation.describe(
         'The current server price per kilobyte. NOTE: if a server is implementing surge pricing, this amount could vary.',
       ),
-      schema: z.any().optional().describe('A schema describing how to interact with this databox'),
+      schemaInterface: z.string().optional().describe('A schema interface describing input and output for this databox'),
     }),
   },
   'Databox.exec': {
