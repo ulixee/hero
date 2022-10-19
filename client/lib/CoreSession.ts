@@ -136,8 +136,8 @@ export default class CoreSession
     this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
   }
 
-  public async setDataSnippet(key: string, value: any): Promise<void> {
-    await this.commandQueue.run('Session.setDataSnippet', key, value, Date.now());
+  public async setSnippet(key: string, value: any): Promise<void> {
+    await this.commandQueue.run('Session.setSnippet', key, value, Date.now());
   }
 
   public async getCollectedAssetNames(
@@ -146,8 +146,8 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getCollectedAssetNames', sessionId);
   }
 
-  public async getDataSnippets(sessionId: string, name: string): Promise<IDataSnippet[]> {
-    return await this.commandQueue.run('Session.getDataSnippets', sessionId, name);
+  public async getSnippets(sessionId: string, name: string): Promise<IDataSnippet[]> {
+    return await this.commandQueue.run('Session.getSnippets', sessionId, name);
   }
 
   public async getDetachedElements(sessionId: string, name: string): Promise<IDetachedElement[]> {

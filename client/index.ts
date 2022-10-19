@@ -29,13 +29,13 @@ import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import { Command } from './interfaces/IInteractions';
 import { Hero, HeroReplay, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
 import ConnectionToHeroCore from './connections/ConnectionToHeroCore';
-import DetachedDOM from './lib/DetachedDOM';
+import DetachedElement from './lib/DetachedElement';
 
 export default Hero;
 
 export {
   HeroReplay,
-  DetachedDOM,
+  DetachedElement,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,

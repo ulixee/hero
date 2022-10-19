@@ -249,8 +249,8 @@ export default class Session
     SessionsDb.find().recordSession(this);
 
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
-      this.setDataSnippet,
-      this.getDataSnippets,
+      this.setSnippet,
+      this.getSnippets,
       this.getDetachedElements,
       this.getDetachedResources,
       this.getCollectedAssetNames,
@@ -298,8 +298,8 @@ export default class Session
     return Promise.resolve(this.meta);
   }
 
-  public setDataSnippet(key: string, value: any, timestamp: number): Promise<void> {
-    const asset = this.db.dataSnippets.insert(key, value, timestamp, this.commands.lastId);
+  public setSnippet(key: string, value: any, timestamp: number): Promise<void> {
+    const asset = this.db.snippets.insert(key, value, timestamp, this.commands.lastId);
     this.emit('collected-asset', { type: 'snippet', asset });
     return Promise.resolve();
   }
@@ -314,7 +314,7 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     const snippets = new Set<string>();
-    for (const snippet of db.dataSnippets.all()) {
+    for (const snippet of db.snippets.all()) {
       snippets.add(snippet.name);
     }
     const resources = new Set<string>();
@@ -331,14 +331,14 @@ export default class Session
     });
   }
 
-  public getDataSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
+  public getSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    return Promise.resolve(db.dataSnippets.getByName(name));
+    return Promise.resolve(db.snippets.getByName(name));
   }
 
   public getDetachedResources(fromSessionId: string, name: string): Promise<IDetachedResource[]> {

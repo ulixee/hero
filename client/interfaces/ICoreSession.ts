@@ -6,8 +6,8 @@ import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 
 export default interface ICoreSession {
   sessionId: string;
-  setDataSnippet(key: string, value: any): Promise<void>;
-  getDataSnippets(sessionId: string, key: string): Promise<IDataSnippet[]>;
+  setSnippet(key: string, value: any): Promise<void>;
+  getSnippets(sessionId: string, key: string): Promise<IDataSnippet[]>;
   getCollectedAssetNames(sessionId: string): Promise<{ resources: string[]; elements: string[]; snippets: string[] }>;
   getDetachedElements(sessionId: string, name: string): Promise<IDetachedElement[]>;
   getDetachedResources(sessionId: string, name: string): Promise<IDetachedResource[]>;

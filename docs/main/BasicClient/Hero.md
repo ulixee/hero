@@ -101,6 +101,18 @@ The connectionToCore host address to which this Hero has connected. This is usef
 
 #### **Type**: `Promise<string>`
 
+### hero.detachedElements
+
+DetachedElements object providing access to all elements that have been detached and tagged with a name.
+
+#### **Returns** [`DetachedElements`](/docs/hero/advanced-client/detached-elements)
+
+### hero.detachedResources
+
+DetachedResources object providing access to all resources that have been detached and tagged with a name.
+
+#### **Returns** [`DetachedResources`](/docs/hero/advanced-client/detached-resources)
+
 ### hero.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the main Document for the active tab.
@@ -258,20 +270,20 @@ Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
 
 ### hero.detach *(elementOrResource, options?)* {#detach}
 
-Detaches an element or resource from AwaitedDOM and converts it into DetachedDOM. You can supply an optional name in the 2nd argument to store the element in [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) for later use.
+Detaches an element or resource and converts it into a DetachedElement or DetachedResource object. You can supply an optional name in the 2nd argument to add it for later use into [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [hero.detachedResources](/docs/hero/basic-client/hero#detachedElements).
 
 ```js
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
 await hero.detach('title', hero.querySelector('h1'));
-const when = await hero.detachedElements.get('title');
+const h1 = await hero.detachedElements.get('title');
 ```
 
 To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
 
 ```js
 const replay = new HeroReplay({ /* previousSessionId */});
-const when = await replay.detachedElements.get('title');
+const h1 = await replay.detachedElements.get('title');
 ```
 
 #### **Arguments**:
@@ -280,7 +292,7 @@ const when = await replay.detachedElements.get('title');
 - options `object`. Optional settings to apply to this extraction
   - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
 
-#### **Returns**: `Promise<DetachedDOM>`
+#### **Returns**: `Promise<DetachedElement>`
 
 ### hero.exportUserProfile *()* {#export-profile}
 
@@ -300,15 +312,15 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 Alias for [Tab.focus()](/docs/hero/basic-client/tab#focus)
 
-### hero.getData *(key)* {#getData}
+### hero.getSnippet *(key)* {#getSnippet}
 
-Retrieves a value you previously stored with setData.
+Retrieves a value you previously stored with setSnippet.
 
 ```js
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
-await hero.setData('time', new Date());
-const when = await hero.getData('time');
+await hero.setSnippet('time', new Date());
+const when = await hero.getSnippet('time');
 ```
 
 #### **Arguments**:
@@ -330,21 +342,21 @@ Executes a series of mouse and keyboard interactions.
 Refer to the [Interactions page](/docs/hero/basic-client/interactions) for details on how to construct an interaction.
 
 
-### hero.setData *(key, value)* {#setData}
+### hero.setSnippet *(key, value)* {#setSnippet}
 
 Stores a JSON-able value in the session database that can be retrieved later with [HeroReplay](/docs/hero/basic-client/hero-replay).
 
 ```js
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
-await hero.setData('time', new Date());
-const when = await hero.getData('time');
+await hero.setSnippet('time', new Date());
+const when = await hero.getSnippet('time');
 ```
 To retrieve later with [HeroReplay](/docs/hero/basic-client/hero-replay):
 
 ```js
 const replay = new HeroReplay({ /* previousSessionId */});
-const when = await replay.getData('time');
+const when = await replay.getSnippet('time');
 ```
 
 #### **Arguments**:

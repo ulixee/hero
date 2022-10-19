@@ -31,7 +31,7 @@ export default class HeroReplay {
     return this.#hero.close();
   }
 
-  public getData<T = any>(key: string): Promise<T> {
-    return this.#hero.getData<T>(key);
+  public getSnippet<T = any>(key: string): Promise<T> {
+    return this.#hero.getSnippet<T>(key);
   }
 }

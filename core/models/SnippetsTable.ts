@@ -3,9 +3,9 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 
-export default class DataSnippetsTable extends SqliteTable<IDataSnippet> {
+export default class SnippetsTable extends SqliteTable<IDataSnippet> {
   constructor(db: SqliteDatabase) {
-    super(db, 'DataSnippets', [
+    super(db, 'Snippets', [
       ['name', 'TEXT'],
       ['value', 'TEXT'],
       ['timestamp', 'DATETIME'],

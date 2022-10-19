@@ -71,6 +71,8 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Element Methods
 
+The following methods are added to ([`Nodes`](/docs/awaited-dom/super-node), [`Elements`](/docs/awaited-dom/super-element), and [`HTMLElements`](/docs/awaited-dom/super-html-element)).
+
 ### element.$clearInputText *()* {#clear-value}
 
 Clears out the value of an input field by performing a Focus, Select All, and Backspace.
@@ -96,7 +98,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ### element.$detach *(name?)* {#extract-later}
 
-Detaches an element from the browser's live [AwaitedDOM](/docs/hero/basic-client/awaited-dom) environment and converts it into a [DetachedDOM](/docs/hero/basic-client/detached-dom) object for local usage (i.e, without any need for promises or awaits). You can optionally supply a name as the first argument if you want to add it to the [hero.detachedElements](/docs/hero/basic-client/hero#detached-elements) bucket. The advantage of hero.detachedElements is you can use and reuse them from within [HeroReplay(/docs/hero/basic-client/hero-replay) long after your Hero session has closed. This allows you to write extraction logic that can be easily iterated on without needing to reload the webpage(s).
+Detaches an element from the browser's live [AwaitedDOM](/docs/hero/basic-client/awaited-dom) environment and converts it into a [DetachedElement](/docs/hero/basic-client/detached-dom) object for local usage (i.e, without any need for promises or awaits). You can optionally supply a name as the first argument if you want to add it to the [hero.detachedElements](/docs/hero/basic-client/hero#detached-elements) bucket. The advantage of hero.detachedElements is you can use and reuse them from within [HeroReplay](/docs/hero/basic-client/hero-replay) long after your Hero session has closed. This allows you to write extraction logic that can be easily iterated on without needing to reload the webpage(s).
 
 For example, below is a simple hero script that collects the `h1` element:
 ```js
@@ -113,13 +115,13 @@ const h1 = await hero.detachedElements.get('title');
 const h1Children = [...h1.querySelectorAll('div')].map(x => x.textContent);
 ```
 
-It's important to remember that the returned element returned is no longer [AwaitedDOM](/docs/hero/basic-client/awaited-dom). It is in the form of [DetachedDOM](/docs/hero/basic-client/detached-dom), which allows access to properties and methods without the `await` keyword.
+Returned elements are no longer [AwaitedDOM](/docs/hero/basic-client/awaited-dom) objects -- they are in the form of [DetachedElement](/docs/hero/basic-client/detached-dom), which allows access to properties and methods without the `await` keyword.
 
 #### **Arguments**:
 
-- name `string`. Optional. The name used to retrieve this element from from [hero.detachedElements](/docs/databox/basic-client/hero#detached-elements). Leaving out this argument ensures the element is not added to detachedElements.
+- name `string`. Optional. The name used to retrieve this element from [hero.detachedElements](/docs/databox/basic-client/hero#detached-elements).
 
-#### **Returns**: `Promise<DetachedDOM.Element>`
+#### **Returns**: `Promise<DetachedElement.Element>`
 
 ### element.$type *(...typeInteractions)* {#type}
 
@@ -220,6 +222,8 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Collection Methods
 
+The following methods are added to ([`NodeList`](/docs/awaited-dom/super-node-list) and [`HTMLCollections`](/docs/awaited-dom/super-html-collection)).
+
 ### collection.$map *(iteratorFn)* {#map}
 
 Adds syntactic sugar to run an `Array.map` on the results and await all results. This can be useful to transform results.
@@ -239,7 +243,7 @@ Attached to NodeCollections ([see list](#super-collections)).
 
 ### collection.$detach *(name?)* {#detach}
 
-Detaches all elements of a NodeList or HTMLElementCollection and converts them to [DetachedDOM](/docs/hero/basic-client/detached-dom). Supplying a string as the first argument adds your elements to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements).
+Detaches all elements of a NodeList or HTMLElementCollection and converts them to [DetachedElement](/docs/hero/basic-client/detached-dom). Supplying a string as the first argument adds your elements to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements).
 
 ```js
   await hero.goto('https://ulixee.org');

@@ -35,13 +35,13 @@ Readonly unique sessionId for this Session.
 
 ## Methods
 
-### heroReplay.getData *(key)* {#getData}
+### heroReplay.getSnippet *(key)* {#getSnippet}
 
-Retrieves a value you previously stored with [hero.setData](/docs/hero/basic-client/hero#setData).
+Retrieves a value you previously stored with [hero.setSnippet](/docs/hero/basic-client/hero#setSnippet).
 
 ```js
 const heroReplay = new HeroReplay({/* previousSessionId */});
-const when = await heroReplay.getData('time');
+const when = await heroReplay.getSnippet('time');
 ```
 
 #### **Arguments**:

@@ -1,9 +1,9 @@
 import { DOMParser } from 'linkedom';
 
-export default class DetachedDOM {
+export default class DetachedElement {
   static #domParser = new DOMParser();
 
-  public static loadFragment(outerHTML: string): Element {
+  public static load(outerHTML: string): Element {
     return this.#domParser.parseFromString(outerHTML, 'text/html').firstChild;
   }
 }

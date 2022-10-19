@@ -9,7 +9,7 @@
     - Hero
     - HeroReplay
     - AwaitedDOM
-    - DetachedDOM
+    - DetachedElement
     - Interactions
     - Flow Handling
 

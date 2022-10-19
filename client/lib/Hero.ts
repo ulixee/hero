@@ -283,18 +283,18 @@ export default class Hero extends AwaitedEventTarget<{
     this.#activeTab = tab;
   }
 
-  public async getData<T = any>(key: string): Promise<T> {
+  public async getSnippet<T = any>(key: string): Promise<T> {
     const coreSession = await this.#getCoreSessionOrReject();
 
-    const snippets = await coreSession.getDataSnippets(coreSession.sessionId, key);
+    const snippets = await coreSession.getSnippets(coreSession.sessionId, key);
     if (!snippets.length) return null;
 
     return snippets[snippets.length-1].value as T;
   }
 
-  public async setData(key: string, value: any): Promise<void> {
+  public async setSnippet(key: string, value: any): Promise<void> {
     const coreSession = await this.#getCoreSessionOrReject();
-    await coreSession.setDataSnippet(key, value);  
+    await coreSession.setSnippet(key, value);  
   }
 
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {

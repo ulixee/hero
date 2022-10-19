@@ -2,7 +2,7 @@
 /// <reference lib="DOM.Iterable" />
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import ICoreSession from '../interfaces/ICoreSession';
-import DetachedDOM from './DetachedDOM';
+import DetachedElement from './DetachedElement';
 
 export default class DetachedElements {
   #detachedElementsByName = new Map<string, IDetachedElement[]>();
@@ -42,7 +42,7 @@ export default class DetachedElements {
   async get(name: string): Promise<Element> {
     const detachedElements = await this.getRawDetails(name);
     if (detachedElements.length === 0) return null;
-    const element = DetachedDOM.loadFragment(detachedElements[0].outerHTML);
+    const element = DetachedElement.load(detachedElements[0].outerHTML);
     this.#rawDetailsByElement.set(element, detachedElements[0]);
     return element;
   }
@@ -51,7 +51,7 @@ export default class DetachedElements {
     const detachedElements = await this.getRawDetails(name);
     if (detachedElements.length === 0) return null;
     return detachedElements.map(x => {
-      const element = DetachedDOM.loadFragment(x.outerHTML);
+      const element = DetachedElement.load(x.outerHTML);
       this.#rawDetailsByElement.set(element, detachedElements[0]);
       return element;
     });

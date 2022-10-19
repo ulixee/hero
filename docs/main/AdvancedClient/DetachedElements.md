@@ -4,7 +4,7 @@
 
 DetachedElements cannot be constructed. You access it through [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [heroReplay.detachedElements](/docs/hero/basic-client/hero-replay#detachedElements).
 
-Retrieved elements are decendants of the DetachedDOM not AwaitedDOM, which means they have no need for promises or awaits.
+Retrieved elements are decendants of the DetachedElement not AwaitedDOM, which means they have no need for promises or awaits.
 
 ```js
 await hero.goto('https://ulixee.org');

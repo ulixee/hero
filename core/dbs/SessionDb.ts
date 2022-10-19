@@ -25,7 +25,7 @@ import Core from '../index';
 import StorageChangesTable from '../models/StorageChangesTable';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
 import DetachedElementsTable from '../models/DetachedElementsTable';
-import DataSnippetsTable from '../models/DataSnippetsTable';
+import SnippetsTable from '../models/SnippetsTable';
 import DetachedResourcesTable from '../models/DetachedResourcesTable';
 import OutputTable from '../models/OutputTable';
 import FlowHandlersTable from '../models/FlowHandlersTable';
@@ -57,7 +57,7 @@ export default class SessionDb {
   public readonly domChanges: DomChangesTable;
   public readonly detachedElements: DetachedElementsTable;
   public readonly detachedResources: DetachedResourcesTable;
-  public readonly dataSnippets: DataSnippetsTable;
+  public readonly snippets: SnippetsTable;
   public readonly interactions: InteractionStepsTable;
   public readonly flowHandlers: FlowHandlersTable;
   public readonly flowCommands: FlowCommandsTable;
@@ -103,7 +103,7 @@ export default class SessionDb {
     this.domChanges = new DomChangesTable(this.db);
     this.detachedElements = new DetachedElementsTable(this.db);
     this.detachedResources = new DetachedResourcesTable(this.db);
-    this.dataSnippets = new DataSnippetsTable(this.db);
+    this.snippets = new SnippetsTable(this.db);
     this.flowHandlers = new FlowHandlersTable(this.db);
     this.flowCommands = new FlowCommandsTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
@@ -131,7 +131,7 @@ export default class SessionDb {
       this.domChanges,
       this.detachedElements,
       this.detachedResources,
-      this.dataSnippets,
+      this.snippets,
       this.flowHandlers,
       this.flowCommands,
       this.pageLogs,

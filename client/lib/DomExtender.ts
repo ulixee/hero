@@ -24,9 +24,8 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Interactor from './Interactor';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import { scriptInstance } from './internal';
-import { IExtractElementFn, IExtractElementOptions, IExtractElementsFn } from '../interfaces/IExtractElementFn';
-import DetachedElements from './DetachedElements';
-import DetachedDOM from './DetachedDOM';
+import { IExtractElementFn, IExtractElementsFn } from '../interfaces/IExtractElementFn';
+import DetachedElement from './DetachedElement';
 
 const awaitedPathState = StateMachine<
   any,
@@ -164,7 +163,7 @@ const NodeExtensionFns: INodeExtensionFns = {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
     const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
-    return DetachedDOM.loadFragment(detachedElementsRaw[0].outerHTML);
+    return DetachedElement.load(detachedElementsRaw[0].outerHTML);
   },
 };
 
@@ -228,7 +227,7 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
     const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
-    return detachedElementsRaw.map(x => DetachedDOM.loadFragment(x.outerHTML));
+    return detachedElementsRaw.map(x => DetachedElement.load(x.outerHTML));
   },
 };
 
@@ -277,21 +276,6 @@ export function isDomExtensionClass(instance: any): boolean {
   if (instance instanceof NodeList) return true;
   if (instance instanceof HTMLCollection) return true;
   return false;
-}
-
-function execExtractor<T>(
-  extractFn:
-    | IExtractElementFn<T>
-    | IExtractElementsFn<T>,
-  element?: globalThis.Element | globalThis.Element[],
-): Promise<any> {
-  let response: any;
-  if (Array.isArray(element)) {
-    response = (extractFn as IExtractElementsFn<T>)(element as globalThis.Element[]);
-  } else {
-    response = (extractFn as IExtractElementFn<T>)(element as globalThis.Element);
-  }
-  return response;
 }
 
 async function getCoreFrame(element: ISuperElement): Promise<CoreFrameEnvironment> {

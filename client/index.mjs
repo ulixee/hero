@@ -2,7 +2,7 @@ import cjsImport from './index.js';
 
 const {
   HeroReplay,
-  DetachedDOM,
+  DetachedElement,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
@@ -39,7 +39,7 @@ const {
 
 export {
   HeroReplay,
-  DetachedDOM,
+  DetachedElement,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
