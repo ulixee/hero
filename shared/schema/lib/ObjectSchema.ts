@@ -21,7 +21,7 @@ export default class ObjectSchema<O extends Record<string, BaseSchema<any>>> ext
       'You must configure one or more fields for this object',
     );
     assert(
-      Object.values(config.fields).every(x => x instanceof BaseSchema),
+      Object.values(config.fields).every(x => x && x instanceof BaseSchema),
       'Each value of fields must be a type of Schema',
     );
   }
@@ -42,12 +42,10 @@ export default class ObjectSchema<O extends Record<string, BaseSchema<any>>> ext
       const childPath = `${path}.${key}`;
       if (key in fields) {
         const schema: BaseSchema<any> = fields[key];
-        if (key in value) {
-          const keyValue = value[key];
-          if (schema.optional && (keyValue === undefined || keyValue === null)) {
-          } else {
-            schema.validate(keyValue, childPath, tracker);
-          }
+        if (!schema || !(schema instanceof BaseSchema)) continue;
+        const keyValue = value[key];
+        if (keyValue !== null && keyValue !== undefined) {
+          schema.validate(keyValue, childPath, tracker);
         } else if (!schema.optional) {
           this.propertyMissing(schema, childPath, tracker);
         }
