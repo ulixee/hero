@@ -9,6 +9,7 @@ jobs:
   doms:
     name: 'Update Profiled Doms'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Install pcap
         run: sudo apt-get install -y libpcap-dev
