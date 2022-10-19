@@ -31,9 +31,7 @@ Hero instances can have multiple [Tabs](/docs/hero/basic-client/tab), but only a
 
 Each Hero instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/hero/plugins/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
-## Constructor
-
-### new Hero *(options)* {#constructor}
+## Constructor {#constructor}
 
 Creates a new sandboxed browser instance with [unique user session and fingerprints](/docs/overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
 
@@ -102,6 +100,18 @@ Returns a reference to the currently active tab.
 The connectionToCore host address to which this Hero has connected. This is useful in scenarios where Hero instances are round-robining between multiple hosts.
 
 #### **Type**: `Promise<string>`
+
+### hero.detachedElements
+
+DetachedElements object providing access to all elements that have been detached and tagged with a name.
+
+#### **Returns** [`DetachedElements`](/docs/hero/advanced-client/detached-elements)
+
+### hero.detachedResources
+
+DetachedResources object providing access to all resources that have been detached and tagged with a name.
+
+#### **Returns** [`DetachedResources`](/docs/hero/advanced-client/detached-resources)
 
 ### hero.document <div class="specs"><i>W3C</i></div> {#document}
 
@@ -257,6 +267,33 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
 
+
+### hero.detach *(elementOrResource, options?)* {#detach}
+
+Detaches an element or resource and converts it into a DetachedElement or DetachedResource object. You can supply an optional name in the 2nd argument to add it for later use into [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [hero.detachedResources](/docs/hero/basic-client/hero#detachedElements).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.detach('title', hero.querySelector('h1'));
+const h1 = await hero.detachedElements.get('title');
+```
+
+To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const h1 = await replay.detachedElements.get('title');
+```
+
+#### **Arguments**:
+
+- elementOrResource `AwaitedDOM`. This can be any AwaitedDOM element, collection of elements, or resource(s).
+- options `object`. Optional settings to apply to this extraction
+  - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
+
+#### **Returns**: `Promise<DetachedElement>`
+
 ### hero.exportUserProfile *()* {#export-profile}
 
 Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `new Hero({ userProfile: serialized })`. See the [UserProfile page](/docs/hero/advanced-client/user-profile) for more details.
@@ -275,6 +312,23 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 Alias for [Tab.focus()](/docs/hero/basic-client/tab#focus)
 
+### hero.getSnippet *(key)* {#getSnippet}
+
+Retrieves a value you previously stored with setSnippet.
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.setSnippet('time', new Date());
+const when = await hero.getSnippet('time');
+```
+
+#### **Arguments**:
+
+- key `string`. The key you previously used to store the value.
+
+#### **Returns**: `Promise<any>`
+
 ### hero.interact *(interaction\[, interaction, ...])* {#interact}
 
 Executes a series of mouse and keyboard interactions.
@@ -286,6 +340,32 @@ Executes a series of mouse and keyboard interactions.
 #### **Returns**: `Promise`
 
 Refer to the [Interactions page](/docs/hero/basic-client/interactions) for details on how to construct an interaction.
+
+
+### hero.setSnippet *(key, value)* {#setSnippet}
+
+Stores a JSON-able value in the session database that can be retrieved later with [HeroReplay](/docs/hero/basic-client/hero-replay).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.setSnippet('time', new Date());
+const when = await hero.getSnippet('time');
+```
+To retrieve later with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const when = await replay.getSnippet('time');
+```
+
+#### **Arguments**:
+
+- key `string`. The key you want to use to retrieve this value at a later time.
+- value `any`. The only constraint is the value must be JSON-able.
+
+#### **Returns**: `Promise<void>`
+
 
 ### hero.scrollTo *(mousePosition)* {#scroll-to}
 

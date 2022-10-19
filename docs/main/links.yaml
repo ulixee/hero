@@ -7,14 +7,15 @@
 - title: Basic Client
   items:
     - Hero
-    - Tab
-    - Interactions
+    - HeroReplay
     - AwaitedDOM
-    - AwaitedDOM Extenders
-    - Flow
+    - DetachedElement
+    - Interactions
+    - Flow Handling
 
 - title: Advanced Client
   items:
+    - Tab
     - FrameEnvironment
     - UserProfile
     - CookieStorage
@@ -25,17 +26,20 @@
     - ResourceResponse
     - WebsocketResource
     - ConnectionToCore
-
-- title: Plugins
-  items:
-    - Client Plugins
-    - Core Plugins
+    - DetachedElements
+    - DetachedResources
 
 - title: Advanced Concepts
   items:
     - Client vs Core
     - Sessions
     - TimeTravel
+
+- title: Plugins
+  items:
+    - Overview
+    - Client Plugins
+    - Core Plugins
 
 - title: Help
   items:

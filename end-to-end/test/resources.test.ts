@@ -158,9 +158,9 @@ describe('basic resource tests', () => {
       const coreSession1 = await hero1[InternalPropertiesSymbol].coreSessionPromise;
       const { resourceMeta, coreTabPromise } = resource[InternalPropertiesSymbol];
       const coreTab = await coreTabPromise;
-      await coreTab.collectResource('xhr', resourceMeta.id);
+      await coreTab.detachResource('xhr', resourceMeta.id);
 
-      const collected = await coreSession1.getCollectedResources(await hero1.sessionId, 'xhr');
+      const collected = await coreSession1.getDetachedResources(await hero1.sessionId, 'xhr');
       expect(collected).toHaveLength(1);
       expect(JSON.parse(collected[0].resource.response.buffer.toString())).toEqual({ hi: 'there' });
       await hero1.close();
@@ -174,7 +174,7 @@ describe('basic resource tests', () => {
       await hero2.goto(`${koaServer.baseUrl}`);
       await hero2.waitForPaintingStable();
       const coreSession2 = await hero2[InternalPropertiesSymbol].coreSessionPromise;
-      const collected2 = await coreSession2.getCollectedResources(await hero1.sessionId, 'xhr');
+      const collected2 = await coreSession2.getDetachedResources(await hero1.sessionId, 'xhr');
       expect(collected2).toHaveLength(1);
       expect(collected2[0].resource.url).toBe(`${koaServer.baseUrl}/ajax?counter=0`);
       // should prefetch the body

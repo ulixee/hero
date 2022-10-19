@@ -24,19 +24,19 @@ describe('basic Element tests', () => {
     const [hero, coreSession] = await openBrowser(`/element-basic`);
     const sessionId = await hero.sessionId;
     const test1Element = await hero.document.querySelector('.test1');
-    await test1Element.$collect('a');
-    await test1Element.nextElementSibling.$collect('b');
+    await test1Element.$detach('a');
+    await test1Element.nextElementSibling.$detach('b');
 
-    const elementsA = await coreSession.getCollectedElements(sessionId, 'a');
+    const elementsA = await coreSession.getDetachedElements(sessionId, 'a');
     expect(elementsA).toHaveLength(1);
     expect(elementsA[0].outerHTML).toBe('<div class="test1">test 1</div>');
 
-    const elementsB = await coreSession.getCollectedElements(sessionId, 'b');
+    const elementsB = await coreSession.getDetachedElements(sessionId, 'b');
     expect(elementsB[0].outerHTML).toBe(`<div class="test2">
             <ul><li>Test 2</li></ul>
           </div>`);
 
-    await expect(hero.collectedElements.names).resolves.toMatchObject(['a', 'b']);
+    await expect(hero.detachedElements.names).resolves.toMatchObject(['a', 'b']);
   });
 
   it('can extract selectorAll lists', async () => {
@@ -56,15 +56,15 @@ describe('basic Element tests', () => {
     });
     const [hero, coreSession] = await openBrowser(`/element-list`);
     const sessionId = await hero.sessionId;
-    await hero.document.querySelectorAll('.valid').$collect('valid');
+    await hero.document.querySelectorAll('.valid').$detach('valid');
 
-    const valid = await coreSession.getCollectedElements(sessionId, 'valid');
+    const valid = await coreSession.getDetachedElements(sessionId, 'valid');
     expect(valid).toHaveLength(3);
     expect(valid[0].outerHTML).toBe('<li class="valid">Test 1</li>');
     expect(valid[1].outerHTML).toBe('<li class="valid">Test 4</li>');
     expect(valid[2].outerHTML).toBe('<li class="valid">Test 5</li>');
 
-    await expect(hero.collectedElements.names).resolves.toMatchObject(['valid']);
+    await expect(hero.detachedElements.names).resolves.toMatchObject(['valid']);
   });
 });
 

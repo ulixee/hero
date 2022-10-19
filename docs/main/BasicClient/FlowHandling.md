@@ -1,4 +1,4 @@
-# Flow
+# Flow Handling
 
 > Flow is the definition of handlers around states a webpage can exist, and controls to restore your desired scraper script state.
 
@@ -10,12 +10,12 @@ Often while building a scraper script, the script is built to handle the "clean 
 To that end, FlowHandlers were created. FlowHandlers allow you to define a "State" that the page can be in, and a "Resolver" to correct the state and resume your "clean path". Because these are outlier paths, the expectation is that FlowHandlers will click the consent button and resume, or redirect back to the page you wish to be on (if you've been sent to another page).
 
 ```js
-5.   await hero.registerFlowHandler('CookieModal', assert => {
-6.     assert(hero.querySelector('#cookie-modal').$isVisible);
-7.   },
-8.   async error => {
-9.     await hero.querySelector('#cookie-modal .dismiss').$click();
-10.  });
+await hero.registerFlowHandler('CookieModal', assert => {
+  assert(hero.querySelector('#cookie-modal').$isVisible);
+},
+async error => {
+  await hero.querySelector('#cookie-modal .dismiss').$click();
+});
 ```
 
 NOTE: If the "flow" cannot be resumed, a FlowHandler should throw an error to indicate to a "controlling" process how to retry the activity.

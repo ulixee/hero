@@ -28,13 +28,13 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
 import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
 import FrameNavigationsObserver from '@unblocked-web/agent/lib/FrameNavigationsObserver';
@@ -78,7 +78,7 @@ export default class Tab
   protected readonly logger: IBoundLog;
   private readonly mirrorNetwork: MirrorNetwork;
 
-  private collectedElementsPendingHTML = new Set<Resolvable<ICollectedElement>>();
+  private detachedElementsPendingHTML = new Set<Resolvable<IDetachedElement>>();
 
   private events = new EventSubscriber();
   private commandRecorder: CommandRecorder;
@@ -165,7 +165,7 @@ export default class Tab
       this.reload,
       this.assert,
       this.takeScreenshot,
-      this.collectResource,
+      this.detachResource,
       this.registerFlowHandler,
       this.registerFlowCommand,
       this.waitForFileChooser,
@@ -313,10 +313,10 @@ export default class Tab
     }
   }
 
-  public async collectResource(name: string, resourceId: number, timestamp: number): Promise<void> {
+  public async detachResource(name: string, resourceId: number, timestamp: number): Promise<void> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
-    this.session.db.collectedResources.insert(
+    this.session.db.detachedResources.insert(
       this.id,
       resourceId,
       name,
@@ -324,7 +324,7 @@ export default class Tab
       this.session.commands.lastId,
     );
 
-    const collectedResource: ICollectedResource = {
+    const detachedResource: IDetachedResource = {
       name,
       commandId: this.session.commands.lastId,
       timestamp,
@@ -338,9 +338,9 @@ export default class Tab
     );
 
     if (resource.type === 'Websocket') {
-      collectedResource.websocketMessages = this.session.websocketMessages.getMessages(resourceId);
+      detachedResource.websocketMessages = this.session.websocketMessages.getMessages(resourceId);
     }
-    this.session.emit('collected-asset', { type: 'resource', asset: collectedResource });
+    this.session.emit('collected-asset', { type: 'resource', asset: detachedResource });
   }
 
   public async getResourceProperty(
@@ -470,7 +470,7 @@ export default class Tab
   }
 
   public pendingCollects(): Promise<any> {
-    return Promise.all(this.collectedElementsPendingHTML);
+    return Promise.all(this.detachedElementsPendingHTML);
   }
 
   public onResource(x: ITabEventParams['resource']): void {
@@ -497,58 +497,58 @@ export default class Tab
     this.mirrorNetwork.addResource(resourceSummary);
   }
 
-  public onElementRequested(collectedElement: ICollectedElement, saveToDb = true): Promise<ICollectedElement> {
-    const resolvable = new Resolvable<ICollectedElement>();
-    const resolveExisting = Promise.all(this.collectedElementsPendingHTML);
-    this.collectedElementsPendingHTML.add(resolvable);
+  public onElementRequested(detachedElement: IDetachedElement, saveToDb = true): Promise<IDetachedElement> {
+    const resolvable = new Resolvable<IDetachedElement>();
+    const resolveExisting = Promise.all(this.detachedElementsPendingHTML);
+    this.detachedElementsPendingHTML.add(resolvable);
 
     if (saveToDb) {
-      this.session.db.collectedElements.insert(collectedElement);
+      this.session.db.detachedElements.insert(detachedElement);
     }
     
     // Don't await this so promise explosions don't escape
     // eslint-disable-next-line promise/catch-or-return
     resolveExisting
-      .then(() => this.getElementHtml(collectedElement))
+      .then(() => this.getElementHtml(detachedElement))
       .then(resolvable.resolve)
       .catch(error => {
-        this.logger.warn('CollectedElement.collectHTML:Error', {
+        this.logger.warn('DetachedElement.collectHTML:Error', {
           error,
-          id: collectedElement.id,
+          id: detachedElement.id,
         });
         resolvable.resolve(null);
       })
-      .finally(() => this.collectedElementsPendingHTML.delete(resolvable));
+      .finally(() => this.detachedElementsPendingHTML.delete(resolvable));
 
     return resolvable.promise;
   }
 
-  public async getElementHtml(collectedElement: ICollectedElement): Promise<ICollectedElement> {
+  public async getElementHtml(detachedElement: IDetachedElement): Promise<IDetachedElement> {
     await this.flushDomChanges();
-    const paintIndex = this.mirrorPage.getPaintIndex(collectedElement.domChangesTimestamp);
+    const paintIndex = this.mirrorPage.getPaintIndex(detachedElement.domChangesTimestamp);
     try {
       await this.mirrorPage.open(
         await Core.getUtilityContext(),
         this.sessionId,
         this.session.viewport,
       );
-      const frameDomNodeId = this.frameEnvironmentsById.get(collectedElement.frameId).domNodeId;
+      const frameDomNodeId = this.frameEnvironmentsById.get(detachedElement.frameId).domNodeId;
       const outerHtml = await this.mirrorPage.getNodeOuterHtml(
         paintIndex,
-        collectedElement.nodePointerId,
+        detachedElement.nodePointerId,
         frameDomNodeId,
       );
-      collectedElement.documentUrl = outerHtml.url;
-      collectedElement.outerHTML = outerHtml.html;
-      this.session.db.collectedElements.updateHtml(collectedElement);
-      this.session.emit('collected-asset', { type: 'element', asset: collectedElement });
+      detachedElement.documentUrl = outerHtml.url;
+      detachedElement.outerHTML = outerHtml.html;
+      this.session.db.detachedElements.updateHtml(detachedElement);
+      this.session.emit('collected-asset', { type: 'element', asset: detachedElement });
     } catch (error) {
       this.logger.warn('Tab.getElementHtml: ERROR', {
-        Element: collectedElement,
+        Element: detachedElement,
         error,
       });
     }
-    return collectedElement;
+    return detachedElement;
   }
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {

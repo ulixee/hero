@@ -1,7 +1,8 @@
 import cjsImport from './index.js';
 
 const {
-  HeroExtractor,
+  HeroReplay,
+  DetachedElement,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
@@ -19,7 +20,7 @@ const {
   LocationStatus,
   LocationTrigger,
   IHeroCreateOptions,
-  IHeroExtractorCreateOptions,
+  IHeroReplayCreateOptions,
   IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,
@@ -37,7 +38,8 @@ const {
 } = cjsImport;
 
 export {
-  HeroExtractor,
+  HeroReplay,
+  DetachedElement,
   Command,
   ConnectionToHeroCore,
   InteractionCommand,
@@ -55,7 +57,7 @@ export {
   LocationStatus,
   LocationTrigger,
   IHeroCreateOptions,
-  IHeroExtractorCreateOptions,
+  IHeroReplayCreateOptions,
   IConnectionToCoreOptions,
   ISuperElement,
   ISuperNode,

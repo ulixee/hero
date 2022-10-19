@@ -1,11 +1,11 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 
-export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippet> {
+export default class SnippetsTable extends SqliteTable<IDataSnippet> {
   constructor(db: SqliteDatabase) {
-    super(db, 'CollectedSnippets', [
+    super(db, 'Snippets', [
       ['name', 'TEXT'],
       ['value', 'TEXT'],
       ['timestamp', 'DATETIME'],
@@ -13,11 +13,11 @@ export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippe
     ]);
   }
 
-  public getByName(name: string): ICollectedSnippet[] {
+  public getByName(name: string): IDataSnippet[] {
     return this.db
       .prepare(`select * from ${this.tableName} where name=:name`)
       .all({ name })
-      .map((x: ICollectedSnippet) => {
+      .map((x: IDataSnippet) => {
         return {
           ...x,
           value: TypeSerializer.parse(x.value),
@@ -30,7 +30,7 @@ export default class CollectedSnippetsTable extends SqliteTable<ICollectedSnippe
     value: any,
     timestamp: number,
     commandId: number,
-  ): ICollectedSnippet {
+  ): IDataSnippet {
     this.queuePendingInsert([
       name,
       TypeSerializer.stringify(value),

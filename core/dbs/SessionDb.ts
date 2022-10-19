@@ -24,9 +24,9 @@ import SocketsTable from '../models/SocketsTable';
 import Core from '../index';
 import StorageChangesTable from '../models/StorageChangesTable';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
-import CollectedElementsTable from '../models/CollectedElementsTable';
-import CollectedSnippetsTable from '../models/CollectedSnippetsTable';
-import CollectedResourcesTable from '../models/CollectedResourcesTable';
+import DetachedElementsTable from '../models/DetachedElementsTable';
+import SnippetsTable from '../models/SnippetsTable';
+import DetachedResourcesTable from '../models/DetachedResourcesTable';
 import OutputTable from '../models/OutputTable';
 import FlowHandlersTable from '../models/FlowHandlersTable';
 import FlowCommandsTable from '../models/FlowCommandsTable';
@@ -55,9 +55,9 @@ export default class SessionDb {
   public readonly resourceStates: ResourceStatesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
-  public readonly collectedElements: CollectedElementsTable;
-  public readonly collectedResources: CollectedResourcesTable;
-  public readonly collectedSnippets: CollectedSnippetsTable;
+  public readonly detachedElements: DetachedElementsTable;
+  public readonly detachedResources: DetachedResourcesTable;
+  public readonly snippets: SnippetsTable;
   public readonly interactions: InteractionStepsTable;
   public readonly flowHandlers: FlowHandlersTable;
   public readonly flowCommands: FlowCommandsTable;
@@ -101,9 +101,9 @@ export default class SessionDb {
     this.resourceStates = new ResourceStatesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
-    this.collectedElements = new CollectedElementsTable(this.db);
-    this.collectedResources = new CollectedResourcesTable(this.db);
-    this.collectedSnippets = new CollectedSnippetsTable(this.db);
+    this.detachedElements = new DetachedElementsTable(this.db);
+    this.detachedResources = new DetachedResourcesTable(this.db);
+    this.snippets = new SnippetsTable(this.db);
     this.flowHandlers = new FlowHandlersTable(this.db);
     this.flowCommands = new FlowCommandsTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
@@ -129,9 +129,9 @@ export default class SessionDb {
       this.resourceStates,
       this.websocketMessages,
       this.domChanges,
-      this.collectedElements,
-      this.collectedResources,
-      this.collectedSnippets,
+      this.detachedElements,
+      this.detachedResources,
+      this.snippets,
       this.flowHandlers,
       this.flowCommands,
       this.pageLogs,

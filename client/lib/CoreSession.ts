@@ -7,9 +7,9 @@ import * as readline from 'readline';
 import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
+import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import CoreCommandQueue from './CoreCommandQueue';
@@ -136,8 +136,8 @@ export default class CoreSession
     this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
   }
 
-  public async collectSnippet(name: string, value: any): Promise<void> {
-    await this.commandQueue.run('Session.collectSnippet', name, value, Date.now());
+  public async setSnippet(key: string, value: any): Promise<void> {
+    await this.commandQueue.run('Session.setSnippet', key, value, Date.now());
   }
 
   public async getCollectedAssetNames(
@@ -146,19 +146,19 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getCollectedAssetNames', sessionId);
   }
 
-  public async getCollectedSnippets(sessionId: string, name: string): Promise<ICollectedSnippet[]> {
-    return await this.commandQueue.run('Session.getCollectedSnippets', sessionId, name);
+  public async getSnippets(sessionId: string, name: string): Promise<IDataSnippet[]> {
+    return await this.commandQueue.run('Session.getSnippets', sessionId, name);
   }
 
-  public async getCollectedElements(sessionId: string, name: string): Promise<ICollectedElement[]> {
-    return await this.commandQueue.run('Session.getCollectedElements', sessionId, name);
+  public async getDetachedElements(sessionId: string, name: string): Promise<IDetachedElement[]> {
+    return await this.commandQueue.run('Session.getDetachedElements', sessionId, name);
   }
 
-  public async getCollectedResources(
+  public async getDetachedResources(
     sessionId: string,
     name: string,
-  ): Promise<ICollectedResource[]> {
-    return await this.commandQueue.run('Session.getCollectedResources', sessionId, name);
+  ): Promise<IDetachedResource[]> {
+    return await this.commandQueue.run('Session.getDetachedResources', sessionId, name);
   }
 
   // END OF PRIVATE APIS FOR DATABOX ///////////////////////////////////////////////////////////////

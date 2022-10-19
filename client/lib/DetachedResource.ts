@@ -1,9 +1,9 @@
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
-import ICollectedResourceDetails from '../interfaces/ICollectedResourceDetails';
+import IDetachedResourceDetails from '../interfaces/IDetachedResourceDetails';
 
-export default class CollectedResource implements ICollectedResourceDetails {
+export default class DetachedResource implements IDetachedResourceDetails {
   public documentUrl: string;
   public frameId: number;
   public id: number;
@@ -28,15 +28,15 @@ export default class CollectedResource implements ICollectedResourceDetails {
     return this.buffer?.toString();
   }
 
-  public readonly request: ICollectedResourceDetails['request'];
-  public readonly response: ICollectedResourceDetails['response'];
+  public readonly request: IDetachedResourceDetails['request'];
+  public readonly response: IDetachedResourceDetails['response'];
 
-  #collectedResource: ICollectedResource;
+  #detachedResource: IDetachedResource;
 
-  constructor(collectedResource: ICollectedResource) {
-    this.#collectedResource = collectedResource;
-    const resource = collectedResource.resource;
-    this.messages = collectedResource.websocketMessages;
+  constructor(detachedResource: IDetachedResource) {
+    this.#detachedResource = detachedResource;
+    const resource = detachedResource.resource;
+    this.messages = detachedResource.websocketMessages;
     Object.assign(this, resource);
     this.response = (resource.response as any) ?? {};
 

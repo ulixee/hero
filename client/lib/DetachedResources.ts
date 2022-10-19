@@ -1,6 +1,7 @@
 import ICoreSession from '../interfaces/ICoreSession';
+import DetachedResource from './DetachedResource';
 
-export default class CollectedSnippets {
+export default class DetachedResources {
   readonly #coreSessionPromise: Promise<ICoreSession>;
   readonly #sessionIdPromise: Promise<string>;
 
@@ -13,27 +14,26 @@ export default class CollectedSnippets {
     return Promise.all([this.#coreSessionPromise, this.#sessionIdPromise]).then(
       async ([coreSession, sessionId]) => {
         const names = await coreSession.getCollectedAssetNames(sessionId);
-        return names.snippets;
+        return names.resources;
       },
     );
   }
 
-  async get<T>(name: string): Promise<T> {
+  async get(name: string): Promise<DetachedResource> {
     const [coreSession, sessionId] = await Promise.all([
       this.#coreSessionPromise,
       this.#sessionIdPromise,
     ]);
-    const snippets = await coreSession.getCollectedSnippets(sessionId, name);
-    if (snippets.length) return snippets[0].value as T;
-    return null;
+    const resources = await coreSession.getDetachedResources(sessionId, name);
+    return resources.length ? new DetachedResource(resources[0]) : null;
   }
 
-  async getAll<T = unknown>(name: string): Promise<T[]> {
+  async getAll(name: string): Promise<DetachedResource[]> {
     const [coreSession, sessionId] = await Promise.all([
       this.#coreSessionPromise,
       this.#sessionIdPromise,
     ]);
-    const snippets = await coreSession.getCollectedSnippets(sessionId, name);
-    return snippets.map(x => x.value);
+    const resources = await coreSession.getDetachedResources(sessionId, name);
+    return resources.map(x => new DetachedResource(x));
   }
 }

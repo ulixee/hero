@@ -63,10 +63,10 @@ import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-import CollectedElements from './CollectedElements';
-import CollectedResources from './CollectedResources';
-import CollectedSnippets from './CollectedSnippets';
+import DetachedElements from "./DetachedElements";
+import DetachedResources from "./DetachedResources";
 import { isDomExtensionClass } from './DomExtender';
+import IDetachElementOptions from '../interfaces/IDetachElementOptions';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -97,9 +97,8 @@ export default class Hero extends AwaitedEventTarget<{
   #activeTab: Tab;
   #isClosingPromise: Promise<void>;
 
-  #collectedElements: CollectedElements;
-  #collectedSnippets: CollectedSnippets;
-  #collectedResources: CollectedResources;
+  #detachedElements: DetachedElements;
+  #detachedResources: DetachedResources;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
@@ -213,34 +212,27 @@ export default class Hero extends AwaitedEventTarget<{
     return this.activeTab.Request;
   }
 
-  public get collectedElements(): CollectedElements {
+  public get detachedElements(): DetachedElements {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedElements ??= new CollectedElements(coreSessionPromise, this.sessionId);
-    return this.#collectedElements;
+    this.#detachedElements ??= new DetachedElements(coreSessionPromise, this.sessionId);
+    return this.#detachedElements;
   }
 
-  public get collectedSnippets(): CollectedSnippets {
+  public get detachedResources(): DetachedResources {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedSnippets ??= new CollectedSnippets(coreSessionPromise, this.sessionId);
-    return this.#collectedSnippets;
-  }
-
-  public get collectedResources(): CollectedResources {
-    const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#collectedResources ??= new CollectedResources(coreSessionPromise, this.sessionId);
-    return this.#collectedResources;
+    this.#detachedResources ??= new DetachedResources(coreSessionPromise, this.sessionId);
+    return this.#detachedResources;
   }
 
   // METHODS
 
-  public async collect(name: string, value: any): Promise<void> {
-    if (value instanceof Resource || value instanceof WebsocketResource) {
-      await value.$collect(name);
-    } else if (isDomExtensionClass(value)) {
-      await value.$collect(name);
+  public async detach(elementOrResource: any, options: IDetachElementOptions = {}): Promise<void> {
+    if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
+      await elementOrResource.$detach(options.name);
+    } else if (isDomExtensionClass(elementOrResource)) {
+      await elementOrResource.$detach(options.name);
     } else {
-      const coreSession = await this.#getCoreSessionOrReject();
-      await coreSession.collectSnippet(name, value);
+      throw new Error('The first argument must be an Element or Resource');
     }
   }
 
@@ -289,6 +281,20 @@ export default class Hero extends AwaitedEventTarget<{
     const coreTab = await getCoreTab(tab);
     await coreTab.focusTab();
     this.#activeTab = tab;
+  }
+
+  public async getSnippet<T = any>(key: string): Promise<T> {
+    const coreSession = await this.#getCoreSessionOrReject();
+
+    const snippets = await coreSession.getSnippets(coreSession.sessionId, key);
+    if (!snippets.length) return null;
+
+    return snippets[snippets.length-1].value as T;
+  }
+
+  public async setSnippet(key: string, value: any): Promise<void> {
+    const coreSession = await this.#getCoreSessionOrReject();
+    await coreSession.setSnippet(key, value);  
   }
 
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {

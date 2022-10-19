@@ -12,10 +12,10 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
-import ICollectedElement from '@ulixee/hero-interfaces/ICollectedElement';
-import ICollectedSnippet from '@ulixee/hero-interfaces/ICollectedSnippet';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
+import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import ICollectedResource from '@ulixee/hero-interfaces/ICollectedResource';
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import Agent from '@unblocked-web/agent/lib/Agent';
 import Resources from '@unblocked-web/agent/lib/Resources';
 import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
@@ -54,7 +54,7 @@ export default class Session
     output: { changes: IOutputChangeRecord[] };
     'collected-asset': {
       type: 'resource' | 'snippet' | 'element';
-      asset: ICollectedSnippet | ICollectedElement | ICollectedResource;
+      asset: IDataSnippet | IDetachedElement | IDetachedResource;
     };
   }>
   implements ICommandableTarget, IRemoteEventListener
@@ -249,10 +249,10 @@ export default class Session
     SessionsDb.find().recordSession(this);
 
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
-      this.collectSnippet,
-      this.getCollectedSnippets,
-      this.getCollectedElements,
-      this.getCollectedResources,
+      this.setSnippet,
+      this.getSnippets,
+      this.getDetachedElements,
+      this.getDetachedResources,
       this.getCollectedAssetNames,
       this.close,
       this.flush,
@@ -298,8 +298,8 @@ export default class Session
     return Promise.resolve(this.meta);
   }
 
-  public collectSnippet(name: string, value: any, timestamp: number): Promise<void> {
-    const asset = this.db.collectedSnippets.insert(name, value, timestamp, this.commands.lastId);
+  public setSnippet(key: string, value: any, timestamp: number): Promise<void> {
+    const asset = this.db.snippets.insert(key, value, timestamp, this.commands.lastId);
     this.emit('collected-asset', { type: 'snippet', asset });
     return Promise.resolve();
   }
@@ -314,15 +314,15 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     const snippets = new Set<string>();
-    for (const snippet of db.collectedSnippets.all()) {
+    for (const snippet of db.snippets.all()) {
       snippets.add(snippet.name);
     }
     const resources = new Set<string>();
-    for (const resource of db.collectedResources.all()) {
+    for (const resource of db.detachedResources.all()) {
       resources.add(resource.name);
     }
 
-    const elementNames = db.collectedElements.allNames();
+    const elementNames = db.detachedElements.allNames();
 
     return Promise.resolve({
       snippets: [...snippets],
@@ -331,45 +331,45 @@ export default class Session
     });
   }
 
-  public getCollectedSnippets(fromSessionId: string, name: string): Promise<ICollectedSnippet[]> {
+  public getSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    return Promise.resolve(db.collectedSnippets.getByName(name));
+    return Promise.resolve(db.snippets.getByName(name));
   }
 
-  public getCollectedResources(fromSessionId: string, name: string): Promise<ICollectedResource[]> {
+  public getDetachedResources(fromSessionId: string, name: string): Promise<IDetachedResource[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const resources = db.collectedResources.getByName(name).map(async x => {
+    const resources = db.detachedResources.getByName(name).map(async x => {
       const resource = await db.resources.getMeta(x.resourceId, true);
-      const collectedResource = {
+      const detachedResource = {
         ...x,
         resource,
-      } as ICollectedResource;
+      } as IDetachedResource;
 
       if (resource.type === 'Websocket') {
-        collectedResource.websocketMessages = db.websocketMessages.getTranslatedMessages(
+        detachedResource.websocketMessages = db.websocketMessages.getTranslatedMessages(
           resource.id,
         );
       }
 
-      return collectedResource;
+      return detachedResource;
     });
     return Promise.all(resources);
   }
 
-  public async getCollectedElements(
+  public async getDetachedElements(
     fromSessionId: string,
     name: string,
-  ): Promise<ICollectedElement[]> {
+  ): Promise<IDetachedElement[]> {
     let db = this.db;
     if (!fromSessionId || fromSessionId === this.id) {
       for (const tab of this.tabsById.values()) {
@@ -379,7 +379,7 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     db.flush();
-    return db.collectedElements.getByName(name);
+    return db.detachedElements.getByName(name);
   }
 
   public async openBrowser(): Promise<void> {

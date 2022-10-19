@@ -14,13 +14,13 @@ describe('basic snippets tests', () => {
     const [hero] = await openBrowser();
     await hero.goto(`${koaServer.baseUrl}/`);
 
-    await hero.collect('data', { value: true });
-    await hero.collect('text', 'string');
-    await hero.collect('number', 1);
+    await hero.setSnippet('data', { value: true });
+    await hero.setSnippet('text', 'string');
+    await hero.setSnippet('number', 1);
 
-    await expect(hero.collectedSnippets.get('data')).resolves.toMatchObject({ value: true });
-    await expect(hero.collectedSnippets.get('text')).resolves.toBe('string');
-    await expect(hero.collectedSnippets.get('number')).resolves.toBe(1);
+    await expect(hero.getSnippet('data')).resolves.toMatchObject({ value: true });
+    await expect(hero.getSnippet('text')).resolves.toBe('string');
+    await expect(hero.getSnippet('number')).resolves.toBe(1);
   });
 });
 

@@ -1,11 +1,11 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
-export default class CollectedResourcesTable extends SqliteTable<ICollectedResourcesRecord> {
+export default class DetachedResourcesTable extends SqliteTable<IDetachedResourcesRecord> {
   constructor(db: SqliteDatabase) {
     super(
       db,
-      'CollectedResources',
+      'DetachedResources',
       [
         ['name', 'TEXT'],
         ['resourceId', 'INTEGER'],
@@ -17,7 +17,7 @@ export default class CollectedResourcesTable extends SqliteTable<ICollectedResou
     );
   }
 
-  public getByName(name: string): ICollectedResourcesRecord[] {
+  public getByName(name: string): IDetachedResourcesRecord[] {
     return this.db.prepare(`select * from ${this.tableName} where name=:name`).all({ name });
   }
 
@@ -38,7 +38,7 @@ export default class CollectedResourcesTable extends SqliteTable<ICollectedResou
   }
 }
 
-export interface ICollectedResourcesRecord {
+export interface IDetachedResourcesRecord {
   name: string;
   resourceId: number;
   tabId: number;
