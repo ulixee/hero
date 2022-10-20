@@ -24,7 +24,6 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Interactor from './Interactor';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import { scriptInstance } from './internal';
-import { IExtractElementFn, IExtractElementsFn } from '../interfaces/IExtractElementFn';
 import DetachedElement from './DetachedElement';
 
 const awaitedPathState = StateMachine<
