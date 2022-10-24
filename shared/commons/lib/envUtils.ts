@@ -72,10 +72,13 @@ export function parseEnvPath(envvar: string, relativeTo?: string): string {
   return Path.resolve(relativeTo ?? process.cwd(), envvar);
 }
 
-export function parseEnvBool(envvar: string): boolean {
+export function parseEnvBool(envvar: string): boolean | undefined {
+  if (envvar === null || envvar === undefined) return undefined;
   if (envvar === '1' || envvar?.toLowerCase() === 'true' || envvar?.toLowerCase() === 'yes')
     return true;
-  return false;
+  if (envvar === '0' || envvar?.toLowerCase() === 'false' || envvar?.toLowerCase() === 'no') {
+    return false;
+  }
 }
 
 export function parseEnvBigint(envvar: string): bigint | null {
