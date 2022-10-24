@@ -784,6 +784,11 @@ export default class Session
   private recordSession(providedOptions: ISessionCreateOptions): void {
     const configuration = this.meta;
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
+    if (!this.browserEngine) {
+      let extraMessage = '.';
+      if (this.options.userAgent) extraMessage = ` matching selector(${this.options.userAgent}).`;
+      throw new Error(`Failed to select a browser engine${extraMessage}`);
+    }
     this.db.session.insert(
       this.id,
       configuration,
