@@ -51,7 +51,7 @@ describe('basic resource tests', () => {
 
       const resources = await hero1.waitForResources({ type: 'Fetch' });
       expect(resources).toHaveLength(1);
-      await resources[0].$detach('xhr');
+      await resources[0].$addToDetachedResources('xhr');
 
       const detachedResources = new DetachedResources(
         Promise.resolve(coreSession1),

@@ -45,7 +45,8 @@ interface IBaseExtendNode {
   $waitForHidden(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $xpathSelector(selector: string): ISuperNode;
-  $detach(name?: string): Promise<globalThis.Element>;
+  $detach(): Promise<globalThis.Element>;
+  $addToDetachedElements(name: string): Promise<globalThis.Element>;
 }
 
 interface IBaseExtendNodeList {
@@ -54,7 +55,8 @@ interface IBaseExtendNodeList {
     iteratorFn: (initial: T, node: ISuperNode) => Promise<T>,
     initial: T,
   ): Promise<T>;
-  $detach(name?: string): Promise<globalThis.Element[]>;
+  $detach(): Promise<globalThis.Element[]>;
+  $addToDetachedElements(name?: string): Promise<globalThis.Element[]>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -158,10 +160,16 @@ const NodeExtensionFns: INodeExtensionFns = {
     );
     return createSuperNode(newPath, awaitedOptions);
   },
-  async $detach(name: string): Promise<globalThis.Element> {
+  async $detach(): Promise<globalThis.Element> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
+    const detachedElementsRaw = await coreFrame.detachElement(undefined, awaitedPath.toJSON(), true, false);
+    return DetachedElement.load(detachedElementsRaw[0].outerHTML);
+  },
+  async $addToDetachedElements(name: string): Promise<globalThis.Element> {
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
     return DetachedElement.load(detachedElementsRaw[0].outerHTML);
   },
 };
@@ -222,10 +230,16 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     }
     return initial;
   },
-  async $detach(name?: string): Promise<globalThis.Element[]> {
+  async $detach(): Promise<globalThis.Element[]> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON());
+    const detachedElementsRaw = await coreFrame.detachElement(undefined, awaitedPath.toJSON(), true, false);
+    return detachedElementsRaw.map(x => DetachedElement.load(x.outerHTML));
+  },
+  async $addToDetachedElements(name: string): Promise<globalThis.Element[]> {
+    const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
+    const coreFrame = await awaitedOptions.coreFrame;
+    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
     return detachedElementsRaw.map(x => DetachedElement.load(x.outerHTML));
   },
 };

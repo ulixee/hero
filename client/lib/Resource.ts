@@ -58,8 +58,13 @@ export default class Resource {
     return this.text.then(JSON.parse);
   }
 
-  public $detach(name: string): Promise<void> {
-    return this.#coreTabPromise.then(x => x.detachResource(name, this.#resourceMeta.id));
+  public $detach(): Promise<void> {
+    return this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+  }
+
+  public async $addToDetachedResources(name: string): Promise<void> {
+    await this.#coreTabPromise.then(x => x.detachResource(name, this.#resourceMeta.id));
+    return undefined;
   }
 
   public static async findLatest(

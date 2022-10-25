@@ -24,8 +24,8 @@ describe('basic Element tests', () => {
     const [hero, coreSession] = await openBrowser(`/element-basic`);
     const sessionId = await hero.sessionId;
     const test1Element = await hero.document.querySelector('.test1');
-    await test1Element.$detach('a');
-    await test1Element.nextElementSibling.$detach('b');
+    await test1Element.$addToDetachedElements('a');
+    await test1Element.nextElementSibling.$addToDetachedElements('b');
 
     const elementsA = await coreSession.getDetachedElements(sessionId, 'a');
     expect(elementsA).toHaveLength(1);
@@ -56,7 +56,7 @@ describe('basic Element tests', () => {
     });
     const [hero, coreSession] = await openBrowser(`/element-list`);
     const sessionId = await hero.sessionId;
-    await hero.document.querySelectorAll('.valid').$detach('valid');
+    await hero.document.querySelectorAll('.valid').$addToDetachedElements('valid');
 
     const valid = await coreSession.getDetachedElements(sessionId, 'valid');
     expect(valid).toHaveLength(3);

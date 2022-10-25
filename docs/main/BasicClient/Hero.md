@@ -238,6 +238,34 @@ Alias for [Tab.Request](/docs/hero/basic-client/tab#request-tab)
 
 ## Methods
 
+
+### hero.addToDetached *(name, elementOrResource)* {#addToDetached}
+
+Converts an element or resource to a DetachedElement or DetachedResource and adds it to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [hero.detachedResources](/docs/hero/basic-client/hero#detachedElements).
+
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.addToDetached('title', hero.querySelector('h1'));
+const h1 = await hero.detachedElements.get('title');
+```
+
+To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
+
+```js
+const replay = new HeroReplay({ /* previousSessionId */});
+const h1 = await replay.detachedElements.get('title');
+```
+
+#### **Arguments**:
+
+- elementOrResource `AwaitedDOM`. This can be any AwaitedDOM element, collection of elements, or resource(s).
+- options `object`. Optional settings to apply to this extraction
+  - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
+
+#### **Returns**: `Promise<DetachedElement>`
+
+
 ### hero.click *(mousePosition, verification?)* {#click}
 
 Executes a click interaction. This is a shortcut for `hero.interact({ click: mousePosition })`. See the [Interactions page](/docs/hero/basic-client/interactions) for more details.
@@ -268,29 +296,20 @@ Close a single Tab. The first opened Tab will become the focused tab.
 Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
 
 
-### hero.detach *(elementOrResource, options?)* {#detach}
+### hero.detach *(elementOrResource)* {#detach}
 
-Detaches an element or resource and converts it into a DetachedElement or DetachedResource object. You can supply an optional name in the 2nd argument to add it for later use into [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [hero.detachedResources](/docs/hero/basic-client/hero#detachedElements).
+Returns an element or resource as a [DetachedElement](/docs/hero/basic-client/detached-element) or [DetachedResource](/docs/hero/basic-client/detached-resource) object. This allows you to access the elements properties and methods without using `await`.
 
 ```js
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
-await hero.detach('title', hero.querySelector('h1'));
-const h1 = await hero.detachedElements.get('title');
-```
-
-To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
-
-```js
-const replay = new HeroReplay({ /* previousSessionId */});
-const h1 = await replay.detachedElements.get('title');
+const h1Elem = await hero.detach(hero.querySelector('h1'));
+console.log('title: ', h1Elem.getAttribute.get('title');
 ```
 
 #### **Arguments**:
 
 - elementOrResource `AwaitedDOM`. This can be any AwaitedDOM element, collection of elements, or resource(s).
-- options `object`. Optional settings to apply to this extraction
-  - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
 
 #### **Returns**: `Promise<DetachedElement>`
 
