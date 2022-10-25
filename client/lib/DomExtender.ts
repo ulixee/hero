@@ -1,5 +1,5 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperNode, ISuperHTMLElement, ISuperNodeList, ISuperHTMLCollection } from 'awaited-dom/base/interfaces/super';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
 import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
 import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
@@ -18,6 +18,7 @@ import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
 import { createSuperDocument, createSuperNode } from 'awaited-dom/impl/create';
 import { KeyboardShortcuts } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
+import { IElement, IHTMLCollection, IHTMLElement, INode, INodeList } from 'awaited-dom/base/interfaces/official';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -46,7 +47,7 @@ interface IBaseExtendNode {
   $waitForVisible(options?: { timeoutMs?: number }): Promise<ISuperElement>;
   $xpathSelector(selector: string): ISuperNode;
   $detach(): Promise<globalThis.Element>;
-  $addToDetachedElements(name: string): Promise<globalThis.Element>;
+  $addToDetachedElements(name: string): Promise<void>;
 }
 
 interface IBaseExtendNodeList {
@@ -56,7 +57,7 @@ interface IBaseExtendNodeList {
     initial: T,
   ): Promise<T>;
   $detach(): Promise<globalThis.Element[]>;
-  $addToDetachedElements(name?: string): Promise<globalThis.Element[]>;
+  $addToDetachedElements(name?: string): Promise<void>;
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -166,11 +167,10 @@ const NodeExtensionFns: INodeExtensionFns = {
     const detachedElementsRaw = await coreFrame.detachElement(undefined, awaitedPath.toJSON(), true, false);
     return DetachedElement.load(detachedElementsRaw[0].outerHTML);
   },
-  async $addToDetachedElements(name: string): Promise<globalThis.Element> {
+  async $addToDetachedElements(name: string): Promise<void> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
-    return DetachedElement.load(detachedElementsRaw[0].outerHTML);
+    await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
   },
 };
 
@@ -236,11 +236,10 @@ const NodeListExtensionFns: IBaseExtendNodeList = {
     const detachedElementsRaw = await coreFrame.detachElement(undefined, awaitedPath.toJSON(), true, false);
     return detachedElementsRaw.map(x => DetachedElement.load(x.outerHTML));
   },
-  async $addToDetachedElements(name: string): Promise<globalThis.Element[]> {
+  async $addToDetachedElements(name: string): Promise<void> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const detachedElementsRaw = await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
-    return detachedElementsRaw.map(x => DetachedElement.load(x.outerHTML));
+    await coreFrame.detachElement(name, awaitedPath.toJSON(), false, true);
   },
 };
 
@@ -290,6 +289,8 @@ export function isDomExtensionClass(instance: any): boolean {
   if (instance instanceof HTMLCollection) return true;
   return false;
 }
+
+export type IDomExtensionClass = ISuperElement | ISuperNode | ISuperHTMLElement | IElement | INode | IHTMLElement | ISuperNodeList | ISuperHTMLCollection | INodeList | IHTMLCollection;
 
 async function getCoreFrame(element: ISuperElement): Promise<CoreFrameEnvironment> {
   const { awaitedOptions } = awaitedPathState.getState(element);

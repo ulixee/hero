@@ -65,7 +65,7 @@ import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 import DetachedElements from "./DetachedElements";
 import DetachedResources from "./DetachedResources";
-import { isDomExtensionClass } from './DomExtender';
+import { isDomExtensionClass, IDomExtensionClass } from './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -225,7 +225,7 @@ export default class Hero extends AwaitedEventTarget<{
 
   // METHODS
 
-  public async addToDetached(name: string, elementOrResource: any): Promise<void> {
+  public async addToDetached(name: string, elementOrResource: Resource | WebsocketResource | IDomExtensionClass): Promise<void> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
       await elementOrResource.$addToDetachedResources(name);
     } else if (isDomExtensionClass(elementOrResource)) {
@@ -235,7 +235,7 @@ export default class Hero extends AwaitedEventTarget<{
     }
   }
 
-  public async detach(elementOrResource: any): Promise<void> {
+  public async detach(elementOrResource: Resource | WebsocketResource | IDomExtensionClass): Promise<void> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
       await elementOrResource.$detach();
     } else if (isDomExtensionClass(elementOrResource)) {

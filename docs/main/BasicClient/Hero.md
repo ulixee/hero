@@ -263,7 +263,7 @@ const h1 = await replay.detachedElements.get('title');
 - options `object`. Optional settings to apply to this extraction
   - name `string`. A name to use in retrieving from [DetachedElements](/docs/hero/basic-client/hero#detached-elements). It does not need to be unique - items with the same name will be added to a list.
 
-#### **Returns**: `Promise<DetachedElement>`
+#### **Returns**: `Promise<void>`
 
 
 ### hero.click *(mousePosition, verification?)* {#click}
