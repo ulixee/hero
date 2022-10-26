@@ -19,7 +19,7 @@ afterEach(Helpers.afterEach);
 
 describe('Websocket tests', () => {
   it('can wait for a websocket', async () => {
-    const mitmServer = await MitmServer.start();
+    const mitmServer = await MitmServer.start(null);
     const upgradeSpy = jest.spyOn(HttpUpgradeHandler.prototype, 'onUpgrade');
     Helpers.needsClosing.push(mitmServer);
 
