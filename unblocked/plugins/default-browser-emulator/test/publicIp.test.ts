@@ -11,7 +11,7 @@ test('can resolve a v4 address', async () => {
 });
 
 test('can resolve an ip address with a mitm socket', async () => {
-  const mitmServer = await MitmServer.start();
+  const mitmServer = await MitmServer.start(null);
   Helpers.needsClosing.push(mitmServer);
 
   const session = new RequestSession(`1`, {}, TestLogger.forTest(module));
