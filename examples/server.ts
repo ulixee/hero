@@ -9,9 +9,8 @@ import { AddressInfo } from 'net';
 import { IncomingMessage } from 'http';
 
 /**
- * This is a simple CoreServer that you would probably not ever use beyond simple examples.
+ * This is a simple CoreServer that can be used as a starting point for your own server (or integration with an existing server).
  */
-
 class CoreServer {
   public addressPromise: Promise<string>;
   private wsServer: WebSocket.Server;
@@ -29,21 +28,21 @@ class CoreServer {
   }
 
   public async open(): Promise<void> {
+    await Core.start();
     const address = await this.addressPromise;
     await UlixeeServerConfig.global.setVersionHost(version, address);
     ShutdownHandler.register(() => UlixeeServerConfig.global.setVersionHost(version, null));
-    Core.events.on('all-browsers-closed', () => Core.shutdown());
-    Core.events.on('browser-has-no-open-windows', ({ browser }) => browser.close());
 
     console.log('Started server at %s', address);
   }
 
-  public close(): void {
+  public async close(): Promise<void> {
     try {
       this.wsServer.close();
     } catch (error) {
       console.log('Error closing socket connections', error);
     }
+    await Core.shutdown();
   }
 
   private handleWsConnection(ws: WebSocket, req: IncomingMessage): void {

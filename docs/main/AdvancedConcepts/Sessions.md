@@ -15,3 +15,17 @@ You can control the location sessions are stored using the [`dataDir`](/docs/her
 Session databases can grow rather large, since they store all DOM changes, Devtools messages and Http resources for all loaded tabs and frames in a "scraping session".
 
 You should clean up any unwanted or unneeded session databases manually. You can safely discard any databases you do not want to inspect at any future point, or you can archive them to another location. Either approach will not impact future scripts. An archived or relocated Session database can still be replayed at a later date. 
+
+You can subscribe to closed Session databases for automated cleanup (this will run wherever your Core is running).
+
+```js
+import { Session } from '@ulixee/hero-core';
+import * as Fs from 'fs'
+
+Session.events.on('closed', ({ id, databasePath }) => {
+  // NOTE: determine if database should be kept (track session ids vs errors on your own)
+  if (!didHaveErrors(id)) {
+    Fs.unlink(databasePath);
+  }
+});
+```
