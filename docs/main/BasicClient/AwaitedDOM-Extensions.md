@@ -6,6 +6,7 @@ These extensions are automatically added to all AwaitedDOM elements ([`Nodes`](/
 
 ## Properties
 
+
 ### element.$contentDocument {#content-document}
 
 Accesses a child frames ContentDocument **bypassing** cross-origin restrictions. This can be really nice when you are accessing frame querySelectors on different domains. The native javascript sandboxes do not have this privilege.
@@ -73,6 +74,33 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 The following methods are added to ([`Nodes`](/docs/awaited-dom/super-node), [`Elements`](/docs/awaited-dom/super-element), and [`HTMLElements`](/docs/awaited-dom/super-html-element)).
 
+
+### element.$addToDetachedElements *(name)* {#addToDetachedElements}
+
+Converts the element to a [DetachedElement](/docs/hero/basic-client/detached-element) and adds it to the [hero.detachedElements](/docs/hero/basic-client/hero#detached-elements) object. The advantage of hero.detachedElements is you can use and reuse them from within [HeroReplay](/docs/hero/basic-client/hero-replay) long after your Hero session has closed. This allows you to write extraction logic that can be easily iterated on without needing to reload the webpage(s).
+
+For example, below is a simple hero script that collects the `h1` element:
+```js
+const hero = new Hero();
+await hero.goto('https://ulixee.org');
+await hero.querySelector('h1').$addToDetachedElements('title');
+console.log('Session ID: ', await hero.sessionId);
+```
+
+You can create a second script that uses [HeroReplay](/docs/hero/basic-client/hero-replay) to find the data you need without loading the website again:
+```js
+const hero = new HeroReplay({ /* previousSessionId */});
+const h1 = await hero.detachedElements.get('title');
+const h1Children = [...h1.querySelectorAll('div')].map(x => x.textContent);
+```
+
+#### **Arguments**:
+
+- name `string`. The name used to retrieve this element from [hero.detachedElements](/docs/databox/basic-client/hero#detached-elements).
+
+#### **Returns**: `Promise<void>`
+
+
 ### element.$clearInputText *()* {#clear-value}
 
 Clears out the value of an input field by performing a Focus, Select All, and Backspace.
@@ -96,32 +124,22 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 #### **Returns**: `Promise<void>`
 
 
-### element.$detach *(name?)* {#extract-later}
+### element.$detach *()* {#detach}
 
-Detaches an element from the browser's live [AwaitedDOM](/docs/hero/basic-client/awaited-dom) environment and converts it into a [DetachedElement](/docs/hero/basic-client/detached-dom) object for local usage (i.e, without any need for promises or awaits). You can optionally supply a name as the first argument if you want to add it to the [hero.detachedElements](/docs/hero/basic-client/hero#detached-elements) bucket. The advantage of hero.detachedElements is you can use and reuse them from within [HeroReplay](/docs/hero/basic-client/hero-replay) long after your Hero session has closed. This allows you to write extraction logic that can be easily iterated on without needing to reload the webpage(s).
+Detaches element and returns it as a [DetachedElement](/docs/hero/basic-client/detached-element) for local usage (i.e, without any need for promises or awaits). 
 
-For example, below is a simple hero script that collects the `h1` element:
+For example, below is a simple hero script that detaches the `h1` element and uses getAttribute:
 ```js
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
-await hero.querySelector('h1').$detach('title');
-console.log('Session ID: ', await hero.sessionId);
+const h1Elem = await hero.querySelector('h1').$detach();
+console.log('Session ID: ', h1Elem.getAttribute('title'));
 ```
 
-You can create a second script that uses [HeroReplay](/docs/hero/basic-client/hero-replay) to find the data you need without loading the website again:
-```js
-const hero = new HeroReplay({ /* previousSessionId */});
-const h1 = await hero.detachedElements.get('title');
-const h1Children = [...h1.querySelectorAll('div')].map(x => x.textContent);
-```
-
-Returned elements are no longer [AwaitedDOM](/docs/hero/basic-client/awaited-dom) objects -- they are in the form of [DetachedElement](/docs/hero/basic-client/detached-dom), which allows access to properties and methods without the `await` keyword.
-
-#### **Arguments**:
-
-- name `string`. Optional. The name used to retrieve this element from [hero.detachedElements](/docs/databox/basic-client/hero#detached-elements).
+You'll notice the h1Elem above has full access to properties and methods without needing the `await` keyword.
 
 #### **Returns**: `Promise<DetachedElement.Element>`
+
 
 ### element.$type *(...typeInteractions)* {#type}
 
@@ -243,11 +261,11 @@ Attached to NodeCollections ([see list](#super-collections)).
 
 ### collection.$detach *(name?)* {#detach}
 
-Detaches all elements of a NodeList or HTMLElementCollection and converts them to [DetachedElement](/docs/hero/basic-client/detached-dom). Supplying a string as the first argument adds your elements to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements).
+Detaches all elements of a NodeList or HTMLElementCollection and converts them to [DetachedElement](/docs/hero/basic-client/detached-element). Supplying a string as the first argument adds your elements to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements).
 
 ```js
   await hero.goto('https://ulixee.org');
-  await hero.querySelectorAll('h1 div').$detach('h1 divs');
+  await hero.querySelectorAll('h1 div').$addToDetachedElements('h1 divs');
   const h1 = await hero.detachedElements.getAll('h1 divs'); // will have 2 entries
   const h1Divs = h1.map(x => x.textContent);
 ```
