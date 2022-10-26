@@ -2,7 +2,7 @@
 
 > AwaitedDOM Extensions add extra functionality to the DOM specification in order to make using Hero easier. All extensions are prefixed with a "$" character.
 
-These extensions are automatically added to all AwaitedDOM elements ([`Nodes`](/docs/awaited-dom/super-node), [`Elements`](/docs/awaited-dom/super-element), [`HTMLElements`](/docs/awaited-dom/super-html-element)) and collections ([`NodeList`](/docs/awaited-dom/super-node-list) and [`HTMLCollections`](/docs/awaited-dom/super-html-collection)).
+These extensions are automatically added to all AwaitedDOM elements ([`Nodes`](/docs/hero/awaited-dom/super-node), [`Elements`](/docs/hero/awaited-dom/super-element), [`HTMLElements`](/docs/hero/awaited-dom/super-html-element)) and collections ([`NodeList`](/docs/hero/awaited-dom/super-node-list) and [`HTMLCollections`](/docs/hero/awaited-dom/super-html-collection)).
 
 ## Properties
 
@@ -72,7 +72,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Element Methods
 
-The following methods are added to ([`Nodes`](/docs/awaited-dom/super-node), [`Elements`](/docs/awaited-dom/super-element), and [`HTMLElements`](/docs/awaited-dom/super-html-element)).
+The following methods are added to ([`Nodes`](/docs/hero/awaited-dom/super-node), [`Elements`](/docs/hero/awaited-dom/super-element), and [`HTMLElements`](/docs/hero/awaited-dom/super-html-element)).
 
 
 ### element.$addToDetachedElements *(name)* {#addToDetachedElements}
@@ -240,7 +240,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ## Collection Methods
 
-The following methods are added to ([`NodeList`](/docs/awaited-dom/super-node-list) and [`HTMLCollections`](/docs/awaited-dom/super-html-collection)).
+The following methods are added to ([`NodeList`](/docs/hero/awaited-dom/super-node-list) and [`HTMLCollections`](/docs/hero/awaited-dom/super-html-collection)).
 
 ### collection.$map *(iteratorFn)* {#map}
 

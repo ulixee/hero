@@ -33,8 +33,8 @@ Interaction Commands fall into three broad categories:
 Every mouse command include a [`MousePosition`](#mouseposition) value, which specifies where the interaction takes place. It accepts three possible options:
 
 - `[x, y]` These are pixels relative to the top-left corner of the viewport.
-- [`SuperElement`](/docs/awaited-dom/super-element) Any element from the AwaitedDOM, which are translated into x/y coordinates.
-- { element: [`SuperElement`](/docs/awaited-dom/super-element), verification: [`ClickVerification`](#clickverification) } An element with a specified click verification strategy.
+- [`SuperElement`](/docs/hero/awaited-dom/super-element) Any element from the AwaitedDOM, which are translated into x/y coordinates.
+- { element: [`SuperElement`](/docs/hero/awaited-dom/super-element), verification: [`ClickVerification`](#clickverification) } An element with a specified click verification strategy.
 - `null` Leave the mouse in its current position.
 
 For example, here's how to hover over a link:
@@ -60,17 +60,17 @@ hero.interact({ clickRight: [55, 42] });
 
 #### **ClickVerification**: {#click-verification}
 
-Click commands can include a click verification when a [`SuperElement`](/docs/awaited-dom/super-element) is provided as the `MousePosition`. This is the strategy used to confirm that a specific element is clicked after scrolling and moving the mouse over the target. The default verification is `elementAtPath` if none is provided.
+Click commands can include a click verification when a [`SuperElement`](/docs/hero/awaited-dom/super-element) is provided as the `MousePosition`. This is the strategy used to confirm that a specific element is clicked after scrolling and moving the mouse over the target. The default verification is `elementAtPath` if none is provided.
 
 The web has evolved to include sites where "Elements" on some sites are swapped in and out many times as the site is rendered with new data (think React, Vue, Svelte, etc).
 
-During a normal interaction, the [`SuperElement`](/docs/awaited-dom/super-element) will be looked up at the beginning of the operation to confirm location and current visibility/clickability. Verification that the given element was actually clicked are:
+During a normal interaction, the [`SuperElement`](/docs/hero/awaited-dom/super-element) will be looked up at the beginning of the operation to confirm location and current visibility/clickability. Verification that the given element was actually clicked are:
 
 - `exactElement`. This verification strategy checks that the original node is clicked. This works on most sites, but can fail on dynamic sites, or where data is updating the site (eg, a select list being updated by your type interactions).
-- `elementAtPath` Default Option. This verification approach will first check `exactElement`. If the original element is no longer attached or visible, it will re-check the full path to the [`SuperElement`](/docs/awaited-dom/super-element) and click on any refreshed node.
+- `elementAtPath` Default Option. This verification approach will first check `exactElement`. If the original element is no longer attached or visible, it will re-check the full path to the [`SuperElement`](/docs/hero/awaited-dom/super-element) and click on any refreshed node.
 - `none`. Do not verify clicks. This approach will scroll and click on the last known position of the element - eg, you ran [`hero.getComputedVisibility *(element)*`](/docs/hero/basic-client/hero#get-computed-visibility) or `element.getBoundingClientRect()`. If the position hasn't been previously looked up, it will be looked up once during the interact command. The position of the element will be used to scroll, move the mouse and click.
 
-Verification strategies can be provided to click/doubleclick commands with a [`SuperElement`](/docs/awaited-dom/super-element) as the `MousePosition`. If you don't provide a verification strategy, `elementAtPath` will be used by default.
+Verification strategies can be provided to click/doubleclick commands with a [`SuperElement`](/docs/hero/awaited-dom/super-element) as the `MousePosition`. If you don't provide a verification strategy, `elementAtPath` will be used by default.
 
 ```js
 const aElem = hero.document.querySelector('a.more-information');

@@ -24,7 +24,7 @@ Returns a reference to the document of the [mainFrameEnvironment](#main-frame-en
 
 Alias for [tab.mainFrameEnvironment.document](/docs/hero/advanced-client/frame-environment#document).
 
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
 ### tab.frameEnvironments {#frame-environments}
 
@@ -72,11 +72,11 @@ An execution point that refers to a command run on this Hero instance (`waitForE
 
 ### tab.localStorage <div class="specs"><i>W3C</i></div> {#local-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
+Returns a reference to the [Storage](/docs/hero/awaited-dom/storage) object managing localStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
 Alias for [tab.mainFrameEnvironment.localStorage](/docs/hero/advanced-client/frame-environment#local-storage).
 
-#### **Type**: [`Storage`](/docs/awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/hero/awaited-dom/storage)
 
 ### tab.mainFrameEnvironment {#main-frame-environment}
 
@@ -86,11 +86,11 @@ Returns the [`FrameEnvironment`](/docs/hero/advanced-client/frame-environment) r
 
 ### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
+Returns a reference to the [Storage](/docs/hero/awaited-dom/storage) object managing sessionStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
 
 Alias for [tab.mainFrameEnvironment.sessionStorage](/docs/hero/advanced-client/frame-environment#session-storage).
 
-#### **Type**: [`Storage`](/docs/awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/hero/awaited-dom/storage)
 
 ### tab.tabId {#tabid}
 
@@ -106,11 +106,11 @@ The url of the active tab.
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a [Request](/docs/awaited-dom/request) object in the [mainFrameEnvironment](#main-frame-environment).
+Returns a constructor for a [Request](/docs/hero/awaited-dom/request) object in the [mainFrameEnvironment](#main-frame-environment).
 
 Alias for [tab.mainFrameEnvironment.Request](/docs/hero/advanced-client/frame-environment#request-type)
 
-#### **Type**: [`Request`](/docs/awaited-dom/request)
+#### **Type**: [`Request`](/docs/hero/awaited-dom/request)
 
 ## Methods
 
@@ -136,7 +136,7 @@ from a different [FrameEnvironment](/docs/hero/advanced-client/frame-environment
 
 Alias for [tab.mainFrameEnvironment.fetch](/docs/hero/advanced-client/frame-environment#fetch)
 
-#### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
+#### **Returns**: [`Promise<Response>`](/docs/hero/awaited-dom/response)
 
 ```js
 const origin = 'https://dataliberationfoundation.org/';
@@ -249,10 +249,10 @@ Alias for [tab.mainFrameEnvironment.getComputedStyle](/docs/hero/advanced-client
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element) An element loaded in this tab environment.
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element) An element loaded in this tab environment.
 - pseudoElement `string?` Optional string specifying the pseudo-element to match (eg, ::before, ::after, etc). More information can be found on [w3c](https://www.w3.org/TR/css-pseudo-4/).
 
-#### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/awaited-dom/cssstyledeclaration)
+#### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/hero/awaited-dom/cssstyledeclaration)
 
 ```js
 await hero.goto('https://dataliberationfoundation.org');
@@ -327,7 +327,7 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/advanced-c
 
 #### **Arguments**:
 
-- node [`SuperNode`](/docs/awaited-dom/super-node). The node to determine visibility.
+- node [`SuperNode`](/docs/hero/awaited-dom/super-node). The node to determine visibility.
 
 #### **Returns**: `Promise<INodeVisibility>` Boolean values indicating if the node (or closest element) is visible to an end user.
 
@@ -349,13 +349,13 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/advanced-c
 
 This is a shortcut for mainFrame.document.querySelector.
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 ### tab.querySelectorAll *(stringOrOptions)* {#query-selector-all}
 
 This is a shortcut for mainFrame.document.querySelectorAll.
 
-#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given patterns. Returns an empty list if a resultset is not found that satisfies the constraints.
+#### **Returns**: [`SuperNodeList`](/docs/hero/awaited-dom/super-node-list). A NodeList that satisfies the given patterns. Returns an empty list if a resultset is not found that satisfies the constraints.
 
 ### tab.registerFlowHandler *(name, state, handlerFn)* {#register-flow-handler}
 
@@ -459,7 +459,7 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/hero/advanced-client/f
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element)
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility).
@@ -720,7 +720,7 @@ This is a shortcut for mainFrame.document.evaluate(`selector`, document, `FIRST_
 - selector `string`. An XPath selector that can return a single node result.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 ### tab.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
 
@@ -733,7 +733,7 @@ NOTE: this API will iterate through the results to return an array of all matchi
 - selector `string`. An XPath selector that can return node results.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
-#### **Returns**: Promise<Array<[`SuperNode`](/docs/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
+#### **Returns**: Promise<Array<[`SuperNode`](/docs/hero/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
 
 ## Events
 
