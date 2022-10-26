@@ -24,7 +24,7 @@ Returns a [CookieStorage](/docs/hero/advanced-client/cookie-storage) instance to
 
 Returns a reference to the document of the frameEnvironment.
 
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
 ### frameEnvironment.frameId {#frameid}
 
@@ -66,9 +66,9 @@ An execution point that refers to a command run on this Hero instance (`waitForE
 
 ### frameEnvironment.localStorage <div class="specs"><i>W3C</i></div> {#local-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the frameEnvironment.
+Returns a reference to the [Storage](/docs/hero/awaited-dom/storage) object managing localStorage for the frameEnvironment.
 
-#### **Type**: [`Storage`](/docs/awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/hero/awaited-dom/storage)
 
 ### frameEnvironment.parentFrameId {#parent-frameid}
 
@@ -84,9 +84,9 @@ Returns the name given to the frame DOM element. NOTE: this name is not populate
 
 ### frameEnvironment.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the frameEnvironment.
+Returns a reference to the [Storage](/docs/hero/awaited-dom/storage) object managing sessionStorage for the frameEnvironment.
 
-#### **Type**: [`Storage`](/docs/awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/hero/awaited-dom/storage)
 
 ### frameEnvironment.url {#url}
 
@@ -96,7 +96,7 @@ The url of the active frameEnvironment.
 
 ### frameEnvironment.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a [Request](/docs/awaited-dom/request) object that can be sent to [frameEnvironment.fetch(request)](#fetch).
+Returns a constructor for a [Request](/docs/hero/awaited-dom/request) object that can be sent to [frameEnvironment.fetch(request)](#fetch).
 
 ```js
 const { Request, fetch } = hero;
@@ -109,7 +109,7 @@ const request = new Request(url, {
 const response = await fetch(request);
 ```
 
-#### **Type**: [`Request`](/docs/awaited-dom/request)
+#### **Type**: [`Request`](/docs/hero/awaited-dom/request)
 
 ## Methods
 
@@ -124,7 +124,7 @@ Perform a native "fetch" request in the current frame environment.
   - Inbound Body currently supports: `string`, `ArrayBuffer`, `null`.
   - Not supported: `Blob`, `FormData`, `ReadableStream`, `URLSearchParams`
 
-#### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
+#### **Returns**: [`Promise<Response>`](/docs/hero/awaited-dom/response)
 
 ```js
 const origin = 'https://dataliberationfoundation.org/';
@@ -160,7 +160,7 @@ Get the [FrameEnvironment](/docs/hero/advanced-client/frame-environment) object 
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element) A frame or iframe element loaded in this frame environment (ie, a direct child element of this frame document).
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element) A frame or iframe element loaded in this frame environment (ie, a direct child element of this frame document).
 
 #### **Returns**: [`Promise<Frame>`](/docs/hero/advanced-client/frame-environment)
 
@@ -180,10 +180,10 @@ Perform a native `Window.getComputedStyle` request in the current frame context 
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element) An element loaded in this frame environment.
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element) An element loaded in this frame environment.
 - pseudoElement `string?` Optional string specifying the pseudo-element to match (eg, ::before, ::after, etc). More information can be found on [w3c](https://www.w3.org/TR/css-pseudo-4/).
 
-#### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/awaited-dom/cssstyledeclaration)
+#### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/hero/awaited-dom/cssstyledeclaration)
 
 ```js
 await hero.goto('https://dataliberationfoundation.org');
@@ -207,7 +207,7 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/hero/advanced-c
 
 #### **Arguments**:
 
-- node [`SuperNode`](/docs/awaited-dom/super-node). The node to compute visibility.
+- node [`SuperNode`](/docs/hero/awaited-dom/super-node). The node to compute visibility.
 
 #### **Returns**: `Promise<INodeVisibility>` Boolean values indicating if the node (or closest element) is visible to an end user.
 
@@ -251,7 +251,7 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element). The element to determine visibility.
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element). The element to determine visibility.
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
@@ -259,13 +259,13 @@ Determines if an element is visible to an end user. This method checks whether a
 
 This is a shortcut for document.querySelector.
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 ### frameEnvironment.querySelectorAll *(stringOrOptions)* {#query-selector-all}
 
 This is a shortcut for document.querySelectorAll.
 
-#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list). A NodeList that satisfies the given selector. Returns an empty list if a resultset is not found.
+#### **Returns**: [`SuperNodeList`](/docs/hero/awaited-dom/super-node-list). A NodeList that satisfies the given selector. Returns an empty list if a resultset is not found.
 
 ### frameEnvironment.xpathSelector *(selector, orderedResults)* {#xpath-selector}
 
@@ -276,7 +276,7 @@ This is a shortcut for document.evaluate(`selector`, document, `FIRST_ORDERED_NO
 - selector `string`. An XPath selector that can return a single node result.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
-#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
+#### **Returns**: [`SuperNode`](/docs/hero/awaited-dom/super-node). A Node that satisfies the given patterns. Evaluates to null if awaited and not present.
 
 ### frameEnvironment.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
 
@@ -289,7 +289,7 @@ NOTE: this API will iterate through the results to return an array of all matchi
 - selector `string`. An XPath selector that can return node results.
 - orderedResults `boolean`. Optional boolean to indicate if results should return first ordered result. Default is false.
 
-#### **Returns**: Promise<Array<[`SuperNode`](/docs/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
+#### **Returns**: Promise<Array<[`SuperNode`](/docs/hero/awaited-dom/super-node)>>. A promise resolving to an array of nodes that satisfies the given pattern.
 
 ### frameEnvironment.waitForPaintingStable *(options)* {#wait-for-painting-stable}
 
@@ -311,7 +311,7 @@ Wait until a specific element is present in the dom.
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element)
+- element [`SuperElement`](/docs/hero/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility).

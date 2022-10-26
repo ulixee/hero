@@ -117,7 +117,7 @@ DetachedResources object providing access to all resources that have been detach
 
 Returns a reference to the main Document for the active tab.
 
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
 Alias for [activeTab.document](/docs/hero/basic-client/tab#document)
 
@@ -173,7 +173,7 @@ Returns a reference to the document of the [mainFrameEnvironment](#main-frame-en
 
 Alias for [tab.mainFrameEnvironment.document](/docs/hero/advanced-client/frame-environment#document).
 
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
 ### hero.meta {#meta}
 
@@ -232,7 +232,7 @@ Alias for [Tab.url](/docs/hero/basic-client/tab#url)
 
 Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](/docs/hero/basic-client/tab#request-type). These objects can be used to run browser-native [tab.fetch](/docs/hero/basic-client/tab#fetch) requests from the context of the Tab document.
 
-#### **Type**: [`Request`](/docs/awaited-dom/request)
+#### **Type**: [`Request`](/docs/hero/awaited-dom/request)
 
 Alias for [Tab.Request](/docs/hero/basic-client/tab#request-tab)
 
