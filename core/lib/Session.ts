@@ -61,6 +61,7 @@ export default class Session
 {
   public static events = new TypedEventEmitter<{
     new: { session: Session };
+    closed: { id: string; databasePath: string };
   }>();
 
   private static readonly byId: { [id: string]: Session } = {};
@@ -572,6 +573,8 @@ export default class Session
     this.db.flush();
 
     this.removeAllListeners();
+    const databasePath = `${SessionDb.databaseDir}/${this.id}.db`;
+    const id = this.id;
     // give the system a second to write to db before clearing
     setImmediate(db => {
       try {
@@ -579,6 +582,7 @@ export default class Session
       } catch (e) {
         /* no-op */
       }
+      Session.events.emit('closed', { id, databasePath });
     }, this.db);
   }
 
