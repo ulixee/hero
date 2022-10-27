@@ -63,8 +63,8 @@ import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
 import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
-import DetachedElements from "./DetachedElements";
-import DetachedResources from "./DetachedResources";
+import DetachedElements from './DetachedElements';
+import DetachedResources from './DetachedResources';
 import { isDomExtensionClass, IDomExtensionClass } from './DomExtender';
 
 export const DefaultOptions = {
@@ -74,7 +74,6 @@ export const DefaultOptions = {
 
 export type ISessionOptions = Omit<ISessionCreateOptions, 'sessionId'> &
   Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;
-
 
 interface ISharedInternalProperties {
   clientPlugins: IClientPlugin[];
@@ -133,9 +132,7 @@ export default class Hero extends AwaitedEventTarget<{
       corePluginPaths: [],
     } as ISessionOptions;
 
-    this.#connectionToCore = ConnectionFactory.createConnection(
-      connectionToCore ?? { isPersistent: false },
-    );
+    this.#connectionToCore = ConnectionFactory.createConnection(connectionToCore ?? {});
 
     this.#didAutoCreateConnection = this.#connectionToCore !== connectionToCore;
   }
@@ -225,7 +222,10 @@ export default class Hero extends AwaitedEventTarget<{
 
   // METHODS
 
-  public async addToDetached(name: string, elementOrResource: Resource | WebsocketResource | IDomExtensionClass): Promise<void> {
+  public async addToDetached(
+    name: string,
+    elementOrResource: Resource | WebsocketResource | IDomExtensionClass,
+  ): Promise<void> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
       await elementOrResource.$addToDetachedResources(name);
     } else if (isDomExtensionClass(elementOrResource)) {
@@ -235,7 +235,9 @@ export default class Hero extends AwaitedEventTarget<{
     }
   }
 
-  public async detach(elementOrResource: Resource | WebsocketResource | IDomExtensionClass): Promise<void> {
+  public async detach(
+    elementOrResource: Resource | WebsocketResource | IDomExtensionClass,
+  ): Promise<void> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
       await elementOrResource.$detach();
     } else if (isDomExtensionClass(elementOrResource)) {
@@ -244,7 +246,7 @@ export default class Hero extends AwaitedEventTarget<{
       throw new Error('The first argument must be an Element or Resource');
     }
   }
-  
+
   public close(): Promise<void> {
     return (this.#isClosingPromise ??= new Promise(async (resolve, reject) => {
       try {
@@ -298,12 +300,12 @@ export default class Hero extends AwaitedEventTarget<{
     const snippets = await coreSession.getSnippets(coreSession.sessionId, key);
     if (!snippets.length) return null;
 
-    return snippets[snippets.length-1].value as T;
+    return snippets[snippets.length - 1].value as T;
   }
 
   public async setSnippet(key: string, value: any): Promise<void> {
     const coreSession = await this.#getCoreSessionOrReject();
-    await coreSession.setSnippet(key, value);  
+    await coreSession.setSnippet(key, value);
   }
 
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {

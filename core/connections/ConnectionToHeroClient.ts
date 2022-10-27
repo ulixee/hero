@@ -33,7 +33,6 @@ export default class ConnectionToHeroClient
   implements IConnectionToClient<any, {}>, ICommandableTarget
 {
   public disconnectPromise: Promise<void>;
-  public isPersistent = true;
   public autoShutdownMillis = 500;
 
   private autoShutdownTimer: NodeJS.Timer;
@@ -109,9 +108,8 @@ export default class ConnectionToHeroClient
   }
 
   public async connect(
-    options: ICoreConfigureOptions & { isPersistent?: boolean; version?: string } = {},
+    options: ICoreConfigureOptions & { version?: string } = {},
   ): Promise<{ maxConcurrency: number }> {
-    this.isPersistent = options.isPersistent ?? true;
     if (options.version) {
       if (!isSemverSatisfied(options.version, version)) {
         throw new Error(
@@ -120,7 +118,7 @@ export default class ConnectionToHeroClient
       }
     }
     this.disconnectPromise = null;
-    await Core.start(options, false);
+    await Core.start(options);
     return {
       maxConcurrency: Core.pool.maxConcurrentAgents,
     };
@@ -154,7 +152,6 @@ export default class ConnectionToHeroClient
       }
 
       await Promise.all([...closeAll, this.transport.disconnect?.(fatalError)]);
-      this.isPersistent = false;
       this.emit('disconnected', fatalError);
       log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
     } finally {
@@ -163,7 +160,7 @@ export default class ConnectionToHeroClient
   }
 
   public isActive(): boolean {
-    return this.sessionIdToRemoteEvents.size > 0 || this.isPersistent || this.hasActiveCommand;
+    return this.sessionIdToRemoteEvents.size > 0 || this.hasActiveCommand;
   }
 
   public isAllowedCommand(method: string): boolean {
