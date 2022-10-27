@@ -871,7 +871,7 @@ ${data}`,
     }
 
     if (!session) {
-      await Core.start({}, false);
+      await Core.start();
       session = new Session(options);
 
       if (session.mode !== 'browserless') {

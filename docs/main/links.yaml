@@ -32,6 +32,7 @@
 - title: Advanced Concepts
   items:
     - Client vs Core
+    - Deployment
     - Sessions
     - TimeTravel
 

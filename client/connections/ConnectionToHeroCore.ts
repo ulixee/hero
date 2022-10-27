@@ -28,7 +28,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     options?: Omit<IConnectionToCoreOptions, 'host'>,
   ) {
     super(transport);
-    this.options = options ?? { isPersistent: true };
+    this.options = options ?? {};
     this.commandQueue = new CoreCommandQueue(null, scriptInstance.mode, this, null);
     this.coreSessions = new CoreSessions(
       this,
@@ -76,7 +76,6 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
 
   protected async afterConnect(): Promise<void> {
     const connectOptions = <ICoreConfigureOptions>{
-      isPersistent: this.options.isPersistent,
       dataDir: this.options.dataDir,
       version: this.options.version,
     };

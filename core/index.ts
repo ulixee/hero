@@ -60,7 +60,7 @@ export default class Core {
     >
   >();
 
-  public static readonly connections: ConnectionToHeroClient[] = [];
+  public static readonly connections = new Set<ConnectionToHeroClient>();
 
   public static corePluginsById: { [id: string]: ICorePluginClass } = {};
 
@@ -69,11 +69,8 @@ export default class Core {
 
   public static allowDynamicPluginLoading = true;
   public static isClosing: Promise<void>;
-  public static autoShutdownMillis = 5e3;
 
-  private static wasManuallyStarted = false;
   private static isStarting = false;
-  private static autoShutdownTimer: NodeJS.Timer;
   private static didRegisterSignals = false;
   private static _dataDir: string = dataDir;
   private static _defaultUnblockedPlugins: IUnblockedPluginClass[] = [
@@ -87,12 +84,8 @@ export default class Core {
   public static addConnection(transportToClient?: ITransportToClient<any>): ConnectionToHeroClient {
     transportToClient ??= new EmittingTransportToClient();
     const connection = new ConnectionToHeroClient(transportToClient);
-    connection.on('disconnected', () => {
-      const idx = this.connections.indexOf(connection);
-      if (idx >= 0) this.connections.splice(idx, 1);
-      this.checkForAutoShutdown();
-    });
-    this.connections.push(connection);
+    connection.on('disconnected', () => this.connections.delete(connection));
+    this.connections.add(connection);
     return connection;
   }
 
@@ -129,15 +122,10 @@ export default class Core {
     return this.utilityBrowserContext;
   }
 
-  public static async start(
-    options: ICoreConfigureOptions = {},
-    isExplicitlyStarted = true,
-  ): Promise<void> {
-    if (isExplicitlyStarted) this.wasManuallyStarted = true;
+  public static async start(options: ICoreConfigureOptions = {}): Promise<void> {
     if (this.isStarting) return;
     const startLogId = log.info('Core.start', {
       options,
-      isExplicitlyStarted,
       sessionId: null,
     });
     this.isClosing = null;
@@ -179,7 +167,6 @@ export default class Core {
 
   public static async shutdown(): Promise<void> {
     if (this.isClosing) return this.isClosing;
-    clearTimeout(this.autoShutdownTimer);
 
     const isClosing = new Resolvable<void>();
     this.isClosing = isClosing.promise;
@@ -189,7 +176,7 @@ export default class Core {
     let shutDownErrors: (Error | null)[] = [];
     try {
       shutDownErrors = await Promise.all([
-        ...this.connections.map(x => x.disconnect().catch(err => err)),
+        ...[...this.connections].map(x => x.disconnect().catch(err => err)),
         this.utilityBrowserContext?.then(x => x.close()).catch(err => err),
         this.pool?.close().catch(err => err),
       ]);
@@ -199,7 +186,6 @@ export default class Core {
       this.networkDb?.close();
       SessionsDb.shutdown();
 
-      this.wasManuallyStarted = false;
       if (this.onShutdown) this.onShutdown();
       isClosing.resolve();
     } catch (error) {
@@ -221,35 +207,6 @@ export default class Core {
     } else if (!clientError[hasBeenLoggedSymbol]) {
       log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
     }
-  }
-
-  private static checkForAutoShutdown(): void {
-    if (!this.shouldAutoShutdown()) return;
-
-    clearTimeout(this.autoShutdownTimer);
-    this.autoShutdownTimer = setTimeout(
-      () => this.tryAutoShutdown(),
-      this.autoShutdownMillis,
-    ).unref();
-  }
-
-  private static tryAutoShutdown(): void {
-    if (!this.shouldAutoShutdown()) return;
-
-    this.shutdown().catch(error => {
-      log.error('Core.autoShutdown', {
-        error,
-        sessionId: null,
-      });
-    });
-  }
-
-  private static shouldAutoShutdown(): boolean {
-    return !(
-      this.wasManuallyStarted ||
-      this.connections.some(x => x.isActive()) ||
-      Session.hasKeepAliveSessions()
-    );
   }
 
   private static registerSignals(): void {
