@@ -65,15 +65,14 @@ import { InternalPropertiesSymbol, scriptInstance } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 import DetachedElements from './DetachedElements';
 import DetachedResources from './DetachedResources';
-import { isDomExtensionClass, IDomExtensionClass } from './DomExtender';
+import { IDomExtensionClass, isDomExtensionClass } from './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
   defaultUserProfile: {},
 };
 
-export type ISessionOptions = Omit<ISessionCreateOptions, 'sessionId'> &
-  Pick<IHeroCreateOptions, 'connectionToCore' | 'sessionId'>;
+export type ISessionOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
 
 interface ISharedInternalProperties {
   clientPlugins: IClientPlugin[];
@@ -210,13 +209,19 @@ export default class Hero extends AwaitedEventTarget<{
 
   public get detachedElements(): DetachedElements {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#detachedElements ??= new DetachedElements(coreSessionPromise, this.sessionId);
+    this.#detachedElements ??= new DetachedElements(
+      coreSessionPromise,
+      Promise.resolve(this.#options.replaySessionId ?? this.sessionId),
+    );
     return this.#detachedElements;
   }
 
   public get detachedResources(): DetachedResources {
     const coreSessionPromise = this.#getCoreSessionOrReject();
-    this.#detachedResources ??= new DetachedResources(coreSessionPromise, this.sessionId);
+    this.#detachedResources ??= new DetachedResources(
+      coreSessionPromise,
+      Promise.resolve(this.#options.replaySessionId ?? this.sessionId),
+    );
     return this.#detachedResources;
   }
 
@@ -296,8 +301,8 @@ export default class Hero extends AwaitedEventTarget<{
 
   public async getSnippet<T = any>(key: string): Promise<T> {
     const coreSession = await this.#getCoreSessionOrReject();
-
-    const snippets = await coreSession.getSnippets(coreSession.sessionId, key);
+    const sessionId = this.#options.replaySessionId ?? (await this.sessionId);
+    const snippets = await coreSession.getSnippets(sessionId, key);
     if (!snippets.length) return null;
 
     return snippets[snippets.length - 1].value as T;

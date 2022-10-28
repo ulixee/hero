@@ -1,6 +1,7 @@
 import { Helpers, Hero } from '@ulixee/hero-testing';
 import { InternalPropertiesSymbol } from '@ulixee/hero/lib/internal';
 import CoreSession from '@ulixee/hero/lib/CoreSession';
+import { HeroReplay } from '@ulixee/hero';
 
 let koaServer: Helpers.ITestKoaServer;
 beforeAll(async () => {
@@ -21,17 +22,21 @@ describe('basic Element tests', () => {
         </body>
       `;
     });
-    const [hero, coreSession] = await openBrowser(`/element-basic`);
-    const sessionId = await hero.sessionId;
+    const [hero] = await openBrowser(`/element-basic`);
     const test1Element = await hero.document.querySelector('.test1');
     await test1Element.$addToDetachedElements('a');
     await test1Element.nextElementSibling.$addToDetachedElements('b');
 
-    const elementsA = await coreSession.getDetachedElements(sessionId, 'a');
+    const heroReplay = new HeroReplay({ hero });
+    const elementsA = await heroReplay.detachedElements.getAll('a');
     expect(elementsA).toHaveLength(1);
     expect(elementsA[0].outerHTML).toBe('<div class="test1">test 1</div>');
 
-    const elementsB = await coreSession.getDetachedElements(sessionId, 'b');
+    const heroReplayWithSessionId = new HeroReplay({
+      replaySessionId: await hero.sessionId,
+      connectionToCore: Hero.getDirectConnectionToCore(),
+    });
+    const elementsB = await heroReplayWithSessionId.detachedElements.getAll('b');
     expect(elementsB[0].outerHTML).toBe(`<div class="test2">
             <ul><li>Test 2</li></ul>
           </div>`);
@@ -54,17 +59,23 @@ describe('basic Element tests', () => {
         </body>
       `;
     });
-    const [hero, coreSession] = await openBrowser(`/element-list`);
+    const [hero] = await openBrowser(`/element-list`);
     const sessionId = await hero.sessionId;
     await hero.document.querySelectorAll('.valid').$addToDetachedElements('valid');
+    await expect(hero.detachedElements.names).resolves.toMatchObject(['valid']);
+    await hero.close();
 
-    const valid = await coreSession.getDetachedElements(sessionId, 'valid');
+    const heroReplay = new HeroReplay({
+      replaySessionId: sessionId,
+      connectionToCore: Hero.getDirectConnectionToCore(),
+    });
+    const valid = await heroReplay.detachedElements.getAll('valid');
     expect(valid).toHaveLength(3);
     expect(valid[0].outerHTML).toBe('<li class="valid">Test 1</li>');
     expect(valid[1].outerHTML).toBe('<li class="valid">Test 4</li>');
     expect(valid[2].outerHTML).toBe('<li class="valid">Test 5</li>');
 
-    await expect(hero.detachedElements.names).resolves.toMatchObject(['valid']);
+    await expect(heroReplay.detachedElements.names).resolves.toMatchObject(['valid']);
   });
 });
 
@@ -76,4 +87,3 @@ async function openBrowser(path: string): Promise<[Hero, CoreSession]> {
   await hero.waitForPaintingStable();
   return [hero, coreSession];
 }
-
