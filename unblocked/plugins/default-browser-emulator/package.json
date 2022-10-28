@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@ulixee/chrome-105-0": "^5195.127.6",
-    "@ulixee/chrome-app": "^1.0.2",
+    "@ulixee/chrome-app": "^1.0.3",
     "@ulixee/commons": "2.0.0-alpha.12",
     "@unblocked-web/real-user-agents": "2.0.0-alpha.11",
     "@unblocked-web/specifications": "2.0.0-alpha.11",
