@@ -18,7 +18,7 @@ export default class UlixeeConfig {
   private static cachedConfigLocations: { [cwd_entrypoint: string]: string } = {};
   private static cachedConfigObjects: { [cwd_entrypoint: string]: UlixeeConfig } = {};
 
-  public serverHost?: string;
+  public defaultMinerHost?: string;
   public databoxOutDir?: string;
 
   private get configPath(): string {
@@ -28,7 +28,7 @@ export default class UlixeeConfig {
   constructor(readonly directoryPath: string) {
     if (Fs.existsSync(this.configPath)) {
       const data = JSON.parse(Fs.readFileSync(this.configPath, 'utf8'));
-      this.serverHost = data.serverHost;
+      this.defaultMinerHost = data.serverHost;
       if (data.databoxOutDir) {
         this.databoxOutDir = Path.isAbsolute(data.databoxOutDir) ? data.databoxOutDir : Path.resolve(this.directoryPath, data.databoxOutDir);
       }
@@ -41,7 +41,7 @@ export default class UlixeeConfig {
 
   private getData(): IUlixeeConfig {
     return {
-      serverHost: this.serverHost,
+      defaultMinerHost: this.defaultMinerHost,
       databoxOutDir: this.databoxOutDir,
     };
   }
@@ -118,7 +118,7 @@ export default class UlixeeConfig {
 }
 
 export interface IUlixeeConfig {
-  serverHost?: string;
+  defaultMinerHost?: string;
   databoxOutDir?: string
 }
 

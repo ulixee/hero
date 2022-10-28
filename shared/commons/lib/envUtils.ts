@@ -1,6 +1,7 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import * as Os from 'os';
+import { getCacheDirectory } from './dirUtils';
 
 /**
  * Will load env files with this precedence (.env.defaults, .env.<NODE_ENV>, .env)
@@ -66,8 +67,10 @@ export function parseEnvInt(envvar: string): number | null {
 }
 
 export function parseEnvPath(envvar: string, relativeTo?: string): string {
-  if (!envvar) return null;
+  if (!envvar) return undefined;
   if (envvar?.startsWith('~')) envvar = Path.join(Os.homedir(), envvar.slice(1));
+  if (envvar?.startsWith('<CACHE>')) envvar = envvar.replace('<CACHE>', getCacheDirectory());
+  if (envvar?.startsWith('<TMP>')) envvar = envvar.replace('<TMP>', Os.tmpdir());
   if (Path.isAbsolute(envvar)) return envvar;
   return Path.resolve(relativeTo ?? process.cwd(), envvar);
 }
