@@ -4,9 +4,13 @@ import TransportBridge from '@ulixee/net/lib/TransportBridge';
 
 export default class TestHero extends DefaultHero {
   constructor(createOptions: IHeroCreateOptions = {}) {
+    createOptions.connectionToCore = TestHero.getDirectConnectionToCore();
+    super(createOptions);
+  }
+
+  public static getDirectConnectionToCore(): ConnectionToHeroCore {
     const bridge = new TransportBridge();
     Core.addConnection(bridge.transportToClient);
-    createOptions.connectionToCore = new ConnectionToHeroCore(bridge.transportToCore);
-    super(createOptions);
+    return new ConnectionToHeroCore(bridge.transportToCore);
   }
 }

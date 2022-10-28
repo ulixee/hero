@@ -12,7 +12,6 @@ import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
-import { IHeroCreateOptions } from '../index';
 import { scriptInstance } from '../lib/internal';
 
 const { log } = Log(module);
@@ -53,13 +52,9 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     return this.coreSessions.size > 0;
   }
 
-  public async createSession(
-    options: Omit<ISessionCreateOptions, 'sessionId'> & Pick<IHeroCreateOptions, 'sessionId'>,
-  ): Promise<CoreSession> {
+  public async createSession(options: ISessionCreateOptions): Promise<CoreSession> {
     try {
-      if (options.sessionId) options.sessionId = await options.sessionId;
-
-      return await this.coreSessions.create(options as ISessionCreateOptions);
+      return await this.coreSessions.create(options);
     } catch (error) {
       if (error instanceof DisconnectedError && this.disconnectPromise) return null;
       throw error;

@@ -4,12 +4,8 @@ import IConnectionToCoreOptions from './IConnectionToCoreOptions';
 
 export default interface IHeroCreateOptions
   extends Partial<
-    Omit<
-      ISessionCreateOptions,
-      'scriptInstanceMeta' | 'sessionName' | 'dependencyMap' | 'sessionId'
-    >
+    Omit<ISessionCreateOptions, 'scriptInstanceMeta' | 'sessionName' | 'dependencyMap'>
   > {
   name?: string;
-  sessionId?: string | Promise<string>;
   connectionToCore?: IConnectionToCoreOptions | ConnectionToHeroCore;
 }

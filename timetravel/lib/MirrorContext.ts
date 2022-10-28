@@ -11,7 +11,8 @@ export default class MirrorContext {
     headed = true,
   ): Promise<BrowserContext> {
     const options = Session.restoreOptionsFromSessionRecord({}, sessionId);
-    options.sessionResume = null;
+    delete options.resumeSessionId;
+    delete options.resumeSessionStartLocation;
     options.showChromeInteractions = headed;
     options.showChrome = headed;
 

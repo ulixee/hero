@@ -33,7 +33,7 @@ Each Hero instance creates a private environment with its own cache, cookies, se
 
 ## Constructor {#constructor}
 
-Creates a new sandboxed browser instance with [unique user session and fingerprints](/docs/overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
+Creates a new sandboxed browser instance with [unique user session and fingerprints](/docs/hero/overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
 
 You can optionally await an instance (or constructor) to cause the connection to the underlying Hero to be initialized. If you don't await, the connection will be established on the first call.
 
@@ -76,8 +76,7 @@ const Hero = require('@ulixee/hero-playground');
     - screenHeight? `number`. The optional screen height in pixels (minimum 0, maximum 10000000).
     - positionX? `number`. Optional override browser X position on screen in pixels (minimum 0, maximum 10000000).
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
-  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
-  - userProfile `IUserProfile`. Previous user's cookies, session, etc.
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/hero/overview/configuration#blocked-resources).
   - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
