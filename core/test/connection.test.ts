@@ -38,7 +38,7 @@ describe('basic connection tests', () => {
     Helpers.needsClosing.push(hero1);
 
     await expect(hero1).rejects.toThrowError(
-      'Ulixee Server failed to launch Chrome',
+      'Ulixee Miner failed to launch Chrome',
     );
     expect(logError).toHaveBeenCalledTimes(1);
     const error = String((logError.mock.calls[0][1] as any).error);

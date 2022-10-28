@@ -1,7 +1,7 @@
 import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import UlixeeConfig from '@ulixee/commons/config';
-import UlixeeServerConfig from '@ulixee/commons/config/servers';
+import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToHeroCore from './ConnectionToHeroCore';
@@ -11,7 +11,7 @@ const { version } = require('../package.json');
 const { log } = Log(module);
 
 export default class ConnectionFactory {
-  public static hasLocalServerPackage = false;
+  public static hasLocalMinerPackage = false;
 
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToHeroCore,
@@ -26,28 +26,28 @@ export default class ConnectionFactory {
       const transport = new WsTransportToCore(options.host);
       connection = new ConnectionToHeroCore(transport);
     } else {
-      const serverHost =
-        UlixeeConfig.load()?.serverHost ??
-        UlixeeConfig.global.serverHost ??
-        UlixeeServerConfig.global.getVersionHost(version);
+      const host =
+        UlixeeConfig.load()?.defaultMinerHost ??
+        UlixeeConfig.global.defaultMinerHost ??
+        UlixeeHostsConfig.global.getVersionHost(version);
 
-      if (serverHost) {
-        const transport = new WsTransportToCore(serverHost);
+      if (host) {
+        const transport = new WsTransportToCore(host);
         connection = new ConnectionToHeroCore(transport, { ...options, version });
-      } else if (UlixeeServerConfig.global.hasServers()) {
-        if (this.hasLocalServerPackage) {
-          // If servers are launched, but none compatible, propose installing server locally
+      } else if (UlixeeHostsConfig.global.hasHosts()) {
+        if (this.hasLocalMinerPackage) {
+          // If Miners are launched, but none compatible, propose installing Miner locally
           throw new Error(
-            `Your Ulixee Server is not started. From your project, run:\n\nnpx @ulixee/server start`,
+            `Your Ulixee Miner is not started. From your project, run:\n\nnpx @ulixee/miner start`,
           );
         }
 
-        // If servers are launched, but none compatible, propose installing server locally
-        throw new Error(`Your script is using version ${version} of Hero. A compatible Ulixee Server was not found on localhost. You can fix this by installing and running server in your project:
+        // If Miners are launched, but none compatible, propose installing miner locally
+        throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a Ulixee Miner in your project:
 
-npm install --save-dev @ulixee/server @ulixee/apps-chromealive-core
+npm install --save-dev @ulixee/miner @ulixee/apps-chromealive-core
 
-npx @ulixee/server start
+npx @ulixee/miner start
         `);
       }
     }
@@ -77,8 +77,8 @@ npx @ulixee/server start
   }
 }
 try {
-  require.resolve('@ulixee/server');
-  ConnectionFactory.hasLocalServerPackage = true;
+  require.resolve('@ulixee/miner');
+  ConnectionFactory.hasLocalMinerPackage = true;
 } catch (error) {
   /* no-op */
 }

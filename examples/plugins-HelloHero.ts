@@ -1,7 +1,7 @@
 import Hero from '@ulixee/hero';
 import { ClientPlugin } from '@ulixee/hero-plugin-utils';
 
-// NOTE: You need to start a Ulixee Server to run this example
+// NOTE: You need to start a Ulixee Miner to run this example
 
 export default class ClientHelloPlugin extends ClientPlugin {
   static override readonly id = 'client-hello-plugin';

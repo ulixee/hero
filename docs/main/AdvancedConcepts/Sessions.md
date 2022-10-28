@@ -8,7 +8,7 @@ Hero's session logic is managed in the [Core](/docs/hero/advanced-concepts/clien
 
 By default, session databases are located in `os.tmpdir()\.ulixee`. Tmpdir refers to the NodeJs function in the [OS module](https://nodejs.org/api/os.html#os_os_tmpdir).
 
-You can control the location sessions are stored using the [`dataDir`](/docs/hero/overview/configuration#data-dir) configuration when starting a Core server.
+You can control the location sessions are stored using the [`dataDir`](/docs/hero/overview/configuration#data-dir) configuration when starting a Core.
 
 ### Managing Sessions
 

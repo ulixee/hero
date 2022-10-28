@@ -2056,7 +2056,7 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
-"@ulixee/chrome-app@^1.0.2", "@ulixee/chrome-app@^1.0.3":
+"@ulixee/chrome-app@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@ulixee/chrome-app/-/chrome-app-1.0.3.tgz#259761fc324a33a4235a2439b005c16b5d8b2a1a"
   integrity sha512-VhotXRa364M2aym8urvEJ0e1o55dV4gWttAVb0M20xWjpUCIpyBfvO6mz69J40+K/SAVa6ne9mXkiFBFz6g/8g==

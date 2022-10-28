@@ -4,6 +4,41 @@ Hero's architecture is split into two processes: a Client and a Core. It's recom
 
 When you start to think about deploying Hero onto a server, you have a few options:
 
+## Launch a Ulixee Miner
+
+The easiest solution is to use the `@ulixee/miner` package. See details of the Ulixee Miner [here](/docs/miner).
+
+You can either launch our pre-built [docker](https://github.com/ulixee/ulixee/tree/main/miner/tools/docker) image, or start Miner via a simple script. Make sure to open the port you allocate on any firewall that a client might have to pass through:
+
+```javascript
+const Miner = require('@ulixee/miner');
+
+(async () => {
+  const miner = new Miner();
+  await miner.listen({ port: 7007 });
+})();
+```
+
+### Setting Up the Client
+
+Your [Hero](/docs/hero/basic-client/hero) instance must be configured to point at this Remote Core (and any others you've set up).
+
+NOTE: you can use the `@ulixee/hero` npm package if you don't want to install a full browser engine on the machine coordinating all your scrapes. That example is shown below.
+
+```javascript
+const Hero = require('@ulixee/hero');
+
+(async () => {
+  const hero = new Hero({
+    connectionToCore: {
+      host: `${SERVERIP}:7007`,
+    },
+  });
+
+  await hero.goto('https://ulixee.org');
+})().catch(console.log);
+```
+
 ## Fullstack
 
 If you want to run Hero all in one process, you'll want to run a fullstack deployment. Make sure you add both client and core to your project.

@@ -1,15 +1,16 @@
-import * as Os from 'os';
 import AgentEnv from '@unblocked-web/agent/env';
 import { loadEnv, parseEnvBool, parseEnvPath } from '@ulixee/commons/lib/envUtils';
 
 loadEnv(__dirname);
+const env = process.env;
+if (env.ULX_DATA_DIR) env.ULX_DATA_DIR = parseEnvPath(env.ULX_DATA_DIR);
 
 export default {
-  disableMitm: parseEnvBool(process.env.ULX_DISABLE_MITM) ?? AgentEnv.disableMitm,
-  showChrome: parseEnvBool(process.env.ULX_SHOW_CHROME) ?? AgentEnv.showChrome,
-  disableDevtools: parseEnvBool(process.env.ULX_DISABLE_DEVTOOLS) ?? AgentEnv.disableDevtools,
-  noChromeSandbox: parseEnvBool(process.env.ULX_NO_CHROME_SANDBOX) ?? AgentEnv.noChromeSandbox,
-  disableGpu: parseEnvBool(process.env.ULX_DISABLE_GPU) ?? AgentEnv.disableGpu,
+  disableMitm: parseEnvBool(env.ULX_DISABLE_MITM) ?? AgentEnv.disableMitm,
+  showChrome: parseEnvBool(env.ULX_SHOW_CHROME) ?? AgentEnv.showChrome,
+  disableDevtools: parseEnvBool(env.ULX_DISABLE_DEVTOOLS) ?? AgentEnv.disableDevtools,
+  noChromeSandbox: parseEnvBool(env.ULX_NO_CHROME_SANDBOX) ?? AgentEnv.noChromeSandbox,
+  disableGpu: parseEnvBool(env.ULX_DISABLE_GPU) ?? AgentEnv.disableGpu,
 };
 
-export const dataDir = parseEnvPath(process.env.ULX_DATA_DIR?.replace('<TMP>', Os.tmpdir));
+export const dataDir = env.ULX_DATA_DIR;

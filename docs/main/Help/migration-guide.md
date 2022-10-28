@@ -5,7 +5,7 @@ If you're migrating a script from SecretAgent, you can expect to find:
 - a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](/docs/hero/basic-client/awaited-dom-extenders))
 - a much better experience running in "headed" mode during development, while still supporting headless for production.
 - features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/hero/basic-client/flow))
-- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/server; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/unblocked-web/unblocked) project.
+- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/miner; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/unblocked-web/unblocked) project.
 
 Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero-playground')`.
 
@@ -51,13 +51,13 @@ If you were using the default "Agent" from `const agent = require('secret-agent'
 
 ## Server Setup
 
-If you use a Client/Server Setup, you'll find that we moved the `Server` module out of Hero, and into [@ulixee/server][server]. You get the same functionality out of the box - a Server you can install on a machine and your DOM, interactions and other commands all serialize seamlessly.
+If you use a Client/Server Setup, you'll find that we moved the `Server` module out of SecretAgent, and into [@ulixee/miner][miner]. You get the same functionality out of the box - a Server you can install on a machine and your DOM, interactions and other commands all serialize seamlessly.
 
 To avoid installing the whole Chrome infrastructure on your client side, you can use the light client - `npm i @ulixee/hero`. It's the equivalent of `@secret-agent/client`.
 
 ## Handlers
 
-Hero doesn't have a Handler or Server directly in the project. [@ulixee/server][server] is the new approach for setting up a remote Server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Databoxes][databox], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
+Hero doesn't have a Handler or Server directly in the project. [@ulixee/miner][miner] is the new approach for setting up a remote server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Databoxes][databox], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
 
 Databoxes focus on creating a remotely callable "function" that wraps a Hero script in a composable "unit". You can vary inputs and collect outputs, or retry a script from a new IP address without having to think much about how to do that yourself.
 
@@ -77,9 +77,9 @@ If you wrote a Core Plugin, you'll notice that the API callbacks have changed sl
 
 ## Replay
 
-If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new ChromeAlive! tooling. You can download the [Ulixee.app](https://github.com/ulixee/ulixee/releases/latest) install, or you can add `@ulixee/apps-chromealive-core` and `@ulixee/server` to your `devDependencies` and start a local server. This will add a bar to a headed version of Chrome when you're developing.
+If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new ChromeAlive! tooling. You can download the [Ulixee.app](https://github.com/ulixee/ulixee/releases/latest) install, or you can add `@ulixee/apps-chromealive-core` and `@ulixee/miner` to your `devDependencies` and start a local server. This will add a bar to a headed version of Chrome when you're developing.
 
 
-[server]: https://ulixee.org/docs/server
+[miner]: https://ulixee.org/docs/miner
 [unblocked-plugin]: https://github.com/unblocked-web/specifications
 [unblocked-agent]: https://github.com/unblocked-web/agent

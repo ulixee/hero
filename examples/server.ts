@@ -4,12 +4,12 @@ import * as WebSocket from 'ws';
 import Core from '@ulixee/hero-core';
 import { WsTransportToClient } from '@ulixee/net';
 import { version } from '@ulixee/hero-core/package.json';
-import UlixeeServerConfig from '@ulixee/commons/config/servers';
+import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import { AddressInfo } from 'net';
 import { IncomingMessage } from 'http';
 
 /**
- * This is a simple CoreServer that can be used as a starting point for your own server (or integration with an existing server).
+ * This is a simple HeroCore Server that can be used as a starting point for your own server (or integration with an existing server).
  */
 class CoreServer {
   public addressPromise: Promise<string>;
@@ -30,8 +30,8 @@ class CoreServer {
   public async open(): Promise<void> {
     await Core.start();
     const address = await this.addressPromise;
-    await UlixeeServerConfig.global.setVersionHost(version, address);
-    ShutdownHandler.register(() => UlixeeServerConfig.global.setVersionHost(version, null));
+    await UlixeeHostsConfig.global.setVersionHost(version, address);
+    ShutdownHandler.register(() => UlixeeHostsConfig.global.setVersionHost(version, null));
 
     console.log('Started server at %s', address);
   }
@@ -54,6 +54,6 @@ class CoreServer {
 
 (async () => {
   const port = parseInt(process.argv[2] ?? '1337', 10);
-  const server = new CoreServer(port);
-  await server.open();
+  const coreServer = new CoreServer(port);
+  await coreServer.open();
 })().catch(console.error);

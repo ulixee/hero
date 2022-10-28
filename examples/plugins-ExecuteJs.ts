@@ -4,7 +4,7 @@ import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
 
 Core.use(ExecuteJsPlugin);
 
-// NOTE: You need to start a Ulixee Server **in this same process** to run this example
+// NOTE: You need to start a Ulixee Miner **in this same process** to run this example
 import './server'
 
 (async function main() {

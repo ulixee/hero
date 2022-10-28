@@ -41,9 +41,9 @@ class CoreApiServer {
       : `${process.cwd()}/${process.argv[2]}`;
     console.log('Loaded data dir from %s', Core.dataDir);
   }
-  const server = new CoreApiServer(1337);
+  const apiServer = new CoreApiServer(1337);
   ShutdownHandler.register(() => {
-    server.close();
+    apiServer.close();
     return Promise.resolve();
   });
 })();

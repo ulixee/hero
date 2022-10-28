@@ -25,8 +25,10 @@ describe('basic Core tests', () => {
     expect(Core.pool.maxConcurrentAgents).toBe(2);
     expect(Core.pool.activeAgentsCount).toBe(1);
 
+    const didClose = new Promise(resolve => Session.events.on('closed', resolve));
     await Core.shutdown();
     expect(Core.pool.activeAgentsCount).toBe(0);
+    await didClose;
   });
 
   it('can subscribe to Sessions created and closed', async () => {

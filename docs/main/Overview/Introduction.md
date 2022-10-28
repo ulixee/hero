@@ -24,7 +24,7 @@ or
 yarn add @ulixee/hero-playground
 ```
 
-You can drop the "-playground" whenever you want and use Hero directly (the core functionality is exactly the same). Just make sure your Ulixee development environment is setup and ready to go, such as making sure [`@ulixee/server`](/docs/server) is installed and running:
+You can drop the "-playground" whenever you want and use Hero directly (the core functionality is exactly the same). Just make sure your Ulixee development environment is setup and ready to go, such as making sure [`@ulixee/miner`](/docs/miner) is installed and running:
 
 ```bash
 npm i --save @ulixee/hero

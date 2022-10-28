@@ -1,6 +1,6 @@
 import Hero from '@ulixee/hero';
 
-// NOTE: You need to start a Ulixee Server to run this example
+// NOTE: You need to start a Ulixee Miner to run this example
 
 (async () => {
   const hero = new Hero({

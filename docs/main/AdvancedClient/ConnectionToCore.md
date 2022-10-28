@@ -28,7 +28,7 @@ When you provide a ConnectionToHeroCore to a [Hero](/docs/hero/basic-client/hero
 
 The provided settings configure the connection to `Core`. Note: some configurations will apply to all connected Heroes ( `dataDir`).
 
-- options `IConnectionToHeroCoreOptions`. A set of settings that controls the creation of a "connection" to a `Hero Core`.
+- options `IConnectionToCoreOptions`. A set of settings that controls the creation of a "connection" to a `Hero Core`.
   - host `string`. An optional `hostname:port` url that will be used to establish a WebSocket Transport to a Hero Core running on another machine. If no host is provided, a connection to a "locally" running `Core` will be attempted.
   - maxConcurrency `number`. The max number of Heroes to allow to be created at the same time. Heroes are "active" until the created Hero is closed. If not provided, this number will match the max allowed by a `Core`.
   - instanceTimeoutMillis `number`. The number of milliseconds to give each Hero in this connection to complete a session. A TimeoutError will be thrown if this time is exceeded.

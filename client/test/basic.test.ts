@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
 import UlixeeConfig from '@ulixee/commons/config';
-import UlixeeServerConfig from '@ulixee/commons/config/servers';
+import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
 import Hero from '../index';
 import { scriptInstance } from '../lib/internal';
@@ -79,43 +79,43 @@ describe('basic Hero tests', () => {
 });
 
 describe('Connection tests', () => {
-  jest.spyOn(UlixeeServerConfig.global, 'save').mockImplementation(() => Promise.resolve())
+  jest.spyOn<any, any>(UlixeeHostsConfig.global, 'save').mockImplementation(() => null);
 
-  it('connects to a configured server over a started server', async () => {
-    UlixeeConfig.global.serverHost = 'localhost:8000';
-    await UlixeeServerConfig.global.setVersionHost('1', 'localhost:8080');
+  it('connects to a configured Miner over a started Miner', async () => {
+    UlixeeConfig.global.defaultMinerHost = 'localhost:8000';
+    UlixeeHostsConfig.global.setVersionHost('1', 'localhost:8080');
 
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8000');
   });
 
-  it('connects to a started server if the version is compatible', async () => {
-    UlixeeConfig.global.serverHost = null;
+  it('connects to a started Miner if the version is compatible', async () => {
+    UlixeeConfig.global.defaultMinerHost = null;
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
-    await UlixeeServerConfig.global.setVersionHost(next, 'localhost:8081');
+    await UlixeeHostsConfig.global.setVersionHost(next, 'localhost:8081');
 
     const connectionToCore = ConnectionFactory.createConnection({});
     expect(connectionToCore.transport.host).toBe('ws://localhost:8081');
   });
 
-  it('should inform a user if a server needs to be started', async () => {
+  it('should inform a user if a Miner needs to be started', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
-    await UlixeeServerConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalServerPackage = true;
+    await UlixeeHostsConfig.global.setVersionHost(next, null);
+    ConnectionFactory.hasLocalMinerPackage = true;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
-      'Ulixee Server is not started',
+      'Ulixee Miner is not started',
     );
   });
 
-  it('should inform a user if a server needs to be installed', async () => {
+  it('should inform a user if a Miner needs to be installed', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
-    await UlixeeServerConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalServerPackage = false;
+    await UlixeeHostsConfig.global.setVersionHost(next, null);
+    ConnectionFactory.hasLocalMinerPackage = false;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
-      'compatible Ulixee Server was not found',
+      'compatible Hero Core was not found',
     );
   });
 });

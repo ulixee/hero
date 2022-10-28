@@ -2,7 +2,7 @@ import Core from '@ulixee/hero-core';
 import Hero from '@ulixee/hero';
 import * as Path from 'path';
 
-// NOTE: You need to start a Ulixee Server **in this same process** to run this example
+// NOTE: You need to start a Ulixee Miner **in this same process** to run this example
 import './server';
 
 async function run() {

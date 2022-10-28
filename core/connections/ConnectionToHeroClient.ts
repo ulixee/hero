@@ -48,7 +48,7 @@ export default class ConnectionToHeroClient
     this.disconnectIfInactive = this.disconnectIfInactive.bind(this);
   }
 
-  ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
+  ///////  CORE CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreCommandRequestPayload): Promise<void> {
     const { messageId, command, meta, recordCommands, ...nextCommandMeta } = payload;
@@ -286,7 +286,7 @@ export default class ConnectionToHeroClient
 
   private serializeError(error: Error): object {
     if (this.isLaunchError(error)) {
-      const message = `Ulixee Server failed to launch Chrome - ${error.message}. See server logs for details.`;
+      const message = `Ulixee Miner failed to launch Chrome - ${error.message}. See Miner console logs for details.`;
       error.stack = error.stack.replace(error.message, message);
       error.message = message;
     }
