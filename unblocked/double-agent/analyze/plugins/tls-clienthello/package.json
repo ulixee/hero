@@ -1,0 +1,13 @@
+{
+  "name": "@double-agent/analyze-tls-clienthello",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "Analyzes clienthello handshake signatures, including ciphers, extensions and version",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.11",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.11",
+    "@double-agent/tls-server": "2.0.0-alpha.11",
+    "source-map-support": "^0.5.16"
+  }
+}

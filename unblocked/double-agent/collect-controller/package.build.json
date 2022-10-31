@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "prod": "GENERATE_PROFILES=1 LETSENCRYPT=1 MAIN_DOMAIN=da-collect.ulixee.org TLS_DOMAIN=tls.da-collect.ulixee.org SUB_DOMAIN=sub.da-collect.ulixee.org CROSS_DOMAIN=headers.dataliberationfoundation.org HTTP_PORT=80 HTTPS_PORT=443 node index.js"
+  }
+}
