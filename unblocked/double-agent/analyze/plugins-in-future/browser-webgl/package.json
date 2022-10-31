@@ -1,0 +1,11 @@
+{
+  "name": "@double-agent/browser-webgl",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "checkCategories": [
+    "WebGl Parameters"
+  ],
+  "description": "Detect webGL graphics card and capabilities",
+  "scripts": {}
+}

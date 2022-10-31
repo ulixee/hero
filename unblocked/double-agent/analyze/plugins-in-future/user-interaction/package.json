@@ -1,0 +1,13 @@
+{
+  "name": "@double-agent/user-interaction",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "checkCategories": [
+    "Time Between User Actions",
+    "Time to Interact with Page",
+    "Repeated Interaction Steps"
+  ],
+  "description": "Recording of order of exact steps performed (pages loaded, mouse movements/clicks, element interaction, typing)",
+  "scripts": {}
+}

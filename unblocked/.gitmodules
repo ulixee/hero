@@ -1,18 +1,6 @@
-[submodule "specifications"]
-	path = specifications
-	url = https://github.com/unblocked-web/specifications.git
-[submodule "agent"]
-	path = agent
-	url = https://github.com/unblocked-web/agent
-[submodule "js-path"]
-	path = js-path
-	url = https://github.com/unblocked-web/js-path
-[submodule "double-agent"]
-	path = double-agent
-	url = https://github.com/unblocked-web/double-agent
-[submodule "real-user-agents"]
-	path = real-user-agents
-	url = https://blakebyrnes@github.com/unblocked-web/real-user-agents
+[submodule "double-agent/probe-data"]
+	path = double-agent/probe-data
+	url = https://github.com/unblocked-web/double-agent-probes
 [submodule "browser-emulator-builder/data"]
 	path = browser-emulator-builder/data
-	url = https://blakebyrnes@github.com/unblocked-web/unblocked-emulator-data
+	url = https://github.com/unblocked-web/unblocked-emulator-data

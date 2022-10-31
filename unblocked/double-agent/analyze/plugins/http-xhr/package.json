@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/analyze-http-xhr",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "Analyzes header order, capitalization and default values of XHR requests",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.11",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.11",
+    "source-map-support": "^0.5.16"
+  }
+}

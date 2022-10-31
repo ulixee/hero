@@ -1,3 +1,4 @@
+**/.env
 node_modules
 *yarn-error.log
 npm-debug.log
@@ -12,3 +13,6 @@ build-dist
 /.data-test
 /.eslintcache
 browserstack.err
+
+agent/mitm-socket/dist
+connect

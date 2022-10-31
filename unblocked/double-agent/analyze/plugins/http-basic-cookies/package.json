@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/analyze-http-basic-cookies",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "Analyzes whether cookies are enabled correctly, including same-site and secure",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.11",
+    "@double-agent/collect-http-basic-cookies": "2.0.0-alpha.11",
+    "source-map-support": "^0.5.16"
+  }
+}

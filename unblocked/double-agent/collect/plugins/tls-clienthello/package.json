@@ -1,0 +1,13 @@
+{
+  "name": "@double-agent/collect-tls-clienthello",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {},
+  "description": "Collects the TLS clienthello handshake when initiating a secure connection",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.11",
+    "@double-agent/config": "2.0.0-alpha.11",
+    "@double-agent/tls-server": "2.0.0-alpha.11"
+  }
+}

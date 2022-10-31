@@ -20,7 +20,13 @@ jobs:
         include:
           - node-version: 16.x
             os: ubuntu-latest
-            browser: chrome-100-0
+            browser: chrome-104-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-103-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-102-0
           - node-version: 16.x
             os: ubuntu-latest
             browser: chrome-97-0
@@ -47,21 +53,22 @@ jobs:
         with:
           args: install python2 visualcpp-build-tools -y
 
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
         if: ${{ matrix.os == 'windows-latest' }}
 
       - name: Yarn build
-        run: yarn build:all
+        run: yarn build
+        env:
+          UBK_MITM_REBUILD_SOCKET: 1
 
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
         working-directory: ./build
-        run: yarn add -W @ulixee/${{ matrix.browser }}
-
-      - name: Linux - Add Chrome Env
-        if: ${{ matrix.browser }}
-        working-directory: ./agent/build
         run: yarn add -W @ulixee/${{ matrix.browser }}
 
       - name: Linux - Apt Install Chrome(s)
@@ -74,8 +81,11 @@ jobs:
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests
-        run: yarn test:all --testTimeout=60000 --maxWorkers=2
+        run: yarn jest --testTimeout=60000 --maxWorkers=2
+        working-directory: ./build
         env:
+          UBK_DATA_DIR: .data-test
+          NODE_ENV: test
           UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
 
       - name: 'Tar files'

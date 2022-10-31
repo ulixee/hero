@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/analyze-http-websockets",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "Analyzes websocket upgrade request header order, capitalization and default values",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.11",
+    "@double-agent/collect-http-websockets": "2.0.0-alpha.11",
+    "source-map-support": "^0.5.16"
+  }
+}

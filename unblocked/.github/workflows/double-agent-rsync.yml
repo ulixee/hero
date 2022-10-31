@@ -1,0 +1,65 @@
+name: Rsync
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy latest to Digital Ocean
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: (TEMP) Clone ulixee/shared
+        run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
+        working-directory: ..
+
+      - name: (TEMP) Install ulixee/shared
+        run: pwd & yarn && yarn build
+        working-directory: ../shared
+
+      - name: Yarn build
+        run: pwd && yarn build:all
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          name: id_rsa_ulixee_digital_ocean
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: rsync over ssh
+        working-directory: ./double-agent
+        run: rsync -avzhm -e "ssh -i ~/.ssh/id_rsa_ulixee_digital_ocean" --exclude-from '.rsyncignore' . root@$REMOTE:~/double-agent
+        env:
+          REMOTE: 174.138.36.46
+
+      - name: reboot server
+        run: |
+          ssh -i "~/.ssh/id_rsa_ulixee_digital_ocean" "root@$REMOTE" /bin/bash << EOF
+            cd double-agent
+            source "\$HOME/.nvm/nvm.sh"
+            pm2 stop da &> /dev/null
+            pm2 delete da &> /dev/null
+            rm -rf /tmp/double-agent-download-data/
+            yarn
+            yarn build
+            pm2 start "yarn prod" --name=da --time
+          EOF
+        env:
+          REMOTE: 174.138.36.46

@@ -116,7 +116,7 @@ Measure and mask any differences in Sandboxed IFrames, Cross Domain IFrames, Src
 
 ### QUIC
 
-QUIC (or HTTP/3) hasn't gained much use on the web to date, but if/as it does, we will need to proxy and mask QUIC traffic. 
+QUIC (or HTTP/3) hasn't gained much use on the web to date, but if/as it does, we will need to proxy and mask QUIC traffic.
 Much of it behaves like HTTP/2, but it runs over UDP. UDP is unfortunately difficult to proxy. Need to find a way to capture the proxy traffic and then send it through in the correct format. One potential path here is to fork the Chrome `net` stack and use that for the Proxy and/or network "service" in Chrome. This needs more exploration for viability.
 
 ### Future-proofing
@@ -124,8 +124,9 @@ Much of it behaves like HTTP/2, but it runs over UDP. UDP is unfortunately diffi
 Future proofing Bot-Blockers will require some creativity. We welcome any experiments, ideas and suggestions. Because this project aims to collect all the best evasions on the web, it will also be a one-stop shop for Bot Blocker authors. Staying ahead of the curve means we need to look valid across enough surface area that a Bot Blocker author starts to risk blocking real users. We believe that apex will make most bot-blockers un-viable.
 
 Some raw ideas:
+
 - Add a "mode" to Unblocked [Agent][agent] that proxies all DOM methods to see what is being checked (possibly by injected a custom "window/self" proxy in all scripts that are used by a webpage).
-- Could we implement a way to "probe" DOM methods using code snippets from MDN or github projects? This could be used to provide inputs to test to a [DoubleAgent][double-agent] Collect plugin. 
+- Could we implement a way to "probe" DOM methods using code snippets from MDN or github projects? This could be used to provide inputs to test to a [DoubleAgent][double-agent] Collect plugin.
 
 ## Contributing
 
@@ -141,10 +142,10 @@ This project has a [code of conduct](../CODE_OF_CONDUCT.md). By interacting with
 
 [MIT](LICENSE.md)
 
-[agent]: https://github.com/unblocked-web/agent
-[double-agent]: https://github.com/unblocked-web/double-agent
-[spec]: https://github.com/unblocked-web/specifications
-[jspath]: https://github.com/unblocked-web/jspath
+[agent]: ../agent
+[double-agent]: ../double-agent
+[spec]: ../specification
+[jspath]: ../jspath
 [vault]: https://github.com/ulixee/chrome-versions
 [fake]: https://github.com/kkoooqq/fakebrowser
 [stealth]: https://github.com/berstend/puppeteer-extra

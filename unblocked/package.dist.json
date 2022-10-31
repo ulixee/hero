@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "postinstall": "yarn workspace @unblocked-web/agent-mitm-socket postinstall",
     "dist": "lerna publish from-package"
   },
   "devDependencies": {
@@ -7,6 +8,10 @@
   },
   "workspaces": {
     "packages": [
+      "agent/*",
+      "specification",
+      "js-path",
+      "real-user-agents",
       "plugins/*",
       "double-agent-stacks",
       "browser-profiler/*",

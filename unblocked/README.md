@@ -21,7 +21,7 @@ Join us on the [Ulixee Discord](https://discord.gg/tMAycnemHU) for any questions
 
 ## Projects
 
-This repository is home to several of the projects needed to create an "unblocked" automated browser engine. We imagine a world where there are many participants sharing evasions and emulations for all the web features into a [single repository](./plugins). They will live right next to an advanced bot blocking [detection engine][double-agent] that can analyze every facet of a web scraping session (TCP, TLS, HTTP, DOM, User Interactions, etc). A [profiler][./browser-profiler] that can run all [detections][double-agent] using real browser/operating systems to generate [profiles][profiles] of true browser signatures. And an implementation of an [agent][agent] that can run all the evasions and run unblocked.
+This repository is home to several of the projects needed to create an "unblocked" automated browser engine. We imagine a world where there are many participants sharing evasions and emulations for all the web features into a [single repository](./plugins). They will live right next to an advanced bot blocking [detection engine][double-agent] that can analyze every facet of a web scraping session (TCP, TLS, HTTP, DOM, User Interactions, etc). A [profiler](./browser-profiler) that can run all [detections][double-agent] using real browser/operating systems to generate [profiles][profiles] of true browser signatures. And an implementation of an [agent][agent] that can run all the evasions and run unblocked.
 
 - [Specifications][spec]. This contains generic specifications for what an automated browser needs to expose so that it can be hooked into to emulate a normal, headed browser engine. To properly mask the differences between headless Chrome on a linux machine, and a headed Chrome running on a home operating system, a series of "hooks" needs to be exposed. These include things like before browsers start, web pages launch, and web workers have a javascript environment. This specification will be the minimum spec needed to open up the browser to plugin authors.
 - [JsPath][jspath]. A specification is provided for a method to serialize DOM nodes, properties and visibility information so it can be remotely queried.
@@ -48,9 +48,9 @@ This project has a [code of conduct](CODE_OF_CONDUCT.md). By interacting with th
 
 [MIT](LICENSE.md)
 
-[agent]: https://github.com/unblocked-web/agent
-[double-agent]: https://github.com/unblocked-web/double-agent
-[spec]: https://github.com/unblocked-web/specifications
-[jspath]: https://github.com/unblocked-web/jspath
+[agent]: ./agent
+[double-agent]: ./double-agent
+[spec]: ./specification
+[jspath]: ./jspath
 [profiles]: https://github.com/unblocked-web/browser-profile-data
-[real-user-agents]: https://github.com/unblocked-web/real-user-agents
+[real-user-agents]: ./real-user-agents

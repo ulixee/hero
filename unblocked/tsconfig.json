@@ -7,28 +7,26 @@
   "references": [
     {
       "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
+    },
+    {
+      "path": "agent/core/injected-scripts/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
     "**/tsconfig*.json",
-    "build/**/*",
-    "**/build/**/*",
-    "**/build-dist/**/*",
+    "build",
+    "build-dist",
     "node_modules",
-    "**/agent",
-    "**/specifications",
-    "**/js-path",
-    "**/double-agent",
-    "**/real-user-agents",
+    "browser-emulator-builder/data",
+    "double-agent",
     "double-agent-stacks/data/local/3-assignments",
     "double-agent-stacks/data/local/4-assignment-results",
     "double-agent-stacks/data/external/0-foundational-profiles",
     "double-agent-stacks/data/external/3-assignments",
     "double-agent-stacks/data/external/4-assignment-results",
-    "**/browser-emulator-builder/data",
-    "**/node_modules",
     "plugins/default-browser-emulator/injected-scripts",
+    "agent/core/injected-scripts",
     "docs",
     "**/*.d.ts"
   ]

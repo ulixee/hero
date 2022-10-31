@@ -1,0 +1,7 @@
+ToDo:
+
+- Move _$isFrozen and _$isSealed into _$flags array
+- Capture value of getters
+- Capture value of getter-setters
+- Capture toStringToString for functions
+- $accessException of getter-setter doesn't specify which one

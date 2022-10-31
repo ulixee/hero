@@ -135,7 +135,7 @@ export default class UserAgentOptions {
       uaClientHintsPlatformVersion: uaOs.version,
       string: userAgentString,
     };
-    if (browserName.toLowerCase() === 'chrome' && browserVersionMajor > 89) {
+    if (browserName.toLowerCase() === 'chrome' && Number(browserVersionMajor) > 89) {
       const platformVersions = findUaClientHintsPlatformVersion(createOsId(ua));
       if (platformVersions.length) {
         ua.uaClientHintsPlatformVersion = pickRandom(platformVersions);

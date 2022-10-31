@@ -1,0 +1,14 @@
+{
+  "name": "@double-agent/collect-http-ua-hints",
+  "version": "2.0.0-alpha.11",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "Collects User Agent hints for a browser",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.11",
+    "@double-agent/config": "2.0.0-alpha.11"
+  },
+  "devDependencies": {
+    "@types/diff": "^4.0.2"
+  }
+}

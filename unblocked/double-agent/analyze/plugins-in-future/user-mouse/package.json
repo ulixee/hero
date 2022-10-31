@@ -1,0 +1,11 @@
+{
+  "name": "@double-agent/user-mouse",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "checkCategories": [
+    "Mouse Movement"
+  ],
+  "description": "Does the mouse move (scrolling, clicking, movement)?",
+  "scripts": {}
+}

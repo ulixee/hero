@@ -1,0 +1,4 @@
+- header order and default values are aggregated across all pages, which may open up issues. For example, default values
+ likely changes based on the how the pages were accessed. At some point we need to check based on more intelligent patterns.
+
+- We are currently penalizing based on the upper/lower case of headers that have been seen for a given browser. However, some headers never show on certain browsers -- we should add penalties when these headers appear. For example, "sec-fetch-site" is not supported by all Firefox browsers and < 76 Chrome browsers.
