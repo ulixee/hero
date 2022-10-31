@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/double-agent-stacks",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.12",
   "private": true,
   "scripts": {
     "0": "cd ../build/double-agent-stacks && yarn 0",
@@ -20,8 +20,8 @@
     "@double-agent/runner": "2.0.0-alpha.11",
     "@ulixee/commons": "2.0.0-alpha.13",
     "@unblocked-web/agent": "2.0.0-alpha.12",
-    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.11",
-    "@unblocked-web/default-human-emulator": "2.0.0-alpha.11",
+    "@unblocked-web/default-browser-emulator": "2.0.0-alpha.12",
+    "@unblocked-web/default-human-emulator": "2.0.0-alpha.12",
     "@unblocked-web/real-user-agents": "2.0.0-alpha.12",
     "commander": "^9.2.0",
     "puppeteer": "17.1.3",

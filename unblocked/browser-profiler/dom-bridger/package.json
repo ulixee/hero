@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/browser-profiler-dom-bridger",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.12",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/browser-profiler": "2.0.0-alpha.11",
+    "@unblocked-web/browser-profiler": "2.0.0-alpha.12",
     "@unblocked-web/specifications": "2.0.0-alpha.11",
     "lodash": "^4.17.20"
   }

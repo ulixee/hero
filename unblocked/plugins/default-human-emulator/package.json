@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/default-human-emulator",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.12",
   "description": "Default human emulator based on Xetera/ghost-cursor",
   "main": "index.js",
   "dependencies": {
@@ -10,6 +10,6 @@
   "devDependencies": {
     "@unblocked-web/agent": "2.0.0-alpha.12",
     "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/plugins-testing": "2.0.0-alpha.11"
+    "@unblocked-web/plugins-testing": "2.0.0-alpha.12"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@unblocked-web/default-browser-emulator",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.12",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "dependencies": {
@@ -17,7 +17,7 @@
     "@types/tough-cookie": "^4.0.0",
     "@unblocked-web/agent": "2.0.0-alpha.12",
     "@unblocked-web/agent-mitm": "2.0.0-alpha.12",
-    "@unblocked-web/plugins-testing": "2.0.0-alpha.11",
+    "@unblocked-web/plugins-testing": "2.0.0-alpha.12",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "source-map-loader": "^0.2.4"

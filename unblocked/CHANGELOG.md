@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-31)
+
+
+### Bug Fixes
+
+* automation can’t push to repo ([f2dae11](https://github.com/ulixee/ulixee/commit/f2dae111334aa8f6dfd38e7adb64c322bd6986c9))
+* automation not finding browser profile data ([f5598f2](https://github.com/ulixee/ulixee/commit/f5598f2f1dd03cea8b974232e08da7f488acb52b))
+* double-agent ref out of date ([de0d79f](https://github.com/ulixee/ulixee/commit/de0d79fb37590463724f1b57bef70d6e6f3d62a9))
+* update env parsing of paths ([9dbade6](https://github.com/ulixee/ulixee/commit/9dbade6214ac1abb00eec47c7e1b16669b558a58))
+
+
+
+
+
 # [2.0.0-alpha.11](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-10-03)
 
 
