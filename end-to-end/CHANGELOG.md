@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
+
+
+### Bug Fixes
+
+* agent requires a certificate generator ([6715750](https://github.com/ulixee/ulixee/commit/67157501d00cbc0187ba7cc88820b3ff27747189))
+* **client:** fix HeroReplay replaying a sessionid ([56da409](https://github.com/ulixee/ulixee/commit/56da409ad42dffd7b45333cd53811d6a8163e550))
+
+
+### Features
+
+* added hero.collect and element. from databox-for-hero ([6c6de12](https://github.com/ulixee/ulixee/commit/6c6de12562a9f85da05bbab0c81cc5d2769f7f05))
+* detach now only returns element while addToDetached saves it ([f5641f5](https://github.com/ulixee/ulixee/commit/f5641f5806ba0281a8f0bdd6a0143cfc9326808b))
+* renamed DetachedDOM to DetachedElement + getDataSnippet to getSnippet ([d58431a](https://github.com/ulixee/ulixee/commit/d58431a205e354c61c75698e3aefc46cd0ebd7bf))
+* renamed HeroExtractor to HeroReplay as well as how $extract/$collect work and are named ([d97fb2d](https://github.com/ulixee/ulixee/commit/d97fb2dd1ce0b5329f6cf99af96dcd29422b55fb))
+* replaced CollectedSnippets with hero.getData/setData ([96a731f](https://github.com/ulixee/ulixee/commit/96a731fd295204b7c61d3eb4fbb81131289dc606))
+
+
+
+
+
 # [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
 
 
