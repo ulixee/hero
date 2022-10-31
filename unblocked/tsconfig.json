@@ -17,7 +17,6 @@
     "**/build-dist/**/*",
     "node_modules",
     "**/agent",
-    "**/specifications",
     "**/js-path",
     "**/double-agent",
     "**/real-user-agents",
