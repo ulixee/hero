@@ -6,7 +6,7 @@ The Unblocked Specification defines a generic protocol to create an automated br
 
 There are amazing tools available like [Puppeteer](https://developers.google.com/web/tools/puppeteer/) and [Playwright](http://playwright.dev) to control automated web browsers. These tools allow for coding interactions with websites. However... as they're currently built, they can be detected by websites.
 
-Headless Chrome is initialized with different services and features than headed Chrome (not to mention differences with Chromium vs Chrome). These differences can be detected along the spectrum of a web browser session - from TLS, to Http and the DOM. To find a detailed analysis of these differences, check out [Double Agent](https://github.com/unblocked-web/double-agent).
+Headless Chrome is initialized with different services and features than headed Chrome (not to mention differences with Chromium vs Chrome). These differences can be detected along the spectrum of a web browser session - from TLS, to Http and the DOM. To find a detailed analysis of these differences, check out [Double Agent](../double-agent).
 
 To scrape website data, scrapers also need to be able to rotate user attributes like User Agent, IP Address, Language, Geolocation, and even lower level attributes like the WebGL settings and Canvas output.
 

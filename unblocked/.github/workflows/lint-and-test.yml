@@ -71,23 +71,21 @@ jobs:
         working-directory: ./build
         run: yarn add -W @ulixee/${{ matrix.browser }}
 
-      - name: Linux - Add Chrome Env
-        if: ${{ matrix.browser }}
-        working-directory: ./agent/build
-        run: yarn add -W @ulixee/${{ matrix.browser }}
-
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         working-directory: ./build
         run: sudo $(npx install-browser-deps)
 
       - name: Run Lint
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 16 }}
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests
-        run: yarn test:all --testTimeout=60000 --maxWorkers=2
+        run: yarn jest --testTimeout=60000 --maxWorkers=2
+        working-directory: ./build
         env:
+          UBK_DATA_DIR: .data-test
+          NODE_ENV: test
           UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
 
       - name: 'Tar files'

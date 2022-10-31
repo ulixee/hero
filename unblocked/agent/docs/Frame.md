@@ -120,7 +120,7 @@ await page.mainFrame.waitForLocation('change');
 
 ### interact(...interactionGroups): Promise<void>
 
-Initiate an interaction with one or more elements using the [JSPath](https://github.com/unblocked-web/js-path) specification.
+Initiate an interaction with one or more elements using the [JSPath](https://github.com/unblocked-web/unblocked/main/tree/js-path) specification.
 
 ```js
 await page.interact([

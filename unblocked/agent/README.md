@@ -108,10 +108,9 @@ We'd love your help in making Unblocked Agent a better tool. Please don't hesita
 
 [MIT](LICENSE.md)
 
-[agent]: https://github.com/unblocked-web/agent
-[double-agent]: https://github.com/unblocked-web/double-agent
-[plugins]: https://github.com/unblocked-web/unblocked/plugins
-[human]: https://github.com/unblocked-web/unblocked/plugins/default-human-emulator
-[spec]: https://github.com/unblocked-web/specifications
-[jspath]: https://github.com/unblocked-web/js-path
-[vault]: https://github.com/ulixee/chrome-versions
+[agent]: .
+[double-agent]: ../double-agent
+[plugins]: ../plugins
+[human]: ../plugins/default-human-emulator
+[spec]: ../specification
+[jspath]: ../js-path

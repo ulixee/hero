@@ -17,7 +17,6 @@
     "watch:all": "concurrently -n plugins,da \"yarn watch\" \"cd double-agent && yarn watch\"",
     "test": "yarn copy:build && yarn test:build",
     "test:build": "cd ./build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
-    "test:all": "yarn copy:build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
     "lint": "eslint --cache ./",
     "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"

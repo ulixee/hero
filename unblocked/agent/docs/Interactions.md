@@ -29,7 +29,7 @@ Interaction Commands fall into three broad categories:
 - clickUp [`MousePosition`](#mouseposition) Release the mouse button.
 - doubleclick [`MousePosition`](#mouseposition) Press and release the mouse button twice in rapid succession.
 
-[jspath]: https://github.com/unblocked-web/js-path
+[jspath]: https://github.com/unblocked-web/unblocked/main/tree/js-path
 
 #### **MousePosition**:
 
