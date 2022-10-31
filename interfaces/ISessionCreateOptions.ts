@@ -7,15 +7,14 @@ export default interface ISessionCreateOptions extends ISessionOptions, IEmulati
   sessionId?: string;
   sessionName?: string;
   sessionKeepAlive?: boolean;
-  sessionResume?: {
-    sessionId: string;
-    startLocation: 'currentLocation' | 'sessionStart';
-  };
+  resumeSessionId?: string;
+  resumeSessionStartLocation?: 'currentLocation' | 'sessionStart';
+  replaySessionId?: string;
   mode?: 'development' | 'multiverse' | 'production' | 'timetravel' | 'browserless';
   userAgent?: string;
   scriptInstanceMeta?: IScriptInstanceMeta;
   userProfile?: IUserProfile;
-  input?: { command?: string } & any;
+  input?: any;
 
   dependencyMap?: { [clientPluginId: string]: string[] };
   corePluginPaths?: string[];

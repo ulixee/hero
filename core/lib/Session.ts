@@ -384,6 +384,7 @@ export default class Session
   }
 
   public async openBrowser(): Promise<void> {
+    if (this.mode === 'browserless') return;
     const agent = this.agent;
     await agent.open();
     this.browserContext = agent.browserContext;
@@ -639,8 +640,7 @@ export default class Session
   }
 
   private async resume(options: ISessionCreateOptions): Promise<void> {
-    const { sessionResume } = options;
-    if (sessionResume.startLocation === 'sessionStart') {
+    if (options.resumeSessionStartLocation === 'sessionStart') {
       await this.resetStorage();
       // create a new tab
     }
@@ -853,10 +853,9 @@ ${data}`,
     let isSessionResume = false;
 
     // try to resume session. Modify options to match if not active.
-    const resumeSessionId = options?.sessionResume?.sessionId;
-    const resumeLocation = options.sessionResume?.startLocation;
+    const { resumeSessionId, resumeSessionStartLocation } = options;
     if (resumeSessionId) {
-      if (resumeLocation !== 'sessionStart') {
+      if (resumeSessionStartLocation !== 'sessionStart') {
         session = Session.get(resumeSessionId);
         if (session) {
           await session.resume(options);
@@ -874,14 +873,12 @@ ${data}`,
       await Core.start();
       session = new Session(options);
 
-      if (session.mode !== 'browserless') {
-        await session.openBrowser();
-      }
+      await session.openBrowser();
     }
     tab ??= await session.createTab();
 
     if (resumeSessionId) {
-      if (resumeLocation === 'sessionStart' && session.id !== resumeSessionId) {
+      if (resumeSessionStartLocation === 'sessionStart' && session.id !== resumeSessionId) {
         const newId = session.id;
 
         const resumed = Session.get(resumeSessionId);

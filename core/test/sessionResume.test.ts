@@ -86,10 +86,8 @@ describe('sessionResume tests when resume location is sessionStart', () => {
       playInteractionSpy.mockClear();
       const { session, tab } = await createSession({
         sessionKeepAlive: true,
-        sessionResume: {
-          sessionId,
-          startLocation: 'sessionStart',
-        },
+        resumeSessionId: sessionId,
+        resumeSessionStartLocation: 'sessionStart',
       });
 
       expect(session.id).not.toBe(sessionId);
@@ -166,10 +164,8 @@ describe('sessionResume tests when resume location is sessionStart', () => {
       playInteractionSpy.mockClear();
       const { session, tab } = await createSession({
         sessionKeepAlive: true,
-        sessionResume: {
-          sessionId,
-          startLocation: 'sessionStart',
-        },
+        resumeSessionId: sessionId,
+        resumeSessionStartLocation: 'sessionStart',
       });
 
       // should be a new session this time
@@ -204,10 +200,8 @@ describe('sessionResume tests when resume location is sessionStart', () => {
     await expect(
       createSession({
         sessionKeepAlive: true,
-        sessionResume: {
-          sessionId: 'notreal',
-          startLocation: 'sessionStart',
-        },
+        resumeSessionId: 'notreal',
+        resumeSessionStartLocation: 'sessionStart',
       }),
     ).rejects.toThrowError();
   });

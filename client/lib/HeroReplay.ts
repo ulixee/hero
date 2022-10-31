@@ -1,17 +1,17 @@
-import Hero from "./Hero";
-import IHeroReplayCreateOptions from "../interfaces/IHeroReplayCreateOptions";
-import DetachedElements from "./DetachedElements";
-import DetachedResources from "./DetachedResources";
-
+import Hero from './Hero';
+import IHeroReplayCreateOptions from '../interfaces/IHeroReplayCreateOptions';
+import DetachedElements from './DetachedElements';
+import DetachedResources from './DetachedResources';
+import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 
 export default class HeroReplay {
   #hero: Hero;
 
   constructor(initializeOptions: IHeroReplayCreateOptions) {
-    if (initializeOptions.hero) {
-      this.#hero = initializeOptions.hero
+    if ('hero' in initializeOptions) {
+      this.#hero = initializeOptions.hero;
     } else {
-      this.#hero = new Hero(initializeOptions);
+      this.#hero = new Hero(initializeOptions as IHeroCreateOptions);
     }
   }
 
@@ -23,15 +23,15 @@ export default class HeroReplay {
     return this.#hero.detachedResources;
   }
 
+  public getSnippet<T = any>(key: string): Promise<T> {
+    return this.#hero.getSnippet<T>(key);
+  }
+
   public get sessionId(): Promise<string> {
     return this.#hero.sessionId;
   }
 
   public close(): Promise<void> {
     return this.#hero.close();
-  }
-
-  public getSnippet<T = any>(key: string): Promise<T> {
-    return this.#hero.getSnippet<T>(key);
   }
 }

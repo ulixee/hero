@@ -13,10 +13,8 @@ const resumeSessionId = Fs.existsSync(sessionIdPath)
     showChromeInteractions: true, // disable to remove mouse movements and node highlights (can be detected by page!)
     showChrome: true,
     sessionKeepAlive: true,
-    sessionResume: {
-      startLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation
-      sessionId: resumeSessionId,
-    },
+    resumeSessionId,
+    resumeSessionStartLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation
   });
   const sessionId = await hero.sessionId;
   Fs.writeFileSync(sessionIdPath, sessionId);
