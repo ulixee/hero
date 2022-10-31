@@ -1,3 +1,6 @@
+[submodule "double-agent/probe-data"]
+	path = double-agent/probe-data
+	url = https://github.com/unblocked-web/double-agent-probes
 [submodule "browser-emulator-builder/data"]
 	path = browser-emulator-builder/data
 	url = https://github.com/unblocked-web/unblocked-emulator-data

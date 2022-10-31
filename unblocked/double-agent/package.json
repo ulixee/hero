@@ -27,7 +27,8 @@
       "docs",
       "tls-server",
       "runner",
-      "../build/*",
+      "../build/specification",
+      "../build/real-user-agents",
       "../../shared/build/*"
     ]
   }

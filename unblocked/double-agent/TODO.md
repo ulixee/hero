@@ -11,8 +11,6 @@ Detections Still TODO:
 - browser/webgl
 - browser/render
   - browser renders dimensions differently per platform/browser
-- browser/voice
-  - look for available voices - some are OS specific
 - http/referrers
 - http/cache
 - http/favicon
@@ -23,13 +21,11 @@ Detections Still TODO:
 - user/mouse
 
 - http/headers + http/cookies:
-
   - Http delete/update (trigger from forms?)
   - Direct loads without referrers
   - Prefetch
   - Signed Exchange
   - Http2 headers/trailers
-  - Sec CH-UA headers
 
 - ip/address:
 
