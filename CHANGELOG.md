@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.13](https://github.com/ulixee/hero/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
+
+
+### Bug Fixes
+
+* agent requires a certificate generator ([6715750](https://github.com/ulixee/hero/commit/67157501d00cbc0187ba7cc88820b3ff27747189))
+* build not working on main ([fda7005](https://github.com/ulixee/hero/commit/fda700589ee1253f9af3809f2c81b8e2eeebc833))
+* **client:** fix HeroReplay replaying a sessionid ([56da409](https://github.com/ulixee/hero/commit/56da409ad42dffd7b45333cd53811d6a8163e550))
+* implemented Blake's fixes ([64d33fc](https://github.com/ulixee/hero/commit/64d33fc57d1b22067de663ad0261b0de51c225a4))
+* lint ([5d98583](https://github.com/ulixee/hero/commit/5d9858327959ba5aae7f292d5a61851ce3be9971))
+* lint issue ([5614afb](https://github.com/ulixee/hero/commit/5614afbb0cdc0099d0c053cd19fc2bb091a040fc))
+* tmp ([df1b1c5](https://github.com/ulixee/hero/commit/df1b1c550ec4c39b06292e6f630b670f3dfcac01))
+
+
+### Features
+
+* add a session closed event ([0003646](https://github.com/ulixee/hero/commit/0003646ad65e0a182da5e1bceb17f019e469ee55)), closes [#166](https://github.com/ulixee/hero/issues/166)
+* added close method to HeroExtractor ([530747b](https://github.com/ulixee/hero/commit/530747b83e4c657e8dc2b13c8e687b1206129c88))
+* added hero.collect and element. from databox-for-hero ([6c6de12](https://github.com/ulixee/hero/commit/6c6de12562a9f85da05bbab0c81cc5d2769f7f05))
+* detach now only returns element while addToDetached saves it ([f5641f5](https://github.com/ulixee/hero/commit/f5641f5806ba0281a8f0bdd6a0143cfc9326808b))
+* expose IHeroExtractorCreateOptions interface ([60d4851](https://github.com/ulixee/hero/commit/60d4851648ae133e074b6292ea9f5fcbcbf4f03e))
+* renamed DetachedDOM to DetachedElement + getDataSnippet to getSnippet ([d58431a](https://github.com/ulixee/hero/commit/d58431a205e354c61c75698e3aefc46cd0ebd7bf))
+* renamed HeroExtractor to HeroReplay as well as how $extract/$collect work and are named ([d97fb2d](https://github.com/ulixee/hero/commit/d97fb2dd1ce0b5329f6cf99af96dcd29422b55fb))
+* renamed HeroPast to HeroExtractor for clarity ([857d8f1](https://github.com/ulixee/hero/commit/857d8f1ca3e0cc8c8d104a6598989d1f1ad3ba42))
+* replaced CollectedSnippets with hero.getData/setData ([96a731f](https://github.com/ulixee/hero/commit/96a731fd295204b7c61d3eb4fbb81131289dc606))
+
+
+
+
+
 # [2.0.0-alpha.12](https://github.com/ulixee/hero/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
 
 

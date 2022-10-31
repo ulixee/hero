@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
+
+
+### Bug Fixes
+
+* **client:** fix HeroReplay replaying a sessionid ([56da409](https://github.com/ulixee/ulixee/commit/56da409ad42dffd7b45333cd53811d6a8163e550))
+
+
+### Features
+
+* renamed HeroExtractor to HeroReplay as well as how $extract/$collect work and are named ([d97fb2d](https://github.com/ulixee/ulixee/commit/d97fb2dd1ce0b5329f6cf99af96dcd29422b55fb))
+* replaced CollectedSnippets with hero.getData/setData ([96a731f](https://github.com/ulixee/ulixee/commit/96a731fd295204b7c61d3eb4fbb81131289dc606))
+
+
+
+
+
 # [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
 
 
