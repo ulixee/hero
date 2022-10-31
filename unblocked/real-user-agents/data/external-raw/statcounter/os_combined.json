@@ -1,0 +1,13 @@
+{
+  "fromMonthYear": "2022-09",
+  "toMonthYear": "2022-10",
+  "lastModified": "2022-10-01T20:11:10.888Z",
+  "results": {
+    "Windows": ["64.1", "0"],
+    "OS X": ["24.79", "0"],
+    "Chrome OS": ["6.35", "0"],
+    "Linux": ["2.39", "0"],
+    "Unknown": ["2.37", "0"],
+    "Other": ["0.01", "0"]
+  }
+}

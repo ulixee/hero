@@ -4,9 +4,6 @@
 [submodule "double-agent"]
 	path = double-agent
 	url = https://github.com/unblocked-web/double-agent
-[submodule "real-user-agents"]
-	path = real-user-agents
-	url = https://blakebyrnes@github.com/unblocked-web/real-user-agents
 [submodule "browser-emulator-builder/data"]
 	path = browser-emulator-builder/data
 	url = https://blakebyrnes@github.com/unblocked-web/unblocked-emulator-data
