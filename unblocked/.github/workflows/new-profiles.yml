@@ -36,6 +36,7 @@ jobs:
         working-directory: ./unblocked
 
       - name: Linux - Apt Install Chrome(s)
+        working-directory: ./unblocked/build
         run: sudo $(npx install-browser-deps)
 
       - name: 'Collect new Browserstack User Agents'

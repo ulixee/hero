@@ -32,6 +32,7 @@ let certificateGenerator: CertificateGenerator;
 
 beforeAll(() => {
   certificateGenerator = MitmProxy.createCertificateGenerator();
+  Helpers.onClose(() => certificateGenerator.close(), true);
   mocks.HeadersHandler.determineResourceType.mockImplementation(async () => {
     return {
       resourceType: 'Document',
