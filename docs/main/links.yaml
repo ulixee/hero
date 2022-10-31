@@ -25,6 +25,7 @@
     - ResourceRequest
     - ResourceResponse
     - WebsocketResource
+    - UserAgents
     - ConnectionToCore
     - DetachedElements
     - DetachedResources
