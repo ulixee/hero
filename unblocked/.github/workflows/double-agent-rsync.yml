@@ -27,11 +27,11 @@ jobs:
 
       - name: (TEMP) Clone ulixee/shared
         run: git clone --recurse-submodules -j8 https://github.com/ulixee/shared.git
-        working-directory: ../..
+        working-directory: ..
 
       - name: (TEMP) Install ulixee/shared
         run: pwd & yarn && yarn build
-        working-directory: ../../shared
+        working-directory: ../shared
 
       - name: Yarn build
         run: pwd && yarn build:all
@@ -44,7 +44,7 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
       - name: rsync over ssh
-        working-directory: double-agent
+        working-directory: ./double-agent
         run: rsync -avzhm -e "ssh -i ~/.ssh/id_rsa_ulixee_digital_ocean" --exclude-from '.rsyncignore' . root@$REMOTE:~/double-agent
         env:
           REMOTE: 174.138.36.46

@@ -35,6 +35,20 @@ jobs:
         run: yarn build:all
         working-directory: ./unblocked
 
+      - name: Linux - Apt Install Chrome(s)
+        run: sudo $(npx install-browser-deps)
+
+      - name: 'Collect new Browserstack User Agents'
+        run: yarn workspace @unblocked-web/real-user-agents update:agents
+        working-directory: ./unblocked
+        env:
+          BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - name: 'Update Real UserAgent Stats'
+        run: yarn workspace @unblocked-web/real-user-agents update
+        working-directory: ./unblocked
+
       - name: 'Clear plugin-ids from manual'
         if: ${{ github.event.inputs.clearPlugins }}
         run: yarn workspace @unblocked-web/browser-profiler profile:clean ${{ github.event.inputs.clearPlugins }}

@@ -21,7 +21,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PAT }}
-          submodules: 'recursive'
+          submodules: 'true'
 
       - uses: actions/setup-node@v3
         with:
@@ -47,13 +47,6 @@ jobs:
           repository: ./double-agent/probe-data
           branch: main
           commit_message: "chore: automatic probe data"
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        if: steps.probe-data-checkin.outputs.changes_detected == 'true'
-        with:
-          repository: ./double-agent
-          branch: main
-          commit_message: "chore(double-agent): point at new probe data"
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: steps.probe-data-checkin.outputs.changes_detected == 'true'

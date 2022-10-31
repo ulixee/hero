@@ -9,6 +9,7 @@ void (async () => {
         'browser-profiler/main/chrome-docker/*',
         'browser-profiler/main/chrome-docker/.dockerignore',
         'browser-profiler/.env*',
+        'agent/testing/certs/*.pem',
         '-a',
         `${__dirname}/build`,
       ],

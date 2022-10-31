@@ -9,7 +9,7 @@
   "workspaces": {
     "packages": [
       "agent/*",
-      "specifications",
+      "specification",
       "js-path",
       "real-user-agents",
       "plugins/*",

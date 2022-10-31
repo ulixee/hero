@@ -5,13 +5,14 @@
   "scripts": {
     "prepare": "husky install",
     "bump-version": "ulx-repo-version-bump",
-    "build": "pwd && yarn && yarn tsc && cd ./build && cross-env UBK_MITM_REBUILD_SOCKET=1 yarn",
+    "build": "yarn build:all",
+    "build:self": "pwd && yarn && yarn tsc && cd ./build && cross-env UBK_MITM_REBUILD_SOCKET=1 yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
     "build:da": "cd double-agent && pwd && yarn && yarn build",
-    "build:all": " yarn build:da && yarn build",
-    "copy:build": "ulx-repo-after-build && ulx-repo-adjust-paths",
+    "build:all": " yarn build:da && yarn build:self",
+    "copy:build": "ulx-repo-after-build && ulx-repo-adjust-paths && node alsoCopy.js",
     "copy:dist": "ulx-repo-after-build --dist && shx cp -r \"browser-emulator-builder/data\" \"build-dist/plugins/default-browser-emulator\" && ulx-repo-adjust-paths build-dist",
-    "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node alsoCopy.js",
+    "tsc": "tsc -b -i tsconfig.json && yarn copy:build",
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
     "watch:all": "concurrently -n plugins,da \"yarn watch\" \"cd double-agent && yarn watch\"",
     "test": "yarn copy:build && yarn test:build",
@@ -55,7 +56,7 @@
   "workspaces": {
     "packages": [
       "agent/*",
-      "specifications",
+      "specification",
       "js-path",
       "real-user-agents",
       "plugins/*",
