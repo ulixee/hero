@@ -55,7 +55,7 @@ const Hero = require('@ulixee/hero-playground');
 - options `object` Accepts any of the following:
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
-  - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (~) allows for dynamic options.
+  - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (`~`) allows for dynamic options. Details can be found [here](/docs/hero/advanced-client/user-agents).
   - browserEmulatorId `string` defaults to `default-browser-emulator`. Chooses the BrowserEmulator plugin which emulates the properties that help Hero look like a normal browser.
   - humanEmulatorId `string` defaults to `default-human-emulator`. Chooses the HumanEmulator plugin which drives the mouse/keyboard movements.
   - mode `string`. A mode of operation. This variable controls logging levels and whether Hero "tooling" should be activated. Defaults to environment variable `NODE_ENV`.
@@ -304,7 +304,7 @@ Returns an element or resource as a [DetachedElement](/docs/hero/basic-client/de
 const hero = new Hero();
 await hero.goto('https://ulixee.org');
 const h1Elem = await hero.detach(hero.querySelector('h1'));
-console.log('title: ', h1Elem.getAttribute.get('title');
+console.log('title: ', h1Elem.getAttribute.get('title'));
 ```
 
 #### **Arguments**:
