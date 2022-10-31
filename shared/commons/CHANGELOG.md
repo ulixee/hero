@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.13](https://github.com/ulixee/shared/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
+
+
+### Bug Fixes
+
+* **commons:** don’t convert env bools if null ([c4b4456](https://github.com/ulixee/shared/commit/c4b4456c550513f7620388f1e08af1f8449f4f8b))
+* rename server config to hosts ([70d4e66](https://github.com/ulixee/shared/commit/70d4e661c1c2a964ffe72b79635cfa40bf12b2c6))
+
+
+### Features
+
+* ability to generate schema interface strings ([b1be5c5](https://github.com/ulixee/shared/commit/b1be5c585c19a2d8c101812d8ae5d7b08be9dc0e))
+
+
+
+
+
 # [2.0.0-alpha.12](https://github.com/ulixee/shared/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
 
 
