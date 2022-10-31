@@ -20,7 +20,13 @@ jobs:
         include:
           - node-version: 16.x
             os: ubuntu-latest
-            browser: chrome-100-0
+            browser: chrome-104-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-103-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-102-0
           - node-version: 16.x
             os: ubuntu-latest
             browser: chrome-97-0
@@ -47,12 +53,18 @@ jobs:
         with:
           args: install python2 visualcpp-build-tools -y
 
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
         if: ${{ matrix.os == 'windows-latest' }}
 
       - name: Yarn build
-        run: yarn build:all
+        run: yarn build
+        env:
+          UBK_MITM_REBUILD_SOCKET: 1
 
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
@@ -70,7 +82,7 @@ jobs:
         run: sudo $(npx install-browser-deps)
 
       - name: Run Lint
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 16 }}
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests

@@ -31,10 +31,6 @@ jobs:
           submodules: 'recursive'
           path: unblocked
 
-      - name: Pull latest real user agents
-        run: git checkout -B main origin/main && git pull --rebase
-        working-directory: ./unblocked/real-user-agents
-
       - name: Install unblocked
         run: yarn build:all
         working-directory: ./unblocked

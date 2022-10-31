@@ -13,3 +13,6 @@ build-dist
 /.data-test
 /.eslintcache
 browserstack.err
+
+agent/mitm-socket/dist
+connect

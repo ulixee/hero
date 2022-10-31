@@ -1,0 +1,26 @@
+name: New Version
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  socket:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+
+      - name: Build Sockets
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          version: v0.183.0
+          args: release --rm-dist --debug --skip-validate
+          workdir: ${{ github.workspace }}/agent/mitm-socket
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

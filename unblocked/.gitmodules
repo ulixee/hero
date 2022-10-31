@@ -1,6 +1,3 @@
-[submodule "agent"]
-	path = agent
-	url = https://github.com/unblocked-web/agent
 [submodule "double-agent"]
 	path = double-agent
 	url = https://github.com/unblocked-web/double-agent
