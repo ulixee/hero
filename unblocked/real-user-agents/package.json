@@ -3,8 +3,8 @@
   "version": "2.0.0-alpha.12",
   "description": "Real User Agents is a library created for use in the Unblocked and Ulixee projects. It sources real user agent strings from BrowserStack browsers, Chromium source control, and Statcounter statistics so that current, popular user agent strings can be generated for automation software.",
   "scripts": {
-    "update": "ts-node scripts/update run && prettier data/**/*.json --write",
-    "update:agents": "export $(cat .env | xargs) && ts-node -e 'require(\"./scripts/importBrowserstackUserAgents.ts\").default()'"
+    "update": "node ../build/real-user-agents/scripts/update run && prettier data/**/*.json --write",
+    "update:agents": "export $(cat .env | xargs) && node -e 'require(\"../build/real-user-agents/scripts/importBrowserstackUserAgents.js\").default()'"
   },
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.13",
