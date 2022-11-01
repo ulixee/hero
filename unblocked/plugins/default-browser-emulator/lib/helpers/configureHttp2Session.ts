@@ -1,6 +1,6 @@
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import IHttp2ConnectSettings from '@unblocked-web/specifications/agent/net/IHttp2ConnectSettings';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import IHttp2ConnectSettings from '@ulixee/unblocked-specification/agent/net/IHttp2ConnectSettings';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import IBrowserData from '../../interfaces/IBrowserData';
 
 export default function configureHttp2Session(

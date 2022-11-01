@@ -1,4 +1,4 @@
-import IDeviceProfile from '@unblocked-web/specifications/plugin/IDeviceProfile';
+import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfile';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import { randomBytes } from 'crypto';
 

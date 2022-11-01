@@ -1,12 +1,12 @@
 import { Protocol } from 'devtools-protocol';
-import { getResourceTypeForChromeValue } from '@unblocked-web/specifications/agent/net/IResourceType';
+import { getResourceTypeForChromeValue } from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import {
   IBrowserNetworkEvents,
   IBrowserResourceRequest,
-} from '@unblocked-web/specifications/agent/browser/IBrowserNetworkEvents';
+} from '@ulixee/unblocked-specification/agent/browser/IBrowserNetworkEvents';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { URL } from 'url';

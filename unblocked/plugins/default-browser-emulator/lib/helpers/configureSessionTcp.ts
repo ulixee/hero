@@ -1,5 +1,5 @@
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import ITcpSettings from '@unblocked-web/specifications/agent/net/ITcpSettings';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import ITcpSettings from '@ulixee/unblocked-specification/agent/net/ITcpSettings';
 import getTcpSettingsForOs from '../utils/getTcpSettingsForOs';
 
 export default function configureSessionTcp(

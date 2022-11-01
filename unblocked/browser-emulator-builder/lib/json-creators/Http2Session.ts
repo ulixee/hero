@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
 import type IHttp2SessionProfile from '@double-agent/collect-http2-session/interfaces/IProfile';
 import Config from './Config';
 import EmulatorData from '../EmulatorData';

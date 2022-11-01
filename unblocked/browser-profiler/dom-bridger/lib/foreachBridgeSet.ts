@@ -1,6 +1,6 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
 import { gunzipSync } from 'zlib';
 import { extractDirGroupsMap } from './BridgeUtils';
 import IBridgeType from '../interfaces/IBridgeType';

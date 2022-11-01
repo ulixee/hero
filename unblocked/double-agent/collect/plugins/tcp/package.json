@@ -2,6 +2,7 @@
   "name": "@double-agent/collect-tcp",
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Collects tcp packet values such as window-size and time-to-live",
   "dependencies": {

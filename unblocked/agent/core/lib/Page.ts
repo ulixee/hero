@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 import Protocol from 'devtools-protocol';
-import { IPage, IPageEvents } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IPage, IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
 import {
   IElementInteractVerification,
   IInteractionGroup,
   InteractionCommand,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import * as Url from 'url';
 import Timer from '@ulixee/commons/lib/Timer';
-import { ILoadStatus, LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
-import { IJsPath } from '@unblocked-web/js-path';
-import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
-import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
-import IDialog from '@unblocked-web/specifications/agent/browser/IDialog';
-import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
+import { ILoadStatus, LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { IJsPath } from '@ulixee/js-path';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
+import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import DevtoolsSession from './DevtoolsSession';
 import NetworkManager from './NetworkManager';
 import { Keyboard } from './Keyboard';

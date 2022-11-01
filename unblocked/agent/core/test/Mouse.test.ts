@@ -1,6 +1,6 @@
-import { IKeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
-import TestLogger from '@unblocked-web/agent-testing/TestLogger';
-import { defaultBrowserEngine } from '@unblocked-web/agent-testing/browserUtils';
+import { IKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
+import TestLogger from '@ulixee/unblocked-agent-testing/TestLogger';
+import { defaultBrowserEngine } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { TestServer } from './server';
 import { Browser, BrowserContext, Page } from '../index';
 import { setContent } from './_pageTestUtils';

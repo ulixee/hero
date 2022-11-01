@@ -5,12 +5,12 @@
   "description": "Double agent is a detection system for when an http request or browser interaction is not the user agent it says it is",
   "scripts": {
     "tsc": "tsc -b -i && ulx-repo-after-build && ulx-repo-adjust-paths && node alsoCopy.js",
-    "build": "yarn tsc && cd build && yarn && yarn workspace @double-agent/config sync",
+    "build": "yarn tsc && yarn workspace @double-agent/config sync",
     "watch": "yarn tsc && tsc -b -w",
+    "clean": "tsc -b --clean",
     "docs": "node build/docs/generator",
     "start": "cd build && yarn workspace @double-agent/collect-controller start",
-    "prod": "cd build && yarn workspace @double-agent/collect-controller prod",
-    "clean": "tsc -b --clean"
+    "prod": "cd build && yarn workspace @double-agent/collect-controller prod"
   },
   "devDependencies": {
     "@ulixee/repo-tools": "^1.0.21",
@@ -27,8 +27,6 @@
       "docs",
       "tls-server",
       "runner",
-      "../build/specification",
-      "../build/real-user-agents",
       "../../shared/build/*"
     ]
   }

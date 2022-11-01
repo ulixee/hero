@@ -1,10 +1,10 @@
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Protocol from 'devtools-protocol';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { IWorker, IWorkerEvents } from '@unblocked-web/specifications/agent/browser/IWorker';
+import { IWorker, IWorkerEvents } from '@ulixee/unblocked-specification/agent/browser/IWorker';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { IBrowserContextHooks } from '@unblocked-web/specifications/agent/hooks/IHooks';
+import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import BrowserContext from './BrowserContext';
 import DevtoolsSession from './DevtoolsSession';

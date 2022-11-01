@@ -2,6 +2,7 @@
   "name": "@double-agent/collect-http-xhr",
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Collects the headers used by browsers when facilitating XHR requests",
   "dependencies": {

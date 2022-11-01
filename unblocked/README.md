@@ -8,11 +8,11 @@ This is a Monorepo to work on the Browser Detect + Evade workflow of building an
 
 You can work with the project by:
 1. Cloning the repository and installing git submodules (you can add --recursive to your initial clone request).
-2. Run `yarn build:all`. NOTE: you MUST run this command to build. The sub-projects have to be built-up individually in order by this command.
+2. Run `yarn build`. NOTE: you must run this command to build typescript files.
 
 ### Browser Profiles
 
-If you want to work with profiles (ie, update Emulator Data, generate Double Agent probes, etc), you'll need to download the BrowserProfiles data: `$ yarn workspace @unblocked-web/browser-profiler downloadData`. This will clone data into a folder called `browser-profile-data` adjacent to the `unblocked` folder. NOTE: You might want to checkout instead of clone into this directory if you intend to check-in.
+If you want to work with profiles (ie, update Emulator Data, generate Double Agent probes, etc), you'll need to download the BrowserProfiles data: `$ yarn workspace @ulixee/unblocked-browser-profiler downloadData`. This will clone data into a folder called `browser-profile-data` adjacent to the `unblocked` folder. NOTE: You might want to checkout instead of clone into this directory if you intend to check-in.
 
 
 ## Questions

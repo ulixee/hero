@@ -1,9 +1,9 @@
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IUserAgentOption, { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
-import RealUserAgents from '@unblocked-web/real-user-agents';
-import UserAgent from '@unblocked-web/real-user-agents/lib/UserAgent';
-import findUaClientHintsPlatformVersion from '@unblocked-web/real-user-agents/lib/findUaClientHintsPlatformVersion';
+import IUserAgentOption, { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
+import RealUserAgents from '@ulixee/real-user-agents';
+import UserAgent from '@ulixee/real-user-agents/lib/UserAgent';
+import findUaClientHintsPlatformVersion from '@ulixee/real-user-agents/lib/findUaClientHintsPlatformVersion';
 import DataLoader from './DataLoader';
 import UserAgentSelector from './UserAgentSelector';
 import { createBrowserId, createOsId } from './BrowserData';

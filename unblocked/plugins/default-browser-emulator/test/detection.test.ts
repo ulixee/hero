@@ -1,9 +1,9 @@
-import { Helpers, TestLogger } from '@unblocked-web/plugins-testing/index';
-import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
-import Pool from '@unblocked-web/agent/lib/Pool';
+import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing/index';
+import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
-import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');

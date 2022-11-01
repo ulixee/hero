@@ -1,9 +1,8 @@
 name: Rsync
 
 on:
-  push:
-    branches:
-      - 'main'
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -34,7 +33,8 @@ jobs:
         working-directory: ../shared
 
       - name: Yarn build
-        run: pwd && yarn build:all
+        run: pwd && yarn build
+        working-directory: ./double-agent
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2

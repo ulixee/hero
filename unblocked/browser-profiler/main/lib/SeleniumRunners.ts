@@ -1,5 +1,5 @@
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import SeleniumRunner from '@unblocked-web/double-agent-stacks/lib/SeleniumRunner';
+import SeleniumRunner from '@ulixee/double-agent-stacks/lib/SeleniumRunner';
 import AssignmentsClient from '@double-agent/runner/lib/AssignmentsClient';
 import BrowserStack from './BrowserStack';
 import BrowserProfiler from '../index';

@@ -1,5 +1,5 @@
-import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
-import IEmulationProfile from "@unblocked-web/specifications/plugin/IEmulationProfile";
+import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
+import IEmulationProfile from "@ulixee/unblocked-specification/plugin/IEmulationProfile";
 
 export default async function setTimezone(
   emulationProfile: IEmulationProfile,

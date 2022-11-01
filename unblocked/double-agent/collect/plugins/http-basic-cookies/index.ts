@@ -1,5 +1,5 @@
 import * as Cookie from 'cookie';
-import RealUserAgents from '@unblocked-web/real-user-agents';
+import RealUserAgents from '@ulixee/real-user-agents';
 import IRequestContext from '@double-agent/collect/interfaces/IRequestContext';
 import Plugin, { IPluginPage } from '@double-agent/collect/lib/Plugin';
 import Document from '@double-agent/collect/lib/Document';

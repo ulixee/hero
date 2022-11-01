@@ -2,6 +2,7 @@
   "name": "@double-agent/user-interaction",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "checkCategories": [
     "Time Between User Actions",

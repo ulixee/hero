@@ -7,15 +7,15 @@ import {
   getPublicSuffix,
   permuteDomain,
 } from 'tough-cookie';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import SameSiteContext from '@ulixee/commons/interfaces/SameSiteContext';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { UnblockedPluginClassDecorator } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import DomOverridesBuilder from '../DomOverridesBuilder';
 
 @UnblockedPluginClassDecorator

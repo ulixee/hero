@@ -22,13 +22,13 @@ Source data can be updated by using `yarn update`.
 ## Installation
 
 ```shell script
-npm i --save @unblocked-web/real-user-agents
+npm i --save @ulixee/real-user-agents
 ```
 
 or
 
 ```shell script
-yarn add @unblocked-web/real-user-agents
+yarn add @ulixee/real-user-agents
 ```
 
 ## Contributing

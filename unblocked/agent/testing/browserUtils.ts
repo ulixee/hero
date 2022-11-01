@@ -1,8 +1,8 @@
-import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
-import Browser from '@unblocked-web/agent/lib/Browser';
-import ChromeEngine from '@unblocked-web/agent/lib/ChromeEngine';
-import { IBrowserContextHooks, IBrowserHooks } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import IBrowser from '@unblocked-web/specifications/agent/browser/IBrowser';
+import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
+import Browser from '@ulixee/unblocked-agent/lib/Browser';
+import ChromeEngine from '@ulixee/unblocked-agent/lib/ChromeEngine';
+import { IBrowserContextHooks, IBrowserHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
 import { Helpers } from './index';
 
 // eslint-disable-next-line import/no-dynamic-require

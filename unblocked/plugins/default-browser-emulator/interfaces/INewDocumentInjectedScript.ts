@@ -1,4 +1,4 @@
-import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 
 export default interface INewDocumentInjectedScript {
   script: string;

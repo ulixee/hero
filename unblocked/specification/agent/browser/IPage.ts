@@ -8,7 +8,7 @@ import IDevtoolsSession from './IDevtoolsSession';
 import IDialog from './IDialog';
 import IBrowserContext from './IBrowserContext';
 import IScreenshotOptions from './IScreenshotOptions';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import IExecJsPathResult from './IExecJsPathResult';
 import IFileChooserPrompt from './IFileChooserPrompt';
 import { IInteractionGroups } from '../interact/IInteractions';

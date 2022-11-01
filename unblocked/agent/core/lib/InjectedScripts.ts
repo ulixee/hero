@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
-import { IDomPaintEvent } from '@unblocked-web/specifications/agent/browser/Location';
+import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 import FramesManager from './FramesManager';
 
 const pageScripts = {

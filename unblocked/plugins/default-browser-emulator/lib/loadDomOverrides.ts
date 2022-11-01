@@ -1,4 +1,4 @@
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import { pickRandom } from '@ulixee/commons/lib/utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';

@@ -1,6 +1,6 @@
 import Queue from '@ulixee/commons/lib/Queue';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import MitmSocket from '@unblocked-web/agent-mitm-socket';
+import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';

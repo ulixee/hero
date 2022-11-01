@@ -1,5 +1,5 @@
-import deepDiff from '@unblocked-web/browser-profiler/lib/deepDiff';
-import IDomPolyfill from '@unblocked-web/specifications/plugin/IDomPolyfill';
+import deepDiff from '@ulixee/unblocked-browser-profiler/lib/deepDiff';
+import IDomPolyfill from '@ulixee/unblocked-specification/plugin/IDomPolyfill';
 import { isAllowedValueDifference, isExplicitExport } from './domMatch';
 
 export default function generatePolyfill(dom1: any, dom2: any): IDomPolyfill {

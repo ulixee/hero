@@ -17,4 +17,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.11](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-10-03)
 
-**Note:** Version bump only for package @unblocked-web/double-agent-stacks
+**Note:** Version bump only for package @ulixee/double-agent-stacks

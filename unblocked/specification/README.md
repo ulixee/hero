@@ -28,7 +28,7 @@ Configurations include:
 - browserEngine [`IBrowserEngine`](./agent/browser/IBrowserEngine.ts). Metadata about the Browser executable and launch arguments that should be used to launch the underlying browser process (eg, Chrome 98).
 - deviceProfile [`IDeviceProfile`](./plugin/IDeviceProfile.ts). Settings relevant to the hardware to be emulated, including Media devices and Graphics card settings.
 - options [`IEmulationOptions`](./plugin/IEmulationProfile.ts). Options to configure user and browser settings. These are passed on from a Client program. These same settings are applied to the Profile itself. A plugin can opt to modify these if needed, or set them with defaults.
-- customEmulatorConfig `object`. Settings to be passed to individual Plugins. The `@unblocked-web/default-browser-emulator` uses a custom `userAgentSelector` syntax, which is an example of this property.
+- customEmulatorConfig `object`. Settings to be passed to individual Plugins. The `@ulixee/default-browser-emulator` uses a custom `userAgentSelector` syntax, which is an example of this property.
 - logger `IBoundLog`. Optional logger instance to use for output.
 
 - dnsOverTlsProvider `object`. Configure the host and port to use for DNS over TLS. This feature replicates the Chrome feature that is used if the host DNS provider supports DNS over TLS or DNS over HTTPS. A `null` value will disable this feature.

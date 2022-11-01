@@ -1,5 +1,5 @@
-import { UnblockedPluginClassDecorator } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import Plugins from '../lib/Plugins';
 
 test('each plugin should be given a chance to pre-configure the profile', () => {

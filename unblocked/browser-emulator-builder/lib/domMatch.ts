@@ -1,4 +1,4 @@
-import { IDiff } from '@unblocked-web/browser-profiler/lib/deepDiff';
+import { IDiff } from '@ulixee/unblocked-browser-profiler/lib/deepDiff';
 
 export function isAllowedValueDifference(diff: IDiff): boolean {
   const { path, lhs, rhs } = diff;

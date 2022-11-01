@@ -8,7 +8,7 @@ import { existsAsync } from '@ulixee/commons/lib/fileUtils';
 import AssignmentsClient, { IAssignment } from '@double-agent/runner/lib/AssignmentsClient';
 import saveAssignmentToProfileDir from '@double-agent/runner/lib/saveAssignmentToProfileDir';
 import Config, { createUserAgentIdFromIds } from '@double-agent/config';
-import getLocalOperatingSystemMeta from '@unblocked-web/real-user-agents/lib/getLocalOperatingSystemMeta';
+import getLocalOperatingSystemMeta from '@ulixee/real-user-agents/lib/getLocalOperatingSystemMeta';
 import BrowserProfiler from '../index';
 import {
   buildChromeDocker,

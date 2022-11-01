@@ -1,5 +1,5 @@
 /* eslint  @typescript-eslint/no-loss-of-precision:0 */
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
 
 // Legendre-Gauss abscissae with n=24 (x_i values, defined at i=n as the roots of the nth order Legendre polynomial Pn(x))
 const Tvalues = [

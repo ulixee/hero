@@ -132,7 +132,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.4](https://github.com/ulixee/agent/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-10)
 
-**Note:** Version bump only for package @unblocked-web/agent-monorepo
+**Note:** Version bump only for package @ulixee/unblocked-agent-monorepo
 
 
 
@@ -291,7 +291,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-monorepo
+**Note:** Version bump only for package @ulixee/unblocked-agent-monorepo
 
 
 
@@ -1177,7 +1177,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-monorepo
+**Note:** Version bump only for package @ulixee/unblocked-agent-monorepo
 
 
 

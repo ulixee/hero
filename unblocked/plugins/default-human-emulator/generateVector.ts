@@ -1,4 +1,4 @@
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
 import Bezier from './Bezier';
 
 export default function generateVector(

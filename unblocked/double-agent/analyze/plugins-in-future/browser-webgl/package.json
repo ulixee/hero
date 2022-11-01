@@ -2,6 +2,7 @@
   "name": "@double-agent/browser-webgl",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "checkCategories": [
     "WebGl Parameters"

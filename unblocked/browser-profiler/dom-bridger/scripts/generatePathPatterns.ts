@@ -1,8 +1,8 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import * as Fs from 'fs';
 import * as Path from 'path';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
-import getStableChromeVersions from '@unblocked-web/browser-profiler/lib/getStableChromeVersions';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
+import getStableChromeVersions from '@ulixee/unblocked-browser-profiler/lib/getStableChromeVersions';
 import { readFile } from 'fs/promises';
 import { gunzip } from 'zlib';
 import InstanceChangeExtractor from '../lib/extractors/InstanceChangeExtractor';

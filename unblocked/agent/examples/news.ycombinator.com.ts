@@ -1,5 +1,5 @@
-import { Agent } from '@unblocked-web/agent';
-import { IJsPath } from '@unblocked-web/js-path';
+import { Agent } from '@ulixee/unblocked-agent';
+import { IJsPath } from '@ulixee/js-path';
 
 const Chrome98 = require('@ulixee/chrome-98-0');
 

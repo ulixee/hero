@@ -45,7 +45,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/unblocked-monorepo
+**Note:** Version bump only for package @ulixee/unblocked
 
 
 
@@ -53,7 +53,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.9](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-08-16)
 
-**Note:** Version bump only for package @unblocked-web/unblocked-monorepo
+**Note:** Version bump only for package @ulixee/unblocked
 
 
 
@@ -77,7 +77,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-07-26)
 
-**Note:** Version bump only for package @unblocked-web/unblocked-monorepo
+**Note:** Version bump only for package @ulixee/unblocked
 
 
 
@@ -85,7 +85,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.6](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-07-13)
 
-**Note:** Version bump only for package @unblocked-web/unblocked-monorepo
+**Note:** Version bump only for package @ulixee/unblocked
 
 
 

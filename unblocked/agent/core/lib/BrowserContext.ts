@@ -1,8 +1,8 @@
 import { assert } from '@ulixee/commons/lib/utils';
 import IBrowserContext, {
   IBrowserContextEvents,
-} from '@unblocked-web/specifications/agent/browser/IBrowserContext';
-import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
+} from '@ulixee/unblocked-specification/agent/browser/IBrowserContext';
+import { ICookie } from '@ulixee/unblocked-specification/agent/net/ICookie';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
@@ -10,13 +10,13 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import {
   IBrowserContextHooks,
   IInteractHooks,
-} from '@unblocked-web/specifications/agent/hooks/IHooks';
+} from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
+import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
 import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
 import ICommandMarker from '../interfaces/ICommandMarker';

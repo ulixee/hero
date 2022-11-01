@@ -1,4 +1,4 @@
-import { IPathStep } from '@unblocked-web/js-path';
+import { IPathStep } from '@ulixee/js-path';
 
 export default class InjectedScriptError extends Error {
   private readonly pathState: { step: IPathStep; index: number };

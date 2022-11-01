@@ -1,5 +1,5 @@
 import IExecJsPathResult from './IExecJsPathResult';
-import { IElementRect, IJsPath, INodePointer } from '@unblocked-web/js-path';
+import { IElementRect, IJsPath, INodePointer } from '@ulixee/js-path';
 
 import IPoint from '../browser/IPoint';
 

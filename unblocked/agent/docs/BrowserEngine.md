@@ -21,8 +21,8 @@ ChromeEngine is a wrapper that can load Chrome versions from the [Browser Vault]
 The ChromeEngine wrapper makes an IBrowserEngine "writeable" so you can modify launch arguments.
 
 ```js
-const { Agent } = require('@unblocked-web/agent');
-const ChromeEngine = require('@unblocked-web/lib/ChromeEngine');
+const { Agent } = require('@ulixee/unblocked-agent');
+const ChromeEngine = require('@ulixee/unblocked-agent/lib/ChromeEngine');
 const Chrome100 = require('@ulixee/chrome-100-0');
 
 const agent = new Agent({

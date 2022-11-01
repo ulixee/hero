@@ -1,6 +1,6 @@
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { Protocol } from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+import { Protocol } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import DevtoolsSession from './DevtoolsSession';
 import Frame from './Frame';

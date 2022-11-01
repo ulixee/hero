@@ -1,4 +1,4 @@
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import ChromeApp from '@ulixee/chrome-app';
 import { existsAsync } from '@ulixee/chrome-app/lib/dirUtils';
 import env from '../env';

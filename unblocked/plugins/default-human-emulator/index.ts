@@ -6,18 +6,18 @@ import {
   IMousePositionXY,
   InteractionCommand,
   isMousePositionXY,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IInteractionsHelper, {
   IRectLookup,
-} from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
-import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractionsHelper';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
+import IMouseResult from '@ulixee/unblocked-specification/agent/interact/IMouseResult';
 import logger from '@ulixee/commons/lib/Logger';
 import IUnblockedPlugin, {
   UnblockedPluginClassDecorator,
-} from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import generateVector from './generateVector';
 
 const { log } = logger(module);

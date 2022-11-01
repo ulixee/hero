@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import IUserAgentOption from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
 import * as Path from 'path';
 import { IDataBrowserEngineOptions, IDataCore } from '../interfaces/IBrowserData';
 import BrowserData from './BrowserData';

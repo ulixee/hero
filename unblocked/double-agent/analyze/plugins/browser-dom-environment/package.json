@@ -2,6 +2,7 @@
   "name": "@double-agent/analyze-browser-dom-environment",
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Analyzes the DOM environment, such as functionality and object structure, match the given user-agent",
   "dependencies": {

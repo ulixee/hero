@@ -1,8 +1,8 @@
 import INavigation, {
   ContentPaint,
   NavigationStatus,
-} from '@unblocked-web/specifications/agent/browser/INavigation';
-import { NavigationReason } from '@unblocked-web/specifications/agent/browser/NavigationReason';
+} from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
@@ -10,11 +10,11 @@ import {
   IDomPaintEvent,
   ILoadStatus,
   LoadStatus,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import {
   IFrameNavigationEvents,
   IFrameNavigations,
-} from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
+} from '@ulixee/unblocked-specification/agent/browser/IFrameNavigations';
 import Frame from './Frame';
 
 export default class FrameNavigations

@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
+import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
 
 interface IConfig {
   defaultLocale: string;

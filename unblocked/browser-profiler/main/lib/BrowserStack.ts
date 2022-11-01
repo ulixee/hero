@@ -1,8 +1,8 @@
 import Axios from 'axios';
 import * as webdriver from 'selenium-webdriver';
-import IBrowser from '@unblocked-web/real-user-agents/interfaces/IBrowser';
-import IOperatingSystem from '@unblocked-web/real-user-agents/interfaces/IOperatingSystem';
-import SeleniumRunner from '@unblocked-web/double-agent-stacks/lib/SeleniumRunner';
+import IBrowser from '@ulixee/real-user-agents/interfaces/IBrowser';
+import IOperatingSystem from '@ulixee/real-user-agents/interfaces/IOperatingSystem';
+import SeleniumRunner from '@ulixee/double-agent-stacks/lib/SeleniumRunner';
 import IBrowserstackAgent from '../interfaces/IBrowserstackAgent';
 import env from '../env';
 

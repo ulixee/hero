@@ -1,6 +1,6 @@
 import { assert } from '@ulixee/commons/lib/utils';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 
 export default function setActiveAndFocused(
   emulationProfile: IEmulationProfile,

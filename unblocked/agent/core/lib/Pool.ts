@@ -1,19 +1,19 @@
 import Log from '@ulixee/commons/lib/Logger';
-import { MitmProxy } from '@unblocked-web/agent-mitm';
+import { MitmProxy } from '@ulixee/unblocked-agent-mitm';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Queue from '@ulixee/commons/lib/Queue';
 import ICertificateGenerator, {
   ICertificateStore,
-} from '@unblocked-web/agent-mitm/interfaces/ICertificateGenerator';
+} from '@ulixee/unblocked-agent-mitm/interfaces/ICertificateGenerator';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import IBrowserLaunchArgs from '@unblocked-web/specifications/agent/browser/IBrowserLaunchArgs';
-import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import Browser from './Browser';
 import Agent, { IAgentCreateOptions } from './Agent';
 import env from '../env';

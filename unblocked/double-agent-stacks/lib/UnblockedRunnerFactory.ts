@@ -1,8 +1,8 @@
 import { IRunner, IRunnerFactory } from '@double-agent/runner/interfaces/IRunnerFactory';
 import IAssignment from '@double-agent/collect-controller/interfaces/IAssignment';
-import { Pool } from '@unblocked-web/agent';
-import DefaultHumanEmulator from '@unblocked-web/default-human-emulator';
-import DefaultBrowserEmulator, { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
+import { Pool } from '@ulixee/unblocked-agent';
+import DefaultHumanEmulator from '@ulixee/default-human-emulator';
+import DefaultBrowserEmulator, { IEmulatorOptions } from '@ulixee/default-browser-emulator';
 import UnblockedRunner from './UnblockedRunner';
 
 export default class UnblockedRunnerFactory implements IRunnerFactory {

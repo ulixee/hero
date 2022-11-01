@@ -3,7 +3,7 @@
 This is the primary class to interact with Unblocked Agent. The following is a simple example:
 
 ```js
-const { Agent } = require('@unblocked-web/agent');
+const { Agent } = require('@ulixee/unblocked-agent');
 
 (async () => {
   const agent = new Agent();

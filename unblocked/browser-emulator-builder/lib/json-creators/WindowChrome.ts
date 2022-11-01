@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
 import { IProfileDataByProtocol } from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
 import * as Path from 'path';
 import IBaseProfile from '@double-agent/collect/interfaces/IBaseProfile';

@@ -1,11 +1,11 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import RealUserAgents from '@unblocked-web/real-user-agents';
+import RealUserAgents from '@ulixee/real-user-agents';
 import IUserAgentToTest, {
   UserAgentToTestPickType,
 } from '@double-agent/config/interfaces/IUserAgentToTest';
 import Config from '@double-agent/config/index';
-import UserAgent from '@unblocked-web/real-user-agents/lib/UserAgent';
+import UserAgent from '@ulixee/real-user-agents/lib/UserAgent';
 import IUserAgentConfig from '../interfaces/IUserAgentConfig';
 
 const FsPromises = Fs.promises;

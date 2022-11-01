@@ -1,4 +1,4 @@
-import { Agent } from '@unblocked-web/agent';
+import { Agent } from '@ulixee/unblocked-agent';
 
 async function run() {
   const agent = new Agent();

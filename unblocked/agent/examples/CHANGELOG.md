@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.12](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-31)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -13,7 +13,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.11](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-10-03)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -21,7 +21,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.10](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-31)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -51,7 +51,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.7](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-07-26)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -59,7 +59,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.6](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-07-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -67,7 +67,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.5](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2022-06-28)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -75,7 +75,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.4](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-10)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -83,7 +83,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.3](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-06-09)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples
 
 
 
@@ -91,4 +91,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.2](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-19)
 
-**Note:** Version bump only for package @unblocked-web/agent-examples
+**Note:** Version bump only for package @ulixee/unblocked-agent-examples

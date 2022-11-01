@@ -1,6 +1,7 @@
 {
   "name": "@double-agent/analyze",
   "version": "2.0.0-alpha.11",
+  "private": true,
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -10,7 +11,7 @@
     "@double-agent/collect": "2.0.0-alpha.11",
     "@double-agent/config": "2.0.0-alpha.11",
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/real-user-agents": "2.0.0-alpha.12",
+    "@ulixee/real-user-agents": "2.0.0-alpha.12",
     "humanize-string": "^2.1.0",
     "initialism": "^1.0.2",
     "lodash": "^4.17.21",

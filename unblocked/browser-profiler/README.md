@@ -46,7 +46,7 @@ NOTE: The latter half of this approach is still in flux and needs work to improv
 
 - `$ yarn bridge`
 
-6. Create Emulator Data (from unblocked-web/browser-emulator-builder)
+6. Create Emulator Data (from ../browser-emulator-builder)
 
 - `$ yarn generate`
 

@@ -2,20 +2,20 @@ import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
-} from '@unblocked-web/agent-mitm/handlers/RequestSession';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+} from '@ulixee/unblocked-agent-mitm/handlers/RequestSession';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import MitmRequestContext from '@unblocked-web/agent-mitm/lib/MitmRequestContext';
-import { IBrowserResourceRequest } from '@unblocked-web/specifications/agent/browser/IBrowserNetworkEvents';
-import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
-import { IPageEvents } from '@unblocked-web/specifications/agent/browser/IPage';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import HeadersHandler from '@unblocked-web/agent-mitm/handlers/HeadersHandler';
+import MitmRequestContext from '@ulixee/unblocked-agent-mitm/lib/MitmRequestContext';
+import { IBrowserResourceRequest } from '@ulixee/unblocked-specification/agent/browser/IBrowserNetworkEvents';
+import { ICookie } from '@ulixee/unblocked-specification/agent/net/ICookie';
+import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import HeadersHandler from '@ulixee/unblocked-agent-mitm/handlers/HeadersHandler';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { Cookie } from 'tough-cookie';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IBrowserRequestMatcher from '@unblocked-web/agent-mitm/interfaces/IBrowserRequestMatcher';
+import IBrowserRequestMatcher from '@ulixee/unblocked-agent-mitm/interfaces/IBrowserRequestMatcher';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { IMitmRequestPendingBrowserRequest, IResourceEvents } from '../interfaces/IResourceEvents';
 import BrowserContext from './BrowserContext';

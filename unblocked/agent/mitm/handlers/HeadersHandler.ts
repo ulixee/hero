@@ -1,10 +1,10 @@
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import * as http from 'http';
 import * as http2 from 'http2';
-import OriginType from '@unblocked-web/specifications/agent/net/OriginType';
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import OriginType from '@ulixee/unblocked-specification/agent/net/OriginType';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import { URL } from 'url';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import { parseRawHeaders, toLowerCase } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';

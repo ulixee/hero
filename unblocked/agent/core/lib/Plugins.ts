@@ -1,30 +1,30 @@
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import IUnblockedPlugins from '@unblocked-web/specifications/plugin/IUnblockedPlugins';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import IUnblockedPlugins from '@ulixee/unblocked-specification/plugin/IUnblockedPlugins';
 import IUnblockedPlugin, {
   IUnblockedPluginClass,
-} from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import { URL } from 'url';
 import {
   IInteractionGroups,
   IInteractionStep,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
-import IInteractionsHelper from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import IHttp2ConnectSettings from '@unblocked-web/specifications/agent/net/IHttp2ConnectSettings';
-import IBrowserContext from '@unblocked-web/specifications/agent/browser/IBrowserContext';
-import { IWorker } from '@unblocked-web/specifications/agent/browser/IWorker';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
-import IBrowser from '@unblocked-web/specifications/agent/browser/IBrowser';
-import IBrowserLaunchArgs from '@unblocked-web/specifications/agent/browser/IBrowserLaunchArgs';
-import IHttpSocketAgent from '@unblocked-web/specifications/agent/net/IHttpSocketAgent';
-import ITlsSettings from '@unblocked-web/specifications/agent/net/ITlsSettings';
-import ITcpSettings from '@unblocked-web/specifications/agent/net/ITcpSettings';
-import IDnsSettings from '@unblocked-web/specifications/agent/net/IDnsSettings';
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
-import IDevtoolsSession from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IInteractionsHelper from '@ulixee/unblocked-specification/agent/interact/IInteractionsHelper';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import IHttp2ConnectSettings from '@ulixee/unblocked-specification/agent/net/IHttp2ConnectSettings';
+import IBrowserContext from '@ulixee/unblocked-specification/agent/browser/IBrowserContext';
+import { IWorker } from '@ulixee/unblocked-specification/agent/browser/IWorker';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
+import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
+import ITlsSettings from '@ulixee/unblocked-specification/agent/net/ITlsSettings';
+import ITcpSettings from '@ulixee/unblocked-specification/agent/net/ITcpSettings';
+import IDnsSettings from '@ulixee/unblocked-specification/agent/net/IDnsSettings';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
+import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import ChromeApp from '@ulixee/chrome-app';
-import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
+import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import ChromeEngine from './ChromeEngine';
 import Interactor from './Interactor';
 

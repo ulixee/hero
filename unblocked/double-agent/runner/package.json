@@ -1,13 +1,14 @@
 {
   "name": "@double-agent/runner",
   "version": "2.0.0-alpha.11",
+  "private": true,
   "dependencies": {
     "@double-agent/analyze": "2.0.0-alpha.11",
     "@double-agent/collect": "2.0.0-alpha.11",
     "@double-agent/collect-controller": "2.0.0-alpha.11",
     "@double-agent/config": "2.0.0-alpha.11",
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/real-user-agents": "2.0.0-alpha.12",
+    "@ulixee/real-user-agents": "2.0.0-alpha.12",
     "commander": "^9.0.0",
     "node-fetch": "^2.6.1",
     "p-queue": "^6.6.2",

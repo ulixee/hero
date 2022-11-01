@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "postinstall": "yarn workspace @unblocked-web/agent-mitm-socket postinstall",
+    "postinstall": "yarn workspace @ulixee/unblocked-agent-mitm-socket postinstall",
     "dist": "lerna publish from-package"
   },
   "devDependencies": {

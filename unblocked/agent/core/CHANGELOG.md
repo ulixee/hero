@@ -79,7 +79,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.7](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-07-26)
 
-**Note:** Version bump only for package @unblocked-web/agent
+**Note:** Version bump only for package @ulixee/unblocked-agent
 
 
 
@@ -119,7 +119,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.4](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-10)
 
-**Note:** Version bump only for package @unblocked-web/agent
+**Note:** Version bump only for package @ulixee/unblocked-agent
 
 
 
@@ -152,7 +152,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.6.4](https://github.com/ulixee/agent/compare/v1.6.3...v1.6.4) (2022-01-24)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -260,7 +260,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -465,7 +465,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.4.1-alpha.4](https://github.com/ulixee/agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -568,7 +568,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.4.0-alpha.1](https://github.com/ulixee/agent/compare/v1.4.0-alpha.0...v1.4.0-alpha.1) (2021-03-11)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -731,7 +731,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.2.0-alpha.5](https://github.com/ulixee/agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -739,7 +739,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.2.0-alpha.4](https://github.com/ulixee/agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -890,7 +890,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.19](https://github.com/ulixee/agent/compare/v1.0.0-alpha.18...v1.0.0-alpha.19) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -898,7 +898,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.18](https://github.com/ulixee/agent/compare/v1.0.0-alpha.17...v1.0.0-alpha.18) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -906,7 +906,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.17](https://github.com/ulixee/agent/compare/v1.0.0-alpha.16...v1.0.0-alpha.17) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -933,7 +933,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.15](https://github.com/ulixee/agent/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2020-10-06)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -952,7 +952,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -985,7 +985,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.11](https://github.com/ulixee/agent/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2020-08-25)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -1057,7 +1057,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.6](https://github.com/ulixee/agent/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2020-07-22)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -1065,7 +1065,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.5](https://github.com/ulixee/agent/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2020-07-21)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -1122,7 +1122,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.1 (2020-06-27)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core
 
 
 
@@ -1130,4 +1130,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.0 (2020-06-27)
 
-**Note:** Version bump only for package @unblocked-web/agent-core
+**Note:** Version bump only for package @ulixee/unblocked-agent-core

@@ -1,7 +1,7 @@
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 import IUserAgentData from '../../interfaces/IUserAgentData';
 

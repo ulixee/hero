@@ -1,5 +1,5 @@
 import '@ulixee/commons/lib/SourceMapSupport';
-import { Agent } from '@unblocked-web/agent';
+import { Agent } from '@ulixee/unblocked-agent';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
 import * as Fs from 'fs';
 import { getDataFilePath } from '../lib/paths';

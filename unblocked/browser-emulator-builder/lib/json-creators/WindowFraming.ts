@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
 import IDomProfile from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
 import Config from './Config';
 import EmulatorData from '../EmulatorData';

@@ -1,8 +1,8 @@
-import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/agent-testing';
-import MitmRequestContext from '@unblocked-web/agent-mitm/lib/MitmRequestContext';
+import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
+import MitmRequestContext from '@ulixee/unblocked-agent-mitm/lib/MitmRequestContext';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
-import { ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
+import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { Pool } from '../index';
 

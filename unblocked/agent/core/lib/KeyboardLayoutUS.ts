@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IKeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+import { IKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 
 export interface IKeyDefinition {
   keyCode?: number;

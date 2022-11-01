@@ -3,7 +3,7 @@ import * as net from 'net';
 import { promises as dns } from 'dns';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import IDnsSettings from '@unblocked-web/specifications/agent/net/IDnsSettings';
+import IDnsSettings from '@ulixee/unblocked-specification/agent/net/IDnsSettings';
 import DnsOverTlsSocket from './DnsOverTlsSocket';
 import RequestSession from '../handlers/RequestSession';
 

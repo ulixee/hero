@@ -1,14 +1,14 @@
-import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/plugins-testing';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
-import { getLogo, ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
+import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
+import { getLogo, ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
 import {
   getClientRectFnName,
   getNodePointerFnName,
-} from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
-import { IElementRect } from '@unblocked-web/js-path';
-import { LoadStatus, LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
-import { Agent, Pool } from '@unblocked-web/agent';
+} from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
+import { IElementRect } from '@ulixee/js-path';
+import { LoadStatus, LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { Agent, Pool } from '@ulixee/unblocked-agent';
 import HumanEmulator from '..';
 
 let koaServer: ITestKoaServer;

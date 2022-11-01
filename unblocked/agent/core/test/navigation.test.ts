@@ -1,13 +1,13 @@
 import * as Fs from 'fs';
-import { BrowserUtils, Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import {
   LoadStatus,
   LocationStatus,
   LocationTrigger,
-} from '@unblocked-web/specifications/agent/browser/Location';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import { getLogo, ITestKoaServer } from '@unblocked-web/agent-testing/helpers';
-import { ContentPaint } from '@unblocked-web/specifications/agent/browser/INavigation';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import { getLogo, ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
+import { ContentPaint } from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import FrameNavigationsObserver from '../lib/FrameNavigationsObserver';
 import { Agent, Page, Pool } from '../index';
 

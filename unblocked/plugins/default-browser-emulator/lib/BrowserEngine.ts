@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
-import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
+import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
 import ChromeApp from '@ulixee/chrome-app';
 import BrowserEngineOptions from './BrowserEngineOptions';
 

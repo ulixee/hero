@@ -1,10 +1,10 @@
-import { Helpers, TestLogger } from '@unblocked-web/plugins-testing/index';
-import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
-import Pool from '@unblocked-web/agent/lib/Pool';
+import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing/index';
+import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IUserAgentOption from '@unblocked-web/specifications/plugin/IUserAgentOption';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IUserAgentOption from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import BrowserEmulator from '../index';
 import BrowserData from '../lib/BrowserData';
 

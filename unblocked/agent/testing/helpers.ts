@@ -18,9 +18,9 @@ import * as tls from 'tls';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import MitmSocket from '@unblocked-web/agent-mitm-socket';
-import MitmSocketSession from '@unblocked-web/agent-mitm-socket/lib/MitmSocketSession';
-import MitmEnv from '@unblocked-web/agent-mitm/env'; // eslint-disable-line import/no-extraneous-dependencies
+import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
+import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocketSession';
+import MitmEnv from '@ulixee/unblocked-agent-mitm/env'; // eslint-disable-line import/no-extraneous-dependencies
 import Logger from '@ulixee/commons/lib/Logger';
 import { Helpers, TestLogger } from './index';
 

@@ -1,4 +1,4 @@
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 
 export default interface IResourceProcessingDetails {
   socketId: number;

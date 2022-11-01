@@ -1,4 +1,4 @@
-import { BrowserUtils, TestLogger, Helpers } from '@unblocked-web/agent-testing/index';
+import { BrowserUtils, TestLogger, Helpers } from '@ulixee/unblocked-agent-testing/index';
 import { Browser } from '../index';
 
 afterEach(Helpers.afterEach);

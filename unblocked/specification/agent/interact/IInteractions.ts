@@ -1,5 +1,5 @@
 import IMouseResult from './IMouseResult';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import IPoint from '../browser/IPoint';
 import {IKeyboardShortcut} from "./IKeyboardShortcuts";
 import {IKeyboardKeyCode} from "./IKeyboardLayoutUS";

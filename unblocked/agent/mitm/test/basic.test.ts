@@ -1,13 +1,13 @@
 import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
-import { Helpers, TestLogger } from '@unblocked-web/agent-testing';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import * as HttpProxyAgent from 'http-proxy-agent';
 import * as Url from 'url';
 import { AddressInfo, Socket } from 'net';
 import * as WebSocket from 'ws';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import CertificateGenerator from '@unblocked-web/agent-mitm-socket/lib/CertificateGenerator';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';

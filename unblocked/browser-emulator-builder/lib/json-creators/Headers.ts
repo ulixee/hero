@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
 import IBasicHeadersProfile from '@double-agent/collect-http-basic-headers/interfaces/IProfile';
 import {
   isOfficialDefaultValueKey,

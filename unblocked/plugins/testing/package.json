@@ -1,5 +1,5 @@
 {
-  "name": "@unblocked-web/plugins-testing",
+  "name": "@ulixee/unblocked-plugins-testing",
   "version": "2.0.0-alpha.12",
   "description": "Helpers and stubs for testing",
   "main": "index.js",
@@ -11,8 +11,8 @@
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/agent": "2.0.0-alpha.12",
-    "@unblocked-web/specifications": "2.0.0-alpha.11",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.12",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.11",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0",

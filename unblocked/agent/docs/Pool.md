@@ -5,7 +5,7 @@ A Pool is an Unblocked Agent utility to share Chrome browser processes across 1+
 A Pool can also throttle requests so that many concurrent Chrome instances and Windows don't freeze up all the system resources.
 
 ```js
-const { Pool } = require('@unblocked-web/agent');
+const { Pool } = require('@ulixee/unblocked-agent');
 
 (async () => {
   const pool = new Pool({ maxConcurrentAgents: 2 });

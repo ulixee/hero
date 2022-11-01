@@ -1,5 +1,5 @@
-import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
-import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
+import { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
+import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
 import ChromeApp from '@ulixee/chrome-app';
 import DataLoader from './DataLoader';
 

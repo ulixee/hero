@@ -6,26 +6,26 @@ import {
   IMousePositionXY,
   InteractionCommand,
   isMousePositionXY,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { assert } from '@ulixee/commons/lib/utils';
 import {
   getKeyboardKey,
   IKeyboardKey,
   KeyboardKey,
-} from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
+} from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 import IInteractionsHelper, {
   IRectLookup,
   IViewportSize,
-} from '@unblocked-web/specifications/agent/interact/IInteractionsHelper';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractionsHelper';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { INodePointer, IJsPath, INodeVisibility } from '@unblocked-web/js-path';
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
-import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
+import { INodePointer, IJsPath, INodeVisibility } from '@ulixee/js-path';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
+import IMouseResult from '@ulixee/unblocked-specification/agent/interact/IMouseResult';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import { IInteractHooks } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import IRect from '@unblocked-web/specifications/agent/browser/IRect';
-import { IKeyboard, IMouse } from '@unblocked-web/specifications/agent/interact/IInput';
-import IWindowOffset from '@unblocked-web/specifications/agent/browser/IWindowOffset';
+import { IInteractHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import IRect from '@ulixee/unblocked-specification/agent/browser/IRect';
+import { IKeyboard, IMouse } from '@ulixee/unblocked-specification/agent/interact/IInput';
+import IWindowOffset from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Frame from './Frame';
 import { JsPath } from './JsPath';

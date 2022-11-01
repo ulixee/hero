@@ -34,7 +34,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.10](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-31)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -76,7 +76,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.7](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-07-26)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -84,7 +84,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.6](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-07-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -109,7 +109,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.4](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-10)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -117,7 +117,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.3](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-06-09)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -125,7 +125,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.2](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-19)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -133,7 +133,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.6.4](https://github.com/ulixee/agent/compare/v1.6.3...v1.6.4) (2022-01-24)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -152,7 +152,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.6.2](https://github.com/ulixee/agent/compare/v1.6.1...v1.6.2) (2021-12-20)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -160,7 +160,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.6.1](https://github.com/ulixee/agent/compare/v1.5.15...v1.6.1) (2021-12-14)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -168,7 +168,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.6.0](https://github.com/ulixee/agent/compare/v1.5.15...v1.6.0) (2021-12-14)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -203,7 +203,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -223,7 +223,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.11](https://github.com/ulixee/agent/compare/v1.5.10...v1.5.11) (2021-09-20)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -231,7 +231,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.10](https://github.com/ulixee/agent/compare/v1.5.9...v1.5.10) (2021-09-11)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -239,7 +239,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.9](https://github.com/ulixee/agent/compare/v1.5.8...v1.5.9) (2021-09-08)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -247,7 +247,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.8](https://github.com/ulixee/agent/compare/v1.5.7...v1.5.8) (2021-08-30)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -266,7 +266,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.6](https://github.com/ulixee/agent/compare/v1.5.5...v1.5.6) (2021-08-15)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -309,7 +309,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.2](https://github.com/ulixee/agent/compare/v1.5.1...v1.5.2) (2021-06-30)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -317,7 +317,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.5.1](https://github.com/ulixee/agent/compare/v1.5.0...v1.5.1) (2021-06-28)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -431,7 +431,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.4.0-alpha.1](https://github.com/ulixee/agent/compare/v1.4.0-alpha.0...v1.4.0-alpha.1) (2021-03-11)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -474,7 +474,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.3.0-alpha.3](https://github.com/ulixee/agent/compare/v1.3.0-alpha.2...v1.3.0-alpha.3) (2021-02-11)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -541,7 +541,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.2.0-alpha.4](https://github.com/ulixee/agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -579,7 +579,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.2.0-alpha.1](https://github.com/ulixee/agent/compare/v1.2.0-alpha.0...v1.2.0-alpha.1) (2020-11-20)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -609,7 +609,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.1.0-alpha.0](https://github.com/ulixee/agent/compare/v1.0.0-alpha.21...v1.1.0-alpha.0) (2020-11-03)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -657,7 +657,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.19](https://github.com/ulixee/agent/compare/v1.0.0-alpha.18...v1.0.0-alpha.19) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -665,7 +665,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.18](https://github.com/ulixee/agent/compare/v1.0.0-alpha.17...v1.0.0-alpha.18) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -673,7 +673,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.17](https://github.com/ulixee/agent/compare/v1.0.0-alpha.16...v1.0.0-alpha.17) (2020-10-13)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -719,7 +719,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -821,7 +821,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.6](https://github.com/ulixee/agent/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2020-07-22)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -829,7 +829,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.5](https://github.com/ulixee/agent/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2020-07-21)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -881,7 +881,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.1 (2020-06-27)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm
 
 
 
@@ -889,4 +889,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.0 (2020-06-27)
 
-**Note:** Version bump only for package @unblocked-web/agent-mitm
+**Note:** Version bump only for package @ulixee/unblocked-agent-mitm

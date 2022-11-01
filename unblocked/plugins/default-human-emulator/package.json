@@ -1,15 +1,15 @@
 {
-  "name": "@unblocked-web/default-human-emulator",
+  "name": "@ulixee/default-human-emulator",
   "version": "2.0.0-alpha.12",
   "description": "Default human emulator based on Xetera/ghost-cursor",
   "main": "index.js",
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/specifications": "2.0.0-alpha.11"
+    "@ulixee/unblocked-specification": "2.0.0-alpha.11"
   },
   "devDependencies": {
-    "@unblocked-web/agent": "2.0.0-alpha.12",
-    "@unblocked-web/js-path": "2.0.0-alpha.1",
-    "@unblocked-web/plugins-testing": "2.0.0-alpha.12"
+    "@ulixee/unblocked-agent": "2.0.0-alpha.12",
+    "@ulixee/js-path": "2.0.0-alpha.1",
+    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.12"
   }
 }

@@ -1,10 +1,10 @@
-import { Helpers, TestLogger } from '@unblocked-web/plugins-testing';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
-import Pool from '@unblocked-web/agent/lib/Pool';
-import Agent from '@unblocked-web/agent/lib/Agent';
-import Page from '@unblocked-web/agent/lib/Page';
-import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import Pool from '@ulixee/unblocked-agent/lib/Pool';
+import Agent from '@ulixee/unblocked-agent/lib/Agent';
+import Page from '@ulixee/unblocked-agent/lib/Page';
+import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import BrowserEmulator from '../index';
 
 let koaServer: ITestKoaServer;

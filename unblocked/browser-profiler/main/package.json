@@ -1,5 +1,5 @@
 {
-  "name": "@unblocked-web/browser-profiler",
+  "name": "@ulixee/unblocked-browser-profiler",
   "version": "2.0.0-alpha.12",
   "main": "index.js",
   "private": true,
@@ -21,8 +21,8 @@
     "@types/selenium-webdriver": "^4.1.5",
     "@ulixee/chrome-app": "^1.0.3",
     "@ulixee/commons": "2.0.0-alpha.13",
-    "@unblocked-web/double-agent-stacks": "2.0.0-alpha.12",
-    "@unblocked-web/real-user-agents": "2.0.0-alpha.12",
+    "@ulixee/double-agent-stacks": "2.0.0-alpha.12",
+    "@ulixee/real-user-agents": "2.0.0-alpha.12",
     "axios": "^0.27.2",
     "chrome-launcher": "^0.13.4",
     "chrome-remote-interface": "0.29.0",

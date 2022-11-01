@@ -1,6 +1,6 @@
 import IAssignment from '@double-agent/collect-controller/interfaces/IAssignment';
 import ISessionPage from '@double-agent/collect/interfaces/ISessionPage';
-import { Agent, Page } from '@unblocked-web/agent';
+import { Agent, Page } from '@ulixee/unblocked-agent';
 import BaseRunner from './BaseRunner';
 
 export default class UnblockedRunner extends BaseRunner {

@@ -10,19 +10,19 @@ Unblocked Agent is an automated web browser that's built to be controlled from e
 ## Installation
 
 ```shell script
-npm i --save @unblocked-web/agent
+npm i --save @ulixee/unblocked-agent
 ```
 
 or
 
 ```shell script
-yarn add @unblocked-web/agent
+yarn add @ulixee/unblocked-agent
 ```
 
 ## Usage
 
 ```js
-const { Agent } = require('@unblocked-web/agent');
+const { Agent } = require('@ulixee/unblocked-agent');
 
 (async () => {
   const agent = new Agent();
@@ -51,7 +51,7 @@ Agents are the primary interface to work with Unblocked Agent. An Agent will coo
 A Pool allows you to share an underlying Browser (ie, Chrome process) across many Agent sessions. Each new Agent will use an Incognito window and an isolated Man-in-the-middle proxy server.
 
 ```js
-const { Agent, Pool } = require('@unblocked-web/agent');
+const { Agent, Pool } = require('@ulixee/unblocked-agent');
 
 (async () => {
   const pool = new Pool();

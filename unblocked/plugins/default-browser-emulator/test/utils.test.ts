@@ -1,8 +1,8 @@
-import * as Helpers from '@unblocked-web/plugins-testing/helpers';
+import * as Helpers from '@ulixee/unblocked-plugins-testing/helpers';
 import { inspect } from 'util';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { Browser } from '@unblocked-web/agent';
+import { Browser } from '@ulixee/unblocked-agent';
 import { getOverrideScript, injectedSourceUrl } from '../lib/DomOverridesBuilder';
 // @ts-ignore
 // eslint-disable-next-line import/extensions

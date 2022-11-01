@@ -9,7 +9,7 @@ import { createPromise } from '@ulixee/commons/lib/utils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import CertificateGenerator, {
   ICertificateStore,
-} from '@unblocked-web/agent-mitm-socket/lib/CertificateGenerator';
+} from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';

@@ -8,7 +8,7 @@ Concepts:
 - `NodePointer` A pointer to a DOM node so it can be referenced across many JsPath queries.
 - `NodeVisiblity` A lookup for all of the parts that make a DOM Element clickable and visible on a page.
 
-They can be accessed from the `@unblocked-web/specifications/browser/IJsPathFunctions.ts` file.
+They can be accessed from the `@ulixee/unblocked-specification/browser/IJsPathFunctions.ts` file.
 
 ## Methods
 

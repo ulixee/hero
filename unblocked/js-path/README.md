@@ -50,13 +50,13 @@ The returned properties will be calculated and returned as follows:
 ## Installation
 
 ```shell script
-npm i --save @unblocked-web/js-path
+npm i --save @ulixee/js-path
 ```
 
 or
 
 ```shell script
-yarn add @unblocked-web/js-path
+yarn add @ulixee/js-path
 ```
 
 ## Contributing

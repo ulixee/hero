@@ -1,4 +1,4 @@
-import deepDiff from '@unblocked-web/browser-profiler/lib/deepDiff';
+import deepDiff from '@ulixee/unblocked-browser-profiler/lib/deepDiff';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function warnForNavigatorOsDifferences(browserNavigators: any, browserKey: string): void {

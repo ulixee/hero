@@ -6,12 +6,12 @@ import {
   LoadStatusPipeline,
   LocationStatus,
   LocationTrigger,
-} from '@unblocked-web/specifications/agent/browser/Location';
-import { NavigationReason } from '@unblocked-web/specifications/agent/browser/NavigationReason';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
+import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
 import INavigation, {
   ContentPaint,
   NavigationStatus,
-} from '@unblocked-web/specifications/agent/browser/INavigation';
+} from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import type IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import type { IBoundLog } from '@ulixee/commons/interfaces/ILog';

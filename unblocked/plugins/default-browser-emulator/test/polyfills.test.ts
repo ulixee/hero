@@ -1,10 +1,10 @@
 import { inspect } from 'util';
-import * as Helpers from '@unblocked-web/plugins-testing/helpers';
-import { ITestKoaServer } from '@unblocked-web/plugins-testing/helpers';
-import { defaultBrowserEngine } from '@unblocked-web/plugins-testing/browserUtils';
-import { Browser } from '@unblocked-web/agent';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
-import { TestLogger } from '@unblocked-web/plugins-testing';
+import * as Helpers from '@ulixee/unblocked-plugins-testing/helpers';
+import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { defaultBrowserEngine } from '@ulixee/unblocked-plugins-testing/browserUtils';
+import { Browser } from '@ulixee/unblocked-agent';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
+import { TestLogger } from '@ulixee/unblocked-plugins-testing';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 

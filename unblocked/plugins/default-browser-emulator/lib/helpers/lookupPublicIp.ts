@@ -2,8 +2,8 @@ import * as http from 'http';
 import { RequestOptions } from 'http';
 import * as https from 'https';
 import * as url from 'url';
-import IHttpSocketAgent from '@unblocked-web/specifications/agent/net/IHttpSocketAgent';
-import IHttpSocketWrapper from '@unblocked-web/specifications/agent/net/IHttpSocketWrapper';
+import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
+import IHttpSocketWrapper from '@ulixee/unblocked-specification/agent/net/IHttpSocketWrapper';
 
 export default async function lookupPublicIp(
   ipLookupServiceUrl: string = IpLookupServices.ipify,

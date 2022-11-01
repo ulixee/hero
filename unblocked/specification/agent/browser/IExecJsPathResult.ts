@@ -1,4 +1,4 @@
-import { INodePointer, IJsPathError } from '@unblocked-web/js-path';
+import { INodePointer, IJsPathError } from '@ulixee/js-path';
 
 export default interface IExecJsPathResult<T = any> {
   value: T;

@@ -1,5 +1,5 @@
-import { IKeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
-import { BrowserUtils, TestLogger } from '@unblocked-web/agent-testing';
+import { IKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
+import { BrowserUtils, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { Browser, BrowserContext, Page } from '../index';
 import { TestServer } from './server';
 import { attachFrame, setContent } from './_pageTestUtils';

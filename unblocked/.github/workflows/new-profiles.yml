@@ -22,7 +22,7 @@ jobs:
         with:
           ref: main
           token: ${{ secrets.PAT }}
-          repository: unblocked-web/browser-profile-data
+          repository: ulixee/browser-profile-data
           path: browser-profile-data
 
       - uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
           path: unblocked
 
       - name: Install unblocked
-        run: yarn build:all
+        run: yarn build
         working-directory: ./unblocked
 
       - name: Linux - Apt Install Chrome(s)
@@ -40,23 +40,23 @@ jobs:
         run: sudo $(npx install-browser-deps)
 
       - name: 'Collect new Browserstack User Agents'
-        run: yarn workspace @unblocked-web/real-user-agents update:agents
+        run: yarn workspace @ulixee/real-user-agents update:agents
         working-directory: ./unblocked
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
       - name: 'Update Real UserAgent Stats'
-        run: yarn workspace @unblocked-web/real-user-agents update
+        run: yarn workspace @ulixee/real-user-agents update
         working-directory: ./unblocked
 
       - name: 'Clear plugin-ids from manual'
         if: ${{ github.event.inputs.clearPlugins }}
-        run: yarn workspace @unblocked-web/browser-profiler profile:clean ${{ github.event.inputs.clearPlugins }}
+        run: yarn workspace @ulixee/unblocked-browser-profiler profile:clean ${{ github.event.inputs.clearPlugins }}
         working-directory: ./unblocked
 
       - name: 'Collect new Browserstack Profiles'
-        run: yarn workspace @unblocked-web/browser-profiler profile:browserstack
+        run: yarn workspace @ulixee/unblocked-browser-profiler profile:browserstack
         working-directory: ./unblocked
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}

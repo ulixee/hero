@@ -1,4 +1,4 @@
-import { BrowserUtils, TestLogger } from '@unblocked-web/agent-testing';
+import { BrowserUtils, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { TestServer } from './server';
 import { Browser, BrowserContext, Page } from '../index';
 

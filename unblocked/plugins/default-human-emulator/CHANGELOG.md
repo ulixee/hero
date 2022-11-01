@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.12](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-31)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -24,7 +24,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -32,7 +32,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.9](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-08-16)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -40,7 +40,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.8](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-08-16)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -48,7 +48,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.7](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-07-26)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -56,7 +56,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.6](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-07-13)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -91,7 +91,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.3](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.1...v2.0.0-alpha.3) (2022-06-09)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator
 
 
 
@@ -99,4 +99,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.2](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-19)
 
-**Note:** Version bump only for package @unblocked-web/default-human-emulator
+**Note:** Version bump only for package @ulixee/default-human-emulator

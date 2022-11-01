@@ -1,4 +1,4 @@
-import IBrowserEngineOption from '@unblocked-web/specifications/agent/browser/IBrowserEngineOption';
+import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
 
 export default interface IBrowserData
   extends Omit<IDataCore, 'browserEngineOptions' | 'userAgentOptions'> {

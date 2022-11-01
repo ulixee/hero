@@ -6,9 +6,9 @@ Unblocked Agent operates with a few different spawned processes:
 
 #### Socket Connect
 
-Each socket created by the browser is proxied through a `Go` process that emulates the TLS signatures of the headed version of the browser engine being used. A small library is placed in `node_modules/@unblocked-web/agent-mitm-socket/dist` during installation. If this is unsuccessful, or aborts, you will see errors.
+Each socket created by the browser is proxied through a `Go` process that emulates the TLS signatures of the headed version of the browser engine being used. A small library is placed in `node_modules/@ulixee/unblocked-agent-mitm-socket/dist` during installation. If this is unsuccessful, or aborts, you will see errors.
 
-You can remove the library and reinstall or rebuild manually using npm run build in the `@unblocked-web/agent-mitm-socket` directory with environmental variable: `UBK_MITM_REBUILD_SOCKET=true`.
+You can remove the library and reinstall or rebuild manually using npm run build in the `@ulixee/unblocked-agent-mitm-socket` directory with environmental variable: `UBK_MITM_REBUILD_SOCKET=true`.
 
 #### Chrome Browser
 

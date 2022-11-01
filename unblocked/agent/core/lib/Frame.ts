@@ -2,27 +2,27 @@ import {
   IFrame,
   IFrameEvents,
   ILifecycleEvents,
-} from '@unblocked-web/specifications/agent/browser/IFrame';
+} from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { NavigationReason } from '@unblocked-web/specifications/agent/browser/NavigationReason';
+import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import IPoint from '@unblocked-web/specifications/agent/browser/IPoint';
-import IWindowOffset from '@unblocked-web/specifications/agent/browser/IWindowOffset';
-import { IInteractionGroups } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
+import IWindowOffset from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
+import { IInteractionGroups } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
-import { IInteractHooks } from '@unblocked-web/specifications/agent/hooks/IHooks';
+import { IInteractHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import {
   ILoadStatus,
   ILocationTrigger,
   LoadStatus,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import Timer from '@ulixee/commons/lib/Timer';
-import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import ProtocolError from '../errors/ProtocolError';
 import DevtoolsSession from './DevtoolsSession';
 import ConsoleMessage from './ConsoleMessage';

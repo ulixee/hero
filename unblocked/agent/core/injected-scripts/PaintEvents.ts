@@ -1,4 +1,4 @@
-import type { IDomPaintEvent } from '@unblocked-web/specifications/agent/browser/Location';
+import type { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 
 declare const runtimeFunction: string;
 // callback binding

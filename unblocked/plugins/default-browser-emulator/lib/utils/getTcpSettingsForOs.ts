@@ -1,4 +1,4 @@
-import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
+import { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
 
 export default function getTcpSettingsForOs(
   name: string,

@@ -1,18 +1,18 @@
 import '@ulixee/commons/lib/SourceMapSupport';
-import { RequestSession } from '@unblocked-web/agent-mitm';
+import { RequestSession } from '@ulixee/unblocked-agent-mitm';
 import Log from '@ulixee/commons/lib/Logger';
-import MitmProxy from '@unblocked-web/agent-mitm/lib/MitmProxy';
+import MitmProxy from '@ulixee/unblocked-agent-mitm/lib/MitmProxy';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { nanoid } from 'nanoid';
-import { IHooksProvider } from '@unblocked-web/specifications/agent/hooks/IHooks';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IEmulationProfile, {
   IEmulationOptions,
-} from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+} from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import Plugins from './Plugins';
 import ICommandMarker from '../interfaces/ICommandMarker';
 import Page from './Page';

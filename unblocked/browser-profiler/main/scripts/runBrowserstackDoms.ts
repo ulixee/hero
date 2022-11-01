@@ -4,7 +4,7 @@ import * as Path from 'path';
 import getAllPlugins from '@double-agent/collect/lib/getAllPlugins';
 import Queue from 'p-queue';
 import { existsAsync } from '@ulixee/commons/lib/fileUtils';
-import RealUserAgents from '@unblocked-web/real-user-agents';
+import RealUserAgents from '@ulixee/real-user-agents';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import BrowserProfiler from '../index';
 import IBrowserstackAgent from '../interfaces/IBrowserstackAgent';

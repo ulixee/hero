@@ -3,6 +3,7 @@
   "disabled": false,
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Collects the settings, pings and frames sent across by a browser http2 client",
   "dependencies": {

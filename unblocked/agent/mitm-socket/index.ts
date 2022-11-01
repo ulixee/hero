@@ -4,9 +4,9 @@ import { unlink } from 'fs';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
-import IHttpSocketWrapper from '@unblocked-web/specifications/agent/net/IHttpSocketWrapper';
+import IHttpSocketWrapper from '@ulixee/unblocked-specification/agent/net/IHttpSocketWrapper';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IHttpSocketConnectOptions from '@unblocked-web/specifications/agent/net/IHttpSocketConnectOptions';
+import IHttpSocketConnectOptions from '@ulixee/unblocked-specification/agent/net/IHttpSocketConnectOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import MitmSocketSession from './lib/MitmSocketSession';
 

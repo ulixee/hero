@@ -1,6 +1,6 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import RealUserAgents, { IUserAgentMeta } from '@unblocked-web/real-user-agents';
+import RealUserAgents, { IUserAgentMeta } from '@ulixee/real-user-agents';
 import Plugin from '@double-agent/collect/lib/Plugin';
 import { gunzipSync } from 'zlib';
 import { profileDataDir } from './paths';

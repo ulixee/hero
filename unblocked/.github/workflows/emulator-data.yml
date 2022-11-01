@@ -30,10 +30,10 @@ jobs:
           cache: 'yarn'
 
       - name: Yarn build
-        run: yarn build:all
+        run: yarn build
 
       - name: Yarn build
-        run: yarn workspace @unblocked-web/browser-emulator-builder generate
+        run: yarn workspace @ulixee/unblocked-browser-emulator-builder generate
 
       - id: browser-data-checkin
         uses: stefanzweifel/git-auto-commit-action@v4

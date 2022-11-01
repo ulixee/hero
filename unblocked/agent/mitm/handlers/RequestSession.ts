@@ -1,21 +1,21 @@
 import * as http from 'http';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import IResourceRequest from '@unblocked-web/specifications/agent/net/IResourceRequest';
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import IResourceRequest from '@ulixee/unblocked-specification/agent/net/IResourceRequest';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import * as http2 from 'http2';
-import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
+import IResourceResponse from '@ulixee/unblocked-specification/agent/net/IResourceResponse';
 import * as net from 'net';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import MitmSocket from '@unblocked-web/agent-mitm-socket/index';
+import MitmSocket from '@ulixee/unblocked-agent-mitm-socket/index';
 import { URL } from 'url';
 import {
   IBrowserContextHooks,
   INetworkHooks,
-} from '@unblocked-web/specifications/agent/hooks/IHooks';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+} from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import MitmRequestAgent from '../lib/MitmRequestAgent';

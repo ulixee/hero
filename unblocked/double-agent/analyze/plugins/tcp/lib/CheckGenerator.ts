@@ -1,5 +1,5 @@
 import ITcpProfile from '@double-agent/collect/plugins/tcp/interfaces/IProfile';
-import RealUserAgents from '@unblocked-web/real-user-agents';
+import RealUserAgents from '@ulixee/real-user-agents';
 import ExpectedValueCheck from './checks/ExpectedValueCheck';
 import ExpectedValuesCheck from './checks/ExpectedValuesCheck';
 

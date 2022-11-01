@@ -2,6 +2,7 @@
   "name": "@double-agent/analyze-browser-codecs",
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Analyzes that the audio, video and WebRTC codecs match the given user agent",
   "dependencies": {

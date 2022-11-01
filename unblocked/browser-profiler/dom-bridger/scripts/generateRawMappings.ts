@@ -1,8 +1,8 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import * as Fs from 'fs';
 import * as Path from 'path';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
-import deepDiff from '@unblocked-web/browser-profiler/lib/deepDiff';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
+import deepDiff from '@ulixee/unblocked-browser-profiler/lib/deepDiff';
 import IBridgeType from '../interfaces/IBridgeType';
 import foreachBridgeSet from '../lib/foreachBridgeSet';
 

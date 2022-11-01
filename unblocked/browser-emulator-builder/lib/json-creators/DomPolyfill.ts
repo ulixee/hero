@@ -3,9 +3,9 @@ import * as Path from 'path';
 import IDomProfile, {
   IProfileDataByProtocol,
 } from '@double-agent/collect-browser-dom-environment/interfaces/IProfile';
-import IDomPolyfill from '@unblocked-web/specifications/plugin/IDomPolyfill';
-import BrowserProfiler from '@unblocked-web/browser-profiler';
-import DomBridger from '@unblocked-web/browser-profiler-dom-bridger';
+import IDomPolyfill from '@ulixee/unblocked-specification/plugin/IDomPolyfill';
+import BrowserProfiler from '@ulixee/unblocked-browser-profiler';
+import DomBridger from '@ulixee/unblocked-browser-profiler-dom-bridger';
 import IBaseProfile from '@double-agent/collect/interfaces/IBaseProfile';
 import { gunzipSync } from 'zlib';
 import generatePolyfill from '../generatePolyfill';

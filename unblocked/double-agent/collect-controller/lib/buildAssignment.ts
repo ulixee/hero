@@ -1,5 +1,5 @@
 import { IUserAgentToTestPickType } from '@double-agent/config/interfaces/IUserAgentToTest';
-import RealUserAgents, { IUserAgentMeta } from '@unblocked-web/real-user-agents';
+import RealUserAgents, { IUserAgentMeta } from '@ulixee/real-user-agents';
 import IAssignment, { AssignmentType, IAssignmentType } from '../interfaces/IAssignment';
 
 export default function buildAssignment(

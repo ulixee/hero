@@ -2,6 +2,7 @@
   "name": "@double-agent/browser-tampering",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "checkCategories": [
     "Dom Features Tampered With"

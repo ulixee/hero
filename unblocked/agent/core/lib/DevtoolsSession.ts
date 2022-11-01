@@ -25,7 +25,7 @@ import IDevtoolsSession, {
   DevtoolsEvents,
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
-} from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+} from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import ProtocolError from '../errors/ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;

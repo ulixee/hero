@@ -3,7 +3,7 @@ import { ChildProcess } from 'child_process';
 import * as readline from 'readline';
 import Log from '@ulixee/commons/lib/Logger';
 import * as Fs from 'fs';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';

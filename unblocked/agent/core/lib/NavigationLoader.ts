@@ -1,5 +1,5 @@
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { ILifecycleEvents, INavigationLoader } from '@unblocked-web/specifications/agent/browser/IFrame';
+import { ILifecycleEvents, INavigationLoader } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 
 export class NavigationLoader {

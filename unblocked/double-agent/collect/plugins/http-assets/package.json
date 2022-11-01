@@ -2,6 +2,7 @@
   "name": "@double-agent/collect-http-assets",
   "version": "2.0.0-alpha.11",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
   "description": "Collects the headers used when loading assets such as css, js, and images in a browser",
   "dependencies": {

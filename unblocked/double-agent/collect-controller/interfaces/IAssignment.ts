@@ -1,6 +1,6 @@
 import ISessionPage from '@double-agent/collect/interfaces/ISessionPage';
 import { IUserAgentToTestPickType } from '@double-agent/config/interfaces/IUserAgentToTest';
-import { IUserAgentMeta } from '@unblocked-web/real-user-agents';
+import { IUserAgentMeta } from '@ulixee/real-user-agents';
 
 export default interface IAssignment {
   id: string;

@@ -1,6 +1,6 @@
-import IMouseResult from '@unblocked-web/specifications/agent/interact/IMouseResult';
-import { INodeVisibility } from '@unblocked-web/js-path';
-import IWindowOffset from '@unblocked-web/specifications/agent/browser/IWindowOffset';
+import IMouseResult from '@ulixee/unblocked-specification/agent/interact/IMouseResult';
+import { INodeVisibility } from '@ulixee/js-path';
+import IWindowOffset from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
 
 class MouseEvents {
   private static pendingEvent?: Promise<IMouseResult>;

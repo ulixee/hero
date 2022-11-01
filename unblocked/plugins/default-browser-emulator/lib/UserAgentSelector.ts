@@ -1,5 +1,5 @@
-import { IVersion } from '@unblocked-web/specifications/plugin/IUserAgentOption';
-import UserAgent from '@unblocked-web/real-user-agents/lib/UserAgent';
+import { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
+import UserAgent from '@ulixee/real-user-agents/lib/UserAgent';
 
 const compareVersions = require('compare-versions');
 

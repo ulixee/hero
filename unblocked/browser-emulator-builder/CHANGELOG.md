@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [2.0.0-alpha.12](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-31)
 
-**Note:** Version bump only for package @unblocked-web/browser-emulator-builder
+**Note:** Version bump only for package @ulixee/unblocked-browser-emulator-builder
 
 
 

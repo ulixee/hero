@@ -1,4 +1,4 @@
-import { Helpers } from '@unblocked-web/plugins-testing';
+import { Helpers } from '@ulixee/unblocked-plugins-testing';
 import DefaultBrowserEmulator, { defaultBrowserEngine } from '../index';
 
 afterAll(Helpers.afterAll);
