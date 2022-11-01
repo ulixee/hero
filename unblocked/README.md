@@ -12,7 +12,7 @@ You can work with the project by:
 
 ### Browser Profiles
 
-If you want to work with profiles (ie, update Emulator Data, generate Double Agent probes, etc), you'll need to download the BrowserProfiles data: `$ yarn workspace @ulixee/unblocked-browser-profiler downloadData`. This will clone data into a folder called `browser-profile-data` adjacent to the `unblocked` folder. NOTE: You might want to checkout instead of clone into this directory if you intend to check-in.
+If you want to work with profiles (ie, update Emulator Data, generate Double Agent probes, etc), you'll need to download the BrowserProfiles data: `$ yarn workspace @ulixee/unblocked-browser-profiler downloadData`. This will clone data into a folder called `browser-profile-data` adjacent to the `unblocked` folder.
 
 
 ## Questions

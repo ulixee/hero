@@ -97,6 +97,6 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
-          name: test-logs-${{matrix.os}}-${{ matrix.node-version }}
+          name: test-logs-${{matrix.os}}-${{ matrix.node-version }}-${{matrix.browser || 'main'}}
           path: build/test-logs.tar
           retention-days: 1
