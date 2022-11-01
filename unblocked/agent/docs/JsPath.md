@@ -1,6 +1,6 @@
 # JsPath
 
-JsPath makes various functions available implementing the [JsPath](https://github.com/unblocked-web/unblocked/main/tree/js-path) specification.
+JsPath makes various functions available implementing the [JsPath](https://github.com/ulixee/unblocked/main/tree/js-path) specification.
 
 Concepts:
 

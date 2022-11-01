@@ -21,7 +21,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Clone Profile Data
-        run: git clone https://github.com/unblocked-web/browser-profile-data.git
+        run: git clone https://github.com/ulixee/browser-profile-data.git
         working-directory: ..
 
       - uses: actions/setup-node@v3

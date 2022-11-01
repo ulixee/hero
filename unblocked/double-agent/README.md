@@ -93,11 +93,11 @@ Probes are generated from a baseline of browsers. Double Agent comes with some b
 
 If you wish to generate probes for different data browsers (or a wider set), you can follow these steps to update the data:
 
-1. Clone the [`unblocked-web/unblocked`](https://github.com/unblocked-web/unblocked) monorepo and install git submodules.
+1. Clone the [`unblocked-web/unblocked`](https://github.com/ulixee/unblocked) monorepo and install git submodules.
 2. Download the `unblocked-web/browser-profiler` data by running `yarn downloadData` in that workspace folder.
 3. Modify [double-agent/stacks/data/external/userAgentConfig.json](stacks/data/external/userAgentConfig.json) to include browser ids you wish to test (`<browser.toLowercase()>-<major>-<minor ?? 0>`).
 4. Run `yarn 0` to copy in the profile data.
 5. Run `yarn 1` to create new probes.
 
 ## Testing your Scraper:
-To view examples of running the test suite with a custom browser, check-out the [DoubleAgent Stacks](https://github.com/unblocked-web/unblocked/double-agent-stacks) project in [Unblocked](https://github.com/unblocked-web/unblocked).
+To view examples of running the test suite with a custom browser, check-out the [DoubleAgent Stacks](https://github.com/ulixee/unblocked/double-agent-stacks) project in [Unblocked](https://github.com/ulixee/unblocked).

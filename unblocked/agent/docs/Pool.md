@@ -33,7 +33,7 @@ Creates a new pool.
   - certificateStore `ICertificateStore` Optional caching layer to store and retrieve certificates.
   - dataDir `string` Optional directory to store/retrieve the Certificate Base Authority and Private Key.
   - defaultBrowserEngine `IBrowserEngine` Optional default [BrowserEngine](./BrowserEngine.md) to launch new Agents with if none is specified.
-  - plugins `IUnblockedPluginClass[]` Optional list of [Unblocked Plugins](https://github.com/unblocked-web/unblocked/main/tree/specification/plugin/IUnblockedPlugin.ts) classes (`IUnblockedPluginClass`). These plugins will be installed into all hooks for the agent.
+  - plugins `IUnblockedPluginClass[]` Optional list of [Unblocked Plugins](https://github.com/ulixee/unblocked/main/tree/specification/plugin/IUnblockedPlugin.ts) classes (`IUnblockedPluginClass`). These plugins will be installed into all hooks for the agent.
   - logger `IBoundLog` Optional logger.
 
 ## Properties

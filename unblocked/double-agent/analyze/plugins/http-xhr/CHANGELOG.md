@@ -11,9 +11,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-# [2.0.0-alpha.11](https://github.com/unblocked-web/unblocked/compare/v1.0.1...v2.0.0-alpha.11) (2022-10-03)
+# [2.0.0-alpha.11](https://github.com/ulixee/unblocked/compare/v1.0.1...v2.0.0-alpha.11) (2022-10-03)
 
 
 ### Features
 
-* integrate automation checks ([55e1920](https://github.com/unblocked-web/unblocked/commit/55e192023d8dacc493ae4969791258576975738d))
+* integrate automation checks ([55e1920](https://github.com/ulixee/unblocked/commit/55e192023d8dacc493ae4969791258576975738d))

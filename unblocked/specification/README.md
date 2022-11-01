@@ -110,7 +110,7 @@ The `/agent` folder of this specification defines all of the hooks that are expe
 - `/agent/net`: The network stack, including taps into lower level protocols
 - `/agent/interact`: An interaction specification, allowing for grouping interaction steps.
 
-NOTE: This set of interfaces was initially extracted from the SecretAgent project (https://github.com/unblocked-web/secret-agent). As such, it has too broad a spec. It should be whittled down over time.
+NOTE: This set of interfaces was initially extracted from the SecretAgent project (https://github.com/ulixee/secret-agent). As such, it has too broad a spec. It should be whittled down over time.
 
 To reach the goal of emulating a human using a regular browser, the following "hooks" must be provided by an implementor:
 

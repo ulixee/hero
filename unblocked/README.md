@@ -52,5 +52,5 @@ This project has a [code of conduct](CODE_OF_CONDUCT.md). By interacting with th
 [double-agent]: ./double-agent
 [spec]: ./specification
 [jspath]: ./jspath
-[profiles]: https://github.com/unblocked-web/browser-profile-data
+[profiles]: https://github.com/ulixee/browser-profile-data
 [real-user-agents]: ./real-user-agents

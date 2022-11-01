@@ -2,7 +2,7 @@
 
 A Page is an individual "WebPage" that is opened in a [BrowserContext](./BrowserContext.md). It can navigate to pages and provides programmatic ways to interact with the DOM.
 
-Pages install a [JsPath](https://github.com/unblocked-web/unblocked/main/tree/js-path) implementation into every [Frame](./Frame.md).
+Pages install a [JsPath](https://github.com/ulixee/unblocked/main/tree/js-path) implementation into every [Frame](./Frame.md).
 
 ## Constructor
 
@@ -52,7 +52,7 @@ Interceptors can be used to serve fake bodies, or cancel HTTP requests from occu
 
 ### interact(...interactionGroups): Promise<void>
 
-Initiate an interaction with one or more elements using the [JSPath](https://github.com/unblocked-web/unblocked/main/tree/js-path) specification.
+Initiate an interaction with one or more elements using the [JSPath](https://github.com/ulixee/unblocked/main/tree/js-path) specification.
 
 ```js
 await page.interact([
