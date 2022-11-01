@@ -96,8 +96,7 @@ jobs:
       - name: Upload Databases
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
-        working-directory: ./build
         with:
           name: test-logs-${{matrix.os}}-${{ matrix.node-version }}
-          path: test-logs.tar
+          path: build/test-logs.tar
           retention-days: 1
