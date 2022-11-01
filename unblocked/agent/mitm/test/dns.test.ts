@@ -24,7 +24,7 @@ class CustomPlugin implements INetworkHooks {
   static id = 'test';
 
   onTlsConfiguration(settings) {
-    settings.tlsClientHelloId = 'chrome-83';
+    settings.tlsClientHelloId = 'chrome-105';
   }
 
   onDnsConfiguration(settings) {

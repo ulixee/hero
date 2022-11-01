@@ -1,5 +1,5 @@
 {
-  "name": "@unblocked-web/specification",
+  "name": "@unblocked-web/specifications",
   "version": "2.0.0-alpha.11",
   "description": "Interfaces to interact with Unblocked Agent Plugins",
   "dependencies": {

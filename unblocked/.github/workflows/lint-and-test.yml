@@ -90,11 +90,13 @@ jobs:
 
       - name: 'Tar files'
         if: ${{ failure() }}
+        working-directory: ./build
         run: tar -cvf test-logs.tar .data-test
 
       - name: Upload Databases
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
+        working-directory: ./build
         with:
           name: test-logs-${{matrix.os}}-${{ matrix.node-version }}
           path: test-logs.tar
