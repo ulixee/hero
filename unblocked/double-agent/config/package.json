@@ -1,15 +1,15 @@
 {
   "name": "@double-agent/config",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.13",
   "license": "MIT",
   "private": true,
   "scripts": {
     "sync": "cd ../../build/double-agent/config && yarn sync"
   },
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.11",
-    "@double-agent/collect": "2.0.0-alpha.11",
-    "@ulixee/commons": "2.0.0-alpha.13",
-    "@ulixee/real-user-agents": "2.0.0-alpha.12"
+    "@double-agent/analyze": "2.0.0-alpha.13",
+    "@double-agent/collect": "2.0.0-alpha.13",
+    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/real-user-agents": "2.0.0-alpha.13"
   }
 }
