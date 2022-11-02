@@ -349,8 +349,8 @@ export default class BrowserContext
         if (!url) return true;
 
         let domain = c.domain;
-        if (!domain.startsWith('.')) domain = `.${  domain}`;
-        if (!(`.${  url.hostname}`).endsWith(domain)) return false;
+        if (!domain.startsWith('.')) domain = `.${domain}`;
+        if (!`.${url.hostname}`.endsWith(domain)) return false;
         if (!url.pathname.startsWith(c.path)) return false;
         if (c.secure === true && url.protocol !== 'https:') return false;
         return true;

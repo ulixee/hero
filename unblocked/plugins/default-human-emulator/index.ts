@@ -149,6 +149,10 @@ export default class DefaultHumanEmulator implements IUnblockedPlugin {
     interactionStep.delayMillis ??= Math.floor(Math.random() * 100);
     delete interactionStep.relativeToScrollOffset;
 
+    if (!mousePosition) {
+      return runFn(interactionStep);
+    }
+
     const retries = 3;
 
     for (let i = 0; i < retries; i += 1) {

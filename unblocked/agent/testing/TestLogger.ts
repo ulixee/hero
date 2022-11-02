@@ -9,8 +9,8 @@ let isDevtoolsLogging = false;
 try {
   const envDebug = process.env.DEBUG ?? '';
   if (
-    envDebug.includes('ubk:*') ||
-    envDebug.includes('ubk*') ||
+    envDebug.includes('ulx:*') ||
+    envDebug.includes('ulx*') ||
     envDebug === '*' ||
     envDebug.includes('devtools')
   ) {

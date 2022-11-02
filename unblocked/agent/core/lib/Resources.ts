@@ -276,7 +276,10 @@ export default class Resources
     // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
     if (
       HeadersHandler.isWorkerDest(mitmResource, 'shared', 'service') ||
-      mitmResource.resourceType === 'Websocket'
+      mitmResource.resourceType === 'Websocket' ||
+      // if navigate and empty, this is likely a download - it won't trigger in chrome
+      (HeadersHandler.getRequestHeader(mitmResource, 'sec-fetch-mode') === 'navigate' &&
+        HeadersHandler.getRequestHeader(mitmResource, 'sec-fetch-dest') === 'empty')
     ) {
       pendingBrowserRequest.browserRequestedPromise.resolve(null);
     }

@@ -320,7 +320,10 @@ export default class Interactor implements IInteractionsHelper {
         const { delayMillis, mouseButton, command, mouseResultVerifier } = interactionStep;
         let interactRect: IRectLookup;
         // if this is a jsPath, need to look it up
-        if (isMousePositionXY(interactionStep.mousePosition) === false) {
+        if (
+          interactionStep.mousePosition &&
+          isMousePositionXY(interactionStep.mousePosition) === false
+        ) {
           interactRect = await this.getInteractionRect(interactionStep);
           if (interactRect.elementTag === 'option') {
             // options need a browser level call
@@ -430,6 +433,7 @@ export default class Interactor implements IInteractionsHelper {
     constrainToViewport = true,
     rect?: IRectLookup,
   ): Promise<[x: number, y: number]> {
+    if (!interactionStep.mousePosition) return [this.mouse.position.x, this.mouse.position.y];
     rect ??= await this.getInteractionRect(interactionStep);
 
     if (isMousePositionXY(interactionStep.mousePosition)) {

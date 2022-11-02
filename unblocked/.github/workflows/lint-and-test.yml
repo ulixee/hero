@@ -64,7 +64,7 @@ jobs:
       - name: Yarn build
         run: yarn build
         env:
-          UBK_MITM_REBUILD_SOCKET: 1
+          ULX_MITM_REBUILD_SOCKET: 1
 
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
@@ -84,9 +84,9 @@ jobs:
         run: yarn jest --testTimeout=60000 --maxWorkers=2
         working-directory: ./build
         env:
-          UBK_DATA_DIR: .data-test
+          ULX_DATA_DIR: .data-test
           NODE_ENV: test
-          UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
+          ULX_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
 
       - name: 'Tar files'
         if: ${{ failure() }}

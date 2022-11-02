@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "husky install",
     "bump-version": "ulx-repo-version-bump",
-    "build": "yarn && yarn tsc && cd ./build && cross-env UBK_MITM_REBUILD_SOCKET=1 yarn && yarn workspace @double-agent/config sync",
+    "build": "yarn && yarn tsc && cd ./build && cross-env ULX_MITM_REBUILD_SOCKET=1 yarn && yarn workspace @double-agent/config sync",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
     "copy:build": "ulx-repo-after-build && ulx-repo-adjust-paths && node alsoCopy.js",
     "copy:dist": "ulx-repo-after-build --dist && shx cp -r \"browser-emulator-builder/data\" \"build-dist/plugins/default-browser-emulator\" && ulx-repo-adjust-paths build-dist",
@@ -13,7 +13,7 @@
     "tsc": "tsc -b -i tsconfig.json && yarn copy:build",
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
     "test": "yarn copy:build && yarn test:build",
-    "test:build": "cd ./build && cross-env UBK_DATA_DIR=.data-test NODE_ENV=test jest",
+    "test:build": "cd ./build && cross-env ULX_DATA_DIR=.data-test NODE_ENV=test jest",
     "lint": "eslint --cache ./",
     "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"

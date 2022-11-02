@@ -10,8 +10,8 @@ const pageScripts = {
   PaintEvents: fs.readFileSync(`${__dirname}/../injected-scripts/PaintEvents.js`, 'utf8'),
 };
 
-const pageEventsCallbackName = '__ubkPagePaintEventListenerCallback';
-export const injectedScript = `(function ubkInjectedScripts(runtimeFunction) {
+const pageEventsCallbackName = '__ulxPagePaintEventListenerCallback';
+export const injectedScript = `(function ulxInjectedScripts(runtimeFunction) {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};
 
@@ -21,15 +21,15 @@ ${pageScripts.MouseEvents};
 ${pageScripts.PaintEvents};
 
 window.TypeSerializer = TypeSerializer;
-window.UBK = {
+window.ULX = {
   JsPath,
   MouseEvents
 };
 })('${pageEventsCallbackName}');`;
 
 export default class InjectedScripts {
-  public static JsPath = `UBK.JsPath`;
-  public static MouseEvents = `UBK.MouseEvents`;
+  public static JsPath = `ULX.JsPath`;
+  public static MouseEvents = `ULX.MouseEvents`;
 
   public static install(
     framesManager: FramesManager,

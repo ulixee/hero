@@ -5,7 +5,7 @@ const rmSync = 'rmSync' in fs ? 'rmSync' : 'rmdirSync';
 // eslint-disable-next-line import/no-extraneous-dependencies
 const CertificateManager = require('@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator').default;
 
-const dataDir = process.env.UBK_DATA_DIR ?? `${__dirname}/.data-test`;
+const dataDir = process.env.ULX_DATA_DIR ?? `${__dirname}/.data-test`;
 
 module.exports = async () => {
   try {
