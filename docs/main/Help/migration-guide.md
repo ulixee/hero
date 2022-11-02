@@ -9,7 +9,7 @@ If you're migrating a script from SecretAgent, you can expect to find:
 
 Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero-playground')`.
 
-```typescript
+```js
 import { Agent } from 'secret-agent';
 
 async function run() {
@@ -26,7 +26,7 @@ async function run() {
 run().catch(error => console.log(error));
 ```
 
-```typescript
+```js
 import Hero from '@ulixee/hero-playground';
 
 async function run() {

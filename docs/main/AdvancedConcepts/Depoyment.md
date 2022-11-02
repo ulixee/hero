@@ -75,7 +75,7 @@ Add `@ulixee/hero-core` and `@ulixee/net` to your server project:
 yarn add @ulixee/hero-core @ulixee/net
 ```
 
-```typescript
+```js
 import HeroCore from '@ulixee/hero-core';
 import WsTransportToClient from '@ulixee/net/lib/WsTransportToClient';
 import * as WebSocket from 'ws';
@@ -103,7 +103,7 @@ Add `@ulixee/hero` to your client project:
 yarn add @ulixee/hero
 ```
 
-```typescript
+```js
 // Connect to your server IP and port as configured above
 async function runHero(serverIpAndPort: string) {
   // hero will dial your IP:PORT/<OPTIONAL PATH>
@@ -114,7 +114,7 @@ async function runHero(serverIpAndPort: string) {
 
 NOTE: If you don't have an existing Http server, a normal NodeJs server will suffice.
 
-```typescript
+```js
 import * as http from 'http';
 
 const server = new http.Server();

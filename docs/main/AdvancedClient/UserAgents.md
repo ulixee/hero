@@ -33,7 +33,7 @@ Selectors are indicated by starting a `userAgent` parameter with a `~`
   - You may also combine a browser and operating system choice `~ chrome = 105 && mac`
   - You may also combine a browser and operating system version `~ chrome = 105 && mac 10.15`
 
-```typescript
+```js
 new Hero({
   userAgent: '~ chrome >= 105 && windows >= 10'
 });
