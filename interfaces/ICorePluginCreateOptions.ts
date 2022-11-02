@@ -1,5 +1,5 @@
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import ICorePlugins from './ICorePlugins';
 import { ISessionSummary } from './ICorePlugin';
 

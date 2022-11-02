@@ -1,6 +1,6 @@
-import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { ContentPaint } from '@unblocked-web/specifications/agent/browser/INavigation';
+import { ContentPaint } from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import { Session, Tab } from '@ulixee/hero-core';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -8,7 +8,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import Log from '@ulixee/commons/lib/Logger';
-import { IFrameNavigationEvents } from '@unblocked-web/specifications/agent/browser/IFrameNavigations';
+import { IFrameNavigationEvents } from '@ulixee/unblocked-specification/agent/browser/IFrameNavigations';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 
 const { log } = Log(module);

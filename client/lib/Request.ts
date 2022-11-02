@@ -2,7 +2,7 @@ import FetchRequest from 'awaited-dom/impl/official-klasses/Request';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { INodePointer } from '@unblocked-web/js-path';
+import { INodePointer } from '@ulixee/js-path';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 

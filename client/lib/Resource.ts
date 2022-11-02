@@ -1,5 +1,5 @@
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';

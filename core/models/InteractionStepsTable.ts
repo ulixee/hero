@@ -6,7 +6,7 @@ import {
   IInteractionStep,
   IKeyboardCommand,
   isMousePositionXY,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 
 export default class InteractionStepsTable extends SqliteTable<IInteractionStepRecord> {
   constructor(db: SqliteDatabase) {

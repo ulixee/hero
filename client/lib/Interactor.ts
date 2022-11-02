@@ -9,12 +9,12 @@ import {
   InteractionCommand as CoreCommand,
   isMousePositionXY,
   MouseButton,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { IKeyboardKeyCode } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
-import { IKeyboardShortcut } from '@unblocked-web/specifications/agent/interact/IKeyboardShortcuts';
+import { IKeyboardKeyCode } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
+import { IKeyboardShortcut } from '@ulixee/unblocked-specification/agent/interact/IKeyboardShortcuts';
 import IInteractions, {
   Command,
   ICommand,

@@ -8,7 +8,7 @@ import Request from 'awaited-dom/impl/official-klasses/Request';
 import {
   ILoadStatus,
   ILocationTrigger,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -20,9 +20,9 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { INodeVisibility } from '@unblocked-web/js-path';
+import { INodeVisibility } from '@ulixee/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IFlowCommandOptions from '@ulixee/hero-interfaces/IFlowCommandOptions';

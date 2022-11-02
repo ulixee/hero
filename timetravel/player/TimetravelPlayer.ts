@@ -1,4 +1,4 @@
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -9,7 +9,7 @@ import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionT
 import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import MirrorNetwork from '../lib/MirrorNetwork';
 import TabPlaybackController from './TabPlaybackController';
 
@@ -71,7 +71,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   ) {
     super();
     this.sessionOptions = {
-      
+
       ...Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId),
     };
     this.sessionOptions.mode = 'timetravel';

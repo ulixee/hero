@@ -1,9 +1,9 @@
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
-import IResourceProcessingDetails from '@unblocked-web/agent/interfaces/IResourceProcessingDetails';
+import IResourceProcessingDetails from '@ulixee/unblocked-agent/interfaces/IResourceProcessingDetails';
 import { decompressBuffer } from '@ulixee/commons/lib/bufferUtils';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {

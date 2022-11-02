@@ -1,4 +1,4 @@
-import AgentEnv from '@unblocked-web/agent/env';
+import AgentEnv from '@ulixee/unblocked-agent/env';
 import { loadEnv, parseEnvBool, parseEnvPath } from '@ulixee/commons/lib/envUtils';
 
 loadEnv(__dirname);

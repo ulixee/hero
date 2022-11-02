@@ -1,6 +1,6 @@
-import { ICookie } from '@unblocked-web/specifications/agent/net/ICookie';
-import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
-import IDeviceProfile from '@unblocked-web/specifications/plugin/IDeviceProfile';
+import { ICookie } from '@ulixee/unblocked-specification/agent/net/ICookie';
+import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
+import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfile';
 
 export default interface IUserProfile {
   cookies?: ICookie[];

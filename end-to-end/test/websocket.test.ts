@@ -1,8 +1,8 @@
 import { Helpers, Hero } from '@ulixee/hero-testing';
-import MitmServer from '@unblocked-web/agent-mitm/lib/MitmProxy';
+import MitmServer from '@ulixee/unblocked-agent-mitm/lib/MitmProxy';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as WebSocket from 'ws';
-import HttpUpgradeHandler from '@unblocked-web/agent-mitm/handlers/HttpUpgradeHandler';
+import HttpUpgradeHandler from '@ulixee/unblocked-agent-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { AddressInfo } from 'net';

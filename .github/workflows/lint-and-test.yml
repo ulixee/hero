@@ -44,14 +44,14 @@ jobs:
         working-directory: ../../shared
 
       - name: Clone unblocked
-        run: git clone --recurse-submodules -j8 https://github.com/unblocked-web/unblocked.git
+        run: git clone --recurse-submodules -j8 https://github.com/ulixee/unblocked.git
         working-directory: ../..
 
       - name: Install unblocked
-        run: yarn build:all
+        run: yarn build
         working-directory: ../../unblocked
         env:
-          UBK_MITM_MITM_SOCKET: 1
+          ULX_MITM_REBUILD_SOCKET: 1
 
       - name: Relink shared
         run: yarn
@@ -80,7 +80,7 @@ jobs:
         env:
           NODE_ENV: test
           ULX_DATA_DIR: .data
-          UBK_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
+          ULX_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
 
       - name: 'Tar files'
         if: ${{ failure() }}

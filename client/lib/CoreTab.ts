@@ -1,14 +1,14 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
+import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';

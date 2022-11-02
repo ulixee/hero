@@ -86,7 +86,7 @@ This tells Hero that the plugin is a CorePlugin. It must always be set.
 
 The following methods are optional. Add them to your plugin as needed. 
 
-NOTE: Many of these API calls allow you to tap into the underlying [Unblocked Plugin](https://github.com/unblocked-web/unblocked/plugins) Specification ([spec](https://github.com/unblocked-web/specifications)). You can find detailed documentation in the two projects listed above.
+NOTE: Many of these API calls allow you to tap into the underlying [Unblocked Plugin](https://github.com/ulixee/unblocked/main/tree/plugins) Specification ([spec](https://github.com/ulixee/unblocked/main/tree/specification)). You can find detailed documentation in the two projects listed above.
 
 ### configure<em>(config)</em>
 

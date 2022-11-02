@@ -1,6 +1,6 @@
-import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
+import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
 import * as Fs from 'fs';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import AwaitedPath  from 'awaited-dom/base/AwaitedPath';
 import { createHTMLInputElement } from 'awaited-dom/impl/create';
 import { IHTMLInputElement } from 'awaited-dom/base/interfaces/official';

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import * as readline from 'readline';

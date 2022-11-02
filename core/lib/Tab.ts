@@ -2,30 +2,30 @@ import Log from '@ulixee/commons/lib/Logger';
 import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import Timer from '@ulixee/commons/lib/Timer';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import { IPageEvents } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
-import { IJsPath } from '@unblocked-web/js-path';
-import { IInteractionGroups } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
+import { IJsPath } from '@ulixee/js-path';
+import { IInteractionGroups } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
 import {
   ILoadStatus,
   ILocationTrigger,
   LoadStatus,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IDialog from '@unblocked-web/specifications/agent/browser/IDialog';
-import IFileChooserPrompt from '@unblocked-web/specifications/agent/browser/IFileChooserPrompt';
+import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
+import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import INavigation from '@unblocked-web/specifications/agent/browser/INavigation';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
@@ -35,12 +35,12 @@ import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
-import FrameNavigations from '@unblocked-web/agent/lib/FrameNavigations';
-import FrameNavigationsObserver from '@unblocked-web/agent/lib/FrameNavigationsObserver';
-import Page from '@unblocked-web/agent/lib/Page';
-import { IWebsocketMessage } from '@unblocked-web/agent/lib/WebsocketMessages';
-import { injectedSourceUrl } from '@unblocked-web/default-browser-emulator/lib/DomOverridesBuilder';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
+import FrameNavigations from '@ulixee/unblocked-agent/lib/FrameNavigations';
+import FrameNavigationsObserver from '@ulixee/unblocked-agent/lib/FrameNavigationsObserver';
+import Page from '@ulixee/unblocked-agent/lib/Page';
+import { IWebsocketMessage } from '@ulixee/unblocked-agent/lib/WebsocketMessages';
+import { injectedSourceUrl } from '@ulixee/default-browser-emulator/lib/DomOverridesBuilder';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
@@ -505,7 +505,7 @@ export default class Tab
     if (saveToDb) {
       this.session.db.detachedElements.insert(detachedElement);
     }
-    
+
     // Don't await this so promise explosions don't escape
     // eslint-disable-next-line promise/catch-or-return
     resolveExisting

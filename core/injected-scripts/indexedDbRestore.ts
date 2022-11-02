@@ -1,4 +1,4 @@
-import type { IIndexedDB } from '@unblocked-web/specifications/agent/browser/IIndexedDB';
+import type { IIndexedDB } from '@ulixee/unblocked-specification/agent/browser/IIndexedDB';
 
 async function restoreIndexedDb(restoreDBs: IIndexedDB[]): Promise<void> {
   if (!restoreDBs || !restoreDBs.length) return;

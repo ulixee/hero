@@ -1,9 +1,9 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICommandMarker from '@unblocked-web/agent/interfaces/ICommandMarker';
+import ICommandMarker from '@ulixee/unblocked-agent/interfaces/ICommandMarker';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import { IRemoteEmitFn } from '../interfaces/IRemoteEventListener';
 import { IEventRecord } from '../models/AwaitedEventsTable';

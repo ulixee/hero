@@ -3,9 +3,9 @@ import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons
 import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
-} from '@unblocked-web/agent-mitm/handlers/RequestSession';
+} from '@ulixee/unblocked-agent-mitm/handlers/RequestSession';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
@@ -16,16 +16,16 @@ import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
-import Agent from '@unblocked-web/agent/lib/Agent';
-import Resources from '@unblocked-web/agent/lib/Resources';
-import WebsocketMessages from '@unblocked-web/agent/lib/WebsocketMessages';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
-import DevtoolsSessionLogger from '@unblocked-web/agent/lib/DevtoolsSessionLogger';
-import Page from '@unblocked-web/agent/lib/Page';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import { IEmulatorOptions } from '@unblocked-web/default-browser-emulator';
-import IViewport from '@unblocked-web/specifications/agent/browser/IViewport';
-import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
+import Agent from '@ulixee/unblocked-agent/lib/Agent';
+import Resources from '@ulixee/unblocked-agent/lib/Resources';
+import WebsocketMessages from '@ulixee/unblocked-agent/lib/WebsocketMessages';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
+import DevtoolsSessionLogger from '@ulixee/unblocked-agent/lib/DevtoolsSessionLogger';
+import Page from '@ulixee/unblocked-agent/lib/Page';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { IEmulatorOptions } from '@ulixee/default-browser-emulator';
+import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';

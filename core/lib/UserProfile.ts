@@ -1,10 +1,10 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IDomStorage, {
   IDomStorageForOrigin,
-} from '@unblocked-web/specifications/agent/browser/IDomStorage';
+} from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import Log from '@ulixee/commons/lib/Logger';
 import { assert } from '@ulixee/commons/lib/utils';
-import Page from '@unblocked-web/agent/lib/Page';
+import Page from '@ulixee/unblocked-agent/lib/Page';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';

@@ -2,8 +2,8 @@
 import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
-import IExecJsPathResult from '@unblocked-web/specifications/agent/browser/IExecJsPathResult';
-import { getNodePointerFnName } from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
+import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
+import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
 import { Helpers } from '@ulixee/hero-testing';
 import Hero from '../index';
 import MockConnectionToCore from './_MockConnectionToCore';

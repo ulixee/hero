@@ -1,4 +1,4 @@
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import Resource from '../lib/Resource';
 import Hero from '../index';
 import MockConnectionToCore from './_MockConnectionToCore';

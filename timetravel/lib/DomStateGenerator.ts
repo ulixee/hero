@@ -12,7 +12,7 @@ import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionB
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import BrowserContext from '@unblocked-web/agent/lib/BrowserContext';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';

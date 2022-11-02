@@ -82,7 +82,7 @@ const Hero = require('@ulixee/hero-playground');
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
-    - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/unblocked-web/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81). Defaults to `ipify.org`.
+    - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81). Defaults to `ipify.org`.
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
     - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
 

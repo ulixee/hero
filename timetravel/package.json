@@ -6,8 +6,8 @@
     "@ulixee/commons": "2.0.0-alpha.13",
     "@ulixee/hero-core": "2.0.0-alpha.13",
     "@ulixee/hero-interfaces": "2.0.0-alpha.13",
-    "@unblocked-web/agent": "2.0.0-alpha.12",
-    "@unblocked-web/specifications": "2.0.0-alpha.11",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.12",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.11",
     "nanoid": "^3.1.30"
   },
   "devDependencies": {

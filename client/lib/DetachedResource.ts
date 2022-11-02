@@ -1,5 +1,5 @@
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import IDetachedResourceDetails from '../interfaces/IDetachedResourceDetails';
 

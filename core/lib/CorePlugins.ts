@@ -7,8 +7,8 @@ import ICorePlugin, {
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import Agent from '@unblocked-web/agent/lib/Agent';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import Agent from '@ulixee/unblocked-agent/lib/Agent';
 import Core from '../index';
 
 interface IOptionsCreate {

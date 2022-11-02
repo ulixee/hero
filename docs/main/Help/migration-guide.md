@@ -5,7 +5,7 @@ If you're migrating a script from SecretAgent, you can expect to find:
 - a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](/docs/hero/basic-client/awaited-dom-extenders))
 - a much better experience running in "headed" mode during development, while still supporting headless for production.
 - features that let you react to the changing state/flow of a web page ([FlowHandlers](/docs/hero/basic-client/flow))
-- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/miner; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/unblocked-web/unblocked) project.
+- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/miner; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/ulixee/unblocked) project.
 
 Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero-playground')`.
 
@@ -65,7 +65,7 @@ If you want to keep a model where you are using "driving" a script by queuing up
 
 ## BrowserEmulators and HumanEmulators
 
-If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have been merged into a single type of Plugin called an [Unblocked Plugin][unblocked-plugin]. You can see our plugins ported to the new format [here](https://github.com/unblocked-web/unblocked/plugins). We're planning to break up the BrowserEmulator into a series of smaller plugins with the end vision of making it far simpler to add workarounds as you find the need to add bot-blocker evasions.
+If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have been merged into a single type of Plugin called an [Unblocked Plugin][unblocked-plugin]. You can see our plugins ported to the new format [here](https://github.com/ulixee/unblocked/main/tree/plugins). We're planning to break up the BrowserEmulator into a series of smaller plugins with the end vision of making it far simpler to add workarounds as you find the need to add bot-blocker evasions.
 
 ## Puppet
 
@@ -81,5 +81,5 @@ If you were using Replay with SecretAgent (sorry Windows users...), it's now par
 
 
 [miner]: https://ulixee.org/docs/miner
-[unblocked-plugin]: https://github.com/unblocked-web/specifications
-[unblocked-agent]: https://github.com/unblocked-web/agent
+[unblocked-plugin]: https://github.com/ulixee/unblocked/main/tree/specification
+[unblocked-agent]: https://github.com/ulixee/unblocked/main/tree/agent

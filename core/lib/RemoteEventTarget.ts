@@ -1,4 +1,4 @@
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Logger from '@ulixee/commons/lib/Logger';

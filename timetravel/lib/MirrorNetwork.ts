@@ -5,7 +5,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
-import { Protocol } from '@unblocked-web/specifications/agent/browser/IDevtoolsSession';
+import { Protocol } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Fetch = Protocol.Fetch;
 

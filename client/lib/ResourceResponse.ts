@@ -1,7 +1,7 @@
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
-import IResourceResponse from '@unblocked-web/specifications/agent/net/IResourceResponse';
-import IHttpResourceLoadDetails from '@unblocked-web/specifications/agent/net/IHttpResourceLoadDetails';
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
+import IResourceResponse from '@ulixee/unblocked-specification/agent/net/IResourceResponse';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import CoreTab from './CoreTab';
 
 export default class ResourceResponse {

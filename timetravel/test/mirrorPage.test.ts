@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session, Tab } from '@ulixee/hero-core';
 import ConnectionToHeroClient from '@ulixee/hero-core/connections/ConnectionToHeroClient';

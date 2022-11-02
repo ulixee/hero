@@ -7,7 +7,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
-import BrowserLaunchError from '@unblocked-web/agent/errors/BrowserLaunchError';
+import BrowserLaunchError from '@ulixee/unblocked-agent/errors/BrowserLaunchError';
 import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import IConnectionToClient, {

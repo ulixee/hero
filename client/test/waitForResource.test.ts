@@ -1,4 +1,4 @@
-import IResourceMeta from '@unblocked-web/specifications/agent/net/IResourceMeta';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import { Helpers } from '@ulixee/hero-testing/index';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';

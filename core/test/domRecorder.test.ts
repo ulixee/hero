@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';

@@ -1,7 +1,7 @@
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Timer from '@ulixee/commons/lib/Timer';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IDomStateResult from '@ulixee/hero-interfaces/IDomStateResult';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';

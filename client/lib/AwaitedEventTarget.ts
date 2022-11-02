@@ -1,4 +1,4 @@
-import { IJsPath } from '@unblocked-web/js-path';
+import { IJsPath } from '@ulixee/js-path';
 import IAwaitedEventTarget from '../interfaces/IAwaitedEventTarget';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 

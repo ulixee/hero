@@ -1,4 +1,4 @@
-import { IUnblockedPluginClass } from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
+import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 
 export default interface ICoreConfigureOptions {
   maxConcurrentClientCount?: number;

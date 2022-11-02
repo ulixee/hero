@@ -1,4 +1,4 @@
-import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 
 export default interface ITimelineMetadata {
   // don't group by tabid/frameid for now

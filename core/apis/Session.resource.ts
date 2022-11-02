@@ -1,4 +1,4 @@
-import IHttpHeaders from '@unblocked-web/specifications/agent/net/IHttpHeaders';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import SessionDb from '../dbs/SessionDb';
 
 export default function sessionResourceApi(args: ISessionResourceArgs): ISessionResourceResult {

@@ -1,7 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import { IInteractionGroup } from '@unblocked-web/specifications/agent/interact/IInteractions';
-import { getKeyboardKey } from '@unblocked-web/specifications/agent/interact/IKeyboardLayoutUS';
-import { getNodePointerFnName } from '@unblocked-web/specifications/agent/browser/IJsPathFunctions';
+import { IInteractionGroup } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import { getKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
+import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';

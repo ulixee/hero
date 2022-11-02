@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { LocationStatus } from '@unblocked-web/specifications/agent/browser/Location';
+import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 import Core, { Session } from '../index';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';

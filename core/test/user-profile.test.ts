@@ -1,13 +1,13 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { InteractionCommand } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { URL } from 'url';
-import { LoadStatus } from '@unblocked-web/specifications/agent/browser/Location';
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
-import MitmRequestAgent from '@unblocked-web/agent-mitm/lib/MitmRequestAgent';
-import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
+import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
+import MitmRequestAgent from '@ulixee/unblocked-agent-mitm/lib/MitmRequestAgent';
+import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import Session from '../lib/Session';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Core from '../index';

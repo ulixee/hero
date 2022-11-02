@@ -12,7 +12,7 @@ Multiple Interactions can be passed through as multiple arguments:
 hero.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
-The timing of Interactions are controlled by the [Unblocked Agent](https://github.com/unblocked-web/agents) and its [Plugins](https://github.com/unblocked-web/specifications), which powers the core browser engine underneath Hero. This allows for realistic-looking, human-like movements on the remote webpage.
+The timing of Interactions are controlled by the [Unblocked Agent](https://github.com/ulixee/unblocked/main/tree/agent) and its [Plugins](https://github.com/ulixee/unblocked/main/tree/specification), which powers the core browser engine underneath Hero. This allows for realistic-looking, human-like movements on the remote webpage.
 
 Interaction Commands fall into three broad categories:
 

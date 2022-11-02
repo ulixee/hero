@@ -1,4 +1,4 @@
-import { IEmulationOptions } from '@unblocked-web/specifications/plugin/IEmulationProfile';
+import { IEmulationOptions } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IUserProfile from './IUserProfile';
 import ISessionOptions from './ISessionOptions';
 import IScriptInstanceMeta from './IScriptInstanceMeta';

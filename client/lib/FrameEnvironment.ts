@@ -19,7 +19,7 @@ import {
   ILoadStatus,
   ILocationTrigger,
   LocationStatus,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
@@ -30,9 +30,9 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import { INodeVisibility } from '@unblocked-web/js-path';
+import { INodeVisibility } from '@ulixee/js-path';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
-import { IMousePositionXY } from '@unblocked-web/specifications/agent/interact/IInteractions';
+import { IMousePositionXY } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';

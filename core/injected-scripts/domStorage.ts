@@ -1,5 +1,5 @@
-import type { IDomStorageForOrigin } from '@unblocked-web/specifications/agent/browser/IDomStorage';
-import type { IIndexedDB } from '@unblocked-web/specifications/agent/browser/IIndexedDB';
+import type { IDomStorageForOrigin } from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
+import type { IIndexedDB } from '@ulixee/unblocked-specification/agent/browser/IIndexedDB';
 
 function dumpStorage(storage: Storage) {
   const store: [string, string][] = [];

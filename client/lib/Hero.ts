@@ -2,7 +2,7 @@ import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import IDomStorage from '@unblocked-web/specifications/agent/browser/IDomStorage';
+import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -12,7 +12,7 @@ import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptio
 import {
   ILoadStatus,
   ILocationTrigger,
-} from '@unblocked-web/specifications/agent/browser/Location';
+} from '@ulixee/unblocked-specification/agent/browser/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
@@ -24,8 +24,8 @@ import {
 } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
-import IScreenshotOptions from '@unblocked-web/specifications/agent/browser/IScreenshotOptions';
-import { INodeVisibility } from '@unblocked-web/js-path';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
+import { INodeVisibility } from '@ulixee/js-path';
 import IClientPlugin, { IClientPluginClass } from '@ulixee/hero-interfaces/IClientPlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
@@ -38,7 +38,7 @@ import {
   IElementInteractVerification,
   IMousePositionXY,
   isMousePositionXY,
-} from '@unblocked-web/specifications/agent/interact/IInteractions';
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import WebsocketResource from './WebsocketResource';

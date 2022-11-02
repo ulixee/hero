@@ -1,7 +1,7 @@
-import { IFrame } from '@unblocked-web/specifications/agent/browser/IFrame';
-import IUnblockedPlugin from '@unblocked-web/specifications/plugin/IUnblockedPlugin';
-import IEmulationProfile from '@unblocked-web/specifications/plugin/IEmulationProfile';
-import { IPage } from '@unblocked-web/specifications/agent/browser/IPage';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import IUnblockedPlugin from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { PluginTypes } from './IPluginTypes';
 import ICorePluginCreateOptions from './ICorePluginCreateOptions';
 import ISessionCreateOptions from './ISessionCreateOptions';

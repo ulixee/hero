@@ -1,4 +1,4 @@
-import IResourceType from '@unblocked-web/specifications/agent/net/IResourceType';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import Resource from '../lib/Resource';
 
 export default interface IWaitForResourceFilter {

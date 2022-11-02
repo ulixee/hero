@@ -6,7 +6,7 @@ import ICorePlugin, {
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
-import IBrowserEngine from '@unblocked-web/specifications/agent/browser/IBrowserEngine';
+import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 
 @CorePluginClassDecorator

@@ -68,10 +68,11 @@
       "plugin-utils",
       "plugins/*",
       "../../shared/build/*",
-      "../../unblocked/agent/build/*",
+      "../../unblocked/build/agent/*",
       "../../unblocked/build/plugins/*",
-      "../../unblocked/specifications/build",
-      "../../unblocked/js-path/build"
+      "../../unblocked/build/specification",
+      "../../unblocked/build/js-path",
+      "../../unblocked/build/real-user-agents"
     ],
     "nohoist": [
       "@ulixee/repo-tools"

@@ -1,4 +1,4 @@
-import type { IJsPath } from '@unblocked-web/js-path';
+import type { IJsPath } from '@ulixee/js-path';
 import IDomStateAssertionBatch, {
   IAssertionAndResult,
 } from '@ulixee/hero-interfaces/IDomStateAssertionBatch';

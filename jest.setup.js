@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const rmSync = 'rmSync' in fs ? 'rmSync' : 'rmdirSync';
 // eslint-disable-next-line import/no-extraneous-dependencies
-const CertificateManager = require('@unblocked-web/agent-mitm-socket/lib/CertificateGenerator').default;
+const CertificateManager = require('@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator').default;
 
 module.exports = async () => {
   try {
