@@ -312,29 +312,35 @@ function loadNamespaces(namespaces: string): void {
 }
 
 registerNamespaceMapping((ns, active, skip) => {
-  if (ns.includes('ubk:*') || ns.includes('ubk*')) {
-    active.push(/agent\/.*/);
-  } else if (ns === 'ubk:mitm') {
-    active.push(/agent[/-]mitm.*/);
-  } else if (ns === 'ubk') {
-    active.push(/agent\/.*/);
-    skip.push(/DevtoolsSessionLogger/, /agent[/-]mitm.*/);
-  } else if (ns.includes('ubk:devtools') || ns === '*') {
-    active.push(/DevtoolsSessionLogger/);
-  }
-});
-
-registerNamespaceMapping((ns, active) => {
-  if (ns.includes('ulx:*') || ns.includes('ulx*')) {
+  if (ns.includes('ulx:*') || ns.includes('ulx*') || ns === '*') {
     active.push(
       /^apps[/-]chromealive*/,
       /hero[/-].*/,
+      /agent\/.*/,
+      /plugins\/.*/,
+      /net\/.*/,
+      /databox[/-].*/,
+      /mainchain[/-].*/,
+      /sidechain[/-].*/,
+      /ramps[/-].*/,
+      /DevtoolsSessionLogger/,
+    );
+  } else if (ns === 'ulx') {
+    active.push(
+      /hero[/-].*/,
+      /agent\/.*/,
+      /plugins\/.*/,
       /net\/.*/,
       /databox[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,
     );
+    skip.push(/^apps[/-]chromealive*/, /DevtoolsSessionLogger/);
+  } else if (ns === 'ulx:mitm') {
+    active.push(/agent[/-]mitm.*/);
+  } else if (ns.includes('ulx:devtools') || ns === '*') {
+    active.push(/DevtoolsSessionLogger/);
   } else if (ns.includes('hero')) {
     active.push(/^hero[/-].*/, /net\/.*/);
   } else if (ns.includes('databox')) {
