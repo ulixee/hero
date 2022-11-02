@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.14](https://github.com/ulixee/shared/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
+
+
+### Features
+
+* change logs to support removal of ubk ([63a9d64](https://github.com/ulixee/shared/commit/63a9d6404ddcd0a042a6bc439ec07de63a2edfde))
+
+
+
+
+
 # [2.0.0-alpha.13](https://github.com/ulixee/shared/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
 
 
