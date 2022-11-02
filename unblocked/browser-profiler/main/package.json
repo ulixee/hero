@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/unblocked-browser-profiler",
-  "version": "2.0.0-alpha.12",
+  "version": "2.0.0-alpha.13",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -15,14 +15,14 @@
     "profile:dom-local": "node -e 'require(\"../../build/browser-profiler/main/scripts/runLocalDoms.js\").default()'"
   },
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.11",
-    "@double-agent/config": "2.0.0-alpha.11",
-    "@double-agent/runner": "2.0.0-alpha.11",
+    "@double-agent/collect": "2.0.0-alpha.13",
+    "@double-agent/config": "2.0.0-alpha.13",
+    "@double-agent/runner": "2.0.0-alpha.13",
     "@types/selenium-webdriver": "^4.1.5",
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.13",
-    "@ulixee/double-agent-stacks": "2.0.0-alpha.12",
-    "@ulixee/real-user-agents": "2.0.0-alpha.12",
+    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/double-agent-stacks": "2.0.0-alpha.13",
+    "@ulixee/real-user-agents": "2.0.0-alpha.13",
     "axios": "^0.27.2",
     "chrome-launcher": "^0.13.4",
     "chrome-remote-interface": "0.29.0",

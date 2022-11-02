@@ -1,23 +1,23 @@
 {
   "name": "@ulixee/default-browser-emulator",
-  "version": "2.0.0-alpha.12",
+  "version": "2.0.0-alpha.13",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "dependencies": {
     "@ulixee/chrome-105-0": "^5195.127.6",
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.13",
-    "@ulixee/real-user-agents": "2.0.0-alpha.12",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.11",
+    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/real-user-agents": "2.0.0-alpha.13",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.13",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.22"
   },
   "devDependencies": {
     "@types/tough-cookie": "^4.0.0",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.12",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.12",
-    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.12",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.13",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.13",
+    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.13",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "source-map-loader": "^0.2.4"

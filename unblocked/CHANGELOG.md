@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-11-02)
+
+
+### Bug Fixes
+
+* convert ubk vars to ulx ([ca3ccf6](https://github.com/ulixee/ulixee/commit/ca3ccf6f6d6b8783507f4155d8b5b9a7bbee0313))
+* github action probes ([bc3aa6f](https://github.com/ulixee/ulixee/commit/bc3aa6fbe62a9b2335e34e9bad3d359d4884ca8f))
+* tweak readme ([1487b53](https://github.com/ulixee/ulixee/commit/1487b534bb679efad2c7df5254f8bfbfec28fbfd))
+
+
+### Features
+
+* flatten specification ([4756b54](https://github.com/ulixee/ulixee/commit/4756b546f081373dc66869dab543e306caad32a6))
+
+
+
+
+
 # [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-31)
 
 

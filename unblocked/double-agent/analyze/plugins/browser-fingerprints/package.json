@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/analyze-browser-fingerprints",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.13",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes whether the browser's fingerprints leak across sessions",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.11",
-    "@double-agent/collect-browser-fingerprints": "2.0.0-alpha.11",
+    "@double-agent/analyze": "2.0.0-alpha.13",
+    "@double-agent/collect-browser-fingerprints": "2.0.0-alpha.13",
     "source-map-support": "^0.5.16"
   }
 }

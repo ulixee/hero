@@ -7,15 +7,6 @@
     "lerna": "^4.0.0"
   },
   "workspaces": {
-    "packages": [
-      "agent/*",
-      "specification",
-      "js-path",
-      "real-user-agents",
-      "plugins/*",
-      "double-agent-stacks",
-      "browser-profiler/*",
-      "browser-emulator-builder"
-    ]
+    "packages": ["agent/*", "specification", "js-path", "real-user-agents", "plugins/*"]
   }
 }

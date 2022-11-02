@@ -1,16 +1,16 @@
 {
   "name": "@double-agent/analyze-tcp-ttl",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-alpha.13",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes tcp packet values, including window-size and time-to-live",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.11",
-    "@double-agent/collect": "2.0.0-alpha.11",
-    "@double-agent/collect-tcp": "2.0.0-alpha.11",
-    "@double-agent/config": "2.0.0-alpha.11",
-    "@ulixee/real-user-agents": "2.0.0-alpha.12",
+    "@double-agent/analyze": "2.0.0-alpha.13",
+    "@double-agent/collect": "2.0.0-alpha.13",
+    "@double-agent/collect-tcp": "2.0.0-alpha.13",
+    "@double-agent/config": "2.0.0-alpha.13",
+    "@ulixee/real-user-agents": "2.0.0-alpha.13",
     "source-map-support": "^0.5.16"
   }
 }
