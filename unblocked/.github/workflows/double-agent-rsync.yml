@@ -33,7 +33,7 @@ jobs:
         working-directory: ../shared
 
       - name: Yarn build
-        run: pwd && yarn build
+        run: pwd && yarn && yarn build
         working-directory: ./double-agent
 
       - name: Install SSH key
