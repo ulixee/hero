@@ -272,6 +272,21 @@
     "@typescript-eslint/types" "5.36.2"
     eslint-visitor-keys "^3.3.0"
 
+"@ulixee/js-path@2.0.0-alpha.13":
+  version "2.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/@ulixee/js-path/-/js-path-2.0.0-alpha.13.tgz#74212dd8a8eb67685c042a91c1a0438778f4a043"
+  integrity sha512-Ve1dfgIyALifADCF1eiGUlHD/6eFH3yhc6GyGiEGlRQ4q3oDuCKXGj/oOEW+h7w4a7y9QqQNWlzilQP5YHbTKQ==
+
+"@ulixee/real-user-agents@2.0.0-alpha.13":
+  version "2.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.13.tgz#32cc473483feead40d0389eb34da7d5f03c07f28"
+  integrity sha512-/i8lzg5rT70Pnv8mPrFYCQeX8JVE9qdDTY0W9dQY7Tf5gVVIIX+YKSwwhvtzrh3nU9j83sDa3ZF9GbdGmycsCQ==
+  dependencies:
+    "@ulixee/commons" "2.0.0-alpha.14"
+    "@ulixee/unblocked-specification" "2.0.0-alpha.13"
+    compare-versions "^3.6.0"
+    ua-parser-js "^0.7.24"
+
 "@ulixee/repo-tools@^1.0.21":
   version "1.0.21"
   resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.21.tgz#357808c570872494fdf9c8255b23038b36d3992e"
@@ -296,27 +311,12 @@
     pretty-quick "^3.1.0"
     typescript "^4.7.2"
 
-"@ulixee/js-path@2.0.0-alpha.1":
-  version "2.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@ulixee/js-path/-/js-path-2.0.0-alpha.1.tgz#39482400d582a1cb88197724f2b1efa339d9483f"
-  integrity sha512-59FWvS1XRD862CLm2/9ZPiJlylolwkhe3HRH+aIes7dRXHSlpdwOLQG1V6NN1W//TXh9ars3f3TJqr4XLSaAcg==
-
-"@ulixee/real-user-agents@2.0.0-alpha.12":
-  version "2.0.0-alpha.12"
-  resolved "https://registry.yarnpkg.com/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.12.tgz#3467e5ed348c12709fea36845d10f9050470bfb3"
-  integrity sha512-CM1hmlz3z+IdPDVobo8PPdqa+Wxvtl5lQnOwVBnuRCRLeE5vja4MPVELJIQRFac8EFz5Aa+6bjTGe+WgYvR7mg==
+"@ulixee/unblocked-specification@2.0.0-alpha.13":
+  version "2.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/@ulixee/unblocked-specification/-/unblocked-specification-2.0.0-alpha.13.tgz#5d988d6a0582a8e25f736f7718a23f1f740b2496"
+  integrity sha512-mpxaytiRQp81qJOGM+7Qn3StjNycPaCttOv49g5y464jWX/750eOqvsoJkZ7a7jyuZlNuc0Ue7tyRFoThixCNw==
   dependencies:
-    "@ulixee/commons" "2.0.0-alpha.13"
-    "@ulixee/unblocked-specification" "2.0.0-alpha.11"
-    compare-versions "^3.6.0"
-    ua-parser-js "^0.7.24"
-
-"@ulixee/unblocked-specification@2.0.0-alpha.11":
-  version "2.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@ulixee/unblocked-specification/-/specifications-2.0.0-alpha.11.tgz#7ec6191f8307c3f34484300eb7459759ae1fd519"
-  integrity sha512-IDIvoPfEywDcsmR/SH2Oo5sISBTn246h2ex+P/xIKe735wYSgX4/pik982wCTWsv5G9D9Jnd/wZcPCFCGSjkYg==
-  dependencies:
-    "@ulixee/js-path" "2.0.0-alpha.1"
+    "@ulixee/js-path" "2.0.0-alpha.13"
     devtools-protocol "^0.0.981744"
 
 acorn-jsx@^5.3.2:
