@@ -69,6 +69,7 @@ import { IDomExtensionClass, isDomExtensionClass } from './DomExtender';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
+  defaultBlockedResourceUrls: [],
   defaultUserProfile: {},
 };
 
@@ -118,6 +119,7 @@ export default class Hero extends AwaitedEventTarget<{
 
     const { name, connectionToCore, ...options } = createOptions;
     options.blockedResourceTypes ??= Hero.options.defaultBlockedResourceTypes;
+    options.blockedResourceUrls ??= Hero.options.defaultBlockedResourceUrls;
     options.userProfile ??= Hero.options.defaultUserProfile;
 
     const sessionName = scriptInstance.generateSessionName(name);

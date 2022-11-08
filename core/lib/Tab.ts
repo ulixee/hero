@@ -817,7 +817,10 @@ export default class Tab
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
     if (this.session.options?.blockedResourceTypes) {
-      await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
+      await this.setBlockedResourceTypes(
+        this.session.options.blockedResourceTypes,
+        this.session.options.blockedResourceUrls,
+      );
     }
   }
 
