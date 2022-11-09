@@ -77,6 +77,9 @@ await hero.goto('https://ulixee.org');
 const doc = await hero.fetch('https://ulixee.org/docs/overview/configuration');
 ```
 
+Next to `blockedResourceTypes` you can also use `blockedResourceUrls`,
+see [here](/docs/overview/configuration#blocked-urls) for more information.
+
 ## Mice and Keyboards Are Human Too
 
 Hero drives mice and keyboards with [Human Emulators](/docs/hero/plugins/human-emulators). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.

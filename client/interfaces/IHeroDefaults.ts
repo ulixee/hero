@@ -3,5 +3,6 @@ import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 
 export default interface IHeroDefaults {
   defaultBlockedResourceTypes?: IBlockedResourceType[];
+  defaultBlockedResourceUrls?: string[];
   defaultUserProfile?: IUserProfile;
 }

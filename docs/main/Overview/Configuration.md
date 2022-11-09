@@ -51,6 +51,22 @@ As you'll notice above, some features are dependent on others and therefore auto
 
 Setting an empty array is the same as setting to `None`.
 
+### Blocked Urls<div class="specs"><i>Connection</i><i>Hero</i></div> {#blocked-urls}
+
+Similar to [`Blocked Resource Types`](#blocked-resources), this allows you to block resources
+from being loaded. Instead of focussing on the type of resource we are focussing on the url instead.
+
+Wild cards can be used as well.
+
+Examples:
+
+```
+http://example.com
+example.com
+*.example.com
+*example.com
+```
+
 ### User Profile <div class="specs"><i>Connection</i><i>Hero</i></div>
 
 A user profile stores and restores Cookies, DOM Storage and IndexedDB records for an Hero. NOTE: the serialized user profile passed into an Hero instance is never modified. If you want to update a profile with changes, you should re-export and save it to the format you're persisting to.

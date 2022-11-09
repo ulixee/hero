@@ -9,4 +9,5 @@ export default interface IConfigureSessionOptions
     | 'locale'
     | 'upstreamProxyUrl'
     | 'blockedResourceTypes'
+    | 'blockedResourceUrls'
   > {}
