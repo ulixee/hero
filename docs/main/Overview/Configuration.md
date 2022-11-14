@@ -54,17 +54,17 @@ Setting an empty array is the same as setting to `None`.
 ### Blocked Urls<div class="specs"><i>Connection</i><i>Hero</i></div> {#blocked-urls}
 
 Similar to [`Blocked Resource Types`](#blocked-resources), this allows you to block resources
-from being loaded. Instead of focussing on the type of resource we are focussing on the url instead.
+from being loaded. Instead of focusing on the type of resource we are focussing on the url instead.
 
 Wild cards can be used as well.
 
 Examples:
 
 ```
-http://example.com
-example.com
-*.example.com
-*example.com
+http://example\.com
+example\.com
+\*\.example.com
+*example\.com
 ```
 
 ### User Profile <div class="specs"><i>Connection</i><i>Hero</i></div>
