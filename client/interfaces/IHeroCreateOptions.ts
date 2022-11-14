@@ -7,5 +7,5 @@ export default interface IHeroCreateOptions
     Omit<ISessionCreateOptions, 'scriptInstanceMeta' | 'sessionName' | 'dependencyMap'>
   > {
   name?: string;
-  connectionToCore?: IConnectionToCoreOptions | ConnectionToHeroCore;
+  connectionToCore?: IConnectionToCoreOptions | ConnectionToHeroCore | string;
 }

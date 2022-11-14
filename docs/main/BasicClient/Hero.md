@@ -53,7 +53,7 @@ const Hero = require('@ulixee/hero-playground');
 #### **Arguments**:
 
 - options `object` Accepts any of the following:
-  - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
+  - connectionToCore `options | ConnectionToCore | 'string'`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. A host may be provided directly as a string. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
   - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (`~`) allows for dynamic options. Details can be found [here](/docs/hero/advanced-client/user-agents).
   - browserEmulatorId `string` defaults to `default-browser-emulator`. Chooses the BrowserEmulator plugin which emulates the properties that help Hero look like a normal browser.

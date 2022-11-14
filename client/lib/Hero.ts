@@ -41,6 +41,7 @@ import {
 } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -133,9 +134,11 @@ export default class Hero extends AwaitedEventTarget<{
       corePluginPaths: [],
     } as ISessionOptions;
 
-    this.#connectionToCore = ConnectionFactory.createConnection(connectionToCore ?? {});
+    let connect = connectionToCore;
+    if (typeof connect === 'string') connect = { host: connect };
+    this.#connectionToCore = ConnectionFactory.createConnection(connect ?? {});
 
-    this.#didAutoCreateConnection = this.#connectionToCore !== connectionToCore;
+    this.#didAutoCreateConnection = this.#connectionToCore !== connect;
   }
 
   public get activeTab(): Tab {
@@ -594,6 +597,7 @@ export default class Hero extends AwaitedEventTarget<{
       const coreTab = this.#coreSessionPromise
         .then(x => {
           if (x instanceof Error) throw x;
+          if (!x) throw new CanceledPromiseError('No connection to Hero Core established.');
           return x.firstTab;
         })
         .catch(err => err);
