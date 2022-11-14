@@ -1,12 +1,12 @@
 ## 2.0
 [x] Open up Slab Data
 
-## Data Catalog
+- Data Catalog
 Double Agent has a large cache of data representing profiles of known browsers, “probes” to identify their characteristics, and currently popular browser engine/operating system combinations. It currently lives in a giant compressed zip file. This data catalog needs to find a “git” based home.
 [x] Convert to one or more data projects
 [x] Submodule(s) to DoubleAgent
 
-## Automation
+- Automation
 We would like to automate the updating of DoubleAgent profiles and statistics.
 [x] Automate Statistics Refresh
 [x] Test New Profiles as Available

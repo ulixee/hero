@@ -58,8 +58,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       // don't use password for an isolated mitm proxy
       return { address: `localhost:${this.isolatedMitm.port}` };
     }
-      return { address: null, password: this.id };
-
+    return { address: null, password: this.id };
   }
 
   constructor(private readonly options: IAgentCreateOptions = {}, readonly pool?: Pool) {

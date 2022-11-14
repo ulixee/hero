@@ -115,14 +115,15 @@ export default class MitmProxy {
       errors.push(err);
     }
 
-    try {
-      for (const session of this.http2Sessions) {
-        session.socket.unref().destroy();
+    for (const session of this.http2Sessions) {
+      try {
+        session.socket?.unref()?.destroy();
         session.destroy();
+      } catch (err) {
+        errors.push(err);
       }
-    } catch (err) {
-      errors.push(err);
     }
+
     try {
       this.http2Sessions.clear();
       this.http2Server.unref().close();
@@ -474,7 +475,7 @@ export default class MitmProxy {
         this.http2Server.addContext(hostname, cert);
         this.httpsServer.addContext(hostname, cert);
       });
-    await this.secureContexts[hostname]
+    await this.secureContexts[hostname];
   }
 
   /////// SESSION ID MGMT //////////////////////////////////////////////////////////////////////////////////////////////

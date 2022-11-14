@@ -3,7 +3,7 @@ import * as os from 'os';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { defaultScreen } from '../Viewports';
 
-let sessionDirCounter = 0;
+const sessionDirCounter = 0;
 
 export function configureBrowserLaunchArgs(
   engine: IBrowserEngine,
@@ -59,11 +59,7 @@ export function configureBrowserLaunchArgs(
   );
 
   if (options.showChrome) {
-    const dataDir = Path.join(
-      os.tmpdir(),
-      engine.fullVersion.replace('.', '-'),
-      `${String(Date.now()).substr(0, 10)}-${(sessionDirCounter += 1)}`,
-    );
+    const dataDir = Path.join(os.tmpdir(), engine.fullVersion.replace(/\./g, '-'));
     engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
     engine.userDataDir = dataDir;
 

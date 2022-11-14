@@ -35,13 +35,14 @@ export default class RequestSession
   public isClosing = false;
   public interceptorHandlers: {
     types?: IResourceType[];
-    urls?: string[];
+    urls?: (string | RegExp)[];
     handlerFn?: (
       url: URL,
       type: IResourceType,
       request: http.IncomingMessage | http2.Http2ServerRequest,
       response: http.ServerResponse | http2.Http2ServerResponse,
     ) => boolean | Promise<boolean>;
+    hasParsed?: boolean;
   }[] = [];
 
   public requestAgent: MitmRequestAgent;
@@ -176,8 +177,15 @@ export default class RequestSession
   public shouldInterceptRequest(url: string): boolean {
     for (const handler of this.interceptorHandlers) {
       if (!handler.urls) continue;
+      if (!handler.hasParsed) {
+        handler.urls = handler.urls.map(x => {
+          if (typeof x === 'string') return stringToRegex(x);
+          return x;
+        });
+        handler.hasParsed = true;
+      }
       for (const blockedUrlFragment of handler.urls) {
-        if (url.includes(blockedUrlFragment) || url.match(blockedUrlFragment)) {
+        if (url.match(blockedUrlFragment)) {
           return true;
         }
       }
@@ -193,8 +201,7 @@ export default class RequestSession
     const url = ctx.url.href;
     for (const handler of this.interceptorHandlers) {
       const isMatch =
-        handler.types?.includes(ctx.resourceType) ||
-        handler.urls?.some(x => url.includes(x) || url.match(x));
+        handler.types?.includes(ctx.resourceType) || handler.urls?.some(x => url.match(x));
       if (
         isMatch &&
         handler.handlerFn &&
@@ -310,4 +317,10 @@ export interface IRequestSessionRequestEvent {
 export interface IRequestSessionHttpErrorEvent {
   request: IRequestSessionResponseEvent;
   error: Error;
+}
+
+function stringToRegex(str: string): RegExp {
+  if (str.startsWith('*')) str = `.*${str.slice(1)}`;
+  const escaped = str.replace(/\/\*/g, '.*').replace(/[-[/\]{}()+?.,\\^$|#\s]/g, '\\$&');
+  return new RegExp(escaped);
 }

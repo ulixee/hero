@@ -8,6 +8,7 @@ import IHttpSocketWrapper from '@ulixee/unblocked-specification/agent/net/IHttpS
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IHttpSocketConnectOptions from '@ulixee/unblocked-specification/agent/net/IHttpSocketConnectOptions';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import MitmSocketSession from './lib/MitmSocketSession';
 
 let idCounter = 0;
@@ -167,7 +168,7 @@ export default class MitmSocket
         this.socketReadyPromise.promise,
       ]);
     } catch (error) {
-      if (session.isClosing || this.isClosing) return;
+      if (error instanceof TimeoutError && (session.isClosing || this.isClosing)) return;
       throw error;
     }
   }
@@ -206,7 +207,7 @@ export default class MitmSocket
         this.emit('eof');
       });
     } else if (status === 'closing') {
-      this.close();
+      setImmediate(this.close.bind(this));
     }
   }
 
