@@ -59,6 +59,44 @@ describe('basic Full Client tests', () => {
     expect(resources[0].type).toBe('Document');
   });
 
+  it('allows you to block urls', async () => {
+    koaServer.get('/block', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/test.css" />
+</head>
+<body>
+  <img src="/img.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/img.png', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/test.css', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceUrls: [
+        // eslint-disable-next-line no-useless-escape
+        '\*\.png',
+        'test.css',
+      ],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
+  });
+
   it('should get unreachable proxy errors in the client', async () => {
     const hero = new Hero({
       upstreamProxyUrl: koaServer.baseUrl,
