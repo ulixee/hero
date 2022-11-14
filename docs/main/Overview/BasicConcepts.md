@@ -64,7 +64,7 @@ When used in a simple example as show above, Puppeteer's approach seems okay. Ho
 
 ## Headless Browsers Need Not Always Render
 
-When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. Hero allows you to [turn off](/docs/overview/configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
+When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. Hero allows you to [turn off](/docs/hero/overview/configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
 
 ```js
 import Hero from '@ulixee/hero-playground';
@@ -74,11 +74,11 @@ const hero = new Hero({
 });
 await hero.goto('https://ulixee.org');
 // referer will be https://ulixee.org
-const doc = await hero.fetch('https://ulixee.org/docs/overview/configuration');
+const doc = await hero.fetch('https://ulixee.org/docs/hero/overview/configuration');
 ```
 
 Next to `blockedResourceTypes` you can also use `blockedResourceUrls`,
-see [here](/docs/overview/configuration#blocked-urls) for more information.
+see [here](/docs/hero/overview/configuration#blocked-urls) for more information.
 
 ## Mice and Keyboards Are Human Too
 

@@ -3,6 +3,11 @@ import { ClientPlugin } from '@ulixee/hero-plugin-utils';
 
 // NOTE: You need to start a Ulixee Miner to run this example
 
+declare module '@ulixee/hero/lib/extendables' {
+  interface Hero {
+    revealAnswers();
+  }
+}
 export default class HeroExtensionPlugin extends ClientPlugin {
   static override readonly id = 'hero-extension-plugin';
 
@@ -10,10 +15,8 @@ export default class HeroExtensionPlugin extends ClientPlugin {
     // define your own hero function,
     // which internally can make use of the actual `Hero` instance,
     // by including it in your own clojure-as-a-method!
-    (hero as any).revealAnswers = async (selector?: string) =>
-      await hero
-        .querySelectorAll(selector ?? 'li.question')
-        .$map((link) => link.$click());
+    hero.revealAnswers = async (selector?: string) =>
+      await hero.querySelectorAll(selector ?? 'li.question').$map(link => link.$click());
   }
 }
 

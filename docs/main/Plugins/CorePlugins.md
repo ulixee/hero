@@ -40,7 +40,7 @@ hero.use(require.resolve('./HelloPlugin'));
 await hero.hello('World');
 ```
 
-NOTE: you can also register a plugin "directly" in Hero-Core. You do need to understand the [Client vs Core](/docs/advanced-concepts/client-vs-core) separation. Wherever your `Core` process is going to be initialized, you can add code to tap into `@ulixee/hero-core`.
+NOTE: you can also register a plugin "directly" in Hero-Core. You do need to understand the [Client vs Core](/docs/hero/advanced-concepts/client-vs-core) separation. Wherever your `Core` process is going to be initialized, you can add code to tap into `@ulixee/hero-core`.
 
 ```javascript
 import HeroCore from '@ulixee/hero-core';
