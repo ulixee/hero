@@ -497,7 +497,10 @@ export default class Tab
     this.mirrorNetwork.addResource(resourceSummary);
   }
 
-  public onElementRequested(detachedElement: IDetachedElement, saveToDb = true): Promise<IDetachedElement> {
+  public onElementRequested(
+    detachedElement: IDetachedElement,
+    saveToDb = true,
+  ): Promise<IDetachedElement> {
     const resolvable = new Resolvable<IDetachedElement>();
     const resolveExisting = Promise.all(this.detachedElementsPendingHTML);
     this.detachedElementsPendingHTML.add(resolvable);
@@ -1032,6 +1035,7 @@ export interface ITabEventParams {
 }
 
 export function stringToRegex(str: string): RegExp {
+  if (str.startsWith('*')) str = `.*${str.slice(1)}`;
   const escaped = str.replace(/\/\*/g, '/.*').replace(/[-[/\]{}()+?.,\\^$|#\s]/g, '\\$&');
   return new RegExp(escaped);
 }
