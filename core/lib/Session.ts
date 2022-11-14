@@ -126,7 +126,7 @@ export default class Session
       uaClientHintsPlatformVersion,
       browserVersion,
       browserName,
-    } = this.emulationProfile.userAgentOption;
+    } = this.emulationProfile.userAgentOption ?? {};
 
     return {
       sessionId: this.id,
@@ -786,13 +786,15 @@ export default class Session
   }
 
   private recordSession(providedOptions: ISessionCreateOptions): void {
-    const configuration = this.meta;
-    const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
     if (!this.browserEngine) {
       let extraMessage = '.';
       if (this.options.userAgent) extraMessage = ` matching selector(${this.options.userAgent}).`;
       throw new Error(`Failed to select a browser engine${extraMessage}`);
     }
+
+    const configuration = this.meta;
+    const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
+
     this.db.session.insert(
       this.id,
       configuration,
