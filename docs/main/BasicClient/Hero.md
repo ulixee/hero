@@ -77,7 +77,7 @@ const Hero = require('@ulixee/hero-playground');
     - positionX? `number`. Optional override browser X position on screen in pixels (minimum 0, maximum 10000000).
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/hero/overview/configuration#blocked-resources).
-  - blockedResourceUrls: `string[]`. Also controls browser resource loading. See for more information [here](/docs/hero/overview/configuration#blocked-urls).
+  - blockedResourceUrls: `(string | RegExp)[]`. Also controls browser resource loading. See for more information [here](/docs/hero/overview/configuration#blocked-urls).
   - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
@@ -186,7 +186,7 @@ Retrieves metadata about the hero configuration:
 - geolocation `IGeolocation`. The configured geolocation of the user (if set).
 - viewport `IViewport`. The emulated viewport size and location.
 - blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
-- blockedResourceUrls `string[]`. The blocked urls.
+- blockedResourceUrls `(string | RegExp)[]`. The blocked urls.
 - upstreamProxyUrl `string`. The proxy url in use for this hero.
 - upstreamProxyIpMask `object`. The proxy IP mask settings for this hero.
   - ipLookupService `string`. Lookup service used to find public IP.

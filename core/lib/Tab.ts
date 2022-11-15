@@ -239,7 +239,7 @@ export default class Tab
   }
 
   public setBlockedResourceUrls(
-    blockedUrls: string[],
+    blockedUrls: (string | RegExp)[],
   ): void {
     const mitmSession = this.session.mitmRequestSession;
 
