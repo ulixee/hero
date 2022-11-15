@@ -71,18 +71,17 @@ describe('basic Full Client tests', () => {
 </html>`;
     });
 
-    koaServer.get('/img.png', ctx => {
+    koaServer.get('/foo/bar/42?x=foo&y=%20baz', ctx => {
       ctx.statusCode = 500;
     });
-    koaServer.get('/test.css', ctx => {
+    koaServer.get('/baz/bar', ctx => {
       ctx.statusCode = 500;
     });
 
     const hero = new Hero({
       blockedResourceUrls: [
-        // eslint-disable-next-line no-useless-escape
-        '\*\.png',
-        'test.css',
+        '42?x=foo',
+        '/baz/',
       ],
     });
     Helpers.needsClosing.push(hero);

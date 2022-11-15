@@ -61,10 +61,10 @@ Wild cards can be used as well.
 Examples:
 
 ```
-http://example\.com
-example\.com
-\*\.example.com
-*example\.com
+http://example.com
+example.com
+*.example.com
+*example.com
 ```
 
 ### User Profile <div class="specs"><i>Connection</i><i>Hero</i></div>
