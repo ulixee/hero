@@ -229,6 +229,15 @@ export default class Tab
       if (blockedResourceTypes.includes('BlockCssResources')) {
         interceptor.types.push('Stylesheet');
       }
+      if (blockedResourceTypes.includes('BlockFonts')) {
+        interceptor.types.push('Font');
+      }
+      if (blockedResourceTypes.includes('BlockIcons')) {
+        interceptor.types.push('Ico');
+      }
+      if (blockedResourceTypes.includes('BlockMedia')) {
+        interceptor.types.push('Media');
+      }
       if (blockedResourceTypes.includes('BlockJsResources')) {
         interceptor.types.push('Script');
       }
