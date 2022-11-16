@@ -60,27 +60,27 @@ describe('basic Full Client tests', () => {
   });
 
   it('allows you to block urls: strings', async () => {
-    koaServer.get('/block', ctx => {
+    koaServer.get('/block-strings', ctx => {
       ctx.body = `<html>
 <head>
-  <link rel="stylesheet" href="/test.css" />
+  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y=%20baz" />
 </head>
 <body>
-  <img src="/img.png" alt="Image"/>
+  <img src="/baz/bar.png" alt="Image"/>
 </body>
 </html>`;
     });
 
-    koaServer.get('/foo/bar/42?x=foo&y=%20baz', ctx => {
+    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
       ctx.statusCode = 500;
     });
-    koaServer.get('/baz/bar', ctx => {
+    koaServer.get('/baz/bar.png', ctx => {
       ctx.statusCode = 500;
     });
 
     const hero = new Hero({
       blockedResourceUrls: [
-        '42?x=foo',
+        '42.css?x=foo',
         '/baz/',
       ],
     });
@@ -88,7 +88,7 @@ describe('basic Full Client tests', () => {
 
     const resources: Resource[] = [];
     await hero.activeTab.on('resource', event => resources.push(event as any));
-    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.goto(`${koaServer.baseUrl}/block-strings`);
     await hero.waitForPaintingStable();
     await new Promise(setImmediate);
     expect(resources).toHaveLength(1);
@@ -97,27 +97,27 @@ describe('basic Full Client tests', () => {
   });
 
   it('allows you to block urls: RegExp', async () => {
-    koaServer.get('/block', ctx => {
+    koaServer.get('/block-regexes', ctx => {
       ctx.body = `<html>
 <head>
-  <link rel="stylesheet" href="/test.css" />
+  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y=%20baz" />
 </head>
 <body>
-  <img src="/img.png" alt="Image"/>
+  <img src="/baz/bar.png" alt="Image"/>
 </body>
 </html>`;
     });
 
-    koaServer.get('/foo/bar/42?x=foo&y=%20baz', ctx => {
+    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
       ctx.statusCode = 500;
     });
-    koaServer.get('/baz/bar', ctx => {
+    koaServer.get('/baz/bar.png', ctx => {
       ctx.statusCode = 500;
     });
 
     const hero = new Hero({
       blockedResourceUrls: [
-        /42\?x=oo/,
+        /.*\?x=foo/,
         /\/baz\//,
       ],
     });
@@ -125,7 +125,7 @@ describe('basic Full Client tests', () => {
 
     const resources: Resource[] = [];
     await hero.activeTab.on('resource', event => resources.push(event as any));
-    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.goto(`${koaServer.baseUrl}/block-regexes`);
     await hero.waitForPaintingStable();
     await new Promise(setImmediate);
     expect(resources).toHaveLength(1);
