@@ -204,7 +204,6 @@ export default class Tab
 
   public async setBlockedResourceTypes(
     blockedResourceTypes: IBlockedResourceType[],
-    blockedUrls?: string[],
   ): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
 
@@ -237,6 +236,19 @@ export default class Tab
       }
     }
     await this.page.setJavaScriptEnabled(enableJs);
+  }
+
+  public setBlockedResourceUrls(
+    blockedUrls: (string | RegExp)[],
+  ): void {
+    const mitmSession = this.session.mitmRequestSession;
+
+    let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
+    if (!interceptor) {
+      mitmSession.interceptorHandlers.push({ types: [] });
+      interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
+    }
+
     interceptor.urls = blockedUrls;
   }
 
@@ -822,6 +834,10 @@ export default class Tab
     if (this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(
         this.session.options.blockedResourceTypes,
+      );
+    }
+    if (this.session.options?.blockedResourceUrls) {
+      await this.setBlockedResourceUrls(
         this.session.options.blockedResourceUrls,
       );
     }

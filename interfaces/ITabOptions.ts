@@ -1,6 +1,6 @@
 export default interface ITabOptions {
   blockedResourceTypes?: IBlockedResourceType[];
-  blockedResourceUrls?: string[];
+  blockedResourceUrls?: (string | RegExp)[];
 }
 
 export enum BlockedResourceType {

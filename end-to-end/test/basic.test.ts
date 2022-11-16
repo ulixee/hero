@@ -59,6 +59,80 @@ describe('basic Full Client tests', () => {
     expect(resources[0].type).toBe('Document');
   });
 
+  it('allows you to block urls: strings', async () => {
+    koaServer.get('/block', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/test.css" />
+</head>
+<body>
+  <img src="/img.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/foo/bar/42?x=foo&y=%20baz', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/baz/bar', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceUrls: [
+        '42?x=foo',
+        '/baz/',
+      ],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
+  });
+
+  it('allows you to block urls: RegExp', async () => {
+    koaServer.get('/block', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/test.css" />
+</head>
+<body>
+  <img src="/img.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/foo/bar/42?x=foo&y=%20baz', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/baz/bar', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceUrls: [
+        /42\?x=oo/,
+        /\/baz\//,
+      ],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
+  });
+
   it('should get unreachable proxy errors in the client', async () => {
     const hero = new Hero({
       upstreamProxyUrl: koaServer.baseUrl,
