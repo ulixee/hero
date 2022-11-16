@@ -40,10 +40,13 @@ One of the best ways to optimize Hero's memory and CPU is setting `blockedResour
 | Options          | Description                                                        |
 | ---------------- | ------------------------------------------------------------------ |
 | `JsRuntime`      | Executes JS in webpage. Requires `AwaitedDOM`.                     |
-| `BlockJsAssets`  | Loads all referenced script assets. Requires `JsRuntime`.          |
-| `BlockCssAssets` | Loads all referenced CSS assets. Requires `JsRuntime`.             |
-| `BlockImages`    | Loads all referenced images on page. Requires `JsRuntime`.         |
-| `BlockAssets`    | Shortcut for `LoadJsAssets`, `LoadCssAssets` and `LoadImages`.     |
+| `BlockJsAssets`  | Blocks all referenced script assets.                               |
+| `BlockCssAssets` | Blocks all referenced CSS assets.                                  |
+| `BlockImages`    | Blocks all referenced images on page.                              |
+| `BlockFonts`     | Blocks all referenced fonts on page.                               |
+| `BlockIcons`     | Blocks all referenced icons on page.                               |
+| `BlockMedia`     | Blocks all referenced media on page.                               |
+| `BlockAssets`    | Shortcut for `BlockJsAssets`, `BlockCssAssets` and `BlockImages`.  |
 | `All`            | Blocks all of the resources above. Only retrieves window.response. |
 | `None`           | No assets are blocked. `default`                                   |
 
