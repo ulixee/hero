@@ -1,5 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { defaultBrowserEngine } from '@ulixee/default-browser-emulator';
 import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 import Core, { Session } from '../index';
 import { stringToRegex } from '../lib/Tab';
@@ -13,30 +14,52 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('loads http2 resources', async () => {
+  // no longer supported in chrome 106
+  const isPushEnabled = Number(defaultBrowserEngine.version.major) < 106;
+
   const server = await Helpers.runHttp2Server((req, res) => {
     if (req.url === '/img.png') {
       // NOTE: chrome will still request this even though it's pushed
       return res.destroy();
     }
-    res.stream.pushStream(
-      {
-        ':path': '/img.png',
-        ':method': 'GET',
-      },
-      (err, pushStream) => {
-        pushStream.respond({
-          ':status': 200,
-          'content-type': 'image/png',
-          'content-length': Buffer.byteLength(Helpers.getLogo()),
-        });
-        pushStream.end(Helpers.getLogo());
-      },
-    );
+    if (isPushEnabled) {
+      res.stream.pushStream(
+        {
+          ':path': '/img.png',
+          ':method': 'GET',
+        },
+        (err, pushStream) => {
+          pushStream.respond({
+            ':status': 200,
+            'content-type': 'image/png',
+            'content-length': Buffer.byteLength(Helpers.getLogo()),
+          });
+          pushStream.end(Helpers.getLogo());
+        },
+      );
+    } else {
+      expect(() =>
+        res.stream.pushStream(
+          {
+            ':path': '/img.png',
+            ':method': 'GET',
+          },
+          (err, pushStream) => {
+            pushStream.respond({
+              ':status': 200,
+              'content-type': 'image/png',
+              'content-length': Buffer.byteLength(Helpers.getLogo()),
+            });
+            pushStream.end(Helpers.getLogo());
+          },
+        ),
+      ).toThrowError();
+    }
     res.stream.respond({
       ':status': 200,
       'content-type': 'text/html',
     });
-    res.stream.end(`<html><body><img src="/img.png"/></body></html>`);
+    res.stream.end(`<html><body><img src='/img.png'/></body></html>`);
   });
 
   const meta = await connection.createSession();
@@ -46,9 +69,11 @@ test('loads http2 resources', async () => {
   await tab.goto(server.url);
   await tab.waitForLoad('DomContentLoaded');
 
-  const resources = await tab.waitForResources({ url: /.*\/img.png/ });
-  expect(resources).toHaveLength(1);
-  expect(resources[0].type).toBe('Image');
+  if (isPushEnabled) {
+    const resources = await tab.waitForResources({ url: /.*\/img.png/ });
+    expect(resources).toHaveLength(1);
+    expect(resources[0].type).toBe('Image');
+  }
   await session.close();
 });
 

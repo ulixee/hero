@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/ulixee/hero/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
+
+
+### Bug Fixes
+
+* allow resource filter with leading * ([8b70497](https://github.com/ulixee/hero/commit/8b7049716281065f9d838ecef3b8182afe5ee0d4))
+* devDependency version ([d94e97c](https://github.com/ulixee/hero/commit/d94e97c146cdca46f68c7d4eb52c927074c626a1))
+* don’t double call onHero ([3ae1326](https://github.com/ulixee/hero/commit/3ae13260baf6b1af8eb34f7899ae066b2f0f4474))
+* example interface ([64e748f](https://github.com/ulixee/hero/commit/64e748f0b15c9299f75b9ecbbbd595408c56d62e))
+* fix compilation of extend-Hero example ([3f2f5b8](https://github.com/ulixee/hero/commit/3f2f5b88cce6d485360804189cab0c4a055cef6f))
+* improve message for no browser engine ([868ce7d](https://github.com/ulixee/hero/commit/868ce7d7e51e349a6a9da2b9d32a76441d3a2f44)), closes [#185](https://github.com/ulixee/hero/issues/185)
+* new tests failing ([a93550e](https://github.com/ulixee/hero/commit/a93550e805d8104a611f3e554ebbfa7c350f83a9))
+* update awaited-dom to fix ts issue ([b98a567](https://github.com/ulixee/hero/commit/b98a5676df634947ec93e100556ecc4af6cd7890)), closes [#181](https://github.com/ulixee/hero/issues/181)
+
+
+### Features
+
+* allow string for host connection ([cb5abd0](https://github.com/ulixee/hero/commit/cb5abd0a4b174c8be1eb44ed81a4e2d37e937ae5))
+* **blockedResourceUrls:** expose and document ([2db8b93](https://github.com/ulixee/hero/commit/2db8b936ee00467bad41e1ea4408006e099c5f87))
+* **example:** showcase how to extend hero with your own function ([b789b0e](https://github.com/ulixee/hero/commit/b789b0e392dd6e25210e95cbbfc0aac26d7062e2))
+
+
+
+
+
 # [2.0.0-alpha.14](https://github.com/ulixee/hero/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
 
 
