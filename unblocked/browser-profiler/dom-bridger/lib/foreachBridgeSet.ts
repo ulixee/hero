@@ -33,12 +33,20 @@ export default function foreachBridgeSet(
 
     const domDir1 = Path.join(baseDomsDir, dirName1);
     const domDir2 = Path.join(baseDomsDir, dirName2);
-    const { data: dom1 } = JSON.parse(gunzipSync(Fs.readFileSync(`${domDir1}/${fileName1}`)).toString());
-    const { data: dom2 } = JSON.parse(gunzipSync(Fs.readFileSync(`${domDir2}/${fileName2}`)).toString());
+    try {
+      const { data: dom1 } = JSON.parse(
+        gunzipSync(Fs.readFileSync(`${domDir1}/${fileName1}`)).toString(),
+      );
+      const { data: dom2 } = JSON.parse(
+        gunzipSync(Fs.readFileSync(`${domDir2}/${fileName2}`)).toString(),
+      );
 
-    const fileName =
-      bridge[0] === bridge[1] ? fileName1.replace('--1.json.gz', '--(1|2).json') : fileName1;
-    const fileKey = `${key}/${fileName}`;
-    runFn(fileKey, dom1, dom2);
+      const fileName =
+        bridge[0] === bridge[1] ? fileName1.replace('--1.json.gz', '--(1|2).json') : fileName1;
+      const fileKey = `${key}/${fileName}`;
+      runFn(fileKey, dom1, dom2);
+    } catch (err) {
+      console.log('couldn\t read file', err, { domDir1, domDir2 });
+    }
   }
 }

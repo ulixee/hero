@@ -109,9 +109,8 @@ function extractDiffValue(
   });
 }
 
-const ignorePaths = new Set(['window.DomExtractor']);
 function ignorePath(path: string): boolean {
-  return ignorePaths.has(path);
+  return path !== 'window.DomExtractor';
 }
 
 function processBridgeDiff(fileKey: string, diff, startingMap): void {

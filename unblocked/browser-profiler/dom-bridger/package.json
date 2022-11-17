@@ -5,8 +5,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "generateRawMappings": "node ../build/dom-bridger/scripts/generateRawMappings.js",
-    "generatePathPatterns": "node ../build/dom-bridger/scripts/generatePathPatterns.js",
+    "generateRawMappings": "node ../../build/browser-profiler/dom-bridger/scripts/generateRawMappings.js",
+    "generatePathPatterns": "node ../../build/browser-profiler/dom-bridger/scripts/generatePathPatterns.js",
     "generate": "yarn generateRawMappings && yarn generatePathPatterns"
   },
   "dependencies": {
