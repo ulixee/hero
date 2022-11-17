@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
-import {
-  addressValidation,
-  identityValidation,
-  micronoteTokenValidation,
-  signatureValidation,
-} from '../common';
+import { identityValidation, micronoteTokenValidation, signatureValidation } from '../common';
 import { PaymentSchema } from '../types/IPayment';
 
 export const databoxVersionHashValidation = z
@@ -52,9 +47,9 @@ export const DataboxApiSchemas = {
       maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
       averageTotalPricePerQuery: positiveInt.describe('Average total microgons paid for a query.'),
       maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
-      giftCardPaymentAddresses: addressValidation
+      giftCardIssuerIdentities: identityValidation
         .array()
-        .describe('The addresses this databox allows gift card payments for (if any).'),
+        .describe('The identities this databox allows gift card payments for (if any).'),
       basePricePerQuery: micronoteTokenValidation.describe('The databox base price per query'),
       computePricePerKb: micronoteTokenValidation.describe(
         'The current server price per kilobyte. NOTE: if a server is implementing surge pricing, this amount could vary.',

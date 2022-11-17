@@ -165,9 +165,14 @@ export function translateToPrintable(
       result.error = value;
       continue;
     }
-    if (key === 'error' && value) {
-      result.error = new Error((value as any).message);
-      Object.assign(result.error, value);
+    if (key === 'error') {
+      if (typeof value === 'object') {
+        const { message, ...rest } = value as any;
+        result.error = new Error(message);
+        Object.assign(result.error, rest);
+      } else if (typeof value === 'string') {
+        result.error = new Error(value as string);
+      }
       continue;
     }
 

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addressValidation, micronoteTokenValidation } from '../common';
+import { addressValidation, identityValidation, micronoteTokenValidation } from '../common';
 import { databoxVersionHashValidation } from '../databox/DataboxApis';
 
 const minDate = new Date('2022-01-01').getTime();
@@ -32,9 +32,9 @@ export const DataboxManifestSchema = z.object({
     .optional()
     .describe('Price per query if requiring payment'),
   paymentAddress: addressValidation.optional(),
-  giftCardAddress: addressValidation
+  giftCardIssuerIdentity: identityValidation
     .optional()
-    .describe('An address this Databox is accepting gift cards'),
+    .describe('A gift card issuer identity for this Databox.'),
 });
 
 export type IVersionHistoryEntry = z.infer<

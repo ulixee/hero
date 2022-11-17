@@ -1,25 +1,14 @@
 import { promises as fs, readFileSync } from 'fs';
 import * as path from 'path';
-import { promisify } from 'util';
-import {
-  createPrivateKey,
-  generateKeyPair,
-  generateKeyPairSync,
-  KeyExportOptions,
-  KeyObject,
-  sign,
-  verify,
-} from 'crypto';
+import { createPrivateKey, generateKeyPairSync, KeyExportOptions, KeyObject } from 'crypto';
 import { sha3 } from '@ulixee/commons/lib/hashUtils';
 import { existsAsync } from '@ulixee/commons/lib/fileUtils';
 import Log from '@ulixee/commons/lib/Logger';
 import { decodeBuffer, encodeBuffer } from '@ulixee/commons/lib/bufferUtils';
-import { createPublicKeyFromBytes, getPublicKeyBytes } from './pkiUtils';
+import Ed25519 from './Ed25519';
 import { UnreadableIdentityError } from './errors';
 
 const { log } = Log(module);
-
-const generateKeyPairAsync = promisify(generateKeyPair);
 
 export default class Identity {
   public static defaultPkcsCipher = 'aes-256-cbc';
@@ -32,7 +21,7 @@ export default class Identity {
   }
 
   public get publicKey(): Buffer {
-    this.#publicKeyBytes ??= getPublicKeyBytes(this.privateKey);
+    this.#publicKeyBytes ??= Ed25519.getPublicKeyBytes(this.privateKey);
     return this.#publicKeyBytes;
   }
 
@@ -47,7 +36,7 @@ export default class Identity {
   }
 
   public sign(hashedMessage: Buffer): Buffer {
-    return sign(null, hashedMessage, this.privateKey);
+    return Ed25519.sign(this.privateKey, hashedMessage);
   }
 
   public equals(identityBech32: string): boolean {
@@ -136,30 +125,23 @@ export default class Identity {
   }
 
   public static async create(): Promise<Identity> {
-    const key = await generateKeyPairAsync('ed25519');
+    const key = await Ed25519.create();
     const pair = new Identity(key.privateKey);
     pair.verifyKeys();
     return pair;
   }
 
   public static verify(identityBech32: string, hashedMessage: Buffer, signature: Buffer): boolean {
-    if (
-      !signature ||
-      !signature.length ||
-      !hashedMessage ||
-      !hashedMessage.length ||
-      !identityBech32
-    )
-      return false;
-
+    if (!identityBech32) return false;
     const publicKeyBytes = decodeBuffer(identityBech32, this.encodingPrefix);
-    const publicKey = createPublicKeyFromBytes(publicKeyBytes);
 
-    try {
-      return verify(null, hashedMessage, publicKey, signature);
-    } catch (err) {
-      log.error('Error validating signature', err);
-      return false;
-    }
+    const publicKey = Ed25519.createPublicKeyFromBytes(publicKeyBytes);
+    const isValid = Ed25519.verify(publicKey, hashedMessage, signature);
+    if (isValid === true) return true;
+
+    log.error('Error validating signature', {
+      error: (isValid as Error) ?? new Error('Invalid parameters'),
+    });
+    return false;
   }
 }

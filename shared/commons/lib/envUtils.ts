@@ -17,6 +17,7 @@ export function loadEnv(baseDir: string, overwriteSetValues = false): void {
   // don't overwrite already set variables
   for (const [key, value] of Object.entries(env)) {
     if (process.env[key] && !overwriteSetValues) continue;
+    if (!value) continue;
     process.env[key] = value;
   }
 }

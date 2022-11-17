@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import {
   blockHeightValidation,
+  giftCardIdValidation,
+  giftCardRemptionKeyValidation,
   identityValidation,
   micronoteIdValidation,
   micronoteTokenValidation,
@@ -8,12 +10,11 @@ import {
 } from '../common';
 import { MicronoteBatchSchema } from './IMicronoteBatch';
 
-export const PaymentSchema = z.object({
+export const MicronoteSchema = z.object({
   microgons: micronoteTokenValidation,
   micronoteId: micronoteIdValidation,
   blockHeight: blockHeightValidation,
   batchSlug: MicronoteBatchSchema.shape.batchSlug,
-  isGiftCardBatch: z.boolean(),
   micronoteBatchUrl: z.string().url(),
   micronoteBatchIdentity: identityValidation,
   micronoteSignature: signatureValidation,
@@ -21,6 +22,16 @@ export const PaymentSchema = z.object({
   sidechainValidationSignature: signatureValidation,
   // guaranteeBlockHash: hashValidation.describe('TODO: Add back in. This should tell a server what block hash they can choose to trust or not'),
   guaranteeBlockHeight: blockHeightValidation,
+});
+
+export const PaymentSchema = z.object({
+  micronote: MicronoteSchema.optional(),
+  giftCard: z
+    .object({
+      id: giftCardIdValidation,
+      redemptionKey: giftCardRemptionKeyValidation,
+    })
+    .optional(),
 });
 
 type IPayment = z.infer<typeof PaymentSchema>;
