@@ -38,7 +38,7 @@
     "@types/ua-parser-js": "^0.7.35",
     "@ulixee/chrome-app": "1.0.2",
     "@ulixee/hero": "2.0.0-alpha.15",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.14",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.15",
     "@ulixee/hero-testing": "2.0.0-alpha.15",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"
