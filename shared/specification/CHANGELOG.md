@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/ulixee/shared/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
+
+
+### Features
+
+* gift card api v2 to support redemption key ([b2f11f4](https://github.com/ulixee/shared/commit/b2f11f44a784adf8dd208db9683c99369f33f98c))
+
+
+
+
+
 # [2.0.0-alpha.14](https://github.com/ulixee/shared/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
 
 **Note:** Version bump only for package @ulixee/specification
