@@ -15,7 +15,7 @@
     "@double-agent/collect-http-basic-headers": "2.0.0-alpha.13",
     "@double-agent/collect-http2-session": "2.0.0-alpha.13",
     "@double-agent/collect-tls-clienthello": "2.0.0-alpha.13",
-    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.15",
     "@ulixee/real-user-agents": "2.0.0-alpha.13",
     "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.13",
     "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.13",

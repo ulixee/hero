@@ -10,7 +10,7 @@
   "dependencies": {
     "@double-agent/collect": "2.0.0-alpha.13",
     "@double-agent/config": "2.0.0-alpha.13",
-    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.15",
     "@ulixee/real-user-agents": "2.0.0-alpha.13",
     "humanize-string": "^2.1.0",
     "initialism": "^1.0.2",

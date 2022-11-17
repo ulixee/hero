@@ -7,7 +7,7 @@
     "update:agents": "export $(cat .env | xargs) && node -e 'require(\"../build/real-user-agents/scripts/importBrowserstackUserAgents.js\").default()'"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.15",
     "@ulixee/unblocked-specification": "2.0.0-alpha.13",
     "compare-versions": "^3.6.0",
     "ua-parser-js": "^0.7.24"

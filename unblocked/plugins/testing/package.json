@@ -10,7 +10,7 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
-    "@ulixee/commons": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.15",
     "@ulixee/unblocked-agent": "2.0.0-alpha.13",
     "@ulixee/unblocked-specification": "2.0.0-alpha.13",
     "http-proxy-agent": "^4.0.1",
