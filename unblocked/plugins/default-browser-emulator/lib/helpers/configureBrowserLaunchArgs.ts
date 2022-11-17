@@ -3,8 +3,6 @@ import * as os from 'os';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { defaultScreen } from '../Viewports';
 
-const sessionDirCounter = 0;
-
 export function configureBrowserLaunchArgs(
   engine: IBrowserEngine,
   options: {
