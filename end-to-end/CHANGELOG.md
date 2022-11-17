@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/ulixee/platform/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
+
+
+### Bug Fixes
+
+* new tests failing ([a93550e](https://github.com/ulixee/platform/commit/a93550e805d8104a611f3e554ebbfa7c350f83a9))
+* update awaited-dom to fix ts issue ([b98a567](https://github.com/ulixee/platform/commit/b98a5676df634947ec93e100556ecc4af6cd7890)), closes [#181](https://github.com/ulixee/platform/issues/181)
+
+
+
+
+
 # [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
 
 

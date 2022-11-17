@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/hero-core",
-  "version": "2.0.0-alpha.14",
+  "version": "2.0.0-alpha.15",
   "description": "The core browser API used to run Hero",
   "exports": {
     ".": {
@@ -15,31 +15,31 @@
     "./connections/*": "./connections/*.js"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.14",
-    "@ulixee/default-browser-emulator": "2.0.0-alpha.13",
-    "@ulixee/default-human-emulator": "2.0.0-alpha.13",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.14",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.14",
-    "@ulixee/hero-timetravel": "2.0.0-alpha.14",
-    "@ulixee/js-path": "2.0.0-alpha.13",
-    "@ulixee/net": "2.0.0-alpha.14",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.13",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.13",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.13",
     "@ulixee/awaited-dom": "1.4.1",
+    "@ulixee/commons": "2.0.0-alpha.15",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.14",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.14",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.15",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.15",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.15",
+    "@ulixee/js-path": "2.0.0-alpha.14",
+    "@ulixee/net": "2.0.0-alpha.15",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.14",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.14",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.14",
     "better-sqlite3": "^7.5.1",
     "moment": "^2.29.4",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@types/ua-parser-js": "^0.7.35",
     "@types/better-sqlite3": "^7.5.0",
     "@types/json-socket": "^0.1.17",
+    "@types/ua-parser-js": "^0.7.35",
     "@ulixee/chrome-app": "1.0.2",
-    "@ulixee/hero": "2.0.0-alpha.14",
+    "@ulixee/hero": "2.0.0-alpha.15",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.14",
-    "@ulixee/hero-testing": "2.0.0-alpha.14",
+    "@ulixee/hero-testing": "2.0.0-alpha.15",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"
   }

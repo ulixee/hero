@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/ulixee/platform/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
+
+
+### Bug Fixes
+
+* allow resource filter with leading * ([8b70497](https://github.com/ulixee/platform/commit/8b7049716281065f9d838ecef3b8182afe5ee0d4))
+* devDependency version ([d94e97c](https://github.com/ulixee/platform/commit/d94e97c146cdca46f68c7d4eb52c927074c626a1))
+* improve message for no browser engine ([868ce7d](https://github.com/ulixee/platform/commit/868ce7d7e51e349a6a9da2b9d32a76441d3a2f44)), closes [#185](https://github.com/ulixee/platform/issues/185)
+* update awaited-dom to fix ts issue ([b98a567](https://github.com/ulixee/platform/commit/b98a5676df634947ec93e100556ecc4af6cd7890)), closes [#181](https://github.com/ulixee/platform/issues/181)
+
+
+### Features
+
+* **blockedResourceUrls:** expose and document ([2db8b93](https://github.com/ulixee/platform/commit/2db8b936ee00467bad41e1ea4408006e099c5f87))
+
+
+
+
+
 # [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
 
 
