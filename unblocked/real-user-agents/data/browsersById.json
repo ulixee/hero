@@ -3179,5 +3179,33 @@
     "deviceCategory": "desktop",
     "releaseDate": "2022-10-18",
     "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-107-0": {
+    "id": "chrome-107-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "107",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-08",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "edge-107-0": {
+    "id": "edge-107-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "107",
+      "minor": "0",
+      "build": "1418",
+      "patch": "24"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-10-27",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
   }
 }

@@ -5,9 +5,9 @@
     "majorVersion": 107,
     "buildVersion": 5304,
     "stablePatchesByOs": {
-      "mac": [87, 62],
-      "win": [88, 63],
-      "linux": [87, 62]
+      "mac": [110, 87, 62],
+      "win": [107, 88, 63],
+      "linux": [110, 87, 62]
     }
   },
   {

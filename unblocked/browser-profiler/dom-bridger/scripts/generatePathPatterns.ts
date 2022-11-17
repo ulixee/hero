@@ -49,7 +49,7 @@ async function generatePathPatterns(): Promise<void> {
 
       const contents = await readFile(`${domDir}/browser-dom-environment--https--1.json.gz`);
       const { data: dom } = JSON.parse(
-        await new Promise<string>(resolve => gunzip(contents, x => resolve(x.toString()))),
+        await new Promise<string>(resolve => gunzip(contents, (err, x) => resolve(x.toString()))),
       );
       const paths = extractPathsFromDom(dom);
       for (const extractor of [

@@ -68,3 +68,9 @@ jobs:
           branch: main
           repository: ./browser-profile-data
           commit_message: "chore(profiles): automatic updates"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ always() }}
+        with:
+          branch: main
+          commit_message: "chore(profiles): automatic updates"

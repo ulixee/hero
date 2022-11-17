@@ -20,6 +20,12 @@ jobs:
         include:
           - node-version: 16.x
             os: ubuntu-latest
+            browser: chrome-106-0
+          - node-version: 16.x
+            os: ubuntu-latest
+            browser: chrome-105-0
+          - node-version: 16.x
+            os: ubuntu-latest
             browser: chrome-104-0
           - node-version: 16.x
             os: ubuntu-latest

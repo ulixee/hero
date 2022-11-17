@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-17)
+
+
+### Bug Fixes
+
+* allow double-agent install on its own ([0ab0cd3](https://github.com/ulixee/ulixee/commit/0ab0cd3968199485342f97a006ec40a3855d6331))
+* don’t build double agent in dist ([21c65ec](https://github.com/ulixee/ulixee/commit/21c65ec3ef2ac1865d5383dd298885d04d40ea38))
+* publish connect errors ([a917c8d](https://github.com/ulixee/ulixee/commit/a917c8dca16ac9220f8d6e4aab41f5fa71d1bc9b))
+
+
+
+
+
 # [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-11-02)
 
 

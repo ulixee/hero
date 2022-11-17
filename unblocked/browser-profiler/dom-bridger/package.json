@@ -1,18 +1,18 @@
 {
   "name": "@ulixee/unblocked-browser-profiler-dom-bridger",
-  "version": "2.0.0-alpha.13",
+  "version": "2.0.0-alpha.14",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "generateRawMappings": "node ../build/dom-bridger/scripts/generateRawMappings.js",
-    "generatePathPatterns": "node ../build/dom-bridger/scripts/generatePathPatterns.js",
+    "generateRawMappings": "node ../../build/browser-profiler/dom-bridger/scripts/generateRawMappings.js",
+    "generatePathPatterns": "node ../../build/browser-profiler/dom-bridger/scripts/generatePathPatterns.js",
     "generate": "yarn generateRawMappings && yarn generatePathPatterns"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.14",
-    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.13",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.13",
+    "@ulixee/commons": "2.0.0-alpha.15",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.14",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.14",
     "lodash": "^4.17.20"
   }
 }
