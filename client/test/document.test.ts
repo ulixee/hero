@@ -1,7 +1,7 @@
 // need to import this before the awaited stuff gets imported
 import '../lib/SetupAwaitedHandler';
 
-import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
+import { getState as getElementState } from '@ulixee/awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
 import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
 import { Helpers } from '@ulixee/hero-testing';

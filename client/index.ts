@@ -10,14 +10,14 @@ import type {
   ISuperText,
   ISuperStyleSheet,
   ISuperHTMLElement,
-} from 'awaited-dom/base/interfaces/super';
+} from '@ulixee/awaited-dom/base/interfaces/super';
 import {
   IElement,
   IHTMLCollection,
   IHTMLElement,
   INode,
   INodeList,
-} from 'awaited-dom/base/interfaces/official';
+} from '@ulixee/awaited-dom/base/interfaces/official';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { KeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 import IResourceType, { ResourceType } from '@ulixee/unblocked-specification/agent/net/IResourceType';

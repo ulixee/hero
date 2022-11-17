@@ -1,11 +1,11 @@
-import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHandler';
+import AwaitedHandler, { NotImplementedError } from '@ulixee/awaited-dom/base/AwaitedHandler';
 import { IJsPath , INodePointer } from '@ulixee/js-path';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import Constructable from 'awaited-dom/base/Constructable';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
+import Constructable from '@ulixee/awaited-dom/base/Constructable';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
 import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import NodeFactory from 'awaited-dom/base/NodeFactory';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import NodeFactory from '@ulixee/awaited-dom/base/NodeFactory';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 

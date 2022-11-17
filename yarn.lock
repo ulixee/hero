@@ -2047,6 +2047,13 @@
     "@typescript-eslint/types" "5.39.0"
     eslint-visitor-keys "^3.3.0"
 
+"@ulixee/awaited-dom@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@ulixee/awaited-dom/-/awaited-dom-1.4.1.tgz#faa43fcc25710caa0bb7558f106768c60ba3622a"
+  integrity sha512-lj5TqBm4thn6+8PcMesgWwPUP9HRf8jKO3+Pc3cst7nDqKKedfBnDvUhDS9outiI1U5dmFvxoYmiNwL1Pi3oXg==
+  dependencies:
+    "@ulixee/js-path" "^2.0.0-alpha.13"
+
 "@ulixee/chrome-105-0@^5195.127.6":
   version "5195.127.6"
   resolved "https://registry.yarnpkg.com/@ulixee/chrome-105-0/-/chrome-105-0-5195.127.6.tgz#b1a3d2e91d5f982c0a2b3b6e7aa5a514cd265a0a"
@@ -2079,10 +2086,10 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@^1.0.21":
-  version "1.0.21"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.21.tgz#357808c570872494fdf9c8255b23038b36d3992e"
-  integrity sha512-Oflv3YtPAYnZWA291PZ7X1AP1HbqHR4HSm+yrOIfUqQ2r97Un5eYdU7f/ZRqd0SGkj9/A/9i+Ad09XKXOHeBBg==
+"@ulixee/repo-tools@^1.0.22":
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.22.tgz#b906737cf464b5fc3ea0be5b2c958e0fedb76921"
+  integrity sha512-Qgocpy/bOCFfr5rIjAY+AHOonif/FgGcOuXUWpe8ucB402ujnIs/woyVzmj3INbu0K0fAop+sJcNvNkx4QhZew==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.27.1"
     "@typescript-eslint/parser" "^5.27.1"
@@ -2102,11 +2109,6 @@
     prettier "^2.6.2"
     pretty-quick "^3.1.0"
     typescript "^4.7.2"
-
-"@unblocked-web/js-path@2.0.0-alpha.1":
-  version "2.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@unblocked-web/js-path/-/js-path-2.0.0-alpha.1.tgz#39482400d582a1cb88197724f2b1efa339d9483f"
-  integrity sha512-59FWvS1XRD862CLm2/9ZPiJlylolwkhe3HRH+aIes7dRXHSlpdwOLQG1V6NN1W//TXh9ars3f3TJqr4XLSaAcg==
 
 "@vue/compiler-sfc@2.7.10":
   version "2.7.10"
@@ -2389,13 +2391,6 @@ at-least-node@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
-
-awaited-dom@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.4.0.tgz#d74ed6bf7012aa8588f2189bee1dd2f7661870d4"
-  integrity sha512-0Am2L51ByCfKkHXUs8Cv2qCoukJtXq+iLrBwoPgNPB5OmfmdnPefibb6jJ1SN9pNMx7pxMakScYY2aO2gikoww==
-  dependencies:
-    "@unblocked-web/js-path" "2.0.0-alpha.1"
 
 aws-sign2@~0.7.0:
   version "0.7.0"

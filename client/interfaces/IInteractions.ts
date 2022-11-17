@@ -4,7 +4,7 @@ import {
   IElementInteractVerification,
   IMousePositionXY,
 } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement } from '@ulixee/awaited-dom/base/interfaces/super';
 
 export type IInteraction = ICommand | ICommandDetailed;
 type IInteractions = IInteraction[];

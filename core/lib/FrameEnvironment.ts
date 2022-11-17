@@ -14,7 +14,7 @@ import {
 import { URL } from 'url';
 import * as Fs from 'fs';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
 import { IFrameEvents } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';

@@ -1,4 +1,4 @@
-import { ISuperElement, ISuperHTMLElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
+import { ISuperElement, ISuperHTMLElement, ISuperNode } from '@ulixee/awaited-dom/base/interfaces/super';
 
 export default interface IDomState {
   url?: string | RegExp;

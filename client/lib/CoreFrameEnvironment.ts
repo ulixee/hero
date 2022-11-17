@@ -8,11 +8,11 @@ import {
   ILocationTrigger,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
 import { IJsPath, INodeVisibility, INodePointer } from '@ulixee/js-path';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { ICookie } from '@ulixee/unblocked-specification/agent/net/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
 import {
   getComputedVisibilityFnName,
@@ -21,9 +21,9 @@ import {
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import { IElementIsolate, INodeIsolate } from '@ulixee/awaited-dom/base/interfaces/isolate';
+import { ISuperElement } from '@ulixee/awaited-dom/base/interfaces/super';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';

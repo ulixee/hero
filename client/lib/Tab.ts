@@ -1,17 +1,17 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import Storage from 'awaited-dom/impl/official-klasses/Storage';
-import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
-import Request from 'awaited-dom/impl/official-klasses/Request';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
+import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
+import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
+import Storage from '@ulixee/awaited-dom/impl/official-klasses/Storage';
+import CSSStyleDeclaration from '@ulixee/awaited-dom/impl/official-klasses/CSSStyleDeclaration';
+import Request from '@ulixee/awaited-dom/impl/official-klasses/Request';
 import {
   ILoadStatus,
   ILocationTrigger,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import Response from 'awaited-dom/impl/official-klasses/Response';
+import Response from '@ulixee/awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
@@ -19,9 +19,9 @@ import {
   IHTMLIFrameElementIsolate,
   IHTMLObjectElementIsolate,
   INodeIsolate,
-} from 'awaited-dom/base/interfaces/isolate';
+} from '@ulixee/awaited-dom/base/interfaces/isolate';
 import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/js-path';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';

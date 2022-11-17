@@ -1,24 +1,24 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode, ISuperHTMLElement, ISuperNodeList, ISuperHTMLCollection } from 'awaited-dom/base/interfaces/super';
-import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
-import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
-import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
-import Element from 'awaited-dom/impl/official-klasses/Element';
-import Node from 'awaited-dom/impl/official-klasses/Node';
-import NodeList from 'awaited-dom/impl/official-klasses/NodeList';
-import HTMLCollection from 'awaited-dom/impl/official-klasses/HTMLCollection';
-import HTMLElement from 'awaited-dom/impl/official-klasses/HTMLElement';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import { ISuperElement, ISuperNode, ISuperHTMLElement, ISuperNodeList, ISuperHTMLCollection } from '@ulixee/awaited-dom/base/interfaces/super';
+import SuperElement from '@ulixee/awaited-dom/impl/super-klasses/SuperElement';
+import SuperNode from '@ulixee/awaited-dom/impl/super-klasses/SuperNode';
+import SuperHTMLElement from '@ulixee/awaited-dom/impl/super-klasses/SuperHTMLElement';
+import Element from '@ulixee/awaited-dom/impl/official-klasses/Element';
+import Node from '@ulixee/awaited-dom/impl/official-klasses/Node';
+import NodeList from '@ulixee/awaited-dom/impl/official-klasses/NodeList';
+import HTMLCollection from '@ulixee/awaited-dom/impl/official-klasses/HTMLCollection';
+import HTMLElement from '@ulixee/awaited-dom/impl/official-klasses/HTMLElement';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { INodePointer } from '@ulixee/js-path';
 import { IElementInteractVerification } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import SuperNodeList from 'awaited-dom/impl/super-klasses/SuperNodeList';
-import SuperHTMLCollection from 'awaited-dom/impl/super-klasses/SuperHTMLCollection';
+import SuperNodeList from '@ulixee/awaited-dom/impl/super-klasses/SuperNodeList';
+import SuperHTMLCollection from '@ulixee/awaited-dom/impl/super-klasses/SuperHTMLCollection';
 import { KeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
-import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
-import { createSuperDocument, createSuperNode } from 'awaited-dom/impl/create';
+import XPathResult from '@ulixee/awaited-dom/impl/official-klasses/XPathResult';
+import { createSuperDocument, createSuperNode } from '@ulixee/awaited-dom/impl/create';
 import { KeyboardShortcuts } from '@ulixee/unblocked-specification/agent/interact/IKeyboardShortcuts';
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import { IElement, IHTMLCollection, IHTMLElement, INode, INodeList } from 'awaited-dom/base/interfaces/official';
+import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
+import { IElement, IHTMLCollection, IHTMLElement, INode, INodeList } from '@ulixee/awaited-dom/base/interfaces/official';
 import { ITypeInteraction } from '../interfaces/IInteractions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -60,7 +60,7 @@ interface IBaseExtendNodeList {
   $addToDetachedElements(name?: string): Promise<void>;
 }
 
-declare module 'awaited-dom/base/interfaces/super' {
+declare module '@ulixee/awaited-dom/base/interfaces/super' {
   interface ISuperElement extends IBaseExtendNode {}
   interface ISuperNode extends IBaseExtendNode {}
   interface ISuperHTMLElement extends IBaseExtendNode {}
@@ -68,7 +68,7 @@ declare module 'awaited-dom/base/interfaces/super' {
   interface ISuperHTMLCollection extends IBaseExtendNodeList {}
 }
 
-declare module 'awaited-dom/base/interfaces/official' {
+declare module '@ulixee/awaited-dom/base/interfaces/official' {
   interface IElement extends IBaseExtendNode {}
   interface INode extends IBaseExtendNode {}
   interface IHTMLElement extends IBaseExtendNode {}

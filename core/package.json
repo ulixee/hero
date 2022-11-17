@@ -15,7 +15,6 @@
     "./connections/*": "./connections/*.js"
   },
   "dependencies": {
-    "@types/ua-parser-js": "^0.7.35",
     "@ulixee/commons": "2.0.0-alpha.14",
     "@ulixee/default-browser-emulator": "2.0.0-alpha.13",
     "@ulixee/default-human-emulator": "2.0.0-alpha.13",
@@ -27,13 +26,14 @@
     "@ulixee/unblocked-agent": "2.0.0-alpha.13",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.13",
     "@ulixee/unblocked-specification": "2.0.0-alpha.13",
-    "awaited-dom": "1.4.0",
+    "@ulixee/awaited-dom": "1.4.1",
     "better-sqlite3": "^7.5.1",
     "moment": "^2.29.4",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },
   "devDependencies": {
+    "@types/ua-parser-js": "^0.7.35",
     "@types/better-sqlite3": "^7.5.0",
     "@types/json-socket": "^0.1.17",
     "@ulixee/chrome-app": "1.0.2",

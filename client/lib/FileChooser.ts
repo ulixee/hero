@@ -1,9 +1,9 @@
 import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
 import * as Fs from 'fs';
 import { IJsPath } from '@ulixee/js-path';
-import AwaitedPath  from 'awaited-dom/base/AwaitedPath';
-import { createHTMLInputElement } from 'awaited-dom/impl/create';
-import { IHTMLInputElement } from 'awaited-dom/base/interfaces/official';
+import AwaitedPath  from '@ulixee/awaited-dom/base/AwaitedPath';
+import { createHTMLInputElement } from '@ulixee/awaited-dom/impl/create';
+import { IHTMLInputElement } from '@ulixee/awaited-dom/base/interfaces/official';
 import * as Path from 'path';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 

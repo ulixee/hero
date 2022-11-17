@@ -10,9 +10,9 @@ import {
   isMousePositionXY,
   MouseButton,
 } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import { ISuperElement, ISuperNode } from '@ulixee/awaited-dom/base/interfaces/super';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 import { IKeyboardShortcut } from '@ulixee/unblocked-specification/agent/interact/IKeyboardShortcuts';
 import IInteractions, {

@@ -1,11 +1,11 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import XPathResult from 'awaited-dom/impl/official-klasses/XPathResult';
-import Storage from 'awaited-dom/impl/official-klasses/Storage';
-import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
+import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
+import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
+import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
+import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
+import XPathResult from '@ulixee/awaited-dom/impl/official-klasses/XPathResult';
+import Storage from '@ulixee/awaited-dom/impl/official-klasses/Storage';
+import CSSStyleDeclaration from '@ulixee/awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import {
   createCSSStyleDeclaration,
   createResponse,
@@ -13,15 +13,15 @@ import {
   createSuperDocument,
   createSuperNode,
   createSuperNodeList,
-} from 'awaited-dom/impl/create';
-import Request from 'awaited-dom/impl/official-klasses/Request';
+} from '@ulixee/awaited-dom/impl/create';
+import Request from '@ulixee/awaited-dom/impl/official-klasses/Request';
 import {
   ILoadStatus,
   ILocationTrigger,
   LocationStatus,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import Response from 'awaited-dom/impl/official-klasses/Response';
+import Response from '@ulixee/awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
@@ -29,7 +29,7 @@ import {
   IHTMLIFrameElementIsolate,
   IHTMLObjectElementIsolate,
   INodeIsolate,
-} from 'awaited-dom/base/interfaces/isolate';
+} from '@ulixee/awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@ulixee/js-path';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import { IMousePositionXY } from '@ulixee/unblocked-specification/agent/interact/IInteractions';

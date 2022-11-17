@@ -1,4 +1,4 @@
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';

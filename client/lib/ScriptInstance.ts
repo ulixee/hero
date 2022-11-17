@@ -4,7 +4,7 @@ import { getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
-const AwaitedDomPath = require.resolve('awaited-dom/package.json').replace('package.json', '');
+const AwaitedDomPath = require.resolve('@ulixee/awaited-dom/package.json').replace('package.json', '');
 const HeroLibPath = require.resolve('./Hero').replace(/\/Hero\.(?:ts|js)/, '');
 
 export default class ScriptInstance {

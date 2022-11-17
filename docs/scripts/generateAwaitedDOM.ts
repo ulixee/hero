@@ -2,7 +2,7 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 import * as json2md from 'json2md';
 import decamelize = require('decamelize');
-import rawDocs = require('awaited-dom/docs.json');
+import rawDocs = require('@ulixee/awaited-dom/docs.json');
 import { DOMParser } from 'noderdom-detached';
 import { IElement, IHTMLLinkElement } from 'noderdom-detached/base/interfaces';
 

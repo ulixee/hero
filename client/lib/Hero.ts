@@ -1,19 +1,19 @@
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
+import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Response from 'awaited-dom/impl/official-klasses/Response';
-import { ISuperElement, ISuperNode, ISuperNodeList } from 'awaited-dom/base/interfaces/super';
+import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
+import Response from '@ulixee/awaited-dom/impl/official-klasses/Response';
+import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import {
   ILoadStatus,
   ILocationTrigger,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
-import Request from 'awaited-dom/impl/official-klasses/Request';
+import Request from '@ulixee/awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
@@ -21,8 +21,8 @@ import {
   IHTMLIFrameElementIsolate,
   IHTMLObjectElementIsolate,
   INodeIsolate,
-} from 'awaited-dom/base/interfaces/isolate';
-import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
+} from '@ulixee/awaited-dom/base/interfaces/isolate';
+import CSSStyleDeclaration from '@ulixee/awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
 import { INodeVisibility } from '@ulixee/js-path';
