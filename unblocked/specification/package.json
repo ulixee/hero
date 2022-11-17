@@ -1,9 +1,9 @@
 {
   "name": "@ulixee/unblocked-specification",
-  "version": "2.0.0-alpha.13",
+  "version": "2.0.0-alpha.14",
   "description": "Interfaces to interact with Unblocked Agent Plugins",
   "dependencies": {
-    "@ulixee/js-path": "2.0.0-alpha.13",
+    "@ulixee/js-path": "2.0.0-alpha.14",
     "devtools-protocol": "^0.0.981744"
   },
   "devDependencies": {
