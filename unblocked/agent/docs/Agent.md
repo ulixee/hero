@@ -26,7 +26,7 @@ Each Agent instance creates a private environment with its own cache, cookies, s
 
 #### Pluggable
 
-Each Agent implements the full Unblocked [Plugin Specification](https://github.com/ulixee/unblocked/main/tree/specification/plugin) allowing developer control along the full spectrum of web scraping sessions.
+Each Agent implements the full Unblocked [Plugin Specification](https://github.com/ulixee/unblocked/tree/main/specification/plugin) allowing developer control along the full spectrum of web scraping sessions.
 
 ## Constructor
 
@@ -50,10 +50,10 @@ const Agent = require('@ulixee/agent');
 - options `IAgentCreateOptions`:
   - id `string` Optional id to track unique logs for this entry
   - browserEngine `IBrowserEngine` - A [BrowserEngine](./BrowserEngine.md) to launch.
-  - plugins `IUnblockedPluginClass[]` - A list of [Plugins](https://github.com/ulixee/unblocked/main/tree/specification/plugin/IUnblockedPlugin.ts) classes (`IUnblockedPluginClass`). These plugins will be installed into all hooks for the agent.
+  - plugins `IUnblockedPluginClass[]` - A list of [Plugins](https://github.com/ulixee/unblocked/tree/main/specification/plugin/IUnblockedPlugin.ts) classes (`IUnblockedPluginClass`). These plugins will be installed into all hooks for the agent.
   - userAgentOptions `IUserAgentOptions` An optional object describing the operating system and browser version that should be emulated by any installed Unblocked Plugins.
   - commandMarker `ICommandMarker` An optional module to track the markers between operations (ie, waitForLocation, interact, etc).
-  - options `IEmulationOptions` An optional configuration accepting all [EmulationProfile](https://github.com/ulixee/unblocked/main/tree/specification#emulation-profile) settings.
+  - options `IEmulationOptions` An optional configuration accepting all [EmulationProfile](https://github.com/ulixee/unblocked/tree/main/specification#emulation-profile) settings.
 
 ## Properties
 

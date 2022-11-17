@@ -4,4 +4,4 @@ Agents support the [Unblocked Plugin][spec] specification, which ensures a Plugi
 
 Hooks can be used to emulate a Browser Engine or a Human user.
 
-[spect]: https://github.com/ulixee/unblocked/main/tree/specification
+[spect]: https://github.com/ulixee/unblocked/tree/main/specification
