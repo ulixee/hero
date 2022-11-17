@@ -91,6 +91,7 @@ export default class Hero extends AwaitedEventTarget<{
   readonly #clientPlugins: IClientPlugin[] = [];
   readonly #connectionToCore: ConnectionToHeroCore;
   readonly #didAutoCreateConnection: boolean = false;
+  #didInitializeClientPlugins = false;
   #coreSessionPromise: Promise<CoreSession | Error>;
   #tabs: Tab[];
   #activeTab: Tab;
@@ -418,7 +419,7 @@ export default class Hero extends AwaitedEventTarget<{
       clientPlugins.push(clientPlugin);
       this.#options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     }
-    if (this.#coreSessionPromise) {
+    if (this.#didInitializeClientPlugins) {
       this.#initializeClientPlugins(clientPlugins);
     }
   }
@@ -614,6 +615,7 @@ export default class Hero extends AwaitedEventTarget<{
   }
 
   #initializeClientPlugins(plugins: IClientPlugin[]): void {
+    this.#didInitializeClientPlugins = true;
     for (const clientPlugin of plugins) {
       if (clientPlugin.onHero) clientPlugin.onHero(this, this.#sendToActiveTab.bind(this));
     }
