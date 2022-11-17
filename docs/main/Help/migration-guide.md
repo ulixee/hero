@@ -65,7 +65,7 @@ If you want to keep a model where you are using "driving" a script by queuing up
 
 ## BrowserEmulators and HumanEmulators
 
-If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have been merged into a single type of Plugin called an [Unblocked Plugin][unblocked-plugin]. You can see our plugins ported to the new format [here](https://github.com/ulixee/unblocked/main/tree/plugins). We're planning to break up the BrowserEmulator into a series of smaller plugins with the end vision of making it far simpler to add workarounds as you find the need to add bot-blocker evasions.
+If you created a custom BrowserEmulator or HumanEmulator, those "concepts" have been merged into a single type of Plugin called an [Unblocked Plugin][unblocked-plugin]. You can see our plugins ported to the new format [here](https://github.com/ulixee/unblocked/tree/main/plugins). We're planning to break up the BrowserEmulator into a series of smaller plugins with the end vision of making it far simpler to add workarounds as you find the need to add bot-blocker evasions.
 
 ## Puppet
 
@@ -81,5 +81,5 @@ If you were using Replay with SecretAgent (sorry Windows users...), it's now par
 
 
 [miner]: https://ulixee.org/docs/miner
-[unblocked-plugin]: https://github.com/ulixee/unblocked/main/tree/specification
-[unblocked-agent]: https://github.com/ulixee/unblocked/main/tree/agent
+[unblocked-plugin]: https://github.com/ulixee/unblocked/tree/main/specification
+[unblocked-agent]: https://github.com/ulixee/unblocked/tree/main/agent
