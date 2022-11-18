@@ -23,9 +23,9 @@ export interface IConnectionToCoreEvents<IEventSpec> {
   event: ICoreEventPayload<IEventSpec, any>;
 }
 export default class ConnectionToCore<
-  ICoreApiHandlers extends IApiHandlers,
-  IEventSpec,
-> extends TypedEventEmitter<IConnectionToCoreEvents<IEventSpec>> {
+  TCoreApiHandlers extends IApiHandlers,
+  TEventSpec,
+> extends TypedEventEmitter<IConnectionToCoreEvents<TEventSpec>> {
   public connectPromise: IResolvablePromise<Error | null>;
   public disconnectPromise: Promise<void>;
 
@@ -47,7 +47,7 @@ export default class ConnectionToCore<
   protected disconnectMessageId: string;
 
   protected pendingMessages = new PendingMessages<
-    ICoreResponsePayload<ICoreApiHandlers, any>['data']
+    ICoreResponsePayload<TCoreApiHandlers, any>['data']
   >();
 
   protected isConnectionTerminated: boolean;
@@ -56,7 +56,7 @@ export default class ConnectionToCore<
   private isSendingConnect = false;
   private isSendingDisconnect = false;
 
-  constructor(public transport: ITransportToCore<ICoreApiHandlers, IEventSpec>) {
+  constructor(public transport: ITransportToCore<TCoreApiHandlers, TEventSpec>) {
     super();
     bindFunctions(this);
     this.events.once(transport, 'disconnected', this.onConnectionTerminated.bind(this));
@@ -134,15 +134,15 @@ export default class ConnectionToCore<
     return this.disconnectPromise;
   }
 
-  public async sendRequest<T extends keyof ICoreApiHandlers & string>(
+  public async sendRequest<T extends keyof TCoreApiHandlers & string>(
     payload: {
       command: T;
-      args: IApiSpec<ICoreApiHandlers>[T]['args'];
+      args: IApiSpec<TCoreApiHandlers>[T]['args'];
       commandId?: number;
       startTime?: IUnixTime;
     },
     timeoutMs?: number,
-  ): Promise<ICoreResponsePayload<ICoreApiHandlers, T>['data']> {
+  ): Promise<ICoreResponsePayload<TCoreApiHandlers, T>['data']> {
     const isConnect = this.isSendingConnect;
     const isDisconnect = this.isSendingDisconnect;
     if (!isConnect && !isDisconnect) {
@@ -161,7 +161,7 @@ export default class ConnectionToCore<
           ...payload,
           messageId: id,
           sendTime: Date.now(),
-        } as ICoreRequestPayload<ICoreApiHandlers, T>),
+        } as ICoreRequestPayload<TCoreApiHandlers, T>),
       ]);
       return result;
     } catch (error) {
@@ -184,7 +184,7 @@ export default class ConnectionToCore<
   }
 
   protected onMessage(
-    payload: ICoreResponsePayload<ICoreApiHandlers, any> | ICoreEventPayload<IEventSpec, any>,
+    payload: ICoreResponsePayload<TCoreApiHandlers, any> | ICoreEventPayload<TEventSpec, any>,
   ): void {
     if ('responseId' in payload) {
       this.onResponse(payload);
@@ -214,7 +214,7 @@ export default class ConnectionToCore<
     }
   }
 
-  protected onEvent(event: ICoreEventPayload<IEventSpec, any>): void {
+  protected onEvent(event: ICoreEventPayload<TEventSpec, any>): void {
     this.emit('event', event);
   }
 

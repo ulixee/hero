@@ -112,6 +112,73 @@ export const DataboxApiSchemas = {
       error: z.any().optional(),
     }),
   },
+  'Databox.createInMemoryTable': {
+    args: z.object({
+      name: z.string(),
+      schema: z.any({}),
+      seedlings: z.any({}).optional(),
+      databoxInstanceId: z.string(),
+    }), 
+    result: z.object({}),
+  },
+  'Databox.createInMemoryFunction': {
+    args: z.object({
+      name: z.string(),
+      schema: z.any({}),
+      databoxInstanceId: z.string(),
+    }), 
+    result: z.object({}),
+  },
+  'Databox.queryInternalTable': {
+    args: z.object({
+      name: z.string(),
+      sql: z.string(),
+      boundValues: z.any({}).optional(),
+      databoxVersionHash: z.string().optional(),
+      databoxInstanceId: z.string().optional(),
+    }), 
+    result: z.any({}),
+  },
+  'Databox.queryInternalFunctionSetup': {
+    args: z.object({
+      name: z.string(),
+      sql: z.string(),
+      boundValues: z.any({}).optional(),
+      databoxVersionHash: z.string().optional(),
+      databoxInstanceId: z.string().optional(),
+    }), 
+    result: z.any({}),
+  },
+  'Databox.queryInternalFunction': {
+    args: z.object({
+      name: z.string(),
+      sql: z.string(),
+      boundValues: z.any({}).optional(),
+      functionRecords: z.array(z.any({})),
+      databoxVersionHash: z.string().optional(),
+      databoxInstanceId: z.string().optional(),
+    }), 
+    result: z.any({}),
+  },
+  'Databox.queryInternalSetup': {
+    args: z.object({
+      sql: z.string(),
+      boundValues: z.any({}).optional(),
+      databoxVersionHash: z.string().optional(),
+      databoxInstanceId: z.string().optional(),
+    }), 
+    result: z.any({}),
+  },
+  'Databox.queryInternal': {
+    args: z.object({
+      sql: z.string(),
+      boundValues: z.any({}).optional(),
+      functionRecordsByName: z.record(z.array(z.any({}))),
+      databoxVersionHash: z.string().optional(),
+      databoxInstanceId: z.string().optional(),
+    }), 
+    result: z.any({}),
+  },
 };
 
 type IDataboxApiTypes = IZodSchemaToApiTypes<typeof DataboxApiSchemas>;
