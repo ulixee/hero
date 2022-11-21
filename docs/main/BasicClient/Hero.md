@@ -17,7 +17,7 @@ An Hero instance can be thought of as a single user-browsing session. Each insta
 
 #### Replayable
 
-An instance has a [replayable](/docs/hero/advanced-client/session-replay)&nbsp;[Session](/docs/hero/advanced-concepts/sessions) that will record all commands, dom changes, interaction and page events.
+An instance has a [replayable](/docs/hero/advanced-concepts/time-travel)&nbsp;[Session](/docs/hero/advanced-concepts/sessions) that will record all commands, dom changes, interaction and page events.
 
 #### Lightweight
 
@@ -29,7 +29,7 @@ Hero instances can have multiple [Tabs](/docs/hero/advanced-client/tab), but onl
 
 #### Sandboxed
 
-Each Hero instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/hero/plugins/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
+Each Hero instance creates a private environment with its own cache, cookies, session data and "incognito" browser window. No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Constructor {#constructor}
 

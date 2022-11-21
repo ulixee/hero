@@ -6,7 +6,7 @@ Hero operates with a few different spawned processes:
 
 #### Browser Emulators
 
-When you install Hero, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/hero/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+When you install Hero, it also downloads a recent version of Chrome and emulator "data files" to mask automated and headless usage. Details of the underlying [Browser Emulators]](https://github.com/ulixee/unblocked/tree/main/plugins/default-browser-emulator) can be found in the [Unblocked](https://github.com/ulixee/unblocked) project.
 
 Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Hero npm installations.
 
@@ -41,7 +41,7 @@ For example:
 
 ```js
 const debug = require('debug')('MyHero');
-const Logger = require('@ulixee/commons/Logger')
+const Logger = require('@ulixee/commons/Logger');
 
 Logger.injectLogger({
   stats(action, data) {
