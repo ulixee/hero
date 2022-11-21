@@ -1,14 +1,12 @@
 # AwaitedDOM
 
-> AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script's context.
+> The AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script context.
 
-AwaitedDOM currently implements a subset of the full DOM specification. Most of the readonly properties and methods have been implemented, however we haven't added DOM manipulation APIs because we believe they are too easy to detect by website bot blockers.
+## What Properties and Methods Can I Use?
 
-Explore the DOM classes listed on this page to see what has been implmented. You'll find a list of the unimplemented methods and properties located at the bottom of each page.
+Many readonly properties and methods have been implemented. We haven't added DOM manipulation APIs because we believe they are easy to detect by the website. We recommend performing actions as a human as much as possible (click, type, move the mouse, etc).
 
-## First, The DOM Extensions
-
-AwaitedDOM adds several DOM extensions to make Hero easier to use. These extensions are prefixed with the "$" character to keep  "non-standard" methods/properties separate from the standard implementation. You can find [the full list here](/docs/hero/basic-client/awaited-dom-extensions).
+On each documented class, you can find a list of the unimplemented methods and properties at the bottom.
 
 ## Document Interfaces
 

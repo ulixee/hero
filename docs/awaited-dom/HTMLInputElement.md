@@ -6,19 +6,19 @@
 
 ### elem.accept <div class="specs"><i>W3C</i></div> {#accept}
 
-<em><code>string</code>: </em><strong>Returns / Sets</strong> the element's <code>accept</code> attribute, containing comma-separated list of file types accepted by the server when <code>type</code> is <code>file</code>.
+<em><code>string</code>: </em><strong>Returns</strong> the element's <code>accept</code> attribute, containing comma-separated list of file types accepted by the server when <code>type</code> is <code>file</code>.
 
 #### **Type**: `Promise<string>`
 
 ### elem.alt <div class="specs"><i>W3C</i></div> {#alt}
 
-<em><code>string</code>: </em><strong>Returns / Sets</strong> the element's <code>alt</code> attribute, containing alternative text to use when <code>type</code> is <code>image.</code>
+<em><code>string</code>: </em><strong>Returns</strong> the element's <code>alt</code> attribute, containing alternative text to use when <code>type</code> is <code>image.</code>
 
 #### **Type**: `Promise<string>`
 
 ### elem.autocomplete <div class="specs"><i>W3C</i></div> {#autocomplete}
 
-<p><em><code>string</code>: </em><strong>Returns / Sets</strong> the element's <code>autocomplete</code> attribute, indicating whether the value of the control can be automatically completed by the browser.</p>
+<p><em><code>string</code>: </em><strong>Returns</strong> the element's <code>autocomplete</code> attribute, indicating whether the value of the control can be automatically completed by the browser.</p>
 			<p>Ignored if the value of the <code>type</code> attribute is <code>hidden</code>, <code>checkbox</code>, <code>radio</code>, <code>file</code>, or a button type (<code>button</code>, <code>submit</code>, <code>reset</code>, <code>image</code>).</p>
 			<dl>
 				<dt>Possible values are:</dt>
@@ -30,37 +30,37 @@
 
 ### elem.autofocus <div class="specs"><i>W3C</i></div> {#autofocus}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the element's <code>autofocus</code> attribute, which specifies that a form control should have input focus when the page loads, unless the user overrides it, for example by typing in a different control. Only one form element in a document can have the <code>autofocus</code> attribute. It cannot be applied if the <code>type</code> attribute is set to <code>hidden</code> (that is, you cannot automatically set focus to a hidden control).
+<em>`boolean`:</em> <strong>Returns</strong> the element's <code>autofocus</code> attribute, which specifies that a form control should have input focus when the page loads, unless the user overrides it, for example by typing in a different control. Only one form element in a document can have the <code>autofocus</code> attribute. It cannot be applied if the <code>type</code> attribute is set to <code>hidden</code> (that is, you cannot automatically set focus to a hidden control).
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.checked <div class="specs"><i>W3C</i></div> {#checked}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the current state of the element when <code>type</code> is <code>checkbox</code> or <code>radio</code>.
+<em>`boolean`:</em> <strong>Returns</strong> the current state of the element when <code>type</code> is <code>checkbox</code> or <code>radio</code>.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.defaultChecked <div class="specs"><i>W3C</i></div> {#defaultChecked}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the default state of a radio button or checkbox as originally specified in HTML that created this object.
+<em>`boolean`:</em> <strong>Returns</strong> the default state of a radio button or checkbox as originally specified in HTML that created this object.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.defaultValue <div class="specs"><i>W3C</i></div> {#defaultValue}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the default value as originally specified in the HTML that created this object.
+<em><code>string</code>:</em> <strong>Returns</strong> the default value as originally specified in the HTML that created this object.
 
 #### **Type**: `Promise<string>`
 
 ### elem.dirName <div class="specs"><i>W3C</i></div> {#dirName}
 
-<em><code>string</code>:</em> <strong>Returns / Sets </strong>the directionality of the element.
+<em><code>string</code>:</em> <strong>Returns </strong>the directionality of the element.
 
 #### **Type**: `Promise<string>`
 
 ### elem.disabled <div class="specs"><i>W3C</i></div> {#disabled}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the element's <code>disabled</code> attribute, indicating that the control is not available for interaction. The input values will not be submitted with the form. See also <code>readonly</code>
+<em>`boolean`:</em> <strong>Returns</strong> the element's <code>disabled</code> attribute, indicating that the control is not available for interaction. The input values will not be submitted with the form. See also <code>readonly</code>
 
 #### **Type**: `Promise<boolean>`
 
@@ -78,37 +78,37 @@
 
 ### elem.formAction <div class="specs"><i>W3C</i></div> {#formAction}
 
-<em><code>string</code>: </em><strong>Returns / Sets</strong> the element's <code>formaction</code> attribute, containing the URI of a program that processes information submitted by the element. This overrides the <code>action</code> attribute of the parent form.
+<em><code>string</code>: </em><strong>Returns</strong> the element's <code>formaction</code> attribute, containing the URI of a program that processes information submitted by the element. This overrides the <code>action</code> attribute of the parent form.
 
 #### **Type**: `Promise<string>`
 
 ### elem.formEnctype <div class="specs"><i>W3C</i></div> {#formEnctype}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>formenctype</code> attribute, containing the type of content that is used to submit the form to the server. This overrides the <code>enctype</code> attribute of the parent form.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>formenctype</code> attribute, containing the type of content that is used to submit the form to the server. This overrides the <code>enctype</code> attribute of the parent form.
 
 #### **Type**: `Promise<string>`
 
 ### elem.formMethod <div class="specs"><i>W3C</i></div> {#formMethod}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>formmethod</code> attribute, containing the HTTP method that the browser uses to submit the form. This overrides the <code>method</code> attribute of the parent form.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>formmethod</code> attribute, containing the HTTP method that the browser uses to submit the form. This overrides the <code>method</code> attribute of the parent form.
 
 #### **Type**: `Promise<string>`
 
 ### elem.formNoValidate <div class="specs"><i>W3C</i></div> {#formNoValidate}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the element's <code>formnovalidate</code> attribute, indicating that the form is not to be validated when it is submitted. This overrides the <code>novalidate</code> attribute of the parent form.
+<em>`boolean`:</em> <strong>Returns</strong> the element's <code>formnovalidate</code> attribute, indicating that the form is not to be validated when it is submitted. This overrides the <code>novalidate</code> attribute of the parent form.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.formTarget <div class="specs"><i>W3C</i></div> {#formTarget}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>formtarget</code> attribute, containing a name or keyword indicating where to display the response that is received after submitting the form. This overrides the <code>target</code> attribute of the parent form.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>formtarget</code> attribute, containing a name or keyword indicating where to display the response that is received after submitting the form. This overrides the <code>target</code> attribute of the parent form.
 
 #### **Type**: `Promise<string>`
 
 ### elem.height <div class="specs"><i>W3C</i></div> {#height}
 
-<em><code>string</code>: </em><strong>Returns / Sets</strong> the element's <code>height</code> attribute, which defines the height of the image displayed for the button, if the value of <code>type</code> is <code>image</code>.
+<em><code>string</code>: </em><strong>Returns</strong> the element's <code>height</code> attribute, which defines the height of the image displayed for the button, if the value of <code>type</code> is <code>image</code>.
 
 #### **Type**: `Promise<number>`
 
@@ -138,57 +138,57 @@ Provides a hint to browsers as to the type of virtual keyboard configuration to 
 
 ### elem.max <div class="specs"><i>W3C</i></div> {#max}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>max</code> attribute, containing the maximum (numeric or date-time) value for this item, which must not be less than its minimum (<code>min</code> attribute) value.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>max</code> attribute, containing the maximum (numeric or date-time) value for this item, which must not be less than its minimum (<code>min</code> attribute) value.
 
 #### **Type**: `Promise<string>`
 
 ### elem.maxLength <div class="specs"><i>W3C</i></div> {#maxLength}
 
-<em><code>long</code>:</em> <strong>Returns / Sets</strong> the element's <code>maxlength</code> attribute, containing the <strong>maximum number of characters</strong> (in Unicode code points) that the value can have. (If you set this to a negative number, an exception will be thrown.)
+<em><code>long</code>:</em> <strong>Returns</strong> the element's <code>maxlength</code> attribute, containing the <strong>maximum number of characters</strong> (in Unicode code points) that the value can have. (If you set this to a negative number, an exception will be thrown.)
 
 #### **Type**: `Promise<number>`
 
 ### elem.min <div class="specs"><i>W3C</i></div> {#min}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>min</code> attribute, containing the minimum (numeric or date-time) value for this item, which must not be greater than its maximum (<code>max</code> attribute) value.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>min</code> attribute, containing the minimum (numeric or date-time) value for this item, which must not be greater than its maximum (<code>max</code> attribute) value.
 
 #### **Type**: `Promise<string>`
 
 ### elem.minLength <div class="specs"><i>W3C</i></div> {#minLength}
 
-<em><code>long</code>:</em> <strong>Returns / Sets</strong> the element's <code>minlength</code> attribute, containing the <strong>minimum number of characters</strong> (in Unicode code points) that the value can have. (If you set this to a negative number, an exception will be thrown.)
+<em><code>long</code>:</em> <strong>Returns</strong> the element's <code>minlength</code> attribute, containing the <strong>minimum number of characters</strong> (in Unicode code points) that the value can have. (If you set this to a negative number, an exception will be thrown.)
 
 #### **Type**: `Promise<number>`
 
 ### elem.multiple <div class="specs"><i>W3C</i></div> {#multiple}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the element's <code>multiple</code> attribute, indicating whether more than one value is possible (e.g., multiple files).
+<em>`boolean`:</em> <strong>Returns</strong> the element's <code>multiple</code> attribute, indicating whether more than one value is possible (e.g., multiple files).
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.name <div class="specs"><i>W3C</i></div> {#name}
 
-<em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>name</code> attribute, containing a name that identifies the element when submitting the form.
+<em><code>string</code>:</em> <strong>Returns</strong> the element's <code>name</code> attribute, containing a name that identifies the element when submitting the form.
 
 #### **Type**: `Promise<string>`
 
 ### elem.pattern <div class="specs"><i>W3C</i></div> {#pattern}
 
-<p><em><code>string</code>:</em> <strong>Returns / Sets</strong> the element's <code>pattern</code> attribute, containing a <strong>regular expression</strong> that the control's value is checked against. Use the <code>title</code> attribute to describe the pattern to help the user.</p>
+<p><em><code>string</code>:</em> <strong>Returns</strong> the element's <code>pattern</code> attribute, containing a <strong>regular expression</strong> that the control's value is checked against. Use the <code>title</code> attribute to describe the pattern to help the user.</p>
 			<p>This attribute only applies when the value of the <code>type</code> attribute is <code>text</code>, <code>search</code>, <code>tel</code>, <code>url</code> or <code>email</code>.</p>
 
 #### **Type**: `Promise<string>`
 
 ### elem.placeholder <div class="specs"><i>W3C</i></div> {#placeholder}
 
-<p><em><code>string</code>: </em><strong>Returns / Sets </strong>the element's <code>placeholder</code> attribute, containing a hint to the user of what can be entered in the control. The placeholder text must not contain carriage returns or line-feeds.</p>
+<p><em><code>string</code>: </em><strong>Returns </strong>the element's <code>placeholder</code> attribute, containing a hint to the user of what can be entered in the control. The placeholder text must not contain carriage returns or line-feeds.</p>
 			<p>This attribute only applies when the value of the <code>type</code> attribute is <code>text</code>, <code>search</code>, <code>tel</code>, <code>url</code> or <code>email</code>.</p>
 
 #### **Type**: `Promise<string>`
 
 ### elem.readOnly <div class="specs"><i>W3C</i></div> {#readOnly}
 
-<p><em><code>boolean</code>:</em><strong> Returns / Sets</strong> the element's <code>readonly</code> attribute, indicating that the user cannot modify the value of the control.<br>
+<p><em><code>boolean</code>:</em><strong> Returns</strong> the element's <code>readonly</code> attribute, indicating that the user cannot modify the value of the control.<br>
 			<span class="inlineIndicator htmlVer htmlVerInline">HTML5</span>.</p>
 			<p>This attribute is ignored if the value of the <code>type</code> attribute is <code>hidden</code>, <code>range</code>, <code>color</code>, <code>checkbox</code>, <code>radio</code>, <code>file</code>, or a button type.</p>
 
@@ -196,13 +196,13 @@ Provides a hint to browsers as to the type of virtual keyboard configuration to 
 
 ### elem.required <div class="specs"><i>W3C</i></div> {#required}
 
-<em>`boolean`:</em> <strong>Returns / Sets</strong> the element's <code>required</code> attribute, indicating that the user must fill in a value before submitting a form.
+<em>`boolean`:</em> <strong>Returns</strong> the element's <code>required</code> attribute, indicating that the user must fill in a value before submitting a form.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.selectionDirection <div class="specs"><i>W3C</i></div> {#selectionDirection}
 
-<p><em><code>string</code>:</em> <strong>Returns / Sets</strong> the direction in which selection occurred.</p>
+<p><em><code>string</code>:</em> <strong>Returns</strong> the direction in which selection occurred.</p>
 			<dl>
 				<dt>Possible values are:</dt>
 				<dd><code>forward</code> if selection was performed in the start-to-end direction of the current locale<br>
@@ -214,38 +214,38 @@ Provides a hint to browsers as to the type of virtual keyboard configuration to 
 
 ### elem.selectionEnd <div class="specs"><i>W3C</i></div> {#selectionEnd}
 
-<em><code>unsigned long</code>:</em> <strong>Returns / Sets </strong>the end index of the selected text. When there's no selection, this returns the offset of the character immediately following the current text input cursor position.
+<em><code>unsigned long</code>:</em> <strong>Returns </strong>the end index of the selected text. When there's no selection, this returns the offset of the character immediately following the current text input cursor position.
 
 #### **Type**: `Promise<number>`
 
 ### elem.selectionStart <div class="specs"><i>W3C</i></div> {#selectionStart}
 
-<em><code>unsigned long</code>:</em> <strong>Returns / Sets</strong> the beginning index of the selected text. When nothing is selected, this returns the position of the text input cursor (caret) inside of the <code>&lt;input&gt;</code> element.
+<em><code>unsigned long</code>:</em> <strong>Returns</strong> the beginning index of the selected text. When nothing is selected, this returns the position of the text input cursor (caret) inside of the <code>&lt;input&gt;</code> element.
 
 #### **Type**: `Promise<number>`
 
 ### elem.size <div class="specs"><i>W3C</i></div> {#size}
 
-<p><em><code>unsigned long</code>:</em> <strong>Returns / Sets </strong>the element's <code>size</code> attribute, which contains the <strong>visual size of the control</strong>. This value is in pixels unless the value of <code>type</code> is <code>text</code> or <code>password</code>, in which case, it is an integer number of characters.</p>
+<p><em><code>unsigned long</code>:</em> <strong>Returns </strong>the element's <code>size</code> attribute, which contains the <strong>visual size of the control</strong>. This value is in pixels unless the value of <code>type</code> is <code>text</code> or <code>password</code>, in which case, it is an integer number of characters.</p>
 			<p>This attribute only applies when <code>type</code> is set to <code>text</code>, <code>search</code>, <code>tel</code>, <code>url</code>, <code>email</code>, or <code>password</code>.</p>
 
 #### **Type**: `Promise<number>`
 
 ### elem.src <div class="specs"><i>W3C</i></div> {#src}
 
-<code><em>string</em></code><em>:</em> <strong>Returns / Sets</strong> the element's <code>src</code> attribute, which specifies a URI for the location of an image to display on the graphical submit button, if the value of <code>type</code> is <code>image</code>; otherwise it is ignored.
+<code><em>string</em></code><em>:</em> <strong>Returns</strong> the element's <code>src</code> attribute, which specifies a URI for the location of an image to display on the graphical submit button, if the value of <code>type</code> is <code>image</code>; otherwise it is ignored.
 
 #### **Type**: `Promise<string>`
 
 ### elem.step <div class="specs"><i>W3C</i></div> {#step}
 
-<code><em>string</em></code><em>:</em> <strong>Returns / Sets</strong> the element's <code>step</code> attribute, which works with<strong> </strong><code>min</code> and <code>max</code> to limit the increments at which a numeric or date-time value can be set. It can be the string <code>any</code> or a positive floating point number. If this is not set to <code>any</code>, the control accepts only values at multiples of the step value greater than the minimum.
+<code><em>string</em></code><em>:</em> <strong>Returns</strong> the element's <code>step</code> attribute, which works with<strong> </strong><code>min</code> and <code>max</code> to limit the increments at which a numeric or date-time value can be set. It can be the string <code>any</code> or a positive floating point number. If this is not set to <code>any</code>, the control accepts only values at multiples of the step value greater than the minimum.
 
 #### **Type**: `Promise<string>`
 
 ### elem.type <div class="specs"><i>W3C</i></div> {#type}
 
-<code><em>string</em></code>: <strong>Returns / Sets</strong> the element's <code>type</code> attribute, indicating the type of control to display. See <code>type</code> attribute of <code>&lt;input&gt;</code> for possible values.
+<code><em>string</em></code>: <strong>Returns</strong> the element's <code>type</code> attribute, indicating the type of control to display. See <code>type</code> attribute of <code>&lt;input&gt;</code> for possible values.
 
 #### **Type**: `Promise<string>`
 
@@ -263,14 +263,14 @@ Provides a hint to browsers as to the type of virtual keyboard configuration to 
 
 ### elem.value <div class="specs"><i>W3C</i></div> {#value}
 
-<code><em>string</em></code><em>:</em> <strong>Returns / Sets</strong> the current value of the control.
+<code><em>string</em></code><em>:</em> <strong>Returns</strong> the current value of the control.
 			<p class="note"><strong>Note:</strong> If the user enters a value different from the value expected, this may return an empty string.</p>
 
 #### **Type**: `Promise<string>`
 
 ### elem.valueAsDate <div class="specs"><i>W3C</i></div> {#valueAsDate}
 
-<em><code>Date</code><code> object</code>:</em> <strong>Returns / Sets</strong> the value of the element, interpreted as a date, or <code>null</code> if conversion is not possible.
+<em><code>Date</code><code> object</code>:</em> <strong>Returns</strong> the value of the element, interpreted as a date, or <code>null</code> if conversion is not possible.
 
 #### **Type**: `Promise<any>`
 
@@ -287,7 +287,7 @@ Provides a hint to browsers as to the type of virtual keyboard configuration to 
 
 ### elem.width <div class="specs"><i>W3C</i></div> {#width}
 
-<code><em>string</em></code><em>:</em> <strong>Returns / Sets</strong> the document's <code>width</code> attribute, which defines the width of the image displayed for the button, if the value of <code>type</code> is <code>image</code>.
+<code><em>string</em></code><em>:</em> <strong>Returns</strong> the document's <code>width</code> attribute, which defines the width of the image displayed for the button, if the value of <code>type</code> is <code>image</code>.
 
 #### **Type**: `Promise<number>`
 
@@ -637,7 +637,7 @@ Returns an <code>unsigned short</code> representing the type of the node. Possib
 
 ### elem.nodeValue <div class="specs"><i>W3C</i></div> {#nodeValue}
 
-Returns / Sets the value of the current node.
+Returns the value of the current node.
 
 #### **Type**: `Promise<string>`
 
@@ -667,7 +667,7 @@ Returns a <code>Node</code> representing the previous node in the tree, or <code
 
 ### elem.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
-Returns / Sets the textual content of an element and all its descendants.
+Returns the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 

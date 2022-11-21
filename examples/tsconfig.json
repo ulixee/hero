@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "ES2020",
+    "module": "ES2021",
     "esModuleInterop": false,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true

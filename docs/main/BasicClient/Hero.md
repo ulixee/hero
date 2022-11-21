@@ -25,7 +25,7 @@ Instances are very lightweight, sharing a pool of browsers underneath. To manage
 
 #### Single Active Tab
 
-Hero instances can have multiple [Tabs](/docs/hero/basic-client/tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable).
+Hero instances can have multiple [Tabs](/docs/hero/advanced-client/tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable).
 
 #### Sandboxed
 
@@ -93,7 +93,7 @@ const Hero = require('@ulixee/hero-playground');
 
 Returns a reference to the currently active tab.
 
-#### **Type**: [`Tab`](/docs/hero/basic-client/tab)
+#### **Type**: [`Tab`](/docs/hero/advanced-client/tab)
 
 ### hero.coreHost {#core-host}
 
@@ -119,7 +119,7 @@ Returns a reference to the main Document for the active tab.
 
 #### **Type**: [`SuperDocument`](/docs/hero/awaited-dom/super-document)
 
-Alias for [activeTab.document](/docs/hero/basic-client/tab#document)
+Alias for [activeTab.document](/docs/hero/advanced-client/tab#document)
 
 ### hero.frameEnvironments {#frame-environments}
 
@@ -133,21 +133,21 @@ Returns a list of [FrameEnvironments](/docs/hero/advanced-client/frame-environme
 
 NOTE: this event does not fire in some circumstances (such as a long-loading asset). You frequently just want to know if the page has loaded for a user (see [isPaintingStable](#is-painting-stable)).
 
-Wait for this event to trigger with [Tab.waitForLoad(AllContentLoaded)](/docs/hero/basic-client/tab#wait-for-load).
+Wait for this event to trigger with [Tab.waitForLoad(AllContentLoaded)](/docs/hero/advanced-client/tab#wait-for-load).
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [Tab.isAllContentLoaded](/docs/hero/basic-client/tab#is-all-content-loaded)
+Alias for [Tab.isAllContentLoaded](/docs/hero/advanced-client/tab#is-all-content-loaded)
 
 ### hero.isDomContentLoaded {#is-dom-content-loaded}
 
 `True` if the "DOMContentLoaded" event has triggered on the active tab.
 
-Wait for this event to trigger with [Tab.waitForLoad(DomContentLoaded)](/docs/hero/basic-client/tab#wait-for-load)
+Wait for this event to trigger with [Tab.waitForLoad(DomContentLoaded)](/docs/hero/advanced-client/tab#wait-for-load)
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [Tab.isDomContentLoaded](/docs/hero/basic-client/tab#is-dom-content-loaded)
+Alias for [Tab.isDomContentLoaded](/docs/hero/advanced-client/tab#is-dom-content-loaded)
 
 ### hero.isPaintingStable {#is-painting-stable}
 
@@ -157,7 +157,7 @@ Wait for this event to trigger with [Hero.waitForPaintingStable()](#wait-for-pai
 
 #### **Type**: `Promise<boolean>`
 
-Alias for [Tab.isPaintingStable](/docs/hero/basic-client/tab#is-painting-stable)
+Alias for [Tab.isPaintingStable](/docs/hero/advanced-client/tab#is-painting-stable)
 
 ### hero.lastCommandId {#lastCommandId}
 
@@ -165,7 +165,7 @@ An execution point that refers to a command run on this instance (`waitForElemen
 
 #### **Type**: `Promise<number>`
 
-Alias for [activeTab.lastCommandId](/docs/hero/basic-client/tab#lastCommandId)
+Alias for [activeTab.lastCommandId](/docs/hero/advanced-client/tab#lastCommandId)
 
 ### hero.mainFrameEnvironment {#main-frame-environment}
 
@@ -219,7 +219,7 @@ A human-readable identifier of the current Hero session.
 
 Returns all open browser tabs.
 
-#### **Type**: [`Promise<Tab[]>`](/docs/hero/basic-client/tab)
+#### **Type**: [`Promise<Tab[]>`](/docs/hero/advanced-client/tab)
 
 ### hero.url {#url}
 
@@ -227,15 +227,15 @@ The url of the active tab.
 
 #### **Type**: `Promise<string>`
 
-Alias for [Tab.url](/docs/hero/basic-client/tab#url)
+Alias for [Tab.url](/docs/hero/advanced-client/tab#url)
 
 ### hero.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](/docs/hero/basic-client/tab#request-type). These objects can be used to run browser-native [tab.fetch](/docs/hero/basic-client/tab#fetch) requests from the context of the Tab document.
+Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](/docs/hero/advanced-client/tab#request-type). These objects can be used to run browser-native [tab.fetch](/docs/hero/advanced-client/tab#fetch) requests from the context of the Tab document.
 
 #### **Type**: [`Request`](/docs/hero/awaited-dom/request)
 
-Alias for [Tab.Request](/docs/hero/basic-client/tab#request-tab)
+Alias for [Tab.Request](/docs/hero/advanced-client/tab#request-tab)
 
 ## Methods
 
@@ -294,7 +294,7 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 #### **Returns**: `Promise<void>`
 
-Alias for [Tab.close()](/docs/hero/basic-client/tab#close)
+Alias for [Tab.close()](/docs/hero/advanced-client/tab#close)
 
 
 ### hero.detach *(elementOrResource)* {#detach}
@@ -330,7 +330,7 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 #### **Returns**: `Promise<void>`
 
-Alias for [Tab.focus()](/docs/hero/basic-client/tab#focus)
+Alias for [Tab.focus()](/docs/hero/advanced-client/tab#focus)
 
 ### hero.getSnippet *(key)* {#getSnippet}
 
@@ -464,7 +464,7 @@ hero.use(require.resolve('./CustomPlugins'));
 
 Wait for a new tab to be created. This can occur either via a `window.open` from within the page javascript, or a Link with a target opening in a new tab or window.
 
-#### **Returns**: [`Promise<Tab>`](/docs/hero/basic-client/tab)
+#### **Returns**: [`Promise<Tab>`](/docs/hero/advanced-client/tab)
 
 ```js
 const url = 'https://dataliberationfoundation.org/nopost';
@@ -488,104 +488,104 @@ Hero instances have aliases to all top-level Tab methods. They will be routed to
 
 ### hero.fetch *(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
-Alias for [Tab.fetch()](/docs/hero/basic-client/tab#fetch)
+Alias for [Tab.fetch()](/docs/hero/advanced-client/tab#fetch)
 
 ### hero.findResource *(filter, options)* {#find-resource}
 
-Alias for [Tab.findResource()](/docs/hero/basic-client/tab#find-resource)
+Alias for [Tab.findResource()](/docs/hero/advanced-client/tab#find-resource)
 
 ### hero.flowCommand *(commandFn, exitState?, options?)* {#flow-command}
 
-Alias for [Tab.flowCommand](/docs/hero/basic-client/tab#flow-command)
+Alias for [Tab.flowCommand](/docs/hero/advanced-client/tab#flow-command)
 
 ### hero.getFrameEnvironment *(frameElement)* {#get-frame-environment}
 
-Alias for [Tab.getFrameEnvironment()](/docs/hero/basic-client/tab#get-frame-environment)
+Alias for [Tab.getFrameEnvironment()](/docs/hero/advanced-client/tab#get-frame-environment)
 
 ### hero.getComputedStyle *(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#get-computed-style}
 
-Alias for [Tab.getComputedStyle()](/docs/hero/basic-client/tab#get-computed-style)
+Alias for [Tab.getComputedStyle()](/docs/hero/advanced-client/tab#get-computed-style)
 
 ### hero.getJsValue *(path)* {#get-js-value}
 
-Alias for [Tab.getJsValue()](/docs/hero/basic-client/tab#get-js-value)
+Alias for [Tab.getJsValue()](/docs/hero/advanced-client/tab#get-js-value)
 
 ### hero.goBack *(timeoutMs?)*
 
-Alias for [Tab.goBack](/docs/hero/basic-client/tab#back)
+Alias for [Tab.goBack](/docs/hero/advanced-client/tab#back)
 
 ### hero.goForward *(timeoutMs?)*
 
-Alias for [Tab.goForward](/docs/hero/basic-client/tab#forward)
+Alias for [Tab.goForward](/docs/hero/advanced-client/tab#forward)
 
 ### hero.goto *(href, timeoutMs?)* {#goto}
 
-Alias for [Tab.goto](/docs/hero/basic-client/tab#goto)
+Alias for [Tab.goto](/docs/hero/advanced-client/tab#goto)
 
 ### hero.getComputedVisibility *(element)* {#get-computed-visibility}
 
-Alias for [Tab.getComputedVisibility](/docs/hero/basic-client/tab#get-computed-visibility)
+Alias for [Tab.getComputedVisibility](/docs/hero/advanced-client/tab#get-computed-visibility)
 
 ### hero.querySelector *(stringOrOptions)* {#query-selector}
 
-Alias for [Tab.querySelector](/docs/hero/basic-client/tab#query-selector)
+Alias for [Tab.querySelector](/docs/hero/advanced-client/tab#query-selector)
 
 ### hero.querySelectorAll *(stringOrOptions)* {#query-selector-all}
 
-Alias for [Tab.querySelectorAll](/docs/hero/basic-client/tab#query-selector-all)
+Alias for [Tab.querySelectorAll](/docs/hero/advanced-client/tab#query-selector-all)
 
 ### hero.registerFlowHandler *(name, state, handlerFn)* {#register-flow-handler}
 
-Alias for [Tab.registerFlowHandler](/docs/hero/basic-client/tab#register-flow-handler)
+Alias for [Tab.registerFlowHandler](/docs/hero/advanced-client/tab#register-flow-handler)
 
 ### hero.reload *(timeoutMs?)* {#reload}
 
-Alias for [Tab.reload](/docs/hero/basic-client/tab#reload)
+Alias for [Tab.reload](/docs/hero/advanced-client/tab#reload)
 
 ### hero.takeScreenshot *(options?)* {#take-screenshot}
 
-Alias for [Tab.takeScreenshot](/docs/hero/basic-client/tab#take-screenshot)
+Alias for [Tab.takeScreenshot](/docs/hero/advanced-client/tab#take-screenshot)
 
 ### hero.validateState *(state)* {#validate-state}
 
-Alias for [Tab.validateState](/docs/hero/basic-client/tab#validate-state)
+Alias for [Tab.validateState](/docs/hero/advanced-client/tab#validate-state)
 
 ### hero.waitForFileChooser *(options)* {#wait-for-file-chooser}
 
-Alias for [Tab.waitForFileChooser()](/docs/hero/basic-client/tab#wait-for-file-chooser)
+Alias for [Tab.waitForFileChooser()](/docs/hero/advanced-client/tab#wait-for-file-chooser)
 
 ### hero.waitForElement *(element, options)* {#wait-for-element}
 
-Alias for [Tab.waitForElement](/docs/hero/basic-client/tab#wait-for-element)
+Alias for [Tab.waitForElement](/docs/hero/advanced-client/tab#wait-for-element)
 
 ### hero.waitForLocation *(trigger, options)* {#wait-for-location}
 
-Alias for [Tab.waitForLocation](/docs/hero/basic-client/tab#wait-for-location)
+Alias for [Tab.waitForLocation](/docs/hero/advanced-client/tab#wait-for-location)
 
 ### hero.waitForMillis *(millis)* {#wait-for-millis}
 
-Alias for [Tab.waitForMillis](/docs/hero/basic-client/tab#wait-for-millis)
+Alias for [Tab.waitForMillis](/docs/hero/advanced-client/tab#wait-for-millis)
 
 ### hero.waitForState *(state, options)* {#wait-for-state}
 
-Alias for [Tab.waitForState](/docs/hero/basic-client/tab#wait-for-state)
+Alias for [Tab.waitForState](/docs/hero/advanced-client/tab#wait-for-state)
 
 ### hero.waitForPaintingStable *()* {#wait-for-painting-stable}
 
-Alias for [Tab.waitForLoad(PaintingStable)](/docs/hero/basic-client/tab#wait-for-load)
+Alias for [Tab.waitForLoad(PaintingStable)](/docs/hero/advanced-client/tab#wait-for-load)
 
 ### hero.waitForResource *(filter, options)* {#wait-for-resource}
 
-Alias for [Tab.waitForResource](/docs/hero/basic-client/tab#wait-for-resource)
+Alias for [Tab.waitForResource](/docs/hero/advanced-client/tab#wait-for-resource)
 
 ### hero.waitForResources *(filter, options)* {#wait-for-resource}
 
-Alias for [Tab.waitForResources](/docs/hero/basic-client/tab#wait-for-resources)
+Alias for [Tab.waitForResources](/docs/hero/advanced-client/tab#wait-for-resources)
 
 ### hero.xpathSelector *(selector, orderedResults)* {#xpath-selector}
 
-Alias for [Tab.xpathSelector](/docs/hero/basic-client/tab#xpath-selector)
+Alias for [Tab.xpathSelector](/docs/hero/advanced-client/tab#xpath-selector)
 
 ### hero.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
 
-Alias for [Tab.xpathSelectorAll](/docs/hero/basic-client/tab#xpath-selector-all)
+Alias for [Tab.xpathSelectorAll](/docs/hero/advanced-client/tab#xpath-selector-all)

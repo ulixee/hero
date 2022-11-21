@@ -122,7 +122,11 @@ ${example}
       markup.push({
         h3: `${variableName}.${p.name} <div class="specs"><i>W3C</i></div> {#${p.name}}`,
       });
-      markup.push({ html: cleanupHTML(p.overview || 'Needs content.') });
+
+      // Cleanup writeable Dom for now!
+      markup.push({
+        html: cleanupHTML(p.overview || 'Needs content.').replace('Returns / Sets', 'Returns'),
+      });
       markup.push({ h4: `**Type**: ${urlify(p.returnType)}` });
     }
   }

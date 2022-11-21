@@ -12,25 +12,25 @@ Needs content.
 
 ### elem.autofocus <div class="specs"><i>W3C</i></div> {#autofocus}
 
-<code><em>boolean</em>:</code> Returns / Sets the element's <code>autofocus</code> attribute, indicating that the control should have input focus when the page loads
+<code><em>boolean</em>:</code> Returns the element's <code>autofocus</code> attribute, indicating that the control should have input focus when the page loads
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.cols <div class="specs"><i>W3C</i></div> {#cols}
 
-<code><em>unsigned long</em>:</code> Returns / Sets the element's <code>cols</code> attribute, indicating the visible width of the text area.
+<code><em>unsigned long</em>:</code> Returns the element's <code>cols</code> attribute, indicating the visible width of the text area.
 
 #### **Type**: `Promise<number>`
 
 ### elem.defaultValue <div class="specs"><i>W3C</i></div> {#defaultValue}
 
-<code><em>string</em>:</code> Returns / Sets the control's default value, which behaves like the <code>Node.textContent</code> property.
+<code><em>string</em>:</code> Returns the control's default value, which behaves like the <code>Node.textContent</code> property.
 
 #### **Type**: `Promise<string>`
 
 ### elem.disabled <div class="specs"><i>W3C</i></div> {#disabled}
 
-<code><em>boolean</em>:</code> Returns / Sets the element's <code>disabled</code> attribute, indicating that the control is not available for interaction.
+<code><em>boolean</em>:</code> Returns the element's <code>disabled</code> attribute, indicating that the control is not available for interaction.
 
 #### **Type**: `Promise<boolean>`
 
@@ -54,61 +54,61 @@ Needs content.
 
 ### elem.maxLength <div class="specs"><i>W3C</i></div> {#maxLength}
 
-<code><em>long</em>:</code> Returns / Sets the element's <code>maxlength</code> attribute, indicating the maximum number of characters the user can enter. This constraint is evaluated only when the value changes.
+<code><em>long</em>:</code> Returns the element's <code>maxlength</code> attribute, indicating the maximum number of characters the user can enter. This constraint is evaluated only when the value changes.
 
 #### **Type**: `Promise<number>`
 
 ### elem.minLength <div class="specs"><i>W3C</i></div> {#minLength}
 
-<code><em>long</em>:</code> Returns / Sets the element's <code>minlength</code> attribute, indicating the minimum number of characters the user can enter. This constraint is evaluated only when the value changes.
+<code><em>long</em>:</code> Returns the element's <code>minlength</code> attribute, indicating the minimum number of characters the user can enter. This constraint is evaluated only when the value changes.
 
 #### **Type**: `Promise<number>`
 
 ### elem.name <div class="specs"><i>W3C</i></div> {#name}
 
-<code><em>string</em>:</code> Returns / Sets the element's <code>name</code> attribute, containing the name of the control.
+<code><em>string</em>:</code> Returns the element's <code>name</code> attribute, containing the name of the control.
 
 #### **Type**: `Promise<string>`
 
 ### elem.placeholder <div class="specs"><i>W3C</i></div> {#placeholder}
 
-<code><em>string</em>:</code> Returns / Sets the element's <code>placeholder</code> attribute, containing a hint to the user about what to enter in the control.
+<code><em>string</em>:</code> Returns the element's <code>placeholder</code> attribute, containing a hint to the user about what to enter in the control.
 
 #### **Type**: `Promise<string>`
 
 ### elem.readOnly <div class="specs"><i>W3C</i></div> {#readOnly}
 
-<code><em>boolean</em>:</code> Returns / Sets the element's <code>readonly</code> attribute, indicating that the user cannot modify the value of the control.
+<code><em>boolean</em>:</code> Returns the element's <code>readonly</code> attribute, indicating that the user cannot modify the value of the control.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.required <div class="specs"><i>W3C</i></div> {#required}
 
-<code><em>boolean</em>:</code> Returns / Sets the element's <code>required</code> attribute, indicating that the user must specify a value before submitting the form.
+<code><em>boolean</em>:</code> Returns the element's <code>required</code> attribute, indicating that the user must specify a value before submitting the form.
 
 #### **Type**: `Promise<boolean>`
 
 ### elem.rows <div class="specs"><i>W3C</i></div> {#rows}
 
-<code><em>unsigned long</em>:</code> Returns / Sets the element's <code>rows</code> attribute, indicating the number of visible text lines for the control.
+<code><em>unsigned long</em>:</code> Returns the element's <code>rows</code> attribute, indicating the number of visible text lines for the control.
 
 #### **Type**: `Promise<number>`
 
 ### elem.selectionDirection <div class="specs"><i>W3C</i></div> {#selectionDirection}
 
-<code><em>string</em>:</code> Returns / Sets the direction in which selection occurred. This is <code>"forward"</code> if selection was performed in the start-to-end direction of the current locale, or <code>"backward"</code> for the opposite direction. This can also be <code>"none"</code> if the direction is unknown."
+<code><em>string</em>:</code> Returns the direction in which selection occurred. This is <code>"forward"</code> if selection was performed in the start-to-end direction of the current locale, or <code>"backward"</code> for the opposite direction. This can also be <code>"none"</code> if the direction is unknown."
 
 #### **Type**: `Promise<string>`
 
 ### elem.selectionEnd <div class="specs"><i>W3C</i></div> {#selectionEnd}
 
-<code><em>unsigned long</em>:</code> Returns / Sets the index of the end of selected text. If no text is selected, contains the index of the character that follows the input cursor. On being set, the control behaves as if <code>setSelectionRange()</code> had been called with this as the second argument, and <code>selectionStart</code> as the first argument.
+<code><em>unsigned long</em>:</code> Returns the index of the end of selected text. If no text is selected, contains the index of the character that follows the input cursor. On being set, the control behaves as if <code>setSelectionRange()</code> had been called with this as the second argument, and <code>selectionStart</code> as the first argument.
 
 #### **Type**: `Promise<number>`
 
 ### elem.selectionStart <div class="specs"><i>W3C</i></div> {#selectionStart}
 
-<code><em>unsigned long</em>:</code> Returns / Sets the index of the beginning of selected text. If no text is selected, contains the index of the character that follows the input cursor. On being set, the control behaves as if <code>setSelectionRange()</code> had been called with this as the first argument, and <code>selectionEnd</code> as the second argument.
+<code><em>unsigned long</em>:</code> Returns the index of the beginning of selected text. If no text is selected, contains the index of the character that follows the input cursor. On being set, the control behaves as if <code>setSelectionRange()</code> had been called with this as the first argument, and <code>selectionEnd</code> as the second argument.
 
 #### **Type**: `Promise<number>`
 
@@ -138,7 +138,7 @@ Needs content.
 
 ### elem.value <div class="specs"><i>W3C</i></div> {#value}
 
-<code><em>string</em>:</code> Returns / Sets the raw value contained in the control.
+<code><em>string</em>:</code> Returns the raw value contained in the control.
 
 #### **Type**: `Promise<string>`
 
@@ -150,7 +150,7 @@ Needs content.
 
 ### elem.wrap <div class="specs"><i>W3C</i></div> {#wrap}
 
-<code><em>string</em>:</code> Returns / Sets the <code>wrap</code> HTML attribute, indicating how the control wraps text.
+<code><em>string</em>:</code> Returns the <code>wrap</code> HTML attribute, indicating how the control wraps text.
 
 #### **Type**: `Promise<string>`
 
@@ -493,7 +493,7 @@ Returns an <code>unsigned short</code> representing the type of the node. Possib
 
 ### elem.nodeValue <div class="specs"><i>W3C</i></div> {#nodeValue}
 
-Returns / Sets the value of the current node.
+Returns the value of the current node.
 
 #### **Type**: `Promise<string>`
 
@@ -523,7 +523,7 @@ Returns a <code>Node</code> representing the previous node in the tree, or <code
 
 ### elem.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
-Returns / Sets the textual content of an element and all its descendants.
+Returns the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 

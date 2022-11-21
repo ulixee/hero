@@ -2,7 +2,7 @@
 
 > Websocket Resources are core websocket connections between a client and server.
 
-Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/hero/basic-client/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/hero/basic-client/tab#resource-event) or from the initial window document load. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
+Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/hero/advanced-client/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/hero/advanced-client/tab#resource-event) or from the initial window document load. It contains all properties of a `Resource` in addition to an ability to subscribe to messages sent back and forth.
 
 ## Properties
 

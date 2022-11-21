@@ -2,7 +2,7 @@
 
 > Resource requests are the raw underlying http request details made to access a resource.
 
-Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/hero/basic-client/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/hero/basic-client/tab#resource-event) or from the initial window document load.
+Instances of this class are associated with a resource returned from [`tab.waitForResource`](/docs/hero/advanced-client/tab##wait-for-resource), listening for resources [`tab.on('resource')`](/docs/hero/advanced-client/tab#resource-event) or from the initial window document load.
 
 ## Properties
 

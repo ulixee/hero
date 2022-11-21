@@ -4,7 +4,7 @@ A FrameEnvironment represents a browsing context which allows you to interact wi
 
 ## Constructor
 
-Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/hero/basic-client/tab#frame-environments) array.
+Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/hero/advanced-client/tab#frame-environments) array.
 
 ## Properties
 
@@ -12,7 +12,7 @@ Frames cannot be constructed in Hero. They're made available through the [tab.fr
 
 Returns child FrameEnvironments for this frame.
 
-#### **Type**: Promise<[`FrameEnvironment`](/docs/hero/basic-client/tab#frame-environments)[]>
+#### **Type**: Promise<[`FrameEnvironment`](/docs/hero/advanced-client/tab#frame-environments)[]>
 
 ### frameEnvironment.cookieStorage {#cookie-storage}
 

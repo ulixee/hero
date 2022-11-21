@@ -303,7 +303,7 @@ Returns an <code>unsigned short</code> representing the type of the node. Possib
 
 ### doc.nodeValue <div class="specs"><i>W3C</i></div> {#nodeValue}
 
-Returns / Sets the value of the current node.
+Returns the value of the current node.
 
 #### **Type**: `Promise<string>`
 
@@ -333,7 +333,7 @@ Returns a <code>Node</code> representing the previous node in the tree, or <code
 
 ### doc.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
-Returns / Sets the textual content of an element and all its descendants.
+Returns the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 

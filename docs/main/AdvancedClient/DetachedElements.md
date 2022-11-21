@@ -58,8 +58,8 @@ Details per `IDetachedElement` record are:
 - name `string`. The provided name for the DetachedElement.
 - frameId `number`. The [FrameEnvironment](/docs/hero/basic-client/frame-environment) id where the Element was extracted.
 - frameNavigationId `number`. The id of the Navigation for the [Frame](/docs/hero/basic-client/frame-environment) at time of extraction. 
-- tabId `number`. The [Tab](/docs/hero/basic-client/tab) id where the Element was extracted.
-- commandId `number`. The [Command](/docs/hero/basic-client/tab#lastCommandId) id at time of extraction.
+- tabId `number`. The [Tab](/docs/hero/advanced-client/tab) id where the Element was extracted.
+- commandId `number`. The [Command](/docs/hero/advanced-client/tab#lastCommandId) id at time of extraction.
 - domChangesTimestamp `number`. The unix timestamp of the DOM at time of extraction.
 - nodePointerId `number`. The internal tracking id assigned to the node.
 - nodeType `string`. The type of node (eg, 'HTMLDivElement', 'HTMLLIElement')

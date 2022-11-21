@@ -46,7 +46,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 ### element.$isClickable {#is-clickable}
 
-Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/hero/basic-client/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM, scrolled into view, and not masked by any other node. Follows the specification of `isClickable` from [tab.getComputedVisibility()](/docs/hero/advanced-client/tab#get-computed-visibility).
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 
@@ -58,7 +58,7 @@ await hero.querySelector('.element').$isClickable;
 
 ### element.$isVisible {#is-visible}
 
-Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/hero/basic-client/tab#get-computed-visibility).
+Checks if a given node is visible in the DOM. Follows the specification of `isVisible` from [tab.getComputedVisibility()](/docs/hero/advanced-client/tab#get-computed-visibility).
 
 NOTE: this does not mean the node is scrolled into view.
 
@@ -208,7 +208,7 @@ Attached to Nodes and Elements ([see list](#super-nodes)).
 
 Wait for the given Node "Path" to be visible in the DOM.
 
-Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/hero/basic-client/tab#get-computed-visibility)
+Visible follows the API defined at: [`tab.getComputedVisibility`](/docs/hero/advanced-client/tab#get-computed-visibility)
 
 Attached to Nodes and Elements ([see list](#super-nodes)).
 

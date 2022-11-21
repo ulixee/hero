@@ -737,7 +737,7 @@ NOTE: this API will iterate through the results to return an array of all matchi
 
 ## Events
 
-Hero's [EventTarget](/docs/hero/basic-client/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/hero/basic-client/event-target).
+Hero's [EventTarget](/docs/hero/awaited-dom/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/hero/awaited-dom/event-target).
 
 ### 'dialog' {#dialog}
 
