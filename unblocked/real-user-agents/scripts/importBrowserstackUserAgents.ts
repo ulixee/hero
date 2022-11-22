@@ -43,7 +43,7 @@ export default async function importBrowserstackUserAgents(): Promise<void> {
     if (browser_version.includes('beta') || os_version.includes('beta')) continue;
 
     if (browser === 'chrome' && parseFloat(browser_version) <= 60) continue;
-    if (browser === 'firefox' && parseFloat(browser_version) < 63) continue;
+    if (browser === 'firefox' && parseFloat(browser_version) < 68) continue;
     if (browser === 'safari' && parseFloat(browser_version) < 11) continue;
     if (browser === 'opera') continue; // can't get opera to work with selenium
 

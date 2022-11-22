@@ -73,4 +73,5 @@ jobs:
         if: ${{ always() }}
         with:
           branch: main
+          repository: ./unblocked
           commit_message: "chore(profiles): automatic updates"
