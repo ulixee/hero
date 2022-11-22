@@ -74,4 +74,5 @@ jobs:
         with:
           branch: main
           repository: ./unblocked
+          commit_options: '--no-verify'
           commit_message: "chore(profiles): automatic updates"
