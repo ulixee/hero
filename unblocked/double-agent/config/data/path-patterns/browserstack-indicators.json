@@ -1,6 +1,9 @@
 {
   "added": [],
-  "removed": ["window.chrome.runtime", "window.HTMLAnchorElement.prototype.hrefTranslate"],
+  "removed": [
+    "window.chrome.runtime",
+    "window.HTMLAnchorElement.prototype.hrefTranslate"
+  ],
   "changed": [],
   "changedOrder": [],
   "extraAdded": [],

@@ -12,5 +12,8 @@
     "window.document.$cdc_asdjflasutopfhvcZLmcfl_",
     "window.cdc_adoQpoasnfa76pfcZLmcfl"
   ],
-  "extraChanged": ["window.navigator.userActivation", "window.navigator.webdriver"]
+  "extraChanged": [
+    "window.navigator.userActivation",
+    "window.navigator.webdriver"
+  ]
 }
