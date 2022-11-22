@@ -16,7 +16,9 @@ const port = 8099;
 const userAgentsData = JSON.parse(Fs.readFileSync(userAgentsPath, 'utf8'));
 const userAgentsIds: Set<string> = new Set(userAgentsData.map(x => x.id));
 
+let isStopping = false;
 ShutdownHandler.register(() => {
+  isStopping = true;
   return Promise.allSettled([...drivers].map(x => x.quit()));
 });
 
@@ -40,9 +42,9 @@ export default async function importBrowserstackUserAgents(): Promise<void> {
     const { browser, browser_version, os, os_version } = capability;
     if (browser_version.includes('beta') || os_version.includes('beta')) continue;
 
-    if (browser === 'chrome' && parseFloat(browser_version) < 40) continue;
-    if (browser === 'firefox' && parseFloat(browser_version) < 6) continue;
-    if (browser === 'safari' && parseFloat(browser_version) < 7) continue;
+    if (browser === 'chrome' && parseFloat(browser_version) <= 60) continue;
+    if (browser === 'firefox' && parseFloat(browser_version) < 63) continue;
+    if (browser === 'safari' && parseFloat(browser_version) < 11) continue;
     if (browser === 'opera') continue; // can't get opera to work with selenium
 
     capability.browserName = titleize(browser);
@@ -72,11 +74,17 @@ export default async function importBrowserstackUserAgents(): Promise<void> {
   }
 
   await queue.onIdle();
+  await queue.onEmpty();
   Fs.writeFileSync(userAgentsPath, JSON.stringify(userAgentsData, null, 2));
   console.log('---------------------');
   console.log(`FINISHED ${todoList.length} browsers`);
+  setTimeout(() => process.exit(), 10e3).unref();
+  await Promise.allSettled([
+    ...[...drivers].map(x => x.quit()),
+    drivers.clear(),
+    new Promise<void>(resolve => browserStack.stop(resolve)),
+  ]);
   server.close();
-  await new Promise<void>(resolve => browserStack.stop(resolve));
 }
 
 async function getRunnerForAgent(
@@ -85,6 +93,7 @@ async function getRunnerForAgent(
   id: string,
   i: number,
 ): Promise<void> {
+  if (isStopping) return;
   const capabilities: Capabilities & any = {
     browserName: agent.browserName,
     browserVersion: agent.browser_version,
