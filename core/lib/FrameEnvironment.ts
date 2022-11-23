@@ -388,6 +388,20 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async removeCookie(name: string): Promise<boolean> {
+    const cookies = await this.getCookies();
+    for (const cookie of cookies) {
+      if (name === cookie.name) {
+        await this.session.browserContext.addCookies([
+          {
+            name,
+            value: '',
+            expires: 0,
+            domain: cookie.domain,
+          },
+        ]);
+        return true;
+      }
+    }
     await this.session.browserContext.addCookies([
       {
         name,
@@ -486,7 +500,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return false;
   }
 
-  public async onShadowDomPushed(payload:string): Promise<void> {
+  public async onShadowDomPushed(payload: string): Promise<void> {
     await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, true);
   }
 

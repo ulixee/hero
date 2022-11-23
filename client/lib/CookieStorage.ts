@@ -20,7 +20,7 @@ export default class CookieStorage {
 
   public async key(index: number): Promise<string> {
     const cookies = await this.getItems();
-    return Object.keys(cookies)[index];
+    return cookies[index]?.name;
   }
 
   public async clear(): Promise<void> {

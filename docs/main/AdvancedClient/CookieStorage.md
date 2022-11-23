@@ -49,7 +49,7 @@ Gets the cookie with the given `name` equal to `keyName`.
 
 ### cookieStorage.key *(index)*
 
-An integer representing the number of the key you want to get the name of. This is a zero-based index. NOTE: key is equivalent to the `name` of a cookie.
+Gets the `name` of the cookie with the given `index`. This is a zero-based index. NOTE: key is equivalent to the `name` of a cookie.
 
 #### **Arguments**:
 

@@ -1,5 +1,6 @@
 import { Helpers, Hero } from '@ulixee/hero-testing';
 import Resource from '@ulixee/hero/lib/Resource';
+import { Session } from '@ulixee/hero-core';
 
 let koaServer;
 beforeAll(async () => {
@@ -79,10 +80,7 @@ describe('basic Full Client tests', () => {
     });
 
     const hero = new Hero({
-      blockedResourceUrls: [
-        '42.css?x=foo',
-        '/baz/',
-      ],
+      blockedResourceUrls: ['42.css?x=foo', '/baz/'],
     });
     Helpers.needsClosing.push(hero);
 
@@ -116,10 +114,7 @@ describe('basic Full Client tests', () => {
     });
 
     const hero = new Hero({
-      blockedResourceUrls: [
-        /.*\?x=foo/,
-        /\/baz\//,
-      ],
+      blockedResourceUrls: [/.*\?x=foo/, /\/baz\//],
     });
     Helpers.needsClosing.push(hero);
 
@@ -192,7 +187,6 @@ describe('basic Full Client tests', () => {
   it('can get and set cookies', async () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
-
     koaServer.get('/cookies', ctx => {
       ctx.cookies.set('Cookie1', 'This is a test', {
         httpOnly: true,
@@ -230,6 +224,51 @@ describe('basic Full Client tests', () => {
       const documentCookies = await hero.getJsValue('document.cookie');
       expect(documentCookies).toBe('');
     }
+    // test deleting a subdomain cookie
+    await cookieStorage.removeItem('Cookie1');
+    expect(await cookieStorage.length).toBe(0);
+  });
+
+  it('can get and set subdomain cookies', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+
+    const session = Session.get(await hero.sessionId);
+    session.agent.mitmRequestSession.interceptorHandlers.push({
+      urls: ['https://ulixee.org'],
+      handlerFn(url, type, request, response) {
+        response.setHeader('Set-Cookie', [
+          'CookieMain=main; httpOnly',
+          'CookieSub=sub; domain=.ulixee.org',
+        ]);
+        response.end(`<html lang='en'>
+<body>
+<h1>Page Title</h1>
+</body>
+</html>`);
+        return true;
+      },
+    });
+
+    await hero.goto(`https://ulixee.org`);
+    const cookieStorage = hero.activeTab.cookieStorage;
+    {
+      expect(await cookieStorage.length).toBe(2);
+      const cookie = await cookieStorage.getItem('CookieMain');
+      expect(cookie.expires).toBe(undefined);
+      expect(cookie.httpOnly).toBe(true);
+      const cookieSub = await cookieStorage.getItem('CookieSub');
+      expect(cookieSub.expires).toBe(undefined);
+      expect(cookieSub.domain).toBe('.ulixee.org');
+      // httponly not in doc
+      const documentCookies = await hero.getJsValue('document.cookie');
+      expect(documentCookies).toBe('CookieSub=sub');
+    }
+    // test deleting a subdomain cookie
+    await cookieStorage.removeItem('CookieSub');
+    expect(await cookieStorage.length).toBe(1);
+    await cookieStorage.removeItem('CookieMain');
+    expect(await cookieStorage.length).toBe(0);
   });
 
   it('should send a friendly message if trying to set cookies before a url is loaded', async () => {
