@@ -7,18 +7,28 @@ const { log } = logger(module);
 
 export default class ShutdownHandler {
   public static exitOnSignal = false;
+  public static disableSignals = false;
 
   private static isRegistered = false;
   private static hasRunHandlers = false;
   private static readonly onShutdownFns: {
-    fn: (signal?: ShutdownSignal) => Promise<any> | void;
+    fn: (signal?: ShutdownSignal) => Promise<any> | any;
     callsite: string;
   }[] = [];
 
-  public static register(onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | void): void {
+  public static register(onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | any): void {
     this.registerSignals();
     const callsite = new Error().stack.split(/\r?\n/).slice(2, 3).shift().trim();
     this.onShutdownFns.push({ fn: onShutdownFn, callsite });
+  }
+
+  public static unregister(onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | any): void {
+    const match = this.onShutdownFns.findIndex(x => x.fn === onShutdownFn);
+    if (match >= 0) this.onShutdownFns.splice(match, 1);
+  }
+
+  public static run(): Promise<void> {
+    return this.onSignal('exit', null, true);
   }
 
   private static registerSignals(): void {
@@ -32,9 +42,15 @@ export default class ShutdownHandler {
     }
   }
 
-  private static async onSignal(signal: ShutdownSignal, code?: number): Promise<void> {
+  private static async onSignal(
+    signal: ShutdownSignal,
+    code?: number,
+    isManual = false,
+  ): Promise<void> {
+    if (this.disableSignals && !isManual) return;
     if (this.hasRunHandlers) return;
     this.hasRunHandlers = true;
+
     const parentLogId = log.stats('ShutdownHandler.onSignal', {
       signal,
       sessionId: null,
