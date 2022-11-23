@@ -4,6 +4,8 @@ import { INetworkHooks } from '@ulixee/unblocked-specification/agent/hooks/IHook
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
 import RequestSession from '../handlers/RequestSession';
+import { pickRandom } from '@ulixee/commons/lib/utils';
+import AgentEnv from '@ulixee/unblocked-agent/env';
 
 const CloudFlare = {
   host: '1.1.1.1',
@@ -14,17 +16,35 @@ const Google = {
   host: '8.8.8.8',
   servername: 'dns.google',
 };
+const Google2 = {
+  host: '8.8.4.4',
+  servername: 'dns.google',
+};
 
 const Quad9 = {
   host: '9.9.9.9',
   servername: 'dns.quad9.net',
+};
+const Quad9_2 = {
+  host: '149.112.112.112',
+  servername: 'dns.quad9.net',
+};
+
+const OpenDns = {
+  host: '208.67.222.222',
+  servername: 'dns.opendns.com',
+};
+
+const OpenDns2 = {
+  host: '208.67.220.220',
+  servername: 'dns.opendns.com',
 };
 
 class CustomPlugin implements INetworkHooks {
   static id = 'test';
 
   onTlsConfiguration(settings) {
-    settings.tlsClientHelloId = 'chrome-105';
+    settings.tlsClientHelloId = AgentEnv.defaultChromeId.replace('-0', '');
   }
 
   onDnsConfiguration(settings) {
@@ -49,32 +69,41 @@ describe('DnsOverTlsSocket', () => {
   beforeEach(() => {
     TestLogger.testNumber += 1;
   });
-  let cloudflareDnsSocket: DnsOverTlsSocket;
+  let testDnsSocket: DnsOverTlsSocket;
+  const dnsOverTlsConnection = pickRandom([
+    OpenDns,
+    OpenDns2,
+    CloudFlare,
+    Google,
+    Google2,
+    Quad9,
+    Quad9_2,
+  ]);
   beforeAll(() => {
-    cloudflareDnsSocket = new DnsOverTlsSocket(
-      { dnsOverTlsConnection: CloudFlare },
+    testDnsSocket = new DnsOverTlsSocket(
+      { dnsOverTlsConnection: dnsOverTlsConnection },
       requestSession,
     );
   });
   afterAll(() => {
-    cloudflareDnsSocket.close();
+    testDnsSocket.close();
   });
 
   test('should be able to lookup dns records', async () => {
-    const response = await cloudflareDnsSocket.lookupARecords('dataliberationfoundation.org');
+    const response = await testDnsSocket.lookupARecords('dataliberationfoundation.org');
     expect(response.answers).toHaveLength(1);
   });
 
   test('should be able to reuse the socket', async () => {
-    const response = await cloudflareDnsSocket.lookupARecords('ulixee.org');
+    const response = await testDnsSocket.lookupARecords('ulixee.org');
     expect(response.answers).toHaveLength(2);
   });
 
   test('should be able to lookup multiple records at once', async () => {
     const response = await Promise.all([
-      cloudflareDnsSocket.lookupARecords('headers.ulixee.org'),
-      cloudflareDnsSocket.lookupARecords('tls.ulixee.org'),
-      cloudflareDnsSocket.lookupARecords('stateofscraping.org'),
+      testDnsSocket.lookupARecords('headers.ulixee.org'),
+      testDnsSocket.lookupARecords('tls.ulixee.org'),
+      testDnsSocket.lookupARecords('stateofscraping.org'),
     ]);
     expect(response).toHaveLength(3);
   });
@@ -91,13 +120,13 @@ describe('DnsOverTlsSocket', () => {
   });
 
   test('should be able to lookup a record after a miss', async () => {
-    const item1 = await cloudflareDnsSocket.lookupARecords('double-agent.collect');
+    const item1 = await testDnsSocket.lookupARecords('double-agent.collect');
     expect(item1).toBeTruthy();
     // @ts-ignore - trigger internal eof
-    cloudflareDnsSocket.mitmSocket.emit('eof');
+    testDnsSocket.mitmSocket.emit('eof');
     const response = await Promise.all([
-      cloudflareDnsSocket.lookupARecords('sub.double-agent.collect'),
-      cloudflareDnsSocket.lookupARecords(' double-agent-external.collect'),
+      testDnsSocket.lookupARecords('sub.double-agent.collect'),
+      testDnsSocket.lookupARecords(' double-agent-external.collect'),
     ]);
     expect(response).toHaveLength(2);
   });
