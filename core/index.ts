@@ -130,7 +130,8 @@ export default class Core {
     });
     this.isClosing = null;
     this.isStarting = true;
-    this.registerSignals();
+
+    this.registerSignals(options.shouldShutdownOnSignals);
 
     const { maxConcurrentClientCount } = options;
 
@@ -170,6 +171,7 @@ export default class Core {
 
     const isClosing = new Resolvable<void>();
     this.isClosing = isClosing.promise;
+    ShutdownHandler.unregister(this.shutdown);
 
     this.isStarting = false;
     const logid = log.info('Core.shutdown');
@@ -187,6 +189,7 @@ export default class Core {
       SessionsDb.shutdown();
 
       if (this.onShutdown) this.onShutdown();
+      await ShutdownHandler.run();
       isClosing.resolve();
     } catch (error) {
       isClosing.reject(error);
@@ -209,15 +212,17 @@ export default class Core {
     }
   }
 
-  private static registerSignals(): void {
+  private static registerSignals(shouldShutdownOnSignals = true): void {
     if (this.didRegisterSignals) return;
     this.didRegisterSignals = true;
-    ShutdownHandler.register(() => this.shutdown());
+    if (!shouldShutdownOnSignals) ShutdownHandler.disableSignals = true;
+    this.shutdown = this.shutdown.bind(this);
+    ShutdownHandler.register(this.shutdown);
 
     if (process.env.NODE_ENV !== 'test') {
       process.on('uncaughtExceptionMonitor', async (error: Error) => {
         await this.logUnhandledError(error, true);
-        await this.shutdown();
+        if (shouldShutdownOnSignals) await ShutdownHandler.run();
       });
       process.on('unhandledRejection', async (error: Error) => {
         await this.logUnhandledError(error, false);

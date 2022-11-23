@@ -81,6 +81,7 @@ const Hero = require('@ulixee/hero-playground');
   - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
+  - userProfile `IUserProfile`. A json object matching the format created by [hero.exportUserProfile()](#export-profile). This property allows restoring user storage and cookies from a previous session.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
     - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81). Defaults to `ipify.org`.
@@ -237,10 +238,22 @@ Returns a constructor for a Request object bound to the `activeTab`. Proxies to 
 
 Alias for [Tab.Request](/docs/hero/advanced-client/tab#request-tab)
 
+## Static Properties
+
+### Hero.defaults {#defaults}
+
+Get/set default properties to be applied to all Hero instances.
+
+- blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/hero/overview/configuration#blocked-resources).
+- blockedResourceUrls: `(string | RegExp)[]`. Also controls browser resource loading. See for more information [here](/docs/hero/overview/configuration#blocked-urls).
+- userProfile `IUserProfile`. A json object matching the format created by [hero.exportUserProfile()](#export-profile). This property allows restoring user storage and cookies from a previous session.
+- shutdownOnProcessSignals `boolean`. Default `true`. Should Hero connections interrupt and cleanup on process abort signals (eg, SIGINT, SIGTERM, SIGQUIT).
+
+#### **Type**: `IHeroDefaults` described above.
+
 ## Methods
 
-
-### hero.addToDetached *(name, elementOrResource)* {#addToDetached}
+### hero.addToDetached _(name, elementOrResource)_ {#addToDetached}
 
 Converts an element or resource to a DetachedElement or DetachedResource and adds it to [hero.detachedElements](/docs/hero/basic-client/hero#detachedElements) or [hero.detachedResources](/docs/hero/basic-client/hero#detachedElements).
 
@@ -254,7 +267,9 @@ const h1 = await hero.detachedElements.get('title');
 To retrieve at a later time with [HeroReplay](/docs/hero/basic-client/hero-replay):
 
 ```js
-const replay = new HeroReplay({ /* previousSessionId */});
+const replay = new HeroReplay({
+  /* previousSessionId */
+});
 const h1 = await replay.detachedElements.get('title');
 ```
 
@@ -266,8 +281,7 @@ const h1 = await replay.detachedElements.get('title');
 
 #### **Returns**: `Promise<void>`
 
-
-### hero.click *(mousePosition, verification?)* {#click}
+### hero.click _(mousePosition, verification?)_ {#click}
 
 Executes a click interaction. This is a shortcut for `hero.interact({ click: mousePosition })`. See the [Interactions page](/docs/hero/basic-client/interactions) for more details.
 
@@ -278,13 +292,13 @@ Executes a click interaction. This is a shortcut for `hero.interact({ click: mou
 
 #### **Returns**: `Promise`
 
-### hero.close *()* {#close}
+### hero.close _()_ {#close}
 
 Closes the current instance and any open tabs.
 
 #### **Returns**: `Promise`
 
-### hero.closeTab *(tab)* {#close-tab}
+### hero.closeTab _(tab)_ {#close-tab}
 
 Close a single Tab. The first opened Tab will become the focused tab.
 
@@ -296,8 +310,7 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 Alias for [Tab.close()](/docs/hero/advanced-client/tab#close)
 
-
-### hero.detach *(elementOrResource)* {#detach}
+### hero.detach _(elementOrResource)_ {#detach}
 
 Returns an element or resource as a [DetachedElement](/docs/hero/basic-client/detached-element) or [DetachedResource](/docs/hero/basic-client/detached-resource) object. This allows you to access the elements properties and methods without using `await`.
 
@@ -314,13 +327,13 @@ console.log('title: ', h1Elem.getAttribute.get('title'));
 
 #### **Returns**: `Promise<DetachedElement>`
 
-### hero.exportUserProfile *()* {#export-profile}
+### hero.exportUserProfile _()_ {#export-profile}
 
 Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `new Hero({ userProfile: serialized })`. See the [UserProfile page](/docs/hero/advanced-client/user-profile) for more details.
 
 #### **Returns**: [`Promise<IUserProfile>`](/docs/hero/advanced-client/user-profile)
 
-### hero.focusTab *(tab)* {#focus-tab}
+### hero.focusTab _(tab)_ {#focus-tab}
 
 Bring a tab to the forefront. This will route all interaction (`click`, `type`, etc) methods to the tab provided as an argument.
 
@@ -332,7 +345,7 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 Alias for [Tab.focus()](/docs/hero/advanced-client/tab#focus)
 
-### hero.getSnippet *(key)* {#getSnippet}
+### hero.getSnippet _(key)_ {#getSnippet}
 
 Retrieves a value you previously stored with setSnippet.
 
@@ -349,7 +362,7 @@ const when = await hero.getSnippet('time');
 
 #### **Returns**: `Promise<any>`
 
-### hero.interact *(interaction\[, interaction, ...])* {#interact}
+### hero.interact _(interaction\[, interaction, ...])_ {#interact}
 
 Executes a series of mouse and keyboard interactions.
 
@@ -361,8 +374,7 @@ Executes a series of mouse and keyboard interactions.
 
 Refer to the [Interactions page](/docs/hero/basic-client/interactions) for details on how to construct an interaction.
 
-
-### hero.setSnippet *(key, value)* {#setSnippet}
+### hero.setSnippet _(key, value)_ {#setSnippet}
 
 Stores a JSON-able value in the session database that can be retrieved later with [HeroReplay](/docs/hero/basic-client/hero-replay).
 
@@ -372,10 +384,13 @@ await hero.goto('https://ulixee.org');
 await hero.setSnippet('time', new Date());
 const when = await hero.getSnippet('time');
 ```
+
 To retrieve later with [HeroReplay](/docs/hero/basic-client/hero-replay):
 
 ```js
-const replay = new HeroReplay({ /* previousSessionId */});
+const replay = new HeroReplay({
+  /* previousSessionId */
+});
 const when = await replay.getSnippet('time');
 ```
 
@@ -386,8 +401,7 @@ const when = await replay.getSnippet('time');
 
 #### **Returns**: `Promise<void>`
 
-
-### hero.scrollTo *(mousePosition)* {#scroll-to}
+### hero.scrollTo _(mousePosition)_ {#scroll-to}
 
 Executes a scroll interaction. This is a shortcut for `hero.interact({ scroll: mousePosition })`. See the [Interactions page](/docs/hero/basic-client/interactions) for more details.
 
@@ -397,7 +411,7 @@ Executes a scroll interaction. This is a shortcut for `hero.interact({ scroll: m
 
 #### **Returns**: `Promise`
 
-### hero.type *(keyboardInteraction\[, keyboardInteraction, ...])* {#type}
+### hero.type _(keyboardInteraction\[, keyboardInteraction, ...])_ {#type}
 
 Executes a keyboard interactions. This is a shortcut for `hero.interact({ type: string | KeyName[] })`.
 
@@ -409,7 +423,7 @@ Executes a keyboard interactions. This is a shortcut for `hero.interact({ type: 
 
 Refer to the [Interactions page](/docs/hero/basic-client/interactions) for details on how to construct keyboard interactions.
 
-### hero.use *(plugin)*
+### hero.use _(plugin)_
 
 Add a plugin to the current instance. This must be called before any other hero methods.
 
@@ -460,7 +474,7 @@ const hero = new Hero();
 hero.use(require.resolve('./CustomPlugins'));
 ```
 
-### hero.waitForNewTab *()* {#wait-for-new-tab}
+### hero.waitForNewTab _()_ {#wait-for-new-tab}
 
 Wait for a new tab to be created. This can occur either via a `window.open` from within the page javascript, or a Link with a target opening in a new tab or window.
 
@@ -486,106 +500,106 @@ await newTab.waitForPaintingStable();
 
 Hero instances have aliases to all top-level Tab methods. They will be routed to the `activeTab`.
 
-### hero.fetch *(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
+### hero.fetch _(requestInput, requestInit)_ <div class="specs"><i>W3C</i></div> {#fetch}
 
 Alias for [Tab.fetch()](/docs/hero/advanced-client/tab#fetch)
 
-### hero.findResource *(filter, options)* {#find-resource}
+### hero.findResource _(filter, options)_ {#find-resource}
 
 Alias for [Tab.findResource()](/docs/hero/advanced-client/tab#find-resource)
 
-### hero.flowCommand *(commandFn, exitState?, options?)* {#flow-command}
+### hero.flowCommand _(commandFn, exitState?, options?)_ {#flow-command}
 
 Alias for [Tab.flowCommand](/docs/hero/advanced-client/tab#flow-command)
 
-### hero.getFrameEnvironment *(frameElement)* {#get-frame-environment}
+### hero.getFrameEnvironment _(frameElement)_ {#get-frame-environment}
 
 Alias for [Tab.getFrameEnvironment()](/docs/hero/advanced-client/tab#get-frame-environment)
 
-### hero.getComputedStyle *(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#get-computed-style}
+### hero.getComputedStyle _(element, pseudoElement)_ <div class="specs"><i>W3C</i></div> {#get-computed-style}
 
 Alias for [Tab.getComputedStyle()](/docs/hero/advanced-client/tab#get-computed-style)
 
-### hero.getJsValue *(path)* {#get-js-value}
+### hero.getJsValue _(path)_ {#get-js-value}
 
 Alias for [Tab.getJsValue()](/docs/hero/advanced-client/tab#get-js-value)
 
-### hero.goBack *(timeoutMs?)*
+### hero.goBack _(timeoutMs?)_
 
 Alias for [Tab.goBack](/docs/hero/advanced-client/tab#back)
 
-### hero.goForward *(timeoutMs?)*
+### hero.goForward _(timeoutMs?)_
 
 Alias for [Tab.goForward](/docs/hero/advanced-client/tab#forward)
 
-### hero.goto *(href, timeoutMs?)* {#goto}
+### hero.goto _(href, timeoutMs?)_ {#goto}
 
 Alias for [Tab.goto](/docs/hero/advanced-client/tab#goto)
 
-### hero.getComputedVisibility *(element)* {#get-computed-visibility}
+### hero.getComputedVisibility _(element)_ {#get-computed-visibility}
 
 Alias for [Tab.getComputedVisibility](/docs/hero/advanced-client/tab#get-computed-visibility)
 
-### hero.querySelector *(stringOrOptions)* {#query-selector}
+### hero.querySelector _(stringOrOptions)_ {#query-selector}
 
 Alias for [Tab.querySelector](/docs/hero/advanced-client/tab#query-selector)
 
-### hero.querySelectorAll *(stringOrOptions)* {#query-selector-all}
+### hero.querySelectorAll _(stringOrOptions)_ {#query-selector-all}
 
 Alias for [Tab.querySelectorAll](/docs/hero/advanced-client/tab#query-selector-all)
 
-### hero.registerFlowHandler *(name, state, handlerFn)* {#register-flow-handler}
+### hero.registerFlowHandler _(name, state, handlerFn)_ {#register-flow-handler}
 
 Alias for [Tab.registerFlowHandler](/docs/hero/advanced-client/tab#register-flow-handler)
 
-### hero.reload *(timeoutMs?)* {#reload}
+### hero.reload _(timeoutMs?)_ {#reload}
 
 Alias for [Tab.reload](/docs/hero/advanced-client/tab#reload)
 
-### hero.takeScreenshot *(options?)* {#take-screenshot}
+### hero.takeScreenshot _(options?)_ {#take-screenshot}
 
 Alias for [Tab.takeScreenshot](/docs/hero/advanced-client/tab#take-screenshot)
 
-### hero.validateState *(state)* {#validate-state}
+### hero.validateState _(state)_ {#validate-state}
 
 Alias for [Tab.validateState](/docs/hero/advanced-client/tab#validate-state)
 
-### hero.waitForFileChooser *(options)* {#wait-for-file-chooser}
+### hero.waitForFileChooser _(options)_ {#wait-for-file-chooser}
 
 Alias for [Tab.waitForFileChooser()](/docs/hero/advanced-client/tab#wait-for-file-chooser)
 
-### hero.waitForElement *(element, options)* {#wait-for-element}
+### hero.waitForElement _(element, options)_ {#wait-for-element}
 
 Alias for [Tab.waitForElement](/docs/hero/advanced-client/tab#wait-for-element)
 
-### hero.waitForLocation *(trigger, options)* {#wait-for-location}
+### hero.waitForLocation _(trigger, options)_ {#wait-for-location}
 
 Alias for [Tab.waitForLocation](/docs/hero/advanced-client/tab#wait-for-location)
 
-### hero.waitForMillis *(millis)* {#wait-for-millis}
+### hero.waitForMillis _(millis)_ {#wait-for-millis}
 
 Alias for [Tab.waitForMillis](/docs/hero/advanced-client/tab#wait-for-millis)
 
-### hero.waitForState *(state, options)* {#wait-for-state}
+### hero.waitForState _(state, options)_ {#wait-for-state}
 
 Alias for [Tab.waitForState](/docs/hero/advanced-client/tab#wait-for-state)
 
-### hero.waitForPaintingStable *()* {#wait-for-painting-stable}
+### hero.waitForPaintingStable _()_ {#wait-for-painting-stable}
 
 Alias for [Tab.waitForLoad(PaintingStable)](/docs/hero/advanced-client/tab#wait-for-load)
 
-### hero.waitForResource *(filter, options)* {#wait-for-resource}
+### hero.waitForResource _(filter, options)_ {#wait-for-resource}
 
 Alias for [Tab.waitForResource](/docs/hero/advanced-client/tab#wait-for-resource)
 
-### hero.waitForResources *(filter, options)* {#wait-for-resource}
+### hero.waitForResources _(filter, options)_ {#wait-for-resource}
 
 Alias for [Tab.waitForResources](/docs/hero/advanced-client/tab#wait-for-resources)
 
-### hero.xpathSelector *(selector, orderedResults)* {#xpath-selector}
+### hero.xpathSelector _(selector, orderedResults)_ {#xpath-selector}
 
 Alias for [Tab.xpathSelector](/docs/hero/advanced-client/tab#xpath-selector)
 
-### hero.xpathSelectorAll *(selector, orderedResults)* {#xpath-selector-all}
+### hero.xpathSelectorAll _(selector, orderedResults)_ {#xpath-selector-all}
 
 Alias for [Tab.xpathSelectorAll](/docs/hero/advanced-client/tab#xpath-selector-all)

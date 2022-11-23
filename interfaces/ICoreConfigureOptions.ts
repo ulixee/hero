@@ -4,4 +4,5 @@ export default interface ICoreConfigureOptions {
   maxConcurrentClientCount?: number;
   dataDir?: string;
   defaultUnblockedPlugins?: IUnblockedPluginClass[];
+  shouldShutdownOnSignals?: boolean;
 }
