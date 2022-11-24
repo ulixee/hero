@@ -499,6 +499,45 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     return Buffer.from(result.data, 'base64');
   }
 
+  async screenshotNew(options: IScreenshotOptions): Promise<Buffer> {
+    options ??= {};
+    const quality = options.jpegQuality ?? 100;
+    const clipRect = options.rectangle;
+    const format = options.format ?? 'jpeg';
+    assert(
+      quality >= 0 && quality <= 100,
+      `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
+    );
+
+    const windowOffset = await this.mainFrame.getWindowOffset();
+    const viewportSize = { height: windowOffset.innerHeight, width: windowOffset.innerWidth };
+
+    const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
+
+    const { scale, pageX, pageY } = layoutMetrics.visualViewport;
+    const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
+
+    const clip: Viewport = options.fullPage
+      ? { x: 0, y: 0, ...contentSize, scale }
+      : clipRect ?? { x: pageX, y: pageY, ...viewportSize, scale }
+
+    const result = await this.devtoolsSession.send('Page.captureScreenshot', {
+      format,
+      quality,
+      clip,
+      captureBeyondViewport: true, // added in chrome 87
+    } as Protocol.Page.CaptureScreenshotRequest);
+
+    const timestamp = Date.now();
+    
+    this.emit('screenshot', {
+      imageBase64: result.data,
+      timestamp,
+    });
+
+    return Buffer.from(result.data, 'base64');
+  }
+
   onWorkerAttached(
     devtoolsSession: DevtoolsSession,
     targetInfo: TargetInfo,
