@@ -203,15 +203,6 @@ export default class Core {
     return isClosing.promise;
   }
 
-  public static logUnhandledError(clientError: Error, fatalError = false): void {
-    if (!clientError || clientError[hasBeenLoggedSymbol]) return;
-    if (fatalError) {
-      log.error('UnhandledError(fatal)', { clientError, sessionId: null });
-    } else if (!clientError[hasBeenLoggedSymbol]) {
-      log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
-    }
-  }
-
   private static registerSignals(shouldShutdownOnSignals = true): void {
     if (this.didRegisterSignals) return;
     this.didRegisterSignals = true;
@@ -221,11 +212,13 @@ export default class Core {
 
     if (process.env.NODE_ENV !== 'test') {
       process.on('uncaughtExceptionMonitor', async (error: Error) => {
-        await this.logUnhandledError(error, true);
+        if (!error || error[hasBeenLoggedSymbol]) return;
+        log.error('UnhandledError(fatal)', { error, sessionId: null });
         if (shouldShutdownOnSignals) await ShutdownHandler.run();
       });
-      process.on('unhandledRejection', async (error: Error) => {
-        await this.logUnhandledError(error, false);
+      process.on('unhandledRejection', (error: Error) => {
+        if (!error || error[hasBeenLoggedSymbol]) return;
+        log.error('UnhandledRejection', { error, sessionId: null });
       });
     }
   }
