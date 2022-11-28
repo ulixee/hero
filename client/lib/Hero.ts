@@ -6,7 +6,11 @@ import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStora
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
 import Response from '@ulixee/awaited-dom/impl/official-klasses/Response';
-import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
+import {
+  ISuperElement,
+  ISuperNode,
+  ISuperNodeList,
+} from '@ulixee/awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import {
@@ -42,6 +46,7 @@ import {
 import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -68,12 +73,6 @@ import DetachedElements from './DetachedElements';
 import DetachedResources from './DetachedResources';
 import { IDomExtensionClass, isDomExtensionClass } from './DomExtender';
 
-export const DefaultOptions = {
-  defaultBlockedResourceTypes: [BlockedResourceType.None],
-  defaultBlockedResourceUrls: [],
-  defaultUserProfile: {},
-};
-
 export type ISessionOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
 
 interface ISharedInternalProperties {
@@ -85,7 +84,10 @@ export default class Hero extends AwaitedEventTarget<{
   close: () => void;
   command: (name: string, commandId: number, args: any[]) => void;
 }> {
-  protected static options: IHeroDefaults = { ...DefaultOptions };
+  public static defaults: IHeroDefaults = {
+    blockedResourceTypes: [BlockedResourceType.None],
+    shutdownOnProcessSignals: true,
+  };
 
   readonly #options: ISessionOptions;
   readonly #clientPlugins: IClientPlugin[] = [];
@@ -120,9 +122,9 @@ export default class Hero extends AwaitedEventTarget<{
     bindFunctions(this);
 
     const { name, connectionToCore, ...options } = createOptions;
-    options.blockedResourceTypes ??= Hero.options.defaultBlockedResourceTypes;
-    options.blockedResourceUrls ??= Hero.options.defaultBlockedResourceUrls;
-    options.userProfile ??= Hero.options.defaultUserProfile;
+    options.blockedResourceTypes ??= Hero.defaults.blockedResourceTypes;
+    options.blockedResourceUrls ??= Hero.defaults.blockedResourceUrls;
+    options.userProfile ??= Hero.defaults.userProfile;
 
     const sessionName = scriptInstance.generateSessionName(name);
 
@@ -137,6 +139,10 @@ export default class Hero extends AwaitedEventTarget<{
 
     let connect = connectionToCore;
     if (typeof connect === 'string') connect = { host: connect };
+
+    if (Hero.defaults.shutdownOnProcessSignals === false) {
+      ShutdownHandler.disableSignals = true;
+    }
     this.#connectionToCore = ConnectionFactory.createConnection(connect ?? {});
 
     this.#didAutoCreateConnection = this.#connectionToCore !== connect;
