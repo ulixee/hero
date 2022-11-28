@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addressValidation, identityValidation, micronoteTokenValidation } from '../common';
+import { addressValidation, identityValidation } from '../common';
 import { databoxVersionHashValidation } from '../databox/DataboxApis';
 
 const minDate = new Date('2022-01-01').getTime();
@@ -22,15 +22,21 @@ export const DataboxManifestSchema = z.object({
       'This is not a Databox scripthash (Bech32 encoded hash starting with "scr").',
     ),
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
-  schemaInterface: z.string().optional().describe('A raw typescript schema for this Databox'),
   coreVersion: z.string().describe('Version of the Databox Core Runtime'),
-  corePlugins: z
-    .record(z.string())
-    .optional()
-    .describe('plugin dependencies required for execution'),
-  pricePerQuery: micronoteTokenValidation
-    .optional()
-    .describe('Price per query if requiring payment'),
+  schemaInterface: z.string().optional().describe('The raw typescript schema for this Databox'),
+  functionsByName: z.record(
+    z.string().describe('The Function name'),
+    z.object({
+      corePlugins: z
+        .record(z.string())
+        .optional()
+        .describe('plugin dependencies required for execution'),
+      pricePerQuery: z.number().int()
+        .nonnegative()
+        .optional()
+        .describe('Price per query if requiring payment'),
+    }),
+  ),
   paymentAddress: addressValidation.optional(),
   giftCardIssuerIdentity: identityValidation
     .optional()

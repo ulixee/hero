@@ -41,26 +41,39 @@ export const DataboxApiSchemas = {
       latestVersionHash: databoxVersionHashValidation.describe(
         'The latest version hash of this databox',
       ),
-      averageBytesPerQuery: positiveInt.describe('Average bytes of output returned per query.'),
-      maxBytesPerQuery: positiveInt.describe('The largest byte count seen.'),
-      averageMilliseconds: positiveInt.describe('Average milliseconds spent before response.'),
-      maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
-      averageTotalPricePerQuery: positiveInt.describe('Average total microgons paid for a query.'),
-      maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
-      giftCardIssuerIdentities: identityValidation
-        .array()
-        .describe('The identities this databox allows gift card payments for (if any).'),
-      basePricePerQuery: micronoteTokenValidation.describe('The databox base price per query'),
+      functionsByName: z.record(
+        z.string().describe('The name of a function'),
+        z.object({
+          averageBytesPerQuery: positiveInt.describe('Average bytes of output returned per query.'),
+          maxBytesPerQuery: positiveInt.describe('The largest byte count seen.'),
+          averageMilliseconds: positiveInt.describe('Average milliseconds spent before response.'),
+          maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
+          averageTotalPricePerQuery: positiveInt.describe(
+            'Average total microgons paid for a query.',
+          ),
+          maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
+          basePricePerQuery: micronoteTokenValidation.describe(
+            'The function base price per query.',
+          ),
+        }),
+      ),
       computePricePerKb: micronoteTokenValidation.describe(
         'The current server price per kilobyte. NOTE: if a server is implementing surge pricing, this amount could vary.',
       ),
-      schemaInterface: z.string().optional().describe('A schema interface describing input and output for this databox'),
+      schemaInterface: z
+        .string()
+        .optional()
+        .describe('A Typescript interface describing Function inputs and outputs this Databox.'),
+      giftCardIssuerIdentities: identityValidation
+        .array()
+        .describe('The identities this databox allows gift card payments for (if any).'),
     }),
   },
   'Databox.exec': {
     args: z.object({
+      functionName: z.string().default('default').describe('The function to execute'),
       versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
-      input: z.any().optional().describe('Optional input parameters for your databox'),
+      input: z.any().optional().describe('Optional input parameters for this function call'),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -87,6 +100,7 @@ export const DataboxApiSchemas = {
   },
   'Databox.execLocalScript': {
     args: z.object({
+      functionName: z.string().describe('The function to execute').default('default'),
       scriptPath: z
         .string()
         .describe('A path to a local script to run. NOTE: API only enabled in development.'),
