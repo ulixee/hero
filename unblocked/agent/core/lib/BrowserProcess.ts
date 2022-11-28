@@ -10,6 +10,7 @@ import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { arch } from 'os';
 import { PipeTransport } from './PipeTransport';
 import env from '../env';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 
 const { log } = Log(module);
 
@@ -44,13 +45,13 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
   }
 
   async close(): Promise<void> {
+    ShutdownHandler.unregister(this.close);
     this.gracefulCloseBrowser();
     await this.killChildProcess();
   }
 
   private bindCloseHandlers(): void {
-    process.once('exit', this.close);
-    process.once('uncaughtExceptionMonitor', this.close);
+    ShutdownHandler.register(this.close);
     this.transport.onCloseFns.push(this.close);
   }
 
@@ -137,6 +138,8 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
   private onChildProcessExit(exitCode: number, signal: NodeJS.Signals): void {
     if (this.processKilled) return;
     this.processKilled = true;
+    ShutdownHandler.unregister(this.close);
+
     if (!this.isProcessFunctionalPromise.isResolved) {
       this.isProcessFunctionalPromise.reject(
         new Error(`Browser exited prematurely (${signal ?? 'no signal'})`),
