@@ -164,9 +164,7 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     if (!datadir) return;
     try {
       if (Fs.existsSync(datadir)) {
-        // rmdir is deprecated in node 16+
-        const fn = 'rmSync' in Fs ? 'rmSync' : 'rmdirSync';
-        Fs[fn](datadir, { recursive: true });
+        Fs.rmSync(datadir, { recursive: true });
       }
     } catch (err) {
       if (retries >= 0) {

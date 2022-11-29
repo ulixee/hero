@@ -1,5 +1,5 @@
 import * as url from 'url';
-import { createReadStream, createWriteStream, existsSync, promises as Fs, rmdirSync } from 'fs';
+import { createReadStream, createWriteStream, existsSync, promises as Fs, rmSync } from 'fs';
 import * as Path from 'path';
 import * as http from 'http';
 import { pathToRegexp } from 'path-to-regexp';
@@ -35,7 +35,7 @@ interface IActiveUser {
 const DOWNLOAD = 'download';
 const downloadDir = '/tmp/double-agent-download-data';
 const MB = 1028 * 1028;
-if (existsSync(downloadDir)) rmdirSync(downloadDir, { recursive: true });
+if (existsSync(downloadDir)) rmSync(downloadDir, { recursive: true });
 
 export default class Server {
   private activeUsersById: { [id: string]: IActiveUser } = {};

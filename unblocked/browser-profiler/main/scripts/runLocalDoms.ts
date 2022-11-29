@@ -1,7 +1,7 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import '../env'; // load our env before DA
 import '@double-agent/config/load';
-import { existsSync, promises as Fs, rmdirSync } from 'fs';
+import { existsSync, promises as Fs, rmSync } from 'fs';
 import * as Path from 'path';
 import Axios from 'axios';
 import { existsAsync } from '@ulixee/commons/lib/fileUtils';
@@ -38,7 +38,7 @@ const defaultShouldRunLocal = Boolean(JSON.parse(process.env.RUN_LOCAL ?? 'true'
 
 const baseDomsDir = Path.resolve(BrowserProfiler.profiledDoms, 'local');
 const tmpDir = Path.resolve(BrowserProfiler.profiledDoms, '.tmp');
-if (existsSync(tmpDir)) rmdirSync(tmpDir, { recursive: true });
+if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true });
 
 export default async function runLocalDoms(
   shouldRunDockers = defaultShouldRunDockers,
@@ -63,7 +63,7 @@ export default async function runLocalDoms(
   }
 
   // cleanup tmp dir
-  if (await existsAsync(tmpDir)) await Fs.rmdir(tmpDir, { recursive: true });
+  if (await existsAsync(tmpDir)) await Fs.rm(tmpDir, { recursive: true });
 }
 
 // HELPERS

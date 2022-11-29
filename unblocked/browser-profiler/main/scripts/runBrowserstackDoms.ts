@@ -1,5 +1,5 @@
 import '../env';
-import { existsSync, promises as Fs, rmdirSync } from 'fs';
+import { existsSync, promises as Fs, rmSync } from 'fs';
 import * as Path from 'path';
 import getAllPlugins from '@double-agent/collect/lib/getAllPlugins';
 import Queue from 'p-queue';
@@ -14,7 +14,7 @@ import BrowserStack from '../lib/BrowserStack';
 const baseDomsDir = Path.resolve(BrowserProfiler.profiledDoms, 'browserstack');
 const tmpDir = Path.resolve(BrowserProfiler.profiledDoms, '.tmp');
 // clean up tmp dir
-if (existsSync(tmpDir)) rmdirSync(tmpDir, { recursive: true });
+if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true });
 
 const runners = new SeleniumRunners();
 
@@ -52,7 +52,7 @@ export default async function runBrowserstack(): Promise<void> {
           expected: browserDomPlugin.outputFiles * 2,
         });
         // clean dir
-        // await Fs.rmdir(domDir, { recursive: true });
+        // await Fs.rm(domDir, { recursive: true });
       }
     }
 
@@ -110,5 +110,5 @@ async function createSecondDomProfile(
     }
     await Fs.rename(`${tmpFilesDir}/${tmpFileName}`, `${domDir}/${destFileName}`);
   }
-  await Fs.rmdir(tmpFilesDir, { recursive: true }).catch(() => null);
+  await Fs.rm(tmpFilesDir, { recursive: true }).catch(() => null);
 }
