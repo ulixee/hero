@@ -69,6 +69,7 @@ export default class Core {
 
   public static allowDynamicPluginLoading = true;
   public static isClosing: Promise<void>;
+  public static clearIdleConnectionsAfterMillis = -1;
 
   private static isStarting = false;
   private static didRegisterSignals = false;
@@ -83,8 +84,11 @@ export default class Core {
 
   public static addConnection(transportToClient?: ITransportToClient<any>): ConnectionToHeroClient {
     transportToClient ??= new EmittingTransportToClient();
-    const connection = new ConnectionToHeroClient(transportToClient);
-    connection.on('disconnected', () => this.connections.delete(connection));
+    const connection = new ConnectionToHeroClient(
+      transportToClient,
+      this.clearIdleConnectionsAfterMillis,
+    );
+    connection.once('disconnected', () => this.connections.delete(connection));
     this.connections.add(connection);
     return connection;
   }

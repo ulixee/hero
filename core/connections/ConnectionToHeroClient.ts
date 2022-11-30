@@ -33,13 +33,12 @@ export default class ConnectionToHeroClient
   implements IConnectionToClient<any, {}>, ICommandableTarget
 {
   public disconnectPromise: Promise<void>;
-  public autoShutdownMillis = 500;
 
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
-  private hasActiveCommand = false;
+  private activeCommandMessageIds = new Set<string>();
 
-  constructor(readonly transport: ITransportToClient<any>) {
+  constructor(readonly transport: ITransportToClient<any>, public autoShutdownMillis: number = -1) {
     super();
     transport.on('message', message => this.handleRequest(message));
     transport.once('disconnected', error => this.disconnect(error));
@@ -59,7 +58,7 @@ export default class ConnectionToHeroClient
 
     let data: any;
     try {
-      this.hasActiveCommand = true;
+      this.activeCommandMessageIds.add(messageId);
       if (recordCommands) await this.recordCommands(meta, payload.sendTime, recordCommands);
       data = await this.executeCommand(command, args, meta, nextCommandMeta);
 
@@ -91,7 +90,7 @@ export default class ConnectionToHeroClient
       data = this.serializeError(error);
       data.isDisconnecting = isClosing;
     } finally {
-      this.hasActiveCommand = false;
+      this.activeCommandMessageIds.delete(messageId);
     }
 
     const response: ICoreResponsePayload<any, any> = {
@@ -160,7 +159,7 @@ export default class ConnectionToHeroClient
   }
 
   public isActive(): boolean {
-    return this.sessionIdToRemoteEvents.size > 0 || this.hasActiveCommand;
+    return this.sessionIdToRemoteEvents.size > 0 || this.activeCommandMessageIds.size > 0;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -250,11 +249,12 @@ export default class ConnectionToHeroClient
   }
 
   private disconnectIfInactive(): Promise<void> {
-    if (this.isActive()) return;
+    if (this.isActive() || this.autoShutdownMillis <= 0) return;
     return this.disconnect();
   }
 
   private checkForAutoShutdown(): void {
+    if (this.autoShutdownMillis <= 0) return;
     clearTimeout(this.autoShutdownTimer);
     this.autoShutdownTimer = setTimeout(this.disconnectIfInactive, this.autoShutdownMillis).unref();
   }
