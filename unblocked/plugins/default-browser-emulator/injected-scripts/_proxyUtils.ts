@@ -330,6 +330,7 @@ function defaultProxyApply<T, K extends keyof T>(
 function getDescriptorInHierarchy<T, K extends keyof T>(obj: T, prop: K) {
   let proto = obj;
   do {
+    if (!proto) return null;
     if (proto.hasOwnProperty(prop)) {
       return {
         descriptorOwner: proto,
