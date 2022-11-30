@@ -96,9 +96,9 @@ const h1Children = [...h1.querySelectorAll('div')].map(x => x.textContent);
 
 #### **Arguments**:
 
-- name `string`. The name used to retrieve this element from [hero.detachedElements](/docs/databox/basic-client/hero#detached-elements).
+- name `string`. The name used to retrieve this element from [hero.detachedElements](/docs/hero/basic-client/hero#detached-elements).
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<DetachedElement>`
 
 
 ### element.$clearInputText *()* {#clear-value}
