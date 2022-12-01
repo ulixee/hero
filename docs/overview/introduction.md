@@ -1,4 +1,6 @@
-# Ulixee Hero
+# Introduction
+
+> Hero is a free and open source headless browser that's written in NodeJs, built on top of Chrome, and designed for easy and reliable scraping.
 
 A few cool highlights about Hero:
 
@@ -8,18 +10,30 @@ A few cool highlights about Hero:
 - [x] **Emulates any modern browser** - Emulators make it easy to disguise your script as practically any browser.
 - [x] **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 
-Check out our [website for more details](https://ulixee.org).
-
 ## Installation
 
-```shell script
+To get started using Hero in your project, we have a "playground" that allows you to run examples out of the box. It can be installed using the following commands:
+
+```bash
 npm i --save @ulixee/hero-playground
 ```
 
 or
 
-```shell script
+```bash
 yarn add @ulixee/hero-playground
+```
+
+You can drop the "-playground" whenever you want and use Hero directly (the core functionality is exactly the same). Just make sure your Ulixee development environment is setup and ready to go, such as making sure [`@ulixee/miner`](https://ulixee.org/docs/miner) is installed and running:
+
+```bash
+npm i --save @ulixee/hero
+```
+
+or
+
+```bash
+yarn add @ulixee/hero
 ```
 
 ## Usage
@@ -38,8 +52,6 @@ const Hero = require('@ulixee/hero-playground');
 })();
 ```
 
-Browse the [full API docs](https://ulixee.org/docs/hero).
-
 ## Contributing
 
 See [How to Contribute](https://ulixee.org/how-to-contribute) for ways to get started.
@@ -47,7 +59,3 @@ See [How to Contribute](https://ulixee.org/how-to-contribute) for ways to get st
 This project has a [Code of Conduct](https://ulixee.org/code-of-conduct). By interacting with this repository, organization, or community you agree to abide by its terms.
 
 We'd love your help in making Hero a better tool. Please don't hesitate to send a pull request.
-
-## License
-
-[MIT](LICENSE.md)
