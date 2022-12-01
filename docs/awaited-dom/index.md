@@ -1,101 +1,111 @@
 # AwaitedDOM
 
-> The AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script context.
+> AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script context.
 
-## What Properties and Methods Can I Use?
+AwaitedDOM currently implements a subset of the full DOM specification. Most of the readonly properties and methods have been implemented, however we haven't added DOM manipulation APIs because we believe they are too easy to detect by website bot blockers.
 
-Many readonly properties and methods have been implemented. We haven't added DOM manipulation APIs because we believe they are easy to detect by the website. We recommend performing actions as a human as much as possible (click, type, move the mouse, etc).
+```js
+const link = await hero.document.querySelector('a').href;
+```
 
-On each documented class, you can find a list of the unimplemented methods and properties at the bottom.
+Explore the DOM classes listed on this page to see what has been implemented. You'll find a list of the unimplemented methods and properties located at the bottom of each page.
+
+## Hero DOM Extensions
+
+AwaitedDOM adds several DOM extensions to make Hero easier to use. These extensions are prefixed with the "$" character to keep "non-standard" methods/properties separate from the standard implementation. You can find the [full list here](../basic-client/awaited-dom-extensions.md).
+
+```js
+await hero.querySelector('.element').$click();
+```
 
 ## Document Interfaces
 
 |     |     |
 | --- | --- |
-| [Document](/docs/hero/awaited-dom/document) | [DocumentFragment](/docs/hero/awaited-dom/document-fragment) |
-| [HTMLDocument](/docs/hero/awaited-dom/html-document) | [XMLDocument](/docs/hero/awaited-dom/xml-document) |
-| [XPathEvaluator](/docs/hero/awaited-dom/x-path-evaluator) |  |
+| [Document](./document.md) | [DocumentFragment](./document-fragment.md) |
+| [HTMLDocument](./html-document.md) | [XMLDocument](./xml-document.md) |
+| [XPathEvaluator](./xpath-evaluator.md) |  |
 
 
 ## Node Interfaces
 
 |     |     |
 | --- | --- |
-| [Comment](/docs/hero/awaited-dom/comment) | [Element](/docs/hero/awaited-dom/element) |
-| [Node](/docs/hero/awaited-dom/node) | [Text](/docs/hero/awaited-dom/text) |
+| [Comment](./comment.md) | [Element](./element.md) |
+| [Node](./node.md) | [Text](./text.md) |
 
 
 ## HTML Elements
 
 |     |     |
 | --- | --- |
-| [HTMLAnchorElement](/docs/hero/awaited-dom/html-anchor-element) | [HTMLAreaElement](/docs/hero/awaited-dom/html-area-element) |
-| [HTMLAudioElement](/docs/hero/awaited-dom/html-audio-element) | [HTMLBRElement](/docs/hero/awaited-dom/htmlbr-element) |
-| [HTMLBaseElement](/docs/hero/awaited-dom/html-base-element) | [HTMLBodyElement](/docs/hero/awaited-dom/html-body-element) |
-| [HTMLButtonElement](/docs/hero/awaited-dom/html-button-element) | [HTMLCanvasElement](/docs/hero/awaited-dom/html-canvas-element) |
-| [HTMLDListElement](/docs/hero/awaited-dom/htmld-list-element) | [HTMLDataElement](/docs/hero/awaited-dom/html-data-element) |
-| [HTMLDataListElement](/docs/hero/awaited-dom/html-data-list-element) | [HTMLDetailsElement](/docs/hero/awaited-dom/html-details-element) |
-| [HTMLDialogElement](/docs/hero/awaited-dom/html-dialog-element) | [HTMLDivElement](/docs/hero/awaited-dom/html-div-element) |
-| [HTMLElement](/docs/hero/awaited-dom/html-element) | [HTMLEmbedElement](/docs/hero/awaited-dom/html-embed-element) |
-| [HTMLFieldSetElement](/docs/hero/awaited-dom/html-field-set-element) | [HTMLFontElement](/docs/hero/awaited-dom/html-font-element) |
-| [HTMLFormElement](/docs/hero/awaited-dom/html-form-element) | [HTMLFrameSetElement](/docs/hero/awaited-dom/html-frame-set-element) |
-| [HTMLHRElement](/docs/hero/awaited-dom/htmlhr-element) | [HTMLHeadElement](/docs/hero/awaited-dom/html-head-element) |
-| [HTMLHeadingElement](/docs/hero/awaited-dom/html-heading-element) | [HTMLHtmlElement](/docs/hero/awaited-dom/html-html-element) |
-| [HTMLIFrameElement](/docs/hero/awaited-dom/htmli-frame-element) | [HTMLImageElement](/docs/hero/awaited-dom/html-image-element) |
-| [HTMLInputElement](/docs/hero/awaited-dom/html-input-element) | [HTMLLIElement](/docs/hero/awaited-dom/htmlli-element) |
-| [HTMLLabelElement](/docs/hero/awaited-dom/html-label-element) | [HTMLLegendElement](/docs/hero/awaited-dom/html-legend-element) |
-| [HTMLLinkElement](/docs/hero/awaited-dom/html-link-element) | [HTMLMapElement](/docs/hero/awaited-dom/html-map-element) |
-| [HTMLMarqueeElement](/docs/hero/awaited-dom/html-marquee-element) | [HTMLMediaElement](/docs/hero/awaited-dom/html-media-element) |
-| [HTMLMenuElement](/docs/hero/awaited-dom/html-menu-element) | [HTMLMetaElement](/docs/hero/awaited-dom/html-meta-element) |
-| [HTMLMeterElement](/docs/hero/awaited-dom/html-meter-element) | [HTMLModElement](/docs/hero/awaited-dom/html-mod-element) |
-| [HTMLOListElement](/docs/hero/awaited-dom/htmlo-list-element) | [HTMLObjectElement](/docs/hero/awaited-dom/html-object-element) |
-| [HTMLOptGroupElement](/docs/hero/awaited-dom/html-opt-group-element) | [HTMLOptionElement](/docs/hero/awaited-dom/html-option-element) |
-| [HTMLOutputElement](/docs/hero/awaited-dom/html-output-element) | [HTMLParagraphElement](/docs/hero/awaited-dom/html-paragraph-element) |
-| [HTMLParamElement](/docs/hero/awaited-dom/html-param-element) | [HTMLPictureElement](/docs/hero/awaited-dom/html-picture-element) |
-| [HTMLPreElement](/docs/hero/awaited-dom/html-pre-element) | [HTMLProgressElement](/docs/hero/awaited-dom/html-progress-element) |
-| [HTMLQuoteElement](/docs/hero/awaited-dom/html-quote-element) | [HTMLScriptElement](/docs/hero/awaited-dom/html-script-element) |
-| [HTMLSelectElement](/docs/hero/awaited-dom/html-select-element) | [HTMLSlotElement](/docs/hero/awaited-dom/html-slot-element) |
-| [HTMLSourceElement](/docs/hero/awaited-dom/html-source-element) | [HTMLSpanElement](/docs/hero/awaited-dom/html-span-element) |
-| [HTMLStyleElement](/docs/hero/awaited-dom/html-style-element) | [HTMLTableCaptionElement](/docs/hero/awaited-dom/html-table-caption-element) |
-| [HTMLTableCellElement](/docs/hero/awaited-dom/html-table-cell-element) | [HTMLTableColElement](/docs/hero/awaited-dom/html-table-col-element) |
-| [HTMLTableElement](/docs/hero/awaited-dom/html-table-element) | [HTMLTableRowElement](/docs/hero/awaited-dom/html-table-row-element) |
-| [HTMLTableSectionElement](/docs/hero/awaited-dom/html-table-section-element) | [HTMLTemplateElement](/docs/hero/awaited-dom/html-template-element) |
-| [HTMLTextAreaElement](/docs/hero/awaited-dom/html-text-area-element) | [HTMLTimeElement](/docs/hero/awaited-dom/html-time-element) |
-| [HTMLTitleElement](/docs/hero/awaited-dom/html-title-element) | [HTMLTrackElement](/docs/hero/awaited-dom/html-track-element) |
-| [HTMLUListElement](/docs/hero/awaited-dom/htmlu-list-element) | [HTMLUnknownElement](/docs/hero/awaited-dom/html-unknown-element) |
-| [HTMLVideoElement](/docs/hero/awaited-dom/html-video-element) |  |
+| [HTMLAnchorElement](./html-anchor-element.md) | [HTMLAreaElement](./html-area-element.md) |
+| [HTMLAudioElement](./html-audio-element.md) | [HTMLBRElement](./html-br-element.md) |
+| [HTMLBaseElement](./html-base-element.md) | [HTMLBodyElement](./html-body-element.md) |
+| [HTMLButtonElement](./html-button-element.md) | [HTMLCanvasElement](./html-canvas-element.md) |
+| [HTMLDListElement](./html-d-list-element.md) | [HTMLDataElement](./html-data-element.md) |
+| [HTMLDataListElement](./html-data-list-element.md) | [HTMLDetailsElement](./html-details-element.md) |
+| [HTMLDialogElement](./html-dialog-element.md) | [HTMLDivElement](./html-div-element.md) |
+| [HTMLElement](./html-element.md) | [HTMLEmbedElement](./html-embed-element.md) |
+| [HTMLFieldSetElement](./html-field-set-element.md) | [HTMLFontElement](./html-font-element.md) |
+| [HTMLFormElement](./html-form-element.md) | [HTMLFrameSetElement](./html-frame-set-element.md) |
+| [HTMLHRElement](./html-hr-element.md) | [HTMLHeadElement](./html-head-element.md) |
+| [HTMLHeadingElement](./html-heading-element.md) | [HTMLHtmlElement](./html-html-element.md) |
+| [HTMLIFrameElement](./html-iframe-element.md) | [HTMLImageElement](./html-image-element.md) |
+| [HTMLInputElement](./html-input-element.md) | [HTMLLIElement](./html-li-element.md) |
+| [HTMLLabelElement](./html-label-element.md) | [HTMLLegendElement](./html-legend-element.md) |
+| [HTMLLinkElement](./html-link-element.md) | [HTMLMapElement](./html-map-element.md) |
+| [HTMLMarqueeElement](./html-marquee-element.md) | [HTMLMediaElement](./html-media-element.md) |
+| [HTMLMenuElement](./html-menu-element.md) | [HTMLMetaElement](./html-meta-element.md) |
+| [HTMLMeterElement](./html-meter-element.md) | [HTMLModElement](./html-mod-element.md) |
+| [HTMLOListElement](./html-o-list-element.md) | [HTMLObjectElement](./html-object-element.md) |
+| [HTMLOptGroupElement](./html-opt-group-element.md) | [HTMLOptionElement](./html-option-element.md) |
+| [HTMLOutputElement](./html-output-element.md) | [HTMLParagraphElement](./html-paragraph-element.md) |
+| [HTMLParamElement](./html-param-element.md) | [HTMLPictureElement](./html-picture-element.md) |
+| [HTMLPreElement](./html-pre-element.md) | [HTMLProgressElement](./html-progress-element.md) |
+| [HTMLQuoteElement](./html-quote-element.md) | [HTMLScriptElement](./html-script-element.md) |
+| [HTMLSelectElement](./html-select-element.md) | [HTMLSlotElement](./html-slot-element.md) |
+| [HTMLSourceElement](./html-source-element.md) | [HTMLSpanElement](./html-span-element.md) |
+| [HTMLStyleElement](./html-style-element.md) | [HTMLTableCaptionElement](./html-table-caption-element.md) |
+| [HTMLTableCellElement](./html-table-cell-element.md) | [HTMLTableColElement](./html-table-col-element.md) |
+| [HTMLTableElement](./html-table-element.md) | [HTMLTableRowElement](./html-table-row-element.md) |
+| [HTMLTableSectionElement](./html-table-section-element.md) | [HTMLTemplateElement](./html-template-element.md) |
+| [HTMLTextAreaElement](./html-text-area-element.md) | [HTMLTimeElement](./html-time-element.md) |
+| [HTMLTitleElement](./html-title-element.md) | [HTMLTrackElement](./html-track-element.md) |
+| [HTMLUListElement](./html-u-list-element.md) | [HTMLUnknownElement](./html-unknown-element.md) |
+| [HTMLVideoElement](./html-video-element.md) |  |
 
 
 ## SVG Elements
 
 |     |     |
 | --- | --- |
-| [SVGElement](/docs/hero/awaited-dom/svg-element) | [SVGGraphicsElement](/docs/hero/awaited-dom/svg-graphics-element) |
-| [SVGSVGElement](/docs/hero/awaited-dom/svgsvg-element) | [SVGTitleElement](/docs/hero/awaited-dom/svg-title-element) |
+| [SVGElement](./svg-element.md) | [SVGGraphicsElement](./svg-graphics-element.md) |
+| [SVGSVGElement](./svgsvg-element.md) | [SVGTitleElement](./svg-title-element.md) |
 
 
 ## Array-like Interfaces
 
 |     |     |
 | --- | --- |
-| [HTMLCollection](/docs/hero/awaited-dom/html-collection) | [HTMLOptionsCollection](/docs/hero/awaited-dom/html-options-collection) |
-| [NodeList](/docs/hero/awaited-dom/node-list) | [RadioNodeList](/docs/hero/awaited-dom/radio-node-list) |
+| [HTMLCollection](./html-collection.md) | [HTMLOptionsCollection](./html-options-collection.md) |
+| [NodeList](./node-list.md) | [RadioNodeList](./radio-node-list.md) |
 
 
 ## XPath Interfaces
 
 |     |     |
 | --- | --- |
-| [XPathEvaluator](/docs/hero/awaited-dom/x-path-evaluator) | [XPathEvaluatorBase](/docs/hero/awaited-dom/x-path-evaluator-base) |
-| [XPathExpression](/docs/hero/awaited-dom/x-path-expression) | [XPathNSResolver](/docs/hero/awaited-dom/x-path-ns-resolver) |
-| [XPathResult](/docs/hero/awaited-dom/x-path-result) |  |
+| [XPathEvaluator](./xpath-evaluator.md) | [XPathEvaluatorBase](./xpath-evaluator-base.md) |
+| [XPathExpression](./xpath-expression.md) | [XPathNSResolver](./xpath-ns-resolver.md) |
+| [XPathResult](./xpath-result.md) |  |
 
 
 ## Miscellaneous Interfaces
 
 |     |     |
 | --- | --- |
-| [Attr](/docs/hero/awaited-dom/attr) | [CharacterData](/docs/hero/awaited-dom/character-data) |
-| [EventTarget](/docs/hero/awaited-dom/event-target) | [Request](/docs/hero/awaited-dom/request) |
-| [Response](/docs/hero/awaited-dom/response) | [Storage](/docs/hero/awaited-dom/storage) |
+| [Attr](./attr.md) | [CharacterData](./character-data.md) |
+| [EventTarget](./event-target.md) | [Request](./request.md) |
+| [Response](./response.md) | [Storage](./storage.md) |
 

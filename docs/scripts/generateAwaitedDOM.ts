@@ -11,6 +11,8 @@ const docs = rawDocs as unknown as IDoc[];
 const domParser = new DOMParser();
 
 interface IDoc {
+  title: string;
+  slug: string;
   name: string;
   variableName: string;
   category: string;
@@ -24,21 +26,25 @@ interface IDoc {
 
 const docUrls = new Map<string, string>();
 for (const doc of docs) {
-  docUrls.set(doc.name, decamelize(doc.name, '-'));
+  doc.title = doc.name;
+  let slug = doc.name.replace('IFrame', 'Iframe').replace('XPath', 'Xpath');
+  if (slug.startsWith('HTML')) slug = `html-${slug.slice(4)}`;
+  doc.slug = decamelize(slug, '-');
+  docUrls.set(doc.title, `${doc.slug}.md`);
 }
 
 json2md.converters.html = input => input;
 
 const awaitedDomDir = Path.resolve(__dirname, '../awaited-dom');
-const docsDir = Path.resolve(__dirname, '../main');
-const awaitedDOMBasePath = Path.join(docsDir, 'BasicClient', 'AwaitedDOM.base.md');
-const awaitedDOMIndexPath1 = Path.join(docsDir, 'BasicClient', 'AwaitedDOM.md');
+const docsDir = Path.resolve(__dirname, '..');
+const awaitedDOMBasePath = Path.join(docsDir, 'basic-client', 'awaited-dom.base.md');
+const awaitedDOMIndexPath1 = Path.join(docsDir, 'basic-client', 'awaited-dom.md');
 const awaitedDOMIndexPath2 = Path.join(awaitedDomDir, 'index.md');
 
 const docsByTag: { [tag: string]: IDoc[] } = {};
 
 docs.forEach((doc: IDoc) => {
-  const filepath = Path.join(awaitedDomDir, `${doc.name}.md`);
+  const filepath = Path.join(awaitedDomDir, `${doc.slug}.md`);
   const tags = doc.tags.split(',').filter(t => t);
   tags.forEach(tag => {
     docsByTag[tag] = docsByTag[tag] || [];
@@ -54,7 +60,7 @@ Object.keys(docsByTag).forEach(tag => {
   if (!awaitedDOMBase.includes(placementToken)) return;
 
   const linksTable = extractLinksTable(docsByTag[tag], (doc: IDoc) => {
-    return [doc.name, `/docs/hero/awaited-dom/${decamelize(doc.name, '-')}`];
+    return [doc.title, `../awaited-dom/${doc.slug}.md`];
   });
 
   const markup = [{ table: linksTable }];
@@ -63,13 +69,18 @@ Object.keys(docsByTag).forEach(tag => {
 });
 
 Fs.writeFileSync(awaitedDOMIndexPath1, awaitedDOMBase);
-Fs.writeFileSync(awaitedDOMIndexPath2, awaitedDOMBase);
+Fs.writeFileSync(
+  awaitedDOMIndexPath2,
+  awaitedDOMBase
+    .replace(/\.\.\/awaited-dom\//g, './')
+    .replace('./awaited-dom-extensions.md', '../basic-client/awaited-dom-extensions.md'),
+);
 
 // SAVE DOC
 
 function saveDoc(doc: IDoc, filePath: string) {
   const markup: any[] = [
-    { h1: `[AwaitedDOM](/docs/hero/basic-client/awaited-dom) <span>/</span> ${doc.name}` },
+    { h1: `[AwaitedDOM](../basic-client/awaited-dom) <span>/</span> ${doc.title}` },
   ];
   const variableName = doc.variableName || '';
 
@@ -80,15 +91,16 @@ function saveDoc(doc: IDoc, filePath: string) {
   if (doc.tags.includes('Super') && doc.dependencies.length) {
     markup.push({ h2: 'Dependencies' });
     markup.push({
-      p: `${doc.name} implements all the properties and methods of the following classes:`,
+      p: `${doc.title} implements all the properties and methods of the following classes:`,
     });
-    const linksTable = extractLinksTable(doc.dependencies, (dep: any) => {
-      return [dep.name, `./${decamelize(dep.name, '-')}`];
+    const linksTable = extractLinksTable(doc.dependencies, dep => {
+      const url = docUrls.get(dep.name);
+      return [dep.name, url ? `./${url}` : undefined];
     });
     markup.push({ table: linksTable });
   }
 
-  if (doc.name === 'XPathResult') {
+  if (doc.title === 'XPathResult') {
     for (const p of doc.properties) {
       if (p.name === 'singleNodeValue') {
         const example =
@@ -230,7 +242,7 @@ function urlify(type: string) {
     docUrls.get(`Promise<${type}[]>`) ??
     docUrls.get(`${type}[]`);
   if (url) {
-    return `[\`${type}\`](/docs/hero/awaited-dom/${url})`;
+    return `[\`${type}\`](./${url})`;
   }
   return `\`${type}\``;
 }
@@ -291,7 +303,7 @@ function extractLinksTable(records: any[], extractLinkFn: (record: any) => [stri
 
   records.forEach(record => {
     const [linkName, linkHref] = extractLinkFn(record);
-    cells.push(`[${linkName}](${linkHref})`);
+    if (linkHref) cells.push(`[${linkName}](${linkHref})`);
   });
 
   const rows: string[][] = [];
