@@ -62,6 +62,14 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
         if: ${{ matrix.os == 'windows-latest' }}
 
+      - name: Clone ulixee/shared
+        run: git clone https://github.com/ulixee/shared.git
+        working-directory: ..
+
+      - name: Install ulixee/shared
+        run: yarn build
+        working-directory: ../shared
+
       - name: Yarn build
         run: yarn build
         env:
