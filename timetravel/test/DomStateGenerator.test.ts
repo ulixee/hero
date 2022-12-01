@@ -139,6 +139,7 @@ describe('domStateGenerator', () => {
       await tab.flushDomChanges();
       const startTime = Date.now();
       await tab.getJsValue(`tick(50)`);
+      await tab.flushDomChanges();
       await session.close();
       domStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
     }

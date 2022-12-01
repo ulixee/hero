@@ -1,6 +1,7 @@
 import { Hero, Helpers } from '@ulixee/hero-testing';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { InternalPropertiesSymbol } from '@ulixee/hero/lib/internal';
+import Resource from '@ulixee/hero/lib/Resource';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -43,7 +44,44 @@ describe('basic resource tests', () => {
     expect(resources).toHaveLength(1);
 
     const findResource = await hero.findResource({ type: 'Fetch' });
-    expect(findResource).toBeTruthy()
+    expect(findResource).toBeTruthy();
+  });
+
+  it('gets the resource back from a goto', async () => {
+    const exampleUrl = `${koaServer.baseUrl}/`;
+    const hero = new Hero({
+      locale: 'en-US,en',
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resource = await hero.goto(exampleUrl);
+    const { request, response } = resource;
+    expect(await request.headers).toMatchObject({
+      Host: koaServer.baseHost,
+      Connection: 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'User-Agent': expect.any(String),
+      Accept: expect.any(String),
+      'Accept-Encoding': 'gzip, deflate',
+      'Accept-Language': 'en-US,en;q=0.9',
+    });
+    expect(await request.url).toBe(exampleUrl);
+    expect(await request.timestamp).toBeTruthy();
+    expect(await request.method).toBe('GET');
+    expect(await request.postData).toBeNull();
+
+    expect(await response.headers).toMatchObject({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Length': expect.any(String),
+      Date: expect.any(String),
+      Connection: 'keep-alive',
+    });
+    expect(await response.url).toBe(exampleUrl);
+    expect(await response.timestamp).toBeTruthy();
+    expect(await response.remoteAddress).toBeTruthy();
+    expect(await response.statusCode).toBe(200);
+    expect(await response.statusMessage).toBe('OK');
+    expect(await response.text).toMatch('<h1>Example Domain</h1>');
   });
 
   it('waits for resources by default since the previous command', async () => {
@@ -180,5 +218,106 @@ describe('basic resource tests', () => {
       // should prefetch the body
       expect(collected2[0].resource.response.buffer).toBeTruthy();
     }
+  });
+  it('allows you to block resources', async () => {
+    koaServer.get('/block', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/test.css" />
+</head>
+<body>
+  <img src="/img.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/img.png', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/test.css', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceTypes: ['BlockAssets'],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
+  });
+
+  it('allows you to block urls: strings', async () => {
+    koaServer.get('/block-strings', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y=%20baz" />
+</head>
+<body>
+  <img src="/baz/bar.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/baz/bar.png', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceUrls: ['42.css?x=foo', '/baz/'],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block-strings`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
+  });
+
+  it('allows you to block urls: RegExp', async () => {
+    koaServer.get('/block-regexes', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y=%20baz" />
+</head>
+<body>
+  <img src="/baz/bar.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/baz/bar.png', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const hero = new Hero({
+      blockedResourceUrls: [/.*\?x=foo/, /\/baz\//],
+    });
+    Helpers.needsClosing.push(hero);
+
+    const resources: Resource[] = [];
+    await hero.activeTab.on('resource', event => resources.push(event as any));
+    await hero.goto(`${koaServer.baseUrl}/block-regexes`);
+    await hero.waitForPaintingStable();
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
   });
 });
