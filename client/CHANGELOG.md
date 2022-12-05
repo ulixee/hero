@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.16](https://github.com/ulixee/platform/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
+
+
+### Bug Fixes
+
+* **core:** subdomain cookies not being removed ([fad14db](https://github.com/ulixee/platform/commit/fad14db468a3c7354e7e5f865fa3c62bf699eac0))
+
+
+### Features
+
+* **core:** allow user to specify auto-shutdown ([18371b1](https://github.com/ulixee/platform/commit/18371b1351a00237ffe852d2fd4ca18845112b4f))
+
+
+
+
+
 # [2.0.0-alpha.15](https://github.com/ulixee/platform/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
 
 

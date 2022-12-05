@@ -1,16 +1,16 @@
 {
   "name": "@ulixee/hero-timetravel",
-  "version": "2.0.0-alpha.15",
+  "version": "2.0.0-alpha.16",
   "description": "The interface to playback and examine previous Hero sessions",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.15",
-    "@ulixee/hero-core": "2.0.0-alpha.15",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.15",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.14",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.16",
+    "@ulixee/hero-core": "2.0.0-alpha.16",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.16",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.15",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.15",
     "nanoid": "^3.1.30"
   },
   "devDependencies": {
-    "@ulixee/hero-testing": "2.0.0-alpha.15"
+    "@ulixee/hero-testing": "2.0.0-alpha.16"
   }
 }
