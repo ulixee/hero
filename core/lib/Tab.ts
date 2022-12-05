@@ -318,7 +318,7 @@ export default class Tab
 
   public async setOrigin(origin: string): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
-    const originalBlocker = mitmSession.interceptorHandlers;
+    const originalBlocker = [...mitmSession.interceptorHandlers];
     mitmSession.interceptorHandlers.unshift({
       urls: [origin],
       handlerFn(url, type, request, response) {

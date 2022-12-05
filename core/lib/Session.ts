@@ -220,7 +220,7 @@ export default class Session
 
     Session.events.emit('new', { session: this });
 
-    // if no settings for chrome visiblity, default to headless
+    // if no settings for chrome visibility, default to headless
     options.showChrome ??= false;
     options.showChromeInteractions ??= options.showChrome;
 
