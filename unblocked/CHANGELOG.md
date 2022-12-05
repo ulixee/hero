@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-12-05)
+
+
+### Bug Fixes
+
+* **agent:** remove process hooks on browser close ([d468b4a](https://github.com/ulixee/ulixee/commit/d468b4aba38b0f3cd800b1dc241586265ff13a38))
+* don’t verify automated profile collection ([f79a367](https://github.com/ulixee/ulixee/commit/f79a367a13d59fd7d355d959a5e90df52b48f146))
+* links ([7df3342](https://github.com/ulixee/ulixee/commit/7df3342339ce3f2d594d634ba9c8c1c5b617737b))
+* node 18 deprecated functions ([252ac2d](https://github.com/ulixee/ulixee/commit/252ac2dfd3c46c58ed8261b69e72da074f45ca92))
+* **plugins:** check that performance.memory exists ([a05a2b1](https://github.com/ulixee/ulixee/commit/a05a2b1f74aa86ec000427427eeb799f77a4cd74))
+* re-enable prettier on configs ([df38416](https://github.com/ulixee/ulixee/commit/df38416e59d83134f9114701dfda778bfa23fe36))
+
+
+### Features
+
+* add dns failovers to help tests ([241c4a0](https://github.com/ulixee/ulixee/commit/241c4a0b0c3a34ec2ea0d10cc9972f779ba1082e))
+
+
+
+
+
 # [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-17)
 
 
