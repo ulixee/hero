@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.16](https://github.com/ulixee/shared/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
+
+**Note:** Version bump only for package @ulixee/schema
+
+
+
+
+
 # [2.0.0-alpha.15](https://github.com/ulixee/shared/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
 
 **Note:** Version bump only for package @ulixee/schema

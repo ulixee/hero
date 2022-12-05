@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.16](https://github.com/ulixee/shared/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
+
+
+### Features
+
+* add databox functions ([4577be8](https://github.com/ulixee/shared/commit/4577be8ca3d1adf887659bf57cbf8a48c5d39b14))
+* allow manual shutdown ([41c9ebb](https://github.com/ulixee/shared/commit/41c9ebbd8b4b255502ed957927f0db2c9ca5c366))
+
+
+
+
+
 # [2.0.0-alpha.15](https://github.com/ulixee/shared/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
 
 
