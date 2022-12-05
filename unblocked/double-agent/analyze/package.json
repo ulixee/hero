@@ -1,6 +1,6 @@
 {
   "name": "@double-agent/analyze",
-  "version": "2.0.0-alpha.14",
+  "version": "2.0.0-alpha.15",
   "private": true,
   "main": "index.js",
   "license": "MIT",
@@ -8,10 +8,10 @@
     "initialize": "node initialize.js"
   },
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.14",
-    "@double-agent/config": "2.0.0-alpha.14",
+    "@double-agent/collect": "2.0.0-alpha.15",
+    "@double-agent/config": "2.0.0-alpha.15",
     "@ulixee/commons": "2.0.0-alpha.15",
-    "@ulixee/real-user-agents": "2.0.0-alpha.14",
+    "@ulixee/real-user-agents": "2.0.0-alpha.15",
     "humanize-string": "^2.1.0",
     "initialism": "^1.0.2",
     "lodash": "^4.17.21",

@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/unblocked-agent-testing",
-  "version": "2.0.0-alpha.14",
+  "version": "2.0.0-alpha.15",
   "description": "Helpers and stubs for testing",
   "main": "index.js",
   "private": true,
@@ -10,10 +10,10 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
-    "@ulixee/commons": "2.0.0-alpha.15",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.14",
-    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.14",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.14",
+    "@ulixee/commons": "2.0.0-alpha.16",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.15",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.15",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.15",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0",
