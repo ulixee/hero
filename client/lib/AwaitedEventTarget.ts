@@ -14,7 +14,9 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
     options?,
   ): Promise<void> {
     const { target, jsPath } = await this.getEventTarget();
-    return (await target).addEventListener(jsPath, eventType as string, listenerFn as any, options);
+    const awaitedTarget = await target;
+    if (!awaitedTarget) return;
+    return awaitedTarget.addEventListener(jsPath, eventType as string, listenerFn as any, options);
   }
 
   public async removeEventListener<K extends keyof T>(
@@ -22,7 +24,9 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
     listenerFn: T[K] & Function,
   ): Promise<void> {
     const { target, jsPath } = await this.getEventTarget();
-    return (await target).removeEventListener(jsPath, eventType as string, listenerFn as any);
+    const awaitedTarget = await target;
+    if (!awaitedTarget) return;
+    return awaitedTarget.removeEventListener(jsPath, eventType as string, listenerFn as any);
   }
 
   // aliases
