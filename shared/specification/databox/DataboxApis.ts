@@ -1,15 +1,13 @@
 import { z } from 'zod';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
-import { identityValidation, micronoteTokenValidation, signatureValidation } from '../common';
+import {
+  databoxVersionHashValidation,
+  identityValidation,
+  micronoteTokenValidation,
+  signatureValidation,
+} from '../common';
 import { PaymentSchema } from '../types/IPayment';
-
-export const databoxVersionHashValidation = z
-  .string()
-  .length(62)
-  .regex(
-    /^dbx1[ac-hj-np-z02-9]{58}/,
-    'This is not a Databox versionHash (Bech32 encoded hash starting with "dbx1").',
-  );
+import { DataboxFunctionPricing } from '../types/IDataboxFunctionPricing';
 
 const positiveInt = z.number().int().positive();
 
@@ -44,21 +42,30 @@ export const DataboxApiSchemas = {
       functionsByName: z.record(
         z.string().describe('The name of a function'),
         z.object({
-          averageBytesPerQuery: positiveInt.describe('Average bytes of output returned per query.'),
-          maxBytesPerQuery: positiveInt.describe('The largest byte count seen.'),
-          averageMilliseconds: positiveInt.describe('Average milliseconds spent before response.'),
-          maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
-          averageTotalPricePerQuery: positiveInt.describe(
-            'Average total microgons paid for a query.',
+          stats: z.object({
+            averageBytesPerQuery: positiveInt.describe(
+              'Average bytes of output returned per query.',
+            ),
+            maxBytesPerQuery: positiveInt.describe('The largest byte count seen.'),
+            averageMilliseconds: positiveInt.describe(
+              'Average milliseconds spent before response.',
+            ),
+            maxMilliseconds: positiveInt.describe('Max milliseconds spent before response.'),
+            averageTotalPricePerQuery: positiveInt.describe(
+              'Average total microgons paid for a query.',
+            ),
+            maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
+          }),
+
+          pricePerQuery: micronoteTokenValidation.describe('The function base price per query.'),
+          minimumPrice: micronoteTokenValidation.describe(
+            'Minimum microgons that must be allocated for a query to be accepted.',
           ),
-          maxPricePerQuery: positiveInt.describe('The largest total microgon price seen.'),
-          basePricePerQuery: micronoteTokenValidation.describe(
-            'The function base price per query.',
-          ),
+          priceBreakdown: DataboxFunctionPricing.array(),
         }),
       ),
-      computePricePerKb: micronoteTokenValidation.describe(
-        'The current server price per kilobyte. NOTE: if a server is implementing surge pricing, this amount could vary.',
+      computePricePerQuery: micronoteTokenValidation.describe(
+        'The current server price per query. NOTE: if a server is implementing surge pricing, this amount could vary.',
       ),
       schemaInterface: z
         .string()
@@ -77,10 +84,17 @@ export const DataboxApiSchemas = {
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
+      authentication: z
+        .object({
+          identity: identityValidation,
+          signature: signatureValidation,
+          nonce: z.string().length(10).describe('A random nonce adding signature noise.'),
+        })
+        .optional(),
       pricingPreferences: z
         .object({
-          maxComputePricePerKb: micronoteTokenValidation.describe(
-            'Maximum price to pay for compute costs per kilobyte (NOTE: This only applies to Servers implementing surge pricing).',
+          maxComputePricePerQuery: micronoteTokenValidation.describe(
+            'Maximum price to pay for compute costs per query (NOTE: This only applies to Servers implementing surge pricing).',
           ),
         })
         .optional(),
@@ -118,7 +132,7 @@ export const DataboxApiSchemas = {
       schema: z.any({}),
       seedlings: z.any({}).optional(),
       databoxInstanceId: z.string(),
-    }), 
+    }),
     result: z.object({}),
   },
   'Databox.createInMemoryFunction': {
@@ -126,7 +140,7 @@ export const DataboxApiSchemas = {
       name: z.string(),
       schema: z.any({}),
       databoxInstanceId: z.string(),
-    }), 
+    }),
     result: z.object({}),
   },
   'Databox.queryInternalTable': {
@@ -136,7 +150,7 @@ export const DataboxApiSchemas = {
       boundValues: z.any({}).optional(),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
-    }), 
+    }),
     result: z.any({}),
   },
   'Databox.queryInternalFunction': {
@@ -148,7 +162,7 @@ export const DataboxApiSchemas = {
       output: z.array(z.any({})),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
-    }), 
+    }),
     result: z.any({}),
   },
   'Databox.queryInternal': {
@@ -159,7 +173,7 @@ export const DataboxApiSchemas = {
       outputByFunctionName: z.record(z.array(z.any({}))),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
-    }), 
+    }),
     result: z.any({}),
   },
 };

@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 class UlixeeError extends Error {
-  constructor(override readonly message, readonly code, protected data?: object) {
+  constructor(override message, public code, public data?: object) {
     // Calling parent constructor of base Error class.
     super(message);
 
@@ -24,7 +24,7 @@ class UlixeeError extends Error {
 }
 
 class APIError extends UlixeeError {
-  constructor(readonly status, json) {
+  constructor(public status, json) {
     super(json.message || 'Unexpected error', json.code, json);
   }
 }

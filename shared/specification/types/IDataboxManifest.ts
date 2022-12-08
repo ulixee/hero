@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { addressValidation, identityValidation } from '../common';
-import { databoxVersionHashValidation } from '../databox/DataboxApis';
+import { addressValidation, identityValidation , databoxVersionHashValidation } from '../common';
+import { DataboxFunctionPricing } from './IDataboxFunctionPricing';
 
 const minDate = new Date('2022-01-01').getTime();
 
@@ -25,16 +25,22 @@ export const DataboxManifestSchema = z.object({
   coreVersion: z.string().describe('Version of the Databox Core Runtime'),
   schemaInterface: z.string().optional().describe('The raw typescript schema for this Databox'),
   functionsByName: z.record(
-    z.string().describe('The Function name'),
+    z
+      .string()
+      .regex(/[a-z][A-Za-z0-9]+/)
+      .describe('The Function name'),
     z.object({
       corePlugins: z
         .record(z.string())
         .optional()
         .describe('plugin dependencies required for execution'),
-      pricePerQuery: z.number().int()
-        .nonnegative()
+      prices: DataboxFunctionPricing.array()
+        .min(1)
         .optional()
-        .describe('Price per query if requiring payment'),
+        .describe(
+          'Price details for a function call. This array will have an entry for each function called in this process. ' +
+            'The first entry is the cost of the function packaged in this Databox.',
+        ),
     }),
   ),
   paymentAddress: addressValidation.optional(),

@@ -25,10 +25,17 @@ export const MicronoteSchema = z.object({
 });
 
 export const PaymentSchema = z.object({
-  micronote: MicronoteSchema.optional(),
+  micronote: MicronoteSchema.extend({
+    holdAuthorizationCode: z
+      .string()
+      .length(16)
+      .optional()
+      .describe('A hold authorization code granting sub-holds on a micronote.'),
+  }).optional(),
   giftCard: z
     .object({
       id: giftCardIdValidation,
+      sidechainIdentity: identityValidation,
       redemptionKey: giftCardRemptionKeyValidation,
     })
     .optional(),
