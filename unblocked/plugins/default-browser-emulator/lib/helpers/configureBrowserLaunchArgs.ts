@@ -8,7 +8,7 @@ export function configureBrowserLaunchArgs(
   options: {
     showChrome?: boolean;
     disableGpu?: boolean;
-    disableDevtools?: boolean;
+    showDevtools?: boolean;
   },
 ): void {
   engine.launchArguments.push(
@@ -61,7 +61,7 @@ export function configureBrowserLaunchArgs(
     engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
     engine.userDataDir = dataDir;
 
-    if (!options.disableDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
+    if (options.showDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
   } else {
     engine.launchArguments.push(
       '--hide-scrollbars',

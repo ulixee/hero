@@ -67,7 +67,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.engine = engine;
     this.id = String((browserIdCounter += 1));
     launchArgs ??= {};
-    launchArgs.disableDevtools ??= env.disableDevtools;
     launchArgs.disableGpu ??= env.disableGpu;
     launchArgs.noChromeSandbox ??= env.noChromeSandbox;
     launchArgs.showChrome ??= env.showChrome;

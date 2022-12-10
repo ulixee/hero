@@ -54,7 +54,7 @@ Configurations include:
   - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
   - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
 - showChrome `boolean`. A boolean whether to show the Chrome browser window.
-- disableDevtools `boolean`. Do not automatically show devtools when `showChrome` is enabled.
+- showDevtools `boolean`. Automatically show devtools when `showChrome` is enabled.
 - disableIncognito `boolean`. Disable the use of an incognito context.
 - disableMitm `boolean`. Disable the use of a man-in-the-middle server. This stops the ability to mimic the TLS signature of a headed Chrome version.
 - noChromeSandbox `boolean`. A boolean to disable the Chrome Sandbox requirement on Linux.
