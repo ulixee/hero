@@ -171,19 +171,21 @@ export default class Pool extends TypedEventEmitter<{
       }
       this.browsersById.clear();
 
+      if (this.mitmStartPromise) {
+        this.mitmStartPromise.then(x => x.close()).catch(err => err);
+        this.mitmStartPromise = null;
+      }
+
+      if (this.sharedMitmProxy) {
+        this.sharedMitmProxy.close();
+        this.sharedMitmProxy = null;
+      }
+
       if (this.certificateGenerator) {
         this.certificateGenerator.close();
         this.certificateGenerator = null;
       }
 
-      if (this.mitmStartPromise) {
-        this.mitmStartPromise.then(x => x.close()).catch(err => err);
-        this.mitmStartPromise = null;
-      }
-      if (this.sharedMitmProxy) {
-        this.sharedMitmProxy.close();
-        this.sharedMitmProxy = null;
-      }
       try {
         const errors = await Promise.all(closePromises);
         this.events.close();

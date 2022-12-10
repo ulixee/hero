@@ -475,7 +475,13 @@ export default class MitmProxy {
         this.http2Server.addContext(hostname, cert);
         this.httpsServer.addContext(hostname, cert);
       });
-    await this.secureContexts[hostname];
+
+    try {
+      await this.secureContexts[hostname];
+    } catch (error) {
+      if (error instanceof CanceledPromiseError || this.isClosing) return;
+      throw error;
+    }
   }
 
   /////// SESSION ID MGMT //////////////////////////////////////////////////////////////////////////////////////////////
