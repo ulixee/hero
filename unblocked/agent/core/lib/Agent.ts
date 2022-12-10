@@ -52,8 +52,13 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   private readonly closeBrowserOnClose: boolean = false;
   private isolatedMitm: MitmProxy;
 
-  private get mitmProxyConnectionInfo(): IProxyConnectionOptions {
-    if (!this.enableMitm) return null;
+  private get proxyConnectionInfo(): IProxyConnectionOptions {
+    if (!this.enableMitm) {
+      if (this.emulationProfile.upstreamProxyUrl) {
+        return { address: this.emulationProfile.upstreamProxyUrl };
+      }
+      return null;
+    }
     if (this.isolatedMitm) {
       // don't use password for an isolated mitm proxy
       return { address: `localhost:${this.isolatedMitm.port}` };
@@ -111,8 +116,8 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       );
       if (this.closeBrowserOnClose) {
         this.events.once(this, 'close', () => browser.close());
-        this.events.once(browser, 'close', () => this.close());
       }
+      this.events.once(browser, 'close', () => this.close());
 
       if (this.enableMitm) {
         if (browser.supportsBrowserContextProxy && this.isIncognito) {
@@ -178,12 +183,12 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   protected async createBrowserContext(browser: Browser): Promise<BrowserContext> {
     this.browserContext = await browser.newContext({
       logger: this.logger,
-      proxy: this.mitmProxyConnectionInfo,
+      proxy: this.proxyConnectionInfo,
       hooks: this.plugins,
       isIncognito: this.isIncognito,
       commandMarker: this.options.commandMarker,
     });
-    this.events.once(browser, 'close', () => this.close());
+    this.events.once(this.browserContext, 'close', () => this.close());
 
     if (this.enableMitm) {
       // hook request session to browserContext (this is how RequestSession subscribes to new page creations)
