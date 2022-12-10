@@ -129,6 +129,8 @@ export default class Pool extends TypedEventEmitter<{
         launchArgs.proxyPort ??= this.sharedMitmProxy?.port;
       }
       const browser = new Browser(engine, hooks, launchArgs);
+      // ensure enough listeners is possible
+      browser.setMaxListeners(this.maxConcurrentAgents * 5);
 
       const existing = this.browserWithEngine(browser.engine);
       if (existing) return existing;
