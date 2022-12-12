@@ -91,22 +91,31 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       name: this.engine.name,
       fullVersion: this.engine.fullVersion,
     });
+
     try {
       this.isLaunchStarted = true;
       await this.engine.verifyLaunchable?.();
+    } catch (launchError) {
+      this.launchPromise.reject(launchError);
+      log.error('Browser.verifyLaunchableError', {
+        launchError,
+        parentLogId,
+        chromeStderr: this.process.launchStderr.join('\n'),
+        sessionId: null,
+      });
+      setImmediate(() => this.emit('close'));
+      // will bomb here
+      await this.launchPromise.promise;
+    }
 
+    try {
       this.process = new BrowserProcess(this.engine);
       this.connection = new Connection(this.process.transport);
       this.devtoolsSession = this.connection.rootSession;
 
-      try {
-        await Promise.all([this.testConnection(), this.process.isProcessFunctionalPromise]);
-      } catch (error) {
-        await this.process.close();
-        throw error;
-      }
-
       this.bindDevtoolsEvents();
+
+      await Promise.all([this.testConnection(), this.process.isProcessFunctionalPromise]);
       this.process.once('close', () => this.emit('close'));
 
       this.launchPromise.resolve();
@@ -119,14 +128,34 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       });
       return this;
     } catch (err) {
-      const launchError = new BrowserLaunchError(err.message, err.stack);
+      await this.process.close();
+
+      let launchError: BrowserLaunchError;
+      // give it a second to read errors
+      const processError = await this.process.isProcessFunctionalPromise.catch(error => error);
+
+      let message = 'Failed to launch Chrome!';
+      if (err.code === 'EPIPE' && processError) err = processError;
+      if (err.code !== 'EPIPE') {
+        message += ` ${err.message}`;
+      }
+
+      if (this.process.launchStderr.length) {
+        message +=
+          `\n\n\nSometimes a reason can be found in the Chrome Stderr logs:\n\t` +
+          this.process.launchStderr.join('\n\t');
+      }
+      launchError = new BrowserLaunchError(message, err.stack.split(/\r?\n/).slice(1).join('\n'));
+
       this.launchPromise.reject(launchError);
       log.stats('Browser.LaunchError', {
         launchError,
         parentLogId,
+        chromeStderr: this.process.launchStderr.join('\n'),
         sessionId: null,
       });
       setImmediate(() => this.emit('close'));
+    } finally {
       await this.launchPromise.promise;
     }
   }
@@ -234,7 +263,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   }
 
   private applyDefaultLaunchArgs(options: IBrowserLaunchArgs): void {
-    this.engine.launchArguments ??= [];
+    this.engine.launchArguments = [...(this.engine.launchArguments ?? [])];
     const launchArgs = this.engine.launchArguments;
 
     if (options.proxyPort !== undefined && !launchArgs.some(x => x.startsWith('--proxy-server'))) {
