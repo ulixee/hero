@@ -13,8 +13,8 @@ HeroReplay accepts either a subset of Hero configuration settings, including a `
 - _OPTION 1_ config `object` Accepts any of the following:
   - replaySessionId `string`. The sessionId of a previous session to replay.
   - connectionToCore `object`. OPTIONAL object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
-- _OPTION 2_ config `object`.
-  - OR hero `Hero`. An existing Hero object.
+- OR _OPTION 2_ config `object`.
+  - hero `Hero`. An existing Hero object.
 
 ## Properties
 

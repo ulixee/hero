@@ -216,7 +216,6 @@ export default class Session
     options.noChromeSandbox ??= env.noChromeSandbox;
     options.disableGpu ??= env.disableGpu;
     options.disableMitm ??= env.disableMitm;
-    options.disableDevtools ??= env.disableDevtools;
 
     Session.events.emit('new', { session: this });
 

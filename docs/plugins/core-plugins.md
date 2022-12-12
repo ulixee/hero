@@ -118,7 +118,7 @@ This is called every time a new browser engine is started, which may not be ever
 - launchArgs `IBrowserLaunchArgs`. Additional options provided to launch this instance.
   - showChrome: `boolean` - has the user requested to show the browser
   - disableGpu: `boolean` - has the user requested to disable the gpu
-  - disableDevtools: `boolean` - has the user requested to disable automatically showing devtools
+  - showDevtools: `boolean` - has the user requested to automatically show devtools
 
 #### **Returns** `Promise` | `void`
 

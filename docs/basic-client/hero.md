@@ -80,6 +80,7 @@ const Hero = require('@ulixee/hero-playground');
   - blockedResourceUrls: `(string | RegExp)[]`. Also controls browser resource loading. See for more information [here](../overview/configuration.md#blocked-urls).
   - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
+  - showDevtools: `boolean` - Automatically show devtools when Chrome is open using `showChrome`. Default `false`.
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
   - userProfile `IUserProfile`. A json object matching the format created by [hero.exportUserProfile()](#export-profile). This property allows restoring user storage and cookies from a previous session.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.

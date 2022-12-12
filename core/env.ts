@@ -8,7 +8,6 @@ if (env.ULX_DATA_DIR) env.ULX_DATA_DIR = parseEnvPath(env.ULX_DATA_DIR);
 export default {
   disableMitm: parseEnvBool(env.ULX_DISABLE_MITM) ?? AgentEnv.disableMitm,
   showChrome: parseEnvBool(env.ULX_SHOW_CHROME) ?? AgentEnv.showChrome,
-  disableDevtools: parseEnvBool(env.ULX_DISABLE_DEVTOOLS) ?? AgentEnv.disableDevtools,
   noChromeSandbox: parseEnvBool(env.ULX_NO_CHROME_SANDBOX) ?? AgentEnv.noChromeSandbox,
   disableGpu: parseEnvBool(env.ULX_DISABLE_GPU) ?? AgentEnv.disableGpu,
 };
