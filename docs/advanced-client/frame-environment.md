@@ -113,7 +113,7 @@ const response = await fetch(request.md);
 
 ## Methods
 
-### frameEnvironment.fetch *(requestInput, requestInit.md)* <div class="specs"><i>W3C</i></div> {#fetch}
+### frameEnvironment.fetch *(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
 Perform a native "fetch" request in the current frame environment.
 
@@ -154,7 +154,7 @@ const response = await mainFrame.fetch(postUrl, {
 });
 ```
 
-### frameEnvironment.getFrameEnvironment *(frameElement.md)* {#get-frame-environment}
+### frameEnvironment.getFrameEnvironment *(frameElement)* {#get-frame-environment}
 
 Get the [FrameEnvironment](../advanced-client/frame-environment.md) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
 
@@ -169,12 +169,12 @@ await hero.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ifram
 const { document } = hero.activeTab;
 const iframeElement = document.querySelector('iframe.interactive');
 
-const iframe = await hero.getFrameEnvironment(iframeElement.md);
+const iframe = await hero.getFrameEnvironment(iframeElement);
 
 const h4 = await iframe.document.querySelector('h4').textContent; // should be something like HTML demo: <iframe>
 ```
 
-### frameEnvironment.getComputedStyle *(element, pseudoElement.md)* <div class="specs"><i>W3C</i></div> {#computed-style}
+### frameEnvironment.getComputedStyle *(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
 
 Perform a native `Window.getComputedStyle` request in the current frame context - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
 
@@ -193,7 +193,7 @@ const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
 ```
 
-### frameEnvironment.getComputedVisibility *(element.md)* {#get-computed-visibility}
+### frameEnvironment.getComputedVisibility *(element* {#get-computed-visibility}
 
 Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether a node (or containing element.md) has:
 
@@ -240,7 +240,7 @@ await hero.goto('https://dataliberationfoundation.org');
 const navigatorAgent = await hero.activeFrame.getJsValue(`navigator.userAgent`);
 ```
 
-### frameEnvironment.isElementVisible *(element.md)* {#is-element-visible}
+### frameEnvironment.isElementVisible *(element)* {#is-element-visible}
 
 Determines if an element is visible to an end user. This method checks whether an element has:
 
