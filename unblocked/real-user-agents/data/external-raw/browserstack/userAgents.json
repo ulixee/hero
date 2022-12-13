@@ -15228,5 +15228,60 @@
     "id": "Chrome-108.0--OS X-Monterey",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "osId": "mac-os-12"
+  },
+  {
+    "id": "Edge-108.0--Windows-8.1",
+    "string": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
+    "osId": "windows-8-1"
+  },
+  {
+    "id": "Edge-108.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Edge-108.0--Windows-7",
+    "string": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
+    "osId": "windows-7"
+  },
+  {
+    "id": "Edge-108.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Edge-108.0--Windows-8",
+    "string": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
+    "osId": "windows-8"
+  },
+  {
+    "id": "Edge-108.0--OS X-High Sierra",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-10-13"
+  },
+  {
+    "id": "Edge-108.0--OS X-Mojave",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-10-14"
+  },
+  {
+    "id": "Edge-108.0--OS X-Catalina",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-10-15"
+  },
+  {
+    "id": "Edge-108.0--OS X-Big Sur",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-11"
+  },
+  {
+    "id": "Edge-108.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-12"
+  },
+  {
+    "id": "Edge-108.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
+    "osId": "mac-os-13"
   }
 ]

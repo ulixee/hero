@@ -3245,5 +3245,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-108-0": {
+    "id": "edge-108-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "108",
+      "minor": "0",
+      "build": "1462",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-12-01",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
   }
 }
