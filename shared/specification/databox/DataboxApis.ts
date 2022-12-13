@@ -69,11 +69,11 @@ export const DataboxApiSchemas = {
         .describe('The identities this databox allows gift card payments for (if any).'),
     }),
   },
-  'Databox.exec': {
+  'Databox.query': {
     args: z.object({
-      functionName: z.string().default('default').describe('The function to execute'),
+      sql: z.string().describe('The SQL command(s) you want to run'),
+      boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
       versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
-      input: z.any().optional().describe('Optional input parameters for this function call'),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -98,13 +98,13 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
   },
-  'Databox.execLocalScript': {
+  'Databox.queryLocalScript': {
     args: z.object({
-      functionName: z.string().describe('The function to execute').default('default'),
+      sql: z.string().describe('The SQL command(s) you want to run'),
+      boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
       scriptPath: z
         .string()
         .describe('A path to a local script to run. NOTE: API only enabled in development.'),
-      input: z.any().optional().describe('Optional input parameters for your databox'),
     }),
     result: z.object({
       latestVersionHash: databoxVersionHashValidation,
@@ -139,31 +139,13 @@ export const DataboxApiSchemas = {
     }), 
     result: z.any({}),
   },
-  'Databox.queryInternalFunctionSetup': {
-    args: z.object({
-      name: z.string(),
-      sql: z.string(),
-      boundValues: z.any({}).optional(),
-      databoxVersionHash: z.string().optional(),
-      databoxInstanceId: z.string().optional(),
-    }), 
-    result: z.any({}),
-  },
   'Databox.queryInternalFunction': {
     args: z.object({
       name: z.string(),
       sql: z.string(),
       boundValues: z.any({}).optional(),
-      functionRecords: z.array(z.any({})),
-      databoxVersionHash: z.string().optional(),
-      databoxInstanceId: z.string().optional(),
-    }), 
-    result: z.any({}),
-  },
-  'Databox.queryInternalSetup': {
-    args: z.object({
-      sql: z.string(),
-      boundValues: z.any({}).optional(),
+      input: z.any({}).optional(),
+      output: z.array(z.any({})),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
     }), 
@@ -173,7 +155,8 @@ export const DataboxApiSchemas = {
     args: z.object({
       sql: z.string(),
       boundValues: z.any({}).optional(),
-      functionRecordsByName: z.record(z.array(z.any({}))),
+      inputByFunctionName: z.record(z.any()),
+      outputByFunctionName: z.record(z.array(z.any({}))),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
     }), 
