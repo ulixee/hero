@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/platform/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Features
+
+* invert use of devtools flag ([7b39975](https://github.com/ulixee/platform/commit/7b39975c10fead577c517964f9586abb49eaee42))
+
+
+
+
+
 # [2.0.0-alpha.16](https://github.com/ulixee/platform/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
 
 
