@@ -42,7 +42,7 @@ export const GiftCardApiSchemas = {
     }),
     result: z.object({
       holdId: z.string().length(32),
-      giftCardBalance: micronoteTokenValidation,
+      remainingBalance: micronoteTokenValidation,
     }),
   },
   'GiftCard.settleHold': {
@@ -57,7 +57,7 @@ export const GiftCardApiSchemas = {
     result: z.object({
       success: z.boolean(),
       microgonsAllowed: micronoteTokenValidation.describe('The microgons settled.'),
-      giftCardBalance: micronoteTokenValidation,
+      remainingBalance: micronoteTokenValidation,
     }),
   },
 };

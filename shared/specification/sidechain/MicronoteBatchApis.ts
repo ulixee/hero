@@ -4,7 +4,7 @@ import { NoteSchema } from '../types/INote';
 import { addressValidation, micronoteTokenValidation } from '../common';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
 
-const fundsIdValidation = z.number().int().positive();
+const fundsIdValidation = z.string().length(30);
 
 export const MicronoteBatchApiSchemas = {
   'MicronoteBatch.fund': {
@@ -36,7 +36,7 @@ export const MicronoteBatchApiSchemas = {
       address: addressValidation,
     }),
     result: z.object({
-      fundsId: z.number().int().positive(),
+      fundsId: fundsIdValidation,
       microgonsRemaining: micronoteTokenValidation,
       allowedRecipientAddresses: addressValidation.array().optional(),
     }),

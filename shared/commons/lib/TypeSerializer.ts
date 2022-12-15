@@ -241,7 +241,8 @@ export default class TypeSerializer {
 
       const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
 
-      const e = new Constructor(message);
+      const e = new Constructor();
+      e.message = message;
       e.name = name;
       Object.assign(e, extras);
       if (stack) {
@@ -255,7 +256,7 @@ export default class TypeSerializer {
 }
 
 export function registerSerializableErrorType(errorConstructor: {
-  new (message?: string): Error;
+  new (...args: any[]): Error;
 }): void {
   TypeSerializer.errorTypes.set(errorConstructor.name, errorConstructor);
 }

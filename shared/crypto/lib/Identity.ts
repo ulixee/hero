@@ -139,9 +139,11 @@ export default class Identity {
     const isValid = Ed25519.verify(publicKey, hashedMessage, signature);
     if (isValid === true) return true;
 
-    log.error('Error validating signature', {
-      error: (isValid as Error) ?? new Error('Invalid parameters'),
-    });
+    if (isValid instanceof Error) {
+      log.error('Error validating signature', {
+        error: isValid,
+      });
+    }
     return false;
   }
 }
