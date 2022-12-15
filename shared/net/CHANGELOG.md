@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/shared/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Features
+
+* added table endpoints ([62fe366](https://github.com/ulixee/shared/commit/62fe366a967d2ff8f1ae0f100cf8d8adb52d2e98))
+
+
+
+
+
 # [2.0.0-alpha.16](https://github.com/ulixee/shared/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
 
 **Note:** Version bump only for package @ulixee/net

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/shared/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Features
+
+* micronote apis conversion to hold/settle ([c03c6fd](https://github.com/ulixee/shared/commit/c03c6fd8c7d17c29a8347aaba7413920e859c556))
+
+
+
+
+
 # [2.0.0-alpha.16](https://github.com/ulixee/shared/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
 
 **Note:** Version bump only for package @ulixee/crypto
