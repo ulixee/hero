@@ -37,7 +37,7 @@ const ObjectCached = {
         if (argArray?.length) proxyToTarget.set(result, argArray[0]);
         return result;
       } catch (err) {
-        throw cleanErrorStack(err);
+        throw cleanErrorStack(err, null, false, true);
       }
     },
   });
@@ -98,7 +98,7 @@ Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
     try {
       return ReflectCached.apply(...arguments);
     } catch (error) {
-      throw cleanErrorStack(error);
+      throw cleanErrorStack(error, null, false, true);
     } finally {
       isObjectSetPrototypeOf = false;
     }
@@ -116,6 +116,7 @@ function cleanErrorStack(
   error: Error,
   replaceLineFn?: (line: string, index: number) => string,
   startAfterSourceUrl = false,
+  stripStartingReflect = false,
 ) {
   if (!error.stack) return error;
 
@@ -124,6 +125,7 @@ function cleanErrorStack(
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
+    if (stripStartingReflect && line.includes(' Reflect.')) continue;
     if (line.includes(sourceUrl)) {
       if (startAfterSourceUrl === true) {
         newStack.length = 1;
@@ -158,7 +160,11 @@ function proxyConstructor<T, K extends keyof T>(
       } catch (err) {
         throw cleanErrorStack(err);
       }
-      return ReflectCached.construct(...arguments);
+      try {
+        return ReflectCached.construct(...arguments);
+      } catch (err) {
+        throw cleanErrorStack(err, null, false, true);
+      }
     },
   });
   overriddenFns.set(descriptor.value, toString);
@@ -182,7 +188,7 @@ function internalCreateFnProxy(
         const caller = isObjectSetPrototypeOf ? ObjectCached : ReflectCached;
         return caller.setPrototypeOf(target, protoTarget);
       } catch (error) {
-        throw cleanErrorStack(error);
+        throw cleanErrorStack(error, null, false, true);
       }
     },
     get(target: any, p: string | symbol, receiver: any): any {
@@ -193,8 +199,11 @@ function internalCreateFnProxy(
           throw cleanErrorStack(err);
         }
       }
-
-      return ReflectCached.get(target, p, receiver);
+      try {
+        return ReflectCached.get(target, p, receiver);
+      } catch (err) {
+        throw cleanErrorStack(err, null, false, true);
+      }
     },
     set(target: any, p: string | symbol, value: any, receiver: any): boolean {
       if (p === '__proto__') {
@@ -208,7 +217,11 @@ function internalCreateFnProxy(
           throw cleanErrorStack(error);
         }
       }
-      return ReflectCached.set(...arguments);
+      try {
+        return ReflectCached.set(...arguments);
+      } catch (err) {
+        throw cleanErrorStack(err, null, false, true);
+      }
     },
   });
   overriddenFns.set(proxy, toString);
@@ -314,7 +327,7 @@ function defaultProxyApply<T, K extends keyof T>(
         // @ts-expect-error
         if (result && result.then && result.catch) {
           // @ts-expect-error
-          return result.catch((err) => {
+          return result.catch(err => {
             throw cleanErrorStack(err);
           });
         }
