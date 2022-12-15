@@ -26,10 +26,7 @@ export default class ConnectionFactory {
       const transport = new WsTransportToCore(options.host);
       connection = new ConnectionToHeroCore(transport);
     } else {
-      const host =
-        UlixeeConfig.load()?.defaultMinerHost ??
-        UlixeeConfig.global.defaultMinerHost ??
-        UlixeeHostsConfig.global.getVersionHost(version);
+      const host = UlixeeHostsConfig.global.getVersionHost(version);
 
       if (host) {
         const transport = new WsTransportToCore(host);

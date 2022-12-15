@@ -82,7 +82,6 @@ describe('Connection tests', () => {
   jest.spyOn<any, any>(UlixeeHostsConfig.global, 'save').mockImplementation(() => null);
 
   it('connects to a configured Miner over a started Miner', async () => {
-    UlixeeConfig.global.defaultMinerHost = 'localhost:8000';
     UlixeeHostsConfig.global.setVersionHost('1', 'localhost:8080');
 
     const connectionToCore = ConnectionFactory.createConnection({});
@@ -90,7 +89,6 @@ describe('Connection tests', () => {
   });
 
   it('connects to a started Miner if the version is compatible', async () => {
-    UlixeeConfig.global.defaultMinerHost = null;
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, 'localhost:8081');
