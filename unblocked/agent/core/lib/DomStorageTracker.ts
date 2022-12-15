@@ -2,7 +2,9 @@ import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IDomStorage, { IDomStorageForOrigin } from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
+import IDomStorage, {
+  IDomStorageForOrigin,
+} from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import { IIndexedDB } from '@ulixee/unblocked-specification/agent/browser/IIndexedDB';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
@@ -307,6 +309,7 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
       }
     } catch (error) {
       if (error instanceof CanceledPromiseError) return;
+      if (error.code === -32000) return;
       this.logger.info('DomStorageTracker.onIndexedDBListUpdated:ERROR', {
         error,
         event,
@@ -354,7 +357,8 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
       });
     } catch (error) {
       if (error instanceof CanceledPromiseError) return;
-      this.logger.error('DomStorageTracker.onIndexedDBContentUpdated', {
+      if (error.code === -32000) return;
+      this.logger.info('DomStorageTracker.onIndexedDBContentUpdated', {
         error,
         event,
       });
