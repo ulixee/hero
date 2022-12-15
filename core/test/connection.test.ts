@@ -42,7 +42,7 @@ describe('basic connection tests', () => {
     );
     expect(logError).toHaveBeenCalledTimes(1);
     const error = String((logError.mock.calls[0][1] as any).error);
-    expect(error).toMatch('BrowserLaunchError');
+    expect(error).toMatch('DependenciesMissingError');
     expect(error).toMatch('You can resolve this by running');
     expect(validate).toHaveBeenCalledTimes(1);
   });
