@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/hero/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Bug Fixes
+
+* **client:** if no awaited event target, return ([920f843](https://github.com/ulixee/hero/commit/920f843f8a0a915f2d4ce49fc62440961af9d446))
+* **docs:** find/replace issues with .md extensions ([849e93f](https://github.com/ulixee/hero/commit/849e93f1763dadc65df94fdbd41b76167b7d752b))
+* improve message when hosts w wrong version ([3f30733](https://github.com/ulixee/hero/commit/3f307339af77647d3192dda0ed7304d8dc8dc418))
+
+
+### Features
+
+* invert use of devtools flag ([7b39975](https://github.com/ulixee/hero/commit/7b39975c10fead577c517964f9586abb49eaee42))
+
+
+
+
+
 # [2.0.0-alpha.16](https://github.com/ulixee/hero/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
 
 
