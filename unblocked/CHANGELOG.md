@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.15...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Bug Fixes
+
+* allow pool amount of browser close listeners ([a73088f](https://github.com/ulixee/ulixee/commit/a73088fa2ff09b711315ec2732899b5c0c3aee52))
+* attempt to fix certificate generator error ([8a62e46](https://github.com/ulixee/ulixee/commit/8a62e4670ba32946138f356188ac78da89a8a85a))
+* correctly set user agent platform and memory ([1b11514](https://github.com/ulixee/ulixee/commit/1b115148c0cbb6bf972c912ad5a5d1ca0236e439))
+* handle installed chrome not being latest ([cf94c1d](https://github.com/ulixee/ulixee/commit/cf94c1d217d08b7b05e46d266a100edc9da35891))
+* proxy leak in js ([54bf072](https://github.com/ulixee/ulixee/commit/54bf0727a74608441444d75c7daf5dc85ce32c01))
+
+
+### Features
+
+* enable upstream proxy when mitm diabled ([f952d6c](https://github.com/ulixee/ulixee/commit/f952d6c250837154417e3157085f6f7e2d65063c))
+* improve logs for storage tracker, mitm instl ([611b08d](https://github.com/ulixee/ulixee/commit/611b08d071d2fb3f14649d844130c9416a5966be))
+* improve message when no xvfb and headed ([1ccfe01](https://github.com/ulixee/ulixee/commit/1ccfe01d2967d3d7ac73558046996ff128cb2d6b))
+* invert disableDevtools and default to off ([b66d8cc](https://github.com/ulixee/ulixee/commit/b66d8cc13d716acc99014ffcb818650ebc2624a2))
+
+
+
+
+
 # [2.0.0-alpha.15](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-12-05)
 
 

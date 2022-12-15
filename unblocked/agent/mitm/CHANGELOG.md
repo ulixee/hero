@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.15...v2.0.0-alpha.17) (2022-12-15)
+
+
+### Bug Fixes
+
+* attempt to fix certificate generator error ([8a62e46](https://github.com/ulixee/unblocked/commit/8a62e4670ba32946138f356188ac78da89a8a85a))
+
+
+### Features
+
+* improve logs for storage tracker, mitm instl ([611b08d](https://github.com/ulixee/unblocked/commit/611b08d071d2fb3f14649d844130c9416a5966be))
+
+
+
+
+
 # [2.0.0-alpha.15](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-12-05)
 
 

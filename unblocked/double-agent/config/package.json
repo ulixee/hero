@@ -1,12 +1,12 @@
 {
   "name": "@double-agent/config",
-  "version": "2.0.0-alpha.15",
+  "version": "2.0.0-alpha.17",
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.15",
-    "@double-agent/collect": "2.0.0-alpha.15",
-    "@ulixee/commons": "2.0.0-alpha.15",
-    "@ulixee/real-user-agents": "2.0.0-alpha.15"
+    "@double-agent/analyze": "2.0.0-alpha.17",
+    "@double-agent/collect": "2.0.0-alpha.17",
+    "@ulixee/commons": "2.0.0-alpha.17",
+    "@ulixee/real-user-agents": "2.0.0-alpha.17"
   }
 }

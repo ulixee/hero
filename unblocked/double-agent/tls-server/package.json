@@ -1,12 +1,12 @@
 {
   "name": "@double-agent/tls-server",
-  "version": "2.0.0-alpha.15",
+  "version": "2.0.0-alpha.17",
   "private": true,
   "main": "index.js",
   "license": "MIT",
   "description": "TLS server for capturing clienthello",
   "dependencies": {
-    "@double-agent/config": "2.0.0-alpha.15",
-    "@ulixee/commons": "2.0.0-alpha.15"
+    "@double-agent/config": "2.0.0-alpha.17",
+    "@ulixee/commons": "2.0.0-alpha.17"
   }
 }
