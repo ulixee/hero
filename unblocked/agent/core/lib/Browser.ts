@@ -97,12 +97,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       await this.engine.verifyLaunchable?.();
     } catch (launchError) {
       this.launchPromise.reject(launchError);
-      log.error('Browser.verifyLaunchableError', {
-        launchError,
-        parentLogId,
-        chromeStderr: this.process.launchStderr.join('\n'),
-        sessionId: null,
-      });
       setImmediate(() => this.emit('close'));
       // will bomb here
       await this.launchPromise.promise;
