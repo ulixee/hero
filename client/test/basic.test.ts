@@ -80,6 +80,7 @@ describe('basic Hero tests', () => {
 
 describe('Connection tests', () => {
   jest.spyOn<any, any>(UlixeeHostsConfig.global, 'save').mockImplementation(() => null);
+  UlixeeHostsConfig.global.setVersionHost('1', 'localhost:8080');
 
   it('connects to a started Miner if the version is compatible', async () => {
     const version = pkg.version;

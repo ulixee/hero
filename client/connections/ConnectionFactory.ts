@@ -1,6 +1,5 @@
 import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
@@ -28,17 +27,17 @@ export default class ConnectionFactory {
     } else {
       const host = UlixeeHostsConfig.global.getVersionHost(version);
 
+      if (!host && ConnectionFactory.hasLocalMinerPackage) {
+        // If Miners are launched, but none compatible, propose installing Miner locally
+        throw new Error(
+          `Your Ulixee Miner is not started. From your project, run:\n\nnpx @ulixee/miner start`,
+        );
+      }
+
       if (host) {
         const transport = new WsTransportToCore(host);
         connection = new ConnectionToHeroCore(transport, { ...options, version });
       } else if (UlixeeHostsConfig.global.hasHosts()) {
-        if (this.hasLocalMinerPackage) {
-          // If Miners are launched, but none compatible, propose installing Miner locally
-          throw new Error(
-            `Your Ulixee Miner is not started. From your project, run:\n\nnpx @ulixee/miner start`,
-          );
-        }
-
         // If Miners are launched, but none compatible, propose installing miner locally
         throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a Ulixee Miner in your project:
 
