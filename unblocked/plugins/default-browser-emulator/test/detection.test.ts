@@ -174,6 +174,30 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should properly emulate memory', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  const server = await Helpers.runHttpsServer((req, res) => {
+    res.end('<html><body><h1>Hi</h1></body></html>');
+  }, false);
+  await page.goto(`${server.baseUrl}`);
+  const { deviceMemory, heapSize } = await page.evaluate(`(() => {
+  const { deviceMemory } = navigator
+ 
+  const heapSize = performance?.memory?.jsHeapSizeLimit || null;
+  return { deviceMemory, heapSize };
+})()`);
+
+  expect([2, 4, 8]).toContain(deviceMemory);
+  const heapSizeGb = heapSize ? +(heapSize / 1073741824).toFixed(1) : 0;
+
+  expect(heapSizeGb).toBeLessThanOrEqual(deviceMemory);
+});
+
 test('should properly maintain stack traces in toString', async () => {
   const agent = pool.createAgent({
     logger,

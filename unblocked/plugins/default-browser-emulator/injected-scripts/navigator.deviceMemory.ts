@@ -14,7 +14,7 @@ if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
       'memory' as any,
       function () {
         const result = ReflectCached.apply(...arguments);
-        result.jsHeapSizeLimit = args.maxHeapSize;
+        proxyGetter(result, 'jsHeapSizeLimit', () => args.maxHeapSize);
         return result;
       },
       true,
@@ -26,7 +26,7 @@ if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
       'memory' as any,
       function () {
         const result = ReflectCached.apply(...arguments);
-        result.jsHeapSizeLimit = args.maxHeapSize;
+        proxyGetter(result, 'jsHeapSizeLimit', () => args.maxHeapSize);
         return result;
       },
       true,
