@@ -3259,5 +3259,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "2022-12-01",
     "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-108-0": {
+    "id": "firefox-108-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "108",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-12-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
   }
 }
