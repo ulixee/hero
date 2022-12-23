@@ -61,6 +61,9 @@ export default class Queue {
       const next = this.queue.shift();
       if (!next) continue;
 
+      // catch unhandled rejections here
+      // eslint-disable-next-line promise/no-promise-in-callback
+      next.promise.promise.catch(() => null);
       this.reject(next, canceledError);
     }
   }

@@ -75,7 +75,7 @@ export default class Timer {
       if (next) {
         const { timeout, reject } = next;
         clearTimeout(timeout);
-        reject(error);
+        reject(error, true);
       }
     }
   }
@@ -83,5 +83,5 @@ export default class Timer {
 
 interface IRegistry {
   timeout: NodeJS.Timer;
-  reject: (err: Error) => any;
+  reject: (err: Error, noUnhandledRejections?: boolean) => any;
 }

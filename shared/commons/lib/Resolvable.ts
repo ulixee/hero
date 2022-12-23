@@ -32,19 +32,27 @@ export default class Resolvable<T = any> implements IResolvablePromise<T>, Promi
     if (this.isResolved) return;
     clearTimeout(this.timeout);
     this.resolveFn(value);
-    Promise.resolve(value)
-      // eslint-disable-next-line promise/always-return,@typescript-eslint/no-floating-promises
-      .then(x => {
-        this.isResolved = true;
-        this.resolved = x;
-        this.clean();
-      })
-      .catch(this.reject);
+    this.isResolved = true;
+    this.clean();
+    if (value && typeof value === 'object' && 'then' in value && typeof value.then === 'function') {
+      void Promise.resolve(value)
+        // eslint-disable-next-line promise/always-return
+        .then(x => {
+          this.resolved = x;
+        })
+        .catch(this.reject);
+    } else {
+      this.resolved = value as T;
+    }
   }
 
-  public reject(error: Error): void {
+  public reject(error: Error, noUnhandledRejections = false): void {
     if (this.isResolved) return;
     this.isResolved = true;
+    if (noUnhandledRejections) {
+      // eslint-disable-next-line promise/no-promise-in-callback
+      this.promise.catch(() => null);
+    }
     this.rejectFn(error);
     this.clean();
   }

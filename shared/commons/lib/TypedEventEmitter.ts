@@ -29,6 +29,8 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
         continue;
       }
       if (message) event.error.message = message;
+      // catch unhandled rejections here: eslint-disable-next-line promise/no-promise-in-callback
+      event.resolvable.promise.catch(() => null);
       event.resolvable.reject(event.error);
     }
   }
