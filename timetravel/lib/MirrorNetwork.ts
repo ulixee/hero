@@ -178,7 +178,7 @@ export default class MirrorNetwork {
     for (const resourceSet of Object.values(this.resourceLookup)) {
       for (const resource of resourceSet) {
         if (resource.responsePromise && !resource.responsePromise.isResolved)
-          resource.responsePromise.reject(new CanceledPromiseError('Replacing resources'));
+          resource.responsePromise.reject(new CanceledPromiseError('Replacing resources'), true);
       }
     }
     this.resourceLookup = {};

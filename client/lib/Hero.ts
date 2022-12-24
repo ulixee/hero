@@ -73,6 +73,8 @@ import DetachedElements from './DetachedElements';
 import DetachedResources from './DetachedResources';
 import { IDomExtensionClass, isDomExtensionClass } from './DomExtender';
 
+const { version } = require('../package.json');
+
 export type ISessionOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
 
 interface ISharedInternalProperties {
@@ -217,6 +219,10 @@ export default class Hero extends AwaitedEventTarget<{
 
   public get Request(): typeof Request {
     return this.activeTab.Request;
+  }
+
+  public get version(): string {
+    return version;
   }
 
   public get detachedElements(): DetachedElements {
