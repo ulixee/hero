@@ -1,21 +1,26 @@
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
 
-export interface INumberSchemaConfig extends IBaseConfig {
+export interface INumberSchemaConfig<TOptional extends boolean = boolean>
+  extends IBaseConfig<TOptional> {
   min?: number;
   max?: number;
   decimals?: number;
   integer?: boolean;
 }
 
-export default class NumberSchema extends BaseSchema<number, INumberSchemaConfig> {
+export default class NumberSchema<TOptional extends boolean = boolean> extends BaseSchema<
+  number,
+  TOptional,
+  INumberSchemaConfig<TOptional>
+> {
   readonly typeName = 'number';
   min?: number;
   max?: number;
   decimals?: number;
   integer?: boolean;
 
-  constructor(config: INumberSchemaConfig = {}) {
+  constructor(config: INumberSchemaConfig<TOptional> = {}) {
     super(config);
     if (isDefined(config.min)) assert(typeof config.min === 'number', 'Min value must be a number');
     if (isDefined(config.max)) assert(typeof config.max === 'number', 'Max value must be a number');

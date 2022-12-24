@@ -1,21 +1,29 @@
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig } from './BaseSchema';
 import StringSchema from './StringSchema';
+import { ExtractSchemaType } from '../index';
 
-export interface IRecordSchemaConfig<Value extends BaseSchema<any>> extends IBaseConfig {
+export interface IRecordSchemaConfig<
+  Value extends BaseSchema<any, boolean>,
+  TOptional extends boolean = false,
+> extends IBaseConfig<TOptional> {
   values: Value;
   keys?: StringSchema;
 }
 
-export default class RecordSchema<Value extends BaseSchema<any>> extends BaseSchema<
-  Record<string, Value>,
-  IRecordSchemaConfig<Value>
+export default class RecordSchema<
+  Value extends BaseSchema<any, boolean>,
+  TOptional extends boolean = boolean,
+> extends BaseSchema<
+  Record<string, ExtractSchemaType<Value>>,
+  TOptional,
+  IRecordSchemaConfig<Value, TOptional>
 > {
   readonly typeName = 'record';
   values: BaseSchema<any>;
   keys?: StringSchema;
 
-  constructor(config: IRecordSchemaConfig<Value>) {
+  constructor(config: IRecordSchemaConfig<Value, TOptional>) {
     super(config);
     assert(config.values, 'You must configure the types of values for this record');
     assert(

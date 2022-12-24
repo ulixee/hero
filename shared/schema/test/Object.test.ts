@@ -1,4 +1,17 @@
-import { array, boolean, ExtractSchemaType, number, object, string } from '../index';
+import {
+  array,
+  bigint,
+  boolean,
+  buffer,
+  date,
+  ExtractSchemaType,
+  FilterOptionalKeys,
+  FilterRequiredKeys,
+  number,
+  object,
+  string,
+} from '../index';
+import ObjectSchema from '../lib/ObjectSchema';
 
 test('should be able to create an object schema', () => {
   const schema = object({
@@ -25,6 +38,33 @@ test('should be able to create an object schema with nested objects', () => {
     one: string(),
     two: string({ format: 'email' }),
   });
+
+  const record = {
+    one: string({ optional: true }),
+    two: string({ format: 'email' }),
+    nested: object({
+      three: buffer({ optional: true }),
+      four: number({ optional: false }),
+    }),
+    nestedWithFields: object({
+      optional: true,
+      fields: {
+        five: number({ optional: true }),
+        six: date(),
+        seven: bigint({ optional: false }),
+      },
+    }),
+  };
+
+  // test out some nested optionals (just in typescript)
+  const nestedOptionalSchema: ExtractSchemaType<typeof record> = {
+    two: 'two',
+    nested: {
+      four: 1,
+    },
+    nestedWithFields: { seven: 2n, six: new Date() },
+  };
+  expect(nestedOptionalSchema).toBeTruthy();
 
   const schema = object({
     fields: {

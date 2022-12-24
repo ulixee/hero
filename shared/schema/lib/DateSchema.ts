@@ -2,17 +2,22 @@ import moment = require('moment');
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
 
-export interface IDateSchemaConfig extends IBaseConfig {
+export interface IDateSchemaConfig<TOptional extends boolean = boolean>
+  extends IBaseConfig<TOptional> {
   future?: boolean;
   past?: boolean;
 }
 
-export default class DateSchema extends BaseSchema<Date, IDateSchemaConfig> {
+export default class DateSchema<TOptional extends boolean = boolean> extends BaseSchema<
+  Date,
+  TOptional,
+  IDateSchemaConfig<TOptional>
+> {
   readonly typeName = 'date';
   future?: boolean;
   past?: boolean;
 
-  constructor(config: IDateSchemaConfig = {}) {
+  constructor(config: IDateSchemaConfig<TOptional> = {}) {
     super(config);
     if (isDefined(config.future))
       assert(typeof config.future === 'boolean', 'future must be a boolean');

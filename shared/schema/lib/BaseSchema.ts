@@ -1,14 +1,18 @@
 import * as assert from 'assert';
 import IValidationResult, { IValidationError } from '../interfaces/IValidationResult';
 
-export interface IBaseConfig {
-  optional?: boolean;
+export interface IBaseConfig<TOptional extends boolean = boolean> {
+  optional?: TOptional;
   description?: string;
 }
 
-export default abstract class BaseSchema<Type, Config extends IBaseConfig = IBaseConfig> {
-  readonly type: Type;
-  optional?: boolean;
+export default abstract class BaseSchema<
+  Type,
+  TOptional extends boolean = boolean,
+  Config extends IBaseConfig<TOptional> = IBaseConfig<TOptional>,
+> {
+  readonly $type: Type;
+  readonly optional: TOptional;
   description?: string;
 
   abstract readonly typeName: string;
@@ -129,7 +133,7 @@ export function isDefined(value: any): boolean {
 
 export type IValidationTracker = {
   errors: IValidationError[];
-  has(candidate: object, type: BaseSchema<any>): boolean;
+  has(candidate: object, type: BaseSchema<any, boolean>): boolean;
 };
 
 function ValidationTracker(): IValidationTracker {

@@ -3,7 +3,8 @@ import { URL } from 'url';
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
 
-export interface IStringSchemaConfig extends IBaseConfig {
+export interface IStringSchemaConfig<TOptional extends boolean = boolean>
+  extends IBaseConfig<TOptional> {
   format?: 'email' | 'url' | 'date' | 'time';
   regexp?: RegExp;
   enum?: string[];
@@ -12,7 +13,11 @@ export interface IStringSchemaConfig extends IBaseConfig {
   length?: number;
 }
 
-export default class StringSchema extends BaseSchema<string, IStringSchemaConfig> {
+export default class StringSchema<TOptional extends boolean = boolean> extends BaseSchema<
+  string,
+  TOptional,
+  IStringSchemaConfig<TOptional>
+> {
   readonly typeName = 'string';
   format?: 'email' | 'url' | 'date' | 'time';
   regexp?: RegExp;
@@ -21,7 +26,7 @@ export default class StringSchema extends BaseSchema<string, IStringSchemaConfig
   maxLength?: number;
   length?: number;
 
-  constructor(config: IStringSchemaConfig = {}) {
+  constructor(config: IStringSchemaConfig<TOptional> = {}) {
     super(config);
     if (isDefined(this.format))
       assert(
@@ -50,7 +55,7 @@ export default class StringSchema extends BaseSchema<string, IStringSchemaConfig
       return this.incorrectType(value, path, tracker);
     }
 
-    const config = this as IStringSchemaConfig;
+    const config = this as IStringSchemaConfig<TOptional>;
     if (config.format) {
       switch (config.format) {
         case 'date': {

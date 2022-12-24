@@ -12,15 +12,20 @@ const IBufferEncodingTypes = [
   'hex',
 ] as const;
 
-export interface IBufferSchemaConfig extends IBaseConfig {
+export interface IBufferSchemaConfig<TOptional extends boolean = boolean>
+  extends IBaseConfig<TOptional> {
   encoding?: keyof typeof IBufferEncodingTypes;
 }
 
-export default class BufferSchema extends BaseSchema<Buffer, IBufferSchemaConfig> {
+export default class BufferSchema<TOptional extends boolean = boolean> extends BaseSchema<
+  Buffer,
+  TOptional,
+  IBufferSchemaConfig<TOptional>
+> {
   readonly typeName = 'buffer';
   encoding?: keyof typeof IBufferEncodingTypes;
 
-  constructor(config?: IBufferSchemaConfig) {
+  constructor(config?: IBufferSchemaConfig<TOptional>) {
     super(config);
 
     if (isDefined(config.encoding))

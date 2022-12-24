@@ -1,19 +1,29 @@
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig } from './BaseSchema';
+import { ExtractSchemaType } from '../index';
 
-export interface IObjectSchemaConfig<O extends Record<string, BaseSchema<any>>>
-  extends IBaseConfig {
-  fields: O;
+type ISchemaRecord<
+  O extends Record<string, TSchema>,
+  TSchema extends BaseSchema<any, boolean> = BaseSchema<any, boolean>,
+> = {
+  [T in keyof O]: O[T];
+};
+
+export interface IObjectSchemaConfig<
+  O extends Record<string, BaseSchema<any, boolean>>,
+  TOptional extends boolean = boolean,
+> extends IBaseConfig<TOptional> {
+  fields: ISchemaRecord<O>;
 }
 
-export default class ObjectSchema<O extends Record<string, BaseSchema<any>>> extends BaseSchema<
-  { [K in keyof O]?: O[K]['type'] },
-  IObjectSchemaConfig<O>
-> {
+export default class ObjectSchema<
+  O extends Record<string, BaseSchema<any, boolean>>,
+  TOptional extends boolean = boolean,
+> extends BaseSchema<ExtractSchemaType<O>, TOptional, IObjectSchemaConfig<O, TOptional>> {
   readonly typeName = 'object';
   fields: O;
 
-  constructor(config: IObjectSchemaConfig<O>) {
+  constructor(config: IObjectSchemaConfig<O, TOptional>) {
     super(config);
     assert(config.fields, 'You must configure the fields for this object');
     assert(
@@ -41,7 +51,7 @@ export default class ObjectSchema<O extends Record<string, BaseSchema<any>>> ext
     for (const key of keys) {
       const childPath = `${path}.${key}`;
       if (key in fields) {
-        const schema: BaseSchema<any> = fields[key];
+        const schema: BaseSchema<any, any> = fields[key];
         if (!schema || !(schema instanceof BaseSchema)) continue;
         const keyValue = value[key];
         if (keyValue !== null && keyValue !== undefined) {

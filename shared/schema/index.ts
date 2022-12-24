@@ -11,49 +11,73 @@ import RecordSchema, { IRecordSchemaConfig } from './lib/RecordSchema';
 import { DateUtilities, IUnits } from './lib/DateUtilities';
 
 type ISchemaAny =
-  | StringSchema
-  | BooleanSchema
-  | NumberSchema
-  | BigintSchema
-  | BufferSchema
-  | DateSchema
-  | RecordSchema<any>
-  | ObjectSchema<any>
-  | ArraySchema<any>;
+  | StringSchema<boolean>
+  | BooleanSchema<boolean>
+  | NumberSchema<boolean>
+  | BigintSchema<boolean>
+  | BufferSchema<boolean>
+  | DateSchema<boolean>
+  | RecordSchema<any, boolean>
+  | ObjectSchema<any, boolean>
+  | ArraySchema<any, boolean>;
 
 export { ArraySchema, ObjectSchema, ISchemaAny, DateUtilities };
 
-type IRecordSchemaType<T extends Record<string, ISchemaAny>> = {
-  [P in keyof T]: T[P]['type'];
-};
+export type FilterOptionalKeys<T> = {
+  [K in keyof T]: T[K] extends { optional: true } ? K : never;
+}[keyof T];
 
-export type ExtractSchemaType<T> = T extends BaseSchema<any>
-  ? T['type']
-  : T extends Record<string, ISchemaAny>
+export type FilterRequiredKeys<T> = {
+  [K in keyof T]: T[K] extends { optional: true } ? never : K;
+}[keyof T];
+
+export type IRecordSchemaType<T extends Record<string, BaseSchema<any, boolean>>> = {
+  [K in FilterRequiredKeys<T>]: T[K]['$type'];
+} & {
+  [K in FilterOptionalKeys<T>]?: T[K]['$type'];
+} extends infer P
+  ? { [K in keyof P]: P[K] }
+  : never;
+
+export type ExtractSchemaType<T> = T extends BaseSchema<any, boolean>
+  ? T['$type']
+  : T extends Record<string, BaseSchema<any, boolean>>
   ? IRecordSchemaType<T>
   : any;
 
-export function boolean(config: IBooleanSchemaConfig = {}): BooleanSchema {
+export function boolean<TOptional extends boolean = false>(
+  config: IBooleanSchemaConfig<TOptional> = {},
+): BooleanSchema<TOptional> {
   return new BooleanSchema(config);
 }
 
-export function number(config: INumberSchemaConfig = {}): NumberSchema {
+export function number<TOptional extends boolean = false>(
+  config: INumberSchemaConfig<TOptional> = {},
+): NumberSchema<TOptional> {
   return new NumberSchema(config);
 }
 
-export function string(config: IStringSchemaConfig = {}): StringSchema {
+export function string<TOptional extends boolean = false>(
+  config: IStringSchemaConfig<TOptional> = {},
+): StringSchema<TOptional> {
   return new StringSchema(config);
 }
 
-export function bigint(config: IBigintSchemaConfig = {}): BigintSchema {
+export function bigint<TOptional extends boolean = false>(
+  config: IBigintSchemaConfig<TOptional> = {},
+): BigintSchema<TOptional> {
   return new BigintSchema(config);
 }
 
-export function buffer(config: IBufferSchemaConfig = {}): BufferSchema {
+export function buffer<TOptional extends boolean = false>(
+  config: IBufferSchemaConfig<TOptional> = {},
+): BufferSchema<TOptional> {
   return new BufferSchema(config);
 }
 
-export function date(config: IDateSchemaConfig = {}): DateSchema {
+export function date<TOptional extends boolean = false>(
+  config: IDateSchemaConfig<TOptional> = {},
+): DateSchema<TOptional> {
   return new DateSchema(config);
 }
 
@@ -65,34 +89,37 @@ export function dateSubtract(quantity: number, units: IUnits): DateUtilities {
   return new DateUtilities({ func: 'subtract', units, quantity });
 }
 
-export function record<Values extends BaseSchema<any>>(
-  config: IRecordSchemaConfig<Values>,
-): RecordSchema<Values> {
+export function record<Values extends BaseSchema<any, boolean>, TOptional extends boolean = false>(
+  config: IRecordSchemaConfig<Values, TOptional>,
+): RecordSchema<Values, TOptional> {
   return new RecordSchema(config);
 }
 
-export function object<O extends Record<string, BaseSchema<any>>>(
-  config: IObjectSchemaConfig<O>,
-): ObjectSchema<O>;
-export function object<O extends Record<string, BaseSchema<any>>>(fields: O): ObjectSchema<O>;
-export function object<O extends Record<string, BaseSchema<any>>>(
-  fieldsOrConfig: IObjectSchemaConfig<O> | O,
-): ObjectSchema<O> {
+export function object<
+  O extends Record<string, BaseSchema<any, boolean>>,
+  TOptional extends boolean = false,
+>(config: IObjectSchemaConfig<O, TOptional>): ObjectSchema<O, false>;
+export function object<O extends Record<string, BaseSchema<any, boolean>>>(
+  fields: O,
+): ObjectSchema<O, false>;
+export function object(fieldsOrConfig): ObjectSchema<any> {
   if (
     !fieldsOrConfig.fields ||
     typeof fieldsOrConfig.fields !== 'object' ||
     !(Object.values(fieldsOrConfig.fields)[0] instanceof BaseSchema)
   ) {
-    fieldsOrConfig = { fields: fieldsOrConfig } as IObjectSchemaConfig<O>;
+    fieldsOrConfig = { fields: fieldsOrConfig } as IObjectSchemaConfig<any, any>;
   }
-  return new ObjectSchema(fieldsOrConfig as IObjectSchemaConfig<O>);
+  return new ObjectSchema(fieldsOrConfig as any);
 }
 
 export function array<E extends BaseSchema<any>>(element: E): ArraySchema<E>;
-export function array<E extends BaseSchema<any>>(config: IArraySchemaConfig<E>): ArraySchema<E>;
-export function array<E extends BaseSchema<any>>(
-  elementOrConfig: IArraySchemaConfig<E> | E,
-): ArraySchema<E> {
+export function array<E extends BaseSchema<any>, TOptional extends boolean = false>(
+  config: IArraySchemaConfig<E, TOptional>,
+): ArraySchema<E, TOptional>;
+export function array<E extends BaseSchema<any>, TOptional extends boolean = false>(
+  elementOrConfig: IArraySchemaConfig<E, TOptional> | E,
+): ArraySchema<E, TOptional> {
   if (elementOrConfig instanceof BaseSchema) {
     elementOrConfig = { element: elementOrConfig };
   }
