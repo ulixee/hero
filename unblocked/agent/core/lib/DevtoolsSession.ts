@@ -131,7 +131,7 @@ export default class DevtoolsSession
         50,
         '-',
       )}\n${`------DEVTOOLS_SESSION_ID=${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
-      resolvable.reject(error);
+      resolvable.reject(error, true);
     }
     this.pendingMessages.clear();
     this.connection = null;

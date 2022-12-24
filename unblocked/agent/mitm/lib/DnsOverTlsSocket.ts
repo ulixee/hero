@@ -115,7 +115,7 @@ export default class DnsOverTlsSocket {
 
   private disconnect(): void {
     for (const [, entry] of this.pending) {
-      entry.resolvable.reject(new CanceledPromiseError('Disconnecting Dns Socket'));
+      entry.resolvable.reject(new CanceledPromiseError('Disconnecting Dns Socket'), true);
     }
     this.close();
   }

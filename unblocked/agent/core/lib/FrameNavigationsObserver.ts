@@ -118,7 +118,7 @@ export default class FrameNavigationsObserver {
 
       const canceled = new CanceledPromiseError(cancelMessage);
       canceled.stack += `\n${'------LOCATION'.padEnd(50, '-')}\n${promise.stack}`;
-      promise.reject(canceled);
+      promise.reject(canceled, true);
     }
   }
 

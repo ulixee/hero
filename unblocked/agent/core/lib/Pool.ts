@@ -156,7 +156,7 @@ export default class Pool extends TypedEventEmitter<{
         browsers: this.browsersById.size,
       });
       for (const { promise } of this.#waitingForAvailability) {
-        promise.reject(new CanceledPromiseError('Agent pool shutting down'));
+        promise.reject(new CanceledPromiseError('Agent pool shutting down'), true);
       }
       this.#waitingForAvailability.length = 0;
       this.browserCreationQueue.stop(new CanceledPromiseError('Browser pool shutting down'));
