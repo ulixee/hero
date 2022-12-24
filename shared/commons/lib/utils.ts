@@ -96,6 +96,17 @@ export function escapeUnescapedChar(str: string, char: string): string {
   return str;
 }
 
+function isClass(func: any): boolean {
+  // Class constructor is also a function
+  if (!(func && func.constructor === Function) || func.prototype === undefined) return false;
+
+  // This is a class that extends other class
+  if (Function.prototype !== Object.getPrototypeOf(func)) return true;
+
+  // Usually a function will only have 'constructor' in the prototype
+  return Object.getOwnPropertyNames(func.prototype).length > 1;
+}
+
 export function pickRandom<T>(array: T[]): T {
   if (array.length === 1) return array[0];
   if (!array.length) throw new Error('Empty array provided to "pickRandom"');
@@ -117,7 +128,10 @@ export function getObjectFunctionProperties(object: any): Set<PropertyKey> {
       typeof descriptor.value === 'function' &&
       !descriptor.get &&
       !descriptor.set &&
-      descriptor.writable
+      descriptor.writable &&
+      !Object.prototype[key] &&
+      !Object[key] &&
+      !isClass(descriptor.value)
     ) {
       functionKeys.add(key);
     }
