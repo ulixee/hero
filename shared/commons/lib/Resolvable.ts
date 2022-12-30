@@ -1,7 +1,10 @@
 import IResolvablePromise from '../interfaces/IResolvablePromise';
 import TimeoutError from '../interfaces/TimeoutError';
 
+let idCounter = 0;
 export default class Resolvable<T = any> implements IResolvablePromise<T>, PromiseLike<T> {
+  // eslint-disable-next-line no-multi-assign
+  public id = (idCounter += 1);
   public isResolved = false;
   public resolved: T;
   public promise: Promise<T>;
