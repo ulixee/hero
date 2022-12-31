@@ -27,6 +27,21 @@ jobs:
           submodules: 'true'
           path: unblocked
 
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          repository: ulixee/shared
+          path: shared
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Install ulixee/shared
+        run: yarn build
+        working-directory: ./shared
+
       - name: Install unblocked
         run: yarn build
         working-directory: ./unblocked
