@@ -37,6 +37,7 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+          cache-dependency-path: unblocked/yarn.lock
 
       - name: Install ulixee/shared
         run: yarn build
