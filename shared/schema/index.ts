@@ -43,7 +43,7 @@ export type ExtractSchemaType<T> = T extends BaseSchema<any, boolean>
   ? T['$type']
   : T extends Record<string, BaseSchema<any, boolean>>
   ? IRecordSchemaType<T>
-  : any;
+  : unknown;
 
 export function boolean<TOptional extends boolean = false>(
   config: IBooleanSchemaConfig<TOptional> = {},
