@@ -26,6 +26,8 @@ function installNamedNodeItems(
   return props;
 }
 
+const uint32Overflow = 4294967296;
+
 function createNamedNodeMap(
   protoClass: PluginArray | MimeTypeArray,
   list: (Plugin | MimeType)[],
@@ -59,7 +61,9 @@ function createNamedNodeMap(
     'item',
     (target, thisArg, argArray) => {
       if (!argArray || !argArray.length) return ProxyOverride.callOriginal;
-      return thisArg[argArray[0]];
+      // handle uint32 overflow
+      const itemNumber = argArray[0] % uint32Overflow;
+      return thisArg[itemNumber];
     },
     true,
   );
@@ -114,7 +118,9 @@ const pluginList: Plugin[] = args.plugins.map(fakeP => {
     'item',
     (target, thisArg, argArray) => {
       if (!argArray || !argArray.length) return ProxyOverride.callOriginal;
-      const entry = pluginMimes[argArray[0]];
+      // handle uint32 overflow
+      const itemNumber = argArray[0] % uint32Overflow;
+      const entry = pluginMimes[itemNumber];
       if (entry) return createMime(entry);
     },
     true,
