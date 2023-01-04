@@ -19,6 +19,8 @@ export default class NetworkDb {
   constructor() {
     NetworkDb.createDir();
     this.db = new Database(NetworkDb.databasePath);
+    this.db.unsafeMode(false)
+    this.db.pragma('journal_mode = WAL');
     this.certificates = new CertificatesTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
 

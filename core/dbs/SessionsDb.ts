@@ -21,6 +21,8 @@ export default class SessionsDb {
     SessionsDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.db = new Database(SessionsDb.databasePath, { readonly, fileMustExist });
+    this.db.unsafeMode(false);
+    this.db.pragma('journal_mode = WAL');
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
   }

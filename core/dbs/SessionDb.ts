@@ -88,6 +88,8 @@ export default class SessionDb {
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
     this.db = new Database(`${SessionDb.databaseDir}/${sessionId}.db`, { readonly, fileMustExist });
+    this.db.unsafeMode(false);
+    this.db.pragma('journal_mode = WAL');
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
