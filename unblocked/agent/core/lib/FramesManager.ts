@@ -103,9 +103,17 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         const [framesResponse, , readyStateResult] = await Promise.all([
           this.devtoolsSession.send('Page.getFrameTree'),
           this.devtoolsSession.send('Page.enable'),
-          this.devtoolsSession.send('Runtime.evaluate', {
-            expression: 'document.readyState',
-          }),
+          this.devtoolsSession
+            .send('Runtime.evaluate', {
+              expression: 'document.readyState',
+            })
+            .catch(() => {
+              return {
+                result: {
+                  value: null,
+                },
+              };
+            }),
           this.devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
           this.devtoolsSession.send('Runtime.enable'),
           InjectedScripts.install(this, this.onDomPaintEvent),
