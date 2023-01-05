@@ -27,13 +27,13 @@
     "@ulixee/unblocked-agent": "2.0.0-alpha.17",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.17",
     "@ulixee/unblocked-specification": "2.0.0-alpha.17",
-    "better-sqlite3": "^7.5.1",
+    "better-sqlite3": "^8.0.1",
     "moment": "^2.29.4",
     "nanoid": "^3.1.30",
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.5.0",
+    "@types/better-sqlite3": "^7.6.3",
     "@types/json-socket": "^0.1.17",
     "@types/ua-parser-js": "^0.7.35",
     "@ulixee/chrome-app": "1.0.2",
