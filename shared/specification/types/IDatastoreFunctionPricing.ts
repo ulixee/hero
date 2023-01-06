@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { databoxVersionHashValidation } from '../common';
+import { datastoreVersionHashValidation } from '../common';
 
-export const DataboxFunctionPricing = z.object({
+export const DatastoreFunctionPricing = z.object({
   minimum: z.number().int().nonnegative().optional().describe('Minimum price for this step.'),
   perQuery: z.number().int().nonnegative().describe('Base price per query.'),
   addOns: z
@@ -17,11 +17,11 @@ export const DataboxFunctionPricing = z.object({
   remoteMeta: z
     .object({
       host: z.string().describe('The remote host'),
-      databoxVersionHash: databoxVersionHashValidation,
+      datastoreVersionHash: datastoreVersionHashValidation,
       functionName: z.string().describe('The remote function name'),
     })
     .optional(),
 });
-type IDataboxFunctionPricing = z.infer<typeof DataboxFunctionPricing>;
+type IDatastoreFunctionPricing = z.infer<typeof DatastoreFunctionPricing>;
 
-export default IDataboxFunctionPricing;
+export default IDatastoreFunctionPricing;

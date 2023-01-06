@@ -12,6 +12,6 @@
     "source-map-js": "^1.0.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.5.0"
+    "@types/better-sqlite3": "^7.6.3"
   }
 }

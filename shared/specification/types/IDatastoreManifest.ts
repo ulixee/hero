@@ -1,15 +1,15 @@
 import { z } from 'zod';
-import { addressValidation, identityValidation , databoxVersionHashValidation } from '../common';
-import { DataboxFunctionPricing } from './IDataboxFunctionPricing';
+import { addressValidation, identityValidation , datastoreVersionHashValidation } from '../common';
+import { DatastoreFunctionPricing } from './IDatastoreFunctionPricing';
 
 const minDate = new Date('2022-01-01').getTime();
 
-export const DataboxManifestSchema = z.object({
-  versionHash: databoxVersionHashValidation,
+export const DatastoreManifestSchema = z.object({
+  versionHash: datastoreVersionHashValidation,
   versionTimestamp: z.number().int().gt(minDate),
   linkedVersions: z
     .object({
-      versionHash: databoxVersionHashValidation,
+      versionHash: datastoreVersionHashValidation,
       versionTimestamp: z.number().int().gt(minDate),
     })
     .array()
@@ -19,11 +19,11 @@ export const DataboxManifestSchema = z.object({
     .length(62)
     .regex(
       /^scr1[ac-hj-np-z02-9]{58}/,
-      'This is not a Databox scripthash (Bech32 encoded hash starting with "scr").',
+      'This is not a Datastore scripthash (Bech32 encoded hash starting with "scr").',
     ),
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
-  coreVersion: z.string().describe('Version of the Databox Core Runtime'),
-  schemaInterface: z.string().optional().describe('The raw typescript schema for this Databox'),
+  coreVersion: z.string().describe('Version of the Datastore Core Runtime'),
+  schemaInterface: z.string().optional().describe('The raw typescript schema for this Datastore'),
   functionsByName: z.record(
     z
       .string()
@@ -34,24 +34,24 @@ export const DataboxManifestSchema = z.object({
         .record(z.string())
         .optional()
         .describe('plugin dependencies required for execution'),
-      prices: DataboxFunctionPricing.array()
+      prices: DatastoreFunctionPricing.array()
         .min(1)
         .optional()
         .describe(
           'Price details for a function call. This array will have an entry for each function called in this process. ' +
-            'The first entry is the cost of the function packaged in this Databox.',
+            'The first entry is the cost of the function packaged in this Datastore.',
         ),
     }),
   ),
   paymentAddress: addressValidation.optional(),
   giftCardIssuerIdentity: identityValidation
     .optional()
-    .describe('A gift card issuer identity for this Databox.'),
+    .describe('A gift card issuer identity for this Datastore.'),
 });
 
 export type IVersionHistoryEntry = z.infer<
-  typeof DataboxManifestSchema.shape.linkedVersions.element
+  typeof DatastoreManifestSchema.shape.linkedVersions.element
 >;
-type IDataboxManifest = z.infer<typeof DataboxManifestSchema>;
+type IDatastoreManifest = z.infer<typeof DatastoreManifestSchema>;
 
-export default IDataboxManifest;
+export default IDatastoreManifest;

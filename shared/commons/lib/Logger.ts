@@ -326,7 +326,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /agent\/.*/,
       /plugins\/.*/,
       /net\/.*/,
-      /databox[/-].*/,
+      /datastore[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,
@@ -338,7 +338,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /agent\/.*/,
       /plugins\/.*/,
       /net\/.*/,
-      /databox[/-].*/,
+      /datastore[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,
@@ -350,7 +350,7 @@ registerNamespaceMapping((ns, active, skip) => {
     active.push(/DevtoolsSessionLogger/);
   } else if (ns.includes('hero')) {
     active.push(/^hero[/-].*/, /net\/.*/);
-  } else if (ns.includes('databox')) {
-    active.push(/^databox[/-].*/, /net\/.*/);
+  } else if (ns.includes('datastore')) {
+    active.push(/^datastore[/-].*/, /net\/.*/);
   }
 });

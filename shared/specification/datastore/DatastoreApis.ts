@@ -1,20 +1,20 @@
 import { z } from 'zod';
 import { IZodSchemaToApiTypes } from '../utils/IZodApi';
 import {
-  databoxVersionHashValidation,
+  datastoreVersionHashValidation,
   identityValidation,
   micronoteTokenValidation,
   signatureValidation,
 } from '../common';
 import { PaymentSchema } from '../types/IPayment';
-import { DataboxFunctionPricing } from '../types/IDataboxFunctionPricing';
+import { DatastoreFunctionPricing } from '../types/IDatastoreFunctionPricing';
 
 const positiveInt = z.number().int().positive();
 
-export const DataboxApiSchemas = {
-  'Databox.upload': {
+export const DatastoreApiSchemas = {
+  'Datastore.upload': {
     args: z.object({
-      compressedDatabox: z.instanceof(Buffer).describe('Bytes of a compressed .dbx file'),
+      compressedDatastore: z.instanceof(Buffer).describe('Bytes of a compressed .dbx file'),
       allowNewLinkedVersionHistory: z
         .boolean()
         .describe(
@@ -31,13 +31,13 @@ export const DataboxApiSchemas = {
       success: z.boolean(),
     }),
   },
-  'Databox.meta': {
+  'Datastore.meta': {
     args: z.object({
-      versionHash: databoxVersionHashValidation.describe('The hash of a unique databox version'),
+      versionHash: datastoreVersionHashValidation.describe('The hash of a unique datastore version'),
     }),
     result: z.object({
-      latestVersionHash: databoxVersionHashValidation.describe(
-        'The latest version hash of this databox',
+      latestVersionHash: datastoreVersionHashValidation.describe(
+        'The latest version hash of this datastore',
       ),
       functionsByName: z.record(
         z.string().describe('The name of a function'),
@@ -61,7 +61,7 @@ export const DataboxApiSchemas = {
           minimumPrice: micronoteTokenValidation.describe(
             'Minimum microgons that must be allocated for a query to be accepted.',
           ),
-          priceBreakdown: DataboxFunctionPricing.array(),
+          priceBreakdown: DatastoreFunctionPricing.array(),
         }),
       ),
       computePricePerQuery: micronoteTokenValidation.describe(
@@ -70,18 +70,18 @@ export const DataboxApiSchemas = {
       schemaInterface: z
         .string()
         .optional()
-        .describe('A Typescript interface describing Function inputs and outputs this Databox.'),
+        .describe('A Typescript interface describing Function inputs and outputs this Datastore.'),
       giftCardIssuerIdentities: identityValidation
         .array()
-        .describe('The identities this databox allows gift card payments for (if any).'),
+        .describe('The identities this datastore allows gift card payments for (if any).'),
     }),
   },
-  'Databox.stream': {
+  'Datastore.stream': {
     args: z.object({
       streamId: z.string().describe('The streamId to push results for this query.'),
-      functionName: z.string().describe('The DataboxFunction name'),
+      functionName: z.string().describe('The DatastoreFunction name'),
       input: z.any().optional().describe('Optional input parameters for this function call'),
-      versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
+      versionHash: datastoreVersionHashValidation.describe('The hash of this unique datastore version'),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -101,7 +101,7 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
     result: z.object({
-      latestVersionHash: databoxVersionHashValidation,
+      latestVersionHash: datastoreVersionHashValidation,
       metadata: z
         .object({
           microgons: micronoteTokenValidation,
@@ -111,11 +111,11 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
   },
-  'Databox.query': {
+  'Datastore.query': {
     args: z.object({
       sql: z.string().describe('The SQL command(s) you want to run'),
       boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
-      versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
+      versionHash: datastoreVersionHashValidation.describe('The hash of this unique datastore version'),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -135,7 +135,7 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
     result: z.object({
-      latestVersionHash: databoxVersionHashValidation,
+      latestVersionHash: datastoreVersionHashValidation,
       outputs: z.any().array(),
       metadata: z
         .object({
@@ -146,7 +146,7 @@ export const DataboxApiSchemas = {
         .optional(),
     }),
   },
-  'Databox.queryLocalScript': {
+  'Datastore.queryLocalScript': {
     args: z.object({
       sql: z.string().describe('The SQL command(s) you want to run'),
       boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
@@ -155,63 +155,63 @@ export const DataboxApiSchemas = {
         .describe('A path to a local script to run. NOTE: API only enabled in development.'),
     }),
     result: z.object({
-      latestVersionHash: databoxVersionHashValidation,
+      latestVersionHash: datastoreVersionHashValidation,
       outputs: z.any().array(),
       error: z.any().optional(),
     }),
   },
-  'Databox.createInMemoryTable': {
+  'Datastore.createInMemoryTable': {
     args: z.object({
       name: z.string(),
       schema: z.any({}),
       seedlings: z.any({}).optional(),
-      databoxInstanceId: z.string(),
+      datastoreInstanceId: z.string(),
     }),
     result: z.object({}),
   },
-  'Databox.createInMemoryFunction': {
+  'Datastore.createInMemoryFunction': {
     args: z.object({
       name: z.string(),
       schema: z.any({}),
-      databoxInstanceId: z.string(),
+      datastoreInstanceId: z.string(),
     }),
     result: z.object({}),
   },
-  'Databox.queryInternalTable': {
+  'Datastore.queryInternalTable': {
     args: z.object({
       name: z.string(),
       sql: z.string(),
       boundValues: z.any({}).optional(),
-      databoxVersionHash: z.string().optional(),
-      databoxInstanceId: z.string().optional(),
+      datastoreVersionHash: z.string().optional(),
+      datastoreInstanceId: z.string().optional(),
     }),
     result: z.any({}),
   },
-  'Databox.queryInternalFunctionResult': {
+  'Datastore.queryInternalFunctionResult': {
     args: z.object({
       name: z.string(),
       sql: z.string(),
       boundValues: z.any({}).optional(),
       input: z.any({}).optional(),
       outputs: z.array(z.any({})),
-      databoxVersionHash: z.string().optional(),
-      databoxInstanceId: z.string().optional(),
+      datastoreVersionHash: z.string().optional(),
+      datastoreInstanceId: z.string().optional(),
     }),
     result: z.any({}),
   },
-  'Databox.queryInternal': {
+  'Datastore.queryInternal': {
     args: z.object({
       sql: z.string(),
       boundValues: z.any({}).optional(),
       inputByFunctionName: z.record(z.any()),
       outputByFunctionName: z.record(z.array(z.any({}))),
-      databoxVersionHash: z.string().optional(),
-      databoxInstanceId: z.string().optional(),
+      datastoreVersionHash: z.string().optional(),
+      datastoreInstanceId: z.string().optional(),
     }),
     result: z.any({}),
   },
 };
 
-type IDataboxApiTypes = IZodSchemaToApiTypes<typeof DataboxApiSchemas>;
+type IDatastoreApiTypes = IZodSchemaToApiTypes<typeof DatastoreApiSchemas>;
 
-export default IDataboxApiTypes;
+export default IDatastoreApiTypes;

@@ -50,10 +50,10 @@ export const centagonTokenValidation = z.bigint().refine(x => x > 0n);
 
 export const micronoteTokenValidation = z.number().int().positive();
 
-export const databoxVersionHashValidation = z
+export const datastoreVersionHashValidation = z
   .string()
   .length(62)
   .regex(
     /^dbx1[ac-hj-np-z02-9]{58}/,
-    'This is not a Databox versionHash (Bech32 encoded hash starting with "dbx1").',
+    'This is not a Datastore versionHash (Bech32 encoded hash starting with "dbx1").',
   );
