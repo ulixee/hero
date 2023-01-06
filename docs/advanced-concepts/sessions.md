@@ -10,6 +10,11 @@ By default, session databases are located in `os.tmpdir()\.ulixee`. Tmpdir refer
 
 You can control the location sessions are stored using the [`dataDir`](../overview/configuration.md#data-dir) configuration when starting a Core.
 
+To output your tmpdir, you can run:
+```bash
+node -e "console.log(require('os').tmpdir())"
+```
+
 ### Managing Sessions
 
 Session databases can grow rather large, since they store all DOM changes, Devtools messages and Http resources for all loaded tabs and frames in a "scraping session".

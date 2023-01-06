@@ -127,7 +127,7 @@ export default class CoreSession
     this.tabsById.delete(tab.tabId);
   }
 
-  // START OF PRIVATE APIS FOR DATABOX /////////////////////////////////////////////////////////////
+  // START OF PRIVATE APIS FOR DATASTORE /////////////////////////////////////////////////////////////
 
   public recordOutput(changes: IOutputChangeToRecord[]): void {
     for (const change of changes as any[]) {
@@ -161,7 +161,7 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getDetachedResources', sessionId, name);
   }
 
-  // END OF PRIVATE APIS FOR DATABOX ///////////////////////////////////////////////////////////////
+  // END OF PRIVATE APIS FOR DATASTORE ///////////////////////////////////////////////////////////////
 
   public async close(force = false): Promise<void> {
     await this.closingPromise;

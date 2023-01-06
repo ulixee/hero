@@ -57,9 +57,9 @@ To avoid installing the whole Chrome infrastructure on your client side, you can
 
 ## Handlers
 
-Hero doesn't have a Handler or Server directly in the project. [@ulixee/miner][miner] is the new approach for setting up a remote server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Databoxes][databox], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
+Hero doesn't have a Handler or Server directly in the project. [@ulixee/miner][miner] is the new approach for setting up a remote server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Datastores][datastore], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
 
-Databoxes focus on creating a remotely callable "function" that wraps a Hero script in a composable "unit". You can vary inputs and collect outputs, or retry a script from a new IP address without having to think much about how to do that yourself.
+Datastores focus on creating a remotely callable "function" that wraps a Hero script in a composable "unit". You can vary inputs and collect outputs, or retry a script from a new IP address without having to think much about how to do that yourself.
 
 If you want to keep a model where you are using "driving" a script by queuing up a local "Client" that executes remotely (ie, like a SecretAgent Handler). To achieve client-size load-balancing, we recommend migrating to a tool like [`p-queue`](https://github.com/sindresorhus/p-queue). We've included an example in the Hero repo ([here](https://github.com/ulixee/hero/blob/27e1966c636f47519ed5d1ccc22273c1215855c1/examples/ulixee.org.ts)).
 

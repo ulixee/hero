@@ -2,7 +2,7 @@ import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 
-// This interface exists for DataboxInternal to import
+// This interface exists for DatastoreInternal to import
 
 export default interface ICoreSession {
   sessionId: string;
