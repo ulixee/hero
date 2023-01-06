@@ -13,9 +13,13 @@ import { Agent, Page, Pool } from '../index';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
+const resolvePendingTriggerSpy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingTrigger');
 
-async function createAgent(): Promise<{ agent: Agent; page: Page }> {
-  const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
+async function createAgent(enableMitm): Promise<{ agent: Agent; page: Page }> {
+  const agent = pool.createAgent({
+    logger: TestLogger.forTest(module),
+    options: { disableMitm: !enableMitm },
+  });
   const page = await agent.newPage();
   Helpers.needsClosing.push(agent);
   return { agent, page };
@@ -28,16 +32,22 @@ beforeAll(async () => {
   pool = new Pool({ defaultBrowserEngine: BrowserUtils.defaultBrowserEngine });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
-  koaServer = await Helpers.runKoaServer();
 });
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-describe('basic Navigation tests', () => {
+describe.each([
+  ['with Mitm', true],
+  ['withoutMitm', false],
+])('basic Navigation tests %s', (key, enableMitm) => {
+  beforeAll(async () => {
+    koaServer = await Helpers.runKoaServer();
+  });
+
   it('handles unformatted urls', async () => {
     const unformattedUrl = koaServer.baseUrl;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     await page.goto(unformattedUrl);
     const formattedUrl = page.mainFrame.url;
 
@@ -48,12 +58,12 @@ describe('basic Navigation tests', () => {
     koaServer.get('/hash', ctx => {
       ctx.body = 'done';
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     await expect(page.goto(`${koaServer.baseUrl}/hash#hash`)).resolves.toBeTruthy();
   });
 
   it('works without explicit waitForLocation', async () => {
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     await page.goto(koaServer.baseUrl);
     await page.waitForLoad(LocationStatus.PaintingStable);
 
@@ -72,7 +82,7 @@ describe('basic Navigation tests', () => {
       });
       ctx.body = 'done';
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     await expect(page.goto(startingUrl, { timeoutMs: 100 })).rejects.toThrowError('Timeout');
     timeoutResolve();
   });
@@ -92,7 +102,7 @@ describe('basic Navigation tests', () => {
       ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
       ctx.body = await getLogo();
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     for (let i = 0; i < 10; i += 1) {
       await page.goto(startingUrl);
@@ -127,7 +137,7 @@ describe('basic Navigation tests', () => {
   </script>
   </body></html>`;
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     for (let i = 0; i < 15; i += 1) {
       await page.goto(startingUrl);
@@ -139,7 +149,7 @@ describe('basic Navigation tests', () => {
 
   it('handles page reloading itself', async () => {
     const startingUrl = `${koaServer.baseUrl}/reload`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     let hasReloaded = false;
     koaServer.get('/reload', ctx => {
@@ -162,7 +172,7 @@ describe('basic Navigation tests', () => {
 
   it('can reload a page', async () => {
     const startingUrl = `${koaServer.baseUrl}/pagex`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     let counter = 0;
     koaServer.get('/pagex', ctx => {
@@ -192,7 +202,7 @@ describe('basic Navigation tests', () => {
   });
 
   it('can go back and forward', async () => {
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/backAndForth', ctx => {
       ctx.body = `<html><body><h1>Page 2</h1></body></html>`;
@@ -230,7 +240,7 @@ describe('basic Navigation tests', () => {
   it('handles page that navigates to another url', async () => {
     const startingUrl = `${koaServer.baseUrl}/navigate`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/navigate', ctx => {
       ctx.body = `<body><script>window.location = '${navigateToUrl}'</script></body>`;
@@ -245,7 +255,7 @@ describe('basic Navigation tests', () => {
   it('handles submitting a form', async () => {
     const startingUrl = `${koaServer.baseUrl}/form`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/form', ctx => {
       ctx.body = `<body><form action="${navigateToUrl}" method="post"><input type="submit" id="button"></form></body>`;
@@ -271,7 +281,7 @@ describe('basic Navigation tests', () => {
   it('handles navigation via link clicks', async () => {
     const startingUrl = `${koaServer.baseUrl}/click`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/click', ctx => {
       ctx.body = `<body><a href='${navigateToUrl}'>Clicker</a></body>`;
@@ -299,7 +309,7 @@ describe('basic Navigation tests', () => {
   it('handles an in-page navigation change', async () => {
     const startingUrl = `${koaServer.baseUrl}/inpage`;
     const navigateToUrl = `${koaServer.baseUrl}/inpage#location2`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/inpage', ctx => {
       ctx.body = `<body>
@@ -337,7 +347,7 @@ describe('basic Navigation tests', () => {
   it('handles an in-page navigation back', async () => {
     const startingUrl = `${koaServer.baseUrl}/inpage-back`;
     const navigateToUrl = `${koaServer.baseUrl}/inpage-back#location2`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/inpage-back', ctx => {
       ctx.body = `<body>
@@ -375,7 +385,7 @@ describe('basic Navigation tests', () => {
   it('handles an in-page navigation change that happens before page load', async () => {
     const startingUrl = `${koaServer.baseUrl}/instant-hash`;
     const navigateToUrl = `${koaServer.baseUrl}/instant-hash#id=12343`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/instant-hash', ctx => {
       ctx.body = `<body>
@@ -411,7 +421,7 @@ setTimeout(function() {
 
   it('handles in-page history change that happens before page load', async () => {
     const navigateToUrl = `${koaServer.baseUrl}/inpagenav/1`;
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/inpagenav', ctx => {
       ctx.body = `<body><script>
@@ -447,7 +457,7 @@ history.pushState({}, '', '/inpagenav/1');
       userAgentString2 = ctx.get('user-agent');
       ctx.body = `<body><h1 id="newPageHeader">You are here</h1></body>`;
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     await page.goto(`${koaServer.baseUrl}/newPageTest`);
     await page.waitForLoad('PaintingStable');
     await page.interact([
@@ -471,8 +481,7 @@ history.pushState({}, '', '/inpagenav/1');
   });
 
   it('should not trigger location change for first navigation of new pages', async () => {
-    const { page } = await createAgent();
-
+    const { page } = await createAgent(enableMitm);
     koaServer.get('/newPage', ctx => {
       ctx.body = `<body><h1>Loaded</h1></body>`;
     });
@@ -488,23 +497,23 @@ history.pushState({}, '', '/inpagenav/1');
       },
     ]);
 
-    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingTrigger');
+    resolvePendingTriggerSpy.mockClear();
 
     // clear data before this run
     const popupPage = await waitForPopup(page);
     await popupPage.mainFrame.waitForLoad({ loadStatus: LocationStatus.PaintingStable });
 
     // can sometimes call for paint event
-    if (spy.mock.calls.length === 1) {
-      expect(spy.mock.calls[0][0]).not.toBe('change');
+    if (resolvePendingTriggerSpy.mock.calls.length === 1) {
+      expect(resolvePendingTriggerSpy.mock.calls[0][0]).not.toBe('change');
     } else {
       // should not have triggered a navigation change
-      expect(spy).toHaveBeenCalledTimes(0);
+      expect(resolvePendingTriggerSpy).toHaveBeenCalledTimes(0);
     }
   });
 
   it('handles a new page that redirects', async () => {
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/popup-redirect', async ctx => {
       await new Promise(resolve => setTimeout(resolve, 25));
@@ -586,14 +595,17 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     koaServer.get('/after-redirect', ctx => {
       ctx.body = '<html lang="en"><body><h1>Hi</h1></body></html>';
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     const resource = await page.goto(startingUrl);
     expect(resource.request.url).toBe(`${koaServer.baseUrl}/after-redirect`);
     expect(resource.isRedirect).toBe(false);
   });
 });
 
-describe('PaintingStable tests', () => {
+describe.each([
+  ['with Mitm', true],
+  ['withoutMitm', false],
+])('PaintingStable tests %s', (key, enableMitm) => {
   it('should trigger painting stable after a redirect', async () => {
     const startingUrl = `${koaServer.baseUrl}/stable-redirect`;
     koaServer.get('/stable-redirect', async ctx => {
@@ -603,7 +615,7 @@ describe('PaintingStable tests', () => {
     koaServer.get('/post-stable-redirect', ctx => {
       ctx.body = '<html lang="en"><body><h1>So stable</h1></body></html>';
     });
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
     const resource = await page.goto(startingUrl);
     await expect(page.waitForLoad(LocationStatus.PaintingStable)).resolves.toBeTruthy();
     expect(resource.request.url).toBe(`${koaServer.baseUrl}/post-stable-redirect`);
@@ -611,7 +623,7 @@ describe('PaintingStable tests', () => {
   });
 
   it('should trigger a painting stable on a page that never triggers load', async () => {
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     let completeLongScript: () => void;
     koaServer.get('/long-script.js', async ctx => {
@@ -646,7 +658,7 @@ describe('PaintingStable tests', () => {
   });
 
   it('should trigger painting stable once a single page app is loaded', async () => {
-    const { page } = await createAgent();
+    const { page } = await createAgent(enableMitm);
 
     koaServer.get('/spa/:filename', async ctx => {
       const filename = ctx.params.filename;

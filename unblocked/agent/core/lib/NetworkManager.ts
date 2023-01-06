@@ -135,15 +135,20 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     disableSessionLogging: boolean,
   ): Promise<void> {
     this.mockNetworkRequests = mockNetworkRequests;
+
     const promises: Promise<any>[] = [];
     if (disableSessionLogging) {
       promises.push(this.devtools.send('Network.disable'));
     }
-    promises.push(
-      this.devtools.send('Fetch.enable', {
-        handleAuthRequests: !!this.proxyConnectionOptions?.password,
-      }),
-    );
+    if (mockNetworkRequests) {
+      promises.push(
+        this.devtools.send('Fetch.enable', {
+          handleAuthRequests: !!this.proxyConnectionOptions?.password,
+        }),
+      );
+    } else {
+      promises.push(this.devtools.send('Fetch.disable'));
+    }
     await Promise.all(promises);
   }
 

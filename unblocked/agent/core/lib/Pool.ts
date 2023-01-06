@@ -80,7 +80,7 @@ export default class Pool extends TypedEventEmitter<{
 
   public createAgent(options?: IAgentCreateOptions): Agent {
     options ??= {};
-    options.browserEngine ??= this.options.defaultBrowserEngine;
+    options.browserEngine ??= { ...this.options.defaultBrowserEngine };
     options.plugins ??= [...this.plugins];
     const agent = new Agent(options, this);
     this.agentsById.set(agent.id, agent);
@@ -122,9 +122,9 @@ export default class Pool extends TypedEventEmitter<{
     launchArgs?: IBrowserLaunchArgs,
   ): Promise<Browser> {
     return await this.browserCreationQueue.run(async () => {
-      if (!this.sharedMitmProxy && !launchArgs?.disableMitm) await this.start();
-
       launchArgs ??= {};
+      if (!this.sharedMitmProxy && !launchArgs.disableMitm) await this.start();
+
       if (!launchArgs.disableMitm) {
         launchArgs.proxyPort ??= this.sharedMitmProxy?.port;
       }
