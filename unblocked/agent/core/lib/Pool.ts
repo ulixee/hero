@@ -17,6 +17,8 @@ import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IU
 import Browser from './Browser';
 import Agent, { IAgentCreateOptions } from './Agent';
 import env from '../env';
+import Plugins from './Plugins';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 
 const { log } = Log(module);
 
@@ -80,7 +82,12 @@ export default class Pool extends TypedEventEmitter<{
 
   public createAgent(options?: IAgentCreateOptions): Agent {
     options ??= {};
-    options.browserEngine ??= { ...this.options.defaultBrowserEngine };
+    if (this.options.defaultBrowserEngine) {
+      options.browserEngine ??= {
+        ...this.options.defaultBrowserEngine,
+        launchArguments: [...this.options.defaultBrowserEngine.launchArguments],
+      };
+    }
     options.plugins ??= [...this.plugins];
     const agent = new Agent(options, this);
     this.agentsById.set(agent.id, agent);
@@ -118,23 +125,26 @@ export default class Pool extends TypedEventEmitter<{
 
   public async getBrowser(
     engine: IBrowserEngine,
-    hooks: IHooksProvider,
+    hooks: IHooksProvider & { profile?: IEmulationProfile },
     launchArgs?: IBrowserLaunchArgs,
   ): Promise<Browser> {
     return await this.browserCreationQueue.run(async () => {
       launchArgs ??= {};
-      if (!this.sharedMitmProxy && !launchArgs.disableMitm) await this.start();
+      // You can't proxy browser contexts if the top level proxy isn't enabled
+      const needsBrowserLevelProxy =
+        launchArgs.disableMitm !== true || !!hooks.profile?.upstreamProxyUrl;
+      if (!this.sharedMitmProxy && needsBrowserLevelProxy) await this.start();
 
-      if (!launchArgs.disableMitm) {
+      if (needsBrowserLevelProxy) {
         launchArgs.proxyPort ??= this.sharedMitmProxy?.port;
       }
       const browser = new Browser(engine, hooks, launchArgs);
-      // ensure enough listeners is possible
-      browser.setMaxListeners(this.maxConcurrentAgents * 5);
 
       const existing = this.browserWithEngine(browser.engine);
       if (existing) return existing;
 
+      // ensure enough listeners is possible
+      browser.setMaxListeners(this.maxConcurrentAgents * 5);
       this.browsersById.set(browser.id, browser);
 
       this.events.on(browser, 'new-context', this.watchForContextPagesClosed.bind(this));

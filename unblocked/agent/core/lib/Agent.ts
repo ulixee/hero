@@ -105,12 +105,12 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
     this.isOpen = new Resolvable();
     try {
       if (!this.options.browserEngine)
-        throw new Error('A browserEngine is required create a new Agent instance.');
+        throw new Error('A browserEngine is required to create a new Agent instance.');
 
       const pool = this.pool;
       await pool.waitForAvailability(this);
       const browser = await pool.getBrowser(
-        this.options.browserEngine as IBrowserEngine,
+        this.options.browserEngine,
         this.plugins,
         this.plugins.profile.options,
       );

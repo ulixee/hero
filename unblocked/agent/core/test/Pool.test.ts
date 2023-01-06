@@ -4,15 +4,11 @@ import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testi
 import { ITestHttpServer } from '@ulixee/unblocked-agent-testing/helpers';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { Pool } from '../index';
-import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
 import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 
 let httpServer: ITestHttpServer<http.Server>;
 
-// @ts-expect-error;
-const certificatesOriginalOnMessage = CertificateGenerator.prototype.onMessage;
-const certificatesOnMessageSpy = jest.spyOn<any, any>(CertificateGenerator.prototype, 'onMessage');
 beforeAll(async () => {
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
 });
@@ -158,7 +154,7 @@ describe('Pool tests', () => {
     await pool.close();
   });
 
-  test('should be able to use an upstream proxy with mitm disable', async () => {
+  test('should be able to use an upstream proxy with mitm disabled', async () => {
     const proxyServer = await Helpers.runHttpServer();
     const httpsServer = await Helpers.runHttpsServer((req, res) => res.end('good'));
     const upstreamProxyUrl = proxyServer.url.replace(/\/$/, '');
@@ -171,6 +167,7 @@ describe('Pool tests', () => {
 
     const pool = new Pool(BrowserUtils.newPoolOptions);
     Helpers.needsClosing.push(pool);
+    await pool.start();
 
     @UnblockedPluginClassDecorator
     class TestPlugin {
@@ -187,7 +184,7 @@ describe('Pool tests', () => {
     const page = await agent.newPage();
     expect(agent.browserContext.proxy.address).toBe(proxyServer.baseUrl);
 
-    await page.goto(httpsServer.baseUrl).catch(() => null);
+    await page.goto(httpsServer.baseUrl).catch(console.error);
 
     expect(upstreamProxyConnected).toBe(true);
   });

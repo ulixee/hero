@@ -23,7 +23,14 @@ export function configureBrowserLaunchArgs(
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
     '--disable-site-isolation-trials',
-    '--disable-features=PaintHolding,DestroyProfileOnBrowserClose,IsolateOrigins,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+    /**
+     * --disable-features
+     *  site-per-process = Disables OOPIF
+     *  OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+     *  AvoidUnnecessaryBeforeUnloadCheckSync = allow about:blank nav
+     *  MediaRouter,DialMediaRouteProvider (don't lookup local area casting options)
+     */
+    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,AvoidUnnecessaryBeforeUnloadCheckSync,IsolateOrigins,site-per-process,OutOfBlinkCors,GlobalMediaControls,MediaRouter,DialMediaRouteProvider',
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
