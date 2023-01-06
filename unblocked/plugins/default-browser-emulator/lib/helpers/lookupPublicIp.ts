@@ -5,11 +5,15 @@ import * as url from 'url';
 import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
 import IHttpSocketWrapper from '@ulixee/unblocked-specification/agent/net/IHttpSocketWrapper';
 
+let cachedMachineIp: string;
+
 export default async function lookupPublicIp(
   ipLookupServiceUrl: string = IpLookupServices.ipify,
   agent?: IHttpSocketAgent,
   proxyUrl?: string,
 ): Promise<string> {
+  if (cachedMachineIp && !proxyUrl && !agent) return cachedMachineIp;
+
   if (!ipLookupServiceUrl.startsWith('http')) ipLookupServiceUrl = `https://${ipLookupServiceUrl}`;
   if (proxyUrl && proxyUrl.startsWith('http')) {
     // require https for lookup services over http proxies
@@ -17,7 +21,6 @@ export default async function lookupPublicIp(
   }
   const lookupService = parse(ipLookupServiceUrl);
   const port = lookupService.port ?? lookupService.protocol === 'https:' ? 443 : 80;
-
 
   const requestOptions: http.RequestOptions = {
     method: 'GET',
@@ -38,7 +41,9 @@ export default async function lookupPublicIp(
   }
 
   try {
-    return await httpGet(ipLookupServiceUrl, requestOptions);
+    const ip = await httpGet(ipLookupServiceUrl, requestOptions);
+    if (!proxyUrl && !agent) cachedMachineIp = ip;
+    return ip;
   } finally {
     if (socketWrapper) socketWrapper.close();
   }
