@@ -169,6 +169,8 @@ export function translateToPrintable(
       if (typeof value === 'object') {
         const { message, ...rest } = value as any;
         result.error = new Error(message);
+        if ('stack' in value) result.error.stack = (value as any).stack;
+        if ('name' in value) result.error.name = (value as any).name;
         Object.assign(result.error, rest);
       } else if (typeof value === 'string') {
         result.error = new Error(value as string);

@@ -76,6 +76,41 @@ export const DataboxApiSchemas = {
         .describe('The identities this databox allows gift card payments for (if any).'),
     }),
   },
+  'Databox.stream': {
+    args: z.object({
+      streamId: z.string().describe('The streamId to push results for this query.'),
+      functionName: z.string().describe('The DataboxFunction name'),
+      input: z.any().optional().describe('Optional input parameters for this function call'),
+      versionHash: databoxVersionHashValidation.describe('The hash of this unique databox version'),
+      payment: PaymentSchema.optional().describe(
+        'Payment for this request created with an approved Ulixee Sidechain.',
+      ),
+      authentication: z
+        .object({
+          identity: identityValidation,
+          signature: signatureValidation,
+          nonce: z.string().length(10).describe('A random nonce adding signature noise.'),
+        })
+        .optional(),
+      pricingPreferences: z
+        .object({
+          maxComputePricePerQuery: micronoteTokenValidation.describe(
+            'Maximum price to pay for compute costs per query (NOTE: This only applies to Servers implementing surge pricing).',
+          ),
+        })
+        .optional(),
+    }),
+    result: z.object({
+      latestVersionHash: databoxVersionHashValidation,
+      metadata: z
+        .object({
+          microgons: micronoteTokenValidation,
+          bytes: z.number().int().nonnegative(),
+          milliseconds: z.number().int().nonnegative(),
+        })
+        .optional(),
+    }),
+  },
   'Databox.query': {
     args: z.object({
       sql: z.string().describe('The SQL command(s) you want to run'),
@@ -101,8 +136,7 @@ export const DataboxApiSchemas = {
     }),
     result: z.object({
       latestVersionHash: databoxVersionHashValidation,
-      output: z.any().optional(),
-      error: z.any().optional(),
+      outputs: z.any().array(),
       metadata: z
         .object({
           microgons: micronoteTokenValidation,
@@ -122,7 +156,7 @@ export const DataboxApiSchemas = {
     }),
     result: z.object({
       latestVersionHash: databoxVersionHashValidation,
-      output: z.any().optional(),
+      outputs: z.any().array(),
       error: z.any().optional(),
     }),
   },
@@ -153,13 +187,13 @@ export const DataboxApiSchemas = {
     }),
     result: z.any({}),
   },
-  'Databox.queryInternalFunction': {
+  'Databox.queryInternalFunctionResult': {
     args: z.object({
       name: z.string(),
       sql: z.string(),
       boundValues: z.any({}).optional(),
       input: z.any({}).optional(),
-      output: z.array(z.any({})),
+      outputs: z.array(z.any({})),
       databoxVersionHash: z.string().optional(),
       databoxInstanceId: z.string().optional(),
     }),
