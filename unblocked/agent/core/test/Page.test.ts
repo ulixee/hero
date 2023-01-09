@@ -7,6 +7,7 @@ import { Browser } from '../index';
 import { setContent } from './_pageTestUtils';
 import Page from '../lib/Page';
 import BrowserContext from '../lib/BrowserContext';
+import * as Fs from 'fs';
 
 describe('Pages', () => {
   let server: TestServer;
@@ -217,9 +218,8 @@ describe('Pages', () => {
         type: 'jpg',
         height: viewport.innerHeight,
       });
-      expect(screenshot.toString('base64')).toContain(
-        'AlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGK',
-      );
+      expect(sizeOf(screenshot).height).toBe(viewport.innerHeight);
+      expect(sizeOf(screenshot).width).toBe(viewport.innerWidth);
     });
 
     it('should be able to take a clipped rect screenshot', async () => {

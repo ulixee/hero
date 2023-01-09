@@ -21,7 +21,7 @@ jobs:
         include:
           - node-version: 16.x
             os: ubuntu-latest
-            browser: chrome-106-0
+            browser: chrome-107-0
           - node-version: 16.x
             os: ubuntu-latest
             browser: chrome-105-0
