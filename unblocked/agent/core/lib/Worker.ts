@@ -132,7 +132,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       .then(this.resumeAfterEmulation.bind(this))
       .catch(error => {
         if (error instanceof CanceledPromiseError) return;
-        this.logger.error('Emulator.onNewWorkerError', {
+        this.logger.warn('Emulator.onNewWorkerError', {
           error,
         });
         throw error;
