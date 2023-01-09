@@ -61,6 +61,8 @@ export interface IEmulatorOptions {
   userAgentSelector?: string;
 }
 
+let hasWarnedAboutProxyIp = false;
+
 @UnblockedPluginClassDecorator
 export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUnblockedPlugin<T> {
   public readonly logger: IBoundLog;
@@ -102,9 +104,13 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     );
     emulationProfile.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    if (emulationProfile.upstreamProxyUrl) {
-      emulationProfile.upstreamProxyIpMask ??= {};
-      emulationProfile.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
+    if (emulationProfile.upstreamProxyUrl && !emulationProfile.upstreamProxyIpMask) {
+      if (!hasWarnedAboutProxyIp) {
+        hasWarnedAboutProxyIp = true;
+        console.warn(
+          "You're using an upstreamProxyUrl without a Proxy IP Mask. This can expose the public IP of your host machine via WebRTC leaks in Chrome. To resolve, you can use the upstreamProxyIpMask feature.",
+        );
+      }
     }
 
     this.domOverridesBuilder ??= loadDomOverrides(

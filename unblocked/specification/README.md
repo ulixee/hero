@@ -50,7 +50,7 @@ Configurations include:
   - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
 - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
-  - ipLookupService `string`. The URL of an http based IpLookupService. Defaults to `ipify.org`.
+  - ipLookupService `string`. The URL of an http based IpLookupService.
   - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
   - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
 - showChrome `boolean`. A boolean whether to show the Chrome browser window.
