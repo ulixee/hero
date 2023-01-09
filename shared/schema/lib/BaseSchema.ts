@@ -12,19 +12,22 @@ export default abstract class BaseSchema<
   Config extends IBaseConfig<TOptional> = IBaseConfig<TOptional>,
 > {
   readonly $type: Type;
-  readonly optional: TOptional;
+  optional: TOptional;
   description?: string;
 
   abstract readonly typeName: string;
 
   constructor(config?: Config) {
     if (config) {
-      Object.assign(this, config);
       if (isDefined(config.description)) {
         assert(typeof config.description === 'string', 'description must be a string');
       }
       if (isDefined(config.optional)) {
         assert(typeof config.optional === 'boolean', 'optional must be a boolean');
+      }
+      for (const [key, value] of Object.entries(config)) {
+        if (key === 'optional' && value === false) continue;
+        this[key] = value;
       }
     }
   }

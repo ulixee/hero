@@ -33,7 +33,13 @@ export const DatastoreApiSchemas = {
   },
   'Datastore.meta': {
     args: z.object({
-      versionHash: datastoreVersionHashValidation.describe('The hash of a unique datastore version'),
+      versionHash: datastoreVersionHashValidation.describe(
+        'The hash of a unique datastore version',
+      ),
+      includeSchemasAsJson: z
+        .boolean()
+        .optional()
+        .describe('Include JSON describing the schema for each function'),
     }),
     result: z.object({
       latestVersionHash: datastoreVersionHashValidation.describe(
@@ -62,6 +68,8 @@ export const DatastoreApiSchemas = {
             'Minimum microgons that must be allocated for a query to be accepted.',
           ),
           priceBreakdown: DatastoreFunctionPricing.array(),
+
+          schemaJson: z.string().optional().describe('The schema JSON if requested'),
         }),
       ),
       computePricePerQuery: micronoteTokenValidation.describe(
@@ -70,7 +78,9 @@ export const DatastoreApiSchemas = {
       schemaInterface: z
         .string()
         .optional()
-        .describe('A Typescript interface describing Function inputs and outputs this Datastore.'),
+        .describe(
+          'A Typescript interface describing all Function inputs and outputs of this Datastore.',
+        ),
       giftCardIssuerIdentities: identityValidation
         .array()
         .describe('The identities this datastore allows gift card payments for (if any).'),
@@ -81,7 +91,9 @@ export const DatastoreApiSchemas = {
       streamId: z.string().describe('The streamId to push results for this query.'),
       functionName: z.string().describe('The DatastoreFunction name'),
       input: z.any().optional().describe('Optional input parameters for this function call'),
-      versionHash: datastoreVersionHashValidation.describe('The hash of this unique datastore version'),
+      versionHash: datastoreVersionHashValidation.describe(
+        'The hash of this unique datastore version',
+      ),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -114,8 +126,13 @@ export const DatastoreApiSchemas = {
   'Datastore.query': {
     args: z.object({
       sql: z.string().describe('The SQL command(s) you want to run'),
-      boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
-      versionHash: datastoreVersionHashValidation.describe('The hash of this unique datastore version'),
+      boundValues: z
+        .array(z.any())
+        .optional()
+        .describe('An array of values you want to use as bound parameters'),
+      versionHash: datastoreVersionHashValidation.describe(
+        'The hash of this unique datastore version',
+      ),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
@@ -149,7 +166,10 @@ export const DatastoreApiSchemas = {
   'Datastore.queryLocalScript': {
     args: z.object({
       sql: z.string().describe('The SQL command(s) you want to run'),
-      boundValues: z.array(z.any()).optional().describe('An array of values you want to use as bound parameters'),
+      boundValues: z
+        .array(z.any())
+        .optional()
+        .describe('An array of values you want to use as bound parameters'),
       scriptPath: z
         .string()
         .describe('A path to a local script to run. NOTE: API only enabled in development.'),
