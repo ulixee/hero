@@ -72,15 +72,34 @@ export const DatastoreApiSchemas = {
           schemaJson: z.string().optional().describe('The schema JSON if requested'),
         }),
       ),
-      computePricePerQuery: micronoteTokenValidation.describe(
-        'The current server price per query. NOTE: if a server is implementing surge pricing, this amount could vary.',
+      tablesByName: z.record(
+        z.string().describe('The name of a table'),
+        z.object({
+          pricePerQuery: micronoteTokenValidation.describe('The table base price per query.'),
+          priceBreakdown: z
+            .object({
+              perQuery: z.number().int().nonnegative().describe('Base price per query.'),
+              remoteMeta: z
+                .object({
+                  host: z.string().describe('The remote host'),
+                  datastoreVersionHash: datastoreVersionHashValidation,
+                  tableName: z.string().describe('The remote table name'),
+                })
+                .optional(),
+            })
+            .array(),
+          schemaJson: z.string().optional().describe('The schema JSON if requested'),
+        }),
       ),
       schemaInterface: z
         .string()
         .optional()
         .describe(
-          'A Typescript interface describing all Function inputs and outputs of this Datastore.',
+          'A Typescript interface describing input and outputs of Datastore Functions, and schemas of Datastore Tables',
         ),
+      computePricePerQuery: micronoteTokenValidation.describe(
+        'The current server price per query. NOTE: if a server is implementing surge pricing, this amount could vary.',
+      ),
       giftCardIssuerIdentities: identityValidation
         .array()
         .describe('The identities this datastore allows gift card payments for (if any).'),
@@ -225,6 +244,10 @@ export const DatastoreApiSchemas = {
       boundValues: z.any({}).optional(),
       inputByFunctionName: z.record(z.any()),
       outputByFunctionName: z.record(z.array(z.any({}))),
+      recordsByVirtualTableName: z.record(
+        z.string({ description: 'Virtual Table Name' }),
+        z.record(z.string(), z.any(), { description: 'Virtual Table Record' }).array(),
+      ),
       datastoreVersionHash: z.string().optional(),
       datastoreInstanceId: z.string().optional(),
     }),

@@ -51,6 +51,33 @@ export const DatastoreManifestSchema = z.object({
         ),
     }),
   ),
+  tablesByName: z.record(
+    z
+      .string()
+      .regex(/[a-z][A-Za-z0-9]+/)
+      .describe('The Table name'),
+    z.object({
+      schemaAsJson: z.record(z.string(), z.any()).optional().describe('The schema as json.'),
+      prices: z
+        .object({
+          perQuery: z.number().int().nonnegative().describe('Base price per query.'),
+          remoteMeta: z
+            .object({
+              host: z.string().describe('The remote host'),
+              datastoreVersionHash: datastoreVersionHashValidation,
+              tableName: z.string().describe('The remote table name'),
+            })
+            .optional(),
+        })
+        .array()
+        .min(1)
+        .optional()
+        .describe(
+          'Price details for a table call. This array will have an entry for each table called in this process. ' +
+            'The first entry is the cost of the table packaged in this Datastore.',
+        ),
+    }),
+  ),
   paymentAddress: addressValidation.optional(),
   giftCardIssuerIdentity: identityValidation
     .optional()

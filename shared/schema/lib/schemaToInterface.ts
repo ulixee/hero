@@ -6,12 +6,15 @@ import BaseSchema from './BaseSchema';
 const { factory: f } = ts;
 
 export default function schemaToInterface(
-  schema: ISchemaAny | Record<string, ISchemaAny>,
+  schema: ISchemaAny | Record<string, ISchemaAny> | Record<string, Record<string, ISchemaAny>>,
 ): ts.TypeNode {
-  if (schema !== null && !(schema instanceof BaseSchema)) {
-    if (typeof schema === 'object' && Object.values(schema).every(x => x instanceof BaseSchema)) {
-      schema = object({ fields: schema as Record<string, ISchemaAny> });
-    }
+  if (schema !== null && !(schema instanceof BaseSchema) && typeof schema === 'object') {
+    const members = Object.entries(schema).map(([key, value]) => {
+      const propName = getIdentifierOrStringLiteral(key);
+      const type = schemaToInterface(value);
+      return f.createPropertySignature(undefined, propName, undefined, type);
+    });
+    return f.createTypeLiteralNode(members);
   }
 
   switch (schema.typeName) {
@@ -127,9 +130,7 @@ export function printNode(node: ts.Node, printerOptions?: ts.PrinterOptions): st
     false,
     ts.ScriptKind.TS,
   );
-  const printer = ts.createPrinter(
-    printerOptions ?? { newLine: ts.NewLineKind.LineFeed },
-  );
+  const printer = ts.createPrinter(printerOptions ?? { newLine: ts.NewLineKind.LineFeed });
   return (
     printer
       .printNode(ts.EmitHint.Unspecified, node, sourceFile)
