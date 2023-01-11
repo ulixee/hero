@@ -9,6 +9,7 @@ import RecordSchema, { IRecordSchemaConfig } from './RecordSchema';
 import ArraySchema from './ArraySchema';
 import ObjectSchema from './ObjectSchema';
 import { ISchemaAny } from '../index';
+import { IBaseConfig } from './BaseSchema';
 
 export default function schemaFromJson(
   json: Record<string, IAnySchemaJson> | IAnySchemaJson,
@@ -22,32 +23,37 @@ export default function schemaFromJson(
 }
 
 function parseField(json: IAnySchemaJson): ISchemaAny {
-  if (json.typeName === 'number') return new NumberSchema(json);
-  if (json.typeName === 'bigint') return new BigintSchema(json);
-  if (json.typeName === 'boolean') return new BooleanSchema(json);
-  if (json.typeName === 'buffer') return new BufferSchema(json);
-  if (json.typeName === 'date') return new DateSchema(json);
-  if (json.typeName === 'string') return new StringSchema(json);
-  if (json.typeName === 'record') {
+  const { typeName, element, fields, values, keys, ...config } = json as any;
+  if (typeName === 'number') return new NumberSchema(config);
+  if (typeName === 'bigint') return new BigintSchema(config);
+  if (typeName === 'boolean') return new BooleanSchema(config);
+  if (typeName === 'buffer') return new BufferSchema(config);
+  if (typeName === 'date') return new DateSchema(config);
+  if (typeName === 'string') return new StringSchema(config);
+  if (typeName === 'record') {
     const recordConfig: IRecordSchemaConfig<any> = {
-      values: parseField(json.values),
+      values: parseField(values),
+      ...config,
     };
-    if (json.keys) recordConfig.keys = new StringSchema(json.keys);
+    if (keys) recordConfig.keys = new StringSchema(keys);
     return new RecordSchema(recordConfig);
   }
-  if (json.typeName === 'array') {
-    const elementConfig = parseField(json.element);
-    return new ArraySchema({ element: elementConfig });
+  if (typeName === 'array') {
+    const elementConfig = parseField(element);
+    return new ArraySchema({ element: elementConfig, ...config });
   }
-  if (json.typeName === 'object') {
-    return parseObjectSchema(json.fields);
+  if (typeName === 'object') {
+    return parseObjectSchema(fields, config);
   }
 }
 
-function parseObjectSchema(json: Record<string, IAnySchemaJson>): ObjectSchema<any> {
+function parseObjectSchema(
+  json: Record<string, IAnySchemaJson>,
+  options: IBaseConfig = {},
+): ObjectSchema<any> {
   const fields: Record<string, ISchemaAny> = {};
   for (const [field, schemaJson] of Object.entries(json)) {
     fields[field] = parseField(schemaJson);
   }
-  return new ObjectSchema<any>({ fields });
+  return new ObjectSchema<any>({ fields, ...options });
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addressValidation, identityValidation , datastoreVersionHashValidation } from '../common';
+import { addressValidation, identityValidation, datastoreVersionHashValidation } from '../common';
 import { DatastoreFunctionPricing } from './IDatastoreFunctionPricing';
 
 const minDate = new Date('2022-01-01').getTime();
@@ -34,6 +34,14 @@ export const DatastoreManifestSchema = z.object({
         .record(z.string())
         .optional()
         .describe('plugin dependencies required for execution'),
+      schemaAsJson: z
+        .object({
+          input: z.any().optional(),
+          output: z.any().optional(),
+          inputExamples: z.any().optional(),
+        })
+        .optional()
+        .describe('The schema as json.'),
       prices: DatastoreFunctionPricing.array()
         .min(1)
         .optional()
