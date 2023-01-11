@@ -196,6 +196,8 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       const requestSession = this.mitmRequestSession;
       this.browserContext.resources.connectToMitm(requestSession);
       await this.plugins.onHttpAgentInitialized(requestSession.requestAgent);
+    } else {
+      await this.plugins.onHttpAgentInitialized(null);
     }
 
     return this.browserContext;

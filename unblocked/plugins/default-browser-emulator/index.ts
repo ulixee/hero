@@ -41,7 +41,7 @@ import loadDomOverrides from './lib/loadDomOverrides';
 import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
-import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
+import lookupPublicIp from './lib/helpers/lookupPublicIp';
 import IUserAgentData from './interfaces/IUserAgentData';
 import UserAgentOptions from './lib/UserAgentOptions';
 import BrowserEngineOptions from './lib/BrowserEngineOptions';
@@ -139,13 +139,22 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
     const profile = this.emulationProfile;
     const upstreamProxyIpMask = profile.upstreamProxyIpMask;
-    if (upstreamProxyIpMask) {
+    if (upstreamProxyIpMask && profile.upstreamProxyUrl) {
       upstreamProxyIpMask.publicIp ??= await lookupPublicIp(upstreamProxyIpMask.ipLookupService);
       upstreamProxyIpMask.proxyIp ??= await lookupPublicIp(
         upstreamProxyIpMask.ipLookupService,
         agent,
         profile.upstreamProxyUrl,
       );
+      if (upstreamProxyIpMask.proxyIp === upstreamProxyIpMask.publicIp) {
+        this.logger.error(
+          'upstreamProxyIpMask Lookup showing same IP for Proxy and Machine IP. Please check these settings.',
+          {
+            ...upstreamProxyIpMask,
+          },
+        );
+        return;
+      }
       this.logger.info('PublicIp Lookup', {
         ...upstreamProxyIpMask,
       });

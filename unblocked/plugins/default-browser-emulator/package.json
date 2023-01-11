@@ -9,6 +9,7 @@
     "@ulixee/commons": "2.0.0-alpha.17",
     "@ulixee/real-user-agents": "2.0.0-alpha.17",
     "@ulixee/unblocked-specification": "2.0.0-alpha.17",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.17",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.22"
@@ -20,6 +21,7 @@
     "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.17",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
+    "proxy": "^1.0.1",
     "source-map-loader": "^0.2.4"
   }
 }
