@@ -51,7 +51,7 @@ To connect your client and core, you'll create a transport bridge that will pipe
 
 ```javascript
 import HeroCore from '@ulixee/hero-core';
-import TransportBridge from '@ulixee/net/lib/TransportBridge';
+import { TransportBridge } from '@ulixee/net';
 import { ConnectionToHeroCore } from '@ulixee/hero';
 
 const bridge = new TransportBridge();
