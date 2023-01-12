@@ -444,79 +444,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     const { scale, pageX, pageY } = layoutMetrics.visualViewport;
     const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
 
-    let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;
-    let clip: Viewport;
-    if (options.fullPage) {
-      if (scale > 1) {
-        contentSize.height = Math.floor(contentSize.height / scale);
-        contentSize.width = Math.floor(contentSize.width / scale);
-      }
-      // Ignore current page scale when taking fullpage screenshots (based on the page content, not viewport),
-      clip = { x: 0, y: 0, ...contentSize, scale: 1 };
-
-      if (contentSize.width > viewportSize.width || contentSize.height > viewportSize.height) {
-        await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
-          ...contentSize,
-          deviceScaleFactor: scale,
-          mobile: false,
-        });
-        resizeAfterScreenshot = {
-          ...viewportSize,
-          deviceScaleFactor: scale,
-          mobile: false,
-        };
-      }
-    } else {
-      const viewportRect = clipRect
-        ? this.trimClipToSize(clipRect, viewportSize)
-        : { x: 0, y: 0, ...viewportSize };
-      clip = {
-        x: pageX + viewportRect.x,
-        y: pageY + viewportRect.y,
-        width: Math.floor(viewportRect.width / scale),
-        height: Math.floor(viewportRect.height / scale),
-        scale,
-      };
-    }
-
-    const timestamp = Date.now();
-    const result = await this.devtoolsSession.send('Page.captureScreenshot', {
-      format,
-      quality,
-      clip,
-      captureBeyondViewport: true, // added in chrome 87
-    } as Protocol.Page.CaptureScreenshotRequest);
-
-    if (resizeAfterScreenshot) {
-      await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', resizeAfterScreenshot);
-    }
-
-    this.emit('screenshot', {
-      imageBase64: result.data,
-      timestamp,
-    });
-
-    return Buffer.from(result.data, 'base64');
-  }
-
-  async screenshotNew(options: IScreenshotOptions): Promise<Buffer> {
-    options ??= {};
-    const quality = options.jpegQuality ?? 100;
-    const clipRect = options.rectangle;
-    const format = options.format ?? 'jpeg';
-    assert(
-      quality >= 0 && quality <= 100,
-      `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
-    );
-
-    const windowOffset = await this.mainFrame.getWindowOffset();
-    const viewportSize = { height: windowOffset.innerHeight, width: windowOffset.innerWidth };
-
-    const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
-
-    const { scale, pageX, pageY } = layoutMetrics.visualViewport;
-    const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
-
     const clip: Viewport = options.fullPage
       ? { x: 0, y: 0, ...contentSize, scale }
       : clipRect ?? { x: pageX, y: pageY, ...viewportSize, scale }
@@ -525,7 +452,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       format,
       quality,
       clip,
-      captureBeyondViewport: true, // added in chrome 87
+      captureBeyondViewport: true, // added in chrome 87 works since 89
     } as Protocol.Page.CaptureScreenshotRequest);
 
     const timestamp = Date.now();
