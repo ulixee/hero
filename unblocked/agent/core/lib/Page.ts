@@ -722,24 +722,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     });
   }
 
-  // COPIED FROM PLAYWRIGHT
-  private trimClipToSize(clip: Rect, size: Size): Rect {
-    const p1 = {
-      x: Math.max(0, Math.min(clip.x, size.width)),
-      y: Math.max(0, Math.min(clip.y, size.height)),
-    };
-    const p2 = {
-      x: Math.max(0, Math.min(clip.x + clip.width, size.width)),
-      y: Math.max(0, Math.min(clip.y + clip.height, size.height)),
-    };
-    const result = { x: p1.x, y: p1.y, width: p2.x - p1.x, height: p2.y - p1.y };
-    assert(
-      result.width && result.height,
-      'Clipped area is either empty or outside the resulting image',
-    );
-    return result;
-  }
-
   private onWebsocketFrame(event: IPageEvents['websocket-frame']): void {
     const resourceId = this.browserContext.resources.getBrowserRequestLatestResource(
       event.browserRequestId,
