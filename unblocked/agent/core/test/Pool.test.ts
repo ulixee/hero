@@ -4,6 +4,8 @@ import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testi
 import { ITestHttpServer } from '@ulixee/unblocked-agent-testing/helpers';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { Pool } from '../index';
+import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 
 let httpServer: ITestHttpServer<http.Server>;
 
@@ -150,5 +152,40 @@ describe('Pool tests', () => {
     await allBrowsersTriggered.promise;
     expect(allBrowsersClosedEvent).toBeCalledTimes(1);
     await pool.close();
+  });
+
+  test('should be able to use an upstream proxy with mitm disabled', async () => {
+    const proxyServer = await Helpers.runHttpServer();
+    const httpsServer = await Helpers.runHttpsServer((req, res) => res.end('good'));
+    const upstreamProxyUrl = proxyServer.url.replace(/\/$/, '');
+
+    let upstreamProxyConnected = false;
+    proxyServer.on('connect', (req: http.IncomingMessage, socket: any) => {
+      upstreamProxyConnected = true;
+      socket.end();
+    });
+
+    const pool = new Pool(BrowserUtils.newPoolOptions);
+    Helpers.needsClosing.push(pool);
+    await pool.start();
+
+    @UnblockedPluginClassDecorator
+    class TestPlugin {
+      static shouldActivate(profile: IEmulationProfile): boolean {
+        profile.upstreamProxyUrl = upstreamProxyUrl;
+        profile.options.disableMitm = true;
+        return true;
+      }
+    }
+
+    const agent = pool.createAgent({ logger: TestLogger.forTest(module), plugins: [TestPlugin] });
+    Helpers.needsClosing.push(agent);
+    expect(agent.plugins.profile.options.disableMitm).toBe(true);
+    const page = await agent.newPage();
+    expect(agent.browserContext.proxy.address).toBe(proxyServer.baseUrl);
+
+    await page.goto(httpsServer.baseUrl).catch(console.error);
+
+    expect(upstreamProxyConnected).toBe(true);
   });
 });

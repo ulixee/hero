@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/collect-http2-session",
   "disabled": false,
-  "version": "2.0.0-alpha.14",
+  "version": "2.0.0-alpha.17",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Collects the settings, pings and frames sent across by a browser http2 client",
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.14",
-    "@double-agent/config": "2.0.0-alpha.14"
+    "@double-agent/collect": "2.0.0-alpha.17",
+    "@double-agent/config": "2.0.0-alpha.17"
   }
 }

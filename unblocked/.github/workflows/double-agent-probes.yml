@@ -17,6 +17,10 @@ jobs:
         run: git clone https://github.com/ulixee/browser-profile-data.git
         working-directory: ..
 
+      - name: Clone ulixee/shared
+        run: git clone https://github.com/ulixee/shared.git
+        working-directory: ..
+
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
@@ -27,6 +31,10 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+
+      - name: Install ulixee/shared
+        run: yarn build
+        working-directory: ../shared
 
       - name: Yarn build
         run: yarn build

@@ -18,9 +18,9 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
   public readonly transport: PipeTransport;
 
   public isProcessFunctionalPromise = new Resolvable<boolean>();
+  public launchStderr: string[] = [];
   private processKilled = false;
   private readonly launchedProcess: ChildProcess;
-  private launchStderr: string[] = [];
 
   constructor(private browserEngine: IBrowserEngine, private processEnv?: NodeJS.ProcessEnv) {
     super();
@@ -28,18 +28,11 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     bindFunctions(this);
     this.launchedProcess = this.launch();
     this.bindProcessEvents();
+
     this.transport = new PipeTransport(this.launchedProcess);
     this.transport.connectedPromise
       .then(() => this.isProcessFunctionalPromise.resolve(true))
-      .catch(err => setImmediate(this.isProcessFunctionalPromise.reject, err));
-
-    this.isProcessFunctionalPromise.catch(() => {
-      setTimeout(() => {
-        if (this.launchStderr.length) {
-          log.error('ERROR launching browser', { stderr: this.launchStderr.join('\n') } as any);
-        }
-      }, 1e3);
-    });
+      .catch(err => setTimeout(() => this.isProcessFunctionalPromise.reject(err), 1.1e3));
 
     this.bindCloseHandlers();
   }
@@ -77,7 +70,9 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
       stdio: ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'],
     });
     child.on('error', e => {
-      this.isProcessFunctionalPromise.reject(new Error(`Failed to launch browser: ${e}`));
+      if (!this.isProcessFunctionalPromise) {
+        this.isProcessFunctionalPromise.reject(new Error(`Failed to launch browser: ${e}`));
+      }
     });
     return child;
   }
@@ -93,11 +88,10 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     });
     readline.createInterface({ input: stderr }).on('line', line => {
       if (!line) return;
-      if (
-        !this.isProcessFunctionalPromise.isResolved ||
-        this.isProcessFunctionalPromise.resolved !== true
-      ) {
-        this.launchStderr.push(line);
+      this.launchStderr.push(line);
+      // don't grow in perpetuity!
+      if (this.launchStderr.length > 100) {
+        this.launchStderr = this.launchStderr.slice(-100);
       }
       log.warn(`${name}.stderr`, { message: line, sessionId: null });
     });

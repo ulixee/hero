@@ -49,7 +49,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
   public override close(): void {
     super.close();
     for (const pending of this.pendingCertsById.values())
-      pending.reject(new CanceledPromiseError('Closing Certificate Generator'));
+      pending.reject(new CanceledPromiseError('Closing Certificate Generator'), true);
   }
 
   protected async generateCerts(
@@ -120,10 +120,10 @@ export default class CertificateGenerator extends BaseIpcHandler {
 
   protected beforeExit(): void {
     for (const cert of this.pendingCertsById.values()) {
-      cert.reject(new CanceledPromiseError('Canceling certificate generation'));
+      cert.reject(new CanceledPromiseError('Canceling certificate generation'), true);
     }
     if (this.hasWaitForInitListeners && this.waitForInit && !this.waitForInit.isResolved) {
-      this.waitForInit.reject(new CanceledPromiseError('Canceling ipc initialization'));
+      this.waitForInit.reject(new CanceledPromiseError('Canceling ipc initialization'), true);
     }
   }
 }

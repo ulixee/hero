@@ -10,6 +10,7 @@ import BrowserContext from '../lib/BrowserContext';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
 
+
 describe('Pages', () => {
   let server: TestServer;
   let page: Page;
@@ -225,9 +226,8 @@ describe('Pages', () => {
         type: 'jpg',
         height: viewport.innerHeight,
       });
-      expect(screenshot.toString('base64')).toContain(
-        'AlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGK',
-      );
+      expect(sizeOf(screenshot).height).toBe(viewport.innerHeight);
+      expect(sizeOf(screenshot).width).toBe(viewport.innerWidth);
     });
 
     it('should be able to take a clipped rect screenshot', async () => {

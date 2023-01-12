@@ -103,9 +103,17 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         const [framesResponse, , readyStateResult] = await Promise.all([
           this.devtoolsSession.send('Page.getFrameTree'),
           this.devtoolsSession.send('Page.enable'),
-          this.devtoolsSession.send('Runtime.evaluate', {
-            expression: 'document.readyState',
-          }),
+          this.devtoolsSession
+            .send('Runtime.evaluate', {
+              expression: 'document.readyState',
+            })
+            .catch(() => {
+              return {
+                result: {
+                  value: null,
+                },
+              };
+            }),
           this.devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
           this.devtoolsSession.send('Runtime.enable'),
           InjectedScripts.install(this, this.onDomPaintEvent),
@@ -190,16 +198,23 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     resource: IResourceMeta,
     error?: Error,
   ): boolean {
-    if (resource.type !== 'Document') return;
+    if (resource.type !== 'Document' || resource.isRedirect) return;
 
-    const frame = this.frameWithPendingNavigation(
-      browserRequestId,
-      resource.request?.url,
-      resource.response?.url,
-    );
-    if (frame && !resource.isRedirect) {
-      frame.navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
-      return true;
+    for (const frame of this.framesById.values()) {
+      const matchingResource = frame.navigations.pendingResourceId(
+        browserRequestId,
+        resource.request?.url,
+        resource.response?.url,
+      );
+      if (matchingResource) {
+        frame.navigations.onResourceLoaded(
+          matchingResource,
+          resource.id,
+          resource.response?.statusCode,
+          error,
+        );
+        return true;
+      }
     }
     return false;
   }
@@ -210,8 +225,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     finalUrl: string,
   ): Frame | null {
     for (const frame of this.framesById.values()) {
-      const isMatch = frame.navigations.doesMatchPending(browserRequestId, requestedUrl, finalUrl);
-      if (isMatch) return frame;
+      const isMatch = frame.navigations.pendingResourceId(browserRequestId, requestedUrl, finalUrl);
+      if (!!isMatch) return frame;
     }
   }
 
@@ -518,13 +533,13 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     // if we didn't get a frame, don't keep going
     if (!frame) return;
 
-    const isPending = frame.navigations.doesMatchPending(
+    const pendingResourceId = frame.navigations.pendingResourceId(
       resource.browserRequestId,
       resource.url?.href,
       resource.responseUrl,
       event.loaderId,
     );
-    if (isPending) {
+    if (pendingResourceId) {
       if (resource.browserServedFromCache) {
         frame.navigations.onHttpResponded(
           resource.browserRequestId,
@@ -537,7 +552,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         resource.browserRequestId,
       );
       if (existingResource) {
-        frame.navigations.onResourceLoaded(existingResource.id, resource.status);
+        frame.navigations.onResourceLoaded(pendingResourceId, existingResource.id, resource.status);
       }
     }
 

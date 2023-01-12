@@ -299,6 +299,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
   private isClientConnectionDestroyed(): boolean {
     const proxyToClientResponse = this.context.proxyToClientResponse;
+    if (!proxyToClientResponse) return true;
     return (
       (proxyToClientResponse as Http2ServerResponse).stream?.destroyed ||
       proxyToClientResponse.socket?.destroyed ||

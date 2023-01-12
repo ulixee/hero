@@ -100,7 +100,7 @@ export default abstract class BaseIpcHandler {
     }
 
     if (!this.waitForConnect.isResolved && this.hasWaitListeners) {
-      this.waitForConnect.reject(new CanceledPromiseError('Canceling ipc connect'));
+      this.waitForConnect.reject(new CanceledPromiseError('Canceling ipc connect'), true);
     }
     this.logger.stats(`${this.handlerName}.Closed`, {
       parentLogId,

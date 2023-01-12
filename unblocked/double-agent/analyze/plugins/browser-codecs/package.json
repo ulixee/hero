@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/analyze-browser-codecs",
-  "version": "2.0.0-alpha.14",
+  "version": "2.0.0-alpha.17",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes that the audio, video and WebRTC codecs match the given user agent",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.14",
-    "@double-agent/collect-browser-codecs": "2.0.0-alpha.14",
+    "@double-agent/analyze": "2.0.0-alpha.17",
+    "@double-agent/collect-browser-codecs": "2.0.0-alpha.17",
     "csv-parse": "^4.8.5",
     "source-map-support": "^0.5.16"
   }

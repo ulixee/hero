@@ -174,6 +174,30 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should properly emulate memory', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  const server = await Helpers.runHttpsServer((req, res) => {
+    res.end('<html><body><h1>Hi</h1></body></html>');
+  }, false);
+  await page.goto(`${server.baseUrl}`);
+  const { deviceMemory, heapSize } = await page.evaluate(`(() => {
+  const { deviceMemory } = navigator
+ 
+  const heapSize = performance?.memory?.jsHeapSizeLimit || null;
+  return { deviceMemory, heapSize };
+})()`);
+
+  expect([2, 4, 8]).toContain(deviceMemory);
+  const heapSizeGb = heapSize ? +(heapSize / 1073741824).toFixed(1) : 0;
+
+  expect(heapSizeGb).toBeLessThanOrEqual(deviceMemory);
+});
+
 test('should properly maintain stack traces in toString', async () => {
   const agent = pool.createAgent({
     logger,
@@ -360,6 +384,7 @@ describe('Proxy detections', () => {
         const targetStackLine = ((error.stack || '').split('\n') || [])[1];
         return targetStackLine.startsWith(targetStack);
       }
+
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         proxy instanceof proxy;
@@ -511,9 +536,36 @@ describe('Proxy detections', () => {
         return `Error checking "123 in fn":${error.message}`;
       }
     }
+
     const result: string = await page.evaluate(
       `(${getReflectSetProtoLie.toString()})(Permissions.prototype.query)`,
     );
     expect(result).toBe('ok');
+  });
+
+  test('should not detect Proxy when accessing caller of toString', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    await page.goto(`${koaServer.baseUrl}`);
+
+    const error = await page.evaluate<{ message: string; stack: string }>(
+      `(() => {
+  try {
+    navigator.plugins.toString.caller;
+  } catch (e) {
+    return { message:e.message, stack:e.stack};
+  }
+})();`,
+    );
+
+    expect(error).toBeTruthy();
+    expect(error.message).not.toContain('Proxy');
+    expect(error.stack).not.toContain('Proxy');
+    expect(error.stack).not.toContain('Object.get');
+    expect(error.stack).not.toContain('Reflect');
+    expect(error.stack.split('\n').length).toBeGreaterThan(1);
   });
 });

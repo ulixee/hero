@@ -14,8 +14,6 @@ if (!fs.existsSync(outDir)) {
 const { version } = packageJson;
 const releasesAssetsUrl = `https://github.com/ulixee/unblocked/releases/download/v${version}`;
 
-// tslint:disable:no-console
-
 const forceBuild = Boolean(JSON.parse(process.env.ULX_MITM_REBUILD_SOCKET || 'false'));
 
 (async function install() {
@@ -42,10 +40,16 @@ const forceBuild = Boolean(JSON.parse(process.env.ULX_MITM_REBUILD_SOCKET || 'fa
     }
 
     const goVersionNeeded = getGoVersionNeeded();
-    console.log(
-      `The architecture file you need for the Agent connect library is not available (${filepath}).\n\n
+    if (forceBuild) {
+      console.log(
+        `You requested to rebuild the Ulixee Unblocked Agent connect library, but the needed version of golang is not available. Please install golang ${goVersionNeeded} and try again.`,
+      );
+    } else {
+      console.log(
+        `The architecture file you need for the Agent connect library is not available (${filepath}).\n\n
 You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/go directory\n\n`,
-    );
+      );
+    }
     process.exit(1);
   }
 
@@ -175,10 +179,7 @@ function compile() {
     execSync('go build', { cwd: `${__dirname}/go` });
     return true;
   } catch (err) {
-    console.log(
-      'Error compiling Agent MitmSocket library.\n\nWill download instead.',
-      err.message,
-    );
+    console.log('Error compiling Agent MitmSocket library.\n\nWill download instead.', err.message);
     return false;
   }
 }

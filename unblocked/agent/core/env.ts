@@ -5,9 +5,8 @@ const env = process.env;
 const pkgJson = require('./package.json');
 
 export default {
-  disableMitm: parseEnvBool(env.ULX_MITM_DISABLE),
+  disableMitm: parseEnvBool(env.ULX_DISABLE_MITM),
   showChrome: parseEnvBool(env.ULX_SHOW_CHROME),
-  disableDevtools: parseEnvBool(env.ULX_DISABLE_DEVTOOLS),
   noChromeSandbox: parseEnvBool(env.ULX_NO_CHROME_SANDBOX),
   disableGpu: parseEnvBool(env.ULX_DISABLE_GPU),
   defaultChromeId:

@@ -264,17 +264,27 @@ export default class MitmSocket
   }
 }
 
-class Socks5ProxyConnectError extends Error {}
-class HttpProxyConnectError extends Error {}
-class SocketConnectError extends Error {}
+class Socks5ProxyConnectError extends Error {
+  override name = 'Socks5ProxyConnectError';
+}
+class HttpProxyConnectError extends Error {
+  override name = 'HttpProxyConnectError';
+}
+class SocketConnectError extends Error {
+  override name = 'SocketConnectError';
+}
 
 function buildConnectError(connectError: string, callStack: string): Error {
   let error: Error;
   connectError ??= 'Error connecting to host';
   if (connectError.includes('SOCKS5_PROXY_ERR')) {
-    error = new Socks5ProxyConnectError(connectError.replace('SOCKS5_PROXY_ERR', '').trim());
+    error = new Socks5ProxyConnectError(
+      connectError.replace('SOCKS5_PROXY_ERR', 'Socks5 Proxy Connect Error').trim(),
+    );
   } else if (connectError.includes('HTTP_PROXY_ERR')) {
-    error = new HttpProxyConnectError(connectError.replace('HTTP_PROXY_ERR', '').trim());
+    error = new HttpProxyConnectError(
+      connectError.replace('HTTP_PROXY_ERR', 'Http Proxy Connect Error').trim(),
+    );
   } else {
     error = new SocketConnectError(connectError.trim());
   }

@@ -31,7 +31,8 @@ export default function parseNavigatorPlugins(navigator: any): {
         delete plugin[pluginKey];
         delete plugin[mimeType];
         plugin.mimeTypes.push(mimeType);
-        mimeTypes.find(x => x.type === mimeType).__pluginName = plugin.name;
+        // TODO: extract `enabledPlugin.name` during dom extraction.
+        mimeTypes.find(x => x.type === mimeType).__pluginName ??= plugin.name;
       }
     }
   }

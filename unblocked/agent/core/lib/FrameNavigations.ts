@@ -298,42 +298,50 @@ export default class FrameNavigations
     this.recordStatusChange(navigation, LoadStatus.HttpResponded, responseTime);
   }
 
-  public doesMatchPending(
+  public pendingResourceId(
     browserRequestId: string,
     requestedUrl: string,
     finalUrl: string,
     loaderId?: string,
-  ): boolean {
-    const top = this.lastHttpNavigationRequest;
-    if (!top || top.resourceIdResolvable.isResolved) return false;
-    if (loaderId && top.loaderId !== loaderId) return false;
-    if (browserRequestId && top.browserRequestId && browserRequestId !== top.browserRequestId)
-      return false;
+  ): INavigation {
+    const match = this.findMostRecentHistory(x => {
+      if (x.resourceIdResolvable.isResolved) return false;
+      if (loaderId && x.loaderId !== loaderId) return false;
+      if (browserRequestId && x.browserRequestId && browserRequestId !== x.browserRequestId)
+        return false;
+      return true;
+    });
+
+    if (!match) return null;
 
     // hash won't be in the http request
-    const frameRequestedUrl = top.requestedUrl?.split('#')?.shift();
+    const frameRequestedUrl = match.requestedUrl?.split('#')?.shift();
 
-    if ((top.finalUrl && finalUrl === top.finalUrl) || requestedUrl === frameRequestedUrl) {
-      return true;
+    if ((match.finalUrl && finalUrl === match.finalUrl) || requestedUrl === frameRequestedUrl) {
+      return match;
     }
-    return false;
+    return null;
   }
 
-  public onResourceLoaded(resourceId: number, statusCode: number, error?: Error): void {
+  public onResourceLoaded(
+    navigation: INavigation,
+    resourceId: number,
+    statusCode: number,
+    error?: Error,
+  ): void {
     this.logger.info('NavigationResource resolved', {
       resourceId,
       statusCode,
       error,
       currentUrl: this.currentUrl,
     });
-    const top = this.lastHttpNavigationRequest;
 
-    if (!top || top.resourceIdResolvable.isResolved) return;
+    if (!navigation || navigation.resourceIdResolvable.isResolved) return;
 
     // since we don't know if there are listeners yet, we need to just set the error on the return value
     // otherwise, get unhandledrejections
-    if (error) top.navigationError = error;
-    top.resourceIdResolvable.resolve(resourceId);
+    if (error) navigation.navigationError = error;
+    navigation.resourceIdResolvable.resolve(resourceId);
   }
 
   public onLoadStatusChanged(

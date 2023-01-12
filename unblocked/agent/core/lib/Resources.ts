@@ -89,6 +89,7 @@ export default class Resources
       if (pending.browserRequestedPromise.isResolved) continue;
       pending.browserRequestedPromise.reject(
         new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
+        true,
       );
     }
     this.mitmRequestsPendingBrowserRequest.length = 0;

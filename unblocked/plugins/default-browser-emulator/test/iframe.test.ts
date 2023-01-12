@@ -158,7 +158,7 @@ test('should override before iframe.src using javascript', async () => {
   const page = await agent.newPage();
   await page.goto(`${koaServer.baseUrl}`);
   await page.waitForLoad(LoadStatus.DomContentLoaded);
-  const complete = new Promise((resolve) => page.once('console', (msg) => resolve(msg.message)));
+  const complete = new Promise(resolve => page.once('console', msg => resolve(msg.message)));
 
   await page.evaluate(`(() => {
 
@@ -206,7 +206,7 @@ test('should handle a removed frame', async () => {
   const page = await createPage(agent);
   await page.goto(koaServer.baseUrl);
   await page.waitForLoad('PaintingStable');
-  const navigatorPlatform = await page.evaluate<boolean>(`(() => {
+  const navigatorPlatform = await page.evaluate<string>(`(() => {
     try {
       const numberOfIframes = window.length;
       const div = document.createElement('div');
@@ -222,6 +222,33 @@ test('should handle a removed frame', async () => {
   })()`);
   await page.close();
   expect(navigatorPlatform).toBe(agent.emulationProfile.windowNavigatorPlatform);
+});
+
+test('should set user agent on same origin frames', async () => {
+  const agent = await createAgent();
+  const page = await createPage(agent);
+  await page.goto(koaServer.baseUrl);
+  await page.waitForLoad('PaintingStable');
+  const data = await page.evaluate<any>(`(() => {
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('style', 'display:none');
+      iframe.src = location.href;
+      document.body.append(iframe);
+
+      const { userAgent, platform } = iframe.contentWindow.navigator || {};
+      const data = { iframe: { userAgent, platform}, page: { userAgent: navigator.userAgent, platform: navigator.platform } };
+      iframe.parentNode.removeChild(iframe);
+      return data;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  })()`);
+  await page.close();
+
+  expect(data.iframe.platform).toBe(data.page.platform);
+  expect(data.iframe.userAgent).toBe(data.page.userAgent);
 });
 
 // only run this test manually
@@ -272,7 +299,7 @@ test.skip('should not break recaptcha popup', async () => {
       mousePosition: ['window', 'document', ['querySelector', '#tswsubmit']],
     },
   ]);
-  await new Promise((resolve) => setTimeout(resolve, 1e3));
+  await new Promise(resolve => setTimeout(resolve, 1e3));
 
   const { hasRecaptchaPopup } = await page.evaluate(`(() => {
     const hasRecaptchaPopup = !!document.querySelectorAll('iframe[title="recaptcha challenge"]')

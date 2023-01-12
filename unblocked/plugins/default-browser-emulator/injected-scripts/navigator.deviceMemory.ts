@@ -9,9 +9,27 @@ if (
 
 if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
   if ('memory' in performance && (performance as any).memory) {
-    proxyGetter((performance as any).memory, 'jsHeapSizeLimit', () => args.maxHeapSize, true);
+    proxyGetter(
+      performance,
+      'memory' as any,
+      function () {
+        const result = ReflectCached.apply(...arguments);
+        proxyGetter(result, 'jsHeapSizeLimit', () => args.maxHeapSize);
+        return result;
+      },
+      true,
+    );
   }
   if ('memory' in console && (console as any).memory) {
-    proxyGetter((console as any).memory, 'jsHeapSizeLimit', () => args.maxHeapSize, true);
+    proxyGetter(
+      console,
+      'memory' as any,
+      function () {
+        const result = ReflectCached.apply(...arguments);
+        proxyGetter(result, 'jsHeapSizeLimit', () => args.maxHeapSize);
+        return result;
+      },
+      true,
+    );
   }
 }

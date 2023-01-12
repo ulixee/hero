@@ -18,7 +18,7 @@ export default class BrowserEngineOptions {
       const id = defaultBrowserId.replace('@ulixee/', '');
       this.default = this.installedOptions.find(x => x.id === id);
       if (!this.default) {
-        if (this.browserIdsNeedingDataFiles.has(id) || this.isInstalled(id)) {
+        if (this.browserIdsNeedingDataFiles.has(id) || this.getInstalled(id)) {
           throw new Error(
             `The Default Browser Engine specified in your environment does not have Emulation Data Files installed. You'll need to generate data files for ${id}`,
           );
@@ -34,18 +34,20 @@ export default class BrowserEngineOptions {
     }
   }
 
-  private isInstalled(browserId: string): boolean {
+  private getInstalled(browserId: string): ChromeApp {
     try {
-      require.resolve(`@ulixee/${browserId}`);
-      return true;
+      // eslint-disable-next-line import/no-dynamic-require
+      const ChromeVersion = require(`@ulixee/${browserId}`);
+      return new ChromeVersion();
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
   private checkForInstalled(): void {
     for (const engine of this.dataLoader.browserEngineOptions) {
-      if (!this.isInstalled(engine.id)) continue;
+      const ChromeVersion = this.getInstalled(engine.id);
+      if (!ChromeVersion) continue;
 
       if (!this.dataLoader.isInstalledBrowser(`as-${engine.id}`)) {
         this.browserIdsNeedingDataFiles.add(engine.id);
@@ -55,8 +57,7 @@ You must install data files for "${engine.id}" to support emulating the browser.
         continue;
       }
 
-      const [major, minor, patch, build] =
-        BrowserEngineOptions.latestFullVersion(engine).split('.');
+      const [major, minor, patch, build] = ChromeVersion.fullVersion.split('.');
       this.installedOptions.push({
         ...engine,
         version: {

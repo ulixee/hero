@@ -35,7 +35,7 @@ afterEach(Helpers.afterEach);
 const debug = process.env.DEBUG || false;
 
 test('it should override plugins in a browser window', async () => {
-  const httpServer = await Helpers.runHttpServer();
+  const httpServer = await Helpers.runHttpServer(false);
   const context = await browser.newContext({ logger });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
@@ -98,6 +98,42 @@ test('it should override plugins in a browser window', async () => {
   if (debug) console.log(inspect(navigatorPageStructure.plugins, false, null, true));
   expect(navigatorPageStructure.plugins).toStrictEqual(navigatorConfig.plugins);
 }, 60e3);
+
+test('it should handle overflows in plugins', async () => {
+  const httpServer = await Helpers.runHttpServer(false);
+  const context = await browser.newContext({ logger });
+  Helpers.onClose(() => context.close());
+  const page = await context.newPage();
+
+  page.on('page-error', console.log);
+  if (debug) {
+    page.on('console', console.log);
+  }
+  const pluginsData = parseNavigatorPlugins(navigatorConfig);
+  if (debug) console.log(pluginsData);
+  await page.addNewDocumentScript(
+    getOverrideScript('navigator.plugins', pluginsData).script,
+    false,
+  );
+  await page.goto(httpServer.baseUrl);
+  await page.waitForLoad(LoadStatus.DomContentLoaded);
+
+  // should handle Uint32 overflows
+  await expect(
+    page.mainFrame.evaluate<boolean>(
+      `navigator.plugins.item(4294967296) === navigator.plugins[0]`,
+      false,
+    ),
+  ).resolves.toBe(true);
+
+  // should correctly support instance references
+  await expect(
+    page.mainFrame.evaluate<boolean>(
+      `navigator.plugins[0][0].enabledPlugin === navigator.plugins[0]`,
+      false,
+    ),
+  ).resolves.toBe(true);
+});
 
 test('it should override userAgentData in a browser window', async () => {
   const httpServer = await Helpers.runHttpsServer((req, res) => {

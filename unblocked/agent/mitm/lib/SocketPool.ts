@@ -93,7 +93,7 @@ export default class SocketPool {
   public close(): void {
     this.queue.willStop();
     for (const pending of this.pending) {
-      pending.reject(new CanceledPromiseError('Shutting down socket pool'));
+      pending.reject(new CanceledPromiseError('Shutting down socket pool'), true);
     }
     this.pending.length = 0;
     for (const session of this.http2Sessions) {

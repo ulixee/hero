@@ -41,7 +41,7 @@ import loadDomOverrides from './lib/loadDomOverrides';
 import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
-import lookupPublicIp, { IpLookupServices } from './lib/helpers/lookupPublicIp';
+import lookupPublicIp from './lib/helpers/lookupPublicIp';
 import IUserAgentData from './interfaces/IUserAgentData';
 import UserAgentOptions from './lib/UserAgentOptions';
 import BrowserEngineOptions from './lib/BrowserEngineOptions';
@@ -60,6 +60,8 @@ const { log } = Log(module);
 export interface IEmulatorOptions {
   userAgentSelector?: string;
 }
+
+let hasWarnedAboutProxyIp = false;
 
 @UnblockedPluginClassDecorator
 export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUnblockedPlugin<T> {
@@ -102,9 +104,13 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     );
     emulationProfile.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    if (emulationProfile.upstreamProxyUrl) {
-      emulationProfile.upstreamProxyIpMask ??= {};
-      emulationProfile.upstreamProxyIpMask.ipLookupService ??= IpLookupServices.ipify;
+    if (emulationProfile.upstreamProxyUrl && !emulationProfile.upstreamProxyIpMask) {
+      if (!hasWarnedAboutProxyIp) {
+        hasWarnedAboutProxyIp = true;
+        console.warn(
+          "You're using an upstreamProxyUrl without a Proxy IP Mask. This can expose the public IP of your host machine via WebRTC leaks in Chrome. To resolve, you can use the upstreamProxyIpMask feature.",
+        );
+      }
     }
 
     this.domOverridesBuilder ??= loadDomOverrides(
@@ -133,13 +139,22 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   public async onHttpAgentInitialized(agent: IHttpSocketAgent): Promise<void> {
     const profile = this.emulationProfile;
     const upstreamProxyIpMask = profile.upstreamProxyIpMask;
-    if (upstreamProxyIpMask) {
+    if (upstreamProxyIpMask && profile.upstreamProxyUrl) {
       upstreamProxyIpMask.publicIp ??= await lookupPublicIp(upstreamProxyIpMask.ipLookupService);
       upstreamProxyIpMask.proxyIp ??= await lookupPublicIp(
         upstreamProxyIpMask.ipLookupService,
         agent,
         profile.upstreamProxyUrl,
       );
+      if (upstreamProxyIpMask.proxyIp === upstreamProxyIpMask.publicIp) {
+        this.logger.error(
+          'upstreamProxyIpMask Lookup showing same IP for Proxy and Machine IP. Please check these settings.',
+          {
+            ...upstreamProxyIpMask,
+          },
+        );
+        return;
+      }
       this.logger.info('PublicIp Lookup', {
         ...upstreamProxyIpMask,
       });
