@@ -10,7 +10,6 @@ import BrowserContext from '../lib/BrowserContext';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
 
-
 describe('Pages', () => {
   let server: TestServer;
   let page: Page;
