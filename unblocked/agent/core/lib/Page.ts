@@ -436,27 +436,24 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
     );
 
-    const windowOffset = await this.mainFrame.getWindowOffset();
-    const viewportSize = { height: windowOffset.innerHeight, width: windowOffset.innerWidth };
+    const clip: Viewport = clipRect
+    if (clip) {
+      clip.x = Math.round(clip.x)
+      clip.y = Math.round(clip.y)
+      clip.height = Math.round(clip.height)
+      clip.width = Math.round(clip.width)
+    }
 
-    const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
-
-    const { scale, pageX, pageY } = layoutMetrics.visualViewport;
-    const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
-
-    const clip: Viewport = options.fullPage
-      ? { x: 0, y: 0, ...contentSize, scale }
-      : clipRect ?? { x: pageX, y: pageY, ...viewportSize, scale }
-
+    const captureBeyondViewport = (clip || options.fullPage) ? true : false
+    
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
       format,
       quality,
       clip,
-      captureBeyondViewport: true, // added in chrome 87 works since 89
+      captureBeyondViewport: captureBeyondViewport, // added in chrome 87 works since 89
     } as Protocol.Page.CaptureScreenshotRequest);
 
     const timestamp = Date.now();
-    
     this.emit('screenshot', {
       imageBase64: result.data,
       timestamp,
