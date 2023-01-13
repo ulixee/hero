@@ -260,19 +260,21 @@ describe('Pages', () => {
     it('should be able to take a clipped rect screenshot outside of viewport', async () => {
       await setContent(
         page,
-        `<div style="height: 500px; width: 500px; background:blue">&nbsp;</div>
-         <div style="height: 5000px; width: 100px; background:red">&nbsp;</div>`,
+        `<style>body,div {margin:0;padding:0}</style>
+        <div style="height: 2500px; width: 50px; background:blue">&nbsp;</div>
+        <div style="height: 200px; width: 100px; background:red">&nbsp;</div>`,
       );
       const screenshot = await page.screenshot({
         format: 'png',
         rectangle: {
           width: 500,
-          height: 5000,
+          height: 2700,
           x: 0,
           y: 0,
           scale: 1,
         },
       });
+      expect(sizeOf(screenshot).height).toBe(2700);
     });
   });
 
