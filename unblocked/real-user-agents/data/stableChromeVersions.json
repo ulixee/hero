@@ -7,7 +7,7 @@
     "stablePatchesByOs": {
       "mac": [87],
       "win": [75],
-      "linux": [87]
+      "linux": [74]
     }
   },
   {
