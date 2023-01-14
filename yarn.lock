@@ -2054,10 +2054,10 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.13"
 
-"@ulixee/chrome-107-0@^5304.110.6":
-  version "5304.110.6"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-107-0/-/chrome-107-0-5304.110.6.tgz#2c4232486f17664118001bfe5bc324a279abe639"
-  integrity sha512-Mv24Hhe2lP3ZfZBWnE9lQdkYncOgPS3YNJf02M2rl8QKjkxQkbfi1du28Gk+Or6FmGaAF9qQC1KPuL7HRZIQeQ==
+"@ulixee/chrome-108-0@^5359.125.6":
+  version "5359.125.7"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-108-0/-/chrome-108-0-5359.125.7.tgz#ac35bb3260dbb1642763f7f1748e5610a3900b18"
+  integrity sha512-vOjzEzap0qKLu+SfyIGnvX08GYEbWBZQ7+fq/49z1r4eMQAfbPo8fdiQig911b+ssKjlXobgGpM91Kn12cK8jQ==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
