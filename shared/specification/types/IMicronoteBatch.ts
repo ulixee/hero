@@ -5,11 +5,10 @@ export const MicronoteBatchSchema = z.object({
   batchHost: z.string().url(),
   batchSlug: z
     .string()
-    .regex(/^(?:gifts_|micro_)[0-9A-F]+$/i)
+    .regex(/^[0-9A-Fa-f]+$/)
     .length(14),
   plannedClosingTime: z.date(),
   stopNewNotesTime: z.date(),
-  isGiftCardBatch: z.boolean(),
   minimumFundingCentagons: z.bigint().refine(x => x >= 1n),
   micronoteBatchIdentity: identityValidation,
   micronoteBatchAddress: addressValidation,

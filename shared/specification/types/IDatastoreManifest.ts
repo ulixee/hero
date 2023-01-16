@@ -21,6 +21,11 @@ export const DatastoreManifestSchema = z.object({
       /^scr1[ac-hj-np-z02-9]{58}/,
       'This is not a Datastore scripthash (Bech32 encoded hash starting with "scr").',
     ),
+  adminIdentities: identityValidation
+    .array()
+    .describe(
+      'Administrators of this Datastore. If none are present, defaults to Administrators on the Miner.',
+    ),
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
   coreVersion: z.string().describe('Version of the Datastore Core Runtime'),
   schemaInterface: z.string().optional().describe('The raw typescript schema for this Datastore'),
@@ -79,9 +84,6 @@ export const DatastoreManifestSchema = z.object({
     }),
   ),
   paymentAddress: addressValidation.optional(),
-  giftCardIssuerIdentity: identityValidation
-    .optional()
-    .describe('A gift card issuer identity for this Datastore.'),
 });
 
 export type IVersionHistoryEntry = z.infer<

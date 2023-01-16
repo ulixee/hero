@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import {
   blockHeightValidation,
-  giftCardIdValidation,
-  giftCardRemptionKeyValidation,
   identityValidation,
   micronoteIdValidation,
   micronoteTokenValidation,
@@ -32,11 +30,16 @@ export const PaymentSchema = z.object({
       .optional()
       .describe('A hold authorization code granting sub-holds on a micronote.'),
   }).optional(),
-  giftCard: z
+  credits: z
     .object({
-      id: giftCardIdValidation,
-      sidechainIdentity: identityValidation,
-      redemptionKey: giftCardRemptionKeyValidation,
+      id: z
+        .string()
+        .length(12)
+        .regex(
+          /^cred[A-Za-z0-9_]{8}$/,
+          'This is not a Datastore credits id (starting with "cred", following by 8 alphanumeric characters).',
+        ),
+      secret: z.string().length(12),
     })
     .optional(),
 });

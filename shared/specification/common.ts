@@ -16,16 +16,6 @@ export const identityValidation = z
     'This is not a Ulixee identity (Bech32 encoded hash starting with "id1").',
   );
 
-export const giftCardIdValidation = z.string().length(12);
-
-export const giftCardRemptionKeyValidation = z
-  .string()
-  .length(62)
-  .regex(
-    /^gft1[ac-hj-np-z02-9]{58}/,
-    'This is not a Ulixee gift card redemption key (Bech32 encoded hash starting with "gft1").',
-  );
-
 export const hashValidation = z
   .instanceof(Buffer)
   .refine(x => x.length === 32, { message: 'Hashes must be 32 bytes' });
@@ -52,8 +42,8 @@ export const micronoteTokenValidation = z.number().int().positive();
 
 export const datastoreVersionHashValidation = z
   .string()
-  .length(62)
+  .length(22)
   .regex(
-    /^dbx1[ac-hj-np-z02-9]{58}/,
-    'This is not a Datastore versionHash (Bech32 encoded hash starting with "dbx1").',
+    /^dbx1[ac-hj-np-z02-9]{18}/,
+    'This is not a Datastore versionHash (first 21 characters of the bech32 encoded hash starting with "dbx1").',
   );

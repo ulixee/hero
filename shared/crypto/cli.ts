@@ -5,8 +5,10 @@ import { randomBytes } from 'crypto';
 import Identity from '@ulixee/crypto/lib/Identity';
 import * as Path from 'path';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import UlixeeConfig from '@ulixee/commons/config/index';
 import Address from './lib/Address';
 import IAddressSettings, { ISignerType } from './interfaces/IAddressSettings';
+import Ed25519 from './lib/Ed25519';
 
 const logError = (err: Error): void => {
   if (err instanceof APIError) {
@@ -129,6 +131,61 @@ export default function cliCommands(): Command {
         console.log('Saved to %s', filename); // eslint-disable-line no-console
       } else {
         console.log(identity.export(passphrase, passphraseCipher)); // eslint-disable-line no-console
+      }
+    });
+
+  cryptoCommands
+    .command('save-identity')
+    .description('Save an Identity PEM to a local file.')
+    .option('-k, --privateKey <key>', 'The private key bytes')
+    .option(
+      '-f, --filename <path>',
+      'Save this Identity to a filepath. If not specified, will be placed in <CACHE>/identities.',
+    )
+    .option('-p, --passphrase <phrase>', 'Save identity to a file with a passphrase.')
+    .option(
+      '-c, --passphrase-cipher <cipher>',
+      'Encrypt the internal key with a cipher (pkcs8 format).',
+      Identity.defaultPkcsCipher,
+    )
+    .action(async ({ privateKey, filename, passphraseCipher, passphrase }) => {
+      const ed25519 = Ed25519.createPrivateKeyFromBytes(Buffer.from(privateKey, 'base64'));
+
+      const identity = new Identity(ed25519);
+      identity.verifyKeys();
+
+      filename ||= Path.join(
+        UlixeeConfig.global.directoryPath,
+        'identities',
+        `${identity.bech32}.pem`,
+      );
+
+      await identity.save(filename, { passphrase, cipher: passphraseCipher });
+      console.log('Saved %s to %s', identity.bech32, filename); // eslint-disable-line no-console
+    });
+
+  cryptoCommands
+    .command('read-identity')
+    .description('Output the bech32 value of an identity.')
+    .option('--pem <pem>', 'The raw bytes of the PEM.')
+    .option(
+      '-f, --filename <path>',
+      'Save this Identity to a filepath. If not specified, will be console logged.',
+    )
+    .option('-p, --passphrase <phrase>', 'Save identity to a file with a passphrase.')
+    .enablePositionalOptions(true)
+    .action(({ pem, filename, passphrase }) => {
+      pem = pem.replaceAll('\\n', '\n');
+      if (filename) {
+        const identity = Identity.loadFromFile(Path.resolve(process.cwd(), filename), {
+          keyPassphrase: passphrase,
+        });
+
+        console.log(identity.bech32); // eslint-disable-line no-console
+      } else {
+        const identity = Identity.loadFromPem(pem, { keyPassphrase: passphrase });
+
+        console.log(identity.bech32); // eslint-disable-line no-console
       }
     });
 

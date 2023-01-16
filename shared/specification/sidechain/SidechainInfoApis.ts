@@ -41,7 +41,6 @@ export const SidechainInfoApiSchemas = {
     args: z.undefined().nullish(),
     result: z.object({
       micronote: MicronoteBatchSchema.array(),
-      giftCard: MicronoteBatchSchema.optional(),
     }),
   },
 };
