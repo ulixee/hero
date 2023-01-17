@@ -18,7 +18,7 @@
     "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"
   },
-  "repository": "git@github.com:ulixee/ulixee.git",
+  "repository": "git@github.com:ulixee/unblocked.git",
   "author": "Ulixee",
   "contributors": [
     "Caleb Clark",
