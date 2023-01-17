@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.18](https://github.com/ulixee/hero/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
+
+
+### Bug Fixes
+
+* **core:** do not crash if events listener gone ([63b2206](https://github.com/ulixee/hero/commit/63b2206995b99f14c0cbb8f77b351e5b242dc4ea)), closes [#204](https://github.com/ulixee/hero/issues/204)
+* fullstack instruction reflect addition of TransportBridge to @ulixee/shared/net/index.ts ([cfc17f4](https://github.com/ulixee/hero/commit/cfc17f4457ed20b34290bca3f8aeaacd17edf0a6))
+
+
+### Features
+
+* use WAL mode for databases ([0830238](https://github.com/ulixee/hero/commit/08302386c35e30f336b1651eb01170418a63bd23))
+
+
+
+
+
 # [2.0.0-alpha.17](https://github.com/ulixee/hero/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
 
 
