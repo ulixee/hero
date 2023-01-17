@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
+
+
+### Bug Fixes
+
+* add TransportBridge to net/index.ts and export ([8d4f1f1](https://github.com/ulixee/shared/commit/8d4f1f1e954553dbb75c6df8d155d361d506e83b))
+
+
+
+
+
 # [2.0.0-alpha.17](https://github.com/ulixee/shared/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
 
 

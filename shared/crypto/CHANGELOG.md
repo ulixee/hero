@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
+
+
+### Bug Fixes
+
+* **crypt:** don’t read pem if not provided ([cb825d1](https://github.com/ulixee/shared/commit/cb825d11712215c3a157f433e6b77dcd23230019))
+
+
+### Features
+
+* **specification:** credits api in datastore ([0dfab62](https://github.com/ulixee/shared/commit/0dfab6269e14c2d8cba99e860110732c58365a2e))
+
+
+
+
+
 # [2.0.0-alpha.17](https://github.com/ulixee/shared/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
 
 

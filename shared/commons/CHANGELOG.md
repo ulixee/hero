@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
+
+
+### Bug Fixes
+
+* don’t bindFunction for classes ([cdf1904](https://github.com/ulixee/shared/commit/cdf19040e090c44a6f713457545c65a549879da8))
+
+
+### Features
+
+* add counter to resolvable for debugging ([8ea0232](https://github.com/ulixee/shared/commit/8ea0232bc46c44d9db68918673c542ef90ec5415))
+* catch unhandled rejections for closes ([1dd47a9](https://github.com/ulixee/shared/commit/1dd47a97aeec413475a853b5b4f259bce0e3a3de))
+* databox stream and output apis ([1901482](https://github.com/ulixee/shared/commit/1901482b58d8e8d82497841d7a781efa5ee520cb))
+
+
+
+
+
 # [2.0.0-alpha.17](https://github.com/ulixee/shared/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
 
 
