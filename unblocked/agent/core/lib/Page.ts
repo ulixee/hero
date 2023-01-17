@@ -436,16 +436,24 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
     );
 
-    const clip: Viewport = clipRect
+    let clip: Viewport = clipRect;
     if (clip) {
-      clip.x = Math.round(clip.x)
-      clip.y = Math.round(clip.y)
-      clip.height = Math.round(clip.height)
-      clip.width = Math.round(clip.width)
+      clip.x = Math.round(clip.x);
+      clip.y = Math.round(clip.y);
+      clip.height = Math.round(clip.height);
+      clip.width = Math.round(clip.width);
     }
 
-    const captureBeyondViewport = (clip || options.fullPage) ? true : false
-    
+    const captureBeyondViewport = !!(clip || options.fullPage);
+
+    if (options.fullPage && this.browserContext.browser.majorVersion < 108) {
+      const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
+
+      const { scale } = layoutMetrics.visualViewport;
+      const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
+      clip = { x: 0, y: 0, ...contentSize, scale };
+    }
+
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
       format,
       quality,
