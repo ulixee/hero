@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.18](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
+
+
+### Bug Fixes
+
+* add missing expect ([42f48fe](https://github.com/ulixee/unblocked/commit/42f48fe28e856c6da4e306568c0b8d6d29a61c02))
+* **agent:** don’t crash if no nav history found ([c2159f8](https://github.com/ulixee/unblocked/commit/c2159f8617e18ec5ce15c816c6cc257c773c2563))
+* **agent:** don’t log worker emulation as errors ([3ec779b](https://github.com/ulixee/unblocked/commit/3ec779b51d04bd7df8d11f2e7dfd0ee05a0b31f4)), closes [#30](https://github.com/ulixee/unblocked/issues/30)
+* **agent:** handle new page can’t get readystate ([714eccf](https://github.com/ulixee/unblocked/commit/714eccf503e1de9ee0c8f019b5d50fc442c94b11))
+* ensure ipLookupServices can handle http2 ([ea9bb11](https://github.com/ulixee/unblocked/commit/ea9bb11fdcfa7ebee8ea3aa35577ef8721b994fb)), closes [#29](https://github.com/ulixee/unblocked/issues/29) [#28](https://github.com/ulixee/unblocked/issues/28)
+* improve testing for non-mitm nav ([08a7ddc](https://github.com/ulixee/unblocked/commit/08a7ddcc61e5b4dd46a927406b202ae709bb9ecc))
+* pool test broken ([63b20ea](https://github.com/ulixee/unblocked/commit/63b20eae9b4449e9de4323d25e39631aece0b73f))
+* support fullscreen screenshots ([23a7e74](https://github.com/ulixee/unblocked/commit/23a7e7449e5cb6b04ee4c5164da45c52cb449015))
+* support screenshot outside viewport ([8d6c1d9](https://github.com/ulixee/unblocked/commit/8d6c1d9df552912d9bfb38638aae9696ab4cbb79))
+* test if image is valid ([3f8eed5](https://github.com/ulixee/unblocked/commit/3f8eed5dfad1701bc1d78c4f46544b3e3c39154d))
+* use os.tmpdir ([3bf0ef0](https://github.com/ulixee/unblocked/commit/3bf0ef0e835fe9ab18719f377033d596caab146c))
+
+
+### Features
+
+* no unhandled rejections for close cancels ([d694648](https://github.com/ulixee/unblocked/commit/d694648b8b8eee23965d74d04807c4d8c1c66836))
+* simplify logic ([ff16a06](https://github.com/ulixee/unblocked/commit/ff16a06b8669b6ee4c0b7194ba2465f24c71f60b))
+
+
+
+
+
 # [2.0.0-alpha.17](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.15...v2.0.0-alpha.17) (2022-12-15)
 
 
