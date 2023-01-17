@@ -20,16 +20,55 @@ export const DatastoreApiSchemas = {
         .describe(
           'Allow this upload to start a new version chain (do not link to previous versions)',
         ),
-      uploaderIdentity: identityValidation
+      adminIdentity: identityValidation
         .optional()
-        .describe('If this server is private, an approved uploader Identity'),
-      uploaderSignature: signatureValidation
+        .describe(
+          'If this server is in production mode, an AdminIdentity approved on the Server or Datastore.',
+        ),
+      adminSignature: signatureValidation
         .optional()
-        .describe('A signature from an approved uploader Identity'),
+        .describe('A signature from an approved AdminIdentity'),
     }),
     result: z.object({
       success: z.boolean(),
     }),
+  },
+  'Datastore.creditsBalance': {
+    args: z.object({
+      datastoreVersionHash: datastoreVersionHashValidation.describe(
+        'The hash of the Datastore version to look at credits for.',
+      ),
+      creditId: z.string().describe('CreditId issued by this datastore.'),
+    }),
+    result: z.object({
+      issuedCredits: micronoteTokenValidation.describe('Issued credits balance in microgons.'),
+      balance: micronoteTokenValidation.describe('Remaining credits balance in microgons.'),
+    }),
+  },
+  'Datastore.admin': {
+    args: z.object({
+      versionHash: datastoreVersionHashValidation.describe(
+        'The hash of a unique datastore version',
+      ),
+      adminIdentity: identityValidation
+        .optional()
+        .describe('An admin identity for this Datastore.'),
+      adminSignature: signatureValidation
+        .optional()
+        .describe('A signature from the admin Identity'),
+      adminFunction: z.object({
+        ownerType: z
+          .enum(['table', 'crawler', 'function', 'datastore'])
+          .describe('Where to locate the function.'),
+        ownerName: z
+          .string()
+          .describe('The name of the owning function, table or crawler (if applicable).')
+          .optional(),
+        functionName: z.string().describe('The name of the function'),
+      }),
+      functionArgs: z.any().array().describe('The args to provide to the function.'),
+    }),
+    result: z.any().describe('A flexible result based on the type of api.'),
   },
   'Datastore.meta': {
     args: z.object({
@@ -69,7 +108,7 @@ export const DatastoreApiSchemas = {
           ),
           priceBreakdown: DatastoreFunctionPricing.array(),
 
-          schemaJson: z.string().optional().describe('The schema JSON if requested'),
+          schemaJson: z.any().optional().describe('The schema JSON if requested'),
         }),
       ),
       tablesByName: z.record(
@@ -88,7 +127,7 @@ export const DatastoreApiSchemas = {
                 .optional(),
             })
             .array(),
-          schemaJson: z.string().optional().describe('The schema JSON if requested'),
+          schemaJson: z.any().optional().describe('The schema JSON if requested'),
         }),
       ),
       schemaInterface: z
@@ -100,9 +139,6 @@ export const DatastoreApiSchemas = {
       computePricePerQuery: micronoteTokenValidation.describe(
         'The current server price per query. NOTE: if a server is implementing surge pricing, this amount could vary.',
       ),
-      giftCardIssuerIdentities: identityValidation
-        .array()
-        .describe('The identities this datastore allows gift card payments for (if any).'),
     }),
   },
   'Datastore.stream': {
@@ -113,9 +149,12 @@ export const DatastoreApiSchemas = {
       versionHash: datastoreVersionHashValidation.describe(
         'The hash of this unique datastore version',
       ),
-      payment: PaymentSchema.optional().describe(
-        'Payment for this request created with an approved Ulixee Sidechain.',
-      ),
+      payment: PaymentSchema.optional().describe('Payment for this request.'),
+      affiliateId: z
+        .string()
+        .regex(/aff[a-zA-Z_0-9-]{10}/)
+        .optional()
+        .describe('A tracking id to attribute payments to source affiliates.'),
       authentication: z
         .object({
           identity: identityValidation,
@@ -152,6 +191,11 @@ export const DatastoreApiSchemas = {
       versionHash: datastoreVersionHashValidation.describe(
         'The hash of this unique datastore version',
       ),
+      affiliateId: z
+        .string()
+        .regex(/aff[a-zA-Z_0-9-]{10}/)
+        .optional()
+        .describe('A tracking id to attribute payments to source affiliates.'),
       payment: PaymentSchema.optional().describe(
         'Payment for this request created with an approved Ulixee Sidechain.',
       ),
