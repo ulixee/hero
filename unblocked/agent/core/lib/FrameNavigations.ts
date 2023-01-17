@@ -292,6 +292,7 @@ export default class FrameNavigations
   ): void {
     const navigation = this.findMatchingNavigation(loaderId);
     if (!navigation) {
+      return;
     }
     navigation.finalUrl = url;
 
