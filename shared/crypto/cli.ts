@@ -175,7 +175,6 @@ export default function cliCommands(): Command {
     .option('-p, --passphrase <phrase>', 'Save identity to a file with a passphrase.')
     .enablePositionalOptions(true)
     .action(({ pem, filename, passphrase }) => {
-      pem = pem.replaceAll('\\n', '\n');
       if (filename) {
         const identity = Identity.loadFromFile(Path.resolve(process.cwd(), filename), {
           keyPassphrase: passphrase,
@@ -183,6 +182,7 @@ export default function cliCommands(): Command {
 
         console.log(identity.bech32); // eslint-disable-line no-console
       } else {
+        pem = pem?.replaceAll('\\n', '\n');
         const identity = Identity.loadFromPem(pem, { keyPassphrase: passphrase });
 
         console.log(identity.bech32); // eslint-disable-line no-console

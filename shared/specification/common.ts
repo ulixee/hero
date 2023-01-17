@@ -45,5 +45,5 @@ export const datastoreVersionHashValidation = z
   .length(22)
   .regex(
     /^dbx1[ac-hj-np-z02-9]{18}/,
-    'This is not a Datastore versionHash (first 21 characters of the bech32 encoded hash starting with "dbx1").',
+    'This is not a Datastore versionHash (first 22 characters of the bech32 encoded hash, first 4 characters are "dbx1").',
   );
