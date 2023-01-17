@@ -3271,5 +3271,33 @@
     "deviceCategory": "desktop",
     "releaseDate": "2022-12-13",
     "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-109-0": {
+    "id": "chrome-109-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "109",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-109-0": {
+    "id": "edge-109-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "109",
+      "minor": "0",
+      "build": "1518",
+      "patch": "49"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
