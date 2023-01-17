@@ -3,6 +3,7 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Log from '@ulixee/commons/lib/Logger';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import { scriptInstance } from './internal';
@@ -103,7 +104,8 @@ export default class CoreEventHeap {
         ...extras,
       })
       .catch(error => {
-        log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
+        if (error instanceof DisconnectedError) return;
+        log.warn('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
       });
     this.listenerFnById.delete(listenerId);
     this.listenerIdByHandle.delete(handle);
