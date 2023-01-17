@@ -436,61 +436,24 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
     );
 
-    const windowOffset = await this.mainFrame.getWindowOffset();
-    const viewportSize = { height: windowOffset.innerHeight, width: windowOffset.innerWidth };
-
-    const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
-
-    const { scale, pageX, pageY } = layoutMetrics.visualViewport;
-    const contentSize = layoutMetrics.cssContentSize ?? layoutMetrics.contentSize;
-
-    let resizeAfterScreenshot: SetDeviceMetricsOverrideRequest;
-    let clip: Viewport;
-    if (options.fullPage) {
-      if (scale > 1) {
-        contentSize.height = Math.floor(contentSize.height / scale);
-        contentSize.width = Math.floor(contentSize.width / scale);
-      }
-      // Ignore current page scale when taking fullpage screenshots (based on the page content, not viewport),
-      clip = { x: 0, y: 0, ...contentSize, scale: 1 };
-
-      if (contentSize.width > viewportSize.width || contentSize.height > viewportSize.height) {
-        await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
-          ...contentSize,
-          deviceScaleFactor: scale,
-          mobile: false,
-        });
-        resizeAfterScreenshot = {
-          ...viewportSize,
-          deviceScaleFactor: scale,
-          mobile: false,
-        };
-      }
-    } else {
-      const viewportRect = clipRect
-        ? this.trimClipToSize(clipRect, viewportSize)
-        : { x: 0, y: 0, ...viewportSize };
-      clip = {
-        x: pageX + viewportRect.x,
-        y: pageY + viewportRect.y,
-        width: Math.floor(viewportRect.width / scale),
-        height: Math.floor(viewportRect.height / scale),
-        scale,
-      };
+    const clip: Viewport = clipRect
+    if (clip) {
+      clip.x = Math.round(clip.x)
+      clip.y = Math.round(clip.y)
+      clip.height = Math.round(clip.height)
+      clip.width = Math.round(clip.width)
     }
 
-    const timestamp = Date.now();
+    const captureBeyondViewport = (clip || options.fullPage) ? true : false
+    
     const result = await this.devtoolsSession.send('Page.captureScreenshot', {
       format,
       quality,
       clip,
-      captureBeyondViewport: true, // added in chrome 87
+      captureBeyondViewport: captureBeyondViewport, // added in chrome 87 works since 89
     } as Protocol.Page.CaptureScreenshotRequest);
 
-    if (resizeAfterScreenshot) {
-      await this.devtoolsSession.send('Emulation.setDeviceMetricsOverride', resizeAfterScreenshot);
-    }
-
+    const timestamp = Date.now();
     this.emit('screenshot', {
       imageBase64: result.data,
       timestamp,
@@ -754,24 +717,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       imageBase64: event.data,
       timestamp: event.metadata.timestamp * 1000,
     });
-  }
-
-  // COPIED FROM PLAYWRIGHT
-  private trimClipToSize(clip: Rect, size: Size): Rect {
-    const p1 = {
-      x: Math.max(0, Math.min(clip.x, size.width)),
-      y: Math.max(0, Math.min(clip.y, size.height)),
-    };
-    const p2 = {
-      x: Math.max(0, Math.min(clip.x + clip.width, size.width)),
-      y: Math.max(0, Math.min(clip.y + clip.height, size.height)),
-    };
-    const result = { x: p1.x, y: p1.y, width: p2.x - p1.x, height: p2.y - p1.y };
-    assert(
-      result.width && result.height,
-      'Clipped area is either empty or outside the resulting image',
-    );
-    return result;
   }
 
   private onWebsocketFrame(event: IPageEvents['websocket-frame']): void {

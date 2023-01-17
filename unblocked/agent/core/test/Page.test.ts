@@ -7,7 +7,6 @@ import { Browser } from '../index';
 import { setContent } from './_pageTestUtils';
 import Page from '../lib/Page';
 import BrowserContext from '../lib/BrowserContext';
-import * as Fs from 'fs';
 
 describe('Pages', () => {
   let server: TestServer;
@@ -256,6 +255,28 @@ describe('Pages', () => {
         fullPage: true,
       });
       expect(sizeOf(screenshot).height).toBe(2700);
+    });
+
+    it('should be able to take a clipped rect screenshot outside of viewport', async () => {
+      await setContent(
+        page,
+        `<style>body,div {margin:0;padding:0}</style>
+        <div style="height: 2500px; width: 50px;></div>
+        <div style="height: 200px; width: 100px; background:red">&nbsp;</div>`,
+      );
+      const screenshot = await page.screenshot({
+        format: 'png',
+        rectangle: {
+          width: 500,
+          height: 2700,
+          x: 0,
+          y: 0,
+          scale: 1,
+        },
+      });
+      expect(screenshot.toString('base64')).toContain(
+        'AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNABYEDoADAgdAAYEDoADAgdAAaEDgADQgeAAaEDwIDQAWBA6AAwIHQAGBA6AAwIHQAGhA4AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNAB',
+      );
     });
   });
 
