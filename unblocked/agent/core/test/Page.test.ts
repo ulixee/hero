@@ -254,6 +254,7 @@ describe('Pages', () => {
         jpegQuality: 1,
         fullPage: true,
       });
+      expect(screenshot.toString('base64')).toContain('4AAQSkZJRgABAQAAAQABAAD');
       expect(sizeOf(screenshot).height).toBe(2700);
     });
 
