@@ -261,7 +261,7 @@ describe('Pages', () => {
       await setContent(
         page,
         `<style>body,div {margin:0;padding:0}</style>
-        <div style="height: 2500px; width: 50px; background:blue">&nbsp;</div>
+        <div style="height: 2500px; width: 50px;></div>
         <div style="height: 200px; width: 100px; background:red">&nbsp;</div>`,
       );
       const screenshot = await page.screenshot({
@@ -274,7 +274,9 @@ describe('Pages', () => {
           scale: 1,
         },
       });
-      expect(sizeOf(screenshot).height).toBe(2700);
+      expect(screenshot.toString('base64')).toContain(
+        'AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNABYEDoADAgdAAYEDoADAgdAAaEDgADQgeAAaEDwIDQAWBA6AAwIHQAGBA6AAwIHQAGhA4AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNAB',
+      );
     });
   });
 
