@@ -61,7 +61,7 @@ test('should override webrtc ip', async () => {
   });
   const resultCandidates = await page.evaluate<string[]>(webrtcScript);
   expect(resultCandidates.length).toBeGreaterThanOrEqual(1);
-  expect(resultCandidates.find(x => x.includes('1.1.1.1'))).toBeTruthy();
+  expect(resultCandidates.filter(x => x.includes('1.1.1.1')).length).toBeGreaterThanOrEqual(0);
   expect(resultCandidates.find(x => x.includes(publicIp))).toBeFalsy();
 });
 

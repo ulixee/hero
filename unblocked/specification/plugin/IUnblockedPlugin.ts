@@ -10,6 +10,7 @@ export default interface IUnblockedPlugin<T = any> extends IHooksProvider {
     callback?: (data: string, frame: IFrame) => any,
   ): boolean;
   configure?(emulationProfile: IEmulationProfile<T>): void | Promise<void>;
+  onClose?(): void;
 }
 
 export interface IUnblockedPluginClass<T = any> {

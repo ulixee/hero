@@ -43,6 +43,7 @@ export default class Plugins implements IUnblockedPlugins {
 
   private hooksByName: Record<keyof IUnblockedPlugin, ICallbackFn[]> = {
     configure: [],
+    onClose: [],
     addDomOverride: [],
     playInteractions: [],
     adjustStartingMousePoint: [],
@@ -104,6 +105,14 @@ export default class Plugins implements IUnblockedPlugins {
         callbackFn(this.profile);
       }
     }
+  }
+
+  public onClose(): void {
+    for (const plugin of this.instances) {
+      plugin.onClose?.();
+    }
+    this.instances.length = 0;
+    this.profile = null;
   }
 
   public addDomOverride(

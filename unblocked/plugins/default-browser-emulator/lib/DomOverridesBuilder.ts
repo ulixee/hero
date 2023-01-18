@@ -106,6 +106,11 @@ export default class DomOverridesBuilder {
     });
   }
 
+  public cleanup(): void {
+    this.alwaysPageScripts.clear();
+    this.alwaysWorkerScripts.clear();
+  }
+
   public addWorkerScript(script: string, args: any = {}): void {
     const wrapped = this.wrapScript('customScript', script, args);
     this.alwaysWorkerScripts.add({

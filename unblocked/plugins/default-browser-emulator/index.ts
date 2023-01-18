@@ -193,6 +193,10 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     return true;
   }
 
+  public onClose(): void {
+    this.domOverridesBuilder.cleanup();
+  }
+
   public onNewPage(page: IPage): Promise<any> {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;

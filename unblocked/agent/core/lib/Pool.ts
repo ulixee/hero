@@ -17,8 +17,8 @@ import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IU
 import Browser from './Browser';
 import Agent, { IAgentCreateOptions } from './Agent';
 import env from '../env';
-import Plugins from './Plugins';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 
 const { log } = Log(module);
 
@@ -147,8 +147,12 @@ export default class Pool extends TypedEventEmitter<{
       browser.setMaxListeners(this.maxConcurrentAgents * 5);
       this.browsersById.set(browser.id, browser);
 
-      this.events.on(browser, 'new-context', this.watchForContextPagesClosed.bind(this));
-      this.events.once(browser, 'close', this.onBrowserClosed.bind(this, browser.id));
+      const contextEvent = this.events.on(
+        browser,
+        'new-context',
+        this.watchForContextPagesClosed.bind(this),
+      );
+      this.events.once(browser, 'close', () => this.onBrowserClosed(browser.id, contextEvent));
 
       await browser.launch();
       this.emit('browser-launched', { browser });
@@ -256,12 +260,16 @@ export default class Pool extends TypedEventEmitter<{
     }
   }
 
-  private async onBrowserClosed(browserId: string): Promise<void> {
+  private async onBrowserClosed(
+    browserId: string,
+    contextEvent: IRegisteredEventListener,
+  ): Promise<void> {
     if (this.isClosing) return;
     for (const agent of this.agentsById.values()) {
       if (agent.browserContext?.browserId === browserId) await agent.close();
     }
 
+    if (contextEvent) this.events.off(contextEvent);
     this.logger.info('Browser.closed', {
       engine: this.browsersById.get(browserId)?.engine,
       browserId,
@@ -274,11 +282,13 @@ export default class Pool extends TypedEventEmitter<{
 
   private watchForContextPagesClosed(event: Browser['EventTypes']['new-context']): void {
     const browserContext = event.context;
-    this.events.on(
+
+    const registeredEvent = this.events.on(
       browserContext,
       'all-pages-closed',
       this.checkForInactiveBrowserEngine.bind(this, browserContext.browser.id),
     );
+    this.events.once(browserContext, 'close', () => this.events.off(registeredEvent));
   }
 
   private checkForInactiveBrowserEngine(browserId: string): void {
