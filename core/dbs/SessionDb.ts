@@ -191,8 +191,8 @@ export default class SessionDb {
     }
 
     SessionDb.byId.delete(this.sessionId);
+    this.db.close();
     if (deleteFile) {
-      this.db.close();
       await Fs.promises.rm(this.path);
     }
     this.db = null;

@@ -9,6 +9,7 @@ type AsyncFunc = (...args: any[]) => Promise<any>;
 
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();
+  private readonly fnMap = new Map<string, AsyncFunc>();
   private logger: IBoundLog;
   private isClosed = false;
 
@@ -20,8 +21,10 @@ export default class CommandRecorder {
     fns: AsyncFunc[],
   ) {
     for (const fn of fns) {
+      // used for bypassing recording
       owner[`___${fn.name}`] = fn.bind(owner);
-      owner[fn.name] = ((...args) => this.runCommandFn(fn, ...args)) as any;
+      this.fnMap.set(fn.name, fn.bind(owner));
+      owner[fn.name] = this.runCommandFn.bind(this, fn.name);
       this.fnNames.add(fn.name);
     }
     this.logger = log.createChild(module, {
@@ -35,12 +38,14 @@ export default class CommandRecorder {
     this.isClosed = true;
     this.session = null;
     this.owner = null;
+    this.fnMap.clear();
   }
 
-  private async runCommandFn<T>(commandFn: AsyncFunc, ...args: any[]): Promise<T> {
+  private async runCommandFn<T>(functionName: string, ...args: any[]): Promise<T> {
     if (this.isClosed) return;
-    if (!this.fnNames.has(commandFn.name))
-      throw new Error(`Unsupported function requested ${commandFn.name}`);
+    const commandFn = this.fnMap.get(functionName);
+    if (!this.fnNames.has(functionName) || !commandFn)
+      throw new Error(`Unsupported function requested ${functionName}`);
 
     const { session, owner } = this;
     if (session === null) return;
@@ -50,7 +55,7 @@ export default class CommandRecorder {
     session.commands.presetMeta = null;
 
     const shouldWait =
-      !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(commandFn.name);
+      !owner.shouldWaitForCommandLock || owner.shouldWaitForCommandLock(functionName);
     if (shouldWait) await commands.waitForCommandLock();
 
     let tabId = this.tabId;
@@ -68,7 +73,7 @@ export default class CommandRecorder {
       tabId,
       frameId,
       frame?.navigations?.top?.id,
-      commandFn.name,
+      functionName,
       args,
       meta,
     );
