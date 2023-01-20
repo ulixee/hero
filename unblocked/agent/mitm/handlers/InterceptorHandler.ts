@@ -8,10 +8,7 @@ export default class InterceptorHandler {
     if (!requestSession) return false;
     if (requestSession.isClosing) return false;
 
-    const shouldIntercept =
-      (ctx.resourceType &&
-        requestSession.interceptorHandlers?.some(x => x.types?.includes(ctx.resourceType))) ||
-      requestSession.shouldInterceptRequest(ctx.url.href);
+    const shouldIntercept = requestSession.shouldInterceptRequest(ctx.url.href, ctx.resourceType);
 
     if (!shouldIntercept) return false;
     ctx.didInterceptResource = shouldIntercept;

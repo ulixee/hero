@@ -27,6 +27,7 @@ import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHoo
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import ChromeEngine from './ChromeEngine';
 import Interactor from './Interactor';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 
 type ICallbackFn = (...args: any[]) => Promise<void> | void;
 
@@ -57,6 +58,7 @@ export default class Plugins implements IUnblockedPlugins {
     onTlsConfiguration: [],
     onHttpAgentInitialized: [],
     onHttp2SessionConnect: [],
+    shouldBlockRequest: [],
     beforeHttpRequest: [],
     beforeHttpResponse: [],
     websiteHasFirstPartyInteraction: [],
@@ -198,6 +200,13 @@ export default class Plugins implements IUnblockedPlugins {
     settings: IHttp2ConnectSettings,
   ): Promise<void> {
     await Promise.all(this.hooksByName.onHttp2SessionConnect.map(fn => fn(resource, settings)));
+  }
+
+  public shouldBlockRequest(url: string, resourceTypeIfKnown?: IResourceType): boolean {
+    for (const hook of this.hooksByName.shouldBlockRequest) {
+      if (hook(url, resourceTypeIfKnown)) return true;
+    }
+    return false;
   }
 
   public async beforeHttpRequest(resource: IHttpResourceLoadDetails): Promise<void> {

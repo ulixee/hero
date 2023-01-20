@@ -174,8 +174,11 @@ export default class RequestSession
     });
   }
 
-  public shouldInterceptRequest(url: string): boolean {
+  public shouldInterceptRequest(url: string, resourceType?: IResourceType): boolean {
     for (const handler of this.interceptorHandlers) {
+      if (handler.types && resourceType) {
+        if (handler.types.includes(resourceType)) return true;
+      }
       if (!handler.urls) continue;
       if (!handler.hasParsed) {
         handler.urls = handler.urls.map(x => {
@@ -189,6 +192,9 @@ export default class RequestSession
           return true;
         }
       }
+    }
+    for (const hook of this.hooks) {
+      if (hook.shouldBlockRequest?.(url, resourceType)) return true;
     }
     return false;
   }

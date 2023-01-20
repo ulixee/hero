@@ -149,7 +149,7 @@ These hooks are called on an individual [BrowserContext](./agent/browser/IBrowse
 
 #### addDomOverride(runOn, script, args, callback?)
 
-Add a custom DOM override to the plugin. The function will be run only by the first Plugin that returns true.
+Add a custom DOM override to the plugin. The function will be run only by the first Plugin that returns `true`.
 
 - _runOn_ `page | worker` Where to run this script.
 - _script_ `string` A script to be run in the page. It will be provided with access to Proxy utilities (currently matching the Unblocked Default Browser Emuluator `_proxyUtils`).
@@ -294,9 +294,16 @@ Browsers and versions send specific HTTP2 settings that remain true across all o
   - localWindowSize `number`. The HTTP2 initial window size to use.
   - settings `http2.Settings`. A node.js http2 module Settings object. It can be manipulated to change the settings sent to create an HTTP connection.
 
+#### shouldBlockRequest(url, resourceTypeIfKnown?)
+
+Callback before each an HTTP request is initiated. Any plugin returning `true` will halt processing for the given request.
+
+- url: `string`. The url being requested.
+- resourceTypeIfKnown: [`IResourceType`](./agent/net/IResourceType.ts). The type of resource being requested if it can be determined by the browser.
+  
 #### beforeHttpRequest(request)
 
-Callback before each HTTP request. This hook provides the opportunity to manipulate or bypass each request before it's sent on to the destination URL.
+Callback before each HTTP request (after a socket has been established and protocol agreed upon, but before sending any HTTP request). This hook provides the opportunity to manipulate each request before it's sent on to the destination URL.
 
 Browsers and versions send specific HTTP header values and order that are consistent by Resource Type, Origin, Cookie status, and more. An emulator should ensure headers are correct before a request is sent.
 

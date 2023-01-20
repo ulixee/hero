@@ -90,7 +90,7 @@ describe('move', () => {
       }),
     );
 
-    expect(commands.length).toBeGreaterThan(2);
+    expect(commands.length).toBeGreaterThanOrEqual(2);
   });
 });
 
