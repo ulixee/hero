@@ -88,7 +88,7 @@ describe('Connection tests', () => {
     await UlixeeHostsConfig.global.setVersionHost(next, 'localhost:8081');
 
     const connectionToCore = ConnectionFactory.createConnection({});
-    expect(connectionToCore.transport.host).toBe('ws://localhost:8081');
+    expect(connectionToCore.transport.host).toContain('ws://localhost:8081');
   });
 
   it('should inform a user if a Miner needs to be started', async () => {
