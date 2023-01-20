@@ -328,6 +328,10 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       null,
     );
 
+    if (options?.timeoutMs) {
+      this.browserContext.resources.setNavigationConnectTimeoutMs(formattedUrl, options.timeoutMs);
+    }
+
     const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
     const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);

@@ -24,7 +24,6 @@ import env from '../env';
 
 export default class MitmRequestAgent {
   public static defaultMaxConnectionsPerOrigin = 6;
-  public static connectTimeout = 10e3;
   public socketSession: MitmSocketSession;
   private session: RequestSession;
   private readonly maxConnectionsPerOrigin: number;
@@ -144,7 +143,10 @@ export default class MitmRequestAgent {
     return await pool.isHttp2(false, this.createSocketConnection.bind(this, options));
   }
 
-  public async createSocketConnection(options: IHttpSocketConnectOptions): Promise<MitmSocket> {
+  public async createSocketConnection(
+    options: IHttpSocketConnectOptions,
+    timeoutMillis = 10e3,
+  ): Promise<MitmSocket> {
     const session = this.session;
 
     const dnsLookupTime = new Date();
@@ -170,7 +172,7 @@ export default class MitmRequestAgent {
       mitmSocket.setProxyUrl(session.upstreamProxyUrl);
     }
 
-    await mitmSocket.connect(this.socketSession, 10e3);
+    await mitmSocket.connect(this.socketSession, timeoutMillis);
 
     if (options.isWebsocket) {
       mitmSocket.socket.setNoDelay(true);
@@ -194,7 +196,7 @@ export default class MitmRequestAgent {
 
     const mitmSocket = await pool.getSocket(
       options.isWebsocket,
-      this.createSocketConnection.bind(this, options),
+      this.createSocketConnection.bind(this, options, ctx.connectTimeoutMillis),
     );
     MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
     return mitmSocket;

@@ -13,7 +13,10 @@ import { Agent, Page, Pool } from '../index';
 
 let koaServer: ITestKoaServer;
 let pool: Pool;
-const resolvePendingTriggerSpy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingTrigger');
+const resolvePendingTriggerSpy = jest.spyOn<any, any>(
+  FrameNavigationsObserver.prototype,
+  'resolvePendingTrigger',
+);
 
 async function createAgent(enableMitm): Promise<{ agent: Agent; page: Page }> {
   const agent = pool.createAgent({
@@ -82,9 +85,13 @@ describe.each([
       });
       ctx.body = 'done';
     });
-    const { page } = await createAgent(enableMitm);
+    const { page, agent } = await createAgent(enableMitm);
+    const connectSpy = jest.spyOn(agent.mitmRequestSession.requestAgent, 'createSocketConnection');
     await expect(page.goto(startingUrl, { timeoutMs: 100 })).rejects.toThrowError('Timeout');
     timeoutResolve();
+    if (enableMitm) {
+      expect(connectSpy.mock.calls[0][1]).toEqual(100);
+    }
   });
 
   it('can load a cached page multiple times', async () => {

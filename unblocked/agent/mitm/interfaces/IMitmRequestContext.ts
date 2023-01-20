@@ -7,6 +7,7 @@ import CacheHandler from '../handlers/CacheHandler';
 import ResourceState from './ResourceState';
 
 export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
+  connectTimeoutMillis?: number;
   clientToProxyRequest: http.IncomingMessage | http2.Http2ServerRequest;
   cacheHandler: CacheHandler;
   didInterceptResource: boolean;

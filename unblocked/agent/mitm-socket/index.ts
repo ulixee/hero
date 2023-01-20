@@ -154,6 +154,9 @@ export default class MitmSocket
     }
     if (session.isClosing || this.isClosing || !session) return;
 
+    // minimum of 1 second
+    if (connectTimeoutMillis < 1e3) connectTimeoutMillis = 1e3;
+
     this.connectPromise = new Resolvable<void>(
       connectTimeoutMillis,
       `Timeout connecting to ${this.serverName ?? 'host'} at ${this.connectOpts.host}:${

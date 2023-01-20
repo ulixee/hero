@@ -19,6 +19,7 @@ import IBrowserRequestMatcher from '@ulixee/unblocked-agent-mitm/interfaces/IBro
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { IMitmRequestPendingBrowserRequest, IResourceEvents } from '../interfaces/IResourceEvents';
 import BrowserContext from './BrowserContext';
+import IMitmRequestContext from '@ulixee/unblocked-agent-mitm/interfaces/IMitmRequestContext';
 
 export default class Resources
   extends TypedEventEmitter<IResourceEvents>
@@ -33,6 +34,7 @@ export default class Resources
   public readonly cookiesByDomain = new Map<string, Record<string, ICookie>>();
   protected logger: IBoundLog;
 
+  private navigationConnectTimeoutMs: number;
   private readonly browserRequestIdToTabId = new Map<string, number>();
   private readonly mitmErrorsByUrl = new Map<
     string,
@@ -72,6 +74,10 @@ export default class Resources
     this.events.on(requestSession, 'response', this.onMitmResponse.bind(this));
     this.events.on(requestSession, 'http-error', this.onMitmError.bind(this));
     requestSession.browserRequestMatcher = this;
+  }
+
+  public setNavigationConnectTimeoutMs(url: string, timeoutMs: number): void {
+    this.navigationConnectTimeoutMs = timeoutMs;
   }
 
   public cleanup(): void {
@@ -299,6 +305,12 @@ export default class Resources
   }
 
   /////// MITM REQUESTS ////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public onInitialize(resource: IMitmRequestContext): void {
+    if (this.navigationConnectTimeoutMs !== undefined) {
+      resource.connectTimeoutMillis = this.navigationConnectTimeoutMs;
+    }
+  }
 
   protected onMitmResponse(event: IRequestSessionResponseEvent): void {
     if (!this.isCollecting) return;

@@ -355,6 +355,7 @@ describe('basic MitM tests', () => {
       },
       resolveBrowserRequest() {},
       cancelPending() {},
+      onInitialize() {},
     });
     const beforeHttpHook = jest.fn();
     session.hook({ beforeHttpRequest: beforeHttpHook });

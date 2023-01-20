@@ -110,6 +110,7 @@ export default class MitmRequestContext {
     }
 
     ctx.cacheHandler = new CacheHandler(responseCache, ctx);
+    requestSession.browserRequestMatcher?.onInitialize(ctx);
     return ctx;
   }
 
