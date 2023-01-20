@@ -1,4 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing/index';
+import * as Fs from 'fs';
 import Core, { Session } from '../index';
 
 afterEach(Helpers.afterEach);
@@ -29,6 +30,17 @@ describe('basic Core tests', () => {
     await Core.shutdown();
     expect(Core.pool.activeAgentsCount).toBe(0);
     await didClose;
+  });
+
+  it('can delete session databases', async () => {
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    await connection.connect({ maxConcurrentClientCount: 2 });
+    const { session } = await Session.create({ sessionPersistence: false });
+
+    expect(Fs.existsSync(session.db.path)).toBe(true);
+    await session.close();
+    expect(Fs.existsSync(session.db.path)).toBe(false);
   });
 
   it('can subscribe to Sessions created and closed', async () => {

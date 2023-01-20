@@ -573,17 +573,14 @@ export default class Session
     this.db.flush();
 
     this.removeAllListeners();
-    const databasePath = `${SessionDb.databaseDir}/${this.id}.db`;
-    const id = this.id;
-    // give the system a second to write to db before clearing
-    setImmediate(db => {
-      try {
-        db.close();
-      } catch (e) {
-        /* no-op */
-      }
-      Session.events.emit('closed', { id, databasePath });
-    }, this.db);
+    try {
+      await this.db.close(this.options.sessionPersistence === false);
+    } catch (e) {
+      /* no-op */
+    }
+
+    const databasePath = this.db.path;
+    Session.events.emit('closed', { id: this.id, databasePath });
   }
 
   public addRemoteEventListener(

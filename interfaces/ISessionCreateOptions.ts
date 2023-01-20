@@ -7,6 +7,7 @@ export default interface ISessionCreateOptions extends ISessionOptions, IEmulati
   sessionId?: string;
   sessionName?: string;
   sessionKeepAlive?: boolean;
+  sessionPersistence?: boolean;
   resumeSessionId?: string;
   resumeSessionStartLocation?: 'currentLocation' | 'sessionStart';
   replaySessionId?: string;

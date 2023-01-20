@@ -220,6 +220,7 @@ async function createSession(
 ): Promise<{ session: Session; tab: Tab }> {
   const meta = await connectionToClient.createSession(options);
   const tab = Session.getTab(meta);
-  Helpers.onClose(() => tab.session.close(true));
+  const session = tab.session;
+  Helpers.onClose(() => session.close(true));
   return { session: tab.session, tab };
 }

@@ -88,6 +88,7 @@ const Hero = require('@ulixee/hero-playground');
     - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81).
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
     - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
+  - sessionPersistence `boolean`. Do not save the [Session](../advanced-concepts/sessions.md) database if set to `false`. Defaults to `true` so you can troubleshoot errors, and load/extract data from previous sessions. 
 
 ## Properties
 
