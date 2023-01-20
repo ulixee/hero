@@ -30,12 +30,16 @@ import Hero from '@ulixee/hero';
 })();
 ```
 
-If you'd like to customize log output, you can inject your own logger so long as it supports four methods:
+If you'd like to customize log output, you can inject your own logger so long as it supports these methods:
 
-- `stats(action: string, data?: ILogData)`
-- `info(action: string, data?: ILogData)`
-- `warn(action: string, data?: ILogData)`
-- `error(action: string, data?: ILogData)`
+- `stats(action: string, data?: ILogData): number`
+- `info(action: string, data?: ILogData): number`
+- `warn(action: string, data?: ILogData): number`
+- `error(action: string, data?: ILogData): number`
+- `createChild(module: NodeModule, boundContext: any): ILog` Must return a new logger that retains the given boundContext state.
+
+
+_*NOTE:*_ you must initialize this Logger BEFORE any Hero code is accessed.
 
 For example:
 
@@ -43,20 +47,56 @@ For example:
 const debug = require('debug')('MyHero');
 const Logger = require('@ulixee/commons/Logger');
 
-Logger.injectLogger({
+let logId = 0;
+
+class CustomLogger {
+  level: string;
+  constructor(module, boundContext) {
+    this.boundContext = boundContext;
+    this.filename = module.filename;
+  }
   stats(action, data) {
     debug(`STATS ${action}`, data);
-  },
+    return (logId += 1);
+  }
   info(action, data) {
     debug(`INFO ${action}`, data);
-  },
+    return (logId += 1);
+  }
   warn(action, data) {
     debug(`WARN ${action}`, data);
-  },
+    return (logId += 1);
+  }
   error(action, data) {
     debug(`ERROR ${action}`, data);
-  },
+    return (logId += 1);
+  }
+  createChild(module, boundContext) {
+    const Constructor = this.constructor;
+    // @ts-ignore
+    return new Constructor(module, {
+      ...this.boundContext,
+      ...boundContext,
+    });
+  }
+  flush() {}
+}
+
+injectLogger(module => {
+  return {
+    log: new CustomLogger(module),
+  };
 });
+```
+
+From your main script:
+
+```
+require('./CustomLogger.js');
+const HeroCore = require('@ulixee/hero-core');
+
+// your code...
+
 ```
 
 ### Problems after an upgrade
