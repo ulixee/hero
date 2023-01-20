@@ -1,6 +1,6 @@
 export default interface ILog extends IBoundLog<ILogData> {
-  level: string;
-  flush();
+  level?: string;
+  flush?();
 }
 
 export interface IBoundLog<Base = any> {

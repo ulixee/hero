@@ -123,5 +123,10 @@ export default class WsTransportToCore<
     } else {
       this.host = host;
     }
+    if (!this.host.startsWith('ws') && !this.host.startsWith('http')) {
+      const url = new URL(this.host);
+      url.protocol = 'ws:';
+      this.host = url.href;
+    }
   }
 }
