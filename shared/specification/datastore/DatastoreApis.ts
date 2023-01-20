@@ -81,6 +81,7 @@ export const DatastoreApiSchemas = {
         .describe('Include JSON describing the schema for each function'),
     }),
     result: z.object({
+      name: z.string().optional(),
       latestVersionHash: datastoreVersionHashValidation.describe(
         'The latest version hash of this datastore',
       ),

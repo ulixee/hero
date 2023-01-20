@@ -5,7 +5,9 @@ import { DatastoreFunctionPricing } from './IDatastoreFunctionPricing';
 const minDate = new Date('2022-01-01').getTime();
 
 export const DatastoreManifestSchema = z.object({
+  name: z.string().optional(),
   versionHash: datastoreVersionHashValidation,
+  domain: z.string().optional().describe('A Custom DNS name pointing at the latest version of the Datastore.'),
   versionTimestamp: z.number().int().gt(minDate),
   linkedVersions: z
     .object({
