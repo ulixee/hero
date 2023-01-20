@@ -34,9 +34,9 @@ export const PaymentSchema = z.object({
     .object({
       id: z
         .string()
-        .length(12)
+        .length(11)
         .regex(
-          /^cred[A-Za-z0-9_]{8}$/,
+          /^crd[A-Za-z0-9_]{8}$/,
           'This is not a Datastore credits id (starting with "cred", following by 8 alphanumeric characters).',
         ),
       secret: z.string().length(12),
