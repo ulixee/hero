@@ -22,7 +22,8 @@ export default class ConnectionFactory {
 
     let connection: ConnectionToHeroCore;
     if (options.host) {
-      const transport = new WsTransportToCore(options.host);
+      const host = Promise.resolve(options.host).then(ConnectionToHeroCore.resolveHost);
+      const transport = new WsTransportToCore(host);
       connection = new ConnectionToHeroCore(transport);
     } else {
       const host = UlixeeHostsConfig.global.getVersionHost(version);
@@ -35,7 +36,7 @@ export default class ConnectionFactory {
       }
 
       if (host) {
-        const transport = new WsTransportToCore(host);
+        const transport = new WsTransportToCore(ConnectionToHeroCore.resolveHost(host));
         connection = new ConnectionToHeroCore(transport, { ...options, version });
       } else if (UlixeeHostsConfig.global.hasHosts()) {
         // If Miners are launched, but none compatible, propose installing miner locally

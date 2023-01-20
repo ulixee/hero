@@ -134,7 +134,16 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
   }
 
   public static remote(address: string): ConnectionToHeroCore {
+    address = ConnectionToHeroCore.resolveHost(address);
     const transport = new WsTransportToCore(address);
     return new ConnectionToHeroCore(transport);
+  }
+
+  public static resolveHost(host: string): string {
+    if (host.endsWith('/hero')) return host;
+
+    if (!host.endsWith('/')) host += '/';
+    if (!host.endsWith('hero')) host += 'hero';
+    return host;
   }
 }
