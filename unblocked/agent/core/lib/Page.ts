@@ -446,7 +446,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
 
     const captureBeyondViewport = !!(clip || options.fullPage);
 
-    if (options.fullPage && this.browserContext.browser.majorVersion < 108) {
+    if (options.fullPage) {
       const layoutMetrics = await this.devtoolsSession.send('Page.getLayoutMetrics');
 
       const { scale } = layoutMetrics.visualViewport;
