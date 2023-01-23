@@ -16,13 +16,15 @@ export default class NetworkDb {
   private readonly saveInterval: NodeJS.Timeout;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor() {
+  constructor(options?: { enableSqliteWAL: boolean }) {
     NetworkDb.createDir();
     this.db = new Database(NetworkDb.databasePath);
-    this.db.unsafeMode(false)
-    this.db.pragma('journal_mode = WAL');
     this.certificates = new CertificatesTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
+    if (options?.enableSqliteWAL) {
+      this.db.unsafeMode(false);
+      this.db.pragma('journal_mode = WAL');
+    }
 
     this.tables = [this.certificates];
 
