@@ -37,6 +37,7 @@ const { log } = Log(module);
 interface IDbOptions {
   readonly?: boolean;
   fileMustExist?: boolean;
+  enableWalMode?: boolean;
 }
 
 export default class SessionDb {
@@ -95,8 +96,10 @@ export default class SessionDb {
     this.sessionId = sessionId;
     this.path = `${SessionDb.databaseDir}/${sessionId}.db`;
     this.db = new Database(this.path, { readonly, fileMustExist });
-    this.db.unsafeMode(false);
-    this.db.pragma('journal_mode = WAL');
+    if (dbOptions?.enableWalMode) {
+      this.db.unsafeMode(false);
+      this.db.pragma('journal_mode = WAL');
+    }
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
