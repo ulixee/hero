@@ -374,7 +374,7 @@ export default class BrowserContext
         if (expires === '-1') {
           expires = undefined;
         } else if (expires.match(/^[.\d]+$/)) {
-          expires = parseInt(expires, 10);
+          expires = parseFloat(expires);
           if (expires > 1e10) expires /= 1e3;
         } else {
           expires = new Date(expires).getTime() / 1e3;
