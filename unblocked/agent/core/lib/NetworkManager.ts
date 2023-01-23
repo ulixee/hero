@@ -457,7 +457,9 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
       if (response.requestHeaders) this.mergeRequestHeaders(resource, response.requestHeaders);
       if (!resource.url) {
-        resource.url = new URL(response.url);
+        try {
+          resource.url = new URL(response.url);
+        } catch {}
         resource.frameId = frameId;
         resource.browserRequestId = requestId;
       }
