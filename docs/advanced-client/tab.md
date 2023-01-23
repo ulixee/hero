@@ -505,7 +505,6 @@ NOTE: Null access exceptions are ignored, so you don't need to worry about indiv
 
 ```js
 await hero.waitForState({
-  name: 'ulixeeLoaded',
   all(assert) {
     assert(hero.url, url => url === 'https://ulixee.org'); // once the url is resolved, it will be checked against https://ulixee.org
     assert(hero.isPaintingStable); // the default function evaluates if the result is true
@@ -515,7 +514,6 @@ await hero.waitForState({
 await hero.goto('https://dataliberationfoundation.org');
 
 await hero.waitForState({
-  name: 'dlfLoaded',
   all(assert) {
     assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
     assert(hero.isPaintingStable);
@@ -543,7 +541,6 @@ await hero.waitForState(assert => {
 #### **Arguments**:
 
 - state `object` | `function(assert: IPageStateAssert): void`. A state object or just the callback directly as a shorter option.
-  - name? `string`. Optional name of the state
   - url? `string` | `Regexp`. Optional url to run this state on (useful for running in a loop)
   - all `function(assert: IPageStateAssert): void`. A synchronous function that will be true if all assertions evaluate to true.
     - assert `function(statePromise: Promise<T>, assertionValueOrCallbackFn: (function(result: T): boolean)): void`. A function that takes a Promise as a first parameter, and a callback that will be checked when new state is available.
