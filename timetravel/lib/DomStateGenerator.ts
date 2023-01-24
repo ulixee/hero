@@ -13,6 +13,7 @@ import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterPr
 import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
+import Session from '@ulixee/hero-core/lib/Session';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
 import MirrorPage from './MirrorPage';
@@ -48,7 +49,10 @@ export default class DomStateGenerator {
       sessionId,
       needsProcessing: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
-      db: sessionDb,
+      // could get closed, so need to use getter
+      get db(): SessionDb {
+        return SessionDb.getCached(sessionId, false);
+      },
       dbLocation: SessionDb.databaseDir,
       loadingRange: [...loadingRange],
       timelineRange: timelineRange ? [...timelineRange] : undefined,
@@ -83,15 +87,18 @@ export default class DomStateGenerator {
       };
     }
     for (const session of savedState.sessions) {
+      const sessionId = session.sessionId;
       let db: SessionDb;
       try {
-        db = SessionDb.getCached(session.sessionId, false);
+        db = SessionDb.getCached(sessionId, false);
       } catch (err) {
         // couldn't load
       }
-      this.sessionsById.set(session.sessionId, {
+      this.sessionsById.set(sessionId, {
         ...session,
-        db,
+        get db(): SessionDb {
+          return SessionDb.getCached(sessionId, false);
+        },
         needsProcessing: !!db,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
       });
@@ -188,7 +195,11 @@ export default class DomStateGenerator {
 
       // wait for end point
       if (timeoutMs > 0) await new Promise(resolve => setTimeout(resolve, timeoutMs));
-      if (!db.readonly) db.flush();
+
+      const liveSession = Session.get(sessionId);
+      if (liveSession && liveSession.db?.isOpen && !liveSession.db?.readonly) {
+        liveSession.db.flush();
+      }
 
       session.mainFrameIds = db.frames.mainFrameIds(tabId);
 

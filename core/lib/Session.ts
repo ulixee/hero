@@ -68,7 +68,7 @@ export default class Session
 
   public readonly id: string;
   public readonly baseDir: string;
-  public readonly plugins: CorePlugins;
+  public plugins: CorePlugins;
 
   public get browserEngine(): IBrowserEngine {
     return this.emulationProfile.browserEngine;
@@ -171,7 +171,7 @@ export default class Session
     'rerun-kept-alive': void;
   }>();
 
-  public readonly agent: Agent;
+  public agent: Agent;
 
   protected readonly logger: IBoundLog;
 
@@ -195,7 +195,6 @@ export default class Session
     this.id = this.getId(options.sessionId);
     const id = this.id;
     Session.byId[id] = this;
-    this.events.once(this, 'closed', () => delete Session.byId[id]);
     this.db = new SessionDb(this.id);
     this.commands = new Commands(this.db);
 
@@ -469,6 +468,7 @@ export default class Session
   }
 
   public getLastActiveTab(): Tab {
+    if (!this.commands) return null;
     for (let idx = this.commands.history.length - 1; idx >= 0; idx -= 1) {
       const command = this.commands.history[idx];
       if (command.tabId) {
@@ -562,6 +562,7 @@ export default class Session
     this.emit('closed', closedEvent);
     await closedEvent.waitForPromise;
 
+    delete Session.byId[this.id];
     this.events.close();
     this.commandRecorder.cleanup();
     this.plugins.cleanup();
@@ -571,6 +572,7 @@ export default class Session
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
     this.db.flush();
+    this.cleanup();
 
     this.removeAllListeners();
     try {
@@ -658,6 +660,14 @@ export default class Session
       }
     }
     return sessionId ?? nanoid();
+  }
+
+  private cleanup(): void {
+    this.agent = null;
+    this.commandRecorder = null;
+    this.browserContext = null;
+    this.plugins = null;
+    this.commands = null;
   }
 
   private onResource(event: BrowserContext['resources']['EventTypes']['change']): void {

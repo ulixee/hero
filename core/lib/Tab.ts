@@ -67,7 +67,7 @@ export default class Tab
   }
 
   public readonly parentTabId?: number;
-  public readonly session: Session;
+  public session: Session;
   public readonly frameEnvironmentsById = new Map<number, FrameEnvironment>();
   public readonly frameEnvironmentsByDevtoolsId = new Map<string, FrameEnvironment>();
   public page: Page;
@@ -247,9 +247,7 @@ export default class Tab
     await this.page.setJavaScriptEnabled(enableJs);
   }
 
-  public setBlockedResourceUrls(
-    blockedUrls: (string | RegExp)[],
-  ): void {
+  public setBlockedResourceUrls(blockedUrls: (string | RegExp)[]): void {
     const mitmSession = this.session.mitmRequestSession;
 
     let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
@@ -308,10 +306,14 @@ export default class Tab
       }
     }
     this.events.close();
+    this.commandRecorder.cleanup();
     this.commandRecorder = null;
     this.emit('close');
     // clean up listener memory
     this.removeAllListeners();
+    this.session = null;
+    this.frameEnvironmentsById.clear();
+    this.frameEnvironmentsByDevtoolsId.clear();
 
     this.logger.stats('Tab.Closed', { parentLogId, errors });
   }
@@ -841,14 +843,10 @@ export default class Tab
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
     if (this.session.options?.blockedResourceTypes) {
-      await this.setBlockedResourceTypes(
-        this.session.options.blockedResourceTypes,
-      );
+      await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
     if (this.session.options?.blockedResourceUrls) {
-      await this.setBlockedResourceUrls(
-        this.session.options.blockedResourceUrls,
-      );
+      await this.setBlockedResourceUrls(this.session.options.blockedResourceUrls);
     }
   }
 

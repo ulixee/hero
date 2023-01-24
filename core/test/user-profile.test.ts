@@ -523,9 +523,9 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
         'textContent',
       ]);
       expect(crossContent.value).toBe('1');
+      const history = tab.navigations.history;
       await session.close();
 
-      const history = tab.navigations.history;
       expect(history).toHaveLength(1);
       expect(history[0].finalUrl).toBe(`${koaServer.baseUrl}/cross-storage2`);
     }

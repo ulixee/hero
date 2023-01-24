@@ -64,10 +64,12 @@ export default class MirrorPage extends TypedEventEmitter<{
     super();
     this.setDomRecording(domRecording);
     this.onPageEvents = this.onPageEvents.bind(this);
+    this.logger = log.createChild(module);
   }
 
   public async attachToPage(page: Page, sessionId: string, setReady = true): Promise<void> {
     this.page = page;
+    this.logger = log.createChild(module, { sessionId });
     let readyResolvable: Resolvable<void>;
     if (setReady) {
       readyResolvable = new Resolvable<void>();
@@ -77,16 +79,10 @@ export default class MirrorPage extends TypedEventEmitter<{
       this.events.once(page, 'close', this.close.bind(this));
       if (this.debugLogging) {
         this.events.on(page, 'console', msg => {
-          log.info('MirrorPage.console', {
-            ...msg,
-            sessionId,
-          });
+          this.logger.info('MirrorPage.console', msg);
         });
         this.events.on(page, 'crashed', msg => {
-          log.info('MirrorPage.crashed', {
-            ...msg,
-            sessionId,
-          });
+          this.logger.info('MirrorPage.crashed', msg);
         });
       }
 
@@ -123,6 +119,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     if (this.isReady) return await this.isReady;
 
     this.sessionId = sessionId;
+    this.logger = log.createChild(module, { sessionId });
     const ready = new Resolvable<void>();
     this.isReady = ready.promise;
     try {
@@ -209,10 +206,9 @@ export default class MirrorPage extends TypedEventEmitter<{
         isLoadingDocument = true;
 
         if (this.debugLogging) {
-          log.info('MirrorPage.navigate', {
+          this.logger.info('MirrorPage.navigate', {
             newPaintIndex,
             url: loadingDocument.url,
-            sessionId: this.sessionId,
           });
         }
         const loader = await this.page.navigate(loadingDocument.url);
@@ -229,9 +225,8 @@ export default class MirrorPage extends TypedEventEmitter<{
 
       if (newPaintIndex >= 0) {
         if (this.debugLogging) {
-          log.info('MirrorPage.loadPaintEvents', {
+          this.logger.info('MirrorPage.loadPaintEvents', {
             newPaintIndex,
-            sessionId: this.sessionId,
           });
         }
 
@@ -272,8 +267,6 @@ export default class MirrorPage extends TypedEventEmitter<{
   }
 
   public async close(): Promise<void> {
-    if (this.isReady === null) return;
-    this.isReady = null;
     this.loadQueue.stop();
     if (this.page && !this.page.isClosed) {
       await this.page.close();
@@ -337,9 +330,8 @@ export default class MirrorPage extends TypedEventEmitter<{
           return frame;
         }
       } catch (error) {
-        log.warn('Error matching frame nodeId to environment', {
+        this.logger.warn('Error matching frame nodeId to environment', {
           error,
-          sessionId: this.sessionId,
         });
         // just keep looking?
       }
