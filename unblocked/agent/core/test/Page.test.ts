@@ -64,11 +64,12 @@ describe('Pages', () => {
       // We have to interact with a page so that 'beforeunload' handlers
       // fire.
       await page.click('div');
+      const mainFrameId = page.mainFrame.frameId;
       await page.close();
 
       const message = await waitForConsole;
       await expect(message.message).toBe('Before called');
-      await expect(message.frameId).toBe(page.mainFrame.frameId);
+      await expect(message.frameId).toBe(mainFrameId);
     });
 
     it('page.close should set the page close state', async () => {

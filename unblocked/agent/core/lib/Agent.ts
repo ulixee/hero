@@ -164,15 +164,17 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
     this.isClosing = new Resolvable();
     try {
       await this.browserContext?.close();
-      this.browserContext = null;
       try {
         this.mitmRequestSession.close();
       } catch (error) {
         this.logger.error('Agent.CloseMitmRequestSessionError', { error, sessionId: this.id });
       }
+      this.isolatedMitm?.close();
 
       this.emit('close');
       this.events.close();
+      this.plugins.onClose();
+      this.cleanup();
     } finally {
       this.logger.stats('Agent.Closed', { parentLogId: id });
       this.isClosing.resolve();
@@ -201,5 +203,12 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
     }
 
     return this.browserContext;
+  }
+
+  private cleanup(): void {
+    this.browserContext = null;
+    this.isOpen = null;
+    this.isolatedMitm = null;
+    this.options.commandMarker = null;
   }
 }

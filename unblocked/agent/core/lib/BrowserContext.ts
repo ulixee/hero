@@ -74,7 +74,7 @@ export default class BrowserContext
     frameId: 0,
   };
 
-  public readonly commandMarker: ICommandMarker;
+  public commandMarker: ICommandMarker;
 
   private attachedTargetIds = new Set<string>();
   private pageOptionsByTargetId = new Map<string, IPageCreateOptions>();
@@ -320,6 +320,7 @@ export default class BrowserContext
       this.emit('close');
       this.devtoolsSessionLogger.close();
       this.removeAllListeners();
+      this.cleanup();
       this.logger.stats('BrowserContext.Closed', { parentLogId: logId });
     } finally {
       resolvable.resolve();
@@ -373,7 +374,7 @@ export default class BrowserContext
         if (expires === '-1') {
           expires = undefined;
         } else if (expires.match(/^[.\d]+$/)) {
-          expires = parseInt(expires, 10);
+          expires = parseFloat(expires);
           if (expires > 1e10) expires /= 1e3;
         } else {
           expires = new Date(expires).getTime() / 1e3;
@@ -413,5 +414,17 @@ export default class BrowserContext
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     return this.browser.devtoolsSession.send(method, params, this);
+  }
+
+  private cleanup(): void {
+    this.devtoolsSessionLogger = null;
+    this.workersById.clear();
+    this.pagesById.clear();
+    this.pagesByTabId.clear();
+    this.devtoolsSessionsById.clear();
+    this.defaultPageInitializationFn = null;
+    this.waitForPageAttachedById = null;
+    this.creatingTargetPromises.length = null;
+    this.commandMarker = null;
   }
 }

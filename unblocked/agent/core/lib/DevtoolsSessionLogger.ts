@@ -48,7 +48,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
     };
   } = {};
 
-  constructor(readonly browserContext: BrowserContext) {
+  constructor(private browserContext: BrowserContext) {
     super();
     this.truncateMessageResponses = DevtoolsSessionLogger.defaultTruncateMessageResponses;
     this.truncateParams = DevtoolsSessionLogger.defaultTruncateParams;
@@ -60,6 +60,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
     this.events.close();
     this.browserContextInitiatedMessageIds.clear();
     this.sentMessagesById = {};
+    this.browserContext = null;
   }
 
   public subscribeToDevtoolsMessages(

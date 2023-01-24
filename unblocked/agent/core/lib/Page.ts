@@ -54,9 +54,6 @@ import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
 import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
-import Size = Protocol.SystemInfo.Size;
-import Rect = Protocol.DOM.Rect;
-import SetDeviceMetricsOverrideRequest = Protocol.Emulation.SetDeviceMetricsOverrideRequest;
 import Viewport = Protocol.Page.Viewport;
 import JavascriptDialogClosedEvent = Protocol.Page.JavascriptDialogClosedEvent;
 
@@ -79,7 +76,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   public keyboard: Keyboard;
   public mouse: Mouse;
   public workersById = new Map<string, Worker>();
-  public readonly browserContext: BrowserContext;
+  public browserContext: BrowserContext;
   public readonly opener: Page | null;
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
@@ -559,6 +556,8 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       for (const worker of this.workersById.values()) {
         worker.close();
       }
+      // clear memory
+      this.cleanup();
     } catch (error) {
       this.logger.error('Page.didClose().error', {
         error,
@@ -568,6 +567,16 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       this.emit('close');
       this.removeAllListeners();
     }
+  }
+
+  private cleanup(): void {
+    this.waitTimeouts.length = 0;
+    this.workersById.clear();
+    this.framesManager = null;
+    this.networkManager = null;
+    this.domStorageTracker = null;
+    this.popupInitializeFn = null;
+    this.browserContext = null;
   }
 
   private async navigateToHistory(delta: number): Promise<string> {

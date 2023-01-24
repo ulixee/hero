@@ -149,6 +149,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     for (const frame of this.framesById.values()) {
       frame.close(error);
     }
+    this.framesById.clear();
+    this.framesByFrameId.clear();
   }
 
   public async addPageCallback(
