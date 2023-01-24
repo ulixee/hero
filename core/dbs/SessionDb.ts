@@ -2,7 +2,7 @@ import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
-import * as fs from 'fs';
+import * as Fs from 'fs';
 import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
@@ -47,6 +47,12 @@ export default class SessionDb {
     return this.db?.readonly;
   }
 
+  public get isOpen(): boolean {
+    return this.db?.open;
+  }
+
+  public readonly path: string;
+
   public readonly commands: CommandsTable;
   public readonly frames: FramesTable;
   public readonly frameNavigations: FrameNavigationsTable;
@@ -87,7 +93,8 @@ export default class SessionDb {
     SessionDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
-    this.db = new Database(`${SessionDb.databaseDir}/${sessionId}.db`, { readonly, fileMustExist });
+    this.path = `${SessionDb.databaseDir}/${sessionId}.db`;
+    this.db = new Database(this.path, { readonly, fileMustExist });
     this.db.unsafeMode(false);
     this.db.pragma('journal_mode = WAL');
     if (!readonly) {
@@ -171,7 +178,7 @@ export default class SessionDb {
     }
   }
 
-  public close(): void {
+  public async close(deleteFile = false): Promise<void> {
     clearInterval(this.saveInterval);
 
     if (this.db?.open) {
@@ -184,7 +191,10 @@ export default class SessionDb {
     }
 
     SessionDb.byId.delete(this.sessionId);
-    // NOTE: db will close when out of scope
+    if (deleteFile) {
+      this.db.close();
+      await Fs.promises.rm(this.path);
+    }
     this.db = null;
   }
 
@@ -240,7 +250,7 @@ export default class SessionDb {
 
   public static createDir(): void {
     if (!this.hasInitialized) {
-      fs.mkdirSync(this.databaseDir, { recursive: true });
+      Fs.mkdirSync(this.databaseDir, { recursive: true });
       this.hasInitialized = true;
     }
   }
