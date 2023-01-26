@@ -145,8 +145,8 @@ export const DatastoreApiSchemas = {
   'Datastore.stream': {
     args: z.object({
       streamId: z.string().describe('The streamId to push results for this query.'),
-      functionName: z.string().describe('The DatastoreFunction name'),
-      input: z.any().optional().describe('Optional input parameters for this function call'),
+      name: z.string().describe('The name of the table or function'),
+      input: z.any().optional().describe('Optional input or where parameters'),
       versionHash: datastoreVersionHashValidation.describe(
         'The hash of this unique datastore version',
       ),
@@ -181,6 +181,15 @@ export const DatastoreApiSchemas = {
         })
         .optional(),
     }),
+  },
+  'Datastore.fetchInternalTable': {
+    args: z.object({
+      name: z.string().describe('The name of the table'),
+      input: z.any().optional().describe('Optional input or where parameters'),
+      datastoreVersionHash: z.string().optional(),
+      datastoreInstanceId: z.string().optional(),
+    }),
+    result: z.any({}),
   },
   'Datastore.query': {
     args: z.object({
