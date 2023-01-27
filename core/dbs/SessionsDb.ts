@@ -8,6 +8,7 @@ import Session from '../lib/Session';
 interface IDbOptions {
   readonly?: boolean;
   fileMustExist?: boolean;
+  enableSqliteWAL?: boolean;
 }
 
 export default class SessionsDb {
@@ -19,10 +20,12 @@ export default class SessionsDb {
 
   constructor(dbOptions: IDbOptions = {}) {
     SessionsDb.createDir();
-    const { readonly = false, fileMustExist = false } = dbOptions;
+    const { readonly = false, fileMustExist = false, enableSqliteWAL = false } = dbOptions;
     this.db = new Database(SessionsDb.databasePath, { readonly, fileMustExist });
-    this.db.unsafeMode(false);
-    this.db.pragma('journal_mode = WAL');
+    if (enableSqliteWAL) {
+      this.db.unsafeMode(false);
+      this.db.pragma('journal_mode = WAL');
+    }
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
   }

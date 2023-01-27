@@ -47,6 +47,7 @@ import IDomState, { IDomStateAllFn } from '@ulixee/hero-interfaces/IDomState';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import { EventEmitter } from 'events';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -80,12 +81,15 @@ export type ISessionOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, '
 interface ISharedInternalProperties {
   clientPlugins: IClientPlugin[];
   coreSessionPromise: Promise<CoreSession>;
+  isConnected: boolean;
+}
+interface IHeroEvents {
+  close: () => void;
+  connected: () => void;
+  command: (name: string, commandId: number, args: any[]) => void;
 }
 
-export default class Hero extends AwaitedEventTarget<{
-  close: () => void;
-  command: (name: string, commandId: number, args: any[]) => void;
-}> {
+export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   public static defaults: IHeroDefaults = {
     blockedResourceTypes: [BlockedResourceType.None],
     shutdownOnProcessSignals: true,
@@ -103,13 +107,18 @@ export default class Hero extends AwaitedEventTarget<{
 
   #detachedElements: DetachedElements;
   #detachedResources: DetachedResources;
+  #directEventEmitter = new EventEmitter();
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
+    const isConnected = (): boolean => !!this.#coreSessionPromise;
     return {
       clientPlugins: this.#clientPlugins,
       get coreSessionPromise() {
         return coreSessionPromise();
+      },
+      get isConnected(): boolean {
+        return isConnected();
       },
     };
   }
@@ -597,12 +606,73 @@ export default class Hero extends AwaitedEventTarget<{
     };
   }
 
+  /// EVENTS
+
+  public override async addEventListener<K extends keyof IHeroEvents>(
+    eventType: K,
+    listenerFn: IHeroEvents[K] & Function,
+    options?,
+  ): Promise<void> {
+    if (eventType === 'connected') {
+      this.#directEventEmitter.addListener(eventType, listenerFn);
+      return;
+    }
+    return await super.addEventListener(eventType, listenerFn, options);
+  }
+
+  public override on<K extends keyof IHeroEvents>(
+    eventType: K,
+    listenerFn: IHeroEvents[K] & Function,
+    options?,
+  ): Promise<void> {
+    if (eventType === 'connected') {
+      this.#directEventEmitter.on(eventType, listenerFn);
+      return;
+    }
+    return super.on(eventType, listenerFn, options);
+  }
+
+  public override once<K extends keyof IHeroEvents>(
+    eventType: K,
+    listenerFn: IHeroEvents[K] & Function,
+    options?,
+  ): Promise<void> {
+    if (eventType === 'connected') {
+      this.#directEventEmitter.once(eventType, listenerFn);
+      return;
+    }
+    return super.once(eventType, listenerFn, options);
+  }
+
+  public override off<K extends keyof IHeroEvents>(
+    eventType: K,
+    listenerFn: IHeroEvents[K] & Function,
+  ): Promise<void> {
+    if (eventType === 'connected') {
+      this.#directEventEmitter.off(eventType, listenerFn);
+      return;
+    }
+    return super.off(eventType, listenerFn);
+  }
+
+  public override async removeEventListener<K extends keyof IHeroEvents>(
+    eventType: K,
+    listenerFn: IHeroEvents[K] & Function,
+  ): Promise<void> {
+    if (eventType === 'connected') {
+      this.#directEventEmitter.removeListener(eventType, listenerFn);
+      return;
+    }
+    return await super.removeEventListener(eventType, listenerFn);
+  }
+
   #getCoreSessionOrReject(): Promise<CoreSession> {
     if (!this.#coreSessionPromise) {
       this.#coreSessionPromise = this.#connectionToCore
         .createSession(this.#options)
         .then(session => {
           if (session instanceof CoreSession) this.#initializeClientPlugins(this.#clientPlugins);
+          this.#directEventEmitter.emit('connected');
           return session;
         })
         .catch(err => err);
