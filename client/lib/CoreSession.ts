@@ -18,12 +18,12 @@ import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import { IOutputChangeToRecord } from '../interfaces/ICoreSession';
+import ICoreSession, { IOutputChangeToRecord } from '../interfaces/ICoreSession';
 import Hero from './Hero';
 
 export default class CoreSession
   extends TypedEventEmitter<{ close: void }>
-  implements IJsPathEventTarget
+  implements IJsPathEventTarget, ICoreSession
 {
   public tabsById = new Map<number, CoreTab>();
   public sessionId: string;

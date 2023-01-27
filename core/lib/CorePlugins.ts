@@ -49,8 +49,8 @@ export default class CorePlugins implements ICorePlugins {
     this.logger = agent.logger.createChild(module);
 
     for (const plugin of Object.values(Core.corePluginsById)) {
-      if (plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary()) === false) continue;
-      this.use(plugin);
+      const shouldActivate = plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary()) ?? true;
+      if (shouldActivate) this.use(plugin);
     }
 
     if (Core.allowDynamicPluginLoading) {

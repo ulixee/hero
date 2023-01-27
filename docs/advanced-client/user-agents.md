@@ -4,7 +4,7 @@
 
 ## Background
 
-User Agent rotation is one of the ways developers have traditionally provided "noise" into the browser fingerprint acrss a series of scraping sessions. This is still a viable strategy, albeit less and less so as Chrome, Firefox and other browsers have begun to "freeze" the details of the UserAgent in the normal user-agent string (eg: Chrome 105+ no longer includes the build or patch release of the Browser Version, Mac OS 10.15.17 is the maximum Mac Operating System version shared, etc). These browsers have pushed many settings to the `Accept-CH` headers, where details are provided when a website requests them in the first HTTP Document request, or in a first TLS ClientHello message (via ApplicationSettings). All this to say, you now need to align your User Agent across many settings.
+User Agent rotation is one of the ways developers have traditionally provided "noise" into the browser fingerprint across a series of scraping sessions. This is still a viable strategy, albeit less and less so as Chrome, Firefox and other browsers have begun to "freeze" the details of the UserAgent in the normal user-agent string (eg: Chrome 105+ no longer includes the build or patch release of the Browser Version, Mac OS 10.15.17 is the maximum Mac Operating System version shared, etc). These browsers have pushed many settings to the `Accept-CH` headers, where details are provided when a website requests them in the first HTTP Document request, or in a first TLS ClientHello message (via ApplicationSettings). All this to say, you now need to align your User Agent across many settings.
 
 ## Real User Agent Strings
 

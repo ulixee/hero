@@ -131,7 +131,7 @@ export default class Resource {
     const idsSeen = new Set<number>();
 
     const timer = new Timer(options?.timeoutMs ?? 30e3);
-
+    const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
     const resourceFilter = { url: filter.url, type: filter.type };
     const resourceOptions: IWaitForResourceOptions = {
       sinceCommandId: options?.sinceCommandId,
@@ -177,6 +177,8 @@ export default class Resource {
             return resources;
           }
         }
+        coreTab.commandQueue.appendTrace(err, startStack);
+        coreTab.commandQueue.decorateErrorStack(err);
         throw err;
       }
 

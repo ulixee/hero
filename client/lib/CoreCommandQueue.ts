@@ -5,6 +5,7 @@ import Queue from '@ulixee/commons/lib/Queue';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
+import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
@@ -238,22 +239,7 @@ export default class CoreCommandQueue {
         return this.tryRetryCommand<T>(error);
       })
       .catch(error => {
-        if (!error.stack.includes(this.sessionMarker)) {
-          error.stack += `${this.sessionMarker}`;
-        }
-        if (callsite?.length) {
-          const lastLine = callsite[0];
-          if (lastLine) {
-            try {
-              const code = SourceLoader.getSource(lastLine)?.code?.trim();
-              if (code && !error.stack.includes(code)) {
-                error.stack = `\n\n  --->  ${code}\n\n\n${error.stack}`;
-              }
-            } catch (_) {
-              // drown if we can't read the source code
-            }
-          }
-        }
+        this.decorateErrorStack(error, callsite);
         throw error;
       });
   }
@@ -275,6 +261,49 @@ export default class CoreCommandQueue {
       this.commandCounter,
       this.internalState,
     );
+  }
+
+  public appendTrace(error: Error, startingTrace: string): void {
+    const marker = this.sessionMarker;
+    const sessionLineDivider = error.stack.split(marker);
+    if (sessionLineDivider.length > 1) {
+      error.stack = `${sessionLineDivider[0].trimEnd()}\n${startingTrace}${marker}`;
+    } else {
+      error.stack += `\n${startingTrace}`;
+    }
+  }
+
+  public decorateErrorStack(error: Error, callsite?: ISourceCodeLocation[]): void {
+    if (!error.stack.includes(this.sessionMarker)) {
+      error.stack += `${this.sessionMarker}`;
+    }
+    callsite ??= scriptInstance.getScriptCallsite();
+    if (callsite?.length) {
+      if (error.stack.includes(`\n\n  --->  `)) return;
+      const sourceLine = callsite[0];
+      const codeLines: string[] = [];
+      if (sourceLine) {
+        try {
+          for (let i = 0; i <= 5; i += 1) {
+            const code = SourceLoader.getSource(sourceLine)?.code?.trim();
+            if (!code) break;
+            codeLines.push(code);
+            if (code.includes(';')) break;
+            sourceLine.line += 1;
+            sourceLine.column = 1;
+          }
+        } catch (_) {
+          // drown if we can't read the source code
+        }
+      }
+
+      if (codeLines.length) {
+        const code = codeLines.join('\n        ');
+        if (code && !error.stack.includes(code)) {
+          error.stack = `\n\n  --->  ${code}\n\n\n${error.stack}`;
+        }
+      }
+    }
   }
 
   private async sendRequest<T>(

@@ -7,7 +7,7 @@ import {
   ILoadStatus,
   ILocationTrigger,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
-import { IJsPath, INodeVisibility, INodePointer } from '@ulixee/js-path';
+import { IJsPath, INodePointer, INodeVisibility } from '@ulixee/js-path';
 import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { ICookie } from '@ulixee/unblocked-specification/agent/net/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
@@ -195,7 +195,10 @@ export default class CoreFrameEnvironment {
         else if (waitForClickable) state = 'be clickable';
         else if (waitForVisible) state = 'be visible';
         else state = 'exist';
-        throw new TimeoutError(`Timeout waiting for element to ${state}`);
+        const message = error.message;
+        error.message = `Timeout waiting for element to ${state}`;
+        error.stack = error.stack.replace(message, error.message);
+        throw error;
       }
       throw error;
     }

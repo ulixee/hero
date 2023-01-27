@@ -97,6 +97,7 @@ export default class CoreTab implements IJsPathEventTarget {
     try {
       await handler.waitFor(options.timeoutMs);
     } catch (error) {
+      this.commandQueue.decorateErrorStack(error, callsitePath);
       if (!(error instanceof TimeoutError)) throw error;
 
       // Retry state after each flow handler, but do not retry the timeout
@@ -153,9 +154,18 @@ export default class CoreTab implements IJsPathEventTarget {
     if (typeof exitState === 'function') {
       exitState = { all: exitState };
     }
+    const startStack = new Error('').stack.slice(8);
     const flowCommand = await this.flowCommands.create(commandFn, exitState, callsitePath, options);
 
-    return await flowCommand.run();
+    try {
+      return await flowCommand.run();
+    } catch (error) {
+      const startingTrace = `${'------FLOW COMMAND'.padEnd(50, '-')}\n${startStack}`;
+      if (!error.stack.includes(startStack.split(/\r?\n/g).pop())) {
+        this.commandQueue.appendTrace(error, startingTrace);
+      }
+      throw error;
+    }
   }
 
   public async shouldRetryFlowHandlers(
