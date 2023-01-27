@@ -7,7 +7,7 @@ import {
   signatureValidation,
 } from '../common';
 import { PaymentSchema } from '../types/IPayment';
-import { DatastoreFunctionPricing } from '../types/IDatastoreFunctionPricing';
+import { DatastoreRunnerPricing } from '../types/IDatastoreRunnerPricing';
 
 const positiveInt = z.number().int().positive();
 
@@ -58,11 +58,11 @@ export const DatastoreApiSchemas = {
         .describe('A signature from the admin Identity'),
       adminFunction: z.object({
         ownerType: z
-          .enum(['table', 'crawler', 'function', 'datastore'])
+          .enum(['table', 'crawler', 'runner', 'datastore'])
           .describe('Where to locate the function.'),
         ownerName: z
           .string()
-          .describe('The name of the owning function, table or crawler (if applicable).')
+          .describe('The name of the owning runner, table or crawler (if applicable).')
           .optional(),
         functionName: z.string().describe('The name of the function'),
       }),
@@ -85,7 +85,7 @@ export const DatastoreApiSchemas = {
       latestVersionHash: datastoreVersionHashValidation.describe(
         'The latest version hash of this datastore',
       ),
-      functionsByName: z.record(
+      runnersByName: z.record(
         z.string().describe('The name of a function'),
         z.object({
           stats: z.object({
@@ -107,7 +107,7 @@ export const DatastoreApiSchemas = {
           minimumPrice: micronoteTokenValidation.describe(
             'Minimum microgons that must be allocated for a query to be accepted.',
           ),
-          priceBreakdown: DatastoreFunctionPricing.array(),
+          priceBreakdown: DatastoreRunnerPricing.array(),
 
           schemaJson: z.any().optional().describe('The schema JSON if requested'),
         }),
@@ -135,7 +135,7 @@ export const DatastoreApiSchemas = {
         .string()
         .optional()
         .describe(
-          'A Typescript interface describing input and outputs of Datastore Functions, and schemas of Datastore Tables',
+          'A Typescript interface describing input and outputs of Datastore Runners, and schemas of Datastore Tables',
         ),
       computePricePerQuery: micronoteTokenValidation.describe(
         'The current server price per query. NOTE: if a server is implementing surge pricing, this amount could vary.',
@@ -262,7 +262,7 @@ export const DatastoreApiSchemas = {
     }),
     result: z.object({}),
   },
-  'Datastore.createInMemoryFunction': {
+  'Datastore.createInMemoryRunner': {
     args: z.object({
       name: z.string(),
       schema: z.any({}),
@@ -280,7 +280,7 @@ export const DatastoreApiSchemas = {
     }),
     result: z.any({}),
   },
-  'Datastore.queryInternalFunctionResult': {
+  'Datastore.queryInternalRunnerResult': {
     args: z.object({
       name: z.string(),
       sql: z.string(),
@@ -296,8 +296,8 @@ export const DatastoreApiSchemas = {
     args: z.object({
       sql: z.string(),
       boundValues: z.any({}).optional(),
-      inputByFunctionName: z.record(z.any()),
-      outputByFunctionName: z.record(z.array(z.any({}))),
+      inputByRunnerName: z.record(z.any()),
+      outputByRunnerName: z.record(z.array(z.any({}))),
       recordsByVirtualTableName: z.record(
         z.string({ description: 'Virtual Table Name' }),
         z.record(z.string(), z.any(), { description: 'Virtual Table Record' }).array(),

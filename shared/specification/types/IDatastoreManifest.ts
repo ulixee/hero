@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { addressValidation, identityValidation, datastoreVersionHashValidation } from '../common';
-import { DatastoreFunctionPricing } from './IDatastoreFunctionPricing';
+import { DatastoreRunnerPricing } from './IDatastoreRunnerPricing';
 
 const minDate = new Date('2022-01-01').getTime();
 
@@ -31,11 +31,11 @@ export const DatastoreManifestSchema = z.object({
   scriptEntrypoint: z.string().describe('A relative path from a project root'),
   coreVersion: z.string().describe('Version of the Datastore Core Runtime'),
   schemaInterface: z.string().optional().describe('The raw typescript schema for this Datastore'),
-  functionsByName: z.record(
+  runnersByName: z.record(
     z
       .string()
       .regex(/[a-z][A-Za-z0-9]+/)
-      .describe('The Function name'),
+      .describe('The Runner name'),
     z.object({
       corePlugins: z
         .record(z.string())
@@ -49,7 +49,7 @@ export const DatastoreManifestSchema = z.object({
         })
         .optional()
         .describe('The schema as json.'),
-      prices: DatastoreFunctionPricing.array()
+      prices: DatastoreRunnerPricing.array()
         .min(1)
         .optional()
         .describe(

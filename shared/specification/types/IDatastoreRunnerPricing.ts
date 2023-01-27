@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { datastoreVersionHashValidation } from '../common';
 
-export const DatastoreFunctionPricing = z.object({
+export const DatastoreRunnerPricing = z.object({
   minimum: z.number().int().nonnegative().optional().describe('Minimum price for this step.'),
   perQuery: z.number().int().nonnegative().describe('Base price per query.'),
   addOns: z
@@ -18,10 +18,10 @@ export const DatastoreFunctionPricing = z.object({
     .object({
       host: z.string().describe('The remote host'),
       datastoreVersionHash: datastoreVersionHashValidation,
-      functionName: z.string().describe('The remote function name'),
+      runnerName: z.string().describe('The remote runner name'),
     })
     .optional(),
 });
-type IDatastoreFunctionPricing = z.infer<typeof DatastoreFunctionPricing>;
+type IDatastoreRunnerPricing = z.infer<typeof DatastoreRunnerPricing>;
 
-export default IDatastoreFunctionPricing;
+export default IDatastoreRunnerPricing;
