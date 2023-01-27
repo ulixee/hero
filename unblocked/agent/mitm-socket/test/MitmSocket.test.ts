@@ -86,7 +86,7 @@ test('should be able to hit google using a Chrome Emulator', async () => {
   const request = client.request({ ':path': '/' });
   const httpResponse = await readResponse(request);
   expect(httpResponse).toBeTruthy();
-  expect(httpResponse).toMatch(/<\/body><\/html>$/);
+  expect(httpResponse).toMatch(/<\/body><\/html>$/i);
 });
 
 test('should be able to hit gstatic using a Chrome Emulator', async () => {

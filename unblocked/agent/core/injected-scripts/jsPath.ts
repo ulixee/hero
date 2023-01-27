@@ -124,7 +124,7 @@ class ObjectAtPath {
     const centerX = round(x + width / 2);
     const centerY = round(y + height / 2);
 
-    this._obstructedByElement = ObjectAtPath.elementFromPoint(centerX, centerY);
+    this._obstructedByElement = ObjectAtPath.elementFromPoint(centerX, centerY, element);
     return this._obstructedByElement;
   }
 
@@ -393,7 +393,7 @@ class ObjectAtPath {
     return state;
   }
 
-  public static elementFromPoint(x: number, y: number): Element {
+  public static elementFromPoint(x: number, y: number, target: Element): Element {
     let container: Document | ShadowRoot = document;
     let element: Element;
     while (container) {
@@ -403,6 +403,7 @@ class ObjectAtPath {
       const innerElement = elements[0];
       if (!innerElement || element === innerElement) break;
       element = innerElement;
+      if (element === target) break;
       container = element.shadowRoot;
     }
     return element;
