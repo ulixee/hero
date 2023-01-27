@@ -92,13 +92,13 @@ export default class WsTransportToCore<
         this.events.once(webSocket, 'error', this.onConnectError),
       );
       this.events.once(webSocket, 'open', () => {
+        this.events.once(webSocket, 'close', this.disconnect);
+        this.events.on(webSocket, 'error', this.disconnect);
         this.events.endGroup('preConnect');
         this.connectPromise.resolve();
       });
 
       this.webSocket = webSocket;
-      this.events.once(webSocket, 'close', this.disconnect);
-      this.events.on(webSocket, 'error', this.disconnect);
       this.events.on(webSocket, 'message', this.onMessage);
     }
     const connectOrError = await this.connectPromise;

@@ -1,4 +1,4 @@
-import moment = require('moment');
+import * as moment from 'moment';
 import { URL } from 'url';
 import * as assert from 'assert';
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
@@ -18,6 +18,9 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
   TOptional,
   IStringSchemaConfig<TOptional>
 > {
+  public static DateFormat = 'YYYY-MM-DD';
+  public static TimeFormat = 'HH:mm';
+
   readonly typeName = 'string';
   format?: 'email' | 'url' | 'date' | 'time';
   regexp?: RegExp;
@@ -50,6 +53,25 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
       assert(typeof config.length === 'number', 'length value must be a number');
   }
 
+  public toMoment(value: string): moment.Moment {
+    if (this.format === 'date') return moment(value, StringSchema.DateFormat);
+    if (this.format === 'time') return moment(value, StringSchema.TimeFormat);
+    throw new Error('This StringSchema does not have a format of date or time.');
+  }
+
+  public toDate(value: string): Date {
+    return this.toMoment(value).toDate();
+  }
+
+  public toFormat(date: Date | moment.Moment): string {
+    if (date instanceof Date) {
+      date = moment(date);
+    }
+    if (this.format === 'time') return date.format(StringSchema.TimeFormat);
+    if (this.format === 'date') return date.format(StringSchema.DateFormat);
+    throw new Error('This StringSchema does not have a format of date or time.');
+  }
+
   protected validationLogic(value: any, path, tracker): void {
     if (typeof value !== this.typeName) {
       return this.incorrectType(value, path, tracker);
@@ -59,7 +81,7 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
     if (config.format) {
       switch (config.format) {
         case 'date': {
-          if (!moment(value, 'YYYY-MM-DD').isValid()) {
+          if (!moment(value, StringSchema.DateFormat).isValid()) {
             return this.failedConstraint(
               value,
               ` This value does not follow the YYYY-MM-DD date pattern`,
@@ -76,7 +98,7 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
           break;
         }
         case 'time': {
-          if (!moment(value, 'HH:mm').isValid()) {
+          if (!moment(value, StringSchema.TimeFormat).isValid()) {
             return this.failedConstraint(
               value,
               ` This value does not follow the HH:mm time pattern`,

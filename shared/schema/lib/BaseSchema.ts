@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import IValidationResult, { IValidationError } from '../interfaces/IValidationResult';
+import { ObjectSchema } from '../index';
 
 export interface IBaseConfig<TOptional extends boolean = boolean> {
   optional?: TOptional;
@@ -107,21 +108,24 @@ export default abstract class BaseSchema<
           return schema.typeName;
         }
         case 'array':
-          return `${schema}${BaseSchema.inspect(schema.element, true, circular)}[]`;
-        case 'record': {
-          const keys = Object.keys(schema.fields);
-          return keys.length
-            ? `{ ${keys
-                .map(
-                  k =>
-                    `${schema}${k}${schema.fields[k].optional ? '?' : ''}: ${BaseSchema.inspect(
-                      schema.fields[k],
-                      false,
-                      circular,
-                    )};`,
-                )
-                .join(' ')} }`
-            : '{}';
+          return `Array<${BaseSchema.inspect(schema.element, true, circular)}>`;
+        case 'record':
+          return `{ keys: ${BaseSchema.inspect(
+            schema.keys,
+            true,
+            circular,
+          )}, values: ${BaseSchema.inspect(schema.values, true, circular)} }`;
+        case 'object': {
+          let returnType = '{';
+          let isFirst = true;
+          for (const [key, field] of Object.entries(schema.fields)) {
+            if (!isFirst) returnType += ',';
+            const optional = (field as BaseSchema<any>).optional;
+            const nested = BaseSchema.inspect(field, false, circular);
+            returnType += ` ${key}${optional ? '?' : ''}: ${nested}`;
+            isFirst = false;
+          }
+          return `${returnType} }`;
         }
       }
     } finally {
