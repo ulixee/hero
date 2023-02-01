@@ -115,6 +115,7 @@ export default class TypeSerializer {
     }
 
     const type = typeof value;
+
     if (type === Types.boolean || type === Types.string || type === Types.number) return value;
     if (type === Types.bigint || value instanceof BigInt) {
       return { __type: Types.bigint, value: value.toString() };
@@ -128,7 +129,10 @@ export default class TypeSerializer {
       return { __type: Types.RegExp, value: [value.source, value.flags] };
     }
 
-    if (value instanceof Error) {
+    if (
+      value instanceof Error ||
+      ('stack' in value && 'name' in value && (value.name as string)?.endsWith?.('Error'))
+    ) {
       const { name, message, stack, ...data } = value;
       const extras = this.replace(data, options) as object;
       return { __type: Types.Error, value: { name, message, stack, ...extras } };
