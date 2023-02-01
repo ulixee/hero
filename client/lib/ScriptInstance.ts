@@ -4,11 +4,13 @@ import { getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
-const AwaitedDomPath = require.resolve('@ulixee/awaited-dom/package.json').replace('package.json', '');
+const AwaitedDomPath = require
+  .resolve('@ulixee/awaited-dom/package.json')
+  .replace('package.json', '');
 const HeroLibPath = require.resolve('./Hero').replace(/\/Hero\.(?:ts|js)/, '');
 
 export default class ScriptInstance {
-  public readonly ignoreModulePaths = ['node:internal', AwaitedDomPath, HeroLibPath];
+  public static readonly ignoreModulePaths = ['node:internal', AwaitedDomPath, HeroLibPath];
   public readonly id: string = nanoid();
   public readonly entrypoint = require.main?.filename ?? process.argv[1];
   public readonly startDate = Date.now();
@@ -65,7 +67,7 @@ export default class ScriptInstance {
       const { filename } = callsite;
       if (!filename) continue;
 
-      if (this.ignoreModulePaths.find(x => filename.startsWith(x))) {
+      if (ScriptInstance.ignoreModulePaths.find(x => filename.startsWith(x))) {
         continue;
       }
       if (filename.endsWith(this.entrypoint)) {

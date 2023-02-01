@@ -260,8 +260,10 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     state: IDomState | DomState | IDomStateAllFn,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<void> {
+    const callstack = new Error().stack.slice(8);
+    const callsitePath = scriptInstance.getScriptCallsite();
     const coreTab = await this.#coreTabPromise;
-    return coreTab.waitForState(state, options);
+    return await coreTab.waitForState(state, options, { callstack, callsitePath });
   }
 
   public async validateState(state: IDomState | DomState | IDomStateAllFn): Promise<boolean> {

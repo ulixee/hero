@@ -86,8 +86,10 @@ export default class CoreTab implements IJsPathEventTarget {
   public async waitForState(
     state: IDomState | DomState | IDomStateAllFn,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
+    sourceCode?: { callstack: string, callsitePath: ISourceCodeLocation[] }
   ): Promise<void> {
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callstack = sourceCode?.callstack ?? new Error().stack.slice(8);
+    const callsitePath = sourceCode?.callsitePath ?? scriptInstance.getScriptCallsite();
     if (typeof state === 'function') {
       state = { all: state };
     }
@@ -97,6 +99,7 @@ export default class CoreTab implements IJsPathEventTarget {
     try {
       await handler.waitFor(options.timeoutMs);
     } catch (error) {
+      if (!error.stack.includes(callstack)) error.stack += `\n${callstack}`;
       this.commandQueue.decorateErrorStack(error, callsitePath);
       if (!(error instanceof TimeoutError)) throw error;
 

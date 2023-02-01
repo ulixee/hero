@@ -1,6 +1,8 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { SourceMapSupport } from '@ulixee/commons/lib/SourceMapSupport';
-import INavigation, { ContentPaint } from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import INavigation, {
+  ContentPaint,
+} from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import Session from '@ulixee/hero-core/lib/Session';
@@ -121,7 +123,7 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
           relativeStartMs: x.relativeStartMs,
           commandGapMs: x.commandGapMs,
           runtimeMs: x.runtimeMs,
-          callsite: x.callsite.map(SourceMapSupport.getOriginalSourcePosition),
+          callsite: x.callsite.map(site => SourceMapSupport.getOriginalSourcePosition(site)),
         };
       }),
     };
