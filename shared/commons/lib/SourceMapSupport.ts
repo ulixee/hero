@@ -16,7 +16,7 @@ export class SourceMapSupport {
   private static stackPathsToClear = new Set<string>();
 
   static clearStackPath(stackPath: string): void {
-    this.stackPathsToClear.add(stackPath)
+    this.stackPathsToClear.add(stackPath);
   }
 
   static resetCache(): void {
@@ -69,7 +69,8 @@ export class SourceMapSupport {
 
   static getOriginalSourcePosition(
     position: ISourceCodeLocation,
-  ): ISourceCodeLocation & { name?: string } {
+    includeContent = false,
+  ): ISourceCodeLocation & { name?: string; content?: string } {
     this.sourceMapCache[position.filename] ??= this.retrieveSourceMap(position.filename);
 
     const sourceMap = this.sourceMapCache[position.filename];
@@ -78,11 +79,17 @@ export class SourceMapSupport {
 
       // Only return the original position if a matching line was found
       if (originalPosition.source) {
+        let content: string = null;
+        const filename = this.resolvePath(sourceMap.url, originalPosition.source);
+        if (includeContent) {
+          content = sourceMap.map.sourceContentFor(originalPosition.source, true);
+        }
         return {
-          filename: this.resolvePath(sourceMap.url, originalPosition.source),
+          filename,
           column: originalPosition.column,
           line: originalPosition.line,
           name: originalPosition.name,
+          content,
         };
       }
     }

@@ -19,19 +19,17 @@ export default class SourceLoader {
   static getSource(codeLocation: ISourceCodeLocation): ISourceCodeLocation & { code: string } {
     if (!codeLocation) return null;
 
-    codeLocation = SourceMapSupport.getOriginalSourcePosition(codeLocation);
+    const sourcePosition = SourceMapSupport.getOriginalSourcePosition(codeLocation, true);
 
-    if (!this.sourceLines[codeLocation.filename]) {
-      const file = this.getFileContents(codeLocation.filename);
+    const code = sourcePosition.content;
+    if (!this.sourceLines[sourcePosition.filename]) {
+      const file = code || this.getFileContents(sourcePosition.filename);
       if (!file) return null;
-      this.sourceLines[codeLocation.filename] = file.split(/\r?\n/);
+      this.sourceLines[sourcePosition.filename] = file.split(/\r?\n/);
     }
 
-    const code = this.sourceLines[codeLocation.filename][codeLocation.line - 1];
-    return {
-      code,
-      ...codeLocation,
-    };
+    (sourcePosition as any).code = this.sourceLines[sourcePosition.filename][sourcePosition.line - 1];
+    return sourcePosition as any;
   }
 
   static getFileContents(filepath: string, cache = true): string {
