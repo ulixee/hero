@@ -13,6 +13,11 @@ const fileUrlPrefix = 'file://';
 export class SourceMapSupport {
   private static sourceMapCache: { [source: string]: { map: SourceMapConsumer; url: string } } = {};
   private static resolvedPathCache: { [file_url: string]: string } = {};
+  private static stackPathsToClear = new Set<string>();
+
+  static clearStackPath(stackPath: string): void {
+    this.stackPathsToClear.add(stackPath)
+  }
 
   static resetCache(): void {
     this.sourceMapCache = {};
@@ -145,6 +150,12 @@ export class SourceMapSupport {
           });
           if (position.filename !== filename) {
             const fnName = containingFnName ?? frame.getFunctionName();
+            for (const toReplace of this.stackPathsToClear) {
+              if (position.filename.startsWith(toReplace)) {
+                position.filename = position.filename.replace(toReplace, '');
+              }
+            }
+
             containingFnName = position.name;
             frame = new Proxy(frame, {
               get(target: NodeJS.CallSite, p: string | symbol): any {

@@ -81,7 +81,7 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
     if (config.format) {
       switch (config.format) {
         case 'date': {
-          if (!moment(value, StringSchema.DateFormat).isValid()) {
+          if (!moment(value, StringSchema.DateFormat, true).isValid()) {
             return this.failedConstraint(
               value,
               ` This value does not follow the YYYY-MM-DD date pattern`,
@@ -98,7 +98,7 @@ export default class StringSchema<TOptional extends boolean = boolean> extends B
           break;
         }
         case 'time': {
-          if (!moment(value, StringSchema.TimeFormat).isValid()) {
+          if (!moment(value, StringSchema.TimeFormat, true).isValid()) {
             return this.failedConstraint(
               value,
               ` This value does not follow the HH:mm time pattern`,
