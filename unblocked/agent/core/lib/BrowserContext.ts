@@ -91,7 +91,7 @@ export default class BrowserContext
     this.browser = browser;
     this.proxy = options?.proxy;
     this.isIncognito = isIncognito;
-    this.logger = options?.logger;
+    this.logger = options?.logger ?? log;
     this.hooks = options?.hooks ?? {};
     this.commandMarker = options?.commandMarker ?? new DefaultCommandMarker(this);
     this.resources = new Resources(this);
@@ -306,12 +306,16 @@ export default class BrowserContext
         await Promise.all([...this.pagesById.values()].map(x => x.close()));
         // can only close with id
         if (this.id) {
-          await this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
-            browserContextId: this.id,
-          }).catch(err => {
-            if (err instanceof CanceledPromiseError) return;
-            throw err;
-          });
+          // give it a second, but don't hang here
+          await Promise.race([
+            this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
+              browserContextId: this.id,
+            }).catch(err => {
+              if (err instanceof CanceledPromiseError) return;
+              throw err;
+            }),
+            new Promise(resolve => setTimeout(resolve, 2e3)),
+          ]);
         }
       }
       this.websocketMessages.cleanup();
