@@ -21,7 +21,8 @@ function createError(message: string, type?: { new (message: string): any }) {
   }
   if (!type) type = Error;
   // eslint-disable-next-line new-cap
-  return new type(message);
+  const errType = new type(message);
+  return cleanErrorStack(errType);
 }
 
 function newObjectConstructor(newProps: IDescriptor) {

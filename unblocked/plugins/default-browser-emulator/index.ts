@@ -113,11 +113,8 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       }
     }
 
-    this.domOverridesBuilder ??= loadDomOverrides(
-      this.emulationProfile,
-      this.data,
-      this.userAgentData,
-    );
+    emulationProfile.browserEngine.isHeaded = emulationProfile.options.showChrome;
+    this.domOverridesBuilder ??= loadDomOverrides(emulationProfile, this.data, this.userAgentData);
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {

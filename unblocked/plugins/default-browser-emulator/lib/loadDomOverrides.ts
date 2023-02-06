@@ -16,6 +16,7 @@ export default function loadDomOverrides(
   domOverrides.add('Error.constructor');
   const deviceProfile = emulationProfile.deviceProfile;
   const rtt = pickRandom([25, 50, 100]);
+  const isHeadless = emulationProfile.browserEngine.isHeaded !== true;
 
   domOverrides.add('navigator.deviceMemory', {
     memory: deviceProfile.deviceMemory,
@@ -24,7 +25,7 @@ export default function loadDomOverrides(
   domOverrides.add('navigator', {
     userAgentString: emulationProfile.userAgentOption.string,
     platform: emulationProfile.windowNavigatorPlatform,
-    headless: emulationProfile.browserEngine.isHeaded !== true,
+    headless: isHeadless,
     pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
     userAgentData,
     rtt,
@@ -34,18 +35,20 @@ export default function loadDomOverrides(
     videoDevice: deviceProfile.videoDevice,
   });
 
-  domOverrides.add('Notification.permission');
-  domOverrides.add('Permission.prototype.query');
+  if (isHeadless) {
+    domOverrides.add('Notification.permission');
+    domOverrides.add('Permission.prototype.query');
 
-  const windowChrome = data.windowChrome;
-  if (windowChrome) {
-    domOverrides.add('window.chrome', {
-      updateLoadTimes: true,
-      polyfill: {
-        property: windowChrome.chrome,
-        prevProperty: windowChrome.prevProperty,
-      },
-    });
+    const windowChrome = data.windowChrome;
+    if (windowChrome) {
+      domOverrides.add('window.chrome', {
+        updateLoadTimes: true,
+        polyfill: {
+          property: windowChrome.chrome,
+          prevProperty: windowChrome.prevProperty,
+        },
+      });
+    }
   }
 
   const domPolyfill = data.domPolyfill;
@@ -73,10 +76,14 @@ export default function loadDomOverrides(
   }
 
   const windowNavigator = data.windowNavigator;
-  domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
+  if (isHeadless) {
+    domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
+  }
   domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
   domOverrides.add('console.debug');
-  domOverrides.add('HTMLIFrameElement.prototype');
+  if (isHeadless) {
+    domOverrides.add('HTMLIFrameElement.prototype');
+  }
 
   const locale = emulationProfile.locale;
   const voices = data.speech.voices?.map(x => {

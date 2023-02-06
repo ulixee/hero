@@ -21,6 +21,7 @@ const ObjectCached = {
   setPrototypeOf: Object.setPrototypeOf.bind(Object),
   getPrototypeOf: Object.getPrototypeOf.bind(Object),
   defineProperty: Object.defineProperty.bind(Object),
+  create: Object.create.bind(Object),
   entries: Object.entries.bind(Object),
   getOwnPropertyDescriptors: Object.getOwnPropertyDescriptors.bind(Object),
   getOwnPropertyDescriptor: Object.getOwnPropertyDescriptor.bind(Object),
