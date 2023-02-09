@@ -93,12 +93,17 @@ export default function loadDomOverrides(
   if (voices?.length) {
     domOverrides.add('speechSynthesis.getVoices', { voices });
   }
+  const frame = data.windowFraming
   domOverrides.add('window.outerWidth', {
-    frameBorderWidth: data.windowFraming.frameBorderWidth,
+    frameBorderWidth: frame.frameBorderWidth,
   });
   domOverrides.add('window.outerHeight', {
-    frameBorderHeight: data.windowFraming.frameBorderHeight,
+    frameBorderHeight: frame.frameBorderHeight,
   });
+  domOverrides.add('window.screen', {
+      unAvailHeight: frame.screenGapTop + frame.screenGapBottom,
+      unAvailWidth: frame.screenGapLeft + frame.screenGapRight,
+  })
 
   return domOverrides;
 }

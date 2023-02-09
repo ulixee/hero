@@ -56,8 +56,8 @@ export default class Viewports {
       positionY,
       screenWidth,
       screenHeight,
-      width: windowWidth,
-      height: windowHeight,
+      width: windowInnerWidth,
+      height: windowInnerHeight,
       deviceScaleFactor,
       isDefault: true,
     } as IViewport;
