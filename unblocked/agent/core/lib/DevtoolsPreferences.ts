@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import IDevtoolsSession, { Protocol } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
+import IDevtoolsSession, {
+  Protocol,
+} from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import * as fs from 'fs';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
@@ -41,7 +43,9 @@ export default class DevtoolsPreferences {
       session.send('Page.enable'),
       session.send('Page.addScriptToEvaluateOnNewDocument', {
         source: `(function devtoolsPreferencesInterceptor() {
-    const toIntercept = ['getPreferences', 'setPreference', 'removePreference', 'clearPreferences'];
+    const toIntercept = ['getPreferences', 'setPreference', 'removePreference', 'clearPreferences'].map(x => {
+      return JSON.stringify({ method: x }).replace('{','').replace('}','').trim();
+    });
 
     let inspector;
     Object.defineProperty(window, 'InspectorFrontendHost', {
@@ -53,9 +57,11 @@ export default class DevtoolsPreferences {
          // devtoolsHost is initiated when Inspector is created
          window.DevToolsHost.sendMessageToEmbedder = new Proxy(window.DevToolsHost.sendMessageToEmbedder, {
           apply(target, thisArg, args) {
-            const method = JSON.parse(args[0]).method;
-            if (toIntercept.includes(method)) {
-              return window.${devtoolsPreferencesCallback}(args[0]);
+            const json = args[0];
+            for (const method of toIntercept) {
+              if (json.includes(toIntercept)) {
+                return window.${devtoolsPreferencesCallback}(json);
+              }
             }
             return Reflect.apply(...arguments);
           }
