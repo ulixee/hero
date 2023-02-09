@@ -121,7 +121,7 @@ export default class BrowserContext
       this,
     );
     this.id = browserContextId;
-    this.logger ??= log.createChild(module, {
+    this.logger = this.logger.createChild(module, {
       browserContextId,
     });
   }
@@ -160,6 +160,14 @@ export default class BrowserContext
     await page.isReady;
     if (page.isClosed) throw new Error('Page has been closed.');
     return page;
+  }
+
+  addPageInitializationOptions(optionsByTargetId: {
+    [targetId: string]: IPageCreateOptions;
+  }): void {
+    for (const [targetId, options] of Object.entries(optionsByTargetId)) {
+      this.pageOptionsByTargetId.set(targetId, options);
+    }
   }
 
   trackPage(page: Page): void {

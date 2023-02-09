@@ -1,4 +1,4 @@
-import { Protocol } from 'devtools-protocol';
+import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { assert } from '@ulixee/commons/lib/utils';
 import Log from '@ulixee/commons/lib/Logger';
@@ -16,7 +16,11 @@ import BrowserProcess from './BrowserProcess';
 import BrowserLaunchError from '../errors/BrowserLaunchError';
 import env from '../env';
 import DevtoolsPreferences from './DevtoolsPreferences';
+import Page, { IPageCreateOptions } from './Page';
+import IConnectionTransport from '../interfaces/IConnectionTransport';
 import GetVersionResponse = Protocol.Browser.GetVersionResponse;
+import TargetInfo = Protocol.Target.TargetInfo;
+import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
 
 const { log } = Log(module);
 
@@ -28,7 +32,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   public readonly engine: IBrowserEngine;
   public readonly browserContextsById = new Map<string, BrowserContext>();
   public hooks: IBrowserHooks = {};
-
   public get name(): string {
     if (!this.version) return 'Unlaunched';
     return this.version.product.split('/').shift();
@@ -58,11 +61,19 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   private version: GetVersionResponse;
   private preferencesInterceptor?: DevtoolsPreferences;
 
+  private browserContextCreationHooks: IBrowserContextHooks;
+  private connectOnlyToPageTargets: { [targetId: string]: IPageCreateOptions };
+
   private get defaultBrowserContext(): BrowserContext {
     return this.browserContextsById.get(undefined);
   }
 
-  constructor(engine: IBrowserEngine, hooks?: IHooksProvider, launchArgs?: IBrowserLaunchArgs) {
+  constructor(
+    engine: IBrowserEngine,
+    hooks?: IHooksProvider,
+    launchArgs?: IBrowserLaunchArgs,
+    private debugLog = false,
+  ) {
     super();
     this.engine = engine;
     this.id = String((browserIdCounter += 1));
@@ -77,7 +88,22 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       this.hooks = hooks;
       hooks.onNewBrowser?.(this, launchArgs);
     }
-    if (this.engine.isHeaded) this.preferencesInterceptor = new DevtoolsPreferences(this.engine);
+  }
+
+  public async connect(transport: IConnectionTransport): Promise<Browser> {
+    if (this.isLaunchStarted) {
+      await this.launchPromise.promise;
+      return this;
+    }
+    this.connection = new Connection(transport);
+    this.devtoolsSession = this.connection.rootSession;
+    this.bindDevtoolsEvents();
+
+    await this.testConnection();
+
+    this.launchPromise.resolve();
+
+    return this;
   }
 
   public async launch(): Promise<Browser> {
@@ -120,6 +146,9 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
         sessionId: null,
         parentLogId,
       });
+
+      if (this.engine.isHeaded) this.preferencesInterceptor = new DevtoolsPreferences(this.engine);
+
       return this;
     } catch (err) {
       await this.process.close();
@@ -179,6 +208,30 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     await isolatedContext.open();
     await this.onNewContext(isolatedContext);
     return isolatedContext;
+  }
+
+  public async connectToPage(
+    targetId: string,
+    options: IPageCreateOptions,
+    hooks?: IBrowserContextHooks,
+  ): Promise<Page> {
+    this.connectOnlyToPageTargets ??= {};
+    this.connectOnlyToPageTargets[targetId] = options;
+    this.browserContextCreationHooks = hooks;
+    await this.devtoolsSession.send('Target.attachToTarget', { targetId, flatten: true });
+    await new Promise(setImmediate);
+    for (const context of this.browserContextsById.values()) {
+      const page = context.pagesById.get(targetId);
+      if (page) {
+        await page.isReady;
+        return page;
+      }
+    }
+  }
+
+  public async getAllPageTargets(): Promise<TargetInfo[]> {
+    const targets = await this.devtoolsSession.send('Target.getTargets');
+    return targets.targetInfos.filter(x => x.type === 'page');
   }
 
   public getBrowserContext(id: string): BrowserContext {
@@ -295,7 +348,55 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
     assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
 
-    if (targetInfo.type === 'page') {
+    const isDevtoolsPanel = targetInfo.url.startsWith('devtools://devtools');
+    if (
+      event.targetInfo.type === 'page' &&
+      !isDevtoolsPanel &&
+      this.connectOnlyToPageTargets &&
+      !this.connectOnlyToPageTargets[targetInfo.targetId]
+    ) {
+      if (this.debugLog) {
+        log.stats('Not connecting to target', { event, sessionId: null });
+      }
+
+      if (event.waitingForDebugger) {
+        this.connection
+          .getSession(sessionId)
+          .send('Runtime.runIfWaitingForDebugger')
+          .catch(() => null)
+          .then(() => this.devtoolsSession.send('Target.detachFromTarget', { sessionId }))
+          .catch(() => null);
+        return;
+      }
+      if (targetInfo.attached) {
+        this.devtoolsSession.send('Target.detachFromTarget', { sessionId }).catch(() => null);
+      }
+      return;
+    }
+    if (this.debugLog) {
+      log.stats('onAttachedToTarget', { event, sessionId: null });
+    }
+    if (
+      this.connectOnlyToPageTargets &&
+      this.connectOnlyToPageTargets[targetInfo.targetId] &&
+      !this.browserContextsById.has(targetInfo.browserContextId)
+    ) {
+      if (this.debugLog) {
+        log.stats('Creating BrowserContext for connectOnlyToPageTargets.', {
+          browserContextId: targetInfo.browserContextId,
+          sessionId: null,
+        });
+      }
+      const context = new BrowserContext(this, false);
+      context.hooks = this.browserContextCreationHooks ?? {};
+      context.id = targetInfo.browserContextId;
+      if (this.connectOnlyToPageTargets) {
+        context.addPageInitializationOptions(this.connectOnlyToPageTargets);
+      }
+      void this.onNewContext(context);
+    }
+
+    if (targetInfo.type === 'page' && !isDevtoolsPanel) {
       const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.getBrowserContext(targetInfo.browserContextId);
       context?.onPageAttached(devtoolsSession, targetInfo).catch(() => null);
@@ -323,7 +424,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       }
     }
 
-    if (targetInfo.type === 'other' && targetInfo.url.startsWith('devtools://devtools')) {
+    if (isDevtoolsPanel) {
       const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.getBrowserContext(targetInfo.browserContextId);
 
@@ -347,6 +448,10 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
   private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent): Promise<void> {
     const { targetInfo } = event;
+    if (this.debugLog) {
+      log.stats('onTargetCreated', { targetInfo, sessionId: null });
+    }
+
     if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.getBrowserContext(targetInfo.browserContextId);
       await context?.attachToTarget(targetInfo.targetId);
@@ -359,6 +464,9 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
   private onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent): void {
     const { targetId } = event;
+    if (this.debugLog) {
+      log.stats('onTargetDestroyed', { targetId, sessionId: null });
+    }
     for (const context of this.browserContextsById.values()) {
       context.targetDestroyed(targetId);
     }
