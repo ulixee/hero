@@ -157,6 +157,15 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     this.cancelPendingEvents('NetworkManager closed');
   }
 
+  public reset(): void {
+    this.attemptedAuthentications.clear();
+    this.navigationRequestIdsToLoaderId.clear();
+    this.redirectsById.clear();
+    this.requestsById.clear();
+    this.requestPublishingById.clear();
+    this.navigationRequestIdsToLoaderId.clear();
+  }
+
   public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
     return this.initialize();

@@ -28,8 +28,11 @@ import IDevtoolsSession, {
 } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import ProtocolError from '../errors/ProtocolError';
 import { Connection } from './Connection';
+import Log from '@ulixee/commons/lib/Logger';
 import RemoteObject = Protocol.Runtime.RemoteObject;
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 
+const { log } = Log(module);
 /**
  * The `DevtoolsSession` instances are used to talk raw Chrome Devtools Protocol.
  *
@@ -76,7 +79,14 @@ export default class DevtoolsSession
       id,
     };
     const timestamp = new Date();
-    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>();
+    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>(60e3);
+    resolvable.promise.catch(err => {
+      if (err instanceof TimeoutError)
+        log.info(`DevtoolsApiMessage did not respond after 60 seconds. (${method}, id=${id})`, {
+          error: err,
+          sessionId: this.sessionId,
+        });
+    });
     this.pendingMessages.set(id, { resolvable, method });
 
     if (!this.connection.sendMessage(message)) {

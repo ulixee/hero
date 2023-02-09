@@ -143,6 +143,18 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     return this.isReady;
   }
 
+  public reset(): void {
+    for (const frame of this.framesById.values()) {
+      if (frame.parentId) {
+        this.framesByFrameId.delete(frame.frameId);
+        this.framesById.delete(frame.id);
+        frame.close();
+      }
+    }
+    this.pendingNewDocumentScripts.length = 0;
+    this.onFrameCreatedResourceEventsByFrameId = {}
+  }
+
   public close(error?: Error): void {
     this.events.close();
     this.cancelPendingEvents('FramesManager closed');

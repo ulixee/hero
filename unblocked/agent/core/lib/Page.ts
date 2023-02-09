@@ -498,6 +498,23 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     return worker.isReady;
   }
 
+  async reset(): Promise<void> {
+    if (this.isClosing || this.closePromise.isResolved) return this.closePromise.promise;
+    if (!!this.devtoolsSession.isConnected()) return;
+    this.mainFrame.navigations.reset();
+    this.networkManager.reset();
+    this.framesManager.reset();
+    this.workersById.clear();
+    this.domStorageTracker.reset();
+    try {
+      await this.navigate('about:blank');
+      await this.mainFrame.waitForLifecycleEvent('load');
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) return;
+      throw error;
+    }
+  }
+
   async close(options?: { timeoutMs?: number }): Promise<void> {
     if (this.isClosing || this.closePromise.isResolved) return this.closePromise.promise;
     this.isClosing = true;

@@ -97,6 +97,14 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
     this.cancelPendingEvents('DomStorageTracker closed');
   }
 
+  public reset(): void {
+    for (const key of Object.keys(this.storageByOrigin)) delete this.storageByOrigin[key];
+    this.indexedDBContentUpdatingOrigins.clear();
+    this.indexedDBListUpdatingOrigins.clear();
+    this.processingPromise = Promise.resolve();
+    this.trackedOrigins.clear();
+  }
+
   public async finalFlush(timeoutMs = 30e3): Promise<void> {
     this.events.close();
     await Promise.race([

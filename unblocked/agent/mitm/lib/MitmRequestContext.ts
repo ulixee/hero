@@ -19,12 +19,17 @@ import ResourceState from '../interfaces/ResourceState';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
+  private static nextId(): number {
+    this.contextIdCounter += 1;
+    if (!Number.isSafeInteger(this.contextIdCounter)) this.contextIdCounter = 1;
+    return this.contextIdCounter;
+  }
 
   public static createFromResourceRequest(
     resourceLoadDetails: IBrowserResourceRequest,
   ): IMitmRequestContext {
     return {
-      id: (this.contextIdCounter += 1),
+      id: this.nextId(),
       ...resourceLoadDetails,
       requestOriginalHeaders: Object.freeze({ ...resourceLoadDetails.requestHeaders }),
       didInterceptResource: !!resourceLoadDetails.browserBlockedReason,
@@ -79,7 +84,7 @@ export default class MitmRequestContext {
     const state = new Map<ResourceState, Date>();
     const requestHeaders = parseRawHeaders(clientToProxyRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
-      id: (this.contextIdCounter += 1),
+      id: this.nextId(),
       isSSL,
       isUpgrade,
       isServerHttp2: false,
@@ -125,7 +130,7 @@ export default class MitmRequestContext {
     const state = new Map<ResourceState, Date>();
     const { requestSession } = parentContext;
     const ctx = {
-      id: (this.contextIdCounter += 1),
+      id: this.nextId(),
       url,
       method: requestHeaders[':method'],
       isServerHttp2: parentContext.isServerHttp2,
