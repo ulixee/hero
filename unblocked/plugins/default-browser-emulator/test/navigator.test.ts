@@ -133,6 +133,10 @@ test('it should handle overflows in plugins', async () => {
       false,
     ),
   ).resolves.toBe(true);
+
+  await expect(
+    page.mainFrame.evaluate<boolean>('navigator.plugins[0][0] === navigator.plugins[0][0]', false),
+  ).resolves.toBe(false);
 });
 
 test('it should override userAgentData in a browser window', async () => {

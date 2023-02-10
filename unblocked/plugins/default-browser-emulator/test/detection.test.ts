@@ -174,6 +174,173 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should be able to post message', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  const result = await page.evaluate<{
+    plugins: {
+      message: string;
+      stack: string;
+    };
+    mimes: {
+      message: string;
+      stack: string;
+    };
+    plugin0: { message: string; stack: string };
+    mime0: { message: string; stack: string };
+  }>(`(() => {
+    const result = {};
+    try {
+      window.postMessage(navigator.plugins);
+    } catch (e) {
+      result.plugins = { stack: e.stack, message:e.message }
+    }
+    try {
+      window.postMessage(navigator.plugins[0]);
+    } catch (e) {
+      result.plugin0 = { stack: e.stack, message:e.message }
+    }
+    
+    try {
+      window.postMessage(navigator.mimeTypes);
+    } catch (e) {
+      result.mimes = { stack: e.stack, message:e.message }
+    }
+    
+    try {
+      window.postMessage(navigator.mimeTypes[0]);
+      result.mime0='no error'
+    } catch (e) {
+      result.mime0 = { stack: e.stack, message:e.message }
+    }
+    return result;
+   
+ })()`);
+  expect(result.plugins.message).toBe(
+    "Failed to execute 'postMessage' on 'Window': PluginArray object could not be cloned.",
+  );
+
+  expect(result.plugin0.message).toBe(
+    "Failed to execute 'postMessage' on 'Window': Plugin object could not be cloned.",
+  );
+
+  expect(result.mimes.message).toBe(
+    "Failed to execute 'postMessage' on 'Window': MimeTypeArray object could not be cloned.",
+  );
+
+  expect(result.mime0.message).toBe(
+    "Failed to execute 'postMessage' on 'Window': MimeType object could not be cloned.",
+  );
+});
+
+test('should not see polyfill error overrides', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  // TODO: need to test windows
+  const result = await page.evaluate<string>(`(() => {
+    try {
+        class ass extends Notification{}
+        const ss = new ass(0)
+       
+        return ss.image !== undefined
+    } catch (e) {
+        return e.stack;
+    }
+   
+ })()`);
+  expect(result).not.toContain('anonymuos');
+});
+
+test('cannot detect a proxy of args passed into a proxied function', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  const result = await page.evaluate<{ path: string; result: string }>(`(async () => {
+  let path = ''
+  const proxyOfArgs = new Proxy([37445], { 
+     get(target,prop, receiver) { 
+       path = new Error().stack.slice(8); 
+       return Reflect.get(target,prop, receiver)
+     }
+  })
+  
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl");
+  const result =  gl.getParameter.apply(gl, proxyOfArgs);
+  return { path, result };
+ })()`);
+  expect(result.path).not.toContain('<anonymuos>');
+  expect(result.result).toBe('Intel Inc.');
+});
+
+test('stack overflow test should match chrome', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  await page.goto(`${koaServer.baseUrl}`);
+  const result = await page.evaluate<{
+    depth: number;
+    message: string;
+    name: string;
+    stack: string;
+  }>(`(() => {
+  let depth = 0;
+  let message = '';
+  let name = '';
+  let stack = '';
+  
+  function iWillBetrayYouWithMyLongName() {
+    try {
+      depth++;
+      iWillBetrayYouWithMyLongName();
+    } catch (e) {
+      message = e.message;
+      name = e.name;
+      stack = e.stack.toString();
+    }
+  }
+  
+  iWillBetrayYouWithMyLongName();
+  return {
+    depth,
+    message,
+    name,
+    stack
+  }
+ })()`);
+  expect(result.message).toBe('Maximum call stack size exceeded');
+  expect(result.name).toBe('RangeError');
+  expect(result.stack).toBe(
+    'RangeError: Maximum call stack size exceeded\n' +
+      '    at String.toString (<anonymous>)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)\n' +
+      '    at iWillBetrayYouWithMyLongName (<anonymous>:1:1)',
+  );
+});
+
 test('should properly emulate memory', async () => {
   const agent = pool.createAgent({
     logger,
@@ -335,7 +502,7 @@ test('should not have too much recursion in prototype', async () => {
   await page.goto(`${koaServer.baseUrl}`);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
 
-  const error = await page.evaluate<{ message: string; name: string }>(`(() => {
+  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
     const apiFunction = Object.getOwnPropertyDescriptor(Navigator.prototype, 'deviceMemory').get;
 
     try {
@@ -351,9 +518,10 @@ test('should not have too much recursion in prototype', async () => {
     }
   })();`);
 
+  expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
   expect(error.name).toBe('TypeError');
 
-  const error2 = await page.evaluate<{ message: string; name: string }>(`(() => {
+  const error2 = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
   const apiFunction = WebGL2RenderingContext.prototype.getParameter;
 
   try {
@@ -368,7 +536,7 @@ test('should not have too much recursion in prototype', async () => {
     }
   }
 })();`);
-
+  expect(error2.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
   expect(error2.name).toBe('TypeError');
 });
 

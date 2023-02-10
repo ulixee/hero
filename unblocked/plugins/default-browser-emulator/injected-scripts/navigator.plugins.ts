@@ -7,7 +7,7 @@ function installNamedNodeItems(
   for (let i = 0; i < list.length; i += 1) {
     const item = list[i];
     props.push(String(i));
-    Object.defineProperty(nativeObj, i, {
+    ObjectCached.defineProperty(nativeObj, i, {
       value: item,
       enumerable: true,
       writable: false,
@@ -16,7 +16,7 @@ function installNamedNodeItems(
   }
   for (const item of list) {
     props.push(item[prop]);
-    Object.defineProperty(nativeObj, item[prop], {
+    ObjectCached.defineProperty(nativeObj, item[prop], {
       value: item,
       enumerable: false,
       writable: false,
@@ -28,16 +28,25 @@ function installNamedNodeItems(
 
 const uint32Overflow = 4294967296;
 
+const weakMimes = new WeakSet<MimeType>();
+const weakPlugins = new WeakSet<Plugin>();
+
 function createNamedNodeMap(
   protoClass: PluginArray | MimeTypeArray,
   list: (Plugin | MimeType)[],
   prop: 'type' | 'name',
   hiddenProperties: PropertyKey[] = [],
 ) {
-  const nativeObj = new Proxy(Object.create(protoClass) as PluginArray | MimeTypeArray, {
+  const nativeObj = new Proxy(ObjectCached.create(protoClass) as PluginArray | MimeTypeArray, {
     has(target: MimeTypeArray | PluginArray, p: string | symbol): boolean {
       if (hiddenProperties.includes(p)) return false;
       return p in target;
+    },
+    get(target: PluginArray | MimeTypeArray, p: string | symbol, receiver: any): any {
+      if (p === Symbol.toStringTag) {
+        if (target === nativeObj) return protoClass[Symbol.toStringTag];
+      }
+      return ReflectCached.get(target, p, receiver);
     },
   });
 
@@ -86,12 +95,13 @@ function createNamedNodeMap(
 }
 
 function createMime(fakeMime) {
-  const mime: MimeType = Object.create(MimeType.prototype);
+  const mime: MimeType = ObjectCached.create(MimeType.prototype);
   proxyGetter(mime, 'type', () => fakeMime.type, true);
   proxyGetter(mime, 'suffixes', () => fakeMime.suffixes, true);
   proxyGetter(mime, 'description', () => fakeMime.description, true);
   proxyGetter(mime, 'enabledPlugin', () => navigator.plugins[fakeMime.__pluginName], true);
 
+  weakMimes.add(mime);
   return mime;
 }
 
@@ -104,7 +114,7 @@ const mimes = createNamedNodeMap(
 ) as MimeTypeArray;
 
 const pluginList: Plugin[] = args.plugins.map(fakeP => {
-  let plugin: Plugin = Object.create(Plugin.prototype);
+  let plugin: Plugin = ObjectCached.create(Plugin.prototype);
 
   const pluginMimes = args.mimeTypes.filter(m => fakeP.mimeTypes.includes(m.type));
   const mimeProps = installNamedNodeItems(plugin, pluginMimes.map(createMime), 'type');
@@ -149,6 +159,7 @@ const pluginList: Plugin[] = args.plugins.map(fakeP => {
       return target[p];
     },
   });
+  weakPlugins.add(plugin);
 
   return plugin;
 });
@@ -161,3 +172,41 @@ const navigatorPlugins = createNamedNodeMap(
 
 proxyGetter(navigator, 'mimeTypes', () => mimes, true);
 proxyGetter(navigator, 'plugins', () => navigatorPlugins, true);
+
+function handleCloneObject(target, thisArg, argArray) {
+  try {
+    const args = [...argArray];
+    // trigger error since mimes aren't having clone issues
+    if (weakMimes.has(argArray[0])) {
+      args[0] = mimes;
+    }
+    return ReflectCached.apply(target, thisArg, args);
+  } catch (error) {
+    const self = argArray[0];
+    let message = error.message;
+    if (message.includes('Failed to execute')) {
+      if (self === navigatorPlugins) {
+        message = message.replace('#<PluginArray>', 'PluginArray object');
+        error.stack = error.stack.replace('#<PluginArray>', 'PluginArray object');
+      } else if (self === mimes) {
+        message = message.replace('#<MimeTypeArray>', 'MimeTypeArray object');
+        error.stack = error.stack.replace('#<MimeTypeArray>', 'MimeTypeArray object');
+      } else if (weakMimes.has(self)) {
+        message = message
+          .replace('#<MimeType>', 'MimeType object')
+          .replace('#<MimeTypeArray>', 'MimeType object');
+        error.stack = error.stack
+          .replace('#<MimeType>', 'MimeType object')
+          .replace('#<MimeTypeArray>', 'MimeType object');
+      } else if (weakPlugins.has(self)) {
+        message = message.replace('#<Plugin>', 'Plugin object');
+        error.stack = error.stack.replace('#<Plugin>', 'Plugin object');
+      }
+      // DOMException messages are getters
+      proxyGetter(error, 'message', () => message, true);
+    }
+    throw error;
+  }
+}
+proxyFunction(window, 'postMessage', handleCloneObject);
+proxyFunction(window, 'structuredClone', handleCloneObject);

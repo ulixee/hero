@@ -99,7 +99,7 @@ Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
     try {
       return ReflectCached.apply(...arguments);
     } catch (error) {
-      throw cleanErrorStack(error, null, false, true);
+      throw cleanErrorStack(error, null, false, true, true);
     } finally {
       isObjectSetPrototypeOf = false;
     }
@@ -118,6 +118,7 @@ function cleanErrorStack(
   replaceLineFn?: (line: string, index: number) => string,
   startAfterSourceUrl = false,
   stripStartingReflect = false,
+  stripFirstStackLine = false,
 ) {
   if (!error.stack) return error;
 
@@ -126,6 +127,7 @@ function cleanErrorStack(
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
+    if (stripFirstStackLine && i === 1 && line.includes(' at ')) continue;
     if (stripStartingReflect && line.includes(' Reflect.')) continue;
     if (line.includes(sourceUrl)) {
       if (startAfterSourceUrl === true) {
