@@ -39,8 +39,6 @@ export function configureBrowserLaunchArgs(
     '--disable-sync', // Disable syncing to a Google account
 
     '--force-color-profile=srgb', // Force all monitors to be treated as though they have the specified color profile.
-    '--use-gl=any', // Select which implementation of GL the GPU process should use. Options are: desktop: whatever desktop OpenGL the user has installed (Linux and Mac default). egl: whatever EGL / GLES2 the user has installed (Windows default - actually ANGLE). swiftshader: The SwiftShader software renderer.
-    '--disable-partial-raster', // https://crbug.com/919955
     '--disable-skia-runtime-opts', // Do not use runtime-detected high-end CPU optimizations in Skia.
 
     '--use-fake-device-for-media-stream',

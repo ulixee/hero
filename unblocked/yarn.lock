@@ -2084,10 +2084,10 @@
     "@typescript-eslint/types" "5.38.0"
     eslint-visitor-keys "^3.3.0"
 
-"@ulixee/chrome-108-0@^5359.125.6":
-  version "5359.125.6"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-108-0/-/chrome-108-0-5359.125.6.tgz#ae1a3e41daa7e8fb307df70d8726ee1ff4c340aa"
-  integrity sha512-lnPqHjIOLkVPQrHfah4b5+WAryX8f8jA5WnSseu+2/TwP/LNY2CNOO1hUtvVifMBxxISipxyzSUU1mW28cVvkg==
+"@ulixee/chrome-109-0@^5414.120.7":
+  version "5414.120.7"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-109-0/-/chrome-109-0-5414.120.7.tgz#f49fef8bbd2a5106d8993d0e2616fa7249a6fa96"
+  integrity sha512-h59RUgBaGtpuNKM0hnCxPoLjvRtSG/xAbfccf/hy3DxKAKSVy3yA1SaVGR3f5e+TuR5AFK+UDv3E5EnluMe+tQ==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
