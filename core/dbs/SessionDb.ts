@@ -181,6 +181,25 @@ export default class SessionDb {
     }
   }
 
+  public getCollectedAssetNames(): { resources: string[]; elements: string[]; snippets: string[] } {
+    const snippets = new Set<string>();
+    for (const snippet of this.snippets.all()) {
+      snippets.add(snippet.name);
+    }
+    const resources = new Set<string>();
+    for (const resource of this.detachedResources.all()) {
+      resources.add(resource.name);
+    }
+
+    const elementNames = this.detachedElements.allNames();
+
+    return {
+      snippets: [...snippets],
+      resources: [...resources],
+      elements: [...elementNames],
+    };
+  }
+
   public async close(deleteFile = false): Promise<void> {
     clearInterval(this.saveInterval);
 
@@ -236,7 +255,7 @@ export default class SessionDb {
     if (sessionId?.endsWith('.db')) sessionId = sessionId.split('.db').shift();
 
     // NOTE: don't close db - it's from a shared cache
-    const sessionsDb = SessionsDb.find();
+    const sessionsDb = SessionsDb.getInstance();
     if (!sessionId) {
       sessionId = sessionsDb.findLatestSessionId(scriptArgs);
       if (!sessionId) return null;

@@ -100,7 +100,7 @@ export default class SessionsDb {
     this.instance = undefined;
   }
 
-  public static find(): SessionsDb {
+  public static getInstance(): SessionsDb {
     this.instance = this.instance || new SessionsDb();
     return this.instance;
   }

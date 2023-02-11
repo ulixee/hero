@@ -1,17 +1,15 @@
-import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { Session } from '@ulixee/hero-core';
-import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
 import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
-import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import MirrorNetwork from '../lib/MirrorNetwork';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { IDomRecording } from '@ulixee/hero-core/models/DomChangesTable';
+import { ITabDetails } from '@ulixee/hero-core/apis/Session.ticks';
 import TabPlaybackController from './TabPlaybackController';
+import MirrorPage from '../lib/MirrorPage';
 
 const { log } = Log(module);
 
@@ -30,13 +28,9 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     percentOffset: number;
     focusedRange: [start: number, end: number];
   };
-  'tab-opened': void;
-  'all-tabs-closed': void;
 }> {
   public get activeCommandId(): number {
-    if (this.isOpen) {
-      return this.activeTab?.currentTick?.commandId;
-    }
+    return this.activeTab?.currentTick?.commandId;
   }
 
   public activeTabId: number;
@@ -46,68 +40,40 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public get isOpen(): boolean {
-    for (const tab of this.tabsById.values()) {
-      if (tab.isOpen) return true;
-    }
-    return false;
+    return this.loadedPromise?.isResolved;
   }
 
-  private mirrorNetwork = new MirrorNetwork({
-    ignoreJavascriptRequests: true,
-    headersFilter: ['set-cookie'],
-    loadResourceDetails: this.getResourceDetails.bind(this),
-  });
-
   private tabsById = new Map<number, TabPlaybackController>();
+  private loadedPromise: Resolvable<void>;
   private readonly sessionOptions: ISessionCreateOptions;
-  private isReady: Promise<void>;
 
   private constructor(
     readonly sessionId: string,
     readonly connection: ConnectionToHeroApiCore,
-    readonly loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
+    readonly context: IMirrorPageContext,
     private timelineRange?: [startTime: number, endTime?: number],
     readonly debugLogging = false,
   ) {
     super();
     this.sessionOptions = {
-
-      ...Session.get(sessionId)?.options ?? Session.restoreOptionsFromSessionRecord({}, sessionId),
+      ...(Session.get(sessionId)?.options ??
+        Session.restoreOptionsFromSessionRecord({}, sessionId)),
     };
     this.sessionOptions.mode = 'timetravel';
   }
 
-  public isOwnPage(pageId: string): boolean {
-    for (const tab of this.tabsById.values()) {
-      if (tab.isPage(pageId)) return true;
-    }
-    return false;
-  }
-
   public async findCommandPercentOffset(commandId: number): Promise<number> {
-    this.isReady ??= this.load();
-    await this.isReady;
+    await this.load();
     for (const tick of this.activeTab.ticks) {
       if (tick.commandId === commandId) return tick.timelineOffsetPercent;
     }
     return 0;
   }
 
-  public async loadTick(tick: ITick): Promise<void> {
-    await this.isReady;
-    const tab = this.activeTab;
-    await this.openTab(tab);
-
-    await tab.loadTick(tick);
-  }
-
   public async step(direction: 'forward' | 'back'): Promise<number> {
-    this.isReady ??= this.load();
-    await this.isReady;
+    await this.load();
     let percentOffset: number;
-    if (!this.isOpen) {
-      percentOffset = this.activeTab.ticks[this.activeTab.ticks.length - 1]?.timelineOffsetPercent;
-    } else if (direction === 'forward') {
+    if (direction === 'forward') {
       percentOffset = this.activeTab.nextTimelineOffsetPercent;
     } else {
       percentOffset = this.activeTab.previousTimelineOffsetPercent;
@@ -117,8 +83,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public async setFocusedOffsetRange(offsetRange: [start: number, end: number]): Promise<void> {
-    this.isReady ??= this.load();
-    await this.isReady;
+    await this.load();
     this.activeTab.setFocusedOffsetRange(offsetRange);
   }
 
@@ -126,8 +91,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     sessionOffsetPercent: number,
     statusMetadata?: ITimelineMetadata,
   ): Promise<TabPlaybackController> {
-    this.isReady ??= this.load();
-    await this.isReady;
+    await this.load();
 
     /**
      * TODO: eventually this playbar needs to know which tab is active in the timeline at this offset
@@ -136,7 +100,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     const tab = this.activeTab;
     const startTick = tab.currentTick;
     const startOffset = tab.currentTimelineOffsetPct;
-    await this.openTab(tab);
+    await tab.gotoStart();
     if (sessionOffsetPercent !== undefined) {
       await tab.setTimelineOffset(sessionOffsetPercent);
     } else {
@@ -190,16 +154,16 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   }
 
   public async showStatusText(text: string): Promise<void> {
-    if (this.isReady === null) return;
-    await this.isReady;
+    if (this.loadedPromise === null) return;
+    await this.loadedPromise;
     const tab = this.activeTab;
     if (!tab) return;
-    await this.openTab(tab);
+    await tab.gotoStart();
     await tab.showStatusText(text);
   }
 
   public async close(): Promise<void> {
-    this.isReady = null;
+    this.loadedPromise = null;
     for (const tab of this.tabsById.values()) {
       await tab.close();
     }
@@ -222,30 +186,36 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     if (timelineOffsetRange) {
       this.timelineRange = [...timelineOffsetRange];
     }
+    this.loadedPromise = null;
     await this.load();
   }
 
-  private async openTab(tab: TabPlaybackController): Promise<void> {
-    if (tab.isOpen) return;
-    await tab.open(this.loadIntoContext.browserContext, this.activePlugins.bind(this));
+  public async getDomRecording(): Promise<IDomRecording> {
+    await this.load();
+    return;
   }
 
-  private async activePlugins(page: IPage): Promise<void> {
-    if (!this.loadIntoContext.plugins) return;
-    await Promise.all(
-      this.loadIntoContext.plugins.instances.filter(x => x.onNewPage).map(x => x.onNewPage(page)),
-    );
-  }
+  public async setTabState(state: ITabDetails[]): Promise<void> {
+    this.loadedPromise ??= new Resolvable();
 
-  private async checkAllPagesClosed(): Promise<void> {
-    await new Promise<void>(setImmediate);
-    for (const tab of this.tabsById.values()) {
-      if (tab.isOpen) return;
+    for (const tabDetails of state) {
+      const tabPlaybackController = this.tabsById.get(tabDetails.tab.id);
+      if (tabPlaybackController) {
+        await tabPlaybackController.updateTabDetails(tabDetails);
+        continue;
+      }
+      const mirrorPage = await this.context.getMirrorPage(tabDetails.tab.id);
+      const tab = new TabPlaybackController(tabDetails, mirrorPage);
+      this.tabsById.set(tabDetails.tab.id, tab);
+
+      this.activeTabId ??= tabDetails.tab.id;
     }
-    this.emit('all-tabs-closed');
+    this.loadedPromise.resolve();
   }
 
   private async load(): Promise<void> {
+    if (this.loadedPromise) return this.loadedPromise;
+    this.loadedPromise = new Resolvable();
     const ticksResult = await this.connection.sendRequest({
       command: 'Session.ticks',
       args: [
@@ -258,61 +228,21 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
         },
       ],
     });
-
     if (this.debugLogging) {
       log.info('Timetravel Tab State', {
         sessionId: this.sessionId,
-        tabDetails: ticksResult.tabDetails,
+        ticksResult,
       });
     }
 
-    for (const tabDetails of ticksResult.tabDetails) {
-      const tabPlaybackController = this.tabsById.get(tabDetails.tab.id);
-      if (tabPlaybackController) {
-        await tabPlaybackController.updateTabDetails(tabDetails);
-        continue;
-      }
-      const tab = new TabPlaybackController(
-        tabDetails,
-        this.mirrorNetwork,
-        this.sessionId,
-        this.debugLogging,
-      );
-      tab.mirrorPage.on('open', this.onTabOpen.bind(this));
-      tab.mirrorPage.on('close', this.checkAllPagesClosed.bind(this));
-      this.tabsById.set(tabDetails.tab.id, tab);
+    await this.setTabState(ticksResult.tabDetails);
 
-      this.activeTabId ??= tabDetails.tab.id;
-    }
-
-    const resourcesResult = await this.connection.sendRequest({
-      command: 'Session.resources',
-      args: [{ sessionId: this.sessionId, omitWithoutResponse: true, omitNonHttpGet: true }],
-    });
-
-    this.mirrorNetwork.setResources(resourcesResult.resources, this.getResourceDetails.bind(this));
-  }
-
-  private onTabOpen(): void {
-    this.emit('tab-opened');
-  }
-
-  private async getResourceDetails(resourceId: number): Promise<ISessionResourceDetails> {
-    const { resource } = await this.connection.sendRequest({
-      command: 'Session.resource',
-      args: [
-        {
-          sessionId: this.sessionId,
-          resourceId,
-        },
-      ],
-    });
-    return resource;
+    this.loadedPromise.resolve();
   }
 
   public static create(
     heroSessionId: string,
-    loadIntoContext: { browserContext?: BrowserContext; plugins?: CorePlugins },
+    context: IMirrorPageContext,
     timelineRange?: [startTime: number, endTime: number],
     connectionToCoreApi?: ConnectionToHeroApiCore,
   ): TimetravelPlayer {
@@ -320,6 +250,10 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       const bridge = ConnectionToHeroApiClient.createBridge();
       connectionToCoreApi = new ConnectionToHeroApiCore(bridge.transportToCore);
     }
-    return new TimetravelPlayer(heroSessionId, connectionToCoreApi, loadIntoContext, timelineRange);
+    return new TimetravelPlayer(heroSessionId, connectionToCoreApi, context, timelineRange);
   }
+}
+
+export interface IMirrorPageContext {
+  getMirrorPage(tabId: number): Promise<MirrorPage>;
 }

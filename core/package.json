@@ -12,7 +12,8 @@
     "./dbs": "./dbs",
     "./dbs/*": "./dbs/*.js",
     "./models/*": "./models/*.js",
-    "./connections/*": "./connections/*.js"
+    "./connections/*": "./connections/*.js",
+    "./apis/*": "./apis/*.js"
   },
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",

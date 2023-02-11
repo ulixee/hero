@@ -39,6 +39,7 @@ import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import env from '../env';
+import DetachedAssets from './DetachedAssets';
 
 const { log } = Log(module);
 
@@ -115,55 +116,6 @@ export default class Session
     return this.agent?.emulationProfile;
   }
 
-  public get meta(): IHeroMeta {
-    const { viewport, locale, timezoneId, geolocation, windowNavigatorPlatform } =
-      this.emulationProfile;
-
-    const {
-      string: userAgentString,
-      operatingSystemName,
-      operatingSystemVersion,
-      uaClientHintsPlatformVersion,
-      browserVersion,
-      browserName,
-    } = this.emulationProfile.userAgentOption ?? {};
-
-    return {
-      sessionId: this.id,
-      ...this.options,
-      upstreamProxyUrl: this.options.upstreamProxyUrl,
-      upstreamProxyIpMask: this.options.upstreamProxyIpMask,
-      viewport,
-      locale,
-      timezoneId,
-      geolocation,
-      userAgentString,
-      operatingSystemName,
-      uaClientHintsPlatformVersion,
-      windowNavigatorPlatform,
-      operatingSystemVersion: [
-        operatingSystemVersion.major,
-        operatingSystemVersion.minor,
-        operatingSystemVersion.patch,
-        operatingSystemVersion.build,
-      ]
-        .filter(x => x !== undefined)
-        .join('.'),
-      browserName,
-      browserFullVersion: [
-        browserVersion.major,
-        browserVersion.minor,
-        browserVersion.patch,
-        browserVersion.build,
-      ]
-        .filter(x => x !== undefined)
-        .join('.'),
-
-      renderingEngine: this.browserEngine.name,
-      renderingEngineVersion: this.browserEngine.fullVersion,
-    };
-  }
-
   public awaitedEventEmitter = new TypedEventEmitter<{
     close: void;
     'rerun-stderr': string;
@@ -174,27 +126,33 @@ export default class Session
   public agent: Agent;
 
   protected readonly logger: IBoundLog;
-
-  private hasLoadedUserProfile = false;
-  private commandRecorder: CommandRecorder;
-  private _isClosing = false;
-  private isResettingState = false;
-  private readonly logSubscriptionId: number;
-  private events = new EventSubscriber();
+  protected hasLoadedUserProfile = false;
+  protected commandRecorder: CommandRecorder;
+  protected _isClosing = false;
+  protected isResettingState = false;
+  protected readonly logSubscriptionId: number;
+  protected events = new EventSubscriber();
 
   protected constructor(readonly options: ISessionCreateOptions) {
     super();
 
-    ['showChrome', 'showChromeAlive', 'showChromeInteractions', 'sessionKeepAlive'].forEach(k => {
-      if (!(k in options)) return;
-      const v = options[k];
-      options[k] = Boolean(typeof v === 'string' ? JSON.parse(v.toLowerCase()) : v);
-    });
+    for (const key of Object.keys(options)) {
+      if (
+        key === 'showChrome' ||
+        key === 'showChromeAlive' ||
+        key === 'showChromeInteractions' ||
+        key === 'sessionKeepAlive' ||
+        key === 'sessionPersistence'
+      ) {
+        const v = options[key];
+        if (typeof v === 'string') {
+          options[key] = Boolean(JSON.parse((v as string).toLowerCase()));
+        }
+      }
+    }
 
     this.createdTime = Date.now();
-    this.id = this.getId(options.sessionId);
-    const id = this.id;
-    Session.byId[id] = this;
+    this.id = this.assignId(options.sessionId);
     this.db = new SessionDb(this.id);
     this.commands = new Commands(this.db);
 
@@ -202,67 +160,7 @@ export default class Session
     loggerSessionIdNames.set(this.id, options.sessionName);
     this.logSubscriptionId = LogEvents.subscribe(this.recordLog.bind(this));
 
-    const providedOptions = { ...options };
-    // set default script instance if not provided
-    options.scriptInstanceMeta ??= {
-      id: nanoid(),
-      workingDirectory: process.cwd(),
-      entrypoint: require.main?.filename ?? process.argv[1],
-      startDate: this.createdTime,
-    };
-    // add env vars
-    options.showChrome ??= env.showChrome;
-    options.noChromeSandbox ??= env.noChromeSandbox;
-    options.disableGpu ??= env.disableGpu;
-    options.disableMitm ??= env.disableMitm;
-
-    Session.events.emit('new', { session: this });
-
-    // if no settings for chrome visibility, default to headless
-    options.showChrome ??= false;
-    options.showChromeInteractions ??= options.showChrome;
-
-    const { userProfile, userAgent } = options;
-    const customEmulatorConfig: IEmulatorOptions = {
-      userAgentSelector: userAgent ?? userProfile?.userAgentString,
-    };
-
-    this.agent = Core.pool.createAgent({
-      options,
-      customEmulatorConfig,
-      logger: this.logger,
-      deviceProfile: userProfile?.deviceProfile,
-      id: this.id,
-      commandMarker: this.commands,
-    });
-
-    this.plugins = new CorePlugins(this.agent, {
-      corePluginPaths: options.corePluginPaths,
-      dependencyMap: options.dependencyMap,
-      getSessionSummary: this.getSummary.bind(this),
-    });
-
-    // should come after plugins can initiate
-    this.recordSession(providedOptions);
-
-    SessionsDb.find().recordSession(this);
-
-    this.commandRecorder = new CommandRecorder(this, this, null, null, [
-      this.setSnippet,
-      this.getSnippets,
-      this.getDetachedElements,
-      this.getDetachedResources,
-      this.getCollectedAssetNames,
-      this.close,
-      this.flush,
-      this.exportUserProfile,
-      this.getTabs,
-      this.getHeroMeta,
-      this.addRemoteEventListener,
-      this.removeRemoteEventListener,
-      this.pauseCommands,
-      this.resumeCommands,
-    ]);
+    this.activateAgent(options);
   }
 
   public getSummary(): ISessionSummary {
@@ -294,7 +192,7 @@ export default class Session
   }
 
   public getHeroMeta(): Promise<IHeroMeta> {
-    return Promise.resolve(this.meta);
+    return Promise.resolve(this.db.session.getHeroMeta());
   }
 
   public setSnippet(key: string, value: any, timestamp: number): Promise<void> {
@@ -312,22 +210,7 @@ export default class Session
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const snippets = new Set<string>();
-    for (const snippet of db.snippets.all()) {
-      snippets.add(snippet.name);
-    }
-    const resources = new Set<string>();
-    for (const resource of db.detachedResources.all()) {
-      resources.add(resource.name);
-    }
-
-    const elementNames = db.detachedElements.allNames();
-
-    return Promise.resolve({
-      snippets: [...snippets],
-      resources: [...resources],
-      elements: [...elementNames],
-    });
+    return DetachedAssets.getNames(db);
   }
 
   public getSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
@@ -337,7 +220,7 @@ export default class Session
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    return Promise.resolve(db.snippets.getByName(name));
+    return Promise.resolve(DetachedAssets.getSnippets(db, name));
   }
 
   public getDetachedResources(fromSessionId: string, name: string): Promise<IDetachedResource[]> {
@@ -347,22 +230,7 @@ export default class Session
     } else {
       db = SessionDb.getCached(fromSessionId);
     }
-    const resources = db.detachedResources.getByName(name).map(async x => {
-      const resource = await db.resources.getMeta(x.resourceId, true);
-      const detachedResource = {
-        ...x,
-        resource,
-      } as IDetachedResource;
-
-      if (resource.type === 'Websocket') {
-        detachedResource.websocketMessages = db.websocketMessages.getTranslatedMessages(
-          resource.id,
-        );
-      }
-
-      return detachedResource;
-    });
-    return Promise.all(resources);
+    return DetachedAssets.getResources(db, name);
   }
 
   public async getDetachedElements(
@@ -378,7 +246,7 @@ export default class Session
       db = SessionDb.getCached(fromSessionId);
     }
     db.flush();
-    return db.detachedElements.getByName(name);
+    return DetachedAssets.getElements(db, name);
   }
 
   public async openBrowser(): Promise<void> {
@@ -416,7 +284,7 @@ export default class Session
       this.mode === 'development' && this.options.showChromeInteractions === true;
 
     if (this.options.upstreamProxyIpMask) {
-      this.db.session.updateConfiguration(this.meta);
+      this.db.session.updateConfiguration(this.getConfiguration());
     }
   }
 
@@ -463,7 +331,7 @@ export default class Session
     this.registerTab(tab);
     await tab.isReady;
 
-    if (first) this.db.session.updateConfiguration(this.meta);
+    if (first) this.db.session.updateConfiguration(this.getConfiguration());
     return tab;
   }
 
@@ -551,7 +419,7 @@ export default class Session
     });
 
     await this.closeTabs();
-    await this.agent.close();
+    await this.agent?.close();
 
     log.stats('Session.Closed', {
       sessionId: this.id,
@@ -562,7 +430,6 @@ export default class Session
     this.emit('closed', closedEvent);
     await closedEvent.waitForPromise;
 
-    delete Session.byId[this.id];
     this.events.close();
     this.commandRecorder.cleanup();
     this.plugins.cleanup();
@@ -618,6 +485,88 @@ export default class Session
     return Promise.resolve();
   }
 
+  protected assignId(sessionId?: string): string {
+    if (sessionId) {
+      if (Session.byId[sessionId]) {
+        throw new Error('The pre-provided sessionId is already in use.');
+      }
+      // make sure this is a valid sessionId
+      if (/^[0-9a-zA-Z-_]{6,}/.test(sessionId) === false) {
+        throw new Error(
+          'Unsupported sessionId format provided. Must be > 10 characters including: a-z, 0-9 and dashes.',
+        );
+      }
+    }
+    sessionId ??= nanoid();
+    Session.byId[sessionId] = this;
+    Session.events.once('closed', ({ id }) => delete Session.byId[id]);
+    return sessionId;
+  }
+
+  protected activateAgent(options: ISessionCreateOptions): void {
+    const providedOptions = { ...options };
+    // set default script instance if not provided
+    options.scriptInstanceMeta ??= {
+      id: nanoid(),
+      workingDirectory: process.cwd(),
+      entrypoint: require.main?.filename ?? process.argv[1],
+      startDate: this.createdTime,
+    };
+    // add env vars
+    options.showChrome ??= env.showChrome;
+    options.noChromeSandbox ??= env.noChromeSandbox;
+    options.disableGpu ??= env.disableGpu;
+    options.disableMitm ??= env.disableMitm;
+
+    Session.events.emit('new', { session: this });
+
+    // if no settings for chrome visibility, default to headless
+    options.showChrome ??= false;
+    options.showChromeInteractions ??= options.showChrome;
+
+    const { userProfile, userAgent } = options;
+    const customEmulatorConfig: IEmulatorOptions = {
+      userAgentSelector: userAgent ?? userProfile?.userAgentString,
+    };
+
+    this.agent = Core.pool.createAgent({
+      options,
+      customEmulatorConfig,
+      logger: this.logger,
+      deviceProfile: userProfile?.deviceProfile,
+      id: this.id,
+      commandMarker: this.commands,
+    });
+
+    this.plugins = new CorePlugins(this.agent, {
+      corePluginPaths: options.corePluginPaths,
+      dependencyMap: options.dependencyMap,
+      getSessionSummary: this.getSummary.bind(this),
+    });
+
+    // should come after plugins can initiate
+    this.recordSession(providedOptions);
+
+    SessionsDb.getInstance().recordSession(this);
+
+    this.commandRecorder = new CommandRecorder(this, this, null, null, [
+      this.setSnippet,
+      this.getSnippets,
+      this.getDetachedElements,
+      this.getDetachedResources,
+      this.getCollectedAssetNames,
+      this.close,
+      this.flush,
+      this.exportUserProfile,
+      this.getTabs,
+      this.getHeroMeta,
+      this.addRemoteEventListener,
+      this.removeRemoteEventListener,
+      this.pauseCommands,
+      this.resumeCommands,
+    ]);
+  }
+
   private async willClose(): Promise<void> {
     const willCloseEvent = { waitForPromise: null };
     this.emit('will-close', willCloseEvent);
@@ -645,21 +594,6 @@ export default class Session
     Object.assign(this.options, options);
     this.commands.presetMeta = null;
     this.emit('resumed');
-  }
-
-  private getId(sessionId?: string): string {
-    if (sessionId) {
-      if (Session.byId[sessionId]) {
-        throw new Error('The pre-provided sessionId is already in use.');
-      }
-      // make sure this is a valid sessionid
-      if (/^[0-9a-zA-Z-_]{6,}/.test(sessionId) === false) {
-        throw new Error(
-          'Unsupported sessionId format provided. Must be > 10 characters including: a-z, 0-9 and dashes.',
-        );
-      }
-    }
-    return sessionId ?? nanoid();
   }
 
   private cleanup(): void {
@@ -791,6 +725,56 @@ export default class Session
     );
   }
 
+  private getConfiguration(): IHeroMeta {
+    const { viewport, locale, timezoneId, geolocation, windowNavigatorPlatform } =
+      this.emulationProfile;
+
+    const {
+      string: userAgentString,
+      operatingSystemName,
+      operatingSystemVersion: osVersion,
+      uaClientHintsPlatformVersion,
+      browserVersion,
+      browserName,
+    } = this.emulationProfile.userAgentOption ?? {};
+
+    const browserFullVersion = [
+      browserVersion.major,
+      browserVersion.minor,
+      browserVersion.patch,
+      browserVersion.build,
+    ]
+      .filter(x => x !== undefined)
+      .join('.');
+
+    const operatingSystemVersion = [
+      osVersion.major,
+      osVersion.minor,
+      osVersion.patch,
+      osVersion.build,
+    ]
+      .filter(x => x !== undefined)
+      .join('.');
+
+    return {
+      sessionId: this.id,
+      ...this.options,
+      viewport,
+      locale,
+      timezoneId,
+      geolocation,
+      userAgentString,
+      operatingSystemName,
+      uaClientHintsPlatformVersion,
+      windowNavigatorPlatform,
+      operatingSystemVersion,
+      browserName,
+      browserFullVersion,
+      renderingEngine: this.browserEngine.name,
+      renderingEngineVersion: this.browserEngine.fullVersion,
+    };
+  }
+
   private recordSession(providedOptions: ISessionCreateOptions): void {
     if (!this.browserEngine) {
       let extraMessage = '.';
@@ -798,14 +782,10 @@ export default class Session
       throw new Error(`Failed to select a browser engine${extraMessage}`);
     }
 
-    const configuration = this.meta;
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
 
     this.db.session.insert(
-      this.id,
-      configuration,
-      this.browserEngine.name,
-      this.browserEngine.fullVersion,
+      this.getConfiguration(),
       this.createdTime,
       scriptInstanceMeta,
       this.emulationProfile.deviceProfile,

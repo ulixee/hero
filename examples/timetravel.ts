@@ -4,9 +4,12 @@ import { inspect } from 'util';
 import * as Path from 'path';
 import * as readline from 'readline';
 import Core from '@ulixee/hero-core';
+import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
+import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
 import MirrorContext from '@ulixee/hero-timetravel/lib/MirrorContext';
 import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
 import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
+import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 
 inspect.defaultOptions.depth = null;
 
@@ -33,10 +36,18 @@ inspect.defaultOptions.depth = null;
   });
 
   const context = await MirrorContext.createFromSessionDb(session.id, true);
+  const db = SessionDb.getCached(session.id);
+  const network = await MirrorNetwork.createFromSessionDb(db);
 
   const player = TimetravelPlayer.create(
     session.id,
-    { browserContext: context },
+    {
+      async getMirrorPage(): Promise<MirrorPage> {
+        const mirrorPage = new MirrorPage(network, null, true);
+        await mirrorPage.openInContext(context, session.id);
+        return mirrorPage;
+      },
+    },
     null,
     connectionToCoreApi,
   );

@@ -1,9 +1,6 @@
 import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
-import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
+import { IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import Page from '@ulixee/unblocked-agent/lib/Page';
-import MirrorNetwork from '../lib/MirrorNetwork';
 import MirrorPage from '../lib/MirrorPage';
 
 export default class TabPlaybackController {
@@ -51,10 +48,6 @@ export default class TabPlaybackController {
     return 0;
   }
 
-  public get isOpen(): boolean {
-    return !!this.mirrorPage?.pageId;
-  }
-
   public get focusedPaintIndexes(): [start: number, end: number] {
     if (!this.focusedTickRange) {
       return [this.currentTick?.paintEventIndex, this.currentTick?.paintEventIndex];
@@ -68,7 +61,6 @@ export default class TabPlaybackController {
   public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
-  public readonly mirrorPage: MirrorPage;
   public focusedOffsetRange: [start: number, end: number];
   private events = new EventSubscriber();
 
@@ -76,44 +68,27 @@ export default class TabPlaybackController {
   private paintEventsLoadedIdx = -1;
   private focusedTickRange: [start: number, end: number];
 
-  constructor(
-    private readonly tabDetails: ITabDetails,
-    private readonly mirrorNetwork: MirrorNetwork,
-    private readonly sessionId: string,
-    debugLogging = false,
-  ) {
-    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
-    this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
-  }
-
-  public updateTabDetails(tabDetails: ITabDetails): Promise<void> {
-    Object.assign(this.tabDetails, tabDetails);
-    if (this.currentTickIndex >= 0) {
-      this.currentTimelineOffsetPct =
-        this.tabDetails.ticks[this.currentTickIndex]?.timelineOffsetPercent;
-    }
-    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
-    return this.mirrorPage.replaceDomRecording(domRecording);
-  }
-
-  public isPage(id: string): boolean {
-    return this.mirrorPage?.pageId === id;
-  }
-
-  public async open(
-    browserContext: BrowserContext,
-    onPage?: (page: Page) => Promise<void>,
-  ): Promise<void> {
-    await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
-    if (this.mirrorPage.page.mainFrame.url === 'about:blank') {
-      await this.mirrorPage.page.navigate(this.tabDetails.documents[0].url);
-    }
+  constructor(private readonly tabDetails: ITabDetails, public readonly mirrorPage: MirrorPage) {
     this.events.once(this.mirrorPage, 'close', () => {
       this.paintEventsLoadedIdx = -1;
       this.isPlaying = false;
       this.currentTickIndex = -1;
       this.currentTimelineOffsetPct = 0;
     });
+  }
+
+  public updateTabDetails(tabDetails: ITabDetails): void {
+    Object.assign(this.tabDetails, tabDetails);
+    if (this.currentTickIndex >= 0) {
+      this.currentTimelineOffsetPct =
+        this.tabDetails.ticks[this.currentTickIndex]?.timelineOffsetPercent;
+    }
+  }
+
+  public async gotoStart(): Promise<void> {
+    if (this.mirrorPage.page.mainFrame.url === 'about:blank') {
+      await this.mirrorPage.page.navigate(this.tabDetails.documents[0].url);
+    }
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -145,10 +120,7 @@ export default class TabPlaybackController {
     this.isPlaying = false;
   }
 
-  public async close(): Promise<void> {
-    // go ahead and say this is closed
-    this.mirrorPage.emit('close');
-    await this.mirrorPage.close();
+  public close(): void {
     this.events.close();
   }
 
@@ -247,20 +219,5 @@ export default class TabPlaybackController {
 
   public getPaintEventAtIndex(index: number): IPaintEvent {
     return this.tabDetails.paintEvents[index];
-  }
-
-  private static tabDetailsToDomRecording(tabDetails: ITabDetails): IDomRecording {
-    const mainFrameIds = new Set<number>();
-    const domNodePathByFrameId: { [frameId: number]: string } = {};
-    for (const frame of tabDetails.tab.frames) {
-      if (frame.isMainFrame) mainFrameIds.add(frame.id);
-      domNodePathByFrameId[frame.id] = frame.domNodePath;
-    }
-    return <IDomRecording>{
-      paintEvents: tabDetails.paintEvents,
-      documents: tabDetails.documents,
-      domNodePathByFrameId,
-      mainFrameIds,
-    };
   }
 }

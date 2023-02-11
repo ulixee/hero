@@ -19,8 +19,8 @@ import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import Queue from '@ulixee/commons/lib/Queue';
 import { ITabEventParams } from '@ulixee/hero-core/lib/Tab';
 import Page from '@ulixee/unblocked-agent/lib/Page';
-import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import MirrorNetwork from './MirrorNetwork';
 
 const { log } = Log(module);
@@ -32,9 +32,14 @@ export default class MirrorPage extends TypedEventEmitter<{
   open: void;
   goto: { url: string; loaderId: string };
 }> {
+  public static newPageOptions = {
+    runPageScripts: false,
+    enableDomStorageTracker: false,
+    installJsPathIntoDefaultContext: true,
+  };
+
   public page: Page;
   public isReady: Promise<void>;
-
   public get pageId(): string {
     return this.page?.id;
   }
@@ -42,6 +47,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   public domRecording: IDomRecording;
 
   private events = new EventSubscriber();
+  private createdPage = false;
   private sessionId: string;
   private pendingDomChanges: IDomChangeRecord[] = [];
   private loadedDocument: IDocument;
@@ -58,8 +64,8 @@ export default class MirrorPage extends TypedEventEmitter<{
   constructor(
     public network: MirrorNetwork,
     domRecording: IDomRecording,
-    private showChromeInteractions = false,
-    private debugLogging = false,
+    public showChromeInteractions = false,
+    private debugLogging = true,
   ) {
     super();
     this.setDomRecording(domRecording);
@@ -101,16 +107,20 @@ export default class MirrorPage extends TypedEventEmitter<{
             : null,
           page
             .addNewDocumentScript(injectedScript, this.useIsolatedContext)
-            .then(() => page.reload()),
+            // .then(() => page.reload()),
         );
+        page[installedScriptsSymbol] = true;
       }
       await Promise.all(promises);
+    } catch (error) {
+      this.logger.error('ERROR creating mirror page', { error });
+      readyResolvable.reject(error);
     } finally {
       if (readyResolvable) readyResolvable.resolve();
     }
   }
 
-  public async open(
+  public async openInContext(
     context: BrowserContext,
     sessionId: string,
     viewport?: IViewport,
@@ -123,11 +133,8 @@ export default class MirrorPage extends TypedEventEmitter<{
     const ready = new Resolvable<void>();
     this.isReady = ready.promise;
     try {
-      this.page = await context.newPage({
-        runPageScripts: false,
-        enableDomStorageTracker: false,
-        installJsPathIntoDefaultContext: true,
-      });
+      this.page = await context.newPage(MirrorPage.newPageOptions);
+      this.createdPage = true;
       await this.attachToPage(this.page, sessionId, false);
 
       if (onPage) await onPage(this.page);
@@ -139,10 +146,13 @@ export default class MirrorPage extends TypedEventEmitter<{
           mobile: false,
         });
       }
+    } catch (error) {
+      ready.reject(error);
     } finally {
       ready.resolve();
       this.emit('open');
     }
+    return this.isReady;
   }
 
   public async replaceDomRecording(domRecording: IDomRecording): Promise<void> {
@@ -162,7 +172,7 @@ export default class MirrorPage extends TypedEventEmitter<{
     return this.domRecording.paintEvents.indexOf(paint);
   }
 
-  public subscribe(tab: Tab): void {
+  public subscribe(tab: Tab, cleanupOnTabClose = true): void {
     if (this.subscribeToTab) throw new Error('This MirrorPage is already subscribed to a tab');
 
     // NOTE: domNodePathByFrameId and mainFrameIds are live objects
@@ -171,11 +181,17 @@ export default class MirrorPage extends TypedEventEmitter<{
     const onPageEvents = this.events.on(tab, 'page-events', this.onPageEvents);
     this.events.once(tab, 'close', () => {
       this.events.off(onPageEvents);
-      this.subscribeToTab = null;
-      this.domRecording = null;
-      this.isReady = null;
-      // @ts-ignore
-      this.loadQueue.reset();
+      if (cleanupOnTabClose) {
+        this.subscribeToTab = null;
+        this.domRecording = null;
+        this.isReady = null;
+        // @ts-ignore
+        this.loadQueue.reset();
+      } else {
+        this.domRecording.domNodePathByFrameId = { ...tab.session.db.frames.frameDomNodePathsById };
+        this.domRecording.mainFrameIds = new Set(tab.session.db.frames.mainFrameIds(tab.tabId));
+        this.subscribeToTab = null;
+      }
     });
     this.subscribeToTab = tab;
   }
@@ -269,15 +285,20 @@ export default class MirrorPage extends TypedEventEmitter<{
   public async close(): Promise<void> {
     this.loadQueue.stop();
     if (this.page && !this.page.isClosed) {
-      await this.page.close();
+      if (this.createdPage) {
+        await this.page.close();
+      } else {
+        await this.page.reset();
+      }
     }
+
+    this.createdPage = false;
     this.subscribeToTab = null;
     this.page = null;
     this.loadedDocument = null;
     this.network.close();
     this.events.close();
     this.emit('close');
-    this.removeAllListeners();
   }
 
   public async getNodeOuterHtml(

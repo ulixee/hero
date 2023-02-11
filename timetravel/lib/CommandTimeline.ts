@@ -141,22 +141,11 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   }
 
   public static fromSession(session: Session): CommandTimeline {
-    const commands = session.commands;
-    return new CommandTimeline(commands.history, session.db.frameNavigations.getAllNavigations());
+    return this.fromDb(session.db);
   }
 
   public static fromDb(db: SessionDb): CommandTimeline {
-    const commands = db.commands.all().sort((a, b) => {
-      if (a.id === b.id) return a.retryNumber - b.retryNumber;
-      return a.id - b.id;
-    });
-    for (const command of commands) {
-      if (typeof command.callsite === 'string') {
-        command.callsite = JSON.parse((command.callsite as any) ?? '[]');
-      }
-    }
-
-    return new CommandTimeline(commands, db.frameNavigations.getAllNavigations());
+    return new CommandTimeline(db.commands.loadHistory(), db.frameNavigations.getAllNavigations());
   }
 }
 

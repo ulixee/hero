@@ -52,6 +52,14 @@ export default function sessionsFindWithErrorsApi(): ISessionsFindWithErrorsResu
             wasCanceled: true,
             isLastCommand,
           });
+        } else if (resultType?.includes('Error')) {
+          result.commandsWithErrors.push({
+            label: CommandFormatter.toString(command),
+            date: new Date(command.endDate),
+            didTimeout: false,
+            wasCanceled: false,
+            isLastCommand,
+          });
         }
         i += 1;
       }

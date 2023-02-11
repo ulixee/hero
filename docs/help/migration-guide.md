@@ -77,7 +77,7 @@ If you wrote a Core Plugin, you'll notice that the API callbacks have changed sl
 
 ## Replay
 
-If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new ChromeAlive! tooling. You can download the [Ulixee.app](https://github.com/ulixee/platform/releases/latest.md) install, or you can add `@ulixee/apps-chromealive-core` and `@ulixee/miner` to your `devDependencies` and start a local server. This will add a bar to a headed version of Chrome when you're developing.
+If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new Ulixee Desktop tooling. You can download the [Ulixee.app](https://github.com/ulixee/platform/releases/latest.md) install.
 
 
 [miner]: https://ulixee.org/docs/miner

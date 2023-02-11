@@ -21,5 +21,6 @@ export default interface ISessionCreateOptions extends ISessionOptions, IEmulati
   corePluginPaths?: string[];
   showChrome?: boolean;
   showChromeAlive?: boolean;
+  desktopConnectionId?: string;
   showChromeInteractions?: boolean;
 }

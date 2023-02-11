@@ -1,5 +1,4 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { IJsPath } from '@ulixee/js-path';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -29,11 +28,12 @@ export default class Commands
   }>
   implements ICommandMarker
 {
-  public readonly history: ICommandMeta[] = [];
+  public get history(): ICommandMeta[] {
+    return this.db.commands.history;
+  }
 
   public get last(): ICommandMeta | undefined {
-    if (this.history.length === 0) return;
-    return this.history[this.history.length - 1];
+    return this.db.commands.last
   }
 
   public get lastId(): number {
@@ -95,7 +95,7 @@ export default class Commands
       frameId,
       name: commandName,
       retryNumber: 0,
-      args: args.length ? TypeSerializer.stringify(args) : undefined,
+      args,
       startNavigationId,
     } as ICommandMeta;
 
@@ -122,11 +122,6 @@ export default class Commands
 
   public onStart(commandMeta: ICommandMeta, startDate: number): void {
     commandMeta.runStartDate = startDate;
-    this.history.push(commandMeta);
-    this.history.sort((a, b) => {
-      if (a.id === b.id) return a.retryNumber - b.retryNumber;
-      return a.id - b.id;
-    });
     this.db.commands.insert(commandMeta);
     this.emit('start', commandMeta);
   }

@@ -5,7 +5,7 @@ export default function sessionsFindRelatedApi(
   args: ISessionsFindRelatedArgs,
 ): ISessionsFindRelatedResult {
   // NOTE: don't close db - it's from a shared cache
-  const sessionsDb = SessionsDb.find();
+  const sessionsDb = SessionsDb.getInstance();
   const sessionDb = SessionDb.getCached(args.sessionId, true);
   const session = sessionDb.session.get();
 

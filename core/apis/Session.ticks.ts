@@ -5,7 +5,6 @@ import DomChangesTable, {
   IDomChangeRecord,
   IPaintEvent,
 } from '../models/DomChangesTable';
-import { loadCommandTimeline } from './Session.commands';
 import sessionDomChangesApi from './Session.domChanges';
 import sessionInteractionsApi, { ISessionInteractionsResult } from './Session.interactions';
 import SessionDb from '../dbs/SessionDb';
@@ -20,7 +19,7 @@ import CommandFormatter from '../lib/CommandFormatter';
 export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
   const session = sessionDb.session.get();
-  const timeline = loadCommandTimeline(args);
+  const timeline = CommandTimeline.fromDb(sessionDb);
   const commands = timeline.commands.map(CommandFormatter.parseResult);
   const { domChangesByTabId } = sessionDomChangesApi(args);
   const interactions = sessionInteractionsApi(args);

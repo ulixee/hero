@@ -6,7 +6,7 @@ export default interface ICommandMeta {
   frameId: number;
   name: string;
   retryNumber: number;
-  args?: string;
+  args?: any;
   clientStartDate?: number;
   clientSendDate?: number;
   runStartDate: number;
