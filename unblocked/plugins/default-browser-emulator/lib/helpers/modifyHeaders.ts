@@ -61,11 +61,11 @@ export default function modifyHeaders(
     if (lowerName === 'accept-language') {
       value = `${locale};q=0.9`;
       // if header is an Sec- header, trust Chrome
-    } else if (value && lowerName.startsWith('sec-')) {
-      // keep given value
     } else if (lowerName === 'sec-ch-ua-platform') {
       // must align to user platform! (eg, "Windows")
       value = `"${userAgentData.platform}"`;
+    } else if (value && lowerName.startsWith('sec-')) {
+      // keep given value
     } else if (value && lowerName === 'accept' && isXhr) {
       // allow user to customize accept value on fetch/xhr
     } else if (lowerName === 'user-agent') {
@@ -121,10 +121,10 @@ function getResourceHeaderDefaults(
     defaultOrder.orderKeys ??= new Set(defaultOrder.order.map(toLowerCase));
   }
 
-  let defaultOrders = profiles.filter((x) => x.method === method);
+  let defaultOrders = profiles.filter(x => x.method === method);
 
   if (defaultOrders.length > 1) {
-    const filtered = defaultOrders.filter((x) => x.originTypes.includes(originType));
+    const filtered = defaultOrders.filter(x => x.originTypes.includes(originType));
     if (filtered.length) defaultOrders = filtered;
   }
 
@@ -135,13 +135,13 @@ function getResourceHeaderDefaults(
   }
 
   if (defaultOrders.length > 1 && (headers['sec-fetch-user'] || headers['Sec-Fetch-User'])) {
-    const filtered = defaultOrders.filter((x) => x.orderKeys.has('sec-fetch-user'));
+    const filtered = defaultOrders.filter(x => x.orderKeys.has('sec-fetch-user'));
     if (filtered.length) defaultOrders = filtered;
   }
 
   if (defaultOrders.length > 1) {
     if (headers.Cookie || headers.cookie) {
-      const filtered = defaultOrders.filter((x) => x.orderKeys.has('cookie'));
+      const filtered = defaultOrders.filter(x => x.orderKeys.has('cookie'));
       if (filtered.length) defaultOrders = filtered;
     }
   }
