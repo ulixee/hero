@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
@@ -26,8 +27,15 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 	}
 
 	if proxyUrl.User != nil {
-		proxyAuth := proxyUrl.User.String()
-		connectReq.Header.Set("Proxy-Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(proxyAuth))))
+		authBuffer := bytes.NewBuffer(nil)
+		authEncoder := base64.NewEncoder(base64.StdEncoding, authBuffer)
+		authEncoder.Write([]byte(proxyUrl.User.Username()))
+		if password, passwordSet := proxyUrl.User.Password(); passwordSet {
+			authEncoder.Write([]byte{':'})
+			authEncoder.Write([]byte(password))
+		}
+		authEncoder.Close() // flush any partially written blocks
+		connectReq.Header.Set("Proxy-Authorization", fmt.Sprintf("Basic %s", authBuffer.Bytes()))
 	}
 
 	conn, err := dialer.Dial("tcp", proxyHost)

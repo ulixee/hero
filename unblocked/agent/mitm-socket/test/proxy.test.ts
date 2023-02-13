@@ -83,6 +83,36 @@ test('should be able to send a request through a secure proxy with auth', async 
   expect(connect).toHaveBeenCalledTimes(1);
 });
 
+test('should be able to send a request through a secure proxy with auth using special chars', async () => {
+  const htmlString = 'Proxy secure proxy echo echo';
+  const password = `u:abcDEF!123-_`;
+  const pass64 = Buffer.from(password).toString('base64');
+  const proxyServer = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
+  const proxy = new Proxy(proxyServer.server);
+  proxy.authenticate = (
+    req: http.IncomingMessage,
+    cb: (req: http.IncomingMessage, success: boolean) => any,
+  ) => {
+    const auth = req.headers['proxy-authorization'];
+    const isValid = auth === `Basic ${pass64}`;
+    if (!isValid) {
+      return cb(null, false);
+    }
+    cb(null, true);
+  };
+  const connect = jest.fn();
+  proxy.once('connect', connect);
+
+  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
+  const tlsConnection = getTlsConnection(server.port);
+  tlsConnection.setProxyUrl(`https://${password}@localhost:${proxyServer.port}`);
+
+  await tlsConnection.connect(mitmSocketSession);
+  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
+  expect(httpResponse).toBe(htmlString);
+  expect(connect).toHaveBeenCalledTimes(1);
+});
+
 test('should be able to use a socks5 proxy', async () => {
   const proxy = socks5.createServer();
   await new Promise(resolve => proxy.listen(0, resolve));
@@ -138,6 +168,54 @@ test('should be able to use a socks5 proxy with auth', async () => {
     port: String(server.port),
     servername: 'localhost',
     proxyUrl: `socks5://foo:bar@localhost:${proxyPort}`,
+    isSsl: true,
+  });
+  Helpers.onClose(async () => tlsConnection.close());
+  await tlsConnection.connect(mitmSocketSession);
+
+  const client = http2.connect(server.baseUrl, {
+    createConnection: () => tlsConnection.socket,
+  });
+  Helpers.onClose(async () => client.close());
+
+  const h2stream = client.request({ ':path': '/' });
+  const httpResponse = await readableToBuffer(h2stream);
+
+  expect(httpResponse.toString()).toBe(htmlString);
+  expect(connect).toHaveBeenCalledTimes(1);
+  expect(auth).toHaveBeenCalledTimes(1);
+});
+
+
+test('should be able to use a socks5 proxy with auth, using special characters', async () => {
+  const proxy = socks5.createServer({
+    authenticate(username, password, socket, callback) {
+      // verify username/password
+      if (username !== 'abcDEF!123-_' || password !== 'GHI_jkl-456!!') {
+        // respond with auth failure (can be any error)
+        return setImmediate(callback, new Error('invalid credentials'));
+      }
+
+      // return successful authentication
+      return setImmediate(callback);
+    },
+  });
+  await new Promise(resolve => proxy.listen(0, resolve));
+  Helpers.needsClosing.push(proxy);
+
+  const proxyPort = proxy.address().port;
+  const connect = jest.fn();
+  const auth = jest.fn();
+  proxy.once('proxyConnect', connect);
+  proxy.once('authenticate', auth);
+
+  const htmlString = 'Proxy proxy echo auth';
+  const server = await Helpers.runHttp2Server((req, res) => res.end(htmlString));
+  const tlsConnection = new MitmSocket(`${sessionId}`, TestLogger.forTest(module), {
+    host: 'localhost',
+    port: String(server.port),
+    servername: 'localhost',
+    proxyUrl: `socks5://abcDEF!123-_:GHI_jkl-456!!@localhost:${proxyPort}`,
     isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
