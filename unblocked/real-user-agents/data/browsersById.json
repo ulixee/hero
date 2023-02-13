@@ -3311,5 +3311,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-110-0": {
+    "id": "chrome-110-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
