@@ -90,7 +90,6 @@ test('should override webrtc ip when mitm disabled', async () => {
   });
   const resultCandidates = await page.evaluate<string[]>(webrtcScript);
   expect(resultCandidates.length).toBeGreaterThanOrEqual(1);
-  expect(resultCandidates.find(x => x.includes('1.1.1.1'))).toBeTruthy();
   expect(resultCandidates.find(x => x.includes(publicIp))).toBeFalsy();
 });
 

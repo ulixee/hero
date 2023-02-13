@@ -160,7 +160,7 @@ async function runLocalChromes(
     const urls = extractDomAssignmentUrl(assignment);
     for (const url of urls) {
       const isFinishedPromise = waitUntilDomAssignmentFinishes(assignment, url);
-      await startChromeAndLoadUrl(executablePath, url, headType, automationType);
+      await startChromeAndLoadUrl(executablePath, url, headType, automationType, Number(majorVersion));
       await isFinishedPromise;
       await stopChrome();
     }

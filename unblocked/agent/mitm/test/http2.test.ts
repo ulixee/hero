@@ -198,6 +198,7 @@ test('should handle cache headers for h2', async () => {
   const res1 = await client.request({ ':path': '/cached' });
   expect(res1).toBeTruthy();
   await new Promise(resolve => res1.once('response', resolve));
+  expect(etags).toHaveLength(1);
   expect(etags[0]).not.toBeTruthy();
 
   const res2 = await client.request({ ':path': '/cached' });
@@ -206,11 +207,13 @@ test('should handle cache headers for h2', async () => {
     res2.once('response', resolve),
   );
   expect(result[':status']).toBe(200);
+  expect(etags).toHaveLength(2);
   expect(etags[1]).toBe('"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
 
   const res3 = await client.request({ ':path': '/cached', 'if-none-match': 'etag2' });
   expect(res3).toBeTruthy();
   await new Promise(resolve => res3.once('response', resolve));
+  expect(etags).toHaveLength(3);
   expect(etags[2]).toBe('etag2');
 });
 
