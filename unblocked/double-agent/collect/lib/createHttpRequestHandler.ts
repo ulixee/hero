@@ -36,7 +36,9 @@ export default function createHttpRequestHandler(
     const route = server.getRoute(requestUrl.pathname);
 
     if (!isRecognizedDomain(requestUrl.host, [MainDomain, SubDomain, CrossDomain])) {
-      throw new Error('Invalid domain used to access site');
+      req.socket.destroy();
+      console.warn('Invalid domain used to access site', req.url, req.headers.host);
+      return;
     }
 
     if (requestUrl.pathname === '/favicon.ico') {

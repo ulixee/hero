@@ -18,7 +18,9 @@ export default function createTlsRequestHandler(
     const requestUrl = server.getRequestUrl(req as any);
 
     if (!isRecognizedDomain(req.headers.host, [TlsDomain])) {
-      throw new Error('Invalid domain used to access site');
+      req.socket.destroy();
+      console.warn('Invalid domain used to access site', req.url, req.headers.host);
+      return;
     }
 
     const session = sessionTracker.getSessionFromServerRequest(server, req);
