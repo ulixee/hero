@@ -339,7 +339,14 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
     this.engine.isHeaded = options.showChrome === true;
     if (!this.engine.isHeaded) {
-      launchArgs.push('--headless');
+      const majorVersion = this.majorVersion;
+      if (majorVersion >= 109) {
+        launchArgs.push('--headless=new');
+      } else if (majorVersion >= 94) {
+        launchArgs.push('--headless=chrome');
+      } else {
+        launchArgs.push('--headless');
+      }
     }
   }
 

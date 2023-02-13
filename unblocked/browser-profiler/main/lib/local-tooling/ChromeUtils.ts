@@ -15,6 +15,7 @@ export async function startChromeAndLoadUrl(
   url: string,
   headType: string,
   automationType: string,
+  majorVersion: number
 ): Promise<void> {
   if (chromeProcess) throw new Error('Chrome already started');
 
@@ -27,7 +28,11 @@ export async function startChromeAndLoadUrl(
     '--use-mock-keychain',
   ];
   if (headType === 'headless') {
-    chromeFlags.push('--headless');
+    if (majorVersion >= 109) {
+      chromeFlags.push('--headless=new');
+    } else {
+      chromeFlags.push('--headless');
+    }
   }
 
   if (automationType === 'devtools') {
