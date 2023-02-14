@@ -25,7 +25,7 @@
     "@ulixee/real-user-agents": "2.0.0-alpha.18",
     "axios": "^0.27.2",
     "chrome-launcher": "^0.13.4",
-    "chrome-remote-interface": "0.29.0",
+    "chrome-remote-interface": "0.32.1",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",

@@ -110,6 +110,7 @@ async function runDockerChromes(
         url,
         automationType,
         Config.runner.assignmentsHost?.includes('//localhost'),
+        Number(majorVersion)
       );
       await isFinishedPromise;
       stopDocker(dockerName);

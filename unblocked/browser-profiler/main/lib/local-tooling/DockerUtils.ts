@@ -32,16 +32,33 @@ export async function startDockerAndLoadUrl(
   url: string,
   automationType: string,
   needsLocalHost: boolean,
+  chromeVersion: number,
 ): Promise<ChildProcess> {
   const { hostname } = new URL(url);
   const hasDevtools = automationType === 'devtools';
   const dockerArgs = hasDevtools ? `-p=9222:9222` : '';
-  const chromeArgs = hasDevtools
-    ? `--remote-debugging-address=0.0.0.0 --remote-debugging-port=9222`
-    : '';
+  const chromeArgs = [
+    '--allow-running-insecure-content',
+    '--ignore-certificate-errors',
+    '--headless'
+  ];
+  if (chromeVersion >= 109) {
+    // NOTE: not working on docker.
+    //   chromeArgs.push('--headless=new');
+    // } else if (chromeVersion >= 96) {
+    //   chromeArgs.push('--headless=chrome');
+    // } else {
+    //   chromeArgs.push('--headless');
+  }
+  if (hasDevtools) {
+    chromeArgs.push('--remote-debugging-address=0.0.0.0', '--remote-debugging-port=9222');
+  }
+
   const hostArg = needsLocalHost ? `--add-host="${hostname}:${dockerHost}"` : '';
-  const urlArg = hasDevtools ? '' : url;
-  const command = `docker run --init --rm --name ${dockerName} --security-opt seccomp="./Docker-chrome.json" --ipc=host --shm-size='3gb' --cap-add=SYS_ADMIN ${hostArg} ${dockerArgs} ${dockerName} "${chromeArgs}" "${urlArg}"`;
+  const urlArg = hasDevtools ? 'about:blank' : url;
+  const command = `docker run --init --rm --name ${dockerName} --security-opt seccomp="./Docker-chrome.json" --ipc=host --shm-size='3gb' --cap-add=SYS_ADMIN ${hostArg} ${dockerArgs} ${dockerName} "${chromeArgs.join(
+    ' ',
+  )}" "${urlArg}"`;
 
   console.log(command);
   const child = spawn(command, { shell: true, stdio: 'pipe', cwd: dockerWorkingDirectory });

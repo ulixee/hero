@@ -21,7 +21,7 @@ url=$2
 #export DISPLAY=:99
 
 chrome --version
-chrome --headless --allow-running-insecure-content --ignore-certificate-errors --user-data-dir=/data $chromeArgs $url &
+chrome --user-data-dir=/data $chromeArgs $url &
 browserProcess=$!
 
 wait $browserProcess
