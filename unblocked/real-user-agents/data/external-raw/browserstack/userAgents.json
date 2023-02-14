@@ -15548,5 +15548,10 @@
     "id": "Chrome-110.0--OS X-Big Sur",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "osId": "mac-os-11"
+  },
+  {
+    "id": "Chrome-110.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    "osId": "mac-os-13"
   }
 ]
