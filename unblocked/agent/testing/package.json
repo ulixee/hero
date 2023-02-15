@@ -17,7 +17,7 @@
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0",
-    "multer": "^1.4.2"
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "@types/koa": "^2.11.3",
