@@ -3325,5 +3325,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-110-0": {
+    "id": "edge-110-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0",
+      "build": "1587",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
