@@ -2,14 +2,12 @@ import Log from '@ulixee/commons/lib/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { Session } from '@ulixee/hero-core';
-import ConnectionToHeroApiClient from '@ulixee/hero-core/connections/ConnectionToHeroApiClient';
-import ConnectionToHeroApiCore from '@ulixee/hero-core/connections/ConnectionToHeroApiCore';
 import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IDomRecording } from '@ulixee/hero-core/models/DomChangesTable';
-import { ITabDetails } from '@ulixee/hero-core/apis/Session.ticks';
 import TabPlaybackController from './TabPlaybackController';
 import MirrorPage from '../lib/MirrorPage';
+import getTimetravelTicks, { ITabDetails } from './getTimetravelTicks';
 
 const { log } = Log(module);
 
@@ -49,7 +47,6 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
 
   private constructor(
     readonly sessionId: string,
-    readonly connection: ConnectionToHeroApiCore,
     readonly context: IMirrorPageContext,
     private timelineRange?: [startTime: number, endTime?: number],
     readonly debugLogging = false,
@@ -216,17 +213,9 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
   private async load(): Promise<void> {
     if (this.loadedPromise) return this.loadedPromise;
     this.loadedPromise = new Resolvable();
-    const ticksResult = await this.connection.sendRequest({
-      command: 'Session.ticks',
-      args: [
-        {
-          sessionId: this.sessionId,
-          includeCommands: true,
-          includeInteractionEvents: true,
-          includePaintEvents: true,
-          timelineRange: this.timelineRange,
-        },
-      ],
+    const ticksResult = await getTimetravelTicks({
+      sessionId: this.sessionId,
+      timelineRange: this.timelineRange,
     });
     if (this.debugLogging) {
       log.info('Timetravel Tab State', {
@@ -235,7 +224,7 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
       });
     }
 
-    await this.setTabState(ticksResult.tabDetails);
+    await this.setTabState(ticksResult);
 
     this.loadedPromise.resolve();
   }
@@ -244,13 +233,8 @@ export default class TimetravelPlayer extends TypedEventEmitter<{
     heroSessionId: string,
     context: IMirrorPageContext,
     timelineRange?: [startTime: number, endTime: number],
-    connectionToCoreApi?: ConnectionToHeroApiCore,
   ): TimetravelPlayer {
-    if (!connectionToCoreApi) {
-      const bridge = ConnectionToHeroApiClient.createBridge();
-      connectionToCoreApi = new ConnectionToHeroApiCore(bridge.transportToCore);
-    }
-    return new TimetravelPlayer(heroSessionId, connectionToCoreApi, context, timelineRange);
+    return new TimetravelPlayer(heroSessionId, context, timelineRange);
   }
 }
 

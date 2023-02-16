@@ -1,71 +1,69 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import CommandTimeline from '@ulixee/hero-timetravel/lib/CommandTimeline';
+import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import { IMouseEventRecord, MouseEventType } from '@ulixee/hero-core/models/MouseEventsTable';
+import { IFocusRecord } from '@ulixee/hero-core/models/FocusEventsTable';
+import { IScrollRecord } from '@ulixee/hero-core/models/ScrollEventsTable';
+import ICommandWithResult from '@ulixee/hero-core/interfaces/ICommandWithResult';
+import CommandFormatter from '@ulixee/hero-core/lib/CommandFormatter';
 import DomChangesTable, {
   IDocument,
   IDomChangeRecord,
   IPaintEvent,
-} from '../models/DomChangesTable';
-import sessionDomChangesApi from './Session.domChanges';
-import sessionInteractionsApi, { ISessionInteractionsResult } from './Session.interactions';
-import SessionDb from '../dbs/SessionDb';
-import { IMouseEventRecord } from '../models/MouseEventsTable';
-import { IFocusRecord } from '../models/FocusEventsTable';
-import { IScrollRecord } from '../models/ScrollEventsTable';
-import ICommandWithResult from '../interfaces/ICommandWithResult';
-import sessionTabsApi, { ISessionTab } from './Session.tabs';
-import { ISessionRecord } from '../models/SessionTable';
-import CommandFormatter from '../lib/CommandFormatter';
+} from '@ulixee/hero-core/models/DomChangesTable';
+import CommandTimeline from '../lib/CommandTimeline';
 
-export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksResult {
-  const sessionDb = SessionDb.getCached(args.sessionId, true);
-  const session = sessionDb.session.get();
+export default function getTimetravelTicks(options: {
+  sessionId: string;
+  timelineRange?: [startTime: number, endTime?: number];
+}): ITabDetails[] {
+  const sessionDb = SessionDb.getCached(options.sessionId, true);
   const timeline = CommandTimeline.fromDb(sessionDb);
   const commands = timeline.commands.map(CommandFormatter.parseResult);
-  const { domChangesByTabId } = sessionDomChangesApi(args);
-  const interactions = sessionInteractionsApi(args);
-  const { tabs } = sessionTabsApi(args);
-  const state = createSessionState(session, tabs, timeline);
+  const state = createSessionState(sessionDb, timeline);
 
   createCommandTicks(state, commands);
-  createInteractionTicks(state, interactions);
-  createPaintTicks(state, domChangesByTabId);
+  createInteractionTicks(state, sessionDb);
+  createPaintTicks(state, sessionDb);
 
   // now sort all ticks and assign events
   sortTicks(state);
 
-  const tabDetails = Object.values(state.tabsById);
-  for (const tab of tabDetails) {
-    if (!args.includeInteractionEvents) {
-      delete tab.scroll;
-      delete tab.focus;
-      delete tab.mouse;
-    }
-    if (!args.includeCommands) {
-      delete tab.commands;
-    }
-    if (!args.includePaintEvents) {
-      delete tab.paintEvents;
-    }
-  }
-
-  return { tabDetails };
+  return Object.values(state.tabsById);
 }
 
 /////// HELPER FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////////
 
-function createSessionState(
-  session: ISessionRecord,
-  tabs: ISessionTab[],
-  timeline: CommandTimeline,
-): ISessionState {
+function createSessionState(sessionDb: SessionDb, timeline: CommandTimeline): ISessionState {
   const state: ISessionState = {
     tabsById: {},
     timeline,
   };
+  const tabs = sessionDb.tabs.all();
+  const frames = sessionDb.frames.all();
+  // don't take redirects
+  const frameNavigations = sessionDb.frameNavigations.all().filter(x => !x.httpRedirectedTime);
 
   for (const tab of tabs) {
+    const tabFrames = frames.filter(x => x.tabId === tab.id);
+    const mainFrame = frames.find(x => !x.parentId && x.tabId === tab.id);
+    const startNavigation = frameNavigations.find(x => x.frameId === mainFrame.id);
+    const tabResult = {
+      id: tab.id,
+      width: tab.viewportWidth,
+      height: tab.viewportHeight,
+      startUrl: startNavigation.finalUrl ?? startNavigation.requestedUrl,
+      createdTime: tab.createdTime,
+      frames: tabFrames.map(x => {
+        return {
+          id: x.id,
+          isMainFrame: !x.parentId,
+          domNodePath: sessionDb.frames.frameDomNodePathsById[x.id],
+        };
+      }),
+    };
+
     state.tabsById[tab.id] = {
-      tab,
+      tab: tabResult,
       ticks: [],
       documents: [],
       mouse: [],
@@ -95,27 +93,44 @@ function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]
   }
 }
 
-function createInteractionTicks(
-  state: ISessionState,
-  interactions: ISessionInteractionsResult,
-): void {
-  for (const type of ['mouse', 'focus', 'scroll']) {
-    const events = interactions[type];
+function createInteractionTicks(state: ISessionState, sessionDb: SessionDb): void {
+  function sort(a: { timestamp: number }, b: { timestamp: number }): number {
+    return a.timestamp - b.timestamp;
+  }
+
+  const validMouseEvents = [MouseEventType.MOVE, MouseEventType.DOWN, MouseEventType.UP];
+
+  const filteredMouseEvents = new Set(validMouseEvents);
+  const interactions = {
+    mouse: sessionDb.mouseEvents
+      .all()
+      .filter(x => filteredMouseEvents.has(x.event))
+      .sort(sort),
+    focus: sessionDb.focusEvents.all().sort(sort),
+    scroll: sessionDb.scrollEvents.all().sort(sort),
+  } as const;
+
+  for (const [type, events] of Object.entries(interactions)) {
     for (let i = 0; i < events.length; i += 1) {
       const event = events[i];
       addTick(state, type as any, i, event);
 
-      const { tabId } = event;
-      const tabEvents = state.tabsById[tabId][type];
+      const tabEvents = state.tabsById[event.tabId][type];
       tabEvents.push(event);
     }
   }
 }
 
-function createPaintTicks(
-  state: ISessionState,
-  domChangesByTabId: { [tabId: number]: IDomChangeRecord[] },
-): void {
+function createPaintTicks(state: ISessionState, sessionDb: SessionDb): void {
+  const allDomChanges = sessionDb.domChanges.all();
+
+  const domChangesByTabId: { [tabId: number]: IDomChangeRecord[] } = {};
+
+  for (const change of allDomChanges) {
+    domChangesByTabId[change.tabId] ??= [];
+    domChangesByTabId[change.tabId].push(change);
+  }
+
   for (const [tabId, changes] of Object.entries(domChangesByTabId)) {
     const details = state.tabsById[tabId] as ITabDetails;
     const { documents, tab } = details;
@@ -268,16 +283,19 @@ function addTick(
   return newTick;
 }
 
-interface ISessionTicksArgs {
-  sessionId: string;
-  timelineRange?: [startTime: number, endTime?: number];
-  includeInteractionEvents?: boolean;
-  includeCommands?: boolean;
-  includePaintEvents?: boolean;
+export interface ISessionTab {
+  id: number;
+  createdTime: number;
+  startUrl: string;
+  width: number;
+  height: number;
+  frames: ISessionFrame[];
 }
 
-interface ISessionTicksResult {
-  tabDetails: ITabDetails[];
+export interface ISessionFrame {
+  id: number;
+  isMainFrame: boolean;
+  domNodePath: string;
 }
 
 export interface ITabDetails {
@@ -288,13 +306,6 @@ export interface ITabDetails {
   scroll?: IScrollRecord[];
   commands?: ICommandWithResult[];
   paintEvents?: IPaintEvent[];
-  detachedPaintEvents?: {
-    sourceTabId: number;
-    url: string;
-    frameNavigationId: number;
-    indexRange: [number, number];
-    timestampRange: [number, number];
-  };
   documents: IDocument[];
 }
 

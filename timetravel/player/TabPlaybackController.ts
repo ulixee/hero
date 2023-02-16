@@ -1,6 +1,6 @@
-import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
 import { IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { ITabDetails, ITick } from './getTimetravelTicks';
 import MirrorPage from '../lib/MirrorPage';
 
 export default class TabPlaybackController {

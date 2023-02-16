@@ -31,6 +31,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['scriptInstanceId', 'TEXT'],
         ['workingDirectory', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
+        ['scriptExecPath', 'TEXT'],
+        ['scriptExecArgv', 'TEXT'],
         ['scriptStartDate', 'INTEGER'],
         ['userAgentString', 'TEXT'],
         ['viewport', 'TEXT'],
@@ -116,6 +118,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.workingDirectory,
       scriptInstanceMeta?.entrypoint,
+      scriptInstanceMeta?.execPath,
+      scriptInstanceMeta?.execArgv ? JSON.stringify(scriptInstanceMeta.execArgv) : null,
       scriptInstanceMeta?.startDate,
       configuration.userAgentString,
       JSON.stringify(configuration.viewport),
@@ -157,9 +161,11 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
 
   public get(): ISessionRecord {
     const record = this.db.prepare(`select * from ${this.tableName}`).get() as ISessionRecord;
+    if (!record) return null;
     record.createSessionOptions = TypeSerializer.parse(record.createSessionOptions as string);
     record.viewport = JSON.parse((record.viewport as any) ?? 'undefined');
     record.deviceProfile = TypeSerializer.parse((record.deviceProfile as any) ?? 'undefined');
+    record.scriptExecArgv = JSON.parse(record.scriptExecArgv as any ?? '[]');
     return record;
   }
 }
@@ -178,6 +184,8 @@ export interface ISessionRecord {
   scriptInstanceId: string;
   workingDirectory: string;
   scriptEntrypoint: string;
+  scriptExecPath: string;
+  scriptExecArgv: string[];
   scriptStartDate: number;
   userAgentString: string;
   windowNavigatorPlatform: string;

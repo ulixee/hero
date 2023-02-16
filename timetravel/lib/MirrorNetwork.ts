@@ -2,12 +2,18 @@ import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import { decompressBuffer } from '@ulixee/commons/lib/bufferUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { ISessionResourceDetails } from '@ulixee/hero-core/apis/Session.resource';
 import ResourcesTable, { IResourcesRecord } from '@ulixee/hero-core/models/ResourcesTable';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import { Protocol } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import Fetch = Protocol.Fetch;
+
+interface ISessionResourceDetails {
+  body: Buffer;
+  headers: IHttpHeaders;
+  statusCode: number;
+}
 
 interface IMirrorNetworkConfig {
   headersFilter?: (string | RegExp)[];

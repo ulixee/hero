@@ -2,7 +2,6 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { IInteractionGroup } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { getKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
-import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {
@@ -81,7 +80,7 @@ export default class CommandFormatter {
       .join(', ')})`;
   }
 
-  public static parseResult(meta: ICommandMeta & ICommandTimelineOffset): ICommandWithResult {
+  public static parseResult(meta: ICommandMeta): ICommandWithResult {
     const command: ICommandWithResult = {
       ...meta,
       label: CommandFormatter.toString(meta),
@@ -108,7 +107,7 @@ export default class CommandFormatter {
           : step;
       }
     } else if (meta.resultType && meta.result) {
-      const result = meta.result
+      const result = meta.result;
       command.result = result;
       if (meta.resultType === 'Object' && result.value) {
         const resultType = typeof result.value;

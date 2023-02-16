@@ -19,7 +19,6 @@ import DefaultHumanEmulator from '@ulixee/default-human-emulator';
 import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
-import SessionsDb from './dbs/SessionsDb';
 import NetworkDb from './dbs/NetworkDb';
 import { dataDir } from './env';
 import Tab from './lib/Tab';
@@ -190,7 +189,6 @@ export default class Core {
 
       this.utilityBrowserContext = null;
       this.networkDb?.close();
-      SessionsDb.shutdown();
 
       if (this.onShutdown) this.onShutdown();
       await ShutdownHandler.run();

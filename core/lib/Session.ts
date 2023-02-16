@@ -35,7 +35,6 @@ import Core from '../index';
 import SessionDb from '../dbs/SessionDb';
 import { ICommandableTarget } from './CommandRunner';
 import Commands from './Commands';
-import SessionsDb from '../dbs/SessionsDb';
 import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
 import { IOutputChangeRecord } from '../models/OutputTable';
 import env from '../env';
@@ -547,8 +546,6 @@ export default class Session
     // should come after plugins can initiate
     this.recordSession(providedOptions);
 
-    SessionsDb.getInstance().recordSession(this);
-
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.setSnippet,
       this.getSnippets,
@@ -741,8 +738,8 @@ export default class Session
     const browserFullVersion = [
       browserVersion.major,
       browserVersion.minor,
-      browserVersion.patch,
       browserVersion.build,
+      browserVersion.patch,
     ]
       .filter(x => x !== undefined)
       .join('.');
@@ -750,8 +747,8 @@ export default class Session
     const operatingSystemVersion = [
       osVersion.major,
       osVersion.minor,
-      osVersion.patch,
       osVersion.build,
+      osVersion.patch,
     ]
       .filter(x => x !== undefined)
       .join('.');

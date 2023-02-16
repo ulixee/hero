@@ -16,7 +16,6 @@ import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import ScreenshotsTable from '../models/ScreenshotsTable';
-import SessionsDb from './SessionsDb';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
@@ -250,26 +249,6 @@ export default class SessionDb {
     return this.byId.get(sessionId);
   }
 
-  public static find(scriptArgs: ISessionFindArgs): ISessionFindResult {
-    let { sessionId } = scriptArgs;
-    if (sessionId?.endsWith('.db')) sessionId = sessionId.split('.db').shift();
-
-    // NOTE: don't close db - it's from a shared cache
-    const sessionsDb = SessionsDb.getInstance();
-    if (!sessionId) {
-      sessionId = sessionsDb.findLatestSessionId(scriptArgs);
-      if (!sessionId) return null;
-    }
-
-    const sessionDb = this.getCached(sessionId, true);
-
-    const session = sessionDb.session.get();
-
-    return {
-      session,
-    };
-  }
-
   public static createDir(): void {
     if (!this.hasInitialized) {
       Fs.mkdirSync(this.databaseDir, { recursive: true });
@@ -280,15 +259,4 @@ export default class SessionDb {
   public static get databaseDir(): string {
     return `${Core.dataDir}/hero-sessions`;
   }
-}
-
-export interface ISessionFindResult {
-  session: ISessionRecord;
-}
-
-export interface ISessionFindArgs {
-  scriptInstanceId?: string;
-  sessionName?: string;
-  scriptEntrypoint?: string;
-  sessionId?: string;
 }
