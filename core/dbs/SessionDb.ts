@@ -10,7 +10,7 @@ import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
 import PageLogsTable from '../models/PageLogsTable';
-import SessionTable, { ISessionRecord } from '../models/SessionTable';
+import SessionTable from '../models/SessionTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';

@@ -119,16 +119,14 @@ export default class CommandFormatter {
         ) {
           command.result = result.value;
         }
-
-        if (result.nodePointer) {
-          command.resultNodeIds = [result.nodePointer.id];
-          command.resultNodeType = result.nodePointer.type;
-          if (result.nodePointer.iterableItems) {
-            command.result = result.nodePointer.iterableItems;
-          }
-          if (result.nodePointer.iterableIsNodePointers) {
-            command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
-          }
+      } else if (result.nodePointer) {
+        command.resultNodeIds = [result.nodePointer.id];
+        command.resultNodeType = result.nodePointer.type;
+        if (result.nodePointer.iterableItems) {
+          command.result = result.nodePointer.iterableItems;
+        }
+        if (result.nodePointer.iterableIsNodePointers) {
+          command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
         }
       } else if (meta.resultType === 'Array' && result.length) {
         if (result[0].nodePointerId) {
@@ -150,14 +148,6 @@ export default class CommandFormatter {
       if (mouseInteraction) {
         command.resultNodeIds = mouseInteraction.mousePosition;
       }
-    }
-
-    if (command.result && command.name === 'detachTab') {
-      command.result.prefetchedJsPaths = undefined;
-    }
-
-    if (command.result && command.name.startsWith('go')) {
-      command.result = undefined;
     }
 
     // we have shell objects occasionally coming back. hide from ui

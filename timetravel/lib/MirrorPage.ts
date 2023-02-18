@@ -31,6 +31,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   close: void;
   open: void;
   goto: { url: string; loaderId: string };
+  paint: { paintIndex: number };
 }> {
   public static newPageOptions = {
     runPageScripts: false,
@@ -42,6 +43,14 @@ export default class MirrorPage extends TypedEventEmitter<{
   public isReady: Promise<void>;
   public get pageId(): string {
     return this.page?.id;
+  }
+
+  public get loadedPaintEvent(): IPaintEvent {
+    return this.domRecording.paintEvents[this.loadedPaintIndex];
+  }
+
+  public get hasSubscription(): boolean {
+    return !!this.subscribeToTab;
   }
 
   public domRecording: IDomRecording;
@@ -56,6 +65,7 @@ export default class MirrorPage extends TypedEventEmitter<{
   private subscribeToTab: Tab;
   private loadQueue = new Queue(null, 1);
   private logger: IBoundLog;
+  private loadedPaintIndex = -1;
 
   private get useIsolatedContext(): boolean {
     return this.page.installJsPathIntoIsolatedContext;
@@ -105,9 +115,8 @@ export default class MirrorPage extends TypedEventEmitter<{
           this.showChromeInteractions
             ? InjectedScripts.installInteractionScript(page, this.useIsolatedContext)
             : null,
-          page
-            .addNewDocumentScript(injectedScript, this.useIsolatedContext)
-            // .then(() => page.reload()),
+          page.addNewDocumentScript(injectedScript, this.useIsolatedContext),
+          // .then(() => page.reload()),
         );
         page[installedScriptsSymbol] = true;
       }
@@ -181,16 +190,18 @@ export default class MirrorPage extends TypedEventEmitter<{
     const onPageEvents = this.events.on(tab, 'page-events', this.onPageEvents);
     this.events.once(tab, 'close', () => {
       this.events.off(onPageEvents);
+      this.subscribeToTab = null;
       if (cleanupOnTabClose) {
-        this.subscribeToTab = null;
         this.domRecording = null;
+        this.loadedPaintIndex = -1;
+        this.pendingDomChanges.length = 0;
+        this.loadedDocument = null;
         this.isReady = null;
         // @ts-ignore
         this.loadQueue.reset();
       } else {
         this.domRecording.domNodePathByFrameId = { ...tab.session.db.frames.frameDomNodePathsById };
         this.domRecording.mainFrameIds = new Set(tab.session.db.frames.mainFrameIds(tab.tabId));
-        this.subscribeToTab = null;
       }
     });
     this.subscribeToTab = tab;
@@ -209,6 +220,7 @@ export default class MirrorPage extends TypedEventEmitter<{
       }
       this.processPendingDomChanges();
       newPaintIndex ??= this.domRecording.paintEvents.length - 1;
+      this.loadedPaintIndex = newPaintIndex;
 
       const loadingDocument = this.getActiveDocument(newPaintIndex);
 
@@ -246,6 +258,7 @@ export default class MirrorPage extends TypedEventEmitter<{
           });
         }
 
+        this.emit('paint', { paintIndex: newPaintIndex });
         const showOverlay = (overlayLabel || isLoadingDocument) && this.showChromeInteractions;
 
         if (showOverlay) await this.evaluate('window.overlay();');

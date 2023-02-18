@@ -134,9 +134,9 @@ export default class CommandTimeline<T extends ICommandMeta = ICommandMeta> {
   }
 
   private addNavigation(id: number): void {
-    if (id !== undefined && !this.navigationsById.has(id)) {
+    if (id !== undefined && id !== null && !this.navigationsById.has(id)) {
       const nav = this.allNavigationsById.get(id);
-      this.navigationsById.set(nav.id, nav);
+      if (nav) this.navigationsById.set(nav.id, nav);
     }
   }
 

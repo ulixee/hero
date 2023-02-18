@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session } from '@ulixee/hero-core';
-import getTimetravelTicks from '../player/getTimetravelTicks';
+import TimetravelTicks from '../player/TimetravelTicks';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -24,7 +24,7 @@ function addMe() {
 afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
 
-describe('basic getTimetravelTicks tests', () => {
+describe('basic Timetravel Ticks tests', () => {
   let sessionId: string;
   beforeAll(async () => {
     const connection = Core.addConnection();
@@ -51,13 +51,13 @@ describe('basic getTimetravelTicks tests', () => {
   });
 
   it('can get the ticks for a session', async () => {
-    const tabDetails = await getTimetravelTicks({ sessionId });
+    const tabDetails = TimetravelTicks.loadFromDb(sessionId).tabs;
     expect(tabDetails).toHaveLength(1);
     expect(tabDetails[0].ticks.length).toBeGreaterThanOrEqual(4);
     expect(tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(4);
     expect(tabDetails[0].ticks.filter(x => x.isNewDocumentTick)).toHaveLength(1);
-    expect(tabDetails[0].paintEvents.length).toBeGreaterThanOrEqual(1);
-    expect(tabDetails[0].commands).toHaveLength(4);
+    expect(tabDetails[0].domRecording.paintEvents.length).toBeGreaterThanOrEqual(1);
+    expect(tabDetails[0].ticks.filter(x => x.eventType === 'command')).toHaveLength(4);
     expect(tabDetails[0].mouse.length).toBeGreaterThanOrEqual(1);
   });
 });

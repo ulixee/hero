@@ -15,6 +15,8 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     return this.last?.id;
   }
 
+  private historyById: { [id_retryNumber: string]: ICommandMeta } = {};
+
   constructor(db: SqliteDatabase) {
     super(
       db,
@@ -26,6 +28,8 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
         ['frameId', 'INTEGER'],
         ['flowCommandId', 'INTEGER'],
         ['activeFlowHandlerId', 'INTEGER'],
+        ['startNavigationId', 'INTEGER'],
+        ['endNavigationId', 'INTEGER'],
         ['name', 'TEXT'],
         ['args', 'TEXT'],
         ['clientStartDate', 'INTEGER'],
@@ -46,6 +50,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     this.history = this.all();
 
     for (const command of this.history) {
+      this.historyById[`${command.id}_${command.retryNumber}`] = command;
       if (typeof command.callsite === 'string') {
         command.callsite = JSON.parse((command.callsite as any) ?? '[]');
       }
@@ -64,12 +69,22 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
   }
 
   public insert(commandMeta: ICommandMeta): void {
+    commandMeta.retryNumber ??= 0;
     commandMeta.resultType = commandMeta.result?.constructor?.name ?? typeof commandMeta.result;
-    this.history.push(commandMeta);
-    this.history.sort((a, b) => {
-      if (a.id === b.id) return a.retryNumber - b.retryNumber;
-      return a.id - b.id;
-    });
+    const key = `${commandMeta.id}_${commandMeta.retryNumber}`;
+
+    if (this.historyById[key]) {
+      const idx = this.history.indexOf(this.historyById[key]);
+      this.history[idx] = commandMeta;
+    } else {
+      this.history.push(commandMeta);
+      this.history.sort((a, b) => {
+        if (a.id === b.id) return a.retryNumber - b.retryNumber;
+        return a.id - b.id;
+      });
+    }
+    this.historyById[key] = commandMeta;
+
     let args = commandMeta.args;
     if (typeof commandMeta.args !== 'string') {
       if (commandMeta.args.length === 0) args = undefined;
@@ -77,11 +92,13 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     }
     this.queuePendingInsert([
       commandMeta.id,
-      commandMeta.retryNumber ?? 0,
+      commandMeta.retryNumber,
       commandMeta.tabId,
       commandMeta.frameId,
       commandMeta.flowCommandId,
       commandMeta.activeFlowHandlerId,
+      commandMeta.startNavigationId,
+      commandMeta.endNavigationId,
       commandMeta.name,
       args,
       commandMeta.clientStartDate,
