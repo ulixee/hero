@@ -6,7 +6,7 @@
     "buildVersion": 5481,
     "stablePatchesByOs": {
       "mac": [100, 96, 77],
-      "win": [100, 97],
+      "win": [104, 100, 97],
       "linux": [100, 96, 77]
     }
   },
