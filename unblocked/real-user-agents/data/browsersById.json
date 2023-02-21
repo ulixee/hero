@@ -3339,5 +3339,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-110-0": {
+    "id": "firefox-110-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
