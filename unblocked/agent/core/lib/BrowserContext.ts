@@ -238,7 +238,7 @@ export default class BrowserContext
 
   onDevtoolsPanelAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): void {
     this.devtoolsSessionsById.set(targetInfo.targetId, devtoolsSession);
-    this.hooks.onDevtoolsPanelAttached?.(devtoolsSession).catch(() => null);
+    this.hooks.onDevtoolsPanelAttached?.(devtoolsSession, targetInfo).catch(() => null);
   }
 
   onDevtoolsPanelDetached(devtoolsSession: DevtoolsSession): void {

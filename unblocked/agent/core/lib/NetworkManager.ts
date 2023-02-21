@@ -168,6 +168,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
   public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
+    this.mockNetworkRequests = parentManager.mockNetworkRequests
     return this.initialize();
   }
 

@@ -7,7 +7,7 @@ for (const symbol of ReflectCached.ownKeys(Symbol)) {
   }
 }
 
-function createError(message: string, type?: { new (message: string): any }) {
+function createError(message: string, type?: { new (msg: string): any }) {
   if (!type) {
     const match = nativeErrorRegex.exec(message);
     if (match.length) {

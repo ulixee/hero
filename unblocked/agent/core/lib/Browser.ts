@@ -99,7 +99,9 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.devtoolsSession = this.connection.rootSession;
     this.bindDevtoolsEvents();
 
-    await this.testConnection();
+    this.version = await this.devtoolsSession.send('Browser.getVersion');
+
+    this.connection.once('disconnected', this.emit.bind(this, 'close'));
 
     this.launchPromise.resolve();
 
