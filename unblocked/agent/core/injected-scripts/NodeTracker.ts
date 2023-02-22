@@ -1,3 +1,21 @@
+// have to add an import to use global define
+import { } from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
+
+interface IStaticNodeTracker {
+  has(node: Node): boolean;
+  getNodeId(node: Node): number | undefined;
+  getWatchedNodeWithId(id: number): Node;
+  watchNode(node: Node): number | undefined;
+  track(node: Node): number;
+}
+
+declare global {
+  interface Window {
+    NodeTracker: IStaticNodeTracker;
+  }
+  let NodeTracker: IStaticNodeTracker;
+}
+
 function NodeTrackerStatics(staticClass: IStaticNodeTracker) {}
 
 @NodeTrackerStatics
@@ -57,5 +75,4 @@ class NodeTracker {
   }
 }
 
-// @ts-ignore
 window.NodeTracker = NodeTracker;

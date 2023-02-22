@@ -8,9 +8,6 @@
   "references": [
     {
       "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
-    },
-    {
-      "path": "agent/core/injected-scripts/tsconfig.dist.json"
     }
   ]
 }

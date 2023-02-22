@@ -1,5 +1,11 @@
 import type { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 
+declare global {
+  interface Window {
+    PaintEvents: PaintEvents;
+  }
+}
+
 declare const runtimeFunction: string;
 // callback binding
 const eventsCallback = window[runtimeFunction] as unknown as (data: string) => void;

@@ -11,6 +11,25 @@ import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
 
 const pointerFnName = '__getNodePointer__';
 
+interface ITypeSerializer {
+  stringify(object: any): string;
+  parse(object: string): any;
+  replace(object: any): any;
+}
+
+declare global {
+  let TypeSerializer: ITypeSerializer;
+  let ObjectAtPath: any;
+
+  interface Window {
+    extractDomChanges?();
+    replayInteractions(resultNodeIds?: { frameIdPath: string; nodeIds: number[] });
+    trackElement?(node: Node);
+  }
+}
+
+
+
 class JsPath {
   public static simulateOptionClick(jsPath: IJsPath): IExecJsPathResult<boolean> {
     const objectAtPath = new ObjectAtPath(jsPath);
