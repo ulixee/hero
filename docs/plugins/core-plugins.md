@@ -100,6 +100,7 @@ This hook is called during the initialization of a session/browserEmulator.
   - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
   - locale `string`. The configured locale in use (eg, en-US).
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. See Hero constructor for details.
+  - upstreamProxyUseSystemDns `boolean`. A variable to indicate DNS should be resolved on the host machine. By default, if a proxy is used, hosts will be resolved by the remote proxy.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. See Hero constructor for details.
   - dnsOverTlsProvider `object`. Configure the host and port to use for DNS over TLS. See Hero constructor for details.
 

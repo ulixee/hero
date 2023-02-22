@@ -8,6 +8,7 @@ export default interface IConfigureSessionOptions
     | 'timezoneId'
     | 'locale'
     | 'upstreamProxyUrl'
+    | 'upstreamProxyUseLocalDns'
     | 'blockedResourceTypes'
     | 'blockedResourceUrls'
   > {}

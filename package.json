@@ -43,7 +43,7 @@
     "@types/jest": "^28.1.0",
     "@types/node": "^14.18.18",
     "@ulixee/repo-tools": "^1.0.22",
-    "@ulixee/awaited-dom": "1.4.1",
+    "@ulixee/awaited-dom": "1.4.2",
     "cross-env": "^7.0.3",
     "decamelize": "^4.0.0",
     "husky": "^7.0.1",
