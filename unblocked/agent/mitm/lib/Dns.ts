@@ -22,7 +22,8 @@ export class Dns {
 
   public async lookupIp(host: string, retries = 3): Promise<string> {
     // if this is an upstream proxy requesting upstream lookup, don't resolve dns
-    if (this.requestSession.upstreamProxyUrl?.includes('socks5h')) return host;
+    if (this.requestSession.upstreamProxyUrl && !this.requestSession.upstreamProxyUseSystemDns)
+      return host;
     if (host === 'localhost' || net.isIP(host)) return host;
 
     try {

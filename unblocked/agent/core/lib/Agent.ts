@@ -87,6 +87,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       this.plugins,
       this.logger,
       this.plugins.profile.upstreamProxyUrl,
+      this.plugins.profile.upstreamProxyUseLocalDns
     );
     this.enableMitm = !env.disableMitm && !this.plugins.profile.options.disableMitm;
 

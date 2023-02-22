@@ -19,18 +19,21 @@ export default interface IEmulationProfile<T = any> {
   timezoneId?: string;
   locale?: string;
   upstreamProxyUrl?: string;
+  upstreamProxyUseLocalDns?: boolean;
   upstreamProxyIpMask?: { publicIp?: string; proxyIp?: string; ipLookupService?: string };
   geolocation?: IGeolocation;
   dnsOverTlsProvider?: { host: string; servername: string; port?: number };
 }
 
-export type IEmulationOptions = IBrowserLaunchArgs & Pick<
-  IEmulationProfile,
-  | 'viewport'
-  | 'timezoneId'
-  | 'locale'
-  | 'upstreamProxyIpMask'
-  | 'upstreamProxyUrl'
-  | 'geolocation'
-  | 'dnsOverTlsProvider'
->;
+export type IEmulationOptions = IBrowserLaunchArgs &
+  Pick<
+    IEmulationProfile,
+    | 'viewport'
+    | 'timezoneId'
+    | 'locale'
+    | 'upstreamProxyIpMask'
+    | 'upstreamProxyUseLocalDns'
+    | 'upstreamProxyUrl'
+    | 'geolocation'
+    | 'dnsOverTlsProvider'
+  >;

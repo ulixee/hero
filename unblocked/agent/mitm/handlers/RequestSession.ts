@@ -72,6 +72,7 @@ export default class RequestSession
     hooks: INetworkHooks,
     logger: IBoundLog,
     public upstreamProxyUrl?: string,
+    public upstreamProxyUseSystemDns?: boolean
   ) {
     super();
     this.logger = logger.createChild(module);
