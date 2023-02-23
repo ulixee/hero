@@ -63,13 +63,13 @@ export default class ConnectionToCore<
     this.events.on(transport, 'message', this.onMessage.bind(this));
   }
 
-  public async connect(isAutoConnect = false): Promise<Error | null> {
+  public async connect(isAutoConnect = false, timeoutMs = 30e3): Promise<Error | null> {
     if (!this.connectPromise) {
       this.didAutoConnect = isAutoConnect;
       this.connectStartTime = Date.now();
       this.connectPromise = new Resolvable();
       try {
-        const connectError = await this.transport.connect?.();
+        const connectError = await this.transport.connect?.(timeoutMs);
         if (connectError) throw connectError;
 
         // disconnected during connect

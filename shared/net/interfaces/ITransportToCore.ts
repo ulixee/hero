@@ -12,7 +12,7 @@ export default interface ITransportToCore<
 > extends ITypedEventEmitter<ITransportToCoreEvents<ApiHandlers, EventSpec, ResponsePayload>> {
   host: string;
   isConnected: boolean;
-  connect?(): Promise<void | Error>;
+  connect?(timeoutMs?: number): Promise<void | Error>;
   disconnect?(): Promise<void>;
   send(message: RequestPayload): Promise<void>;
 }

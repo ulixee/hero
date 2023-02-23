@@ -46,10 +46,11 @@ export default class ConnectionToClient<
   }
 
   public sendEvent<T extends keyof IEventSpec>(event: ICoreEventPayload<IEventSpec, T>): void {
+    this.emit('event', { event } as any);
     this.sendMessage(event);
   }
 
-  protected async handleRequest<T extends keyof IClientApiHandlers>(
+  protected async handleRequest<T extends keyof IClientApiHandlers & string>(
     apiRequest: ICoreRequestPayload<IClientApiHandlers, T>,
   ): Promise<void> {
     const { command, messageId } = apiRequest;
@@ -61,6 +62,7 @@ export default class ConnectionToClient<
     try {
       const handler = this.apiHandlers[command];
       if (!handler) throw new Error(`Unknown api requested: ${String(command)}`);
+      this.emit('request', { request: apiRequest });
       data = await handler(...args);
     } catch (error) {
       error.stack ??= error.message;
@@ -72,6 +74,7 @@ export default class ConnectionToClient<
       responseId: messageId,
       data,
     };
+    this.emit('response', { request: apiRequest, response });
     this.sendMessage(response);
   }
 
