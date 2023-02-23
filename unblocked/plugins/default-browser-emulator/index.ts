@@ -65,6 +65,8 @@ let hasWarnedAboutProxyIp = false;
 
 @UnblockedPluginClassDecorator
 export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUnblockedPlugin<T> {
+  // Should the system attempt to manipulate tcp settings to match the emulated OS. NOTE that this can affect tcp performance.
+  public static enableTcpEmulation = false;
   public readonly logger: IBoundLog;
   public readonly emulationProfile: IEmulationProfile<T>;
 
@@ -122,7 +124,9 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   }
 
   public onTcpConfiguration(settings: ITcpSettings): void {
-    configureSessionTcp(this.emulationProfile, settings);
+    if (DefaultBrowserEmulator.enableTcpEmulation) {
+      configureSessionTcp(this.emulationProfile, settings);
+    }
   }
 
   public onTlsConfiguration(settings: ITlsSettings): void {
