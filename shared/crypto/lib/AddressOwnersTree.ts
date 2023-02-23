@@ -1,4 +1,4 @@
-import { sha3 } from '@ulixee/commons/lib/hashUtils';
+import { sha256 } from '@ulixee/commons/lib/hashUtils';
 import * as assert from 'assert';
 import MerkleTree from '@ulixee/crypto/lib/MerkleTree';
 import { IMerkleProof } from '@ulixee/specification';
@@ -26,7 +26,7 @@ export default class AddressOwnersTree {
   }
 
   public static getIdentityIsOwnerProof(merkleTree: MerkleTree, identity: string): IMerkleProof[] {
-    return merkleTree.getProof(sha3(identity));
+    return merkleTree.getProof(sha256(identity));
   }
 
   public static getSignatureSettingsProof(
@@ -78,7 +78,7 @@ export default class AddressOwnersTree {
       }
     }
 
-    const leaves = identities.map(sha3);
+    const leaves = identities.map(sha256);
     let fillLeaves = 2;
     if (leaves.length > 2) {
       fillLeaves = 6;
@@ -111,6 +111,6 @@ export default class AddressOwnersTree {
       salt?.toString('hex') ?? '',
       publicKeyIndices?.join(',') ?? '',
     ];
-    return sha3(parts.join(''));
+    return sha256(parts.join(''));
   }
 }

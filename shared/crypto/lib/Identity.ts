@@ -1,7 +1,7 @@
 import { promises as fs, readFileSync } from 'fs';
 import * as path from 'path';
 import { createPrivateKey, generateKeyPairSync, KeyExportOptions, KeyObject } from 'crypto';
-import { sha3 } from '@ulixee/commons/lib/hashUtils';
+import { sha256 } from '@ulixee/commons/lib/hashUtils';
 import { existsAsync } from '@ulixee/commons/lib/fileUtils';
 import Log from '@ulixee/commons/lib/Logger';
 import { decodeBuffer, encodeBuffer } from '@ulixee/commons/lib/bufferUtils';
@@ -44,7 +44,7 @@ export default class Identity {
   }
 
   public verifyKeys(): void {
-    const hashedMessage = sha3(Buffer.from('signed_test_message'));
+    const hashedMessage = sha256(Buffer.from('signed_test_message'));
     const signature = this.sign(hashedMessage);
     const isValid = Identity.verify(this.bech32, hashedMessage, signature);
     if (!isValid) {
