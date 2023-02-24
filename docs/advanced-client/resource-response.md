@@ -56,6 +56,12 @@ Http response status message.
 
 #### **Returns** `string`
 
+### bodyBytes
+
+A `number` indicating bytes returned in the response body.
+
+#### **Type**: `Promise<number>`
+
 ### buffer
 
 Load the underlying buffer returned by this network response.

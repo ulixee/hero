@@ -36,6 +36,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['responseTimestamp', 'DATETIME'],
         ['responseEncoding', 'TEXT'],
         ['responseData', 'BLOB'],
+        ['responseDataBytes', 'INTEGER'],
         ['dnsResolvedIp', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
@@ -115,6 +116,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       'responseHeaders',
       'responseTrailers',
       'responseTimestamp',
+      'responseDataBytes',
       'browserLoadedTimestamp',
       'browserLoadFailure',
       'browserServedFromCache',
@@ -164,6 +166,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         timestamp: record.responseTimestamp,
         statusCode: record.statusCode,
         statusMessage: record.statusMessage,
+        bodyBytes: record.responseDataBytes,
         remoteAddress: null,
         buffer,
       },
@@ -196,6 +199,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       record.responseTimestamp,
       record.responseEncoding,
       record.responseData,
+      record.responseDataBytes,
       record.dnsResolvedIp,
       record.isHttp2Push ? 1 : 0,
       record.usedArtificialCache ? 1 : 0,
@@ -300,6 +304,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.response?.timestamp,
       contentEncoding,
       meta.response ? body : undefined,
+      meta.response?.bodyBytes,
       extras.dnsResolvedIp,
       extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
@@ -468,6 +473,7 @@ export interface IResourcesRecord {
   responseTimestamp: number;
   responseEncoding: string;
   responseData?: Buffer;
+  responseDataBytes?: number;
   dnsResolvedIp?: string;
   usedArtificialCache: boolean;
   responseIntercepted: boolean;

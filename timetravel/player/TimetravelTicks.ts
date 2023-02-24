@@ -27,20 +27,17 @@ export default class TimetravelTicks {
     domRecordingsWithTabId?: { tabId: number; domRecording: IDomRecording }[],
     commandTimeline?: CommandTimeline,
   ): ITabDetails[] {
-    const tabs = this.sessionDb.tabs.all();
-    for (const tab of tabs) {
-      this.tabsById[tab.id] = {
-        tabId: tab.id,
+    this.timeline = commandTimeline ?? CommandTimeline.fromDb(this.sessionDb);
+    domRecordingsWithTabId ??= TimetravelTicks.loadDomRecording(this.sessionDb);
+    for (const { tabId, domRecording } of domRecordingsWithTabId) {
+      this.tabsById[tabId] = {
+        domRecording,
+        tabId,
         ticks: [],
         mouse: [],
         focus: [],
         scroll: [],
       };
-    }
-    this.timeline = commandTimeline ?? CommandTimeline.fromDb(this.sessionDb);
-    domRecordingsWithTabId ??= TimetravelTicks.loadDomRecording(this.sessionDb);
-    for (const { tabId, domRecording } of domRecordingsWithTabId) {
-      this.tabsById[tabId].domRecording = domRecording;
     }
 
     this.createCommandTicks();
@@ -123,6 +120,7 @@ export default class TimetravelTicks {
         continue;
       }
       const firstDocument = domRecording.documents[0];
+      if (!firstDocument) continue;
 
       let lastEvents: Pick<
         ITick,

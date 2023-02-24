@@ -15,6 +15,7 @@ export default class ResourceResponse {
   public readonly remoteAddress: string;
   public readonly statusCode: number;
   public readonly statusMessage?: string;
+  public readonly bodyBytes?: number;
 
   #coreTab: Promise<CoreTab>;
   #resourceId?: number;
@@ -37,6 +38,7 @@ export default class ResourceResponse {
       this.statusCode = response.statusCode;
       this.statusMessage = response.statusMessage;
       this.remoteAddress = response.remoteAddress;
+      this.bodyBytes = response.bodyBytes;
     }
   }
 
