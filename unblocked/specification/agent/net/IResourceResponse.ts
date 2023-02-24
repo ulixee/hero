@@ -12,5 +12,6 @@ export default interface IResourceResponse {
   remoteAddress: string;
   statusCode: number;
   statusMessage?: string;
+  bodyBytes?: number;
   buffer?: Buffer;
 }

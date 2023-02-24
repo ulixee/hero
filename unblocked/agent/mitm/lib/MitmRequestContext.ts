@@ -186,6 +186,7 @@ export default class MitmRequestContext {
       browserLoadFailure: ctx.browserLoadFailure,
       browserLoadedTime: ctx.browserLoadedTime,
       remoteAddress: ctx.remoteAddress,
+      bodyBytes: ctx.responseBodySize,
     };
 
     return {
