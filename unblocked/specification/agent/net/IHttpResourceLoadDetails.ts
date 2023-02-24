@@ -38,6 +38,7 @@ export default interface IHttpResourceLoadDetails {
   responseTime?: number;
   responseTrailers?: IHttpHeaders;
   resourceType?: IResourceType;
+  responseBodySize?: number;
   browserRequestId?: string;
   browserFrameId?: number;
   browserHasRequested?: Promise<void>;

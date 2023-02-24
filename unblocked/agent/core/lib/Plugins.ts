@@ -62,6 +62,7 @@ export default class Plugins implements IUnblockedPlugins {
     shouldBlockRequest: [],
     beforeHttpRequest: [],
     beforeHttpResponse: [],
+    afterHttpResponse: [],
     websiteHasFirstPartyInteraction: [],
   };
 
@@ -224,6 +225,10 @@ export default class Plugins implements IUnblockedPlugins {
 
   public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
     await Promise.all(this.hooksByName.beforeHttpResponse.map(fn => fn(resource)));
+  }
+
+  public async afterHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
+    await Promise.all(this.hooksByName.afterHttpResponse.map(fn => fn(resource)));
   }
 
   public websiteHasFirstPartyInteraction(url: URL): void {

@@ -130,6 +130,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     } catch (err) {
       return this.onError('ServerToProxyToClient.ReadWriteResponseError', err);
     }
+
+    await context.requestSession.haveSentResponse(context);
+
     context.setState(ResourceState.End);
     this.cleanup();
   }
@@ -263,8 +266,12 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
+    context.responseBodySize = 0;
+
     for await (const chunk of serverToProxyResponse) {
-      const data = context.cacheHandler.onResponseData(chunk as Buffer);
+      let buffer = chunk as Buffer;
+      context.responseBodySize += buffer.length;
+      const data = context.cacheHandler.onResponseData(buffer);
       this.safeWriteToClient(data);
     }
 

@@ -322,6 +322,11 @@ Callback before sending an HTTP response to the Browser. This can be used to tra
 
 - resource: [`IHttpResourceLoadDetails`](./agent/net/IHttpResourceLoadDetails.ts). The HTTP request with a response available.
 
+#### afterHttpResponse(resource)
+
+Callback after an HTTP response was already sent to the browser. This can be used to keep track of the incoming resources without it blocking
+the processing of the response. As it is called after the entire process it also allows us to track the response body.
+
 #### websiteHasFirstPartyInteraction(url)
 
 Callback after a Domain has had a First-Party User Interaction.

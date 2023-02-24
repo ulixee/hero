@@ -24,5 +24,6 @@ export default interface INetworkHooks {
   shouldBlockRequest?(url: string, resourceTypeIfKnown?: IResourceType): boolean;
   beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any> | void;
   beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;
+  afterHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;
   websiteHasFirstPartyInteraction?(url: URL): Promise<any> | void; // needed for implementing first-party cookies
 }
