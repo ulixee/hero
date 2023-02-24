@@ -2047,12 +2047,12 @@
     "@typescript-eslint/types" "5.39.0"
     eslint-visitor-keys "^3.3.0"
 
-"@ulixee/awaited-dom@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@ulixee/awaited-dom/-/awaited-dom-1.4.1.tgz#faa43fcc25710caa0bb7558f106768c60ba3622a"
-  integrity sha512-lj5TqBm4thn6+8PcMesgWwPUP9HRf8jKO3+Pc3cst7nDqKKedfBnDvUhDS9outiI1U5dmFvxoYmiNwL1Pi3oXg==
+"@ulixee/awaited-dom@1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@ulixee/awaited-dom/-/awaited-dom-1.4.2.tgz#9630a497fa20c7e1c6b0ddee4b527be6a7da3923"
+  integrity sha512-o32b+rBzB+6qPVzLK7wB0+TcPJ0BqM81zGmZ+dCCxDMGHo030ip0bW7TBf212YvCIEFDWJNIhrLTZ8SYZd1Dkw==
   dependencies:
-    "@ulixee/js-path" "^2.0.0-alpha.13"
+    "@ulixee/js-path" "^2.0.0-alpha.18"
 
 "@ulixee/chrome-108-0@^5359.125.6":
   version "5359.125.7"

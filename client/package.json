@@ -11,7 +11,7 @@
     "./lib/internal": "./lib/internal.js"
   },
   "dependencies": {
-    "@ulixee/awaited-dom": "1.4.1",
+    "@ulixee/awaited-dom": "1.4.2",
     "@ulixee/commons": "2.0.0-alpha.18",
     "@ulixee/hero-interfaces": "2.0.0-alpha.18",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.18",

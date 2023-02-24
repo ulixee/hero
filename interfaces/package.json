@@ -3,7 +3,7 @@
   "version": "2.0.0-alpha.18",
   "description": "Core interfaces used by Hero",
   "dependencies": {
-    "@ulixee/awaited-dom": "1.4.1",
+    "@ulixee/awaited-dom": "1.4.2",
     "@ulixee/commons": "2.0.0-alpha.18",
     "@ulixee/js-path": "2.0.0-alpha.18",
     "@ulixee/unblocked-specification": "2.0.0-alpha.18",

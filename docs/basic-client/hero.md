@@ -84,6 +84,7 @@ const Hero = require('@ulixee/hero-playground');
   - showChromeAlive `boolean`. A boolean whether to show the ChromeAlive! toolbar (if installed in devDependencies, or using Ulixee.app). Default `false`.
   - userProfile `IUserProfile`. A json object matching the format created by [hero.exportUserProfile()](#export-profile). This property allows restoring user storage and cookies from a previous session.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
+  - upstreamProxyUseSystemDns `boolean`. A variable to indicate DNS should be resolved on the host machine. By default, if a proxy is used, hosts will be resolved by the remote proxy.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
     - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81).
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
@@ -191,6 +192,7 @@ Retrieves metadata about the hero configuration:
 - blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
 - blockedResourceUrls `(string | RegExp)[]`. The blocked urls.
 - upstreamProxyUrl `string`. The proxy url in use for this hero.
+- upstreamProxyUseSystemDns `boolean`. A variable to indicate DNS should be resolved on the host machine.
 - upstreamProxyIpMask `object`. The proxy IP mask settings for this hero.
   - ipLookupService `string`. Lookup service used to find public IP.
   - proxyIp `string`. The public IP address of the proxy.
