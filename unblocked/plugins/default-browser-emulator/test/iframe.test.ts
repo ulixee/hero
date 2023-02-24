@@ -5,6 +5,10 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import Agent from '@ulixee/unblocked-agent/lib/Agent';
 import Page from '@ulixee/unblocked-agent/lib/Page';
 import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { URL } from 'url';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { IncomingHttpHeaders } from 'http';
 import BrowserEmulator from '../index';
 
 let koaServer: ITestKoaServer;
@@ -249,6 +253,80 @@ test('should set user agent on same origin frames', async () => {
 
   expect(data.iframe.platform).toBe(data.page.platform);
   expect(data.iframe.userAgent).toBe(data.page.userAgent);
+});
+
+test('should set user agent on cross origin frames', async () => {
+  const iframeData = new Resolvable<{
+    iframe: { userAgent: string; platform: string };
+    headers: IncomingHttpHeaders;
+  }>();
+  const sslServer = await Helpers.runHttpsServer(async (req, res) => {
+    console.log(req.url, req.headers, req.method);
+    res.setHeader('access-control-allow-origin', '*');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      req.headers['access-control-request-headers'] ?? '',
+    );
+    if (req.url === '/cross-storage') {
+      res.end(`<!DOCTYPE html>
+      <html lang="en"><body>
+<div>Cross Storage</div>
+<iframe src="https://dataliberationfoundation.org/frame"></iframe>
+</body>
+      </html>`);
+      return;
+    }
+    if (req.url === '/cross-origin-data' && req.method === 'POST') {
+      const result = await Helpers.readableToBuffer(req);
+      const json = JSON.parse(result.toString());
+      iframeData.resolve({ iframe: json, headers: req.headers });
+      res.end('');
+      return;
+    }
+    res.end('');
+  });
+  const agent = await createAgent();
+  const page = await createPage(agent);
+  agent.mitmRequestSession.interceptorHandlers.push({
+    urls: ['https://dataliberationfoundation.org/*'],
+    types: [],
+    handlerFn(url: URL, type: IResourceType, request, response) {
+      console.log('intercepting', url.href);
+      response.end(`<html><body><p>frame body</p>
+<script>
+  const { userAgent, platform } = window.navigator || {}
+   fetch('${sslServer.baseUrl}/cross-origin-data', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userAgent, platform }),
+    });
+</script>
+</body>
+</html>`);
+      return true;
+    },
+  });
+
+  await page.goto(`${sslServer.baseUrl}/cross-storage`);
+  const data = await page.evaluate<any>(`(() => {
+    try {
+      const data = { userAgent: navigator.userAgent, platform: navigator.platform };
+      
+      return data;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  })()`);
+
+  const { iframe, headers } = await iframeData;
+
+  expect(iframe.platform).toBe(data.platform);
+  expect(headers['sec-ch-ua-platform']).toBe({ Win32: '"Windows"', MacIntel: '"macOS"' }[data.platform]);
+  expect(iframe.userAgent).toBe(data.userAgent);
+  await page.close();
 });
 
 // only run this test manually
