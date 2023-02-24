@@ -95,6 +95,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       await this.launchPromise.promise;
       return this;
     }
+    this.isLaunchStarted = true;
     this.connection = new Connection(transport);
     this.devtoolsSession = this.connection.rootSession;
     this.bindDevtoolsEvents();

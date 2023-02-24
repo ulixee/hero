@@ -79,10 +79,13 @@ export default class DevtoolsSession
       id,
     };
     const timestamp = new Date();
-    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>(60e3);
+    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>(
+      60e3,
+      `DevtoolsApiMessage did not respond after 60 seconds. (${method}, id=${id})`,
+    );
     resolvable.promise.catch(err => {
       if (err instanceof TimeoutError)
-        log.info(`DevtoolsApiMessage did not respond after 60 seconds. (${method}, id=${id})`, {
+        log.info(`DevtoolsSessionError`, {
           error: err,
           sessionId: this.sessionId,
         });
