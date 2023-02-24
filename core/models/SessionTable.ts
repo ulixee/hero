@@ -5,9 +5,11 @@ import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfil
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {
   private id: string;
+  private heroMeta: IHeroMeta;
 
   constructor(db: SqliteDatabase) {
     super(
@@ -22,11 +24,15 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['operatingSystemVersion', 'TEXT'],
         ['renderingEngine', 'TEXT'],
         ['renderingEngineVersion', 'TEXT'],
+        ['windowNavigatorPlatform', 'TEXT'],
+        ['uaClientHintsPlatformVersion', 'TEXT'],
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
         ['scriptInstanceId', 'TEXT'],
         ['workingDirectory', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
+        ['scriptExecPath', 'TEXT'],
+        ['scriptExecArgv', 'TEXT'],
         ['scriptStartDate', 'INTEGER'],
         ['userAgentString', 'TEXT'],
         ['viewport', 'TEXT'],
@@ -41,40 +47,88 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     );
   }
 
+  public getHeroMeta(): IHeroMeta {
+    if (this.heroMeta) return this.heroMeta;
+    const {
+      id: sessionId,
+      proxyIp,
+      publicIp,
+      createSessionOptions,
+      name,
+      viewport,
+      locale,
+      timezoneId,
+      userAgentString,
+      operatingSystemName,
+      uaClientHintsPlatformVersion,
+      windowNavigatorPlatform,
+      operatingSystemVersion,
+      browserName,
+      browserFullVersion,
+      renderingEngine,
+      renderingEngineVersion,
+    } = this.get();
+
+    this.id ??= sessionId;
+    this.heroMeta = <IHeroMeta>{
+      sessionId,
+      ...createSessionOptions,
+      viewport,
+      locale,
+      timezoneId,
+      sessionName: name,
+      upstreamProxyIpMask: {
+        proxyIp,
+        publicIp,
+      },
+      renderingEngine,
+      renderingEngineVersion,
+      userAgentString,
+      operatingSystemName,
+      uaClientHintsPlatformVersion,
+      windowNavigatorPlatform,
+      operatingSystemVersion,
+      browserName,
+      browserFullVersion,
+    };
+    return this.heroMeta;
+  }
+
   public insert(
-    id: string,
     configuration: IHeroMeta,
-    browserName: string,
-    browserFullVersion: string,
     startDate: number,
     scriptInstanceMeta: IScriptInstanceMeta,
     deviceProfile: IDeviceProfile,
-    createSessionOptions: any,
+    createSessionOptions: Omit<ISessionCreateOptions, keyof IHeroMeta>,
   ): void {
-    this.id = id;
+    this.id = configuration.sessionId;
     const record = [
-      this.id,
+      configuration.sessionId,
       configuration.sessionName,
-      browserName,
-      browserFullVersion,
+      configuration.browserName,
+      configuration.browserFullVersion,
       configuration.operatingSystemName,
       configuration.operatingSystemVersion,
       configuration.renderingEngine,
       configuration.renderingEngineVersion,
+      configuration.windowNavigatorPlatform,
+      configuration.uaClientHintsPlatformVersion,
       startDate,
       null,
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.workingDirectory,
       scriptInstanceMeta?.entrypoint,
+      scriptInstanceMeta?.execPath,
+      scriptInstanceMeta?.execArgv ? JSON.stringify(scriptInstanceMeta.execArgv) : null,
       scriptInstanceMeta?.startDate,
       configuration.userAgentString,
       JSON.stringify(configuration.viewport),
-      JSON.stringify(deviceProfile),
+      TypeSerializer.stringify(deviceProfile),
       configuration.timezoneId,
       configuration.locale,
       configuration.upstreamProxyIpMask?.publicIp,
       configuration.upstreamProxyIpMask?.proxyIp,
-      JSON.stringify(createSessionOptions),
+      TypeSerializer.stringify(createSessionOptions),
     ];
     this.insertNow(record);
   }
@@ -87,6 +141,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       publicIp: configuration.upstreamProxyIpMask?.publicIp,
       proxyIp: configuration.upstreamProxyIpMask?.proxyIp,
     };
+    this.heroMeta = null;
 
     this.db
       .prepare(
@@ -106,9 +161,11 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
 
   public get(): ISessionRecord {
     const record = this.db.prepare(`select * from ${this.tableName}`).get() as ISessionRecord;
-    record.createSessionOptions = JSON.parse(record.createSessionOptions as string);
+    if (!record) return null;
+    record.createSessionOptions = TypeSerializer.parse(record.createSessionOptions as string);
     record.viewport = JSON.parse((record.viewport as any) ?? 'undefined');
-    record.deviceProfile = JSON.parse((record.deviceProfile as any) ?? 'undefined');
+    record.deviceProfile = TypeSerializer.parse((record.deviceProfile as any) ?? 'undefined');
+    record.scriptExecArgv = JSON.parse(record.scriptExecArgv as any ?? '[]');
     return record;
   }
 }
@@ -127,8 +184,12 @@ export interface ISessionRecord {
   scriptInstanceId: string;
   workingDirectory: string;
   scriptEntrypoint: string;
+  scriptExecPath: string;
+  scriptExecArgv: string[];
   scriptStartDate: number;
   userAgentString: string;
+  windowNavigatorPlatform: string;
+  uaClientHintsPlatformVersion: string;
   viewport: IViewport;
   timezoneId: string;
   locale: string;

@@ -2,8 +2,6 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { IInteractionGroup } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import { getKeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
 import { getNodePointerFnName } from '@ulixee/unblocked-specification/agent/browser/IJsPathFunctions';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import ICommandTimelineOffset from '@ulixee/hero-interfaces/ICommandTimelineOffset';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {
@@ -11,7 +9,7 @@ export default class CommandFormatter {
     if (!command.args) {
       return `${command.name}()`;
     }
-    const args = TypeSerializer.parse(command.args).filter(x => x !== null);
+    const args = command.args.filter(x => x !== null);
     if (command.name === 'execJsPath') {
       return formatJsPath(args[0]);
     }
@@ -82,7 +80,7 @@ export default class CommandFormatter {
       .join(', ')})`;
   }
 
-  public static parseResult(meta: ICommandMeta & ICommandTimelineOffset): ICommandWithResult {
+  public static parseResult(meta: ICommandMeta): ICommandWithResult {
     const command: ICommandWithResult = {
       ...meta,
       label: CommandFormatter.toString(meta),
@@ -91,13 +89,13 @@ export default class CommandFormatter {
     };
 
     if (meta.result && meta.name === 'takeScreenshot') {
-      const result = JSON.parse(meta.result);
+      const result = meta.result;
       const imageType = command.label.includes('jpeg') ? 'jpeg' : 'png';
       const base64 = result.__type === 'Buffer64' ? result.value : result.data;
       command.result = `data:image/${imageType}; base64,${base64}`;
       command.resultType = 'image';
     } else if (meta.result && meta.resultType?.toLowerCase().includes('error')) {
-      const result = TypeSerializer.parse(meta.result);
+      const result = meta.result;
 
       command.isError = true;
       command.result = result.message;
@@ -109,7 +107,7 @@ export default class CommandFormatter {
           : step;
       }
     } else if (meta.resultType && meta.result) {
-      const result = TypeSerializer.parse(meta.result);
+      const result = meta.result;
       command.result = result;
       if (meta.resultType === 'Object' && result.value) {
         const resultType = typeof result.value;
@@ -121,16 +119,14 @@ export default class CommandFormatter {
         ) {
           command.result = result.value;
         }
-
-        if (result.nodePointer) {
-          command.resultNodeIds = [result.nodePointer.id];
-          command.resultNodeType = result.nodePointer.type;
-          if (result.nodePointer.iterableItems) {
-            command.result = result.nodePointer.iterableItems;
-          }
-          if (result.nodePointer.iterableIsNodePointers) {
-            command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
-          }
+      } else if (result.nodePointer) {
+        command.resultNodeIds = [result.nodePointer.id];
+        command.resultNodeType = result.nodePointer.type;
+        if (result.nodePointer.iterableItems) {
+          command.result = result.nodePointer.iterableItems;
+        }
+        if (result.nodePointer.iterableIsNodePointers) {
+          command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
         }
       } else if (meta.resultType === 'Array' && result.length) {
         if (result[0].nodePointerId) {
@@ -140,26 +136,18 @@ export default class CommandFormatter {
     }
 
     if (!command.resultNodeIds && command.name === 'execJsPath') {
-      const [jsPath] = JSON.parse(command.args);
+      const [jsPath] = command.args;
       if (typeof jsPath[0] === 'number') command.resultNodeIds = [jsPath[0]];
     }
 
     if (!command.resultNodeIds && command.name === 'interact') {
-      const args = JSON.parse(command.args);
+      const args = command.args;
       const mouseInteraction = args.find((x: IInteractionGroup) => {
         return x.length && x[0].mousePosition && x[0].mousePosition.length === 1;
       });
       if (mouseInteraction) {
         command.resultNodeIds = mouseInteraction.mousePosition;
       }
-    }
-
-    if (command.result && command.name === 'detachTab') {
-      command.result.prefetchedJsPaths = undefined;
-    }
-
-    if (command.result && command.name.startsWith('go')) {
-      command.result = undefined;
     }
 
     // we have shell objects occasionally coming back. hide from ui

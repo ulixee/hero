@@ -321,7 +321,7 @@ export default class DomStateGenerator {
     if (context instanceof Error) throw context;
 
     const sessionRecord = session.db.session.get();
-    await session.mirrorPage?.open(context, session.sessionId, sessionRecord.viewport, page => {
+    await session.mirrorPage?.openInContext(context, session.sessionId, sessionRecord.viewport, page => {
       return page.devtoolsSession
         .send('Emulation.setLocaleOverride', {
           locale: sessionRecord.locale,

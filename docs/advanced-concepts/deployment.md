@@ -8,7 +8,7 @@ When you start to think about deploying Hero onto a server, you have a few optio
 
 The easiest solution is to use the `@ulixee/miner` package. See details of the Ulixee Miner [here](https://ulixee.org/docs/miner).
 
-You can either launch our pre-built [docker](https://github.com/ulixee/ulixee/tree/main/miner/tools/docker) image, or start Miner via a simple script. Make sure to open the port you allocate on any firewall that a client might have to pass through:
+You can either launch our pre-built [docker](https://github.com/ulixee/ulixee/tree/main/cloud/tools/docker) image, or start Miner via a simple script. Make sure to open the port you allocate on any firewall that a client might have to pass through:
 
 ```javascript
 const Miner = require('@ulixee/miner');

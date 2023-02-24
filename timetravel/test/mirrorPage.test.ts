@@ -279,7 +279,7 @@ async function createMirrorPage(tab: Tab, isDebug = false): Promise<MirrorPage> 
     isDebug,
   );
   await mirrorPage.subscribe(tab);
-  await mirrorPage.open(mirrorContext, tab.sessionId);
+  await mirrorPage.openInContext(mirrorContext, tab.sessionId);
   Helpers.needsClosing.push(mirrorPage);
   return mirrorPage;
 }

@@ -179,14 +179,14 @@ export default class Tab
     ]);
   }
 
-  public createMirrorPage(): MirrorPage {
+  public createMirrorPage(cleanupOnTabClose = true): MirrorPage {
     const mirrorPage = new MirrorPage(this.mirrorNetwork, {
       paintEvents: [],
       mainFrameIds: new Set([this.mainFrameId]),
       documents: [],
       domNodePathByFrameId: this.session.db.frames.frameDomNodePathsById,
     });
-    mirrorPage.subscribe(this);
+    mirrorPage.subscribe(this, cleanupOnTabClose);
     return mirrorPage;
   }
 
@@ -553,7 +553,7 @@ export default class Tab
     await this.flushDomChanges();
     const paintIndex = this.mirrorPage.getPaintIndex(detachedElement.domChangesTimestamp);
     try {
-      await this.mirrorPage.open(
+      await this.mirrorPage.openInContext(
         await Core.getUtilityContext(),
         this.sessionId,
         this.session.viewport,

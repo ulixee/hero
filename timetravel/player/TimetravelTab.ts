@@ -1,14 +1,30 @@
-import { ITabDetails, ITick } from '@ulixee/hero-core/apis/Session.ticks';
-import { IDomRecording, IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
+import { IPaintEvent } from '@ulixee/hero-core/models/DomChangesTable';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import Page from '@ulixee/unblocked-agent/lib/Page';
-import MirrorNetwork from '../lib/MirrorNetwork';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import ITimelineMetadata from '@ulixee/hero-interfaces/ITimelineMetadata';
+import { ITabDetails, ITick } from './TimetravelTicks';
 import MirrorPage from '../lib/MirrorPage';
 
-export default class TabPlaybackController {
+export default class TimetravelTab extends TypedEventEmitter<{
+  'new-tick-command': {
+    commandId: number;
+    paintIndex: number;
+  };
+  'new-paint-index': {
+    paintIndexRange: [start: number, end: number];
+    documentLoadPaintIndex: number;
+  };
+  'new-offset': {
+    url: string;
+    playback: 'automatic' | 'manual';
+    percentOffset: number;
+    focusedRange: [start: number, end: number];
+  };
+}> {
+  public latestStatusMetadata?: ITimelineMetadata;
+
   public get id(): number {
-    return this.tabDetails.tab.id;
+    return this.tabDetails.tabId;
   }
 
   public get ticks(): ITick[] {
@@ -27,34 +43,6 @@ export default class TabPlaybackController {
     return this.ticks[this.currentTickIndex - 1];
   }
 
-  public get nextTimelineOffsetPercent(): number {
-    const currentOffset = this.currentTick?.timelineOffsetPercent || 0;
-    let tick: ITick;
-    for (let i = this.currentTickIndex; i < this.ticks.length; i += 1) {
-      tick = this.ticks[i];
-      if (tick && tick.timelineOffsetPercent > currentOffset) {
-        return tick.timelineOffsetPercent;
-      }
-    }
-    return 100;
-  }
-
-  public get previousTimelineOffsetPercent(): number {
-    const currentOffset = this.currentTick?.timelineOffsetPercent || 0;
-    let tick: ITick;
-    for (let i = this.currentTickIndex; i >= 0; i -= 1) {
-      tick = this.ticks[i];
-      if (tick && tick.timelineOffsetPercent < currentOffset) {
-        return tick.timelineOffsetPercent;
-      }
-    }
-    return 0;
-  }
-
-  public get isOpen(): boolean {
-    return !!this.mirrorPage?.pageId;
-  }
-
   public get focusedPaintIndexes(): [start: number, end: number] {
     if (!this.focusedTickRange) {
       return [this.currentTick?.paintEventIndex, this.currentTick?.paintEventIndex];
@@ -68,52 +56,39 @@ export default class TabPlaybackController {
   public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
-  public readonly mirrorPage: MirrorPage;
   public focusedOffsetRange: [start: number, end: number];
   private events = new EventSubscriber();
 
   // put in placeholder
-  private paintEventsLoadedIdx = -1;
   private focusedTickRange: [start: number, end: number];
 
-  constructor(
-    private readonly tabDetails: ITabDetails,
-    private readonly mirrorNetwork: MirrorNetwork,
-    private readonly sessionId: string,
-    debugLogging = false,
-  ) {
-    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
-    this.mirrorPage = new MirrorPage(this.mirrorNetwork, domRecording, true, debugLogging);
+  constructor(private readonly tabDetails: ITabDetails, public readonly mirrorPage: MirrorPage) {
+    super();
+    this.events.once(this.mirrorPage, 'close', () => {
+      this.isPlaying = false;
+      this.currentTickIndex = -1;
+      this.currentTimelineOffsetPct = 0;
+    });
   }
 
-  public updateTabDetails(tabDetails: ITabDetails): Promise<void> {
+  public updateTabDetails(tabDetails: ITabDetails): void {
     Object.assign(this.tabDetails, tabDetails);
     if (this.currentTickIndex >= 0) {
       this.currentTimelineOffsetPct =
         this.tabDetails.ticks[this.currentTickIndex]?.timelineOffsetPercent;
     }
-    const domRecording = TabPlaybackController.tabDetailsToDomRecording(tabDetails);
-    return this.mirrorPage.replaceDomRecording(domRecording);
   }
 
-  public isPage(id: string): boolean {
-    return this.mirrorPage?.pageId === id;
-  }
-
-  public async open(
-    browserContext: BrowserContext,
-    onPage?: (page: Page) => Promise<void>,
-  ): Promise<void> {
-    await this.mirrorPage.open(browserContext, this.sessionId, null, onPage);
-    if (this.mirrorPage.page.mainFrame.url === 'about:blank') {
-      await this.mirrorPage.page.navigate(this.tabDetails.documents[0].url);
+  public async step(direction: 'forward' | 'back'): Promise<boolean> {
+    const tickIndex = this.currentTickIndex;
+    if (direction === 'forward') {
+      if (tickIndex === this.ticks.length - 1) return false;
+      await this.loadTick(this.nextTick);
+    } else {
+      if (tickIndex === 0) return false;
+      await this.loadTick(this.previousTick);
     }
-    this.events.once(this.mirrorPage, 'close', () => {
-      this.paintEventsLoadedIdx = -1;
-      this.isPlaying = false;
-      this.currentTickIndex = -1;
-      this.currentTimelineOffsetPct = 0;
-    });
+    return true;
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -126,7 +101,7 @@ export default class TabPlaybackController {
 
       const startTime = Date.now();
       await this.loadTick(i);
-      onTick(this.ticks[i]);
+      onTick?.(this.ticks[i]);
       const fnDuration = Date.now() - startTime;
 
       if (i < this.ticks.length - 1) {
@@ -139,16 +114,16 @@ export default class TabPlaybackController {
         else if (delay < 0) pendingMillisDeficit = Math.abs(delay);
       }
     }
+    this.isPlaying = false;
+    this.emitOffset();
   }
 
   public pause(): void {
     this.isPlaying = false;
+    this.emitOffset();
   }
 
-  public async close(): Promise<void> {
-    // go ahead and say this is closed
-    this.mirrorPage.emit('close');
-    await this.mirrorPage.close();
+  public close(): void {
     this.events.close();
   }
 
@@ -197,6 +172,8 @@ export default class TabPlaybackController {
   }
 
   public async setTimelineOffset(timelineOffset: number): Promise<void> {
+    if (timelineOffset === undefined) return this.loadEndState();
+
     const newTickIdx = this.findClosestTickIndex(timelineOffset);
     if (this.currentTickIndex === newTickIdx) return;
     await this.loadTick(newTickIdx, timelineOffset);
@@ -204,6 +181,14 @@ export default class TabPlaybackController {
 
   public async loadEndState(): Promise<void> {
     await this.loadTick(this.ticks.length - 1);
+  }
+
+  public async loadTickWithCommandId(commandId: number): Promise<void> {
+    for (const tick of this.ticks) {
+      if (tick.commandId === commandId) {
+        await this.loadTick(tick);
+      }
+    }
   }
 
   public async loadTick(
@@ -220,17 +205,15 @@ export default class TabPlaybackController {
     if (typeof newTickOrIdx === 'number') {
       newTick = this.ticks[newTickOrIdx];
     } else {
-      newTickIdx = this.ticks.indexOf(newTickOrIdx);
+      newTickIdx = this.ticks.indexOf(newTick);
     }
 
+    const startTick = this.currentTick;
+    const startOffset = this.currentTimelineOffsetPct;
     this.currentTickIndex = newTickIdx;
     this.currentTimelineOffsetPct = specificTimelineOffset ?? newTick.timelineOffsetPercent;
 
-    const newPaintIndex = newTick.paintEventIndex;
-    if (newPaintIndex !== this.paintEventsLoadedIdx) {
-      this.paintEventsLoadedIdx = newPaintIndex;
-      await mirrorPage.load(newPaintIndex);
-    }
+    await mirrorPage.load(newTick.paintEventIndex);
 
     const mouseEvent = this.tabDetails.mouse[newTick.mouseEventIndex];
     const scrollEvent = this.tabDetails.scroll[newTick.scrollEventIndex];
@@ -239,6 +222,45 @@ export default class TabPlaybackController {
     if (nodesToHighlight || mouseEvent || scrollEvent) {
       await mirrorPage.showInteractions(nodesToHighlight, mouseEvent, scrollEvent);
     }
+
+    if (newTick.commandId !== startTick?.commandId) {
+      this.emit('new-tick-command', {
+        commandId: newTick.commandId,
+        paintIndex: newTick.paintEventIndex,
+      });
+    }
+    if (newTick.paintEventIndex !== startTick?.paintEventIndex) {
+      this.emit('new-paint-index', {
+        paintIndexRange: this.focusedPaintIndexes,
+        documentLoadPaintIndex: newTick.documentLoadPaintIndex,
+      });
+    }
+    if (this.currentTimelineOffsetPct !== startOffset) {
+      this.emitOffset();
+    }
+    await this.showLoadStatus();
+  }
+
+  public async showLoadStatus(): Promise<void> {
+    const metadata = this.latestStatusMetadata;
+    const timelineOffsetPercent = this.currentTimelineOffsetPct;
+    if (!metadata || timelineOffsetPercent === 100) return;
+
+    let currentUrl: ITimelineMetadata['urls'][0];
+    let activeStatus: ITimelineMetadata['urls'][0]['loadStatusOffsets'][0];
+    for (const url of metadata.urls) {
+      if (url.offsetPercent > timelineOffsetPercent) break;
+      currentUrl = url;
+    }
+
+    for (const status of currentUrl?.loadStatusOffsets ?? []) {
+      if (status.offsetPercent > timelineOffsetPercent) break;
+      activeStatus = status;
+    }
+
+    if (activeStatus) {
+      await this.showStatusText(activeStatus.status);
+    }
   }
 
   public async showStatusText(text: string): Promise<void> {
@@ -246,21 +268,15 @@ export default class TabPlaybackController {
   }
 
   public getPaintEventAtIndex(index: number): IPaintEvent {
-    return this.tabDetails.paintEvents[index];
+    return this.tabDetails.domRecording.paintEvents[index];
   }
 
-  private static tabDetailsToDomRecording(tabDetails: ITabDetails): IDomRecording {
-    const mainFrameIds = new Set<number>();
-    const domNodePathByFrameId: { [frameId: number]: string } = {};
-    for (const frame of tabDetails.tab.frames) {
-      if (frame.isMainFrame) mainFrameIds.add(frame.id);
-      domNodePathByFrameId[frame.id] = frame.domNodePath;
-    }
-    return <IDomRecording>{
-      paintEvents: tabDetails.paintEvents,
-      documents: tabDetails.documents,
-      domNodePathByFrameId,
-      mainFrameIds,
-    };
+  private emitOffset(): void {
+    this.emit('new-offset', {
+      playback: this.isPlaying ? 'automatic' : 'manual',
+      url: this.mirrorPage.page?.mainFrame.url,
+      percentOffset: this.currentTimelineOffsetPct,
+      focusedRange: this.focusedOffsetRange,
+    });
   }
 }

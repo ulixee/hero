@@ -10,13 +10,12 @@ import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
 import PageLogsTable from '../models/PageLogsTable';
-import SessionTable, { ISessionRecord } from '../models/SessionTable';
+import SessionTable from '../models/SessionTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import ScreenshotsTable from '../models/ScreenshotsTable';
-import SessionsDb from './SessionsDb';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
@@ -90,11 +89,11 @@ export default class SessionDb {
   private db: SqliteDatabase;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor(sessionId: string, dbOptions: IDbOptions = {}) {
+  constructor(sessionId: string, dbOptions: IDbOptions = {}, customPath?: string) {
     SessionDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
-    this.path = `${SessionDb.databaseDir}/${sessionId}.db`;
+    this.path = customPath ?? `${SessionDb.databaseDir}/${sessionId}.db`;
     this.db = new Database(this.path, { readonly, fileMustExist });
     if (dbOptions?.enableWalMode) {
       this.db.unsafeMode(false);
@@ -181,6 +180,25 @@ export default class SessionDb {
     }
   }
 
+  public getCollectedAssetNames(): { resources: string[]; elements: string[]; snippets: string[] } {
+    const snippets = new Set<string>();
+    for (const snippet of this.snippets.all()) {
+      snippets.add(snippet.name);
+    }
+    const resources = new Set<string>();
+    for (const resource of this.detachedResources.all()) {
+      resources.add(resource.name);
+    }
+
+    const elementNames = this.detachedElements.allNames();
+
+    return {
+      snippets: [...snippets],
+      resources: [...resources],
+      elements: [...elementNames],
+    };
+  }
+
   public async close(deleteFile = false): Promise<void> {
     clearInterval(this.saveInterval);
 
@@ -217,38 +235,26 @@ export default class SessionDb {
     }
   }
 
-  public static getCached(sessionId: string, fileMustExist = false): SessionDb {
+  public static getCached(
+    sessionId: string,
+    fileMustExist = false,
+    customPath?: string,
+  ): SessionDb {
     if (sessionId.endsWith('.db')) sessionId = sessionId.split('.db').shift();
     if (!this.byId.get(sessionId)?.db?.open) {
       this.byId.set(
         sessionId,
-        new SessionDb(sessionId, {
-          readonly: true,
-          fileMustExist,
-        }),
+        new SessionDb(
+          sessionId,
+          {
+            readonly: true,
+            fileMustExist,
+          },
+          customPath,
+        ),
       );
     }
     return this.byId.get(sessionId);
-  }
-
-  public static find(scriptArgs: ISessionFindArgs): ISessionFindResult {
-    let { sessionId } = scriptArgs;
-    if (sessionId?.endsWith('.db')) sessionId = sessionId.split('.db').shift();
-
-    // NOTE: don't close db - it's from a shared cache
-    const sessionsDb = SessionsDb.find();
-    if (!sessionId) {
-      sessionId = sessionsDb.findLatestSessionId(scriptArgs);
-      if (!sessionId) return null;
-    }
-
-    const sessionDb = this.getCached(sessionId, true);
-
-    const session = sessionDb.session.get();
-
-    return {
-      session,
-    };
   }
 
   public static createDir(): void {
@@ -261,15 +267,4 @@ export default class SessionDb {
   public static get databaseDir(): string {
     return `${Core.dataDir}/hero-sessions`;
   }
-}
-
-export interface ISessionFindResult {
-  session: ISessionRecord;
-}
-
-export interface ISessionFindArgs {
-  scriptInstanceId?: string;
-  sessionName?: string;
-  scriptEntrypoint?: string;
-  sessionId?: string;
 }

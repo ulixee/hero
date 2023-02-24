@@ -42,7 +42,7 @@ export default class ConnectionFactory {
         // If Miners are launched, but none compatible, propose installing miner locally
         throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a Ulixee Miner in your project:
 
-npm install --save-dev @ulixee/miner @ulixee/apps-chromealive-core
+npm install --save-dev @ulixee/miner @ulixee/desktop-core
 
 npx @ulixee/miner start
         `);

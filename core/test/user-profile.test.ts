@@ -69,7 +69,7 @@ describe('UserProfile cookie tests', () => {
     const cookiesBefore = await tab3.session.exportUserProfile();
     expect(cookiesBefore.cookies).toHaveLength(1);
     expect(cookiesBefore.userAgentString).toBe(profile.userAgentString);
-    expect(tab3.session.meta.userAgentString).toBe(profile.userAgentString);
+    expect((await tab3.session.getHeroMeta()).userAgentString).toBe(profile.userAgentString);
     expect(cookiesBefore.deviceProfile).toEqual(profile.deviceProfile);
 
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
