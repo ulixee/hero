@@ -23,8 +23,9 @@ export default class Resolvable<T = any> implements IResolvablePromise<T>, Promi
     });
 
     if (timeoutMillis !== undefined && timeoutMillis !== null) {
-      this.timeout = (
-        setTimeout(this.rejectWithTimeout.bind(this, timeoutMessage), timeoutMillis) as any
+      this.timeout = setTimeout(
+        this.rejectWithTimeout.bind(this, timeoutMessage),
+        timeoutMillis,
       ).unref();
     }
     this.resolve = this.resolve.bind(this);
@@ -93,6 +94,6 @@ export default class Resolvable<T = any> implements IResolvablePromise<T>, Promi
   private rejectWithTimeout(message: string): void {
     const error = new TimeoutError(message);
     error.stack = `TimeoutError: ${message}\n${this.stack}`;
-    this.reject(error);
+    this.reject(error, true);
   }
 }

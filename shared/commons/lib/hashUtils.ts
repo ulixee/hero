@@ -3,8 +3,8 @@ import TypeSerializer from './TypeSerializer';
 
 export const hashMessagePrefix = '\x18Ulixee Signed Message:\n';
 
-export function sha3(data: Buffer | string): Buffer {
-  return createHash('sha3-256').update(data).digest();
+export function sha256(data: Buffer | string): Buffer {
+  return createHash('sha256').update(data).digest();
 }
 
 export function sortedJsonStringify<T>(obj: T | null, ignoreProperties: (keyof T)[] = []): string {
@@ -27,5 +27,5 @@ export function hashObject<T>(
   let buffer = Buffer.from(`${hashMessagePrefix}${json.length}${json}`);
   if (options?.prefix) buffer = Buffer.concat([options.prefix, buffer]);
 
-  return createHash('sha3-256').update(buffer).digest();
+  return sha256(buffer);
 }

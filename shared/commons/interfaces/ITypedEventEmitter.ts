@@ -40,4 +40,6 @@ export default interface ITypedEventEmitter<T> {
     listener: (this: this, event?: T[K]) => void,
     includeUnhandledEvents?: boolean,
   ): this;
+
+  removeAllListeners(event?: string | symbol): this;
 }

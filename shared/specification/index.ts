@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import INote from './types/INote';
 import IMerkleProof from './types/IMerkleProof';
 import IAddressOwnershipProof from './types/IAddressOwnershipProof';
@@ -16,10 +17,11 @@ import IBlock from './types/IBlock';
 import LedgerType from './types/LedgerType';
 import IBlockHeader from './types/IBlockHeader';
 import IBlockSettings from './types/IBlockSettings';
+import IMicronote from './types/IMicronote';
 import TransactionError from './types/TransactionError';
-import IPayment from './types/IPayment';
 
 export {
+  z,
   IBlock,
   IBlockHeader,
   IBlockSettings,
@@ -29,6 +31,7 @@ export {
   NoteType,
   LedgerType,
   IMerkleProof,
+  IMicronote,
   IStakeSettings,
   ITransaction,
   ITransactionSource,
@@ -38,6 +41,5 @@ export {
   IStakeSignature,
   IAddressSignature,
   IAddressOwnershipProof,
-  TransactionError,
-  IPayment,
+  TransactionError
 };

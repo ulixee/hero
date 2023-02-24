@@ -1,15 +1,15 @@
-import { sha3 } from '@ulixee/commons/lib/hashUtils';
+import { sha256 } from '@ulixee/commons/lib/hashUtils';
 import IMerkleProof, { MerklePosition } from '@ulixee/specification/types/IMerkleProof';
 
 /**
- * Use sha3 instead of default keccak used in the network.
+ * Use sha256 instead of default keccak used in the network.
  * This ensures the leaves have a different (albeit slight) encoding
  *
- * Keccak has different padding than sha3
+ * Keccak has different padding than sha256
  * @param content
  */
 function createHash(content: Buffer | string): Buffer {
-  return sha3(content);
+  return sha256(content);
 }
 
 interface Layer {
@@ -72,8 +72,8 @@ export default class MerkleTree {
    * const proof = tree.getProof(leaves[2])
    *
    * @example
-   * const leaves = ['a', 'b', 'a'].map(x => sha3(x))
-   * const tree = new MerkleTree(leaves, sha3)
+   * const leaves = ['a', 'b', 'a'].map(x => sha256(x))
+   * const tree = new MerkleTree(leaves, sha256)
    * const proof = tree.getProof(leaves[2], 2)
    */
   public getProof(leaf: Buffer, index?: number): IMerkleProof[] {

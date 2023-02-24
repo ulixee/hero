@@ -321,7 +321,7 @@ function loadNamespaces(namespaces: string): void {
 registerNamespaceMapping((ns, active, skip) => {
   if (ns.includes('ulx:*') || ns.includes('ulx*') || ns === '*') {
     active.push(
-      /^apps[/-]chromealive*/,
+      /desktop[/-]?.*/,
       /hero[/-].*/,
       /agent\/.*/,
       /plugins\/.*/,
@@ -343,7 +343,9 @@ registerNamespaceMapping((ns, active, skip) => {
       /sidechain[/-].*/,
       /ramps[/-].*/,
     );
-    skip.push(/^apps[/-]chromealive*/, /DevtoolsSessionLogger/);
+    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
+  } else if (ns.includes('ulx:desktop')) {
+    active.push(/desktop[/-]?.*/);
   } else if (ns === 'ulx:mitm') {
     active.push(/agent[/-]mitm.*/);
   } else if (ns.includes('ulx:devtools') || ns === '*') {

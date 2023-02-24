@@ -3,28 +3,30 @@ import * as Path from 'path';
 import { getCacheDirectory } from '../lib/dirUtils';
 import { isSemverSatisfied } from '../lib/VersionUtils';
 import { isPortInUse } from '../lib/utils';
+import { TypedEventEmitter } from '../lib/eventUtils';
 
-export default class UlixeeHostsConfig {
+export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void }> {
   public static global = new UlixeeHostsConfig(Path.join(getCacheDirectory(), 'ulixee'));
 
   public hostByVersion: IUlixeeHostsConfig['hostByVersion'] = {};
+  #watchHandle: Fs.FSWatcher;
 
   private get configPath(): string {
     return Path.join(this.directoryPath, 'hosts');
   }
 
   constructor(readonly directoryPath: string) {
-    if (Fs.existsSync(this.configPath)) {
-      for (const file of Fs.readdirSync(this.configPath)) {
-        if (file.endsWith('.json')) {
-          const versionPath = Path.join(this.configPath, file);
-          const version = file.replace('.json', '');
-          this.hostByVersion[version] = JSON.parse(Fs.readFileSync(versionPath, 'utf8'));
-        }
-      }
-    } else {
+    super();
+    if (!Fs.existsSync(this.configPath)) {
       Fs.mkdirSync(this.configPath, { recursive: true });
     }
+
+    this.#watchHandle = Fs.watch(
+      this.configPath,
+      { recursive: true, persistent: false },
+      this.reload.bind(this, true),
+    );
+    this.reload();
   }
 
   public setVersionHost(version: string, host: string): void {
@@ -70,6 +72,23 @@ export default class UlixeeHostsConfig {
       }
     }
     return host;
+  }
+
+  private reload(checkForChange = false): void {
+    const prev = checkForChange ? JSON.stringify(this.hostByVersion) : '';
+    this.hostByVersion = {};
+
+    for (const file of Fs.readdirSync(this.configPath)) {
+      if (file.endsWith('.json')) {
+        const versionPath = Path.join(this.configPath, file);
+        const version = file.replace('.json', '');
+        this.hostByVersion[version] = JSON.parse(Fs.readFileSync(versionPath, 'utf8'));
+      }
+    }
+
+    if (checkForChange && prev !== JSON.stringify(this.hostByVersion)) {
+      this.emit('change');
+    }
   }
 
   private save(version: string): void {

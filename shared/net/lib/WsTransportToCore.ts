@@ -80,12 +80,15 @@ export default class WsTransportToCore<
     return Promise.resolve();
   }
 
-  public async connect(): Promise<void> {
+  public async connect(timeoutMs?: number): Promise<void> {
     if (!this.connectPromise) {
       this.connectPromise = new Resolvable();
 
       await this.hostPromise;
-      const webSocket = new WebSocket(this.host);
+      const webSocket = new WebSocket(this.host, {
+        followRedirects: false,
+        handshakeTimeout: timeoutMs,
+      });
       this.events.group(
         'preConnect',
         this.events.once(webSocket, 'close', this.onConnectError),

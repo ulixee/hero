@@ -1,7 +1,7 @@
 import { IAddressOwnershipProof, IAddressSignature } from '@ulixee/specification';
 import Identity from '@ulixee/crypto/lib/Identity';
 import MerkleTree from '@ulixee/crypto/lib/MerkleTree';
-import { sha3 } from '@ulixee/commons/lib/hashUtils';
+import { sha256 } from '@ulixee/commons/lib/hashUtils';
 import { MerklePosition } from '@ulixee/specification/types/IMerkleProof';
 import IAddressSettings from '../interfaces/IAddressSettings';
 import AddressOwnersTree from './AddressOwnersTree';
@@ -37,7 +37,7 @@ export default class AddressSignature {
   public isValidWalletOwnershipProof(owner: IAddressOwnershipProof): boolean {
     const isValidProof = MerkleTree.verify(
       owner.ownershipMerkleProofs,
-      sha3(owner.identity),
+      sha256(owner.identity),
       this.treeRoot,
     );
     if (!isValidProof) return false;
@@ -90,7 +90,7 @@ export default class AddressSignature {
        */
       const isMatch = Identity.verify(
         signer.identity,
-        sha3(Buffer.concat([messageHash, ...signatures])),
+        sha256(Buffer.concat([messageHash, ...signatures])),
         signer.signature,
       );
       if (isMatch === false) {
@@ -138,7 +138,7 @@ export default class AddressSignature {
         const ownerProof: IAddressOwnershipProof = {
           ownershipMerkleProofs: identityProof,
           identity: identity.bech32,
-          signature: identity.sign(sha3(Buffer.concat([hash, ...signatures]))),
+          signature: identity.sign(sha256(Buffer.concat([hash, ...signatures]))),
         };
         signatures.push(ownerProof.signature);
         return ownerProof;
