@@ -89,11 +89,11 @@ export default class SessionDb {
   private db: SqliteDatabase;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor(sessionId: string, dbOptions: IDbOptions = {}) {
+  constructor(sessionId: string, dbOptions: IDbOptions = {}, customPath?: string) {
     SessionDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
-    this.path = `${SessionDb.databaseDir}/${sessionId}.db`;
+    this.path = customPath ?? `${SessionDb.databaseDir}/${sessionId}.db`;
     this.db = new Database(this.path, { readonly, fileMustExist });
     if (dbOptions?.enableWalMode) {
       this.db.unsafeMode(false);
@@ -235,15 +235,23 @@ export default class SessionDb {
     }
   }
 
-  public static getCached(sessionId: string, fileMustExist = false): SessionDb {
+  public static getCached(
+    sessionId: string,
+    fileMustExist = false,
+    customPath?: string,
+  ): SessionDb {
     if (sessionId.endsWith('.db')) sessionId = sessionId.split('.db').shift();
     if (!this.byId.get(sessionId)?.db?.open) {
       this.byId.set(
         sessionId,
-        new SessionDb(sessionId, {
-          readonly: true,
-          fileMustExist,
-        }),
+        new SessionDb(
+          sessionId,
+          {
+            readonly: true,
+            fileMustExist,
+          },
+          customPath,
+        ),
       );
     }
     return this.byId.get(sessionId);

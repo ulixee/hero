@@ -118,6 +118,10 @@ export default class TimetravelTicks {
   private sortTicks(): void {
     for (const tab of this.tabs) {
       const { focus, mouse, domRecording, ticks } = tab;
+      if (!domRecording) {
+        delete this.tabsById[tab.tabId];
+        continue;
+      }
       const firstDocument = domRecording.documents[0];
 
       let lastEvents: Pick<
@@ -135,7 +139,7 @@ export default class TimetravelTicks {
       };
       const commandHighlightsById = new Map<number, ICommandWithResult>();
       for (const command of this.timeline.commands) {
-        const result = CommandFormatter.parseResult(command)
+        const result = CommandFormatter.parseResult(command);
         if (result.resultNodeIds) {
           commandHighlightsById.set(command.id, result);
         }
