@@ -105,7 +105,7 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     includeUnhandledEvents = false,
   ): this {
     super.on(eventType, listenerFn);
-    this.onListener?.(eventType);
+    this.onEventListenerAdded?.(eventType);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
@@ -122,7 +122,7 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     includeUnhandledEvents = false,
   ): this {
     super.once(eventType, listenerFn);
-    this.onListener?.(eventType);
+    this.onEventListenerAdded?.(eventType);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
