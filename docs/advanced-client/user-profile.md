@@ -43,6 +43,7 @@ An object containing hardware device properties emulated in this userProfile lik
 
 #### **Type**: `object`
   - deviceMemory `number`. The amount of memory specified for this machine
+  - deviceStorageTib `number`. The amount of storage space in Tebabites for this machine.
   - webGlParameters `object`. Key value of WebGlParameters to override (ie, { 37445: 'WebGl Vendor' })
   - videoDevice `object { deviceId: string, groupId: string }`. A video device to emulate if none is present, such as on a headless server.
 
