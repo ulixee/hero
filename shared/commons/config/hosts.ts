@@ -21,14 +21,17 @@ export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void 
       Fs.mkdirSync(this.configPath, { recursive: true });
     }
 
-    // note supported on linux!
-    if (process.platform === 'win32' || process.platform === 'darwin') {
-      this.#watchHandle = Fs.watch(
-        this.configPath,
-        { recursive: true, persistent: false },
-        this.reload.bind(this, true),
-      );
-    }
+    // not supported on linux!
+    this.onEventListenerAdded = event => {
+      if (event !== 'change') return;
+      if (process.platform === 'win32' || process.platform === 'darwin') {
+        this.#watchHandle = Fs.watch(
+          this.configPath,
+          { recursive: true, persistent: false },
+          this.reload.bind(this, true),
+        );
+      }
+    };
     this.reload();
   }
 

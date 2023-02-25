@@ -9,6 +9,8 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
   public storeEventsWithoutListeners = false;
   public EventTypes: T;
 
+  public onEventListenerAdded?: <K extends keyof T & (string | symbol)>(event: K) => void;
+
   #logger?: IBoundLog;
 
   private pendingIdCounter = 0;
@@ -103,6 +105,7 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     includeUnhandledEvents = false,
   ): this {
     super.on(eventType, listenerFn);
+    this.onListener?.(eventType);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
@@ -119,6 +122,7 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     includeUnhandledEvents = false,
   ): this {
     super.once(eventType, listenerFn);
+    this.onListener?.(eventType);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
