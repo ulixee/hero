@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/hero/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **client:** waitForState not capturing err stack ([338f0aa](https://github.com/ulixee/hero/commit/338f0aaaecd6c38568fac366e3873dc25ccec45e))
+* **core:** cleanup memory variables leaking ([e3ae146](https://github.com/ulixee/hero/commit/e3ae146c0e38aa125bd9df6b1f9be564eae5aebe))
+* **core:** disable defaulting sqlite wal mode on ([44b6720](https://github.com/ulixee/hero/commit/44b67203048295bd1c305419e52ca5fc1d50f6a8))
+* **core:** remove wal experiment on by default ([ab33e70](https://github.com/ulixee/hero/commit/ab33e70192e0c03a51587c062ff247ecce720d2d))
+* **timetravel:** simplify ticks to share state ([5b0a141](https://github.com/ulixee/hero/commit/5b0a141e2aead993345dbf3f7aa0982cdeae17f5))
+
+
+### Features
+
+* **core:** allow loading session db from path ([b8fcb28](https://github.com/ulixee/hero/commit/b8fcb28e2f529f6fb06c6eafcb5a445e8dcf22e9))
+* **core:** proxy local dns feature ([bd6f7dc](https://github.com/ulixee/hero/commit/bd6f7dc4442277ae0379159ebedafc2355fa386f))
+* **core:** refactor to accomodate ulixee/desktop ([be9ed0e](https://github.com/ulixee/hero/commit/be9ed0eb2ee905ea4683d814b9a5a694b94a3705))
+* **hero:** add connected/session created event ([b638ef7](https://github.com/ulixee/hero/commit/b638ef7ec957f7e67ad66246bdb368214c7eff3c))
+* **session:** config to delete sessions ([d06fbc8](https://github.com/ulixee/hero/commit/d06fbc8bc2f00767436faf9a9d70d3ca325c2984))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/hero/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 
