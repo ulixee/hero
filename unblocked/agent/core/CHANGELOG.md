@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **agent:** always get full page content size ([ea62557](https://github.com/ulixee/unblocked/commit/ea62557d21209fd5a7cfd165d3e7f9417b2fae6c))
+* **agent:** devtools preferences when custom exe ([73cf16d](https://github.com/ulixee/unblocked/commit/73cf16dbdecc9a93c54a630a9d0c07a62d8a40c0))
+* **agent:** don’t crash parsing response url ([bf7d2bf](https://github.com/ulixee/unblocked/commit/bf7d2bf198fa6bf172e8027ecda474bfa1ac4455))
+* **agent:** don’t parse json for devtools calls ([9d9e953](https://github.com/ulixee/unblocked/commit/9d9e953a065d2aefcffeab46ddc20f120bf4a244))
+* **agent:** don’t timeout shutting down context ([0a3a5f5](https://github.com/ulixee/unblocked/commit/0a3a5f555ba31b1e7d8567db2c0b606f2309dd44))
+* **agent:** element within shadow dom visibility ([8cc9cb7](https://github.com/ulixee/unblocked/commit/8cc9cb7e0861ad74bb95903aac5b98ec2649acec))
+* **agent:** mark browser connected ([eb4e238](https://github.com/ulixee/unblocked/commit/eb4e2388d1be8356f22ee9bfb99d29da31f13da3))
+* **agent:** no autoattach when browser connects ([1ab573d](https://github.com/ulixee/unblocked/commit/1ab573df817226afdbd9f0b31c732ef171068604))
+* **agent:** parse partial seconds timestamp ([e4dab90](https://github.com/ulixee/unblocked/commit/e4dab904aefeb13beec86a1c9e70200590d47fa5))
+* **agent:** release memory leaks ([934dcdb](https://github.com/ulixee/unblocked/commit/934dcdba48bb0524f47e7ff60aca2fb4afdbd77a))
+* **agent:** sync goto and connect timeout option ([a538329](https://github.com/ulixee/unblocked/commit/a538329530df0ed115e022cf9b21b638aa0520d7))
+* **agent:** timeout all devtools requests ([2cf48e5](https://github.com/ulixee/unblocked/commit/2cf48e556bf06b3fb418e92760ccae9f9ec13f78))
+
+
+### Features
+
+* **agent:** ability to hook directly to a target ([b331297](https://github.com/ulixee/unblocked/commit/b33129731c9c541e30c421f9e2ddaac2ad55e368))
+* **agent:** allow proxy local dns resolution ([#47](https://github.com/ulixee/unblocked/issues/47)) ([a9c412b](https://github.com/ulixee/unblocked/commit/a9c412b77bfc85d7d8634ade1ca647a40b3cc939))
+* **agent:** try to use chrome headless=new mode ([18999c7](https://github.com/ulixee/unblocked/commit/18999c71679ae04c46e1f5218d4be21ccc5af561))
+* **plugins:** add shouldBlockRequest to spec ([ce826a5](https://github.com/ulixee/unblocked/commit/ce826a53133b2009c9572376d3507a0f17562513))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

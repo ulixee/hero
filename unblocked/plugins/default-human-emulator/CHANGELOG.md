@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Features
+
+* **plugins:** add shouldBlockRequest to spec ([ce826a5](https://github.com/ulixee/unblocked/commit/ce826a53133b2009c9572376d3507a0f17562513))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 **Note:** Version bump only for package @ulixee/default-human-emulator

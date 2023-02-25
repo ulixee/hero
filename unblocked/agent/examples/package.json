@@ -1,9 +1,9 @@
 {
   "name": "@ulixee/unblocked-agent-examples",
   "private": true,
-  "version": "2.0.0-alpha.18",
+  "version": "2.0.0-alpha.19",
   "dependencies": {
     "@ulixee/chrome-98-0": "^4758.109.6",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.18"
+    "@ulixee/unblocked-agent": "2.0.0-alpha.19"
   }
 }

@@ -1,29 +1,29 @@
 {
   "name": "@ulixee/unblocked-browser-emulator-builder",
-  "version": "2.0.0-alpha.18",
+  "version": "2.0.0-alpha.19",
   "private": true,
   "license": "MIT",
   "scripts": {
     "generate": "node ../build/browser-emulator-builder/scripts/generateEmulatorData"
   },
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.18",
-    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.18",
-    "@double-agent/collect": "2.0.0-alpha.18",
-    "@double-agent/collect-browser-codecs": "2.0.0-alpha.18",
-    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.18",
-    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.18",
-    "@double-agent/collect-http2-session": "2.0.0-alpha.18",
-    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.18",
-    "@ulixee/commons": "2.0.0-alpha.18",
-    "@ulixee/real-user-agents": "2.0.0-alpha.18",
-    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.18",
-    "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.18",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.18",
+    "@double-agent/analyze": "2.0.0-alpha.19",
+    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.19",
+    "@double-agent/collect": "2.0.0-alpha.19",
+    "@double-agent/collect-browser-codecs": "2.0.0-alpha.19",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.19",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.19",
+    "@double-agent/collect-http2-session": "2.0.0-alpha.19",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.19",
+    "@ulixee/commons": "2.0.0-alpha.19",
+    "@ulixee/real-user-agents": "2.0.0-alpha.19",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.19",
+    "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.19",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.19",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.18"
+    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.19"
   },
   "engines": {
     "node": ">=12.0.0"

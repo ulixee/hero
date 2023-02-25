@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **agent:** element within shadow dom visibility ([8cc9cb7](https://github.com/ulixee/unblocked/commit/8cc9cb7e0861ad74bb95903aac5b98ec2649acec))
+* **agent:** sync goto and connect timeout option ([a538329](https://github.com/ulixee/unblocked/commit/a538329530df0ed115e022cf9b21b638aa0520d7))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

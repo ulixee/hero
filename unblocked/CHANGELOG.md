@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **agent:** always get full page content size ([ea62557](https://github.com/ulixee/unblocked/commit/ea62557d21209fd5a7cfd165d3e7f9417b2fae6c))
+* **agent:** devtools preferences when custom exe ([73cf16d](https://github.com/ulixee/unblocked/commit/73cf16dbdecc9a93c54a630a9d0c07a62d8a40c0))
+* **agent:** don’t crash parsing response url ([bf7d2bf](https://github.com/ulixee/unblocked/commit/bf7d2bf198fa6bf172e8027ecda474bfa1ac4455))
+* **agent:** don’t parse json for devtools calls ([9d9e953](https://github.com/ulixee/unblocked/commit/9d9e953a065d2aefcffeab46ddc20f120bf4a244))
+* **agent:** don’t timeout shutting down context ([0a3a5f5](https://github.com/ulixee/unblocked/commit/0a3a5f555ba31b1e7d8567db2c0b606f2309dd44))
+* **agent:** element within shadow dom visibility ([8cc9cb7](https://github.com/ulixee/unblocked/commit/8cc9cb7e0861ad74bb95903aac5b98ec2649acec))
+* **agent:** mark browser connected ([eb4e238](https://github.com/ulixee/unblocked/commit/eb4e2388d1be8356f22ee9bfb99d29da31f13da3))
+* **agent:** no autoattach when browser connects ([1ab573d](https://github.com/ulixee/unblocked/commit/1ab573df817226afdbd9f0b31c732ef171068604))
+* **agent:** parse partial seconds timestamp ([e4dab90](https://github.com/ulixee/unblocked/commit/e4dab904aefeb13beec86a1c9e70200590d47fa5))
+* **agent:** release memory leaks ([934dcdb](https://github.com/ulixee/unblocked/commit/934dcdba48bb0524f47e7ff60aca2fb4afdbd77a))
+* **agent:** sync goto and connect timeout option ([a538329](https://github.com/ulixee/unblocked/commit/a538329530df0ed115e022cf9b21b638aa0520d7))
+* **agent:** timeout all devtools requests ([2cf48e5](https://github.com/ulixee/unblocked/commit/2cf48e556bf06b3fb418e92760ccae9f9ec13f78))
+* **browser-profiler:** chrome 110 not loading in docker ([86a1b2a](https://github.com/ulixee/unblocked/commit/86a1b2ab7073fcd51c734a4173f9d2ed01e7a862))
+* **default-browser-emulator:** default disable tcp ([5d74fd4](https://github.com/ulixee/unblocked/commit/5d74fd4ddb4cb5300a0a8e0c72808a53ceedd8fc))
+* **default-browser-emulator:** plugins detectable ([c461fa2](https://github.com/ulixee/unblocked/commit/c461fa2c069117444502b7e4f8e869e202dfaa05))
+* **plugins:** avoid incognito detection ([8ced043](https://github.com/ulixee/unblocked/commit/8ced043473f44dd82961a7f96db9def797624e71))
+* **plugins:** check for webkitTemporaryStorage ([38bfa6f](https://github.com/ulixee/unblocked/commit/38bfa6f437454286750a784b4ee304f685922b8f))
+* **plugins:** ensure sec-cha-ua is correct ([add8df4](https://github.com/ulixee/unblocked/commit/add8df48b875dc890cc045205eabbf87ee364729))
+* should use inner ([1026547](https://github.com/ulixee/unblocked/commit/102654757c18fcfc785d1cd945f6842b67e1053f))
+
+
+### Features
+
+* **agent:** ability to hook directly to a target ([b331297](https://github.com/ulixee/unblocked/commit/b33129731c9c541e30c421f9e2ddaac2ad55e368))
+* **agent:** allow proxy local dns resolution ([#47](https://github.com/ulixee/unblocked/issues/47)) ([a9c412b](https://github.com/ulixee/unblocked/commit/a9c412b77bfc85d7d8634ade1ca647a40b3cc939))
+* **agent:** try to use chrome headless=new mode ([18999c7](https://github.com/ulixee/unblocked/commit/18999c71679ae04c46e1f5218d4be21ccc5af561))
+* **plugins:** add shouldBlockRequest to spec ([ce826a5](https://github.com/ulixee/unblocked/commit/ce826a53133b2009c9572376d3507a0f17562513))
+* **plugins:** don’t load unnecessary plugins ([fcfdacd](https://github.com/ulixee/unblocked/commit/fcfdacd1dda71f54b79466d445e6842714d40c3a))
+* set unavailable screen ([b7402b0](https://github.com/ulixee/unblocked/commit/b7402b0cbbd99ac11d16fd7ab0cdf0ebded764ee))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

@@ -261,7 +261,6 @@ test('should set user agent on cross origin frames', async () => {
     headers: IncomingHttpHeaders;
   }>();
   const sslServer = await Helpers.runHttpsServer(async (req, res) => {
-    console.log(req.url, req.headers, req.method);
     res.setHeader('access-control-allow-origin', '*');
     res.setHeader(
       'Access-Control-Allow-Headers',
@@ -271,7 +270,7 @@ test('should set user agent on cross origin frames', async () => {
       res.end(`<!DOCTYPE html>
       <html lang="en"><body>
 <div>Cross Storage</div>
-<iframe src="https://dataliberationfoundation.org/frame"></iframe>
+<iframe src="https://dataliberationfoundation.org/frame" sandbox='allow-scripts' ></iframe>
 </body>
       </html>`);
       return;
@@ -291,7 +290,6 @@ test('should set user agent on cross origin frames', async () => {
     urls: ['https://dataliberationfoundation.org/*'],
     types: [],
     handlerFn(url: URL, type: IResourceType, request, response) {
-      console.log('intercepting', url.href);
       response.end(`<html><body><p>frame body</p>
 <script>
   const { userAgent, platform } = window.navigator || {}
@@ -324,7 +322,9 @@ test('should set user agent on cross origin frames', async () => {
   const { iframe, headers } = await iframeData;
 
   expect(iframe.platform).toBe(data.platform);
-  expect(headers['sec-ch-ua-platform']).toBe({ Win32: '"Windows"', MacIntel: '"macOS"' }[data.platform]);
+  expect(headers['sec-ch-ua-platform']).toBe(
+    { Win32: '"Windows"', MacIntel: '"macOS"' }[data.platform],
+  );
   expect(iframe.userAgent).toBe(data.userAgent);
   await page.close();
 });
