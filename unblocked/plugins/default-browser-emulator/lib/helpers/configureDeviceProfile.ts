@@ -17,6 +17,8 @@ export default function configureDeviceProfile(deviceProfile: IDeviceProfile): v
     deviceProfile.maxHeapSize = 1620000000;
   }
 
+  deviceProfile.deviceStorageTib ??= pickRandom([0.5, 1, 2, 4, 8, 16]);
+
   deviceProfile.webGlParameters ??= {
     // UNMASKED_VENDOR_WEBGL
     37445: 'Intel Inc.',

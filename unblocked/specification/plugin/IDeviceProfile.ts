@@ -1,5 +1,6 @@
 export default interface IDeviceProfile {
   deviceMemory?: number;
+  deviceStorageTib?: number;
   maxHeapSize?: number;
   videoDevice?: {
     deviceId: string;

@@ -99,6 +99,50 @@ test('it should override plugins in a browser window', async () => {
   expect(navigatorPageStructure.plugins).toStrictEqual(navigatorConfig.plugins);
 }, 60e3);
 
+test('it should not be able to detect incognito', async () => {
+  const httpServer = await Helpers.runHttpsServer((req, res) => {
+    res.end('<html><head></head><body>Hi</body></html>');
+  }, false);
+  const context = await browser.newContext({ logger });
+  Helpers.onClose(() => context.close());
+  const page = await context.newPage();
+
+  page.on('page-error', console.log);
+  if (debug) {
+    page.on('console', console.log);
+  }
+
+  await page.addNewDocumentScript(
+    getOverrideScript('navigator.deviceMemory', {
+      memory: 4,
+      storageTib: 0.5,
+      maxHeapSize: 2172649472
+    }).script,
+    false,
+  );
+  await page.goto(httpServer.baseUrl);
+  await page.waitForLoad(LoadStatus.DomContentLoaded);
+
+  const storageEstimate = await page.evaluate<number>(
+    `(async () => { 
+      return (await navigator.storage.estimate()).quota;
+    })()`,
+  );
+  // NOTE: this has some false positive as written, but this amount of temporary quota is highly suspicious
+  // https://github.com/Joe12387/detectIncognito/issues/21
+  const storageEstimateInMib = Math.round(storageEstimate / (1024 * 1024));
+  const quotaLimit = await page.evaluate<number>(`performance.memory.jsHeapSizeLimit`);
+  const quotaLimitInMib = Math.round(quotaLimit / (1024 * 1024)) * 2;
+  const tempQuota = await page.evaluate<number>(`new Promise((resolve, reject) => {
+    navigator.webkitTemporaryStorage.queryUsageAndQuota(
+      (_, quota) => resolve(quota),
+      reject,
+    );
+  })`);
+  const tempQuotaInMib = Math.round(tempQuota / (1024 * 1024));
+  expect(quotaLimitInMib).toBeLessThanOrEqual(tempQuotaInMib);
+});
+
 test('it should handle overflows in plugins', async () => {
   const httpServer = await Helpers.runHttpServer(false);
   const context = await browser.newContext({ logger });
@@ -111,10 +155,7 @@ test('it should handle overflows in plugins', async () => {
   }
   const pluginsData = parseNavigatorPlugins(navigatorConfig);
   if (debug) console.log(pluginsData);
-  await page.addNewDocumentScript(
-    getOverrideScript('navigator.plugins', pluginsData).script,
-    false,
-  );
+  await page.addNewDocumentScript(getOverrideScript('navigator', pluginsData).script, false);
   await page.goto(httpServer.baseUrl);
   await page.waitForLoad(LoadStatus.DomContentLoaded);
 

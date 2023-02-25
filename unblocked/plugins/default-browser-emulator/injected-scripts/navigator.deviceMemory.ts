@@ -8,6 +8,33 @@ if (
 }
 
 if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
+  if (navigator.storage && args.storageTib) {
+    proxyFunction(
+      navigator.storage,
+      'estimate',
+      async (target, thisArg, argArray) => {
+        const result = await ReflectCached.apply(target, thisArg, argArray);
+        result.quota = Math.round(args.storageTib * 1024 * 1024 * 1024 * 1024 * 0.5);
+        return result;
+      },
+      true,
+    );
+    proxyFunction(
+      (navigator as any).webkitTemporaryStorage,
+      'queryUsageAndQuota',
+      (target, thisArg, argArray) => {
+        return ReflectCached.apply(target, thisArg, [
+          usage => {
+            (argArray[0] as any)(
+              usage,
+              Math.round(args.storageTib * 1024 * 1024 * 1024 * 1024 * 0.5),
+            );
+          },
+        ]);
+      },
+      true,
+    );
+  }
   if ('memory' in performance && (performance as any).memory) {
     proxyGetter(
       performance,

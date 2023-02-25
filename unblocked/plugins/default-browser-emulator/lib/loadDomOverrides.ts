@@ -20,6 +20,7 @@ export default function loadDomOverrides(
 
   domOverrides.add('navigator.deviceMemory', {
     memory: deviceProfile.deviceMemory,
+    storageTib: deviceProfile.deviceStorageTib,
     maxHeapSize: deviceProfile.maxHeapSize,
   });
   domOverrides.add('navigator', {
