@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Features
+
+* added Datastore.fetchInternalTable + tweaked Datastore.stream ([5525bb4](https://github.com/ulixee/shared/commit/5525bb4cf0021ac933cfe4fb8e23b631e6aa0f8d))
+* **specification:** add dns domains to datastores ([c36e3d7](https://github.com/ulixee/shared/commit/c36e3d7bbc40aef1f9323178556d59a7d8b203e5))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

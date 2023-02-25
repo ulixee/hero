@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **net:** default to ws transport over actual wire ([cbc0adc](https://github.com/ulixee/shared/commit/cbc0adcf0c899bfdc4d24ca5beccae7daf24869e))
+* **schema:** serialization fixes for schema object ([24ce6cc](https://github.com/ulixee/shared/commit/24ce6cc5605aaff5b1b306755f34e431c8f70cf3))
+
+
+### Features
+
+* **net:** emit request, response and event ([9ed0201](https://github.com/ulixee/shared/commit/9ed02013579ee3bc206182cfce85def3c0271034))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

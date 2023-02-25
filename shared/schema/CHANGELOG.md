@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **commons:** allow clearing sourcemap paths ([4d14167](https://github.com/ulixee/shared/commit/4d141673bd34e22d556539e6eb7bf8e63d9c9c3e))
+* **schema:** serialization fixes for schema object ([24ce6cc](https://github.com/ulixee/shared/commit/24ce6cc5605aaff5b1b306755f34e431c8f70cf3))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 

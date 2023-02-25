@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **commons:** allow clearing sourcemap paths ([4d14167](https://github.com/ulixee/shared/commit/4d141673bd34e22d556539e6eb7bf8e63d9c9c3e))
+* **commons:** no unhandled timeouts ([5428d4a](https://github.com/ulixee/shared/commit/5428d4a2856c7c86dd4737522280a05b8f5d8c8e))
+* **commons:** remove memory for once events ([e9b70ac](https://github.com/ulixee/shared/commit/e9b70ac08ab94c46bd00baa43d56a0b1820f78b1))
+* **commons:** serialize objects named error too ([a915057](https://github.com/ulixee/shared/commit/a9150577b51572a25d3f3ca8144680ff87bf8b0b))
+* **commons:** typo ([38eba49](https://github.com/ulixee/shared/commit/38eba496ada28165dc5e99acc48b0ec81040569c))
+* **commons:** wait to register hosts listener ([02fcddb](https://github.com/ulixee/shared/commit/02fcddbf508c7392143c536707721a611c8b0205))
+* **commons:** watch not available on linux ([cbd982b](https://github.com/ulixee/shared/commit/cbd982bec27c6f9b9c794ff99d01ee50c553ff59))
+* **net:** default to ws transport over actual wire ([cbc0adc](https://github.com/ulixee/shared/commit/cbc0adcf0c899bfdc4d24ca5beccae7daf24869e))
+* **schema:** serialization fixes for schema object ([24ce6cc](https://github.com/ulixee/shared/commit/24ce6cc5605aaff5b1b306755f34e431c8f70cf3))
+
+
+### Features
+
+* added Datastore.fetchInternalTable + tweaked Datastore.stream ([5525bb4](https://github.com/ulixee/shared/commit/5525bb4cf0021ac933cfe4fb8e23b631e6aa0f8d))
+* **commons:** host file monitoring ([01d1e53](https://github.com/ulixee/shared/commit/01d1e53b5087b2b80f96a0bfc504323172adbb81))
+* **commons:** read embedded sourcemap content ([a20db0c](https://github.com/ulixee/shared/commit/a20db0c3c400939ef403a4c7c779f4a49811c92f))
+* **net:** emit request, response and event ([9ed0201](https://github.com/ulixee/shared/commit/9ed02013579ee3bc206182cfce85def3c0271034))
+* **specification:** add dns domains to datastores ([c36e3d7](https://github.com/ulixee/shared/commit/c36e3d7bbc40aef1f9323178556d59a7d8b203e5))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/shared/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 
