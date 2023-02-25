@@ -17,9 +17,11 @@
 import IDevtoolsSession, {
   Protocol,
 } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
-import * as fs from 'fs';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
+import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
+import * as Fs from 'fs';
+import * as Path from 'path';
 import BindingCalledEvent = Protocol.Runtime.BindingCalledEvent;
 
 const devtoolsPreferencesCallback = '_DevtoolsPreferencesCallback';
@@ -30,8 +32,12 @@ export default class DevtoolsPreferences {
 
   constructor(browserEngine: IBrowserEngine) {
     bindFunctions(this);
-    const browserDir = browserEngine.executablePath.split(browserEngine.fullVersion).shift();
-    this.preferencesPath = `${browserDir}/devtoolsPreferences.json`;
+    let browserDir = browserEngine.executablePath.split(browserEngine.fullVersion).shift();
+    if (Fs.lstatSync(browserDir).isFile()) {
+      browserDir = Path.dirname(browserDir);
+    }
+
+    this.preferencesPath = Path.join(browserDir, `devtoolsPreferences.json`);
   }
 
   public installOnConnect(session: IDevtoolsSession): Promise<void> {
@@ -82,7 +88,7 @@ export default class DevtoolsPreferences {
 
     const { id, method, params } = JSON.parse(event.payload);
 
-    this.load();
+    await this.load();
 
     let result;
     if (method === 'getPreferences') {
@@ -95,7 +101,7 @@ export default class DevtoolsPreferences {
       } else if (method === 'clearPreferences') {
         this.cachedPreferences = {};
       }
-      this.save();
+      await this.save();
     }
 
     await session
@@ -107,15 +113,18 @@ export default class DevtoolsPreferences {
       .catch(() => null);
   }
 
-  private save(): void {
-    fs.writeFileSync(this.preferencesPath, JSON.stringify(this.cachedPreferences, null, 2), 'utf8');
+  private async save(): Promise<void> {
+    await Fs.promises.writeFile(
+      this.preferencesPath,
+      JSON.stringify(this.cachedPreferences, null, 2),
+      'utf8',
+    );
   }
 
-  private load(): any {
+  private async load(): Promise<void> {
     if (this.cachedPreferences === undefined) {
       try {
-        const json = fs.readFileSync(this.preferencesPath, 'utf8');
-        this.cachedPreferences = JSON.parse(json);
+        this.cachedPreferences = await readFileAsJson(this.preferencesPath);
       } catch (e) {
         this.cachedPreferences = {};
       }
