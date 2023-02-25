@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/ulixee/platform/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
+
+
+### Bug Fixes
+
+* **client:** waitForState not capturing err stack ([338f0aa](https://github.com/ulixee/platform/commit/338f0aaaecd6c38568fac366e3873dc25ccec45e))
+* **core:** cleanup memory variables leaking ([e3ae146](https://github.com/ulixee/platform/commit/e3ae146c0e38aa125bd9df6b1f9be564eae5aebe))
+* **timetravel:** simplify ticks to share state ([5b0a141](https://github.com/ulixee/platform/commit/5b0a141e2aead993345dbf3f7aa0982cdeae17f5))
+
+
+### Features
+
+* **core:** allow loading session db from path ([b8fcb28](https://github.com/ulixee/platform/commit/b8fcb28e2f529f6fb06c6eafcb5a445e8dcf22e9))
+* **core:** refactor to accomodate ulixee/desktop ([be9ed0e](https://github.com/ulixee/platform/commit/be9ed0eb2ee905ea4683d814b9a5a694b94a3705))
+
+
+
+
+
 # [2.0.0-alpha.18](https://github.com/ulixee/platform/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
