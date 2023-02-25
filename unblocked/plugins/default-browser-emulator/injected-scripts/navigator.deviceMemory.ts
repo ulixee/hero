@@ -8,7 +8,7 @@ if (
 }
 
 if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
-  if (navigator.storage && args.storageTib) {
+  if ('storage' in navigator && navigator.storage && args.storageTib) {
     proxyFunction(
       navigator.storage,
       'estimate',
@@ -19,6 +19,13 @@ if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
       },
       true,
     );
+  }
+
+  if (
+    'webkitTemporaryStorage' in navigator &&
+    'queryUsageAndQuota' in (navigator as any).webkitTemporaryStorage &&
+    args.storageTib
+  ) {
     proxyFunction(
       (navigator as any).webkitTemporaryStorage,
       'queryUsageAndQuota',

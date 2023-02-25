@@ -116,7 +116,7 @@ test('it should not be able to detect incognito', async () => {
     getOverrideScript('navigator.deviceMemory', {
       memory: 4,
       storageTib: 0.5,
-      maxHeapSize: 2172649472
+      maxHeapSize: 2172649472,
     }).script,
     false,
   );
@@ -155,7 +155,7 @@ test('it should handle overflows in plugins', async () => {
   }
   const pluginsData = parseNavigatorPlugins(navigatorConfig);
   if (debug) console.log(pluginsData);
-  await page.addNewDocumentScript(getOverrideScript('navigator', pluginsData).script, false);
+  await page.addNewDocumentScript(getOverrideScript('navigator.plugins', pluginsData).script, false);
   await page.goto(httpServer.baseUrl);
   await page.waitForLoad(LoadStatus.DomContentLoaded);
 
