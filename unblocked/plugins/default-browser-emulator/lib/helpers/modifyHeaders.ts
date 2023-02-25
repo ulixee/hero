@@ -33,6 +33,11 @@ export default function modifyHeaders(
         // must align to user platform! (eg, "Windows")
         newHeaders[header] = `"${userAgentData.platform}"`;
       }
+      if (lower === 'sec-ch-ua') {
+        newHeaders[header] = `"${userAgentData.brands
+          .map(x => `"${x.brand}";v="${x.version}"`)
+          .join(',')}"`;
+      }
     }
     if (!hasKeepAlive && !resource.isServerHttp2) {
       newHeaders.Connection = 'keep-alive';
@@ -64,6 +69,8 @@ export default function modifyHeaders(
     } else if (lowerName === 'sec-ch-ua-platform') {
       // must align to user platform! (eg, "Windows")
       value = `"${userAgentData.platform}"`;
+    } else if (lowerName === 'sec-ch-ua') {
+      value = pickRandom(defaults) ?? value;
     } else if (value && lowerName.startsWith('sec-')) {
       // keep given value
     } else if (value && lowerName === 'accept' && isXhr) {
