@@ -92,7 +92,7 @@ export default class ConnectionToCore<
         if (this.didAutoConnect) {
           this.connectPromise.resolve(err);
         } else {
-          this.connectPromise.reject(err);
+          this.connectPromise.reject(err, true);
         }
       }
     }

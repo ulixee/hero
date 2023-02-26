@@ -27,7 +27,7 @@ export default class WsTransportToCore<
   public isConnected = false;
   public isDisconnecting = false;
 
-  private connectPromise: IResolvablePromise<Error | null>;
+  private connectPromise: IResolvablePromise<void>;
   private webSocket: WebSocket;
   private events = new EventSubscriber();
   private readonly hostPromise: Promise<void>;
@@ -104,8 +104,7 @@ export default class WsTransportToCore<
       this.webSocket = webSocket;
       this.events.on(webSocket, 'message', this.onMessage);
     }
-    const connectOrError = await this.connectPromise;
-    if (connectOrError) throw connectOrError;
+    await this.connectPromise;
     this.isConnected = true;
     this.emit('connected');
   }
@@ -116,8 +115,9 @@ export default class WsTransportToCore<
   }
 
   private onConnectError(error: Error): void {
-    if (error instanceof Error) this.connectPromise.resolve(error);
-    else this.connectPromise.resolve(new Error(`Error connecting to Websocket host -> ${error}`));
+    if (error instanceof Error) this.connectPromise.reject(error);
+    else
+      this.connectPromise.reject(new Error(`Error connecting to Websocket host -> ${error}`), true);
   }
 
   private setHost(host: string): void {
