@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
@@ -66,14 +68,20 @@ export default class InjectedScripts {
   public static PageEventsCallbackName = pageEventsCallbackName;
   public static ShadowDomPiercerScript = pageScripts.shadowDomPiercer;
 
-  public static install(page: IPage, showInteractions = false): Promise<any> {
+  public static install(
+    page: IPage,
+    showInteractions = false,
+    devtoolsSession?: IDevtoolsSession,
+  ): Promise<any> {
     if (page[installedSymbol]) return;
     page[installedSymbol] = true;
 
     return Promise.all([
-      page.addPageCallback(pageEventsCallbackName, null, true),
-      page.addNewDocumentScript(injectedScript, true),
-      showInteractions ? page.addNewDocumentScript(showInteractionScript, true) : null,
+      page.addPageCallback(pageEventsCallbackName, null, true, devtoolsSession),
+      page.addNewDocumentScript(injectedScript, true, devtoolsSession),
+      showInteractions
+        ? page.addNewDocumentScript(showInteractionScript, true, devtoolsSession)
+        : null,
     ]);
   }
 

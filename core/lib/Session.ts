@@ -262,8 +262,15 @@ export default class Session
       await UserProfile.installCookies(this);
     }
 
-    this.browserContext.defaultPageInitializationFn = page =>
-      InjectedScripts.install(page, this.options.showChromeInteractions);
+    agent.plugins.hook({
+      onNewPage: page => InjectedScripts.install(page, this.options.showChromeInteractions),
+      onNewFrameProcess: frame =>
+        InjectedScripts.install(
+          frame.page,
+          this.options.showChromeInteractions,
+          frame.devtoolsSession,
+        ),
+    });
 
     const requestSession = agent.mitmRequestSession;
     requestSession.bypassResourceRegistrationForHost = this.bypassResourceRegistrationForHost;
