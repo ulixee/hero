@@ -4,6 +4,7 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IncomingMessage } from 'http';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
 import { sendWsCloseUnexpectedError, wsSend } from './WsUtils';
 import IApiHandlers from '../interfaces/IApiHandlers';
@@ -16,7 +17,7 @@ export default class WsTransportToClient<IClientApiSpec extends IApiHandlers, IE
   private events = new EventSubscriber();
   constructor(private webSocket: WebSocket, private request: IncomingMessage) {
     super();
-    this.onMessage = this.onMessage.bind(this);
+    bindFunctions(this);
     this.events.on(webSocket, 'message', this.onMessage);
     this.events.on(webSocket, 'close', this.onClose);
     this.events.on(webSocket, 'error', this.onError);
@@ -37,10 +38,12 @@ export default class WsTransportToClient<IClientApiSpec extends IApiHandlers, IE
 
   private onClose(): void {
     this.emit('disconnected', null);
+    this.events.close();
   }
 
   private onError(error: Error): void {
     this.emit('disconnected', error);
+    this.events.close();
   }
 
   private onMessage(message: WebSocket.Data): void {

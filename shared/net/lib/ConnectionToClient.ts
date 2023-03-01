@@ -36,11 +36,14 @@ export default class ConnectionToClient<
     if (this.disconnectPromise) return this.disconnectPromise;
 
     this.disconnectPromise = new Promise<void>(async resolve => {
-      await this.transport.disconnect?.();
-      this.events.close();
-      this.transport.emit('disconnected');
-      this.emit('disconnected', error);
-      resolve();
+      try {
+        this.events.close();
+        await this.transport.disconnect?.();
+      } finally {
+        this.transport.emit('disconnected');
+        this.emit('disconnected', error);
+        resolve();
+      }
     });
     return this.disconnectPromise;
   }
