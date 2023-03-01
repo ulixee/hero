@@ -10,7 +10,7 @@ const { version } = require('../package.json');
 const { log } = Log(module);
 
 export default class ConnectionFactory {
-  public static hasLocalMinerPackage = false;
+  public static hasLocalCloudPackage = false;
 
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToHeroCore,
@@ -28,10 +28,10 @@ export default class ConnectionFactory {
     } else {
       const host = UlixeeHostsConfig.global.getVersionHost(version);
 
-      if (!host && ConnectionFactory.hasLocalMinerPackage) {
-        // If Miners are launched, but none compatible, propose installing Miner locally
+      if (!host && ConnectionFactory.hasLocalCloudPackage) {
+        // If Clouds are launched, but none compatible, propose installing @ulixee/cloud locally
         throw new Error(
-          `Your Ulixee Miner is not started. From your project, run:\n\nnpx @ulixee/miner start`,
+          `A local Ulixee Cloud is not started. From your project, run:\n\nnpx @ulixee/cloud start`,
         );
       }
 
@@ -39,12 +39,12 @@ export default class ConnectionFactory {
         const transport = new WsTransportToCore(ConnectionToHeroCore.resolveHost(host));
         connection = new ConnectionToHeroCore(transport, { ...options, version });
       } else if (UlixeeHostsConfig.global.hasHosts()) {
-        // If Miners are launched, but none compatible, propose installing miner locally
-        throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a Ulixee Miner in your project:
+        // If Clouds are launched, but none compatible, propose installing @ulixee/cloud locally
+        throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a local Ulixee Cloud in your project:
 
-npm install --save-dev @ulixee/miner @ulixee/desktop-core
+npm install --save-dev @ulixee/cloud @ulixee/desktop-core
 
-npx @ulixee/miner start
+npx @ulixee/cloud start
         `);
       }
     }
@@ -74,8 +74,8 @@ npx @ulixee/miner start
   }
 }
 try {
-  require.resolve('@ulixee/miner');
-  ConnectionFactory.hasLocalMinerPackage = true;
+  require.resolve('@ulixee/cloud');
+  ConnectionFactory.hasLocalCloudPackage = true;
 } catch (error) {
   /* no-op */
 }

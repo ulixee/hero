@@ -1,7 +1,7 @@
 import Hero from '@ulixee/hero';
 import { ClientPlugin } from '@ulixee/hero-plugin-utils';
 
-// NOTE: You need to start a Ulixee Miner to run this example
+// NOTE: You need to start a Ulixee Cloud to run this example
 
 declare module '@ulixee/hero/lib/extendables' {
   interface Hero {

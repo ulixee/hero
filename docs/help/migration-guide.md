@@ -5,7 +5,7 @@ If you're migrating a script from SecretAgent, you can expect to find:
 - a more developer-friendly set of APIs (like our [AwaitedDOM Extenders](../basic-client/awaited-dom-extensions.md))
 - a much better experience running in "headed" mode during development, while still supporting headless for production.
 - features that let you react to the changing state/flow of a web page ([FlowHandlers](../basic-client/flow-handling.md))
-- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/miner; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/ulixee/unblocked) project.
+- a much slimmer version of SecretAgent. Non-core functions have been exported: Remote is moved out to @ulixee/cloud; Replay is in a new tool called ChromeAlive!; the internal "Puppet" engine is now in the [Unblocked](https://github.com/ulixee/unblocked) project.
 
 Otherwise, Hero is an evolution of SecretAgent (and started from a git fork). You'll mostly just need to copy/replace of `const { Agent } = require('secret-agent')` with `const Hero = require('@ulixee/hero-playground')`.
 
@@ -51,13 +51,13 @@ If you were using the default "Agent" from `const agent = require('secret-agent'
 
 ## Server Setup
 
-If you use a Client/Server Setup, you'll find that we moved the `Server` module out of SecretAgent, and into [@ulixee/miner][miner]. You get the same functionality out of the box - a Server you can install on a machine and your DOM, interactions and other commands all serialize seamlessly.
+If you use a Client/Server Setup, you'll find that we moved the `Server` module out of SecretAgent, and into [@ulixee/cloud][cloud]. You get the same functionality out of the box - a Server you can install on a machine and your DOM, interactions and other commands all serialize seamlessly.
 
 To avoid installing the whole Chrome infrastructure on your client side, you can use the light client - `npm i @ulixee/hero`. It's the equivalent of `@secret-agent/client`.
 
 ## Handlers
 
-Hero doesn't have a Handler or Server directly in the project. [@ulixee/miner][miner] is the new approach for setting up a remote server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Datastores][datastore], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
+Hero doesn't have a Handler or Server directly in the project. [@ulixee/cloud][cloud] is the new approach for setting up a remote server, and we've decided to go a new direction for our preferred deployment strategy. The new strategy is called [Datastores][datastore], and greatly improves efficiency and has a much simpler remote deployment (well, it will soon :).
 
 Datastores focus on creating a remotely callable "function" that wraps a Hero script in a composable "unit". You can vary inputs and collect outputs, or retry a script from a new IP address without having to think much about how to do that yourself.
 
@@ -80,6 +80,6 @@ If you wrote a Core Plugin, you'll notice that the API callbacks have changed sl
 If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new Ulixee Desktop tooling. You can download the [Ulixee.app](https://github.com/ulixee/platform/releases/latest.md) install.
 
 
-[miner]: https://ulixee.org/docs/miner
+[cloud]: https://ulixee.org/docs/cloud
 [unblocked-plugin]: https://github.com/ulixee/unblocked/tree/main/specification
 [unblocked-agent]: https://github.com/ulixee/unblocked/tree/main/agent

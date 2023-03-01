@@ -6,6 +6,6 @@ However, this division of process allows for some interesting advanced configura
 
 ## Setting Up a Server Process for Core
 
-The `@ulixee/hero-core` package contains all the logic for running Core, but it has no network connectivity. The easiest solution is to use the `@ulixee/miner` package. See details of the Ulixee Miner [here](https://ulixee.org/docs/miner).
+The `@ulixee/hero-core` package contains all the logic for running Core, but it has no network connectivity. The easiest solution is to use the `@ulixee/cloud` package. See details of the Ulixee Cloud [here](https://ulixee.org/docs/cloud).
 
 Various other strategies are listed [here](./deployment.md).

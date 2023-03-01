@@ -286,7 +286,7 @@ export default class ConnectionToHeroClient
 
   private serializeError(error: Error): object {
     if (this.isLaunchError(error)) {
-      const message = `Ulixee Miner failed to launch Chrome - ${error.message}. See Miner console logs for details.`;
+      const message = `Ulixee Cloud failed to launch Chrome - ${error.message}. See Cloud console logs for details.`;
       error.stack = error.stack.replace(error.message, message);
       error.message = message;
     }

@@ -1,4 +1,4 @@
-// NOTE: You need to start a Ulixee Miner to run this example
+// NOTE: You need to start a Ulixee Cloud to run this example
 
 import Queue from 'p-queue';
 import Hero from '@ulixee/hero';

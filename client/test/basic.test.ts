@@ -81,7 +81,7 @@ describe('Connection tests', () => {
   jest.spyOn<any, any>(UlixeeHostsConfig.global, 'save').mockImplementation(() => null);
   UlixeeHostsConfig.global.setVersionHost('1', 'localhost:8080');
 
-  it('connects to a started Miner if the version is compatible', async () => {
+  it('connects to a started Cloud if the version is compatible', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, 'localhost:8081');
@@ -90,21 +90,21 @@ describe('Connection tests', () => {
     expect(connectionToCore.transport.host).toContain('ws://localhost:8081');
   });
 
-  it('should inform a user if a Miner needs to be started', async () => {
+  it('should inform a user if a Cloud needs to be started', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalMinerPackage = true;
+    ConnectionFactory.hasLocalCloudPackage = true;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
-      'Ulixee Miner is not started',
+      'Ulixee Cloud is not started',
     );
   });
 
-  it('should inform a user if a Miner needs to be installed', async () => {
+  it('should inform a user if a Cloud needs to be installed', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalMinerPackage = false;
+    ConnectionFactory.hasLocalCloudPackage = false;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
       'compatible Hero Core was not found',
     );
