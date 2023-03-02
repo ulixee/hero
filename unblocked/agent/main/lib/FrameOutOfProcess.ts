@@ -4,6 +4,7 @@ import NetworkManager from './NetworkManager';
 import DevtoolsSession from './DevtoolsSession';
 import DomStorageTracker from './DomStorageTracker';
 import BrowserContext from './BrowserContext';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 export default class FrameOutOfProcess {
   public page: Page;
@@ -52,7 +53,10 @@ export default class FrameOutOfProcess {
     ]);
 
     for (const error of results) {
-      if (error && error instanceof Error) throw error;
+      if (error && error instanceof Error) {
+        if (error instanceof CanceledPromiseError) continue;
+        throw error;
+      }
     }
   }
 }

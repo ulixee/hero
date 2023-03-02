@@ -198,6 +198,7 @@ describe('Frames Out of Process', () => {
         return frame.isOopif();
       }).length,
     ).toBe(2);
+    await frame2.waitForLoad({ loadStatus: 'DomContentLoaded' });
     expect(await frame2.evaluate(`document.querySelectorAll('button').length`)).toStrictEqual(1);
   });
 
