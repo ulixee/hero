@@ -43,12 +43,14 @@ export interface IPage extends ITypedEventEmitter<IPageEvents> {
   addNewDocumentScript(
     script: string,
     isolateFromWebPageEnvironment: boolean,
+    devtoolsSession?: IDevtoolsSession,
   ): Promise<{ identifier: string }>;
-  removeDocumentScript(identifier: string): Promise<void>;
+  removeDocumentScript(identifier: string, devtoolsSession?: IDevtoolsSession): Promise<void>;
   addPageCallback(
     name: string,
     onCallback?: (payload: string, frame: IFrame) => any,
     isolateFromWebPageEnvironment?: boolean,
+    devtoolsSession?: IDevtoolsSession,
   ): Promise<IRegisteredEventListener>;
 }
 

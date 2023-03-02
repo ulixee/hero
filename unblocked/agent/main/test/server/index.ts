@@ -34,6 +34,7 @@ export class TestServer {
   public get emptyPage() {
     return this.url('empty.html');
   }
+  public port: number;
 
   private readonly server: http.Server | https.Server;
   private readonly dirPath = Path.resolve(__dirname, '../assets');
@@ -46,7 +47,6 @@ export class TestServer {
   private gzipRoutes = new Set<string>();
   private requestSubscribers = new Map<string, Promise<IncomingMessage>>();
   private readonly protocol: string = 'http:';
-  private port: number;
 
   constructor(sslOptions?: https.ServerOptions) {
     if (sslOptions) {

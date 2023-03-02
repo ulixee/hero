@@ -213,6 +213,19 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     ]);
   }
 
+  public onNewFrameProcess(frame: IFrame): Promise<any> {
+    // Don't await here! we want to queue all these up to run before the debugger resumes
+    const devtools = frame.devtoolsSession;
+    const emulationProfile = this.emulationProfile;
+    return Promise.all([
+      setUserAgent(emulationProfile, devtools, this.userAgentData),
+      setTimezone(emulationProfile, devtools),
+      setLocale(emulationProfile, devtools),
+      setPageDomOverrides(this.domOverridesBuilder, this.data, frame.page, frame.devtoolsSession),
+      setGeolocation(emulationProfile, frame),
+    ]);
+  }
+
   public onNewWorker(worker: IWorker): Promise<any> {
     const devtools = worker.devtoolsSession;
     return Promise.all([

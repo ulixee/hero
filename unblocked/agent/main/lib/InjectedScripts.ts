@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
 import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 import FramesManager from './FramesManager';
+import DevtoolsSession from './DevtoolsSession';
 
 const pageScripts = {
   NodeTracker: fs.readFileSync(`${__dirname}/../injected-scripts/NodeTracker.js`, 'utf8'),
@@ -33,6 +34,7 @@ export default class InjectedScripts {
 
   public static install(
     framesManager: FramesManager,
+    devtoolsSession: DevtoolsSession,
     onPaintEvent: (
       frameId: number,
       event: { url: string; event: IDomPaintEvent; timestamp: number },
@@ -43,10 +45,12 @@ export default class InjectedScripts {
         pageEventsCallbackName,
         (payload, frame) => onPaintEvent(frame.frameId, JSON.parse(payload)),
         framesManager.page.installJsPathIntoIsolatedContext,
+        devtoolsSession,
       ),
       framesManager.addNewDocumentScript(
         injectedScript,
         framesManager.page.installJsPathIntoIsolatedContext,
+        devtoolsSession,
       ),
     ]);
   }

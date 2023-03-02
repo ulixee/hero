@@ -1,17 +1,22 @@
 import type ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
+import type IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import IPoint from './IPoint';
+import { IJsPath } from '@ulixee/js-path';
 import { NavigationReason } from './NavigationReason';
 import IJsPathFunctions from './IJsPathFunctions';
 import { IFrameNavigations } from './IFrameNavigations';
 import { ILoadStatus } from './Location';
 import INavigation from './INavigation';
-import { IInteractionGroups } from '../interact/IInteractions';
+import { IElementInteractVerification, IInteractionGroups } from '../interact/IInteractions';
 import { IPage } from './IPage';
+import IDevtoolsSession from './IDevtoolsSession';
 
 export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
   frameId: number; // assigned id unique to the browser context
 
   id: string;
+  childFrames: IFrame[];
+  devtoolsSession: IDevtoolsSession;
   page?: IPage;
   parentId?: string;
   name?: string;
@@ -26,8 +31,13 @@ export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
 
   navigations: IFrameNavigations;
 
+  isOopif(): boolean;
   close(): void;
   interact(...interactionGroups: IInteractionGroups): Promise<void>;
+  click(
+    jsPathOrSelector: IJsPath | string,
+    verification?: IElementInteractVerification,
+  ): Promise<void>;
   waitForLifecycleEvent(
     event: keyof ILifecycleEvents,
     loaderId?: string,
@@ -81,6 +91,7 @@ export interface INavigationLoader {
 
 export interface IFrameManagerEvents {
   'frame-created': { frame: IFrame; loaderId: string };
+  'frame-navigated': { frame: IFrame; navigatedInDocument?: boolean; loaderId: string };
 }
 
 export interface IFrameEvents {

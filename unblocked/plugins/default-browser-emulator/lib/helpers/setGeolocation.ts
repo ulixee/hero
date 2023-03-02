@@ -1,10 +1,11 @@
 import { assert } from '@ulixee/commons/lib/utils';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 
 export default function setActiveAndFocused(
   emulationProfile: IEmulationProfile,
-  page: IPage,
+  pageOrFrame: IPage | IFrame,
 ): Promise<any> {
   const location = emulationProfile.geolocation;
   if (!location) return;
@@ -15,13 +16,15 @@ export default function setActiveAndFocused(
   if (!location.accuracy) location.accuracy = 50 - Math.floor(Math.random() * 10);
   assert(location.accuracy >= 0, 'Accuracy must be a number greater than or equal to 0');
 
+  const browserContext =
+    'browserContext' in pageOrFrame ? pageOrFrame.browserContext : pageOrFrame.page.browserContext;
   return Promise.all([
-    page.devtoolsSession.send('Emulation.setGeolocationOverride', {
+    pageOrFrame.devtoolsSession.send('Emulation.setGeolocationOverride', {
       ...location,
     }),
-    page.browserContext.browser.devtoolsSession.send('Browser.grantPermissions', {
+    browserContext.browser.devtoolsSession.send('Browser.grantPermissions', {
       permissions: ['geolocation'],
-      browserContextId: page.browserContext.id,
+      browserContextId: browserContext.id,
     }),
   ]);
 }

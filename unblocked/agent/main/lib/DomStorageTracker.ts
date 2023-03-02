@@ -57,11 +57,12 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
     networkManager: NetworkManager,
     logger: IBoundLog,
     isEnabled: boolean,
+    session?: DevtoolsSession
   ) {
     super();
     this.isEnabled = isEnabled;
     this.page = page;
-    const session = page.devtoolsSession;
+    session ??= page.devtoolsSession
     this.devtoolsSession = session;
     this.networkManager = networkManager;
     this.storageByOrigin = storageByOrigin ?? {};

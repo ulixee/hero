@@ -124,6 +124,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
             })
             .catch(err => err)
         : Promise.resolve(),
+      // this.devtools.send('Security.setIgnoreCertificateErrors', { ignore: true }),
     ]);
     for (const error of errors) {
       if (error && error instanceof Error) throw error;
@@ -168,7 +169,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
   public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
-    this.mockNetworkRequests = parentManager.mockNetworkRequests
+    this.mockNetworkRequests = parentManager.mockNetworkRequests;
     return this.initialize();
   }
 

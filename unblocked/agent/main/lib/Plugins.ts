@@ -52,6 +52,7 @@ export default class Plugins implements IUnblockedPlugins {
     onNewBrowserContext: [],
     onDevtoolsPanelAttached: [],
     onNewPage: [],
+    onNewFrameProcess: [],
     onNewWorker: [],
     onDevtoolsPanelDetached: [],
     onDnsConfiguration: [],
@@ -168,6 +169,10 @@ export default class Plugins implements IUnblockedPlugins {
 
   public async onNewPage(page: IPage): Promise<void> {
     await Promise.all(this.hooksByName.onNewPage.map(fn => fn(page)));
+  }
+
+  public async onNewFrameProcess(frame: IFrame): Promise<any> {
+    await Promise.all(this.hooksByName.onNewFrameProcess.map(fn => fn(frame)));
   }
 
   public async onNewWorker(worker: IWorker): Promise<void> {

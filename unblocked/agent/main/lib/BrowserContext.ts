@@ -10,7 +10,6 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import {
   IBrowserContextHooks,
   IInteractHooks,
@@ -28,6 +27,7 @@ import Resources from './Resources';
 import WebsocketMessages from './WebsocketMessages';
 import { DefaultCommandMarker } from './DefaultCommandMarker';
 import DevtoolsSessionLogger from './DevtoolsSessionLogger';
+import FrameOutOfProcess from './FrameOutOfProcess';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
 import CreateBrowserContextRequest = Protocol.Target.CreateBrowserContextRequest;
@@ -54,6 +54,7 @@ export default class BrowserContext
   public workersById = new Map<string, Worker>();
   public pagesById = new Map<string, Page>();
   public pagesByTabId = new Map<number, Page>();
+  public targetsById = new Map<string, TargetInfo>();
   public devtoolsSessionsById = new Map<string, DevtoolsSession>();
   public devtoolsSessionLogger: DevtoolsSessionLogger;
   public proxy: IProxyConnectionOptions;
@@ -126,8 +127,6 @@ export default class BrowserContext
     });
   }
 
-  public defaultPageInitializationFn: (page: IPage) => Promise<any> = () => Promise.resolve();
-
   async newPage(options?: IPageCreateOptions): Promise<Page> {
     const createTargetPromise = new Resolvable<void>();
     this.creatingTargetPromises.push(createTargetPromise.promise);
@@ -178,11 +177,29 @@ export default class BrowserContext
   initializePage(page: Page): Promise<any> {
     if (page.runPageScripts === false) return Promise.resolve();
 
-    return Promise.all([this.defaultPageInitializationFn(page), this.hooks.onNewPage?.(page)]);
+    return this.hooks.onNewPage?.(page) ?? Promise.resolve();
+  }
+
+  initializeOutOfProcessIframe(frame: FrameOutOfProcess): Promise<any> {
+    if (frame.page.runPageScripts === false) return Promise.resolve();
+
+    return this.hooks.onNewFrameProcess?.(frame.frame) ?? Promise.resolve();
+  }
+
+  onIframeAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo, pageId: string): void {
+    const page = this.pagesById.get(pageId);
+    if (!page) return;
+
+    this.devtoolsSessionLogger.subscribeToDevtoolsMessages(devtoolsSession, {
+      sessionType: 'iframe',
+      pageTargetId: pageId,
+      iframeTargetId: targetInfo.targetId,
+    });
   }
 
   async onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): Promise<Page> {
     this.attachedTargetIds.add(targetInfo.targetId);
+    this.targetsById.set(targetInfo.targetId, targetInfo);
     await Promise.all(this.creatingTargetPromises);
     if (this.pagesById.has(targetInfo.targetId)) return;
 
@@ -219,6 +236,7 @@ export default class BrowserContext
 
   onTargetDetached(targetId: string): void {
     this.attachedTargetIds.delete(targetId);
+    this.targetsById.delete(targetId);
     const page = this.pagesById.get(targetId);
     if (page) {
       this.pagesById.delete(targetId);
@@ -237,6 +255,7 @@ export default class BrowserContext
   }
 
   onDevtoolsPanelAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): void {
+    this.targetsById.set(targetInfo.targetId, targetInfo);
     this.devtoolsSessionsById.set(targetInfo.targetId, devtoolsSession);
     this.hooks.onDevtoolsPanelAttached?.(devtoolsSession, targetInfo).catch(() => null);
   }
@@ -434,7 +453,6 @@ export default class BrowserContext
     this.pagesById.clear();
     this.pagesByTabId.clear();
     this.devtoolsSessionsById.clear();
-    this.defaultPageInitializationFn = null;
     this.waitForPageAttachedById = null;
     this.creatingTargetPromises.length = null;
     this.commandMarker = null;

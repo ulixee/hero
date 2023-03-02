@@ -18,9 +18,9 @@ import env from '../env';
 import DevtoolsPreferences from './DevtoolsPreferences';
 import Page, { IPageCreateOptions } from './Page';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
+import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
 import GetVersionResponse = Protocol.Browser.GetVersionResponse;
 import TargetInfo = Protocol.Target.TargetInfo;
-import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
 
 const { log } = Log(module);
 
@@ -293,6 +293,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.devtoolsSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
     this.devtoolsSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
     this.devtoolsSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
+    this.devtoolsSession.on('Target.targetInfoChanged', this.onTargetInfoChanged.bind(this));
     this.devtoolsSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
     this.devtoolsSession.on('Target.targetCrashed', this.onTargetCrashed.bind(this));
   }
@@ -358,6 +359,10 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
     assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
 
+    this.browserContextsById
+      .get(targetInfo.browserContextId)
+      ?.targetsById.set(targetInfo.targetId, targetInfo);
+
     const isDevtoolsPanel = targetInfo.url.startsWith('devtools://devtools');
     if (
       event.targetInfo.type === 'page' &&
@@ -400,6 +405,8 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       const context = new BrowserContext(this, false);
       context.hooks = this.browserContextCreationHooks ?? {};
       context.id = targetInfo.browserContextId;
+      context.targetsById.set(targetInfo.targetId, targetInfo);
+
       if (this.connectOnlyToPageTargets) {
         context.addPageInitializationOptions(this.connectOnlyToPageTargets);
       }
@@ -409,7 +416,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     if (targetInfo.type === 'page' && !isDevtoolsPanel) {
       const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.getBrowserContext(targetInfo.browserContextId);
-      context?.onPageAttached(devtoolsSession, targetInfo).catch(() => null);
+      context?.onPageAttached(devtoolsSession, targetInfo).catch(console.error);
       return;
     }
 
@@ -456,11 +463,21 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     }
   }
 
+  private onTargetInfoChanged(event: Protocol.Target.TargetInfoChangedEvent): void {
+    const { targetInfo } = event;
+    this.browserContextsById
+      .get(targetInfo.browserContextId)
+      ?.targetsById.set(targetInfo.targetId, targetInfo);
+  }
+
   private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent): Promise<void> {
     const { targetInfo } = event;
     if (this.debugLog) {
       log.stats('onTargetCreated', { targetInfo, sessionId: null });
     }
+    this.browserContextsById
+      .get(targetInfo.browserContextId)
+      ?.targetsById.set(targetInfo.targetId, targetInfo);
 
     if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.getBrowserContext(targetInfo.browserContextId);

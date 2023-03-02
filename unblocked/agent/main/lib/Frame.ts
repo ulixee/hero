@@ -12,7 +12,10 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
 import IWindowOffset from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
-import { IInteractionGroups } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import {
+  IElementInteractVerification,
+  IInteractionGroups,
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IInteractHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
@@ -35,6 +38,8 @@ import Interactor from './Interactor';
 import FrameNavigations from './FrameNavigations';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
 import IWaitForOptions from '../interfaces/IWaitForOptions';
+import IJsPath from '@ulixee/js-path/interfaces/IJsPath';
+import FrameOutOfProcess from './FrameOutOfProcess';
 import PageFrame = Protocol.Page.Frame;
 
 const ContextNotFoundCode = -32000;
@@ -43,7 +48,7 @@ const InPageNavigationLoaderPrefix = 'inpage';
 export default class Frame extends TypedEventEmitter<IFrameEvents> implements IFrame {
   // TODO: switch this to "id" and migrate "id" to "devtoolsId"
   public readonly frameId: number;
-
+  public didSwapOutOfProcess: boolean = false;
   public get id(): string {
     return this.internalFrame.id;
   }
@@ -85,11 +90,20 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     return this.navigationLoadersById[this.activeLoaderId];
   }
 
+  public get childFrames(): Frame[] {
+    const list: Frame[] = [];
+    for (const value of this.#framesManager.activeFrames) {
+      if (value.parentId === this.id) list.push(value);
+    }
+    return list;
+  }
+
   public get page(): Page {
     return this.#framesManager.page;
   }
 
   public interactor: Interactor;
+
   public jsPath: JsPath;
   public activeLoaderId: string;
   public navigationLoadersById: { [loaderId: string]: NavigationLoader } = {};
@@ -97,20 +111,21 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public get hooks(): IInteractHooks {
     return this.page.browserContext.hooks;
   }
-
   public navigations: FrameNavigations;
+
   public navigationsObserver: FrameNavigationsObserver;
+  public devtoolsSession: DevtoolsSession;
+
+  private outOfProcess: FrameOutOfProcess;
 
   #framesManager: FramesManager;
 
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private frameElementDevtoolsNodeId?: Promise<string>;
   private readonly parentFrame: Frame | null;
-  private readonly devtoolsSession: DevtoolsSession;
-
   private defaultLoaderId: string;
   private startedLoaderId: string;
-
+  public readonly pendingNewDocumentScripts: { script: string; isolated: boolean }[] = [];
   private defaultContextId: number;
   private isolatedContextId: number;
   private readonly activeContextIds: Set<number>;
@@ -151,6 +166,25 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     this.onAttached(internalFrame);
   }
 
+  public async updateDevtoolsSession(devtoolsSession: DevtoolsSession): Promise<void> {
+    if (this.devtoolsSession === devtoolsSession) return;
+    this.devtoolsSession = devtoolsSession;
+    if (
+      devtoolsSession === this.#framesManager.devtoolsSession ||
+      devtoolsSession === this.parentFrame?.devtoolsSession
+    ) {
+      this.outOfProcess = null;
+      return;
+    }
+
+    this.outOfProcess = new FrameOutOfProcess(this.page, this);
+    await this.outOfProcess.initialize();
+  }
+
+  public isOopif(): boolean {
+    return !!this.outOfProcess;
+  }
+
   public close(error?: Error): void {
     this.isClosing = true;
     const cancelMessage = 'Cancel Pending Promise. Frame closed.';
@@ -171,7 +205,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (this.activeLoaderId !== this.defaultLoaderId) return;
     if (this.parentId) return;
 
-    const newDocumentScripts = this.#framesManager.pendingNewDocumentScripts;
+    const newDocumentScripts = [
+      ...this.#framesManager.pendingNewDocumentScripts,
+      ...this.pendingNewDocumentScripts,
+    ];
     if (newDocumentScripts.length) {
       const scripts = [...newDocumentScripts];
       this.#framesManager.pendingNewDocumentScripts.length = 0;
@@ -309,6 +346,15 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     return navigation;
   }
 
+  public click(
+    jsPathOrSelector: IJsPath | string,
+    verification?: IElementInteractVerification,
+  ): Promise<void> {
+    let jsPath = jsPathOrSelector;
+    if (typeof jsPath === 'string') jsPath = ['document', ['querySelector', jsPathOrSelector]];
+    return this.interact([{ command: 'click', mousePosition: jsPath, verification }]);
+  }
+
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
     const timeoutMs = 120e3;
     const interactionResolvable = new Resolvable<void>(timeoutMs);
@@ -363,7 +409,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (!this.parentId) return { x: 0, y: 0 };
     const parentOffset = await this.parentFrame.getContainerOffset();
     const frameElementNodeId = await this.getFrameElementDevtoolsNodeId();
-    const thisOffset = await this.evaluateOnNode<IPoint>(
+    const thisOffset = await this.parentFrame.evaluateOnNode<IPoint>(
       frameElementNodeId,
       `(() => {
       const rect = this.getBoundingClientRect();
@@ -456,7 +502,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       if (!this.parentFrame || this.frameElementDevtoolsNodeId)
         return this.frameElementDevtoolsNodeId;
 
-      this.frameElementDevtoolsNodeId = this.devtoolsSession
+      this.frameElementDevtoolsNodeId = this.parentFrame.devtoolsSession
         .send('DOM.getFrameOwner', { frameId: this.id }, this)
         .then(owner => this.parentFrame.resolveDevtoolsNodeId(owner.backendNodeId, true));
 
@@ -658,12 +704,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   }
 
   public removeContextId(executionContextId: number): void {
-    if (this.defaultContextId === executionContextId) this.defaultContextId = null;
+    if (this.defaultContextId === executionContextId) {
+      this.defaultContextId = null;
+      this.defaultContextCreated = null;
+    }
     if (this.isolatedContextId === executionContextId) this.isolatedContextId = null;
   }
 
   public clearContextIds(): void {
     this.defaultContextId = null;
+    this.defaultContextCreated = null;
     this.isolatedContextId = null;
   }
 

@@ -6,9 +6,11 @@ import IBrowserLaunchArgs from '../browser/IBrowserLaunchArgs';
 import IBrowserContext from '../browser/IBrowserContext';
 import Protocol from 'devtools-protocol';
 import TargetInfo = Protocol.Target.TargetInfo;
+import { IFrame } from '../browser/IFrame';
 
 export interface IBrowserContextHooks {
   onNewPage?(page: IPage): Promise<any>;
+  onNewFrameProcess?(frame: IFrame): Promise<any>;
   onNewWorker?(worker: IWorker): Promise<any>;
 
   onDevtoolsPanelAttached?(devtoolsSession: IDevtoolsSession, targetInfo?: TargetInfo): Promise<any>;

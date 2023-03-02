@@ -11,6 +11,7 @@ interface IMessageDetails {
   sessionType: IDevtoolsLogEvents['devtools-message']['sessionType'];
   workerTargetId?: string;
   pageTargetId?: string;
+  iframeTargetId?: string;
 }
 
 export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLogEvents> {
@@ -146,6 +147,10 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
         pageId = params.targetInfo.targetId;
         event.pageTargetId = pageId;
       }
+
+      if (!frameId && params.targetInfo && params.targetInfo?.type === 'iframe') {
+        frameId =  params.targetInfo.targetId;
+      }
     }
 
     if (event.direction === 'send') {
@@ -231,7 +236,7 @@ interface IDevtoolsLogEvents {
     workerTargetId?: string;
     frameId?: string;
     requestId?: string;
-    sessionType: 'page' | 'worker' | 'browser';
+    sessionType: 'page' | 'worker' | 'browser' | 'iframe';
     sessionId: string;
     method?: string;
     id?: number;

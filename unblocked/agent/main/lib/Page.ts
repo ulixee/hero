@@ -36,7 +36,7 @@ import { IJsPath } from '@ulixee/js-path';
 import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
 import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
-import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import { IFrame, IFrameEvents } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import DevtoolsSession from './DevtoolsSession';
 import NetworkManager from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -175,7 +175,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       'worker',
     ]);
 
-    this.framesManager.addEventEmitter(this, ['frame-created']);
+    this.framesManager.addEventEmitter(this, ['frame-created', 'frame-navigated']);
     this.domStorageTracker.addEventEmitter(this, ['dom-storage-updated']);
     this.networkManager.addEventEmitter(this, [
       'navigation-response',
@@ -189,24 +189,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
 
     const session = this.devtoolsSession;
     this.events.once(session, 'disconnected', this.emit.bind(this, 'close'));
-    this.events.on(session, 'Inspector.targetCrashed', this.onTargetCrashed.bind(this));
-    this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this));
-    this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
-    this.events.on(session, 'Target.attachedToTarget', this.onAttachedToTarget.bind(this));
-    this.events.on(
-      session,
-      'Page.javascriptDialogOpening',
-      this.onJavascriptDialogOpening.bind(this),
-    );
-    this.events.on(
-      session,
-      'Page.javascriptDialogClosed',
-      this.onJavascriptDialogClosed.bind(this),
-    );
-
-    this.events.on(session, 'Page.fileChooserOpened', this.onFileChooserOpened.bind(this));
-    this.events.on(session, 'Page.windowOpen', this.onWindowOpen.bind(this));
-    this.events.on(session, 'Page.screencastFrame', this.onScreencastFrame.bind(this));
+    this.bindSessionEvents(session);
 
     const resources = this.browserContext.resources;
     // websocket events
@@ -244,9 +227,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     jsPathOrSelector: IJsPath | string,
     verification?: IElementInteractVerification,
   ): Promise<void> {
-    let jsPath = jsPathOrSelector;
-    if (typeof jsPath === 'string') jsPath = ['document', ['querySelector', jsPathOrSelector]];
-    return this.mainFrame.interact([{ command: 'click', mousePosition: jsPath, verification }]);
+    return this.mainFrame.click(jsPathOrSelector, verification);
   }
 
   type(text: string): Promise<void> {
@@ -256,18 +237,23 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   addNewDocumentScript(
     script: string,
     isolatedEnvironment: boolean,
+    devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
-    return this.framesManager.addNewDocumentScript(script, isolatedEnvironment);
+    return this.framesManager.addNewDocumentScript(script, isolatedEnvironment, devtoolsSession);
   }
 
-  removeDocumentScript(identifier: string): Promise<void> {
-    return this.devtoolsSession.send('Page.removeScriptToEvaluateOnNewDocument', { identifier });
+  removeDocumentScript(identifier: string, devtoolsSession?: DevtoolsSession): Promise<void> {
+    return (devtoolsSession ?? this.devtoolsSession).send(
+      'Page.removeScriptToEvaluateOnNewDocument',
+      { identifier },
+    );
   }
 
   addPageCallback(
     name: string,
     onCallback?: (payload: string, frame: IFrame) => any,
     isolateFromWebPageEnvironment?: boolean,
+    devtoolsSession?: DevtoolsSession,
   ): Promise<IRegisteredEventListener> {
     return this.framesManager.addPageCallback(
       name,
@@ -281,6 +267,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
         });
       },
       isolateFromWebPageEnvironment,
+      devtoolsSession,
     );
   }
 
@@ -586,6 +573,33 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     }
   }
 
+  bindSessionEvents(session: DevtoolsSession): void {
+    const id = session.id;
+    this.events.once(session, 'disconnected', () => this.events.endGroup(id));
+
+    this.events.group(
+      id,
+      this.events.on(session, 'Inspector.targetCrashed', this.onTargetCrashed.bind(this)),
+      this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this)),
+      this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)),
+      this.events.on(session, 'Target.attachedToTarget', this.onAttachedToTarget.bind(this)),
+      this.events.on(
+        session,
+        'Page.javascriptDialogOpening',
+        this.onJavascriptDialogOpening.bind(this),
+      ),
+      this.events.on(
+        session,
+        'Page.javascriptDialogClosed',
+        this.onJavascriptDialogClosed.bind(this),
+      ),
+
+      this.events.on(session, 'Page.fileChooserOpened', this.onFileChooserOpened.bind(this)),
+      this.events.on(session, 'Page.windowOpen', this.onWindowOpen.bind(this)),
+      this.events.on(session, 'Page.screencastFrame', this.onScreencastFrame.bind(this)),
+    );
+  }
+
   private cleanup(): void {
     this.waitTimeouts.length = 0;
     this.workersById.clear();
@@ -610,7 +624,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   private async initialize(): Promise<void> {
     const promises = [
       this.networkManager.initialize().catch(err => err),
-      this.framesManager.initialize().catch(err => err),
+      this.framesManager.initialize(this.devtoolsSession).catch(err => err),
       this.domStorageTracker.initialize().catch(err => err),
       this.devtoolsSession
         .send('Target.setAutoAttach', {
@@ -661,6 +675,10 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     const { sessionId, targetInfo, waitingForDebugger } = event;
 
     const devtoolsSession = this.devtoolsSession.connection.getSession(sessionId);
+    if (targetInfo.type === 'iframe') {
+      this.browserContext.onIframeAttached(devtoolsSession, targetInfo, this.targetId);
+      return this.framesManager.onFrameTargetAttached(devtoolsSession, targetInfo);
+    }
     if (
       targetInfo.type === 'service_worker' ||
       targetInfo.type === 'shared_worker' ||

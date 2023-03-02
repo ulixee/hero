@@ -26,6 +26,7 @@ import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent
 import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
+import TargetInfo = Protocol.Target.TargetInfo;
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__agent_world__';
@@ -46,6 +47,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     return Array.from(this.attachedFrameIds).map(x => this.framesById.get(x));
   }
 
+  public devtoolsSession: DevtoolsSession;
+
   protected readonly logger: IBoundLog;
 
   private onFrameCreatedResourceEventsByFrameId: {
@@ -60,9 +63,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   }
 
   private attachedFrameIds = new Set<string>();
-  private activeContextIds = new Set<number>();
+  private activeContextIdsBySessionId = new Map<string, Set<number>>();
   private readonly events = new EventSubscriber();
-  private readonly devtoolsSession: DevtoolsSession;
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
 
@@ -71,24 +73,12 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   constructor(page: Page, devtoolsSession: DevtoolsSession) {
     super();
     this.page = page;
-    this.devtoolsSession = devtoolsSession;
     this.networkManager = page.networkManager;
     this.domStorageTracker = page.domStorageTracker;
     this.logger = page.logger.createChild(module);
+    this.devtoolsSession = devtoolsSession;
 
     bindFunctions(this);
-
-    const session = this.devtoolsSession;
-    this.events.on(session, 'Page.frameNavigated', this.onFrameNavigated);
-    this.events.on(session, 'Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument);
-    this.events.on(session, 'Page.frameRequestedNavigation', this.onFrameRequestedNavigation);
-    this.events.on(session, 'Page.frameDetached', this.onFrameDetached);
-    this.events.on(session, 'Page.frameAttached', this.onFrameAttached);
-    this.events.on(session, 'Page.frameStoppedLoading', this.onFrameStoppedLoading);
-    this.events.on(session, 'Page.lifecycleEvent', this.onLifecycleEvent);
-    this.events.on(session, 'Runtime.executionContextsCleared', this.onExecutionContextsCleared);
-    this.events.on(session, 'Runtime.executionContextDestroyed', this.onExecutionContextDestroyed);
-    this.events.on(session, 'Runtime.executionContextCreated', this.onExecutionContextCreated);
 
     this.events.on(page, 'resource-will-be-requested', this.onResourceWillBeRequested);
     this.events.on(page, 'resource-was-requested', this.onResourceWasRequested);
@@ -97,13 +87,65 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.events.on(page, 'navigation-response', this.onNavigationResourceResponse);
   }
 
-  public initialize(): Promise<void> {
+  public initialize(devtoolsSession: DevtoolsSession): Promise<void> {
+    this.events.group(
+      devtoolsSession.id,
+      this.events.on(
+        devtoolsSession,
+        'Page.frameNavigated',
+        this.onFrameNavigated.bind(this, devtoolsSession),
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Page.navigatedWithinDocument',
+        this.onFrameNavigatedWithinDocument,
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Page.frameRequestedNavigation',
+        this.onFrameRequestedNavigation,
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Page.frameDetached',
+        this.onFrameDetached.bind(this, devtoolsSession),
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Page.frameAttached',
+        this.onFrameAttached.bind(this, devtoolsSession),
+      ),
+      this.events.on(devtoolsSession, 'Page.frameStoppedLoading', this.onFrameStoppedLoading),
+      this.events.on(
+        devtoolsSession,
+        'Page.lifecycleEvent',
+        this.onLifecycleEvent.bind(this, devtoolsSession),
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Runtime.executionContextsCleared',
+        this.onExecutionContextsCleared.bind(this, devtoolsSession),
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Runtime.executionContextDestroyed',
+        this.onExecutionContextDestroyed.bind(this, devtoolsSession),
+      ),
+      this.events.on(
+        devtoolsSession,
+        'Runtime.executionContextCreated',
+        this.onExecutionContextCreated.bind(this, devtoolsSession),
+      ),
+    );
+    const id = devtoolsSession.id;
+    this.events.once(devtoolsSession, 'disconnected', () => this.events.endGroup(id));
+
     this.isReady = new Promise<void>(async (resolve, reject) => {
       try {
         const [framesResponse, , readyStateResult] = await Promise.all([
-          this.devtoolsSession.send('Page.getFrameTree'),
-          this.devtoolsSession.send('Page.enable'),
-          this.devtoolsSession
+          devtoolsSession.send('Page.getFrameTree'),
+          devtoolsSession.send('Page.enable'),
+          devtoolsSession
             .send('Runtime.evaluate', {
               expression: 'document.readyState',
             })
@@ -114,11 +156,11 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
                 },
               };
             }),
-          this.devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-          this.devtoolsSession.send('Runtime.enable'),
-          InjectedScripts.install(this, this.onDomPaintEvent),
+          devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
+          devtoolsSession.send('Runtime.enable'),
+          InjectedScripts.install(this, devtoolsSession, this.onDomPaintEvent),
         ]);
-        this.recurseFrameTree(framesResponse.frameTree);
+        this.recurseFrameTree(devtoolsSession, framesResponse.frameTree);
         resolve();
 
         if (this.main.securityOrigin && !this.main.activeLoader?.lifecycle?.load) {
@@ -152,7 +194,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       }
     }
     this.pendingNewDocumentScripts.length = 0;
-    this.onFrameCreatedResourceEventsByFrameId = {}
+    this.onFrameCreatedResourceEventsByFrameId = {};
   }
 
   public close(error?: Error): void {
@@ -169,16 +211,18 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     name: string,
     onCallback: (payload: string, frame: IFrame) => any,
     isolateFromWebPageEnvironment?: boolean,
+    devtoolsSession?: DevtoolsSession,
   ): Promise<IRegisteredEventListener> {
     const params: Protocol.Runtime.AddBindingRequest = {
       name,
     };
     if (isolateFromWebPageEnvironment) {
-      (params as any).executionContextName = ISOLATED_WORLD;
+      params.executionContextName = ISOLATED_WORLD;
     }
+    devtoolsSession ??= this.devtoolsSession;
     // add binding to every new context automatically
-    await this.devtoolsSession.send('Runtime.addBinding', params);
-    return this.events.on(this.devtoolsSession, 'Runtime.bindingCalled', async event => {
+    await devtoolsSession.send('Runtime.addBinding', params);
+    return this.events.on(devtoolsSession, 'Runtime.bindingCalled', async event => {
       if (event.name === name) {
         await this.isReady;
         const frame = this.getFrameForExecutionContext(event.executionContextId);
@@ -190,14 +234,13 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   public async addNewDocumentScript(
     script: string,
     installInIsolatedScope = true,
+    devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
-    const installedScript = await this.devtoolsSession.send(
-      'Page.addScriptToEvaluateOnNewDocument',
-      {
-        source: script,
-        worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
-      },
-    );
+    devtoolsSession ??= this.devtoolsSession;
+    const installedScript = await devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: script,
+      worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
+    });
     this.pendingNewDocumentScripts.push({ script, isolated: installInIsolatedScope });
     // sometimes we get a new anchor link that already has an initiated frame. If that's the case, newDocumentScripts won't trigger.
     // NOTE: we DON'T want this to trigger for internal pages (':', 'about:blank')
@@ -264,6 +307,18 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     }
   }
 
+  public async onFrameTargetAttached(
+    devtoolsSession: DevtoolsSession,
+    target: TargetInfo,
+  ): Promise<void> {
+    await this.isReady;
+
+    const frame = this.framesById.get(target.targetId);
+    if (frame) {
+      await frame.updateDevtoolsSession(devtoolsSession);
+    }
+  }
+
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
 
   public getSecurityOrigins(): { origin: string; frameId: string }[] {
@@ -299,35 +354,47 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     }
   }
 
-  private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent): Promise<void> {
+  private async onExecutionContextDestroyed(
+    devtoolsSession: DevtoolsSession,
+    event: ExecutionContextDestroyedEvent,
+  ): Promise<void> {
     await this.isReady;
-    this.activeContextIds.delete(event.executionContextId);
+    this.activeContextIdsBySessionId.get(devtoolsSession.id)?.delete(event.executionContextId);
     for (const frame of this.framesById.values()) {
-      frame.removeContextId(event.executionContextId);
+      if (frame.devtoolsSession === devtoolsSession)
+        frame.removeContextId(event.executionContextId);
     }
   }
 
-  private async onExecutionContextsCleared(): Promise<void> {
+  private async onExecutionContextsCleared(devtoolsSession: DevtoolsSession): Promise<void> {
     await this.isReady;
-    this.activeContextIds.clear();
+    this.activeContextIdsBySessionId.get(devtoolsSession.id)?.clear();
     for (const frame of this.framesById.values()) {
-      frame.clearContextIds();
+      if (frame.devtoolsSession === devtoolsSession) frame.clearContextIds();
     }
   }
 
-  private async onExecutionContextCreated(event: ExecutionContextCreatedEvent): Promise<void> {
+  private async onExecutionContextCreated(
+    devtoolsSession: DevtoolsSession,
+    event: ExecutionContextCreatedEvent,
+  ): Promise<void> {
     await this.isReady;
     const { context } = event;
     const frameId = context.auxData.frameId as string;
     const type = context.auxData.type as string;
 
-    this.activeContextIds.add(context.id);
+    if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
+      this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
+    }
+    this.activeContextIdsBySessionId.get(devtoolsSession.id).add(context.id);
+
     const frame = this.framesById.get(frameId);
     if (!frame) {
       this.logger.warn('No frame for active context!', {
         frameId,
         executionContextId: context.id,
       });
+      return;
     }
 
     const isDefault =
@@ -340,15 +407,19 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
 
   /////// FRAMES ///////////////////////////////////////////////////////////////
 
-  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent): Promise<void> {
+  private async onFrameNavigated(
+    devtoolsSession: DevtoolsSession,
+    navigatedEvent: FrameNavigatedEvent,
+  ): Promise<void> {
     await this.isReady;
-    const frame = this.recordFrame(navigatedEvent.frame);
+    const frame = this.recordFrame(devtoolsSession, navigatedEvent.frame);
     // if main frame, clear out other frames
     if (!frame.parentId) {
       this.clearChildFrames();
     }
     frame.onNavigated(navigatedEvent.frame);
-    if (!frame.isDefaultUrl && !frame.parentId) {
+    this.emit('frame-navigated', { frame, loaderId: navigatedEvent.frame.loaderId });
+    if (!frame.isDefaultUrl && !frame.parentId && devtoolsSession === this.devtoolsSession) {
       this.pendingNewDocumentScripts.length = 0;
     }
     this.domStorageTracker.track(frame.securityOrigin);
@@ -377,25 +448,56 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.framesById.get(frameId).onNavigatedWithinDocument(url);
   }
 
-  private async onFrameDetached(frameDetachedEvent: FrameDetachedEvent): Promise<void> {
+  private async onFrameDetached(
+    devtoolsSession: DevtoolsSession,
+    frameDetachedEvent: FrameDetachedEvent,
+  ): Promise<void> {
     await this.isReady;
-    const { frameId } = frameDetachedEvent;
-    this.attachedFrameIds.delete(frameId);
+    const { frameId, reason } = frameDetachedEvent;
+    const parentId = this.framesById.get(frameId)?.parentId;
+    if (
+      reason === 'remove' &&
+      // This is a local -> remote frame transtion, where
+      // Page.frameDetached arrives after Target.attachedToTarget.
+      // We've already handled the new target and frame reattach - nothing to do here.
+      (devtoolsSession === this.devtoolsSession ||
+        devtoolsSession === this.framesById.get(parentId)?.devtoolsSession)
+    ) {
+      this.attachedFrameIds.delete(frameId);
+    } else if (reason === 'swap') {
+      this.framesById.get(frameId).didSwapOutOfProcess = true;
+      this.framesById.get(frameId).activeLoader.setNavigationResult();
+    }
   }
 
-  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent): Promise<void> {
+  private async onFrameAttached(
+    devtoolsSession: DevtoolsSession,
+    frameAttachedEvent: FrameAttachedEvent,
+  ): Promise<void> {
     await this.isReady;
     const { frameId, parentFrameId } = frameAttachedEvent;
-
-    this.recordFrame({ id: frameId, parentId: parentFrameId } as any);
+    const frame = this.framesById.get(frameId);
+    if (frame) {
+      if (devtoolsSession && frame.isOopif()) {
+        // If an OOP iframes becomes a normal iframe again
+        // it is first attached to the parent page before
+        // the target is removed.
+        await frame.updateDevtoolsSession(devtoolsSession);
+      }
+      return;
+    }
+    this.recordFrame(devtoolsSession, { id: frameId, parentId: parentFrameId } as any);
     this.attachedFrameIds.add(frameId);
   }
 
-  private async onLifecycleEvent(event: LifecycleEventEvent): Promise<void> {
+  private async onLifecycleEvent(
+    devtoolsSession: DevtoolsSession,
+    event: LifecycleEventEvent,
+  ): Promise<void> {
     await this.isReady;
     const { frameId, name, loaderId, timestamp } = event;
     const eventTime = this.networkManager.monotonicTimeToUnix(timestamp);
-    const frame = this.recordFrame({ id: frameId, loaderId } as any);
+    const frame = this.recordFrame(devtoolsSession, { id: frameId, loaderId } as any);
     frame.onLifecycleEvent(name, eventTime, loaderId);
     this.domStorageTracker.track(frame.securityOrigin);
   }
@@ -412,20 +514,30 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     });
   }
 
-  private recurseFrameTree(frameTree: FrameTree): void {
+  private recurseFrameTree(devtoolsSession: DevtoolsSession, frameTree: FrameTree): void {
     const { frame, childFrames } = frameTree;
-    this.mainFrameId = frame.id;
-    this.recordFrame(frame, true);
+    if (devtoolsSession === this.devtoolsSession) {
+      this.mainFrameId = frame.id;
+      this.recordFrame(devtoolsSession, frame, true);
+    } else {
+      if (!this.framesById.has(frame.id)) {
+        this.recordFrame(devtoolsSession, frame, true);
+      }
+    }
 
     this.attachedFrameIds.add(frame.id);
 
     if (!childFrames) return;
     for (const childFrame of childFrames) {
-      this.recurseFrameTree(childFrame);
+      this.recurseFrameTree(devtoolsSession, childFrame);
     }
   }
 
-  private recordFrame(newFrame: Protocol.Page.Frame, isFrameTreeRecurse = false): Frame {
+  private recordFrame(
+    devtoolsSession: DevtoolsSession,
+    newFrame: Protocol.Page.Frame,
+    isFrameTreeRecurse = false,
+  ): Frame {
     const { id, parentId } = newFrame;
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);
@@ -433,13 +545,16 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       this.domStorageTracker.track(frame.securityOrigin);
       return frame;
     }
+    if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
+      this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
+    }
 
     const parentFrame = parentId ? this.framesById.get(parentId) : null;
     const frame = new Frame(
       this,
       newFrame,
-      this.activeContextIds,
-      this.devtoolsSession,
+      this.activeContextIdsBySessionId.get(devtoolsSession.id),
+      devtoolsSession,
       this.logger,
       () => this.attachedFrameIds.has(id),
       parentFrame,
