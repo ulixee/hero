@@ -12,6 +12,7 @@ export default function setWorkerDomOverrides(
     'Error.constructor',
     'console.debug',
     'navigator.deviceMemory',
+    'navigator.hardwareConcurrency',
     'navigator',
     'WebGLRenderingContext.prototype.getParameter',
   ]);

@@ -1,9 +1,10 @@
-import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfile';
 import { pickRandom } from '@ulixee/commons/lib/utils';
+import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfile';
 import { randomBytes } from 'crypto';
 
 export default function configureDeviceProfile(deviceProfile: IDeviceProfile): void {
   deviceProfile.deviceMemory ??= pickRandom([2, 4, 8]);
+  deviceProfile.hardwareConcurrency ??= pickRandom([4, 8, 10, 12, 16, 24]);
   deviceProfile.videoDevice ??= {
     deviceId: randomBytes(32).toString('hex'),
     groupId: randomBytes(32).toString('hex'),
