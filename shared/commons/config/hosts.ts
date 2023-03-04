@@ -39,16 +39,16 @@ export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void 
     if (!host) {
       delete this.hostByVersion[version];
     } else {
-      let minerModulePath: string;
+      let cloudModulePath: string;
       try {
-        minerModulePath = require.resolve('@ulixee/miner');
+        cloudModulePath = require.resolve('@ulixee/cloud');
       } catch (err) {
         /* no-op */
       }
       this.hostByVersion[version] = {
         host,
         nodePath: process.execPath,
-        minerModulePath,
+        cloudModulePath,
       };
     }
     this.save(version);
@@ -88,7 +88,9 @@ export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void 
       if (file.endsWith('.json')) {
         const versionPath = Path.join(this.configPath, file);
         const version = file.replace('.json', '');
-        this.hostByVersion[version] = JSON.parse(Fs.readFileSync(versionPath, 'utf8'));
+        try {
+          this.hostByVersion[version] = JSON.parse(Fs.readFileSync(versionPath, 'utf8'));
+        } catch {}
       }
     }
 
@@ -119,5 +121,5 @@ export interface IUlixeeHostsConfig {
 export interface IUlixeeHostConfig {
   host: string;
   nodePath: string;
-  minerModulePath: string;
+  cloudModulePath: string;
 }
