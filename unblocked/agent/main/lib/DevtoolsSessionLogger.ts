@@ -54,7 +54,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
     this.truncateMessageResponses = DevtoolsSessionLogger.defaultTruncateMessageResponses;
     this.truncateParams = DevtoolsSessionLogger.defaultTruncateParams;
     this.logger = browserContext.logger.createChild(module);
-    this.onEventReceive = this.onEventReceive.bind(this);
+    this.storeEventsWithoutListeners = true;
   }
 
   public close(): void {
@@ -76,8 +76,9 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
       devtoolsSession.messageEvents,
       'receive',
       this.onEventReceive.bind(this, details),
+      true,
     );
-    this.events.on(devtoolsSession.messageEvents, 'send', this.onEventSend.bind(this, details));
+    this.events.on(devtoolsSession.messageEvents, 'send', this.onEventSend.bind(this, details), true);
   }
 
   private onEventSend(
@@ -149,7 +150,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
       }
 
       if (!frameId && params.targetInfo && params.targetInfo?.type === 'iframe') {
-        frameId =  params.targetInfo.targetId;
+        frameId = params.targetInfo.targetId;
       }
     }
 
