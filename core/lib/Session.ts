@@ -674,12 +674,44 @@ export default class Session
 
   private onSocketClose(event: ISocketEvent): void {
     if (!this.browserContext.resources.isCollecting) return;
-    this.db.sockets.insert(event.socket);
+    this.db.sockets.insert({
+      id: event.socket.id,
+      localAddress: event.socket.localAddress,
+      remoteAddress: event.socket.remoteAddress,
+      dnsResolvedIp: event.socket.dnsResolvedIp,
+      alpn: event.socket.alpn,
+      serverName: event.socket.serverName,
+      createTime: event.socket.createTime,
+      dnsLookupTime: event.socket.dnsLookupTime,
+      ipcConnectionTime: event.socket.ipcConnectionTime,
+      connectTime: event.socket.connectTime,
+      bytesRead: event.socket.socket.bytesRead,
+      bytesWritten: event.socket.socket.bytesWritten,
+      errorTime: event.socket.errorTime,
+      closeTime: event.socket.closeTime,
+      connectError: event.socket.connectError,
+    });
   }
 
   private onSocketConnect(event: ISocketEvent): void {
     if (!this.browserContext.resources.isCollecting) return;
-    this.db.sockets.insert(event.socket);
+    this.db.sockets.insert({
+      id: event.socket.id,
+      localAddress: event.socket.localAddress,
+      remoteAddress: event.socket.remoteAddress,
+      dnsResolvedIp: event.socket.dnsResolvedIp,
+      alpn: event.socket.alpn,
+      serverName: event.socket.serverName,
+      createTime: event.socket.createTime,
+      dnsLookupTime: event.socket.dnsLookupTime,
+      ipcConnectionTime: event.socket.ipcConnectionTime,
+      connectTime: event.socket.connectTime,
+      bytesRead: event.socket.socket.bytesRead,
+      bytesWritten: event.socket.socket.bytesWritten,
+      errorTime: event.socket.errorTime,
+      closeTime: event.socket.closeTime,
+      connectError: event.socket.connectError,
+    });
   }
 
   private async onNewTab(
