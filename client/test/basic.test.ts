@@ -1,5 +1,4 @@
 import { Helpers } from '@ulixee/hero-testing';
-import UlixeeConfig from '@ulixee/commons/config';
 import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
 import Hero from '../index';

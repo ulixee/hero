@@ -257,6 +257,7 @@ export default class Session
       agent.browserContext.devtoolsSessionLogger,
       'devtools-message',
       this.onDevtoolsMessage.bind(this),
+      true,
     );
     if (this.userProfile) {
       await UserProfile.installCookies(this);
