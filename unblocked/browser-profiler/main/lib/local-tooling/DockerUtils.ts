@@ -25,7 +25,7 @@ export function getDockerHost(): string {
   console.log(`Local docker internal ip is ${dockerHost}`);
   return dockerHost;
 }
-
+let counter = 0;
 export async function startDockerAndLoadUrl(
   dockerName: string,
   dockerHost: string,
@@ -37,10 +37,13 @@ export async function startDockerAndLoadUrl(
   const { hostname } = new URL(url);
   const hasDevtools = automationType === 'devtools';
   const dockerArgs = hasDevtools ? `-p=9222:9222` : '';
+  counter += 1;
   const chromeArgs = [
     '--allow-running-insecure-content',
     '--ignore-certificate-errors',
-    '--headless'
+    '--headless',
+    '--incognito',
+    `--user-data-dir=/tmp/${Date.now()}-${(counter += 1)}`,
   ];
   if (chromeVersion >= 109) {
     // NOTE: not working on docker.
@@ -49,6 +52,10 @@ export async function startDockerAndLoadUrl(
     //   chromeArgs.push('--headless=chrome');
     // } else {
     //   chromeArgs.push('--headless');
+  }
+  // regular headless isn't launching without new
+  if (chromeVersion >= 111 && !hasDevtools) {
+    chromeArgs[2] = '--headless=new';
   }
   if (hasDevtools) {
     chromeArgs.push('--remote-debugging-address=0.0.0.0', '--remote-debugging-port=9222');
