@@ -128,8 +128,9 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
   const domPathsByOsId: { [operatingSystemId: string]: string } = {};
 
   for (const dirName of Fs.readdirSync(browserstackProfilesDir)) {
-    const [osId, browserId] = dirName.split('--');
+    const [osId, browserId, features] = dirName.split('--');
     if (browserId !== forBrowserId) continue;
+    if (features !== 'headless-devtools') continue;
 
     const startingDomPath = `${browserstackProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
     const { data: dom } = JSON.parse(gunzipSync(Fs.readFileSync(startingDomPath)).toString());
@@ -142,7 +143,7 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
     const [osId, browserId, features] = dirName.split('--');
     if (browserId !== forBrowserId) continue;
     if (osId !== 'linux') continue;
-    if (features !== 'headed-devtools') continue;
+    if (features !== 'headless-devtools') continue;
 
     const startingDomPath = `${localProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
     const { data: dom } = JSON.parse(gunzipSync(Fs.readFileSync(startingDomPath)).toString());
