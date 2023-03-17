@@ -3365,5 +3365,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "safari-16-3": {
+    "id": "safari-16-3",
+    "name": "Safari",
+    "marketshare": 1.5,
+    "version": {
+      "major": "16",
+      "minor": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
