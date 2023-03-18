@@ -140,4 +140,4 @@ if (args.updateLoadTimes) {
   }
 }
 const descriptor = buildDescriptor(property);
-addDescriptorAfterProperty('window', prevProperty, 'chrome', descriptor);
+addDescriptorAfterProperty('self', prevProperty, 'chrome', descriptor);

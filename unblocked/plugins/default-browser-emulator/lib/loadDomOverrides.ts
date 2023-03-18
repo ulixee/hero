@@ -85,9 +85,7 @@ export default function loadDomOverrides(
   }
   domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
   domOverrides.add('console.debug');
-  if (isHeadless) {
-    domOverrides.add('HTMLIFrameElement.prototype');
-  }
+  domOverrides.add('HTMLIFrameElement.prototype');
 
   const locale = emulationProfile.locale;
   const voices = data.speech.voices?.map(x => {

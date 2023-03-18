@@ -47,7 +47,8 @@ export default class DomOverridesBuilder {
     return {
       callbacks,
       // NOTE: don't make this async. It can cause issues if you read a frame right after creation, for instance
-      script: `(function newDocumentScript() {
+      script: `(function newDocumentScript(selfOverride) {
+      if (selfOverride) self = selfOverride;
   // Worklet has no scope to override, but we can't detect until it loads
   if (typeof self === 'undefined' && typeof window === 'undefined') return;
   

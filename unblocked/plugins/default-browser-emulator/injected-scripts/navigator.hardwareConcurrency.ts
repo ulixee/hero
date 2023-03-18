@@ -1,1 +1,1 @@
-proxyGetter(navigator, 'hardwareConcurrency', () => args.concurrency, true);
+proxyGetter(self.navigator, 'hardwareConcurrency', () => args.concurrency, true);

@@ -170,8 +170,8 @@ const navigatorPlugins = createNamedNodeMap(
   'name',
 ) as PluginArray;
 
-proxyGetter(navigator, 'mimeTypes', () => mimes, true);
-proxyGetter(navigator, 'plugins', () => navigatorPlugins, true);
+proxyGetter(self.navigator, 'mimeTypes', () => mimes, true);
+proxyGetter(self.navigator, 'plugins', () => navigatorPlugins, true);
 
 function handleCloneObject(target, thisArg, argArray) {
   try {
@@ -208,5 +208,5 @@ function handleCloneObject(target, thisArg, argArray) {
     throw error;
   }
 }
-proxyFunction(window, 'postMessage', handleCloneObject);
-proxyFunction(window, 'structuredClone', handleCloneObject);
+proxyFunction(self, 'postMessage', handleCloneObject);
+proxyFunction(self, 'structuredClone', handleCloneObject);

@@ -13,7 +13,7 @@ if ('webdriver' in self.navigator) {
 }
 
 if ('NetworkInformation' in self) {
-  proxyGetter(NetworkInformation.prototype as any, 'rtt', () => args.rtt, false);
+  proxyGetter(self.NetworkInformation.prototype as any, 'rtt', () => args.rtt, false);
 }
 
 if (args.userAgentData && 'userAgentData' in self.navigator) {
@@ -21,7 +21,7 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
   const userAgentData = self.navigator.userAgentData;
   function checkThisArg(thisArg, customMessage = ''): TypeError {
     // @ts-expect-error
-    if (Object.getPrototypeOf(thisArg) !== NavigatorUAData.prototype) {
+    if (Object.getPrototypeOf(thisArg) !== self.NavigatorUAData.prototype) {
       return new TypeError(`${customMessage}Illegal invocation`);
     }
   }

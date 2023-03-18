@@ -1,5 +1,5 @@
 proxyFunction(
-  WebGLRenderingContext.prototype,
+  self.WebGLRenderingContext.prototype,
   'getParameter',
   function (originalFunction, thisArg, argArray) {
     const parameter = argArray && argArray.length ? argArray[0] : null;
@@ -13,7 +13,7 @@ proxyFunction(
 );
 
 proxyFunction(
-  WebGL2RenderingContext.prototype,
+  self.WebGL2RenderingContext.prototype,
   'getParameter',
   function (originalFunction, thisArg, argArray) {
     const parameter = argArray && argArray.length ? argArray[0] : null;

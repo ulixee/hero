@@ -287,6 +287,34 @@ test('cannot detect a proxy of args passed into a proxied function', async () =>
   expect(result.result).toBe('Intel Inc.');
 });
 
+test('should get the correct webgl vendor from a nested srcdoc iframe', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad('DomContentLoaded');
+  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain('<h1>Example Domain</h1>')
+  const result = await page.evaluate<{ vendor: string; src: string }>(`(async () => {
+  var iframe = document.createElement("iframe");
+  iframe.srcdoc = "/**/";
+  iframe.setAttribute("style", "display: none;");
+  document.head.appendChild(iframe);
+  
+  const canvas = iframe.contentWindow.document.createElement("canvas");
+  
+  const gl = canvas.getContext("webgl");
+  const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+  const vendor = gl.getParameter('37445');
+  
+  return { vendor, src: iframe.contentWindow.document.body.outerHTML };
+ })()`);
+  expect(result.vendor).toBe('Intel Inc.');
+  expect(result.src).toBe("<body></body>");
+});
+
 test('stack overflow test should match chrome', async () => {
   const agent = pool.createAgent({
     logger,
