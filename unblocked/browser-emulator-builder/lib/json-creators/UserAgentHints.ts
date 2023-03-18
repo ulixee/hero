@@ -13,6 +13,7 @@ export default class UserAgentHintsJson {
       const { browserId, operatingSystemId } =
         BrowserProfiler.extractMetaFromUserAgentId(userAgentId);
       const profile = BrowserProfiler.getProfile<IProfile>('http-ua-hints', userAgentId);
+      if (!profile) continue;
       this.browserId = browserId;
       this.dataByOsId[operatingSystemId] = profile.data;
     }
@@ -23,8 +24,22 @@ export default class UserAgentHintsJson {
       const dataOsDir = EmulatorData.getEmulatorDataOsDir(dataDir, osId);
       if (!Fs.existsSync(dataOsDir)) Fs.mkdirSync(dataOsDir, { recursive: true });
 
-      const dataString = JSON.stringify({ voices: data }, null, 2);
-      Fs.writeFileSync(`${dataOsDir}/userAgentData.json`, `${dataString}`);
+      const tested = new Set(data.testedHeaders);
+      const documentHeaders: Record<string, string> = {};
+      for (const doc of data.headers) {
+        for (const [header, value] of doc.rawHeaders) {
+          if (tested.has(header.toLowerCase())) {
+            documentHeaders[header] = value;
+          }
+        }
+      }
+
+      const dataString = JSON.stringify(
+        { jsHighEntropyHints: data.jsHighEntropyHints, documentHeaders },
+        null,
+        2,
+      );
+      Fs.writeFileSync(`${dataOsDir}/user-agent-hints.json`, `${dataString}`);
     }
   }
 }

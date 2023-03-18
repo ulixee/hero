@@ -3,6 +3,7 @@ export default interface IUserAgentData {
   platform: string;
   platformVersion: string;
   uaFullVersion: string;
+  fullVersionList: { brand: string; version: string }[];
   architecture?: string;
   model?: string;
   mobile?: boolean;

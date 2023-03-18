@@ -12,6 +12,7 @@ import WindowChromeJson from '../lib/json-creators/WindowChrome';
 import WindowFramingJson from '../lib/json-creators/WindowFraming';
 import WindowNavigatorJson from '../lib/json-creators/WindowNavigator';
 import Http2SessionJson from '../lib/json-creators/Http2Session';
+import UserAgentHintsJson from '../lib/json-creators/UserAgentHints';
 import EmulatorData from '../lib/EmulatorData';
 import { emulatorDataDir } from '../paths';
 import SpeechSynthesisJson from '../lib/json-creators/SpeechSynthesis';
@@ -50,6 +51,9 @@ async function generate(): Promise<void> {
 
     console.log('- Http2');
     new Http2SessionJson(config, userAgentIds).save(browserDir);
+
+    console.log('- UserAgentHints');
+    new UserAgentHintsJson(config, userAgentIds).save(browserDir);
 
     if (config.browserEngineOption) {
       console.log('- Codecs');

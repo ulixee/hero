@@ -244,9 +244,15 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       brand: x.brand._$value,
       version: x.version._$value,
     }));
+    const fullVersionList = brandData.map(x => ({
+      brand: x.brand,
+      version:
+        x.brand === 'Chromium' || x.brand === 'Chrome' ? uaFullVersion : `${x.version}.0.0.0`,
+    }));
     return {
       uaFullVersion,
       brands: brandData,
+      fullVersionList,
       platform: this.data.windowNavigator.navigator.userAgentData.platform._$value,
       platformVersion: uaClientHintsPlatformVersion,
       architecture: 'x86',

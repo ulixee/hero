@@ -64,6 +64,10 @@ export default class BrowserData implements IBrowserData {
     return loadData(`${this.osDataDir}/codecs.json`);
   }
 
+  public get userAgentHints(): IDataCodecs {
+    return loadData(`${this.osDataDir}/user-agent-hints.json`);
+  }
+
   public get speech(): IDataSpeechVoices {
     return loadData(`${this.osDataDir}/browser-speech.json`);
   }

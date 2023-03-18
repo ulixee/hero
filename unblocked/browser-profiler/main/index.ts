@@ -161,6 +161,7 @@ function importProfile<TProfile>(profilePath: IProfilePath): TProfile {
       if (profilePath.endsWith('.gz')) {
         rawData = gunzipSync(rawData);
       }
+      if (!rawData.length) return null;
       return JSON.parse(rawData.toString()) as TProfile;
     } catch (error) {
       console.log(profilePath);

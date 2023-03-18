@@ -11,6 +11,7 @@ export default async function setUserAgent(
     ? {
         brands: userAgentData.brands,
         fullVersion: userAgentData.uaFullVersion,
+        fullVersionList: userAgentData.fullVersionList,
         platform: userAgentData.platform,
         platformVersion: userAgentData.platformVersion,
         architecture: 'x86',
