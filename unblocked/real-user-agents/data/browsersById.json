@@ -3377,5 +3377,31 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-111-0": {
+    "id": "firefox-111-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "111",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-111-0": {
+    "id": "edge-111-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "111",
+      "minor": "0",
+      "build": "1661",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
