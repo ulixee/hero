@@ -1,6 +1,7 @@
 // This bypass is based on the one from puppeteer-stealth-evasions
 
 const frameWindowProxies = new WeakMap();
+const hasRunNewDocumentScripts = new WeakSet();
 
 const originalContentWindow = Object.getOwnPropertyDescriptor(
   self.HTMLIFrameElement.prototype,
@@ -31,10 +32,11 @@ proxySetter(self.HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
           // see if the window has been allocated
           const contentWindow = getTrueContentWindow(iframe);
           if (contentWindow) {
-            if (frameWindowProxies.has(iframe)) {
-              frameWindowProxies.delete(iframe);
+            if (!hasRunNewDocumentScripts.has(iframe)) {
+              hasRunNewDocumentScripts.add(iframe);
               // @ts-expect-error
               newDocumentScript(contentWindow);
+              frameWindowProxies.delete(iframe);
             }
             return contentWindow.document;
           }

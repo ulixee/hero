@@ -15,7 +15,7 @@ import IBrowserContext from '@ulixee/unblocked-specification/agent/browser/IBrow
 import { IWorker } from '@ulixee/unblocked-specification/agent/browser/IWorker';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
-import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
 import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
 import ITlsSettings from '@ulixee/unblocked-specification/agent/net/ITlsSettings';
 import ITcpSettings from '@ulixee/unblocked-specification/agent/net/ITcpSettings';
@@ -162,7 +162,7 @@ export default class Plugins implements IUnblockedPlugins {
     await Promise.all(this.hooksByName.configure.map(fn => fn(profile)));
   }
 
-  public async onNewBrowser(browser: IBrowser, launchArgs: IBrowserLaunchArgs): Promise<void> {
+  public async onNewBrowser(browser: IBrowser, launchArgs: IBrowserUserConfig): Promise<void> {
     this.isStarted = true;
     await Promise.all(this.hooksByName.onNewBrowser.map(fn => fn(browser, launchArgs)));
   }

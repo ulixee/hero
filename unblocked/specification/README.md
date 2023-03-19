@@ -123,8 +123,8 @@ Browser level hooks are called at a Browser level.
 
 Called anytime a new Browser will be launched. The hooking method (eg, [BrowserEmulator](./IBrowserEmulator.ts)) can manipulate the `browser.engine.launchArguments` to control Chrome launch arguments. A list can be found [here](https://peter.sh/experiments/chromium-command-line-switches/).
 
-_browser: [`IBrowser`](./agent/browser/IBrowser.ts)_ a Browser instance. Do not manipulate beyond `launchArguments` unless you really know what you're doing.
-_launchArgs: [`IBrowserLaunchArgs`](./agent/browser/IBrowserLaunchArgs.ts)_ arguments provided by a user or set in the environment that an emulator should use to appropriately set the `launchArguments`
+_browser: [`IBrowser`](./agent/browser/IBrowser.ts)_ a Browser instance. Do not manipulate beyond `browser.engine.launchArguments` unless you really know what you're doing.
+_browserUserConfig: [`IBrowserUserConfig`](./agent/browser/IBrowserUserConfig.ts)_ arguments provided by a user or set in the environment that an emulator should use to appropriately configure `browser.engine.launchArguments`
 
 NOTE: a new browser might be reused by an implementor, so you should not assume this method will be called one-to-one with your scraper sessions.
 

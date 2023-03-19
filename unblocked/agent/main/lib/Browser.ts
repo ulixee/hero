@@ -3,7 +3,7 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { assert } from '@ulixee/commons/lib/utils';
 import Log from '@ulixee/commons/lib/Logger';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
-import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
 import IBrowser, { IBrowserEvents } from '@ulixee/unblocked-specification/agent/browser/IBrowser';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
@@ -71,22 +71,22 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   constructor(
     engine: IBrowserEngine,
     hooks?: IHooksProvider,
-    launchArgs?: IBrowserLaunchArgs,
+    browserUserConfig?: IBrowserUserConfig,
     private debugLog = false,
   ) {
     super();
     this.engine = engine;
     this.id = String((browserIdCounter += 1));
-    launchArgs ??= {};
-    launchArgs.disableGpu ??= env.disableGpu;
-    launchArgs.noChromeSandbox ??= env.noChromeSandbox;
-    launchArgs.showChrome ??= env.showChrome;
+    browserUserConfig ??= {};
+    browserUserConfig.disableGpu ??= env.disableGpu;
+    browserUserConfig.noChromeSandbox ??= env.noChromeSandbox;
+    browserUserConfig.showChrome ??= env.showChrome;
 
-    this.applyDefaultLaunchArgs(launchArgs);
+    this.applyDefaultLaunchArgs(browserUserConfig);
 
     if (hooks) {
       this.hooks = hooks;
-      hooks.onNewBrowser?.(this, launchArgs);
+      hooks.onNewBrowser?.(this, browserUserConfig);
     }
   }
 
@@ -313,7 +313,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.connection.once('disconnected', this.emit.bind(this, 'close'));
   }
 
-  private applyDefaultLaunchArgs(options: IBrowserLaunchArgs): void {
+  private applyDefaultLaunchArgs(options: IBrowserUserConfig): void {
     this.engine.launchArguments = [...(this.engine.launchArguments ?? [])];
     const launchArgs = this.engine.launchArguments;
 

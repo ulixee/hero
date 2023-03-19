@@ -11,7 +11,7 @@ import ICertificateGenerator, {
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import Browser from './Browser';
@@ -126,7 +126,7 @@ export default class Pool extends TypedEventEmitter<{
   public async getBrowser(
     engine: IBrowserEngine,
     hooks: IHooksProvider & { profile?: IEmulationProfile },
-    launchArgs?: IBrowserLaunchArgs,
+    launchArgs?: IBrowserUserConfig,
   ): Promise<Browser> {
     return await this.browserCreationQueue.run(async () => {
       launchArgs ??= {};

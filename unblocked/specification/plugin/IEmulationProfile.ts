@@ -4,7 +4,7 @@ import IDeviceProfile from './IDeviceProfile';
 import IGeolocation from './IGeolocation';
 import IBrowserEngine from '../agent/browser/IBrowserEngine';
 import IViewport from '../agent/browser/IViewport';
-import IBrowserLaunchArgs from '../agent/browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '../agent/browser/IBrowserUserConfig';
 
 export default interface IEmulationProfile<T = any> {
   logger?: IBoundLog;
@@ -25,7 +25,7 @@ export default interface IEmulationProfile<T = any> {
   dnsOverTlsProvider?: { host: string; servername: string; port?: number };
 }
 
-export type IEmulationOptions = IBrowserLaunchArgs &
+export type IEmulationOptions = IBrowserUserConfig &
   Pick<
     IEmulationProfile,
     | 'viewport'

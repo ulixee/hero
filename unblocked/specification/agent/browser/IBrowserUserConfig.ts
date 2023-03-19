@@ -1,4 +1,4 @@
-export default interface IBrowserLaunchArgs {
+export default interface IBrowserUserConfig {
   proxyPort?: number;
   showChrome?: boolean;
   showDevtools?: boolean;

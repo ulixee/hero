@@ -14,7 +14,7 @@ import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { IWorker } from '@ulixee/unblocked-specification/agent/browser/IWorker';
 import IHttp2ConnectSettings from '@ulixee/unblocked-specification/agent/net/IHttp2ConnectSettings';
 import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
-import IBrowserLaunchArgs from '@ulixee/unblocked-specification/agent/browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
 import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
 import Log from '@ulixee/commons/lib/Logger';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
@@ -173,7 +173,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     configureHttp2Session(this.emulationProfile, this.data, request, settings);
   }
 
-  public onNewBrowser(browser: IBrowser, options: IBrowserLaunchArgs): void {
+  public onNewBrowser(browser: IBrowser, options: IBrowserUserConfig): void {
     configureBrowserLaunchArgs(browser.engine, options);
   }
 

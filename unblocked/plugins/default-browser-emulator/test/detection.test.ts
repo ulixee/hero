@@ -287,6 +287,33 @@ test('cannot detect a proxy of args passed into a proxied function', async () =>
   expect(result.result).toBe('Intel Inc.');
 });
 
+test('should get the correct platform from a nested srcdoc iframe', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad('DomContentLoaded');
+  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain(
+    '<h1>Example Domain</h1>',
+  );
+  const result = await page.evaluate<{ win: string; iframe: string }>(`(async () => {
+  var iframe = document.createElement("iframe");
+  iframe.srcdoc = "/**/";
+  iframe.setAttribute("style", "display: none;");
+  document.head.appendChild(iframe);
+  
+  const navigator = iframe.contentWindow.navigator;
+  document.head.removeChild(iframe);
+  
+  return { win :window.navigator.platform, iframe: navigator.platform };
+ })()`);
+
+  expect(result.iframe).toBe(result.win);
+});
+
 test('should get the correct webgl vendor from a nested srcdoc iframe', async () => {
   const agent = pool.createAgent({
     logger,
@@ -296,7 +323,9 @@ test('should get the correct webgl vendor from a nested srcdoc iframe', async ()
   page.on('console', console.log);
   await page.goto(`${koaServer.baseUrl}`);
   await page.waitForLoad('DomContentLoaded');
-  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain('<h1>Example Domain</h1>')
+  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain(
+    '<h1>Example Domain</h1>',
+  );
   const result = await page.evaluate<{ vendor: string; src: string }>(`(async () => {
   var iframe = document.createElement("iframe");
   iframe.srcdoc = "/**/";
@@ -312,7 +341,7 @@ test('should get the correct webgl vendor from a nested srcdoc iframe', async ()
   return { vendor, src: iframe.contentWindow.document.body.outerHTML };
  })()`);
   expect(result.vendor).toBe('Intel Inc.');
-  expect(result.src).toBe("<body></body>");
+  expect(result.src).toBe('<body></body>');
 });
 
 test('stack overflow test should match chrome', async () => {

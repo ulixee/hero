@@ -2,7 +2,7 @@ import IDevtoolsSession from '../browser/IDevtoolsSession';
 import { IPage } from '../browser/IPage';
 import { IWorker } from '../browser/IWorker';
 import IBrowser from '../browser/IBrowser';
-import IBrowserLaunchArgs from '../browser/IBrowserLaunchArgs';
+import IBrowserUserConfig from '../browser/IBrowserUserConfig';
 import IBrowserContext from '../browser/IBrowserContext';
 import Protocol from 'devtools-protocol';
 import TargetInfo = Protocol.Target.TargetInfo;
@@ -18,7 +18,7 @@ export interface IBrowserContextHooks {
 }
 
 export default interface IBrowserHooks {
-  onNewBrowser?(browser: IBrowser, options: IBrowserLaunchArgs): void;
+  onNewBrowser?(browser: IBrowser, userConfig: IBrowserUserConfig): void;
   onNewBrowserContext?(context: IBrowserContext): Promise<any>;
   onDevtoolsPanelAttached?(devtoolsSession: IDevtoolsSession, targetInfo?: TargetInfo): Promise<any>;
 }
