@@ -32,8 +32,8 @@ proxySetter(self.HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
           // see if the window has been allocated
           const contentWindow = getTrueContentWindow(iframe);
           if (contentWindow) {
-            if (!hasRunNewDocumentScripts.has(iframe)) {
-              hasRunNewDocumentScripts.add(iframe);
+            if (!hasRunNewDocumentScripts.has(contentWindow)) {
+              hasRunNewDocumentScripts.add(contentWindow);
               // @ts-expect-error
               newDocumentScript(contentWindow);
               frameWindowProxies.delete(iframe);
