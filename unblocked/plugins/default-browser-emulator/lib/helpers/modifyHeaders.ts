@@ -69,14 +69,16 @@ export default function modifyHeaders(
       // if header is an Sec- header, trust Chrome
     } else if (lowerName === 'rtt') {
       value = deviceProfile.rtt;
-    } else if (lowerName === 'viewport-width') {
-      value = emulationProfile.viewport.screenWidth;
-    } else if (lowerName === 'dpr') {
+    } else if (lowerName === 'sec-ch-viewport-width' || lowerName === 'viewport-width') {
+      value = emulationProfile.viewport.width;
+    } else if (lowerName === 'sec-ch-viewport-height' || lowerName === 'viewport-height') {
+      value = emulationProfile.viewport.height;
+    } else if (lowerName === 'sec-ch-dpr' || lowerName === 'dpr') {
       value = emulationProfile.viewport.deviceScaleFactor;
-    } else if (lowerName === 'sec-ch-ua-platform') {
-      value = `"${userAgentData.platform}"`;
     } else if (lowerName === 'sec-ch-device-memory' || lowerName === 'device-memory') {
       value = deviceProfile.deviceMemory;
+    } else if (lowerName === 'sec-ch-ua-platform') {
+      value = `"${userAgentData.platform}"`;
     } else if (lowerName === 'sec-ch-ua') {
       value = pickRandom(defaults) ?? value;
     } else if (value && lowerName.startsWith('sec-')) {
