@@ -1,4 +1,3 @@
-import { pickRandom } from '@ulixee/commons/lib/utils';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IBrowserData from '../interfaces/IBrowserData';
 import IUserAgentData from '../interfaces/IUserAgentData';
@@ -15,7 +14,6 @@ export default function loadDomOverrides(
   domOverrides.add('Error.captureStackTrace');
   domOverrides.add('Error.constructor');
   const deviceProfile = emulationProfile.deviceProfile;
-  const rtt = pickRandom([25, 50, 100]);
   const isHeadless = emulationProfile.browserEngine.isHeaded !== true;
 
   domOverrides.add('navigator.hardwareConcurrency', {
@@ -32,7 +30,7 @@ export default function loadDomOverrides(
     headless: isHeadless,
     pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
     userAgentData,
-    rtt,
+    rtt: emulationProfile.deviceProfile.rtt,
   });
 
   domOverrides.add('MediaDevices.prototype.enumerateDevices', {

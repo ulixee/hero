@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto';
 
 export default function configureDeviceProfile(deviceProfile: IDeviceProfile): void {
   deviceProfile.deviceMemory ??= pickRandom([2, 4, 8]);
+  deviceProfile.rtt ??= pickRandom([25, 50, 100]);
   deviceProfile.hardwareConcurrency ??= pickRandom([4, 8, 10, 12, 16, 24]);
   deviceProfile.videoDevice ??= {
     deviceId: randomBytes(32).toString('hex'),

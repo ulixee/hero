@@ -1,5 +1,5 @@
-import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import { pickRandom } from '@ulixee/commons/lib/utils';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
 import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
@@ -11,6 +11,7 @@ export default function modifyHeaders(
   userAgentData: IUserAgentData,
   resource: IHttpResourceLoadDetails,
 ): boolean {
+  const deviceProfile = emulationProfile.deviceProfile;
   const userAgentString = emulationProfile.userAgentOption.string;
   const locale = emulationProfile.locale;
   const defaultOrder = getResourceHeaderDefaults(emulationProfile, data.headers, resource);
@@ -66,9 +67,16 @@ export default function modifyHeaders(
     if (lowerName === 'accept-language') {
       value = `${locale};q=0.9`;
       // if header is an Sec- header, trust Chrome
+    } else if (lowerName === 'rtt') {
+      value = deviceProfile.rtt;
+    } else if (lowerName === 'viewport-width') {
+      value = emulationProfile.viewport.screenWidth;
+    } else if (lowerName === 'dpr') {
+      value = emulationProfile.viewport.deviceScaleFactor;
     } else if (lowerName === 'sec-ch-ua-platform') {
-      // must align to user platform! (eg, "Windows")
       value = `"${userAgentData.platform}"`;
+    } else if (lowerName === 'sec-ch-device-memory' || lowerName === 'device-memory') {
+      value = deviceProfile.deviceMemory;
     } else if (lowerName === 'sec-ch-ua') {
       value = pickRandom(defaults) ?? value;
     } else if (value && lowerName.startsWith('sec-')) {
@@ -80,6 +88,7 @@ export default function modifyHeaders(
     } else if (defaults && !defaults.includes(value as string)) {
       value = pickRandom(defaults);
     }
+    // TODO: sec-ch-ua-full-version-list
 
     if (value) {
       headerList.push([headerName, value]);

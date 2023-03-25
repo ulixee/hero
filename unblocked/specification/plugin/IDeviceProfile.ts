@@ -1,5 +1,6 @@
 export default interface IDeviceProfile {
   deviceMemory?: number;
+  rtt?: number;
   hardwareConcurrency?: number;
   deviceStorageTib?: number;
   maxHeapSize?: number;
