@@ -169,4 +169,16 @@ describe('Worker test', () => {
     const request = await requestPromise;
     expect(request.resource.url.href).toBe(url);
   });
+
+  it('should survive shared worker restart', async () => {
+    const page1 = await context.newPage();
+    await page1.goto(server.url('/worker/shared-worker.html'));
+    expect(await page1.evaluate('window.sharedWorkerResponsePromise')).toBe('echo:hello');
+    await page1.close();
+
+    const page2 = await context.newPage();
+    await page2.goto(server.url('/worker/shared-worker.html'));
+    expect(await page2.evaluate('window.sharedWorkerResponsePromise')).toBe('echo:hello');
+    await page2.close();
+  });
 });

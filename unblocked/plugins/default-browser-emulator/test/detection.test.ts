@@ -4,6 +4,7 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -793,4 +794,78 @@ describe('Proxy detections', () => {
     expect(error.stack).not.toContain('Reflect');
     expect(error.stack.split('\n').length).toBeGreaterThan(1);
   });
+});
+
+it('should emulate in a shared worker', async () => {
+  let jsonResult = new Resolvable<string>();
+  const httpsServer = await Helpers.runHttpsServer(async (req, res) => {
+    res.setHeader('access-control-allow-origin', '*');
+    if (req.url === '/test.html') {
+      res.end(`<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<script>
+      const { hardwareConcurrency, userAgent, deviceMemory } = navigator;
+		  const results = [{ hardwareConcurrency, userAgent, deviceMemory }];
+      
+      (async () => {
+        async function check() {
+          const { port } = new SharedWorker("worker.js");
+  
+          port.start();
+  
+          await new Promise(resolve => {
+            port.addEventListener("message", e => {
+              port.close();
+              results.push(e.data);
+              resolve();
+            });
+          })
+        }
+  
+        for (let index = 0; index < 20; index++) {
+          await check();
+        }
+        
+       await fetch('/worker-result', {
+          method: 'POST',
+          body: JSON.stringify(results),
+        });
+     })();
+		</script>
+</body></html>`);
+    } else if (req.url.includes('worker-result')) {
+      const result = await Helpers.readableToBuffer(req);
+      jsonResult.resolve(result.toString());
+      res.end('');
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const body = Fs.readFileSync(`${__dirname}/assets/worker2.js`);
+      res.setHeader('etag', 'W/"69-18719828fba"');
+      res.setHeader('content-type', 'application/javascript; charset=utf-8');
+      res.end(body);
+    }
+  });
+
+  const agent = pool.createAgent({ logger });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  for (let i =0;i<10; i+=1) {
+    await page.goto(`${httpsServer.baseUrl}/test.html`);
+
+    const result = JSON.parse(await jsonResult.promise);
+    expect(result).toBeTruthy();
+
+    expect([...new Set(result.map(x => x.hardwareConcurrency))]).toHaveLength(1);
+    expect([...new Set(result.map(x => x.userAgent))]).toHaveLength(1);
+
+    jsonResult = new Resolvable<string>();
+  }
+  await agent.close();
 });
