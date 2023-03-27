@@ -400,7 +400,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public async getFrameElementNodePointerId(): Promise<number> {
     const frameElementNodeId = await this.getFrameElementDevtoolsNodeId();
     if (!frameElementNodeId) return null;
-    return this.getNodePointerId(frameElementNodeId);
+    return this.parentFrame.getNodePointerId(frameElementNodeId);
   }
 
   // get absolute x/y coordinates of frame container element relative to page

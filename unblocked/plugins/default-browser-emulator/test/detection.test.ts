@@ -829,9 +829,11 @@ it('should emulate in a shared worker', async () => {
           })
         }
   
+        const checks = [];
         for (let index = 0; index < 20; index++) {
-          await check();
+          checks.push(check());
         }
+        await Promise.all(checks)
         
        await fetch('/worker-result', {
           method: 'POST',
