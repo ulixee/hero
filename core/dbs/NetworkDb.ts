@@ -5,6 +5,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import * as fs from 'fs';
 import CertificatesTable from '../models/CertificatesTable';
 import Core from '../index';
+import env from '../env';
 
 const { log } = Log(module);
 
@@ -16,12 +17,12 @@ export default class NetworkDb {
   private readonly saveInterval: NodeJS.Timeout;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor(options?: { enableSqliteWAL: boolean }) {
+  constructor() {
     NetworkDb.createDir();
     this.db = new Database(NetworkDb.databasePath);
     this.certificates = new CertificatesTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
-    if (options?.enableSqliteWAL) {
+    if (env.enableSqliteWal) {
       this.db.unsafeMode(false);
       this.db.pragma('journal_mode = WAL');
     }

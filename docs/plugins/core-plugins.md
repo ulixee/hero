@@ -116,7 +116,7 @@ This is called every time a new browser engine is started, which may not be ever
 #### **Arguments**:
 
 - browser `IBrowser`. The Agent browser. Arguments can be manipulated on the `engine.launchArguments` property.
-- launchArgs `IBrowserLaunchArgs`. Additional options provided to launch this instance.
+- userConfig `IBrowserUserConfig`. Additional options provided to launch this instance.
   - showChrome: `boolean` - has the user requested to show the browser
   - disableGpu: `boolean` - has the user requested to disable the gpu
   - showDevtools: `boolean` - has the user requested to automatically show devtools

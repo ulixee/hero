@@ -30,13 +30,13 @@ import OutputTable from '../models/OutputTable';
 import FlowHandlersTable from '../models/FlowHandlersTable';
 import FlowCommandsTable from '../models/FlowCommandsTable';
 import InteractionStepsTable from '../models/InteractionStepsTable';
+import env from '../env';
 
 const { log } = Log(module);
 
 interface IDbOptions {
   readonly?: boolean;
   fileMustExist?: boolean;
-  enableWalMode?: boolean;
 }
 
 export default class SessionDb {
@@ -95,7 +95,7 @@ export default class SessionDb {
     this.sessionId = sessionId;
     this.path = customPath ?? `${SessionDb.databaseDir}/${sessionId}.db`;
     this.db = new Database(this.path, { readonly, fileMustExist });
-    if (dbOptions?.enableWalMode) {
+    if (env.enableSqliteWal) {
       this.db.unsafeMode(false);
       this.db.pragma('journal_mode = WAL');
     }
