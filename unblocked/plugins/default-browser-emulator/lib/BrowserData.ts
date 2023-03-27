@@ -8,6 +8,7 @@ import IBrowserData, {
   IDataClienthello,
   IDataCodecs,
   IDataDomPolyfill,
+  IDataFonts,
   IDataHeaders,
   IDataHttp2Settings,
   IDataSpeechVoices,
@@ -70,6 +71,10 @@ export default class BrowserData implements IBrowserData {
 
   public get speech(): IDataSpeechVoices {
     return loadData(`${this.osDataDir}/browser-speech.json`);
+  }
+
+  public get fonts(): IDataFonts {
+    return loadData(`${this.osDataDir}/browser-fonts.json`);
   }
 
   public get http2Settings(): IDataHttp2Settings {

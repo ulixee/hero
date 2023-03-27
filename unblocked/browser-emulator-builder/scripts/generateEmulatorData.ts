@@ -16,6 +16,7 @@ import UserAgentHintsJson from '../lib/json-creators/UserAgentHints';
 import EmulatorData from '../lib/EmulatorData';
 import { emulatorDataDir } from '../paths';
 import SpeechSynthesisJson from '../lib/json-creators/SpeechSynthesis';
+import FontsJson from '../lib/json-creators/Fonts';
 
 const userAgentIdsByBrowserId: { [browserId: string]: string[] } = {};
 
@@ -61,6 +62,9 @@ async function generate(): Promise<void> {
 
       console.log('- Speech');
       new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
+
+      console.log('- Fonts');
+      new FontsJson(config, userAgentIds).save(browserDir);
 
       console.log('- WindowChrome');
       new WindowChromeJson(config, userAgentIds).save(browserDir);

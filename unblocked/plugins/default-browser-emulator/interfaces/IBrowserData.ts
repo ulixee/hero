@@ -50,6 +50,10 @@ export interface IDataCodecs {
   webRtcVideoCodecs: any;
 }
 
+export interface IDataFonts {
+  fonts: string[];
+}
+
 export interface IDataSpeechVoices {
   voices: {
     default: boolean;
