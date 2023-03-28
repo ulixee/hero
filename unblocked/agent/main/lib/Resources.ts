@@ -226,7 +226,7 @@ export default class Resources
 
     return this.matchesMitmError(
       tabId,
-      resource.url.href,
+      resource.url?.href,
       resource.method,
       resource.browserRequestId,
       resource.requestTime,
