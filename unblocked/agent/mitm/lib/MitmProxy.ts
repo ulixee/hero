@@ -332,34 +332,44 @@ export default class MitmProxy {
       }
     }
 
-    const connectedPromise = createPromise();
-    const proxyConnection = net.connect(
-      { port: proxyToProxyPort, allowHalfOpen: false },
-      connectedPromise.resolve,
-    );
-    this.serverConnects.add(proxyConnection);
-    proxyConnection.on('error', error => {
-      this.onConnectError(request.url, 'ProxyToProxy.ConnectError', error);
-      if (!socket.destroyed && socket.writable && socket.readable) {
-        socket.destroy(error);
+    if (!proxyToProxyPort && this.isClosing) return;
+
+    try {
+      const connectedPromise = createPromise();
+      const proxyConnection = net.connect(
+        { port: proxyToProxyPort, allowHalfOpen: false },
+        connectedPromise.resolve,
+      );
+      this.serverConnects.add(proxyConnection);
+      proxyConnection.on('error', error => {
+        this.onConnectError(request.url, 'ProxyToProxy.ConnectError', error);
+        if (!socket.destroyed && socket.writable && socket.readable) {
+          socket.destroy(error);
+        }
+      });
+
+      proxyConnection.once('end', () => this.serverConnects.delete(proxyConnection));
+      socket.once('end', () => this.serverConnects.delete(socket));
+
+      proxyConnection.once('close', () => destroyConnection(socket));
+      socket.once('close', () => destroyConnection(proxyConnection));
+
+      await connectedPromise;
+      this.registerProxySession(proxyConnection, sessionId);
+
+      socket.setNoDelay(true);
+      proxyConnection.setNoDelay(true);
+      // create a tunnel back to the same proxy
+      socket.pipe(proxyConnection).pipe(socket);
+      if (head.length) socket.emit('data', head);
+      socket.resume();
+    } catch (error) {
+      if (this.isClosing) return;
+      if (!(error instanceof CanceledPromiseError)) {
+        this.onConnectError(request.url, 'ClientToProxy.HttpConnectError', error);
       }
-    });
-
-    proxyConnection.once('end', () => this.serverConnects.delete(proxyConnection));
-    socket.once('end', () => this.serverConnects.delete(socket));
-
-    proxyConnection.once('close', () => destroyConnection(socket));
-    socket.once('close', () => destroyConnection(proxyConnection));
-
-    await connectedPromise;
-    this.registerProxySession(proxyConnection, sessionId);
-
-    socket.setNoDelay(true);
-    proxyConnection.setNoDelay(true);
-    // create a tunnel back to the same proxy
-    socket.pipe(proxyConnection).pipe(socket);
-    if (head.length) socket.emit('data', head);
-    socket.resume();
+      this.tryCloseConnectSocket(socket);
+    }
   }
 
   private onHttp2Session(session: http2.ServerHttp2Session): void {
