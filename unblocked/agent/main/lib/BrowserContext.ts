@@ -345,6 +345,8 @@ export default class BrowserContext
           ]);
         }
       }
+      // run just in case
+      [...this.pagesById.values()].map(x => x.didClose());
       this.websocketMessages.cleanup();
       this.resources.cleanup();
       this.events.close();
