@@ -54,9 +54,11 @@ export default function cliCommands(): Command {
       'Add salt (noise) to your claims signatures',
       randomBytes(32).toString('base64'),
     )
+
+    .option('-q, --quiet', "Don't log any details to the console.", false)
     .action(async (signerPattern: string, filename: string, args): Promise<void> => {
       try {
-        const { transferSignatures, claimSignatures, transferSalt, claimSalt } = args;
+        const { transferSignatures, claimSignatures, transferSalt, claimSalt, quiet } = args;
         const signersCount = signerPattern.length;
         assert(
           signerPattern.length <= 6,
@@ -100,8 +102,10 @@ export default function cliCommands(): Command {
           filename = filename.replace(Path.extname(filename), '');
         }
         const filepath = await address.save(true, Path.basename(filename), Path.dirname(filename));
-        console.log('Wrote address: %s to %s', address.bech32, filepath); // eslint-disable-line no-console
-        console.log(TypeSerializer.stringify(address.toJSON(), { format: true })); // eslint-disable-line no-console
+        if (!quiet) {
+          console.log('Wrote address: %s to %s', address.bech32, filepath); // eslint-disable-line no-console
+          console.log(TypeSerializer.stringify(address.toJSON(), { format: true })); // eslint-disable-line no-console
+        }
       } catch (err) {
         logError(err);
       }

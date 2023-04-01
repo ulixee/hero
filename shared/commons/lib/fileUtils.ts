@@ -11,6 +11,15 @@ export async function existsAsync(path: string): Promise<boolean> {
   }
 }
 
+export async function copyDir(fromDir: string, toDir: string): Promise<void> {
+  await Fs.mkdir(toDir, { recursive: true });
+  for (const file of await Fs.readdir(fromDir, { withFileTypes: true })) {
+    const path = `${fromDir}/${file.name}`;
+    if (file.isDirectory()) await copyDir(path, `${toDir}/${file.name}`);
+    else await Fs.copyFile(path, `${toDir}/${file.name}`);
+  }
+}
+
 export async function readFileAsJson<T>(path: string): Promise<T> {
   const buffer = await Fs.readFile(path, 'utf8');
   if (!buffer) return null;

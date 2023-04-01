@@ -20,6 +20,14 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
   private storedEventsByType = new Map<keyof T & (string | symbol), any[]>();
   private reemitterCountByEventType: { [eventType: string]: number } = {};
 
+  constructor() {
+    super();
+    this.defaultErrorLogger = this.defaultErrorLogger.bind(this);
+    if ('captureRejections' in this) (this as any).captureRejections = true;
+    // add an error logger as a backup
+    super.on('error', this.defaultErrorLogger);
+  }
+
   public cancelPendingEvents(message?: string, excludeEvents?: (keyof T & string)[]): void {
     this.storedEventsByType.clear();
     const events = [...this.pendingWaitEventsById.values()];
@@ -105,6 +113,10 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     includeUnhandledEvents = false,
   ): this {
     super.on(eventType, listenerFn);
+    // if we're adding an error logger, we can remove the default logger
+    if (eventType === 'error' && listenerFn !== this.defaultErrorLogger as any) {
+      super.off('error', this.defaultErrorLogger);
+    }
     this.onEventListenerAdded?.(eventType);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
@@ -113,6 +125,10 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
   ): this {
+    // if we're adding an error logger, we can remove the default logger
+    if (eventType === 'error' && listenerFn !== this.defaultErrorLogger as any) {
+      super.on('error', this.defaultErrorLogger);
+    }
     return super.off(eventType, listenerFn);
   }
 
@@ -173,6 +189,11 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
   ): this {
     super.prependOnceListener(eventType, listenerFn);
     return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
+  }
+
+  protected defaultErrorLogger(this: this, error: Error): void {
+    if (this.#logger) this.#logger.error('EventListenerError', error);
+    else console.warn('EventListenerError', error);
   }
 
   private replayOrClearMissedEvents<K extends keyof T & (string | symbol)>(
