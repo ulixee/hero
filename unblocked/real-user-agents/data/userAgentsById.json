@@ -8448,7 +8448,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     "browserId": "chrome-111-0",
-    "marketshare": 0
+    "marketshare": 3.6
   },
   "mac-os-10-15--chrome-110-0": {
     "id": "mac-os-10-15--chrome-110-0",
@@ -8471,7 +8471,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "browserId": "chrome-110-0",
-    "marketshare": 2.38
+    "marketshare": 3.09
   },
   "mac-os-10-15--chrome-109-0": {
     "id": "mac-os-10-15--chrome-109-0",
@@ -8494,7 +8494,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 4.21
+    "marketshare": 0.69
   },
   "mac-os-10-15--chrome-108-0": {
     "id": "mac-os-10-15--chrome-108-0",
@@ -8517,7 +8517,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.75
+    "marketshare": 0.26
   },
   "mac-os-10-15--chrome-107-0": {
     "id": "mac-os-10-15--chrome-107-0",
@@ -8540,7 +8540,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
     "browserId": "chrome-107-0",
-    "marketshare": 0.09
+    "marketshare": 0.06
   },
   "mac-os-10-15--chrome-106-0": {
     "id": "mac-os-10-15--chrome-106-0",
@@ -8563,7 +8563,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
     "browserId": "chrome-106-0",
-    "marketshare": 0.06
+    "marketshare": 0.03
   },
   "mac-os-10-15--chrome-105-0": {
     "id": "mac-os-10-15--chrome-105-0",
@@ -8586,7 +8586,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
     "browserId": "chrome-105-0",
-    "marketshare": 0.09
+    "marketshare": 0.06
   },
   "mac-os-10-15--chrome-104-0": {
     "id": "mac-os-10-15--chrome-104-0",
@@ -8632,7 +8632,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.$patch$ Safari/537.36",
     "browserId": "chrome-103-0",
-    "marketshare": 0.15
+    "marketshare": 0.19
   },
   "mac-os-10-15--chrome-102-0": {
     "id": "mac-os-10-15--chrome-102-0",
@@ -8839,7 +8839,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.$patch$ Safari/537.36",
     "browserId": "chrome-94-0",
-    "marketshare": 0
+    "marketshare": 0.03
   },
   "mac-os-10-15--chrome-93-0": {
     "id": "mac-os-10-15--chrome-93-0",
@@ -8931,7 +8931,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.$patch$ Safari/537.36",
     "browserId": "chrome-90-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "mac-os-10-15--chrome-89-0": {
     "id": "mac-os-10-15--chrome-89-0",
@@ -8961,7 +8961,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.$patch$ Safari/537.36",
     "browserId": "chrome-88-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "mac-os-10-15--chrome-87-0": {
     "id": "mac-os-10-15--chrome-87-0",
@@ -8976,7 +8976,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.$patch$ Safari/537.36",
     "browserId": "chrome-87-0",
-    "marketshare": 0.03
+    "marketshare": 0.06
   },
   "mac-os-10-15--chrome-86-0": {
     "id": "mac-os-10-15--chrome-86-0",
@@ -9036,7 +9036,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.$patch$ Safari/537.36",
     "browserId": "chrome-83-0",
-    "marketshare": 0.06
+    "marketshare": 0.03
   },
   "mac-os-10-15--chrome-81-0": {
     "id": "mac-os-10-15--chrome-81-0",
@@ -9276,7 +9276,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.$patch$ Safari/537.36",
     "browserId": "chrome-66-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "mac-os-10-15--chrome-65-0": {
     "id": "mac-os-10-15--chrome-65-0",
@@ -9426,7 +9426,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.$patch$ Safari/537.36",
     "browserId": "chrome-56-0",
-    "marketshare": 0.09
+    "marketshare": 0.06
   },
   "mac-os-10-15--chrome-55-0": {
     "id": "mac-os-10-15--chrome-55-0",
@@ -9681,7 +9681,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
     "browserId": "edge-111-0",
-    "marketshare": 0
+    "marketshare": 1.15
   },
   "mac-os-10-15--edge-110-0": {
     "id": "mac-os-10-15--edge-110-0",
@@ -9696,7 +9696,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
     "browserId": "edge-110-0",
-    "marketshare": 1.14
+    "marketshare": 1.01
   },
   "mac-os-10-15--edge-109-0": {
     "id": "mac-os-10-15--edge-109-0",
@@ -9711,7 +9711,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.81
+    "marketshare": 0.06
   },
   "mac-os-10-15--edge-108-0": {
     "id": "mac-os-10-15--edge-108-0",
@@ -9726,7 +9726,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
     "browserId": "edge-108-0",
-    "marketshare": 0.06
+    "marketshare": 0.03
   },
   "mac-os-10-15--edge-107-0": {
     "id": "mac-os-10-15--edge-107-0",
@@ -9741,7 +9741,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.24",
     "browserId": "edge-107-0",
-    "marketshare": 0.06
+    "marketshare": 0
   },
   "mac-os-10-15--edge-106-0": {
     "id": "mac-os-10-15--edge-106-0",
@@ -10146,7 +10146,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
     "browserId": "firefox-111-0",
-    "marketshare": 0
+    "marketshare": 0.29
   },
   "mac-os-10-15--firefox-110-0": {
     "id": "mac-os-10-15--firefox-110-0",
@@ -10161,7 +10161,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0",
     "browserId": "firefox-110-0",
-    "marketshare": 0.28
+    "marketshare": 0.39
   },
   "mac-os-10-15--firefox-109-0": {
     "id": "mac-os-10-15--firefox-109-0",
@@ -10176,7 +10176,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.43
+    "marketshare": 0.03
   },
   "mac-os-10-15--firefox-108-0": {
     "id": "mac-os-10-15--firefox-108-0",
@@ -10191,7 +10191,7 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:108.0) Gecko/20100101 Firefox/108.0",
     "browserId": "firefox-108-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "mac-os-10-15--firefox-107-0": {
     "id": "mac-os-10-15--firefox-107-0",
@@ -11683,7 +11683,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     "browserId": "chrome-111-0",
-    "marketshare": 0
+    "marketshare": 0.05
   },
   "mac-os-10-14--chrome-110-0": {
     "id": "mac-os-10-14--chrome-110-0",
@@ -11705,7 +11705,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "browserId": "chrome-110-0",
-    "marketshare": 0.07
+    "marketshare": 0.04
   },
   "mac-os-10-14--chrome-109-0": {
     "id": "mac-os-10-14--chrome-109-0",
@@ -11727,7 +11727,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 0.12
+    "marketshare": 0
   },
   "mac-os-10-14--chrome-108-0": {
     "id": "mac-os-10-14--chrome-108-0",
@@ -11749,7 +11749,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "mac-os-10-14--chrome-107-0": {
     "id": "mac-os-10-14--chrome-107-0",
@@ -13090,7 +13090,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
     "browserId": "edge-111-0",
-    "marketshare": 0
+    "marketshare": 0.01
   },
   "mac-os-10-14--edge-110-0": {
     "id": "mac-os-10-14--edge-110-0",
@@ -13105,7 +13105,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
     "browserId": "edge-110-0",
-    "marketshare": 0.03
+    "marketshare": 0.01
   },
   "mac-os-10-14--edge-109-0": {
     "id": "mac-os-10-14--edge-109-0",
@@ -13120,7 +13120,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "mac-os-10-14--edge-108-0": {
     "id": "mac-os-10-14--edge-108-0",
@@ -13585,7 +13585,7 @@
     "operatingSystemId": "mac-os-10-14",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "mac-os-10-14--firefox-108-0": {
     "id": "mac-os-10-14--firefox-108-0",
@@ -15107,7 +15107,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     "browserId": "chrome-111-0",
-    "marketshare": 0
+    "marketshare": 0.1
   },
   "mac-os-10-13--chrome-110-0": {
     "id": "mac-os-10-13--chrome-110-0",
@@ -15129,7 +15129,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "browserId": "chrome-110-0",
-    "marketshare": 0.07
+    "marketshare": 0.08
   },
   "mac-os-10-13--chrome-109-0": {
     "id": "mac-os-10-13--chrome-109-0",
@@ -15151,7 +15151,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 0.12
+    "marketshare": 0.01
   },
   "mac-os-10-13--chrome-108-0": {
     "id": "mac-os-10-13--chrome-108-0",
@@ -15173,7 +15173,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "mac-os-10-13--chrome-107-0": {
     "id": "mac-os-10-13--chrome-107-0",
@@ -16514,7 +16514,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
     "browserId": "edge-111-0",
-    "marketshare": 0
+    "marketshare": 0.03
   },
   "mac-os-10-13--edge-110-0": {
     "id": "mac-os-10-13--edge-110-0",
@@ -16529,7 +16529,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
     "browserId": "edge-110-0",
-    "marketshare": 0.03
+    "marketshare": 0.02
   },
   "mac-os-10-13--edge-109-0": {
     "id": "mac-os-10-13--edge-109-0",
@@ -16544,7 +16544,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "mac-os-10-13--edge-108-0": {
     "id": "mac-os-10-13--edge-108-0",
@@ -16994,7 +16994,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:109.0) Gecko/20100101 Firefox/110.0",
     "browserId": "firefox-110-0",
-    "marketshare": 0
+    "marketshare": 0.01
   },
   "mac-os-10-13--firefox-109-0": {
     "id": "mac-os-10-13--firefox-109-0",
@@ -17009,7 +17009,7 @@
     "operatingSystemId": "mac-os-10-13",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "mac-os-10-13--firefox-108-0": {
     "id": "mac-os-10-13--firefox-108-0",
@@ -24180,7 +24180,7 @@
     "operatingSystemId": "mac-os-10-11",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.8 (KHTML, like Gecko) Version/9.1.3 Safari/601.7.8",
     "browserId": "safari-9-1",
-    "marketshare": 0.2
+    "marketshare": 0.1
   },
   "mac-os-10-10--chrome-87-0": {
     "id": "mac-os-10-10--chrome-87-0",
@@ -31634,7 +31634,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     "browserId": "chrome-111-0",
-    "marketshare": 0
+    "marketshare": 1.95
   },
   "windows-11--chrome-110-0": {
     "id": "windows-11--chrome-110-0",
@@ -31648,7 +31648,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "browserId": "chrome-110-0",
-    "marketshare": 1.17
+    "marketshare": 1.67
   },
   "windows-11--chrome-109-0": {
     "id": "windows-11--chrome-109-0",
@@ -31662,7 +31662,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 2.07
+    "marketshare": 0.37
   },
   "windows-11--chrome-108-0": {
     "id": "windows-11--chrome-108-0",
@@ -31676,7 +31676,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.37
+    "marketshare": 0.14
   },
   "windows-11--chrome-107-0": {
     "id": "windows-11--chrome-107-0",
@@ -31690,7 +31690,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
     "browserId": "chrome-107-0",
-    "marketshare": 0.04
+    "marketshare": 0.03
   },
   "windows-11--chrome-106-0": {
     "id": "windows-11--chrome-106-0",
@@ -31704,7 +31704,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
     "browserId": "chrome-106-0",
-    "marketshare": 0.03
+    "marketshare": 0.01
   },
   "windows-11--chrome-105-0": {
     "id": "windows-11--chrome-105-0",
@@ -31718,7 +31718,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
     "browserId": "chrome-105-0",
-    "marketshare": 0.04
+    "marketshare": 0.03
   },
   "windows-11--chrome-104-0": {
     "id": "windows-11--chrome-104-0",
@@ -31746,7 +31746,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.$patch$ Safari/537.36",
     "browserId": "chrome-103-0",
-    "marketshare": 0.07
+    "marketshare": 0.1
   },
   "windows-11--chrome-102-0": {
     "id": "windows-11--chrome-102-0",
@@ -31872,7 +31872,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.$patch$ Safari/537.36",
     "browserId": "chrome-94-0",
-    "marketshare": 0
+    "marketshare": 0.01
   },
   "windows-11--chrome-93-0": {
     "id": "windows-11--chrome-93-0",
@@ -31928,7 +31928,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.$patch$ Safari/537.36",
     "browserId": "chrome-90-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-11--chrome-89-0": {
     "id": "windows-11--chrome-89-0",
@@ -31956,7 +31956,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.$patch$ Safari/537.36",
     "browserId": "chrome-88-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-11--chrome-87-0": {
     "id": "windows-11--chrome-87-0",
@@ -31970,7 +31970,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.$patch$ Safari/537.36",
     "browserId": "chrome-87-0",
-    "marketshare": 0.01
+    "marketshare": 0.03
   },
   "windows-11--chrome-86-0": {
     "id": "windows-11--chrome-86-0",
@@ -32026,7 +32026,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.$patch$ Safari/537.36",
     "browserId": "chrome-83-0",
-    "marketshare": 0.03
+    "marketshare": 0.01
   },
   "windows-11--chrome-81-0": {
     "id": "windows-11--chrome-81-0",
@@ -32250,7 +32250,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.$patch$ Safari/537.36",
     "browserId": "chrome-66-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-11--chrome-65-0": {
     "id": "windows-11--chrome-65-0",
@@ -32390,7 +32390,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.$patch$ Safari/537.36",
     "browserId": "chrome-56-0",
-    "marketshare": 0.04
+    "marketshare": 0.03
   },
   "windows-11--chrome-55-0": {
     "id": "windows-11--chrome-55-0",
@@ -32670,7 +32670,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
     "browserId": "edge-111-0",
-    "marketshare": 0
+    "marketshare": 0.62
   },
   "windows-11--edge-110-0": {
     "id": "windows-11--edge-110-0",
@@ -32684,7 +32684,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
     "browserId": "edge-110-0",
-    "marketshare": 0.56
+    "marketshare": 0.55
   },
   "windows-11--edge-109-0": {
     "id": "windows-11--edge-109-0",
@@ -32698,7 +32698,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.4
+    "marketshare": 0.03
   },
   "windows-11--edge-108-0": {
     "id": "windows-11--edge-108-0",
@@ -32712,7 +32712,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
     "browserId": "edge-108-0",
-    "marketshare": 0.03
+    "marketshare": 0.01
   },
   "windows-11--edge-107-0": {
     "id": "windows-11--edge-107-0",
@@ -32726,7 +32726,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.24",
     "browserId": "edge-107-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "windows-11--edge-106-0": {
     "id": "windows-11--edge-106-0",
@@ -33104,7 +33104,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
     "browserId": "firefox-111-0",
-    "marketshare": 0
+    "marketshare": 0.16
   },
   "windows-11--firefox-110-0": {
     "id": "windows-11--firefox-110-0",
@@ -33118,7 +33118,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
     "browserId": "firefox-110-0",
-    "marketshare": 0.13
+    "marketshare": 0.21
   },
   "windows-11--firefox-109-0": {
     "id": "windows-11--firefox-109-0",
@@ -33132,7 +33132,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.21
+    "marketshare": 0.01
   },
   "windows-11--firefox-108-0": {
     "id": "windows-11--firefox-108-0",
@@ -33146,7 +33146,7 @@
     "operatingSystemId": "windows-11",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0",
     "browserId": "firefox-108-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-11--firefox-107-0": {
     "id": "windows-11--firefox-107-0",
@@ -34239,7 +34239,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
     "browserId": "chrome-111-0",
-    "marketshare": 0
+    "marketshare": 4.88
   },
   "windows-10--chrome-110-0": {
     "id": "windows-10--chrome-110-0",
@@ -34268,7 +34268,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
     "browserId": "chrome-110-0",
-    "marketshare": 3.59
+    "marketshare": 4.19
   },
   "windows-10--chrome-109-0": {
     "id": "windows-10--chrome-109-0",
@@ -34297,7 +34297,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 6.35
+    "marketshare": 0.94
   },
   "windows-10--chrome-108-0": {
     "id": "windows-10--chrome-108-0",
@@ -34326,7 +34326,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 1.13
+    "marketshare": 0.35
   },
   "windows-10--chrome-107-0": {
     "id": "windows-10--chrome-107-0",
@@ -34355,7 +34355,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
     "browserId": "chrome-107-0",
-    "marketshare": 0.14
+    "marketshare": 0.08
   },
   "windows-10--chrome-106-0": {
     "id": "windows-10--chrome-106-0",
@@ -34384,7 +34384,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
     "browserId": "chrome-106-0",
-    "marketshare": 0.09
+    "marketshare": 0.04
   },
   "windows-10--chrome-105-0": {
     "id": "windows-10--chrome-105-0",
@@ -34413,7 +34413,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
     "browserId": "chrome-105-0",
-    "marketshare": 0.14
+    "marketshare": 0.08
   },
   "windows-10--chrome-104-0": {
     "id": "windows-10--chrome-104-0",
@@ -34471,7 +34471,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.$patch$ Safari/537.36",
     "browserId": "chrome-103-0",
-    "marketshare": 0.23
+    "marketshare": 0.26
   },
   "windows-10--chrome-102-0": {
     "id": "windows-10--chrome-102-0",
@@ -34500,7 +34500,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.$patch$ Safari/537.36",
     "browserId": "chrome-102-0",
-    "marketshare": 0.09
+    "marketshare": 0.08
   },
   "windows-10--chrome-101-0": {
     "id": "windows-10--chrome-101-0",
@@ -34732,7 +34732,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.$patch$ Safari/537.36",
     "browserId": "chrome-94-0",
-    "marketshare": 0
+    "marketshare": 0.04
   },
   "windows-10--chrome-93-0": {
     "id": "windows-10--chrome-93-0",
@@ -34761,7 +34761,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.$patch$ Safari/537.36",
     "browserId": "chrome-93-0",
-    "marketshare": 0.09
+    "marketshare": 0.08
   },
   "windows-10--chrome-92-0": {
     "id": "windows-10--chrome-92-0",
@@ -34848,7 +34848,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.$patch$ Safari/537.36",
     "browserId": "chrome-90-0",
-    "marketshare": 0.04
+    "marketshare": 0
   },
   "windows-10--chrome-89-0": {
     "id": "windows-10--chrome-89-0",
@@ -34876,7 +34876,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.$patch$ Safari/537.36",
     "browserId": "chrome-88-0",
-    "marketshare": 0.04
+    "marketshare": 0
   },
   "windows-10--chrome-87-0": {
     "id": "windows-10--chrome-87-0",
@@ -34890,7 +34890,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.$patch$ Safari/537.36",
     "browserId": "chrome-87-0",
-    "marketshare": 0.04
+    "marketshare": 0.08
   },
   "windows-10--chrome-86-0": {
     "id": "windows-10--chrome-86-0",
@@ -34946,7 +34946,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.$patch$ Safari/537.36",
     "browserId": "chrome-83-0",
-    "marketshare": 0.09
+    "marketshare": 0.04
   },
   "windows-10--chrome-81-0": {
     "id": "windows-10--chrome-81-0",
@@ -34988,7 +34988,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.$patch$ Safari/537.36",
     "browserId": "chrome-79-0",
-    "marketshare": 0.09
+    "marketshare": 0.08
   },
   "windows-10--chrome-78-0": {
     "id": "windows-10--chrome-78-0",
@@ -35030,7 +35030,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.$patch$ Safari/537.36",
     "browserId": "chrome-76-0",
-    "marketshare": 0.09
+    "marketshare": 0.08
   },
   "windows-10--chrome-75-0": {
     "id": "windows-10--chrome-75-0",
@@ -35170,7 +35170,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.$patch$ Safari/537.36",
     "browserId": "chrome-66-0",
-    "marketshare": 0.04
+    "marketshare": 0
   },
   "windows-10--chrome-65-0": {
     "id": "windows-10--chrome-65-0",
@@ -35310,7 +35310,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.$patch$ Safari/537.36",
     "browserId": "chrome-56-0",
-    "marketshare": 0.14
+    "marketshare": 0.08
   },
   "windows-10--chrome-55-0": {
     "id": "windows-10--chrome-55-0",
@@ -35590,7 +35590,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
     "browserId": "edge-111-0",
-    "marketshare": 0
+    "marketshare": 1.56
   },
   "windows-10--edge-110-0": {
     "id": "windows-10--edge-110-0",
@@ -35604,7 +35604,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
     "browserId": "edge-110-0",
-    "marketshare": 1.72
+    "marketshare": 1.38
   },
   "windows-10--edge-109-0": {
     "id": "windows-10--edge-109-0",
@@ -35618,7 +35618,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 1.23
+    "marketshare": 0.08
   },
   "windows-10--edge-108-0": {
     "id": "windows-10--edge-108-0",
@@ -35632,7 +35632,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.42",
     "browserId": "edge-108-0",
-    "marketshare": 0.09
+    "marketshare": 0.04
   },
   "windows-10--edge-107-0": {
     "id": "windows-10--edge-107-0",
@@ -35646,7 +35646,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.24",
     "browserId": "edge-107-0",
-    "marketshare": 0.09
+    "marketshare": 0
   },
   "windows-10--edge-106-0": {
     "id": "windows-10--edge-106-0",
@@ -36080,7 +36080,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
     "browserId": "firefox-111-0",
-    "marketshare": 0
+    "marketshare": 0.4
   },
   "windows-10--firefox-110-0": {
     "id": "windows-10--firefox-110-0",
@@ -36094,7 +36094,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
     "browserId": "firefox-110-0",
-    "marketshare": 0.42
+    "marketshare": 0.53
   },
   "windows-10--firefox-109-0": {
     "id": "windows-10--firefox-109-0",
@@ -36108,7 +36108,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.66
+    "marketshare": 0.04
   },
   "windows-10--firefox-108-0": {
     "id": "windows-10--firefox-108-0",
@@ -36122,7 +36122,7 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0",
     "browserId": "firefox-108-0",
-    "marketshare": 0.04
+    "marketshare": 0
   },
   "windows-10--firefox-107-0": {
     "id": "windows-10--firefox-107-0",
@@ -37215,7 +37215,7 @@
     "operatingSystemId": "windows-8-1",
     "pattern": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 0.12
+    "marketshare": 0
   },
   "windows-8-1--chrome-108-0": {
     "id": "windows-8-1--chrome-108-0",
@@ -37230,7 +37230,7 @@
     "operatingSystemId": "windows-8-1",
     "pattern": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "windows-8-1--chrome-107-0": {
     "id": "windows-8-1--chrome-107-0",
@@ -38520,7 +38520,7 @@
     "operatingSystemId": "windows-8-1",
     "pattern": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.02
+    "marketshare": 0
   },
   "windows-8-1--edge-108-0": {
     "id": "windows-8-1--edge-108-0",
@@ -38985,7 +38985,7 @@
     "operatingSystemId": "windows-8-1",
     "pattern": "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-8-1--firefox-108-0": {
     "id": "windows-8-1--firefox-108-0",
@@ -40424,7 +40424,7 @@
     "operatingSystemId": "windows-8",
     "pattern": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 0.06
+    "marketshare": 0
   },
   "windows-8--chrome-108-0": {
     "id": "windows-8--chrome-108-0",
@@ -40438,7 +40438,7 @@
     "operatingSystemId": "windows-8",
     "pattern": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-8--chrome-107-0": {
     "id": "windows-8--chrome-107-0",
@@ -41642,7 +41642,7 @@
     "operatingSystemId": "windows-8",
     "pattern": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.01
+    "marketshare": 0
   },
   "windows-8--edge-108-0": {
     "id": "windows-8--edge-108-0",
@@ -43434,7 +43434,7 @@
     "operatingSystemId": "windows-7",
     "pattern": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
     "browserId": "chrome-109-0",
-    "marketshare": 0.31
+    "marketshare": 0.03
   },
   "windows-7--chrome-108-0": {
     "id": "windows-7--chrome-108-0",
@@ -43448,7 +43448,7 @@
     "operatingSystemId": "windows-7",
     "pattern": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "browserId": "chrome-108-0",
-    "marketshare": 0.05
+    "marketshare": 0.01
   },
   "windows-7--chrome-107-0": {
     "id": "windows-7--chrome-107-0",
@@ -44764,7 +44764,7 @@
     "operatingSystemId": "windows-7",
     "pattern": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
     "browserId": "edge-109-0",
-    "marketshare": 0.06
+    "marketshare": 0
   },
   "windows-7--edge-108-0": {
     "id": "windows-7--edge-108-0",
@@ -45170,7 +45170,7 @@
     "operatingSystemId": "windows-7",
     "pattern": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
     "browserId": "firefox-111-0",
-    "marketshare": 0
+    "marketshare": 0.01
   },
   "windows-7--firefox-110-0": {
     "id": "windows-7--firefox-110-0",
@@ -45198,7 +45198,7 @@
     "operatingSystemId": "windows-7",
     "pattern": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
     "browserId": "firefox-109-0",
-    "marketshare": 0.03
+    "marketshare": 0
   },
   "windows-7--firefox-108-0": {
     "id": "windows-7--firefox-108-0",
