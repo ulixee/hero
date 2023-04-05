@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
-import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 
 const pageScripts = {

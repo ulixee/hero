@@ -3,6 +3,7 @@ import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from '@ulixee/js-path';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
 import * as readline from 'readline';
 import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -154,10 +155,7 @@ export default class CoreSession
     return await this.commandQueue.run('Session.getDetachedElements', sessionId, name);
   }
 
-  public async getDetachedResources(
-    sessionId: string,
-    name: string,
-  ): Promise<IDetachedResource[]> {
+  public async getDetachedResources(sessionId: string, name: string): Promise<IDetachedResource[]> {
     return await this.commandQueue.run('Session.getDetachedResources', sessionId, name);
   }
 
@@ -270,3 +268,5 @@ export default class CoreSession
     this.cliPrompt.prompt(true);
   }
 }
+
+addGlobalInstance(CoreSession);

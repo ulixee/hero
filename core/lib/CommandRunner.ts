@@ -13,7 +13,7 @@ export default class CommandRunner {
         return;
       }
 
-      throw new Error(`Target for command not available (${targetName})`);
+      throw new Error(`Target for command not available (${targetName}:${method})`);
     }
 
     if (!targets[targetName].isAllowedCommand(method)) {

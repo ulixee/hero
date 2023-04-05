@@ -4,6 +4,7 @@ import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions
 import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
 import ITransportToCore from '@ulixee/net/interfaces/ITransportToCore';
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
@@ -147,3 +148,5 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     return host;
   }
 }
+
+addGlobalInstance(ConnectionToHeroCore);

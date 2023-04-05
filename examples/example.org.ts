@@ -1,5 +1,4 @@
-import Hero from '@ulixee/hero';
-import { LocationTrigger } from '@ulixee/unblocked-specification/agent/browser/Location';
+import Hero, { LocationTrigger } from '@ulixee/hero';
 
 // NOTE: You need to start a Ulixee Miner to run this example
 async function run() {

@@ -1,8 +1,13 @@
 import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
+import {
+  ISuperElement,
+  ISuperNode,
+  ISuperNodeList,
+} from '@ulixee/awaited-dom/base/interfaces/super';
 import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
 import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from '@ulixee/awaited-dom/impl/official-klasses/Storage';
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
 import CSSStyleDeclaration from '@ulixee/awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from '@ulixee/awaited-dom/impl/official-klasses/Request';
 import {
@@ -393,6 +398,8 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return this.#frameEnvironments;
   }
 }
+
+addGlobalInstance(Tab);
 
 export function getCoreTab(tab: Tab): Promise<CoreTab> {
   return tab[InternalPropertiesSymbol].coreTabPromise.then(x => {

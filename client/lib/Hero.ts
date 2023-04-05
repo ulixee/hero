@@ -5,6 +5,7 @@ import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument'
 import IDomStorage from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
 import Response from '@ulixee/awaited-dom/impl/official-klasses/Response';
 import {
   ISuperElement,
@@ -723,6 +724,8 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     return this.#tabs;
   }
 }
+
+addGlobalInstance(Hero);
 
 async function getCoreFrameForInteractions(
   interactions: IInteractions,
