@@ -1,3 +1,5 @@
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
+
 export default class RemoteError extends Error {
   private readonly type: string;
   private readonly code: string;
@@ -30,3 +32,5 @@ export default class RemoteError extends Error {
     return `${this.message}: ${codeMessage}${extras}`;
   }
 }
+
+addGlobalInstance(RemoteError);

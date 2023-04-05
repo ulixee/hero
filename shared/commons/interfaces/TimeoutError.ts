@@ -1,4 +1,5 @@
 import { registerSerializableErrorType } from '../lib/TypeSerializer';
+import addGlobalInstance from '../lib/addGlobalInstance';
 
 export default class TimeoutError extends Error {
   constructor(message?: string) {
@@ -7,4 +8,5 @@ export default class TimeoutError extends Error {
   }
 }
 
+addGlobalInstance(TimeoutError);
 registerSerializableErrorType(TimeoutError);

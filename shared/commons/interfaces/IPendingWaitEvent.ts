@@ -1,3 +1,4 @@
+import addGlobalInstance from '../lib/addGlobalInstance';
 import IResolvablePromise from './IResolvablePromise';
 import { registerSerializableErrorType } from '../lib/TypeSerializer';
 
@@ -15,4 +16,5 @@ export default interface IPendingWaitEvent {
   error: CanceledPromiseError;
 }
 
+addGlobalInstance(CanceledPromiseError);
 registerSerializableErrorType(CanceledPromiseError);
