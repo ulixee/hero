@@ -54,7 +54,6 @@ export default function cliCommands(): Command {
       'Add salt (noise) to your claims signatures',
       randomBytes(32).toString('base64'),
     )
-
     .option('-q, --quiet', "Don't log any details to the console.", false)
     .action(async (signerPattern: string, filename: string, args): Promise<void> => {
       try {

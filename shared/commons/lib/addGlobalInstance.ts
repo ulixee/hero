@@ -8,7 +8,7 @@ export default function addGlobalInstance(...constructors: Function[]): void {
 
     Object.defineProperty(constructor, Symbol.hasInstance, {
       value: function hasInstance(candidate): boolean {
-        return this === constructor && !!candidate[instanceSymbol];
+        return this === constructor && !!candidate?.[instanceSymbol];
       },
     });
   }

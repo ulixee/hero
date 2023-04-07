@@ -34,9 +34,12 @@ export function isPortInUse(port: number | string): Promise<boolean> {
   });
 }
 
-// @deprecated - change case... can't remove due to hero dependency
-export function getCallSite(priorToFilename?: string, endFilename?: string): ISourceCodeLocation[] {
-  return getCallsite(priorToFilename, endFilename);
+function customStacktrace(_: Error, callsite: NodeJS.CallSite[]): ISourceCodeLocation[] {
+  return callsite.map(x => ({
+    filename: x.getFileName(),
+    line: x.getLineNumber(),
+    column: x.getColumnNumber() - 1,
+  }));
 }
 
 export function getCallsite(priorToFilename?: string, endFilename?: string): ISourceCodeLocation[] {
@@ -44,13 +47,7 @@ export function getCallsite(priorToFilename?: string, endFilename?: string): ISo
   const startingTraceLimit = Error.stackTraceLimit;
 
   Error.stackTraceLimit = 25;
-  Error.prepareStackTrace = (_, callsite): ISourceCodeLocation[] => {
-    return callsite.map(x => ({
-      filename: x.getFileName(),
-      line: x.getLineNumber(),
-      column: x.getColumnNumber() - 1,
-    }));
-  };
+  Error.prepareStackTrace = customStacktrace;
 
   const capture: { stack?: ISourceCodeLocation[] } = {};
   Error.captureStackTrace(capture);
