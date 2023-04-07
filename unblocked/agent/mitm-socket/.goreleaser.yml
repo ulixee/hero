@@ -10,20 +10,23 @@ builds:
       - GO111MODULE=on
       - CGO_ENABLED=0
 archives:
-  - name_template: 'connect_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    replacements:
-      darwin: mac
-      linux: linux
-      windows: win
-      386: i386
-      amd64: x86_64
+  - name_template: >-
+      connect_
+      {{ .Version }}_
+      {{- if eq .Os "darwin" }}darwin_
+      {{- else if eq .Os "linux" }}linux_
+      {{- else if eq .Os "windows" }}win_{{end}}
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{end}}
+    rlcp: true
     format: gz
     files:
       - none*
 checksum:
   name_template: 'connect.checksum'
 snapshot:
-  name_template: '{{ .Tag }}-snapshot'
+  name_template: "{{ .Tag }}-snapshot"
 changelog:
   skip: true
 release:

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	tls "github.com/ulixee/utls"
+	tls "github.com/refraction-networking/utls"
 )
 
 var isInited = false
@@ -29,17 +29,22 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 		chromeVersion, _ := strconv.ParseInt(chromeVersionBit, 10, 0)
 		// lowest supported is chrome 72, otherwise channel id extensions crop up
 		if chromeVersion < 83 {
-			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_72)
-		} else if chromeVersion < 95 {
-			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_83)
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_72)
+		} else if chromeVersion < 91 {
+			// application settings added in chrome 91
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_83)
 		} else if chromeVersion < 98 {
-			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_95)
+		   // chrome 98 removed tls 1.1, 1.0
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_96)
+		} else if chromeVersion < 110 {
+		   // chrome 110 implemented shuffling
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_100)
 		} else {
-			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_98)
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_106_Shuffle)
 		}
 	} else {
-		// default to chrome98
-		spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_98)
+		// default to latest shuffle
+		spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_106_Shuffle)
 	}
 
 	tlsConfig := tls.Config{

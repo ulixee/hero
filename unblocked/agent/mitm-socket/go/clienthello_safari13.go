@@ -1,7 +1,7 @@
 package main
 
 import (
-	tls "github.com/ulixee/utls"
+	tls "github.com/refraction-networking/utls"
 )
 
 // TODO: move this to a json format that's sent in.. thus the raw values

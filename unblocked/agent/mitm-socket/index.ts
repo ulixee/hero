@@ -29,7 +29,10 @@ export default class MitmSocket
   public readonly socketPath: string;
   public alpn = 'http/1.1';
   public rawApplicationSettings: Buffer;
-  public alps: { settings?: { id: number; value: number }[]; acceptCh: Buffer };
+  public alps: {
+    settings?: { id: number; value: number }[];
+    acceptCh?: { domain: string; headers: string[] };
+  };
   public socket: net.Socket;
   public dnsResolvedIp: string;
   public remoteAddress: string;
@@ -185,10 +188,23 @@ export default class MitmSocket
       if (message.rawApplicationSettings) {
         // settings are http2 frames
         this.rawApplicationSettings = Buffer.from(message.rawApplicationSettings, 'base64');
+        const acceptChFrame = message.alps?.AcceptChPayload
+          ? Buffer.from(message.alps.AcceptChPayload, 'base64')
+          : null;
+
+        let acceptCh: this['alps']['acceptCh'];
+        if (acceptChFrame) {
+          const originLength = acceptChFrame.readUint16BE();
+          const origin = acceptChFrame.subarray(2, originLength + 2).toString('utf8');
+          const headerLength = acceptChFrame.readUint16BE(3 + originLength);
+          const headers = acceptChFrame
+            .subarray(originLength + 4, originLength + 4 + headerLength)
+            .toString('utf8');
+          acceptCh = { domain: origin, headers: headers.split(',').map(x => x.trim()) };
+        }
+
         this.alps = {
-          acceptCh: message.alps?.AcceptChPayload
-            ? Buffer.from(message.alps.AcceptChPayload, 'base64')
-            : null,
+          acceptCh,
           settings: message.alps?.Settings?.map(x => {
             return {
               id: x.id,

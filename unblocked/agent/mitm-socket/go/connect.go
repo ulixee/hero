@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/http2"
 	"log"
 	"net"
 	"os"
 	"time"
 
-	utls "github.com/ulixee/utls"
+	"golang.org/x/net/http2"
+
+	utls "github.com/refraction-networking/utls"
 )
 
 const CertsMode = "certs"
