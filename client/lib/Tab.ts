@@ -190,7 +190,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
-  public async goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
+  public async goto(href: string, options?: { timeoutMs?: number, referrer?: string }): Promise<Resource> {
     const coreTab = await this.#coreTabOrReject;
     const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
