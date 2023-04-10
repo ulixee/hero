@@ -302,14 +302,16 @@ Navigates forward in the navigation history stack.
 
 #### **Returns**: `Promise<string>` The new document url.
 
-### tab.goto *(locationHref, timeoutMs?)* {#goto}
+### tab.goto *(locationHref, options?: { timeoutMs?: number, referrer?: string }?)* {#goto}
 
 Executes a navigation request for the document associated with the parent Hero instance.
 
 #### **Arguments**:
 
 - locationHref `string` The location to navigate to.
-- timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
+- options `object` Optional object with the options for the navigation.
+  - timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
+  - referrer `string`. Optional string containing the referrer you would like to inject.
 
 #### **Returns**: [`Promise<Resource>`](../advanced-client/resource.md) The loaded resource representing this page.
 
