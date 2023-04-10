@@ -536,7 +536,7 @@ Alias for [Tab.goBack](../advanced-client/tab.md#back)
 
 Alias for [Tab.goForward](../advanced-client/tab.md#forward)
 
-### hero.goto _(href, timeoutMs?)_ {#goto}
+### hero.goto _(href, options?: { timeoutMs?, referrer? })_ {#goto}
 
 Alias for [Tab.goto](../advanced-client/tab.md#goto)
 
