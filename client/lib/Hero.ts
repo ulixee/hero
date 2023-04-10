@@ -447,7 +447,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-  public goto(href: string, options?: { timeoutMs?: number, referrer?: string }): Promise<Resource> {
+  public goto(href: string, options?: { timeoutMs?: number }): Promise<Resource> {
     return this.activeTab.goto(href, options);
   }
 
