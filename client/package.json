@@ -8,7 +8,8 @@
       "require": "./index.cjs"
     },
     "./lib/DomExtender": "./lib/DomExtender.js",
-    "./lib/internal": "./lib/internal.js"
+    "./lib/internal": "./lib/internal.js",
+    "./lib/ScriptInstance": "./lib/ScriptInstance.js"
   },
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",

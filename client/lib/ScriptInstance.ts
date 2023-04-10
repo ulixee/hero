@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
-import { getCallSite } from '@ulixee/commons/lib/utils';
+import { getCallsite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
 
@@ -59,7 +59,7 @@ export default class ScriptInstance {
   }
 
   public getScriptCallsite(): ISourceCodeLocation[] {
-    const stack = getCallSite(module.filename);
+    const stack = getCallsite(module.filename);
 
     let stackLines: ISourceCodeLocation[] = [];
     let lastIndexOfEntrypoint = -1;
