@@ -13,7 +13,7 @@ export default function modifyHeaders(
 ): boolean {
   const deviceProfile = emulationProfile.deviceProfile;
   const userAgentString = emulationProfile.userAgentOption.string;
-  const locale = emulationProfile.locale;
+  const _locale = emulationProfile.locale;
   const defaultOrder = getResourceHeaderDefaults(emulationProfile, data.headers, resource);
   const headers = resource.requestHeaders;
 
@@ -64,8 +64,10 @@ export default function modifyHeaders(
     const lowerName = toLowerCase(headerName);
     let value = requestLowerHeaders[lowerName];
 
+    // Overwrite was here to fix wrong behaviour in chrome headless mode, but this appears to have been
+    // fixed for a while, and was actually causing issues. (https://github.com/ulixee/unblocked/issues/57)
     if (lowerName === 'accept-language') {
-      value = `${locale};q=0.9`;
+      // value = `${locale};q=0.9`;
       // if header is an Sec- header, trust Chrome
     } else if (lowerName === 'rtt') {
       value = deviceProfile.rtt;
