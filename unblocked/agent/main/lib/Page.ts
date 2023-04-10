@@ -297,6 +297,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     options?: { timeoutMs?: number; referrer?: string },
   ): Promise<IResourceMeta> {
     let formattedUrl: string;
+    let navigateOptions = {};
 
     try {
       formattedUrl = Url.format(new Url.URL(url), { unicode: true });
@@ -315,11 +316,16 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     if (options?.timeoutMs) {
       this.browserContext.resources.setNavigationConnectTimeoutMs(formattedUrl, options.timeoutMs);
     }
+    if (options?.referrer) {
+      navigateOptions = {
+        referrer: options?.referrer
+      };
+    }
 
     const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
     const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
-    const loader = await timer.waitForPromise(this.navigate(formattedUrl), timeoutMessage);
+    const loader = await timer.waitForPromise(this.navigate(formattedUrl, navigateOptions), timeoutMessage);
     this.mainFrame.navigations.assignLoaderId(navigation, loader.loaderId);
 
     const resourceId = await timer.waitForPromise(
