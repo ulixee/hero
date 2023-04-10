@@ -472,7 +472,7 @@ export default class Tab
     );
   }
 
-  public async goto(url: string, options?: { timeoutMs?: number }): Promise<IResourceMeta> {
+  public async goto(url: string, options?: { timeoutMs?: number, referrer?: string }): Promise<IResourceMeta> {
     return await this.page.goto(url, options);
   }
 
