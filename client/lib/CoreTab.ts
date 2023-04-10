@@ -252,7 +252,7 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.detachResource', name, resourceId, Date.now());
   }
 
-  public async goto(href: string, options: { timeoutMs?: number }): Promise<IResourceMeta> {
+  public async goto(href: string, options: { timeoutMs?: number, referrer?: string }): Promise<IResourceMeta> {
     return await this.commandQueue.run('Tab.goto', href, options);
   }
 
