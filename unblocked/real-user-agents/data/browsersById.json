@@ -3417,5 +3417,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-112-0": {
+    "id": "edge-112-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "112",
+      "minor": "0",
+      "build": "1722",
+      "patch": "34"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
