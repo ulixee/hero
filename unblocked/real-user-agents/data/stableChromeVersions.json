@@ -6,7 +6,7 @@
     "buildVersion": 5615,
     "stablePatchesByOs": {
       "mac": [49],
-      "win": [50],
+      "win": [87, 50],
       "linux": [49]
     }
   },
