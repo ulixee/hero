@@ -40,6 +40,22 @@ export default class TimetravelTicks {
       };
     }
 
+    if (!domRecordingsWithTabId.length) {
+      this.tabsById[1] = {
+        domRecording: {
+          documents: [],
+          paintEvents: [],
+          mainFrameIds: new Set(),
+          domNodePathByFrameId: {},
+        },
+        tabId: 1,
+        ticks: [],
+        mouse: [],
+        focus: [],
+        scroll: [],
+      };
+    }
+
     this.createCommandTicks();
     this.createInteractionTicks();
     this.createPaintTicks();
