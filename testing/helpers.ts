@@ -22,7 +22,6 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
 import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocketSession';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import { IJsPath } from '@ulixee/js-path';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
 import Logger from '@ulixee/commons/lib/Logger';
@@ -500,15 +499,6 @@ function bindSslListeners(server: tls.Server): void {
 
 export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOnFinal = false) {
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
-}
-
-export function createScriptMeta(module: NodeModule, id: string): IScriptInstanceMeta {
-  return {
-    workingDirectory: process.cwd(),
-    entrypoint: module.filename,
-    id,
-    startDate: Date.now(),
-  };
 }
 
 export async function createSession(

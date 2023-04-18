@@ -1,7 +1,7 @@
 import { IEmulationOptions } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IUserProfile from './IUserProfile';
 import ISessionOptions from './ISessionOptions';
-import IScriptInstanceMeta from './IScriptInstanceMeta';
+import IScriptInvocationMeta from './IScriptInvocationMeta';
 
 export default interface ISessionCreateOptions extends ISessionOptions, IEmulationOptions {
   sessionId?: string;
@@ -13,7 +13,7 @@ export default interface ISessionCreateOptions extends ISessionOptions, IEmulati
   replaySessionId?: string;
   mode?: 'development' | 'multiverse' | 'production' | 'timetravel' | 'browserless';
   userAgent?: string;
-  scriptInstanceMeta?: IScriptInstanceMeta;
+  scriptInvocationMeta?: IScriptInvocationMeta;
   userProfile?: IUserProfile;
   input?: any;
 

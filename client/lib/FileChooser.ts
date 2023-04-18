@@ -1,5 +1,5 @@
 import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
-import * as Fs from 'fs';
+// import * as Fs from 'fs';
 import { IJsPath } from '@ulixee/js-path';
 import AwaitedPath  from '@ulixee/awaited-dom/base/AwaitedPath';
 import { createHTMLInputElement } from '@ulixee/awaited-dom/impl/create';
@@ -33,12 +33,12 @@ export default class FileChooser {
     const frame = await this.#coreFrame;
     const finalFiles: { name: string; data: Buffer }[] = [];
     for (const file of files) {
-      if (typeof file === 'string') {
-        const buffer = await Fs.promises.readFile(file);
-        finalFiles.push({ data: buffer, name: Path.basename(file) });
-      } else {
-        finalFiles.push(file);
-      }
+      // if (typeof file === 'string') {
+      //   const buffer = await Fs.promises.readFile(file);
+      //   finalFiles.push({ data: buffer, name: Path.basename(file) });
+      // } else {
+        finalFiles.push(file as any);
+      // }
     }
     await frame.setFileInputFiles(this.#jsPath, finalFiles);
   }

@@ -69,11 +69,13 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import DomState from './DomState';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
-import { InternalPropertiesSymbol, scriptInstance } from './internal';
+import { InternalPropertiesSymbol } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 import DetachedElements from './DetachedElements';
 import DetachedResources from './DetachedResources';
 import { IDomExtensionClass, isDomExtensionClass } from './DomExtender';
+import ScriptInvocationMeta from './ScriptInvocationMeta';
+import CallsiteLocator from './CallsiteLocator';
 
 const { version } = require('../package.json');
 
@@ -109,6 +111,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   #detachedElements: DetachedElements;
   #detachedResources: DetachedResources;
   #directEventEmitter = new EventEmitter();
+  #callsiteLocator: CallsiteLocator;
 
   get [InternalPropertiesSymbol](): ISharedInternalProperties {
     const coreSessionPromise = (): Promise<CoreSession> => this.#getCoreSessionOrReject();
@@ -127,35 +130,42 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   constructor(createOptions: IHeroCreateOptions = {}) {
     super(() => {
       return {
-        target: this.#getCoreSessionOrReject(),
+        target: new Promise(process.nextTick).then(() => this.#getCoreSessionOrReject()),
       };
     });
 
     bindFunctions(this);
 
-    const { name, connectionToCore, ...options } = createOptions;
+    const { name, connectionToCore, callsiteLocator, ...options } = createOptions;
     options.blockedResourceTypes ??= Hero.defaults.blockedResourceTypes;
     options.blockedResourceUrls ??= Hero.defaults.blockedResourceUrls;
     options.userProfile ??= Hero.defaults.userProfile;
 
-    const sessionName = scriptInstance.generateSessionName(name);
-
     this.#options = {
       ...options,
-      mode: options.mode ?? scriptInstance.mode,
-      sessionName,
-      scriptInstanceMeta: scriptInstance.meta,
+      mode: options.mode,
+      sessionName: name,
+      scriptInvocationMeta: ScriptInvocationMeta.getScriptInvocationMeta(
+        options.scriptInvocationMeta,
+      ),
       dependencyMap: {},
       corePluginPaths: [],
     } as ISessionOptions;
 
-    let connect = connectionToCore;
-    if (typeof connect === 'string') connect = { host: connect };
+    this.#callsiteLocator = callsiteLocator ??
+      new CallsiteLocator(this.#options.scriptInvocationMeta.entrypoint);
 
     if (Hero.defaults.shutdownOnProcessSignals === false) {
       ShutdownHandler.disableSignals = true;
     }
-    this.#connectionToCore = ConnectionFactory.createConnection(connect ?? {});
+
+    let connect = connectionToCore;
+    if (typeof connect === 'string') connect = { host: connect };
+
+    this.#connectionToCore = ConnectionFactory.createConnection(
+      connect ?? {},
+      this.#callsiteLocator,
+    );
 
     this.#didAutoCreateConnection = this.#connectionToCore !== connect;
   }
@@ -344,7 +354,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {
     const coreTab = await getCoreTab(this.activeTab);
     const newCoreTab = coreTab.waitForNewTab(options);
-    const tab = createTab(this, newCoreTab);
+    const tab = createTab(this, newCoreTab, this.#callsiteLocator);
     this.#tabs.push(tab);
     return tab;
   }
@@ -448,7 +458,10 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-  public goto(href: string, options?: { timeoutMs?: number, referrer?: string  }): Promise<Resource> {
+  public goto(
+    href: string,
+    options?: { timeoutMs?: number; referrer?: string },
+  ): Promise<Resource> {
     return this.activeTab.goto(href, options);
   }
 
@@ -670,7 +683,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   #getCoreSessionOrReject(): Promise<CoreSession> {
     if (!this.#coreSessionPromise) {
       this.#coreSessionPromise = this.#connectionToCore
-        .createSession(this.#options)
+        .createSession(this.#options, this.#callsiteLocator)
         .then(session => {
           if (session instanceof CoreSession) this.#initializeClientPlugins(this.#clientPlugins);
           this.#directEventEmitter.emit('connected');
@@ -686,7 +699,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
         })
         .catch(err => err);
 
-      this.#activeTab = createTab(this, coreTab);
+      this.#activeTab = createTab(this, coreTab, this.#callsiteLocator);
       this.#tabs = [this.#activeTab];
     }
 
@@ -717,7 +730,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     for (const coreTab of coreTabs) {
       const hasTab = tabIds.includes(coreTab.tabId);
       if (!hasTab) {
-        const tab = createTab(this, Promise.resolve(coreTab));
+        const tab = createTab(this, Promise.resolve(coreTab), this.#callsiteLocator);
         this.#tabs.push(tab);
       }
     }

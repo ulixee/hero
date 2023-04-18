@@ -13,7 +13,7 @@ import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
-import { scriptInstance } from '../lib/internal';
+import CallsiteLocator from '../lib/CallsiteLocator';
 
 const { log } = Log(module);
 
@@ -26,10 +26,16 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
   constructor(
     transport: ITransportToCore<any, any, ICoreCommandRequestPayload>,
     options?: Omit<IConnectionToCoreOptions, 'host'>,
+    callsiteLocator?: CallsiteLocator,
   ) {
     super(transport);
     this.options = options ?? {};
-    this.commandQueue = new CoreCommandQueue(null, scriptInstance.mode, this, null);
+    this.commandQueue = new CoreCommandQueue(
+      null,
+      this,
+      null,
+      callsiteLocator ?? new CallsiteLocator(),
+    );
     this.coreSessions = new CoreSessions(
       this,
       this.options.maxConcurrency,
@@ -53,9 +59,12 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     return this.coreSessions.size > 0;
   }
 
-  public async createSession(options: ISessionCreateOptions): Promise<CoreSession> {
+  public async createSession(
+    options: ISessionCreateOptions,
+    callsiteLocator: CallsiteLocator,
+  ): Promise<CoreSession> {
     try {
-      return await this.coreSessions.create(options);
+      return await this.coreSessions.create(options, callsiteLocator);
     } catch (error) {
       if (error instanceof DisconnectedError && this.disconnectPromise) return null;
       throw error;

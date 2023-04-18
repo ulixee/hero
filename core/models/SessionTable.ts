@@ -3,9 +3,9 @@ import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IDeviceProfile from '@ulixee/unblocked-specification/plugin/IDeviceProfile';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import IScriptInvocationMeta from '@ulixee/hero-interfaces/IScriptInvocationMeta';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {
   private id: string;
@@ -28,12 +28,14 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['uaClientHintsPlatformVersion', 'TEXT'],
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
-        ['scriptInstanceId', 'TEXT'],
+        ['scriptVersion', 'TEXT'],
+        ['scriptRunId', 'TEXT'],
+        ['scriptRuntime', 'TEXT'],
         ['workingDirectory', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
+        ['scriptEntrypointFunction', 'TEXT'],
         ['scriptExecPath', 'TEXT'],
         ['scriptExecArgv', 'TEXT'],
-        ['scriptStartDate', 'INTEGER'],
         ['userAgentString', 'TEXT'],
         ['viewport', 'TEXT'],
         ['deviceProfile', 'TEXT'],
@@ -97,7 +99,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
   public insert(
     configuration: IHeroMeta,
     startDate: number,
-    scriptInstanceMeta: IScriptInstanceMeta,
+    scriptInvocationMeta: IScriptInvocationMeta,
     deviceProfile: IDeviceProfile,
     createSessionOptions: Omit<ISessionCreateOptions, keyof IHeroMeta>,
   ): void {
@@ -115,12 +117,14 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       configuration.uaClientHintsPlatformVersion,
       startDate,
       null,
-      scriptInstanceMeta?.id,
-      scriptInstanceMeta?.workingDirectory,
-      scriptInstanceMeta?.entrypoint,
-      scriptInstanceMeta?.execPath,
-      scriptInstanceMeta?.execArgv ? JSON.stringify(scriptInstanceMeta.execArgv) : null,
-      scriptInstanceMeta?.startDate,
+      scriptInvocationMeta?.version,
+      scriptInvocationMeta?.runId,
+      scriptInvocationMeta?.runtime,
+      scriptInvocationMeta?.workingDirectory,
+      scriptInvocationMeta?.entrypoint,
+      scriptInvocationMeta?.entryFunction,
+      scriptInvocationMeta?.execPath,
+      scriptInvocationMeta?.execArgv ? JSON.stringify(scriptInvocationMeta.execArgv) : null,
       configuration.userAgentString,
       JSON.stringify(configuration.viewport),
       TypeSerializer.stringify(deviceProfile),
@@ -165,7 +169,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     record.createSessionOptions = TypeSerializer.parse(record.createSessionOptions as string);
     record.viewport = JSON.parse((record.viewport as any) ?? 'undefined');
     record.deviceProfile = TypeSerializer.parse((record.deviceProfile as any) ?? 'undefined');
-    record.scriptExecArgv = JSON.parse(record.scriptExecArgv as any ?? '[]');
+    record.scriptExecArgv = JSON.parse((record.scriptExecArgv as any) ?? '[]');
     return record;
   }
 }
@@ -181,12 +185,14 @@ export interface ISessionRecord {
   operatingSystemVersion: string;
   startDate: number;
   closeDate: number;
-  scriptInstanceId: string;
+  scriptVersion: string;
+  scriptRunId: string;
+  scriptRuntime: string;
   workingDirectory: string;
   scriptEntrypoint: string;
+  scriptEntrypointFunction: string;
   scriptExecPath: string;
   scriptExecArgv: string[];
-  scriptStartDate: number;
   userAgentString: string;
   windowNavigatorPlatform: string;
   uaClientHintsPlatformVersion: string;

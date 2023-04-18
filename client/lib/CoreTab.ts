@@ -28,7 +28,6 @@ import ICommandCounter from '../interfaces/ICommandCounter';
 import IFlowHandler from '../interfaces/IFlowHandler';
 import DomStateHandler from './DomStateHandler';
 import DomState from './DomState';
-import { scriptInstance } from './internal';
 import FlowCommands from './FlowCommands';
 
 export default class CoreTab implements IJsPathEventTarget {
@@ -67,13 +66,18 @@ export default class CoreTab implements IJsPathEventTarget {
     this.connection = connection;
     this.commandQueue = new CoreCommandQueue(
       this.meta,
-      coreSession.mode,
       connection,
       coreSession as ICommandCounter,
+      coreSession.callsiteLocator,
     );
     this.commandQueue.registerCommandRetryHandlerFn(this.shouldRetryFlowHandlers.bind(this));
     this.coreSession = coreSession;
-    this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
+    this.eventHeap = new CoreEventHeap(
+      this.meta,
+      connection,
+      coreSession as ICommandCounter,
+      coreSession.callsiteLocator,
+    );
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(this, meta, null));
 
     const resolvedThis = Promise.resolve(this);
@@ -86,10 +90,10 @@ export default class CoreTab implements IJsPathEventTarget {
   public async waitForState(
     state: IDomState | DomState | IDomStateAllFn,
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
-    sourceCode?: { callstack: string, callsitePath: ISourceCodeLocation[] }
+    sourceCode?: { callstack: string; callsitePath: ISourceCodeLocation[] },
   ): Promise<void> {
     const callstack = sourceCode?.callstack ?? new Error().stack.slice(8);
-    const callsitePath = sourceCode?.callsitePath ?? scriptInstance.getScriptCallsite();
+    const callsitePath = sourceCode?.callsitePath ?? this.coreSession.callsiteLocator.getCurrent();
     if (typeof state === 'function') {
       state = { all: state };
     }
@@ -252,7 +256,10 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('Tab.detachResource', name, resourceId, Date.now());
   }
 
-  public async goto(href: string, options: { timeoutMs?: number, referrer?: string }): Promise<IResourceMeta> {
+  public async goto(
+    href: string,
+    options: { timeoutMs?: number; referrer?: string },
+  ): Promise<IResourceMeta> {
     return await this.commandQueue.run('Tab.goto', href, options);
   }
 

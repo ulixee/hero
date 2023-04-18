@@ -44,8 +44,9 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
 import DomState from './DomState';
-import { InternalPropertiesSymbol, scriptInstance } from './internal';
+import { InternalPropertiesSymbol } from './internal';
 import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
+import CallsiteLocator from './CallsiteLocator';
 
 const awaitedPathState = StateMachine<
   any,
@@ -66,6 +67,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   #mainFrameEnvironment: FrameEnvironment;
   #frameEnvironments: FrameEnvironment[];
   #coreTabPromise: Promise<CoreTab>;
+  #callsiteLocator: CallsiteLocator;
 
   get #coreTabOrReject(): Promise<CoreTab> {
     return this.#coreTabPromise.then(x => {
@@ -80,7 +82,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     };
   }
 
-  constructor(hero: Hero, coreTabPromise: Promise<CoreTab>) {
+  constructor(hero: Hero, coreTabPromise: Promise<CoreTab>, callsiteLocator: CallsiteLocator) {
     super(() => {
       return { target: coreTabPromise };
     });
@@ -92,6 +94,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     );
     this.#frameEnvironments = [this.#mainFrameEnvironment];
     this.#coreTabPromise = coreTabPromise;
+    this.#callsiteLocator = callsiteLocator;
 
     async function sendToTab(pluginId: string, ...args: any[]): Promise<any> {
       return (await coreTabPromise).commandQueue.run('Tab.runPluginCommand', pluginId, args);
@@ -190,7 +193,10 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
-  public async goto(href: string, options?: { timeoutMs?: number, referrer?: string }): Promise<Resource> {
+  public async goto(
+    href: string,
+    options?: { timeoutMs?: number; referrer?: string },
+  ): Promise<Resource> {
     const coreTab = await this.#coreTabOrReject;
     const resource = await coreTab.goto(href, options);
     return createResource(Promise.resolve(coreTab), resource);
@@ -266,13 +272,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
   ): Promise<void> {
     const callstack = new Error().stack.slice(8);
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callsitePath = this.#callsiteLocator.getCurrent();
     const coreTab = await this.#coreTabPromise;
     return await coreTab.waitForState(state, options, { callstack, callsitePath });
   }
 
   public async validateState(state: IDomState | DomState | IDomStateAllFn): Promise<boolean> {
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callsitePath = this.#callsiteLocator.getCurrent();
     const coreTab = await this.#coreTabPromise;
     return coreTab.validateState(state, callsitePath);
   }
@@ -282,7 +288,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     state: IDomState | DomState | IDomStateAllFn,
     handlerFn: (error?: Error) => Promise<any>,
   ): Promise<void> {
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callsitePath = this.#callsiteLocator.getCurrent();
 
     const coreTab = await this.#coreTabPromise;
     await coreTab.registerFlowHandler(name, state, handlerFn, callsitePath);
@@ -297,7 +303,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     commandFn: () => Promise<T>,
     optionsOrExitState?: IDomStateAllFn | IFlowCommandOptions,
   ): Promise<T> {
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callsitePath = this.#callsiteLocator.getCurrent();
 
     const coreTab = await this.#coreTabPromise;
 
@@ -410,6 +416,10 @@ export function getCoreTab(tab: Tab): Promise<CoreTab> {
 
 // CREATE
 
-export function createTab(hero: Hero, coreTab: Promise<CoreTab>): Tab {
-  return new Tab(hero, coreTab);
+export function createTab(
+  hero: Hero,
+  coreTab: Promise<CoreTab>,
+  callsiteLocator: CallsiteLocator,
+): Tab {
+  return new Tab(hero, coreTab, callsiteLocator);
 }

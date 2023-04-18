@@ -4,6 +4,7 @@ import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
 } from '@ulixee/unblocked-agent-mitm/handlers/RequestSession';
+import Callsite from '@ulixee/commons/lib/Callsite';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
@@ -513,11 +514,10 @@ export default class Session
   protected activateAgent(options: ISessionCreateOptions): void {
     const providedOptions = { ...options };
     // set default script instance if not provided
-    options.scriptInstanceMeta ??= {
-      id: nanoid(),
+    options.scriptInvocationMeta ??= {
+      version: 'na',
       workingDirectory: process.cwd(),
-      entrypoint: require.main?.filename ?? process.argv[1],
-      startDate: this.createdTime,
+      entrypoint: Callsite.getEntrypoint(),
     };
     // add env vars
     options.showChrome ??= env.showChrome;
@@ -819,12 +819,12 @@ export default class Session
       throw new Error(`Failed to select a browser engine${extraMessage}`);
     }
 
-    const { sessionName, scriptInstanceMeta, ...optionsToStore } = providedOptions;
+    const { sessionName, scriptInvocationMeta, ...optionsToStore } = providedOptions;
 
     this.db.session.insert(
       this.getConfiguration(),
       this.createdTime,
-      scriptInstanceMeta,
+      scriptInvocationMeta,
       this.emulationProfile.deviceProfile,
       optionsToStore,
     );

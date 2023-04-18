@@ -4,6 +4,7 @@ import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToHeroCore from './ConnectionToHeroCore';
+import CallsiteLocator from '../lib/CallsiteLocator';
 
 const { version } = require('../package.json');
 
@@ -14,6 +15,7 @@ export default class ConnectionFactory {
 
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToHeroCore,
+    callsiteLocator?: CallsiteLocator,
   ): ConnectionToHeroCore {
     if (options instanceof ConnectionToHeroCore) {
       // NOTE: don't run connect on an instance
@@ -24,7 +26,7 @@ export default class ConnectionFactory {
     if (options.host) {
       const host = Promise.resolve(options.host).then(ConnectionToHeroCore.resolveHost);
       const transport = new WsTransportToCore(host);
-      connection = new ConnectionToHeroCore(transport);
+      connection = new ConnectionToHeroCore(transport, null, callsiteLocator);
     } else {
       const host = UlixeeHostsConfig.global.getVersionHost(version);
 
@@ -37,7 +39,7 @@ export default class ConnectionFactory {
 
       if (host) {
         const transport = new WsTransportToCore(ConnectionToHeroCore.resolveHost(host));
-        connection = new ConnectionToHeroCore(transport, { ...options, version });
+        connection = new ConnectionToHeroCore(transport, { ...options, version }, callsiteLocator);
       } else if (UlixeeHostsConfig.global.hasHosts()) {
         // If Clouds are launched, but none compatible, propose installing @ulixee/cloud locally
         throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a local Ulixee Cloud in your project:

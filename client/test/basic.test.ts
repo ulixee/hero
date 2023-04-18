@@ -1,10 +1,11 @@
 import { Helpers } from '@ulixee/hero-testing';
 import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
+import Callsite from '@ulixee/commons/lib/Callsite';
 import Hero from '../index';
-import { scriptInstance } from '../lib/internal';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import MockConnectionToCore from './_MockConnectionToCore';
+import CallsiteLocator from '../lib/CallsiteLocator';
 
 const pkg = require('../package.json');
 
@@ -111,12 +112,13 @@ describe('Connection tests', () => {
   });
 });
 
-describe('ScriptInstance tests', () => {
+describe('CallsiteLocator tests', () => {
   it('should be able to properly get a script location', () => {
-    expect(scriptInstance.getScriptCallsite()).toHaveLength(1);
+    const scriptInstance = new CallsiteLocator(Callsite.getEntrypoint());
+    expect(scriptInstance.getCurrent()).toHaveLength(1);
 
     (function testNested() {
-      expect(scriptInstance.getScriptCallsite()).toHaveLength(2);
+      expect(scriptInstance.getCurrent()).toHaveLength(2);
     })();
   });
 });
