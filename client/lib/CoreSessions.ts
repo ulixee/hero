@@ -4,6 +4,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import CoreSession from './CoreSession';
+import CallsiteLocator from './CallsiteLocator';
 
 export default class CoreSessions {
   public set concurrency(value: number) {
@@ -24,7 +25,10 @@ export default class CoreSessions {
     this.sessionTimeoutMillis = sessionTimeoutMillis;
   }
 
-  public create(options: ISessionCreateOptions): Promise<CoreSession> {
+  public create(
+    options: ISessionCreateOptions,
+    callsiteLocator: CallsiteLocator,
+  ): Promise<CoreSession> {
     const sessionResolvable = new Resolvable<CoreSession>();
     void this.queue
       .run<void>(async () => {
@@ -32,7 +36,7 @@ export default class CoreSessions {
           'Core.createSession',
           options,
         );
-        const coreSession = new CoreSession(sessionMeta, this.connection, options);
+        const coreSession = new CoreSession(sessionMeta, this.connection, options, callsiteLocator);
         const id = coreSession.sessionId;
         this.sessionsById.set(id, coreSession);
         coreSession.once('close', () => this.sessionsById.delete(id));

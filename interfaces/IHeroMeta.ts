@@ -1,7 +1,7 @@
 import ISessionCreateOptions from './ISessionCreateOptions';
 
 export default interface IHeroMeta
-  extends Omit<ISessionCreateOptions, 'userProfile' | 'scriptInstanceMeta'> {
+  extends Omit<ISessionCreateOptions, 'userProfile' | 'scriptInvocationMeta'> {
   userAgentString: string;
   operatingSystemName: string;
   operatingSystemVersion: string;

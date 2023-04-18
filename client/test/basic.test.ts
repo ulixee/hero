@@ -1,10 +1,11 @@
 import { Helpers } from '@ulixee/hero-testing';
 import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import * as VersionUtils from '@ulixee/commons/lib/VersionUtils';
+import Callsite from '@ulixee/commons/lib/Callsite';
 import Hero from '../index';
-import { scriptInstance } from '../lib/internal';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import MockConnectionToCore from './_MockConnectionToCore';
+import CallsiteLocator from '../lib/CallsiteLocator';
 
 const pkg = require('../package.json');
 
@@ -81,7 +82,7 @@ describe('Connection tests', () => {
   jest.spyOn<any, any>(UlixeeHostsConfig.global, 'save').mockImplementation(() => null);
   UlixeeHostsConfig.global.setVersionHost('1', 'localhost:8080');
 
-  it('connects to a started Miner if the version is compatible', async () => {
+  it('connects to a started Cloud if the version is compatible', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, 'localhost:8081');
@@ -90,33 +91,34 @@ describe('Connection tests', () => {
     expect(connectionToCore.transport.host).toContain('ws://localhost:8081');
   });
 
-  it('should inform a user if a Miner needs to be started', async () => {
+  it('should inform a user if a Cloud needs to be started', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalMinerPackage = true;
+    ConnectionFactory.hasLocalCloudPackage = true;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
-      'Ulixee Miner is not started',
+      'Ulixee Cloud is not started',
     );
   });
 
-  it('should inform a user if a Miner needs to be installed', async () => {
+  it('should inform a user if a Cloud needs to be installed', async () => {
     const version = pkg.version;
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
-    ConnectionFactory.hasLocalMinerPackage = false;
+    ConnectionFactory.hasLocalCloudPackage = false;
     expect(() => ConnectionFactory.createConnection({})).toThrowError(
       'compatible Hero Core was not found',
     );
   });
 });
 
-describe('ScriptInstance tests', () => {
+describe('CallsiteLocator tests', () => {
   it('should be able to properly get a script location', () => {
-    expect(scriptInstance.getScriptCallsite()).toHaveLength(1);
+    const scriptInstance = new CallsiteLocator(Callsite.getEntrypoint());
+    expect(scriptInstance.getCurrent()).toHaveLength(1);
 
     (function testNested() {
-      expect(scriptInstance.getScriptCallsite()).toHaveLength(2);
+      expect(scriptInstance.getCurrent()).toHaveLength(2);
     })();
   });
 });

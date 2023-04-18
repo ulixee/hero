@@ -1,6 +1,6 @@
 import Hero, { LocationTrigger } from '@ulixee/hero';
 
-// NOTE: You need to start a Ulixee Miner to run this example
+// NOTE: You need to start a Ulixee Cloud to run this example
 async function run() {
   const hero = new Hero();
   await hero.goto('https://example.org/');

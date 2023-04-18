@@ -6,7 +6,7 @@ import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequ
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import { scriptInstance } from './internal';
+import CallsiteLocator from './CallsiteLocator';
 
 const { log } = Log(module);
 
@@ -21,15 +21,18 @@ export default class CoreEventHeap {
   private readonly meta: ISessionMeta;
   private readonly commandCounter: ICommandCounter;
   private pendingRegistrations: Promise<any> = Promise.resolve();
+  private callsiteLocator: CallsiteLocator;
 
   constructor(
     meta: ISessionMeta | null,
     connection: ConnectionToHeroCore,
     commandCounter: ICommandCounter,
+    callsiteLocator: CallsiteLocator,
   ) {
     this.meta = meta;
     this.connection = connection;
     this.commandCounter = commandCounter;
+    this.callsiteLocator = callsiteLocator;
   }
 
   public hasEventInterceptors(type: string): boolean {
@@ -55,7 +58,7 @@ export default class CoreEventHeap {
     if (this.listenerIdByHandle.has(handle)) return;
 
     extras ??= {};
-    extras.callsite ??= scriptInstance.getScriptCallsite();
+    extras.callsite ??= this.callsiteLocator.getCurrent();
 
     const subscriptionPromise = this.connection.sendRequest({
       commandId: this.commandCounter.nextCommandId,
@@ -92,7 +95,7 @@ export default class CoreEventHeap {
     if (!listenerId) return;
 
     extras ??= {};
-    extras.callsite ??= scriptInstance.getScriptCallsite();
+    extras.callsite ??= this.callsiteLocator.getCurrent();
 
     this.connection
       .sendRequest({

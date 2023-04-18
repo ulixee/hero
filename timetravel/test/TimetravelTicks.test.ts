@@ -30,11 +30,10 @@ describe('basic Timetravel Ticks tests', () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession({
-      scriptInstanceMeta: {
-        startDate: Date.now(),
+      scriptInvocationMeta: {
         workingDirectory: process.cwd(),
         entrypoint: 'testEntrypoint.js',
-        id: '1234',
+        version: '1234',
       },
     });
     const tab = Session.getTab(meta);

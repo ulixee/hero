@@ -26,8 +26,7 @@ Supply one or more files to set on this input. Mimetype will be inferred from th
 
 #### **Arguments**:
 
-One or more `File` arguments. A file can be either:
- - path `string`. A full path to a file to be uploaded.
+One or more `File` arguments.
  - file `Object`. An object with the following properties: 
    - data `Buffer`. File contents as a Node.js Buffer.
    - name `string`. The filename to use for this file.

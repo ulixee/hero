@@ -24,7 +24,6 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Interactor from './Interactor';
 import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
-import { scriptInstance } from './internal';
 import DetachedElement from './DetachedElement';
 
 const awaitedPathState = StateMachine<
@@ -128,7 +127,7 @@ const NodeExtensionFns: INodeExtensionFns = {
   async $clearInputText(): Promise<void> {
     const { awaitedOptions } = awaitedPathState.getState(this);
     const coreFrame = await awaitedOptions.coreFrame;
-    const callsitePath = scriptInstance.getScriptCallsite();
+    const callsitePath = coreFrame.coreTab.coreSession.callsiteLocator.getCurrent();
     await coreFrame.coreTab.runFlowCommand(
       async () => {
         await this.focus();

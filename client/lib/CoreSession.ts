@@ -4,15 +4,11 @@ import { IJsPath } from '@ulixee/js-path';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
-import * as readline from 'readline';
-import { ReadLine } from 'readline';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IDataSnippet from '@ulixee/hero-interfaces/IDataSnippet';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -21,6 +17,8 @@ import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import ICommandCounter from '../interfaces/ICommandCounter';
 import ICoreSession, { IOutputChangeToRecord } from '../interfaces/ICoreSession';
 import Hero from './Hero';
+import CallsiteLocator from './CallsiteLocator';
+import CoreKeepAlivePrompt from './CoreKeepAlivePrompt';
 
 export default class CoreSession
   extends TypedEventEmitter<{ close: void }>
@@ -34,6 +32,7 @@ export default class CoreSession
   public emitter = new EventEmitter();
   public readonly mode: ISessionCreateOptions['mode'];
   public readonly hero: Hero;
+  public callsiteLocator: CallsiteLocator;
 
   public get lastCommandId(): number {
     return this.commandId;
@@ -52,8 +51,7 @@ export default class CoreSession
 
   private readonly connectionToCore: ConnectionToHeroCore;
   private commandId = 0;
-  private cliPromptMessage: string;
-  private cliPrompt: ReadLine;
+  private keepAlivePrompt: CoreKeepAlivePrompt;
   private isClosing = false;
   private closingPromise: Promise<{ didKeepAlive: boolean; message?: string }>;
 
@@ -61,6 +59,7 @@ export default class CoreSession
     sessionMeta: ISessionMeta,
     connectionToCore: ConnectionToHeroCore,
     options: ISessionCreateOptions,
+    callsiteLocator: CallsiteLocator,
   ) {
     super();
     const { sessionName, mode } = options;
@@ -68,6 +67,7 @@ export default class CoreSession
     const { sessionId } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
+    this.callsiteLocator = callsiteLocator;
     this.meta = {
       sessionId,
     };
@@ -75,11 +75,16 @@ export default class CoreSession
     loggerSessionIdNames.set(sessionId, sessionName);
     this.commandQueue = new CoreCommandQueue(
       { sessionId, sessionName },
-      mode,
       connectionToCore,
       this as ICommandCounter,
+      this.callsiteLocator,
     );
-    this.eventHeap = new CoreEventHeap(this.meta, connectionToCore, this as ICommandCounter);
+    this.eventHeap = new CoreEventHeap(
+      this.meta,
+      connectionToCore,
+      this as ICommandCounter,
+      this.callsiteLocator,
+    );
 
     this.addTab(sessionMeta);
   }
@@ -175,7 +180,7 @@ export default class CoreSession
         this.isClosing = false;
         const didClose = new Promise(resolve => this.addEventListener(null, 'close', resolve));
         await this.watchRelaunchLogs();
-        this.showSessionKeepAlivePrompt(result.message);
+        this.keepAlivePrompt = new CoreKeepAlivePrompt(result.message, this.close.bind(this, true));
         await didClose;
       }
     } finally {
@@ -222,9 +227,9 @@ export default class CoreSession
   }
 
   private closeCliPrompt(): void {
-    if (this.cliPrompt) {
-      this.cliPrompt.close();
-      this.cliPrompt = null;
+    if (this.keepAlivePrompt) {
+      this.keepAlivePrompt.close();
+      this.keepAlivePrompt = null;
     }
   }
 
@@ -232,40 +237,10 @@ export default class CoreSession
     await this.addEventListener(null, 'rerun-stdout', msg => process.stdout.write(msg));
     await this.addEventListener(null, 'rerun-stderr', msg => process.stderr.write(msg));
     await this.addEventListener(null, 'rerun-kept-alive', () => {
+      if (!this.keepAlivePrompt) return;
       // eslint-disable-next-line no-console
-      console.log(this.cliPromptMessage);
+      console.log(this.keepAlivePrompt.message);
     });
-  }
-
-  private showSessionKeepAlivePrompt(message: string): void {
-    this.cliPromptMessage = `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`;
-    if (/yes|1|true/i.test(process.env.ULX_CLI_NOPROMPT)) return;
-
-    this.cliPrompt = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    readline.emitKeypressEvents(process.stdin);
-    process.stdin.setEncoding('utf8');
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
-    this.cliPrompt.setPrompt(this.cliPromptMessage);
-
-    process.stdin.on('keypress', async (chunk, key) => {
-      if (
-        key.name?.toLowerCase() === 'q' ||
-        (key.name?.toLowerCase() === 'c' && key.ctrl === true)
-      ) {
-        try {
-          await this.close(true);
-        } catch (error) {
-          if (error instanceof CanceledPromiseError) return;
-          throw error;
-        }
-      }
-    });
-    ShutdownHandler.register(() => this.closeCliPrompt());
-    this.cliPrompt.prompt(true);
   }
 }
 

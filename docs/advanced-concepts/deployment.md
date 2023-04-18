@@ -4,18 +4,18 @@ Hero's architecture is split into two processes: a Client and a Core. It's recom
 
 When you start to think about deploying Hero onto a server, you have a few options:
 
-## Launch a Ulixee Miner
+## Launch a Ulixee Cloud
 
-The easiest solution is to use the `@ulixee/miner` package. See details of the Ulixee Miner [here](https://ulixee.org/docs/miner).
+The easiest solution is to use the `@ulixee/cloud` package. See details of the Ulixee Cloud [here](https://ulixee.org/docs/cloud).
 
-You can either launch our pre-built [docker](https://github.com/ulixee/ulixee/tree/main/cloud/tools/docker) image, or start Miner via a simple script. Make sure to open the port you allocate on any firewall that a client might have to pass through:
+You can either launch our pre-built [docker](https://github.com/ulixee/ulixee/tree/main/cloud/tools/docker) image, or start Ulixee Cloud via a simple script. Make sure to open the port you allocate on any firewall that a client might have to pass through:
 
 ```javascript
-const Miner = require('@ulixee/miner');
+const { CloudNode } = require('@ulixee/cloud');
 
 (async () => {
-  const miner = new Miner();
-  await miner.listen({ port: 7007 });
+  const cloudNode = new CloudNode();
+  await cloudNode.listen({ port: 7007 });
 })();
 ```
 

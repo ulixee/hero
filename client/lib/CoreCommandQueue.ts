@@ -9,7 +9,7 @@ import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation'
 import ConnectionToHeroCore from '../connections/ConnectionToHeroCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';
-import { scriptInstance } from './internal';
+import CallsiteLocator from './CallsiteLocator';
 
 export default class CoreCommandQueue {
   public static maxCommandRetries = 3;
@@ -72,6 +72,7 @@ export default class CoreCommandQueue {
   private readonly connection: ConnectionToHeroCore;
   private flushOnTimeout: NodeJS.Timeout;
   private flushes: Promise<any>[] = [];
+  private callsiteLocator: CallsiteLocator;
 
   private get internalQueue(): Queue {
     return this.internalState.queue;
@@ -79,13 +80,13 @@ export default class CoreCommandQueue {
 
   constructor(
     meta: (ISessionMeta & { sessionName: string }) | null,
-    mode: ISessionCreateOptions['mode'],
     connection: ConnectionToHeroCore,
     commandCounter: ICommandCounter,
+    callsiteLocator: CallsiteLocator,
     internalState?: CoreCommandQueue['internalState'],
   ) {
     this.connection = connection;
-    this.mode = mode;
+    this.callsiteLocator = callsiteLocator;
     if (meta) {
       const markers = [
         ''.padEnd(50, '-'),
@@ -177,7 +178,7 @@ export default class CoreCommandQueue {
       args,
       commandId,
       startTime: Date.now(),
-      callsite: scriptInstance.getScriptCallsite(),
+      callsite: this.callsiteLocator.getCurrent(),
       ...(this.internalState.commandMetadata ?? {}),
     });
   }
@@ -203,7 +204,7 @@ export default class CoreCommandQueue {
       }
       return Promise.resolve(result as T);
     }
-    const callsite = scriptInstance.getScriptCallsite();
+    const callsite = this.callsiteLocator.getCurrent();
     const commandId = this.nextCommandId;
 
     const commandPayload = {
@@ -256,9 +257,9 @@ export default class CoreCommandQueue {
   public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
     return new CoreCommandQueue(
       meta,
-      this.mode,
       this.connection,
       this.commandCounter,
+      this.callsiteLocator,
       this.internalState,
     );
   }
@@ -277,7 +278,7 @@ export default class CoreCommandQueue {
     if (!error.stack.includes(this.sessionMarker)) {
       error.stack += `${this.sessionMarker}`;
     }
-    callsite ??= scriptInstance.getScriptCallsite();
+    callsite ??= this.callsiteLocator.getCurrent();
     if (callsite?.length) {
       if (error.stack.includes(`\n\n  --->  `)) return;
       const sourceLine = callsite[0];

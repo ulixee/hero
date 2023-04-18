@@ -1,4 +1,4 @@
-import { Hero, Helpers } from '@ulixee/hero-testing';
+import { Helpers, Hero } from '@ulixee/hero-testing';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as Fs from 'fs';
 
@@ -10,7 +10,7 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('Filechooser tests', () => {
-  it('can upload a file by path', async () => {
+  it('can upload a file', async () => {
     const didSubmit = createPromise<void>();
     koaServer.post('/upload', koaServer.upload.single('file'), ctx => {
       ctx.body = 'Ok';
@@ -38,7 +38,8 @@ describe('Filechooser tests', () => {
     const input = await hero.document.querySelector('#files');
     await hero.click(input);
     const chooser = await hero.waitForFileChooser();
-    await chooser.chooseFiles(`${__dirname}/html/test.js`);
+    const buffer = await Fs.promises.readFile(`${__dirname}/html/test.js`);
+    await chooser.chooseFiles({ data: buffer, name: 'test.js' });
 
     await expect(input.files.length).resolves.toBe(1);
     const body = await input.files.item(0).text();
