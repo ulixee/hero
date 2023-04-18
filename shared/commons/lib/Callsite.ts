@@ -23,7 +23,6 @@ export default class Callsite {
     Error.prepareStackTrace = startingPrepareStack;
     let startIndex = 1;
 
-    console.log(stack)
     if (priorToFilename) {
       const idx = stack.findIndex(
         x => x.filename === priorToFilename || x.filename?.endsWith(priorToFilename),
