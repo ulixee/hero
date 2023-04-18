@@ -1,5 +1,5 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing/index';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import Resolvable from '@ulixee/commons/lib/Resolvable';

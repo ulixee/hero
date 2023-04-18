@@ -18,7 +18,7 @@
     "@types/tough-cookie": "^4.0.0",
     "@ulixee/unblocked-agent": "2.0.0-alpha.19",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.19",
-    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.19",
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.19",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "proxy": "^1.0.1",

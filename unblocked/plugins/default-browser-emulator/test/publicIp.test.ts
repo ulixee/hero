@@ -1,8 +1,8 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import RequestSession from '@ulixee/unblocked-agent-mitm/handlers/RequestSession';
 import * as Proxy from 'proxy';
 import MitmServer from '@ulixee/unblocked-agent-mitm/lib/MitmProxy';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import * as http from 'http';
 import { createPromise } from '@ulixee/commons/lib/utils';

@@ -1,7 +1,7 @@
-import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
-import { getLogo, ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { getLogo, ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import {
   getClientRectFnName,
   getNodePointerFnName,

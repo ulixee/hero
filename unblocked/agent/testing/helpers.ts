@@ -144,15 +144,17 @@ export async function runHttpsServer(
 export async function runHttpServer(
   params: {
     onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void;
+    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void;
     onPost?: (body: string) => void;
     addToResponse?: (response: http.ServerResponse) => void;
     onlyCloseOnFinal?: boolean;
   } = {},
 ): Promise<ITestHttpServer<http.Server>> {
-  const { onRequest, onPost, addToResponse } = params;
+  const { onRequest, onPost, addToResponse, handler } = params;
   const server = http.createServer().unref();
   const destroyServer = destroyServerFn(server);
   server.on('request', async (request, response) => {
+    if (handler) return handler(request, response);
     if (onRequest) onRequest(request.url, request.method, request.headers);
     if (addToResponse) addToResponse(response);
 

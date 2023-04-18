@@ -1,5 +1,5 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing/index';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
@@ -797,7 +797,8 @@ describe('Proxy detections', () => {
 });
 
 it('should emulate in a shared worker', async () => {
-  let jsonResult = new Resolvable<string>();
+  const hasAllResults = new Resolvable<void>();
+  const jsonResults: string[] = [];
   const httpsServer = await Helpers.runHttpsServer(async (req, res) => {
     res.setHeader('access-control-allow-origin', '*');
     if (req.url === '/test.html') {
@@ -844,7 +845,11 @@ it('should emulate in a shared worker', async () => {
 </body></html>`);
     } else if (req.url.includes('worker-result')) {
       const result = await Helpers.readableToBuffer(req);
-      jsonResult.resolve(result.toString());
+      jsonResults.push(result.toString());
+      if (jsonResults.length === 10) {
+        hasAllResults.resolve();
+      }
+
       res.end('');
     } else {
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -855,19 +860,19 @@ it('should emulate in a shared worker', async () => {
     }
   });
 
-  const agent = pool.createAgent({ logger });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  for (let i =0;i<10; i+=1) {
+  for (let i = 0; i < 10; i += 1) {
+    const agent = pool.createAgent({ logger });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
     await page.goto(`${httpsServer.baseUrl}/test.html`);
+  }
 
-    const result = JSON.parse(await jsonResult.promise);
-    expect(result).toBeTruthy();
+  await hasAllResults;
+  const results = jsonResults.map(x => JSON.parse(x));
+  expect(results).toHaveLength(10);
 
+  for (const result of results) {
     expect([...new Set(result.map(x => x.hardwareConcurrency))]).toHaveLength(1);
     expect([...new Set(result.map(x => x.userAgent))]).toHaveLength(1);
-
-    jsonResult = new Resolvable<string>();
   }
-  await agent.close();
 });

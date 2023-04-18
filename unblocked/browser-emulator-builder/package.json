@@ -23,7 +23,7 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.19"
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.19"
   },
   "engines": {
     "node": ">=12.0.0"

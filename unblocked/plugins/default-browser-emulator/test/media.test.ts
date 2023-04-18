@@ -1,5 +1,5 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import { Pool } from '@ulixee/unblocked-agent';
 import BrowserEmulator from '../index';
 

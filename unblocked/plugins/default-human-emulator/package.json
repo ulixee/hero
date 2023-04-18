@@ -10,6 +10,6 @@
   "devDependencies": {
     "@ulixee/js-path": "2.0.0-alpha.19",
     "@ulixee/unblocked-agent": "2.0.0-alpha.19",
-    "@ulixee/unblocked-plugins-testing": "2.0.0-alpha.19"
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.19"
   }
 }

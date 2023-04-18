@@ -6,7 +6,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import * as rectUtils from '@ulixee/unblocked-agent/lib/rectUtils';
 import IInteractionsHelper from '@ulixee/unblocked-specification/agent/interact/IInteractionsHelper';
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import HumanEmulator from '../index';
 
 const { log } = Log(module);

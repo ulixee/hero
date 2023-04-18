@@ -1,10 +1,10 @@
 import * as Fs from 'fs';
 import { inspect } from 'util';
-import * as Helpers from '@ulixee/unblocked-plugins-testing/helpers';
+import * as Helpers from '@ulixee/unblocked-agent-testing/helpers';
 import { Browser } from '@ulixee/unblocked-agent';
 import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
-import { TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { TestLogger } from '@ulixee/unblocked-agent-testing';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
@@ -35,7 +35,7 @@ afterEach(Helpers.afterEach);
 const debug = process.env.DEBUG || false;
 
 test('it should override plugins in a browser window', async () => {
-  const httpServer = await Helpers.runHttpServer(false);
+  const httpServer = await Helpers.runKoaServer(false);
   const context = await browser.newContext({ logger });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
@@ -144,7 +144,7 @@ test('it should not be able to detect incognito', async () => {
 });
 
 test('it should handle overflows in plugins', async () => {
-  const httpServer = await Helpers.runHttpServer(false);
+  const httpServer = await Helpers.runKoaServer(false);
   const context = await browser.newContext({ logger });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();

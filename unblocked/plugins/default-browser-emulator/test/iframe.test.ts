@@ -1,6 +1,6 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { InteractionCommand } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import Agent from '@ulixee/unblocked-agent/lib/Agent';
 import Page from '@ulixee/unblocked-agent/lib/Page';

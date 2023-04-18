@@ -1,4 +1,4 @@
-import * as Helpers from '@ulixee/unblocked-plugins-testing/helpers';
+import * as Helpers from '@ulixee/unblocked-agent-testing/helpers';
 import { inspect } from 'util';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';

@@ -1,10 +1,10 @@
 import { inspect } from 'util';
-import * as Helpers from '@ulixee/unblocked-plugins-testing/helpers';
-import { ITestKoaServer } from '@ulixee/unblocked-plugins-testing/helpers';
-import { defaultBrowserEngine } from '@ulixee/unblocked-plugins-testing/browserUtils';
+import * as Helpers from '@ulixee/unblocked-agent-testing/helpers';
+import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
+import { defaultBrowserEngine } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { Browser } from '@ulixee/unblocked-agent';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import { TestLogger } from '@ulixee/unblocked-plugins-testing';
+import { TestLogger } from '@ulixee/unblocked-agent-testing';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
@@ -19,7 +19,7 @@ beforeAll(async () => {
 
   context = await browser.newContext({ logger: TestLogger.forTest(module) });
   Helpers.onClose(() => context.close().catch(), true);
-  httpServer = await Helpers.runHttpServer(true);
+  httpServer = await Helpers.runKoaServer(true);
 });
 
 afterAll(Helpers.afterAll);

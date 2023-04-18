@@ -1,4 +1,5 @@
 import { ILogEntry, translateToPrintable } from '@ulixee/commons/lib/Logger';
+import Callsite from '@ulixee/commons/lib/Callsite';
 import * as Path from 'path';
 import * as Fs from 'fs';
 import ILog, { IBoundLog, ILogData } from '@ulixee/commons/interfaces/ILog';
@@ -104,7 +105,7 @@ export default class TestLogger implements ILog {
   }
 
   public static forTest(module: NodeModule): IBoundLog {
-    const entrypoint = require.main?.filename ?? process.argv[1];
+    const entrypoint = Callsite.getEntrypoint();
     const path = entrypoint.split(Path.sep);
     const testName = path.slice(-3).join('-').replace('.test.js', '');
 
