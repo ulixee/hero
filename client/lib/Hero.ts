@@ -130,7 +130,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   constructor(createOptions: IHeroCreateOptions = {}) {
     super(() => {
       return {
-        target: new Promise(process.nextTick).then(() => this.#getCoreSessionOrReject()),
+        target: this.#getCoreSessionOrReject(),
       };
     });
 
