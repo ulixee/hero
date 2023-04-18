@@ -38,18 +38,23 @@ export class SourceMapSupport {
     }
   }
 
-  static getSourceFile(filename: string): string {
+  static getSourceFile(filename: string): { path: string; content?: string } {
     this.sourceMapCache[filename] ??= this.retrieveSourceMap(filename);
-    if (!this.sourceMapCache[filename].map) return filename;
+    if (!this.sourceMapCache[filename].map)
+      return {
+        path: filename,
+      };
 
     let source = filename;
+    let content: string;
     const sourceMap = this.sourceMapCache[filename];
     sourceMap.map.eachMapping(mapping => {
       if (source === filename) {
         source = this.resolvePath(sourceMap.url, mapping.source);
+        content = sourceMap.map.sourceContentFor(mapping.source, true);
       }
     });
-    return source;
+    return { path: source, content };
   }
 
   static getSourceFilePaths(filename: string): string[] {
@@ -70,7 +75,7 @@ export class SourceMapSupport {
   static getOriginalSourcePosition(
     position: ISourceCodeLocation,
     includeContent = false,
-  ): ISourceCodeLocation & { name?: string; content?: string } {
+  ): ISourceCodeLocation & { name?: string; content?: string; source?: string } {
     this.sourceMapCache[position.filename] ??= this.retrieveSourceMap(position.filename);
 
     const sourceMap = this.sourceMapCache[position.filename];
@@ -85,6 +90,7 @@ export class SourceMapSupport {
           content = sourceMap.map.sourceContentFor(originalPosition.source, true);
         }
         return {
+          source: originalPosition.source,
           filename,
           column: originalPosition.column,
           line: originalPosition.line,

@@ -131,7 +131,10 @@ export default class TypeSerializer {
 
     if (
       value instanceof Error ||
-      ('stack' in value && 'name' in value && (value.name as string)?.endsWith?.('Error'))
+      (type === 'object' &&
+        'stack' in value &&
+        'name' in value &&
+        (value.name as string)?.endsWith?.('Error'))
     ) {
       const { name, message, stack, ...data } = value;
       const extras = this.replace(data, options) as object;
@@ -192,7 +195,7 @@ export default class TypeSerializer {
       }
     }
 
-    if ('toJSON' in value) {
+    if (type === 'object' && 'toJSON' in value) {
       return value.toJSON();
     }
 

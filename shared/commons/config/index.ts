@@ -2,6 +2,7 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 import { getCacheDirectory } from '../lib/dirUtils';
 import { safeOverwriteFile } from '../lib/fileUtils';
+import Callsite from '../lib/Callsite';
 
 export default class UlixeeConfig {
   public static get global(): UlixeeConfig {
@@ -28,7 +29,9 @@ export default class UlixeeConfig {
     if (Fs.existsSync(this.configPath)) {
       const data = JSON.parse(Fs.readFileSync(this.configPath, 'utf8'));
       if (data.datastoreOutDir) {
-        this.datastoreOutDir = Path.isAbsolute(data.datastoreOutDir) ? data.datastoreOutDir : Path.resolve(this.directoryPath, data.datastoreOutDir);
+        this.datastoreOutDir = Path.isAbsolute(data.datastoreOutDir)
+          ? data.datastoreOutDir
+          : Path.resolve(this.directoryPath, data.datastoreOutDir);
       }
     }
   }
@@ -75,7 +78,7 @@ export default class UlixeeConfig {
 
   private static useRuntimeLocationDefaults(runtimeLocation?: IRuntimeLocation): IRuntimeLocation {
     return {
-      entrypoint: runtimeLocation?.entrypoint ?? require.main?.filename ?? process.argv[1],
+      entrypoint: runtimeLocation?.entrypoint ?? Callsite.getEntrypoint(),
       workingDirectory: runtimeLocation?.workingDirectory ?? process.cwd(),
     };
   }
@@ -115,7 +118,7 @@ export default class UlixeeConfig {
 }
 
 export interface IUlixeeConfig {
-  datastoreOutDir?: string
+  datastoreOutDir?: string;
 }
 
 export interface IRuntimeLocation {

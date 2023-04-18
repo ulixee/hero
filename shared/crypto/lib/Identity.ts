@@ -1,4 +1,4 @@
-import { promises as fs, readFileSync } from 'fs';
+import { promises as fs, readFileSync, existsSync } from 'fs';
 import * as path from 'path';
 import { createPrivateKey, generateKeyPairSync, KeyExportOptions, KeyObject } from 'crypto';
 import { sha256 } from '@ulixee/commons/lib/hashUtils';
@@ -87,6 +87,9 @@ export default class Identity {
       }
     }
     if (!filepath) throw new Error('No valid filepath was provided');
+    if (existsSync(filepath)) {
+      throw new Error('You attempted to overwrite an existing Identity!! Please remove it first.');
+    }
 
     await fs.writeFile(filepath, this.export(options?.passphrase, options?.cipher));
     return filepath;

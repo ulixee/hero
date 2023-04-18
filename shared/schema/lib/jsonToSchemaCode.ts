@@ -32,12 +32,12 @@ function parseField(json: IAnySchemaJson, schemaImports: Set<string>, leadingSpa
       const field = parseField(element, schemaImports, leadingSpaces);
       return `array(${field})`;
     }
-    config.element = parseField(element, schemaImports, leadingSpaces + 2);
+    config.element = element;
   }
 
   if (typeName === 'record') {
-    config.values = parseField(values, schemaImports, leadingSpaces + 2);
-    if (keys) config.keys = parseField(keys, schemaImports, leadingSpaces + 2);
+    config.values = values;
+    if (keys) config.keys = keys;
   }
 
   let js = `${typeName}(`;
@@ -53,7 +53,12 @@ function parseField(json: IAnySchemaJson, schemaImports: Set<string>, leadingSpa
       } else {
         js += ' ';
       }
-      js += `${getFieldName(key)}: ${JSON.stringify(value)}`;
+      js += `${getFieldName(key)}: `;
+      if (key === 'element' || key === 'values' || key === 'keys') {
+        js += `${parseField(value as any, schemaImports, leadingSpaces + 2)},\n`;
+      } else {
+        js += JSON.stringify(value);
+      }
       if (configEntries > 1) js += ',\n';
     }
     if (configEntries === 1) js += ' ';

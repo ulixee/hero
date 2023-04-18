@@ -31,7 +31,7 @@ export default class ShutdownHandler {
     return this.onSignal('exit', null, true);
   }
 
-  private static registerSignals(): void {
+  public static registerSignals(): void {
     if (!this.isRegistered) {
       this.isRegistered = true;
       process.once('beforeExit', code => ShutdownHandler.onSignal('beforeExit' as any, code));

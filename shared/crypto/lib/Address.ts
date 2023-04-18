@@ -63,6 +63,9 @@ export default class Address {
 
     const json = TypeSerializer.stringify(this.toJSON(), { format });
     const filepath = path.resolve(basePath, `${filename || this.bech32}.json`);
+    if (fs.existsSync(filepath)) {
+      throw new Error('You attempted to overwrite an existing address!!');
+    }
     await fs.promises.writeFile(filepath, json, { encoding: 'utf8' });
     return filepath;
   }
