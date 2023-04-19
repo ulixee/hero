@@ -1,7 +1,10 @@
 import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
 import Browser from '@ulixee/unblocked-agent/lib/Browser';
 import ChromeEngine from '@ulixee/unblocked-agent/lib/ChromeEngine';
-import { IBrowserContextHooks, IBrowserHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import {
+  IBrowserContextHooks,
+  IBrowserHooks,
+} from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
 import { Helpers } from './index';
 
@@ -9,6 +12,12 @@ import { Helpers } from './index';
 const ChromeApp = require(ChromeEngine.defaultPackageName);
 
 export const defaultBrowserEngine = new ChromeEngine(new ChromeApp());
+
+export const defaultHooks = {
+  onNewBrowser(b) {
+    b.engine.launchArguments.push('--password-store=basic', '--use-mock-keychain');
+  },
+};
 
 export const newPoolOptions = { defaultBrowserEngine };
 export const browserEngineOptions = defaultBrowserEngine;

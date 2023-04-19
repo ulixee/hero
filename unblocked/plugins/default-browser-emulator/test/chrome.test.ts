@@ -1,14 +1,15 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import * as Helpers from '@ulixee/unblocked-agent-testing/helpers';
+import { defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { inspect } from 'util';
 import { Browser } from '@ulixee/unblocked-agent';
 import Page from '@ulixee/unblocked-agent/lib/Page';
 import { TestLogger } from '@ulixee/unblocked-agent-testing';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
-import DomExtractor = require('./DomExtractor');
 import { emulatorDataDir } from '../paths';
+import DomExtractor = require('./DomExtractor');
 
 let chrome;
 let prevProperty: string;
@@ -23,7 +24,7 @@ beforeAll(async () => {
     `as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-chrome.json`,
   );
   ({ chrome, prevProperty } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any);
-  browser = new Browser(selectBrowserMeta.browserEngine);
+  browser = new Browser(selectBrowserMeta.browserEngine, defaultHooks);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
 });

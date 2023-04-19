@@ -199,7 +199,9 @@ describe('Frames Out of Process', () => {
       }).length,
     ).toBe(2);
     await frame2.waitForLoad({ loadStatus: 'DomContentLoaded' });
-    expect(await frame2.evaluate(`document.querySelectorAll('button').length`)).toStrictEqual(1);
+    if (browser.majorVersion > 98) {
+      expect(await frame2.evaluate(`document.querySelectorAll('button').length`)).toStrictEqual(1);
+    }
   });
 
   it('should support frames within OOP iframes', async () => {

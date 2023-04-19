@@ -3,6 +3,7 @@ import { inspect } from 'util';
 import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { Browser } from '@ulixee/unblocked-agent';
+import { defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { getOverrideScript, injectedSourceUrl } from '../lib/DomOverridesBuilder';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
@@ -16,7 +17,7 @@ const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 let browser: Browser;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  browser = new Browser(selectBrowserMeta.browserEngine);
+  browser = new Browser(selectBrowserMeta.browserEngine, defaultHooks);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
 });
@@ -95,28 +96,4 @@ test('should override a function and clean error stacks', async () => {
     }
   })();`);
   expect(perms).not.toContain(injectedSourceUrl);
-});
-
-test('should override Errors properly on https pages', async () => {
-  const httpServer = await Helpers.runHttpsServer((req, res) => {
-    res.end(`<html lang="en"><body><h1>Hi</h1></body></html>`);
-  });
-  const context = await browser.newContext({ logger: log as IBoundLog });
-  Helpers.onClose(() => context.close());
-  const page = await context.newPage();
-
-  page.on('console', console.log);
-  await page.addNewDocumentScript(getOverrideScript('Error.captureStackTrace').script, false);
-  await page.addNewDocumentScript(getOverrideScript('Error.constructor').script, false);
-  await Promise.all([
-    page.navigate(httpServer.url),
-    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
-  ]);
-
-  const errorToString = await page.evaluate(`Error.toString()`);
-  expect(errorToString).toBe('function Error() { [native code] }');
-  const errorToStringString = await page.evaluate(`Error.toString.toString()`);
-  expect(errorToStringString).toBe('function toString() { [native code] }');
-  const errorConstructorToString = await page.evaluate(`Error.constructor.toString()`);
-  expect(errorConstructorToString).toBe('function Function() { [native code] }');
 });

@@ -53,7 +53,7 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     log.info(`${name}.LaunchProcess`, { sessionId: null, executablePath, launchArguments });
 
     let spawnFile = executablePath;
-    if (!env.noRosettaChromeOnMac && process.platform === 'darwin' && arch() === 'arm64') {
+    if (env.useRosettaChromeOnMac && process.platform === 'darwin' && arch() === 'arm64') {
       this.processEnv ??= process.env;
       this.processEnv.ARCHPREFERENCE = 'x86_64';
       spawnFile = 'arch'; // we need to launch through arch to force Chrome to use Rosetta

@@ -19,6 +19,8 @@ import DevtoolsPreferences from './DevtoolsPreferences';
 import Page, { IPageCreateOptions } from './Page';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
 import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
+import ChromeEngine from './ChromeEngine';
+import * as Path from 'path';
 import GetVersionResponse = Protocol.Browser.GetVersionResponse;
 import TargetInfo = Protocol.Target.TargetInfo;
 
@@ -76,6 +78,10 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   ) {
     super();
     this.engine = engine;
+    // if chrome engine, make a copy
+    if (engine instanceof ChromeEngine) {
+      this.engine = new ChromeEngine(engine.source);
+    }
     this.id = String((browserIdCounter += 1));
     browserUserConfig ??= {};
     browserUserConfig.disableGpu ??= env.disableGpu;
@@ -88,6 +94,8 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       this.hooks = hooks;
       hooks.onNewBrowser?.(this, browserUserConfig);
     }
+
+    this.afterAllLaunchArgsApplied();
   }
 
   public async connect(transport: IConnectionTransport): Promise<Browser> {
@@ -313,6 +321,20 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.connection.once('disconnected', this.emit.bind(this, 'close'));
   }
 
+  private afterAllLaunchArgsApplied(): void {
+    if (!this.engine.isHeadlessNew) return;
+    const launchArgs = this.engine.launchArguments;
+    // headless=new requires a profile
+    if (!launchArgs.some(x => x.startsWith('--user-data-dir'))) {
+      const dataDir = Path.join(
+        os.tmpdir(),
+        `${browserIdCounter}-${this.engine.fullVersion.replace(/\./g, '-')}`,
+      );
+      this.engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
+      this.engine.userDataDir = dataDir;
+    }
+  }
+
   private applyDefaultLaunchArgs(options: IBrowserUserConfig): void {
     this.engine.launchArguments = [...(this.engine.launchArguments ?? [])];
     const launchArgs = this.engine.launchArguments;
@@ -343,11 +365,12 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
     this.engine.isHeaded = options.showChrome === true;
     if (!this.engine.isHeaded) {
-      const majorVersion = this.majorVersion;
-      if (majorVersion >= 109) {
+      // NOTE: disabling because something is hanging when launching with headless=new.
+      // TODO: some tests still failing
+      const majorVersion = this.engine.fullVersion.split('.').map(Number)[0];
+      if (majorVersion >= 109 && env.enableHeadlessNewMode) {
+        this.engine.isHeadlessNew = true;
         launchArgs.push('--headless=new');
-      } else if (majorVersion >= 94) {
-        launchArgs.push('--headless=chrome');
       } else {
         launchArgs.push('--headless');
       }

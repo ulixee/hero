@@ -1,7 +1,7 @@
 import { inspect } from 'util';
 import * as Helpers from '@ulixee/unblocked-agent-testing/helpers';
 import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
-import { defaultBrowserEngine } from '@ulixee/unblocked-agent-testing/browserUtils';
+import { defaultBrowserEngine, defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { Browser } from '@ulixee/unblocked-agent';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import { TestLogger } from '@ulixee/unblocked-agent-testing';
@@ -13,7 +13,7 @@ let httpServer: ITestKoaServer
 let context: BrowserContext;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  browser = new Browser(defaultBrowserEngine);
+  browser = new Browser(defaultBrowserEngine, defaultHooks);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
 

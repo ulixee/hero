@@ -11,10 +11,8 @@ export default function loadDomOverrides(
 ): DomOverridesBuilder {
   const domOverrides = new DomOverridesBuilder();
 
-  domOverrides.add('Error.captureStackTrace');
-  domOverrides.add('Error.constructor');
   const deviceProfile = emulationProfile.deviceProfile;
-  const isHeadless = emulationProfile.browserEngine.isHeaded !== true;
+  const isHeadless = emulationProfile.browserEngine.isHeaded !== true && emulationProfile.browserEngine.isHeadlessNew !== true;
 
   domOverrides.add('navigator.hardwareConcurrency', {
     concurrency: deviceProfile.hardwareConcurrency,

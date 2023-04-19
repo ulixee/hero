@@ -5,12 +5,13 @@ import { Browser } from '@ulixee/unblocked-agent';
 import { LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { TestLogger } from '@ulixee/unblocked-agent-testing';
+import { defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
-import DomExtractor = require('./DomExtractor');
 import { emulatorDataDir } from '../paths';
+import DomExtractor = require('./DomExtractor');
 
 const logger = TestLogger.forTest(module);
 
@@ -24,7 +25,7 @@ beforeAll(async () => {
 
   const navigatorJsonPath = `${asOsDataDir}/window-navigator.json`;
   ({ navigator: navigatorConfig } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any);
-  browser = new Browser(selectBrowserMeta.browserEngine);
+  browser = new Browser(selectBrowserMeta.browserEngine, defaultHooks);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
 });

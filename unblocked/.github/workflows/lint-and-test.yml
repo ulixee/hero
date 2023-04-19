@@ -19,16 +19,22 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node-version: [14, 16, 18]
         include:
-          - node-version: 16.x
+          - node-version: 18.x
+            os: ubuntu-latest
+            browser: chrome-111-0
+          - node-version: 18.x
+            os: ubuntu-latest
+            browser: chrome-109-0
+          - node-version: 18.x
             os: ubuntu-latest
             browser: chrome-107-0
-          - node-version: 16.x
+          - node-version: 18.x
             os: ubuntu-latest
             browser: chrome-105-0
-          - node-version: 16.x
+          - node-version: 18.x
             os: ubuntu-latest
-            browser: chrome-104-0
-          - node-version: 16.x
+            browser: chrome-103-0
+          - node-version: 18.x
             os: ubuntu-latest
             browser: chrome-97-0
 

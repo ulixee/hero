@@ -82,9 +82,19 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     return this.emulationProfile.deviceProfile;
   }
 
+  protected get domOverridesBuilder(): DomOverridesBuilder {
+    this.#domOverridesBuilder ??= loadDomOverrides(
+      this.emulationProfile,
+      this.data,
+      this.userAgentData,
+    );
+    return this.#domOverridesBuilder;
+  }
+
   protected readonly data: IBrowserData;
-  private domOverridesBuilder: DomOverridesBuilder;
   private readonly userAgentData: IUserAgentData;
+
+  #domOverridesBuilder: DomOverridesBuilder;
 
   constructor(emulationProfile: IEmulationProfile<T>) {
     this.logger = emulationProfile.logger ?? log.createChild(module);
@@ -116,7 +126,6 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
     }
 
     emulationProfile.browserEngine.isHeaded = emulationProfile.options.showChrome;
-    this.domOverridesBuilder ??= loadDomOverrides(emulationProfile, this.data, this.userAgentData);
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
@@ -195,7 +204,8 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   }
 
   public onClose(): void {
-    this.domOverridesBuilder.cleanup();
+    this.#domOverridesBuilder?.cleanup();
+    this.#domOverridesBuilder = null;
   }
 
   public onNewPage(page: IPage): Promise<any> {

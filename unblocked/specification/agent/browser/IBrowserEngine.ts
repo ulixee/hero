@@ -9,5 +9,6 @@ export default interface IBrowserEngine {
   doesBrowserAnimateScrolling?: boolean;
 
   isHeaded?: boolean;
+  isHeadlessNew?: boolean;
   verifyLaunchable?(): Promise<any>;
 }

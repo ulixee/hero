@@ -1,4 +1,4 @@
-import { loadEnv, parseEnvBool, parseEnvPath } from '@ulixee/commons/lib/envUtils';
+import { loadEnv, parseEnvBool } from '@ulixee/commons/lib/envUtils';
 
 loadEnv(__dirname);
 const env = process.env;
@@ -9,11 +9,12 @@ export default {
   showChrome: parseEnvBool(env.ULX_SHOW_CHROME),
   noChromeSandbox: parseEnvBool(env.ULX_NO_CHROME_SANDBOX),
   disableGpu: parseEnvBool(env.ULX_DISABLE_GPU),
+  enableHeadlessNewMode: parseEnvBool(env.ULX_ENABLE_HEADLESS_NEW),
   defaultChromeId:
     env.ULX_DEFAULT_BROWSER_ID ||
     Object.keys(pkgJson.dependencies)
       .find(x => x.match(/^@ulixee\/chrome-\d+-0$/))
       ?.split('@ulixee/')
       ?.pop(),
-  noRosettaChromeOnMac: parseEnvBool(env.ULX_NO_CHROME_ROSETTA),
+  useRosettaChromeOnMac: parseEnvBool(env.ULX_USE_CHROME_ROSETTA),
 };
