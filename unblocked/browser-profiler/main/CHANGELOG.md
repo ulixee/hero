@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **browser-profiler:** chrome 110 not loading in docker ([86a1b2a](https://github.com/ulixee/unblocked/commit/86a1b2ab7073fcd51c734a4173f9d2ed01e7a862))
+* **browser-profiler:** headless docker not working ([bee6353](https://github.com/ulixee/unblocked/commit/bee6353918eb94084876fb899cfc88a8c28f681c))
+
+
+### Features
+
+* **agent:** try to use chrome headless=new mode ([18999c7](https://github.com/ulixee/unblocked/commit/18999c71679ae04c46e1f5218d4be21ccc5af561))
+* **browser-emulator:** add full user version list ([b783db2](https://github.com/ulixee/unblocked/commit/b783db276f2637c9d0a65c44061373cb6b4d11cc))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 

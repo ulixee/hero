@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/double-agent-stacks",
-  "version": "2.0.0-alpha.19",
+  "version": "2.0.0-alpha.20",
   "private": true,
   "scripts": {
     "0": "cd ../build/double-agent-stacks && yarn 0",
@@ -14,15 +14,15 @@
     "3-puppeteer": "cd ../build/double-agent-stacks && yarn 3-puppeteer"
   },
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.19",
-    "@double-agent/collect-controller": "2.0.0-alpha.19",
-    "@double-agent/config": "2.0.0-alpha.19",
-    "@double-agent/runner": "2.0.0-alpha.19",
-    "@ulixee/commons": "2.0.0-alpha.19",
-    "@ulixee/default-browser-emulator": "2.0.0-alpha.19",
-    "@ulixee/default-human-emulator": "2.0.0-alpha.19",
-    "@ulixee/real-user-agents": "2.0.0-alpha.19",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.19",
+    "@double-agent/collect": "2.0.0-alpha.20",
+    "@double-agent/collect-controller": "2.0.0-alpha.20",
+    "@double-agent/config": "2.0.0-alpha.20",
+    "@double-agent/runner": "2.0.0-alpha.20",
+    "@ulixee/commons": "2.0.0-alpha.20",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.20",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.20",
+    "@ulixee/real-user-agents": "2.0.0-alpha.20",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.20",
     "commander": "^9.2.0",
     "puppeteer": "17.1.3",
     "selenium-webdriver": "4.4.0"

@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **agent:** don’t crash mitm during shutdown ([17011ea](https://github.com/ulixee/unblocked/commit/17011ea64c33580275200fd32cb1d4316a22fe75)), closes [#51](https://github.com/ulixee/unblocked/issues/51)
+* **agent:** sync goto and connect timeout option ([a538329](https://github.com/ulixee/unblocked/commit/a538329530df0ed115e022cf9b21b638aa0520d7))
+* **agent:** timeout all devtools requests ([2cf48e5](https://github.com/ulixee/unblocked/commit/2cf48e556bf06b3fb418e92760ccae9f9ec13f78))
+
+
+### Features
+
+* **agent:** allow proxy local dns resolution ([#47](https://github.com/ulixee/unblocked/issues/47)) ([a9c412b](https://github.com/ulixee/unblocked/commit/a9c412b77bfc85d7d8634ade1ca647a40b3cc939))
+* **agent:** try to use chrome headless=new mode ([18999c7](https://github.com/ulixee/unblocked/commit/18999c71679ae04c46e1f5218d4be21ccc5af561))
+* **plugins:** add shouldBlockRequest to spec ([ce826a5](https://github.com/ulixee/unblocked/commit/ce826a53133b2009c9572376d3507a0f17562513))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 

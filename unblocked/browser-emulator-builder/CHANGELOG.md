@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* generate dom polyfills when linux ([a9f7d74](https://github.com/ulixee/unblocked/commit/a9f7d74a16391023730939925048021b57777e59))
+
+
+### Features
+
+* **browser-emulator:** add full user version list ([b783db2](https://github.com/ulixee/unblocked/commit/b783db276f2637c9d0a65c44061373cb6b4d11cc))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 **Note:** Version bump only for package @ulixee/unblocked-browser-emulator-builder

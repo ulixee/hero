@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/analyze-http-basic-headers",
-  "version": "2.0.0-alpha.19",
+  "version": "2.0.0-alpha.20",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes header order, capitalization and default values",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.19",
-    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.19",
+    "@double-agent/analyze": "2.0.0-alpha.20",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.20",
     "source-map-support": "^0.5.16"
   }
 }

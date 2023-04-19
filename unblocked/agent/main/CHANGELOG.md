@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **agent:** broadcast devtools events ([07da77f](https://github.com/ulixee/unblocked/commit/07da77f77ee0ed8e700741cfe37f70d541efcfdd))
+* **agent:** get dom node id from parent frame ([5158d7d](https://github.com/ulixee/unblocked/commit/5158d7d323f3ae5536b31378706e431e6646d598))
+* **agent:** handle no url provided to resourceload ([a45d198](https://github.com/ulixee/unblocked/commit/a45d1989b6d397739534ce484cbc42068b563b89))
+* **agent:** reconnect crashed shared workers ([4d28798](https://github.com/ulixee/unblocked/commit/4d287983337e2f73097776a4b15c89ac236a35f2))
+
+
+### Features
+
+* **agent:** enable out of process iframes ([#50](https://github.com/ulixee/unblocked/issues/50)) ([77b96c8](https://github.com/ulixee/unblocked/commit/77b96c8ae37e7de36a9b38c6d76a1498d34dee81))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 
