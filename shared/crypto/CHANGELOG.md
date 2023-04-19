@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/shared/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **commons:** always handle emitter errors ([1c5f60f](https://github.com/ulixee/shared/commit/1c5f60f21c4c174c99c10e9e9d2edb07b06c28a0))
+* **commons:** global instance bug ([b895c0e](https://github.com/ulixee/shared/commit/b895c0e14602d92f42c559c6130d8a66b9b0770e))
+* **crypto:** disallow overwriting identity/address ([c14a185](https://github.com/ulixee/shared/commit/c14a1857c80ca800198d231236d5fcb6223026c9))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 **Note:** Version bump only for package @ulixee/crypto

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/shared/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **commons:** global instance of check ([f51fed1](https://github.com/ulixee/shared/commit/f51fed1f93e4bfb2c603a0bced79e249ff76d003))
+* **net:** not emitting transport disconnected ([54f4c73](https://github.com/ulixee/shared/commit/54f4c73a096961c5fdf823679fdf25503c9ec6b5))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 

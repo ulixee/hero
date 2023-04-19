@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/shared/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* **crypto:** disallow overwriting identity/address ([c14a185](https://github.com/ulixee/shared/commit/c14a1857c80ca800198d231236d5fcb6223026c9))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/shared/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 
