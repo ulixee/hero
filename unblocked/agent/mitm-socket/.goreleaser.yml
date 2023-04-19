@@ -11,9 +11,8 @@ builds:
       - CGO_ENABLED=0
 archives:
   - name_template: >-
-      connect_
-      {{ .Version }}_
-      {{- if eq .Os "darwin" }}darwin_
+      connect_{{ .Version }}_
+      {{- if eq .Os "darwin" }}mac_
       {{- else if eq .Os "linux" }}linux_
       {{- else if eq .Os "windows" }}win_{{end}}
       {{- if eq .Arch "amd64" }}x86_64
