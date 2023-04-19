@@ -128,9 +128,8 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
   const domPathsByOsId: { [operatingSystemId: string]: string } = {};
 
   for (const dirName of Fs.readdirSync(browserstackProfilesDir)) {
-    const [osId, browserId, features] = dirName.split('--');
+    const [osId, browserId] = dirName.split('--');
     if (browserId !== forBrowserId) continue;
-    if (features !== 'headless-devtools') continue;
 
     const startingDomPath = `${browserstackProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
     const { data: dom } = JSON.parse(gunzipSync(Fs.readFileSync(startingDomPath)).toString());
@@ -138,11 +137,11 @@ function getFoundationDoms(forBrowserId: string): { [operatingSystemId: string]:
     domPathsByOsId[osId] = startingDomPath;
   }
 
-  // add linux polyfills (NOTE: don't want these until we do headed)
   for (const dirName of Fs.readdirSync(localProfilesDir)) {
     const [osId, browserId, features] = dirName.split('--');
     if (browserId !== forBrowserId) continue;
     if (osId !== 'linux') continue;
+    // add linux polyfills (NOTE: these should switch to headed)
     if (features !== 'headless-devtools') continue;
 
     const startingDomPath = `${localProfilesDir}/${dirName}/browser-dom-environment--https--1.json.gz`;
