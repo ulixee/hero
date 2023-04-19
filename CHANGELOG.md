@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/ulixee/hero/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
+
+
+### Bug Fixes
+
+* add a default replay tab ([d890704](https://github.com/ulixee/hero/commit/d89070470c80f57a5fcd4aab84629839e544a758))
+* **client:** export script instance ([62803e5](https://github.com/ulixee/hero/commit/62803e53d5ab153f3e933c26666733c59f2d4af3))
+* **client:** remove ability to specify upload path ([5a6537a](https://github.com/ulixee/hero/commit/5a6537a5603d1715c727b22a3bfc8b59190d33ee))
+* log devtools events ([e39575b](https://github.com/ulixee/hero/commit/e39575bb85a75469e7934c78720dcc951995595d))
+
+
+### Features
+
+* **agent:** ability to turn on wal logging ([e080534](https://github.com/ulixee/hero/commit/e0805342b1e7eac491f2bcd102b5bc91500e6b2b))
+* **client:** allow injectable scriptinstance ([09aa700](https://github.com/ulixee/hero/commit/09aa700c04dc008b34822b9af446339f46f70c20))
+* **client:** global instanceof checks ([b704669](https://github.com/ulixee/hero/commit/b70466975c83a947803c28c98bbdf642c7b0b052))
+* **core:** out of process iframe support ([a95cfd5](https://github.com/ulixee/hero/commit/a95cfd5422115a5559c37fe00015f10760f333df))
+
+
+
+
+
 # [2.0.0-alpha.19](https://github.com/ulixee/hero/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
 
 

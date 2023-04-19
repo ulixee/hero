@@ -1,25 +1,25 @@
 {
   "name": "@ulixee/hero-end-to-end",
-  "version": "2.0.0-alpha.19",
+  "version": "2.0.0-alpha.20",
   "description": "End to end Hero tests",
   "private": true,
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.19",
-    "@ulixee/execute-js-plugin": "2.0.0-alpha.19",
-    "@ulixee/hero": "2.0.0-alpha.19",
-    "@ulixee/hero-core": "2.0.0-alpha.19",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.19",
-    "@ulixee/net": "2.0.0-alpha.19"
+    "@ulixee/commons": "2.0.0-alpha.20",
+    "@ulixee/execute-js-plugin": "2.0.0-alpha.20",
+    "@ulixee/hero": "2.0.0-alpha.20",
+    "@ulixee/hero-core": "2.0.0-alpha.20",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.20",
+    "@ulixee/net": "2.0.0-alpha.20"
   },
   "devDependencies": {
     "@ulixee/awaited-dom": "1.4.2",
-    "@ulixee/default-browser-emulator": "2.0.0-alpha.19",
-    "@ulixee/default-human-emulator": "2.0.0-alpha.19",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.19",
-    "@ulixee/hero-testing": "2.0.0-alpha.19",
-    "@ulixee/hero-timetravel": "2.0.0-alpha.19",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.19",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.19",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.20",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.20",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.20",
+    "@ulixee/hero-testing": "2.0.0-alpha.20",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.20",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.20",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.20",
     "ws": "^7.4.6"
   }
 }
