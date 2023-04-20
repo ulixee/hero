@@ -345,22 +345,19 @@ test('should get the correct webgl vendor from a nested srcdoc iframe', async ()
   expect(result.src).toBe('<body></body>');
 });
 
-// TODO: this broke in chrome 110. Must be something in v8
-test.skip('stack overflow test should match chrome', async () => {
-  if (browserVersion >= 110) return;
+test('stack overflow test should match chrome', async () => {
   const agent = pool.createAgent({
     logger,
   });
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
 
-  await page.goto(`${koaServer.baseUrl}`);
-  const result = await page.evaluate<{
-    depth: number;
-    message: string;
-    name: string;
-    stack: string;
-  }>(`(() => {
+  koaServer.get('/betrayal', ctx => {
+    ctx.body = `<html>
+<body>
+<h1>Page</h1>
+</body>
+<script>
   let depth = 0;
   let message = '';
   let name = '';
@@ -373,33 +370,55 @@ test.skip('stack overflow test should match chrome', async () => {
     } catch (e) {
       message = e.message;
       name = e.name;
-      stack = e.stack;
+      stack = e.stack.toString();
     }
   }
   
   iWillBetrayYouWithMyLongName();
-  return {
+  window.betrayalResult = {
     depth,
     message,
     name,
     stack
   }
- })()`);
+</script>
+
+</html>
+    
+    `;
+  });
+
+  await page.goto(`${koaServer.baseUrl}/betrayal`);
+  await page.waitForLoad('DomContentLoaded');
+  const result = await page.evaluate<{
+    depth: number;
+    message: string;
+    name: string;
+    stack: string;
+  }>(`window.betrayalResult`);
   expect(result.message).toBe('Maximum call stack size exceeded');
   expect(result.name).toBe('RangeError');
-  expect(result.stack).toBe(
-    `RangeError: Maximum call stack size exceeded
-    at String.toString (<anonymous>)
-    at iWillBetrayYouWithMyLongName (<anonymous>:14:23)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)
-    at iWillBetrayYouWithMyLongName (<anonymous>:10:7)`,
-  );
+
+  let stack = `RangeError: Maximum call stack size exceeded
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
+    at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`;
+  if (browserVersion < 112 && browserVersion > 97) {
+    // replace first line only pre-112
+    stack = stack.replace(
+      `at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`,
+      `at String.toString (<anonymous>)`,
+    );
+  }
+
+  expect(result.stack).toBe(stack);
 });
 
 test('should properly emulate memory', async () => {

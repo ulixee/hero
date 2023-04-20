@@ -23,6 +23,7 @@ import * as Path from 'path';
 import { AddressInfo, Socket } from 'net';
 import { createGzip } from 'zlib';
 import Log from '@ulixee/commons/lib/Logger';
+import { Duplex } from 'stream';
 
 const { log } = Log(module);
 const fulfillSymbol = Symbol('fulfill callback');
@@ -53,7 +54,7 @@ export class TestServer {
       this.server = https.createServer(sslOptions, this.onRequest.bind(this));
       this.protocol = 'https:';
     } else this.server = http.createServer(this.onRequest.bind(this));
-    this.server.on('connection', socket => this.onSocket(socket));
+    this.server.on('connection', socket => this.onSocket(socket as any));
     this.startTime = new Date();
     this.cachedPathPrefix = null;
   }
