@@ -5,8 +5,8 @@
     "majorVersion": 112,
     "buildVersion": 5615,
     "stablePatchesByOs": {
-      "mac": [121, 49],
-      "win": [121, 87, 50],
+      "mac": [137, 121, 49],
+      "win": [138, 121, 87, 50],
       "linux": [121, 49]
     }
   },
