@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.21](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
+
+
+### Bug Fixes
+
+* **agent:** test stack trace detect in browser ([#62](https://github.com/ulixee/unblocked/issues/62)) ([b716e59](https://github.com/ulixee/unblocked/commit/b716e592808cd640c034e89e95964155cb11fdf5))
+
+
+
+
+
 # [2.0.0-alpha.20](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.18...v2.0.0-alpha.20) (2023-04-19)
 
 

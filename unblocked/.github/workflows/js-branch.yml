@@ -21,11 +21,11 @@ jobs:
 
       - name: Clone ulixee/shared
         run: git clone https://github.com/ulixee/shared.git
-        working-directory: ../..
+        working-directory: ..
 
       - name: Install ulixee/shared
         run: yarn build
-        working-directory: ../../shared
+        working-directory: ../shared
 
       - name: Build modules
         run: yarn && yarn build:dist --network-timeout 1000000
