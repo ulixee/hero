@@ -175,6 +175,36 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should not call evaluate on a stack getter in debug', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  koaServer.get('/debug', ctx => {
+    ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
+  <script>
+    window.didCallGetter = false;
+    const error = new Error();
+    window.Object.defineProperty(error, 'stack', {
+      configurable: false,
+      enumerable: false,
+      get: function () {
+        window.didCallGetter = true;
+        document.querySelector('#result').innerText = 'called';
+        return '';
+      }
+    });
+    console.debug(error);
+</script></html>`;
+  });
+  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.waitForLoad('DomContentLoaded');
+  const allowStackGetter = await page.evaluate<boolean>('window.didCallGetter');
+  expect(allowStackGetter).toBe(false);
+});
+
 test('should be able to post message', async () => {
   const agent = pool.createAgent({
     logger,
