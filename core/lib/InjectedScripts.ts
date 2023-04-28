@@ -72,7 +72,12 @@ export default class InjectedScripts {
     showInteractions = false,
     devtoolsSession?: IDevtoolsSession,
   ): Promise<any> {
-    if (page[installedSymbol]) return;
+    if (devtoolsSession) {
+      if (devtoolsSession[installedSymbol]) return;
+      devtoolsSession[installedSymbol] = true;
+    } else if (page[installedSymbol]) {
+      return;
+    }
     page[installedSymbol] = true;
 
     return Promise.all([
