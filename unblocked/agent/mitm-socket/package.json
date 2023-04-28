@@ -10,7 +10,7 @@
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.21",
     "@ulixee/unblocked-specification": "2.0.0-alpha.21",
-    "nanoid": "^3.1.30"
+    "nanoid": "^4.0.2"
   },
   "devDependencies": {
     "@types/ws": "^7.2.4",
