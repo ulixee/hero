@@ -11,7 +11,7 @@
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.21",
     "@ulixee/unblocked-specification": "2.0.0-alpha.21",
     "devtools-protocol": "^0.0.981744",
-    "nanoid": "^4.0.2",
+    "nanoid": "^3.3.6",
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
