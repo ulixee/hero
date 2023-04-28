@@ -72,13 +72,13 @@ export interface ISocketRecord {
   dnsResolvedIp: string;
   alpn: string;
   serverName: string;
-  createTime: Date;
-  dnsLookupTime: Date;
-  ipcConnectionTime: Date;
-  connectTime: Date;
+  createTime: number;
+  dnsLookupTime: number;
+  ipcConnectionTime: number;
+  connectTime: number;
   bytesRead: number;
   bytesWritten: number;
-  errorTime: Date;
-  closeTime: Date;
+  errorTime: number;
+  closeTime: number;
   connectError?: string;
 }
