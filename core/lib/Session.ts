@@ -27,6 +27,7 @@ import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulation
 import { IEmulatorOptions } from '@ulixee/default-browser-emulator';
 import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import * as Path from 'path';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
@@ -153,7 +154,10 @@ export default class Session
 
     this.createdTime = Date.now();
     this.id = this.assignId(options.sessionId);
-    this.db = new SessionDb(this.id);
+    const customPath = options.sessionDbDirectory
+      ? Path.join(options.sessionDbDirectory, `${this.id}.db`)
+      : undefined;
+    this.db = new SessionDb(this.id, {}, customPath);
     this.commands = new Commands(this.db);
 
     this.logger = log.createChild(module, { sessionId: this.id });
@@ -208,7 +212,8 @@ export default class Session
     if (fromSessionId === this.id) {
       db.flush();
     } else {
-      db = SessionDb.getCached(fromSessionId);
+      const customPath = this.getCustomSessionPath(fromSessionId);
+      db = SessionDb.getCached(fromSessionId, true, customPath);
     }
     return DetachedAssets.getNames(db);
   }
@@ -218,7 +223,8 @@ export default class Session
     if (fromSessionId === this.id) {
       db.flush();
     } else {
-      db = SessionDb.getCached(fromSessionId);
+      const customPath = this.getCustomSessionPath(fromSessionId);
+      db = SessionDb.getCached(fromSessionId, true, customPath);
     }
     return Promise.resolve(DetachedAssets.getSnippets(db, name));
   }
@@ -228,7 +234,8 @@ export default class Session
     if (fromSessionId === this.id) {
       db.flush();
     } else {
-      db = SessionDb.getCached(fromSessionId);
+      const customPath = this.getCustomSessionPath(fromSessionId);
+      db = SessionDb.getCached(fromSessionId, true, customPath);
     }
     return DetachedAssets.getResources(db, name);
   }
@@ -243,7 +250,8 @@ export default class Session
         await tab.pendingCollects();
       }
     } else {
-      db = SessionDb.getCached(fromSessionId);
+      const customPath = this.getCustomSessionPath(fromSessionId);
+      db = SessionDb.getCached(fromSessionId, true, customPath);
     }
     db.flush();
     return DetachedAssets.getElements(db, name);
@@ -828,6 +836,12 @@ export default class Session
       this.emulationProfile.deviceProfile,
       optionsToStore,
     );
+  }
+
+  private getCustomSessionPath(sessionId: string): string {
+    return this.options.sessionDbDirectory
+      ? Path.join(this.options.sessionDbDirectory, `${sessionId}.db`)
+      : undefined;
   }
 
   public static restoreOptionsFromSessionRecord(

@@ -3,6 +3,7 @@ import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import * as Fs from 'fs';
+import * as Path from 'path';
 import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
@@ -90,10 +91,10 @@ export default class SessionDb {
   private readonly tables: SqliteTable<any>[] = [];
 
   constructor(sessionId: string, dbOptions: IDbOptions = {}, customPath?: string) {
-    SessionDb.createDir();
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
-    this.path = customPath ?? `${SessionDb.databaseDir}/${sessionId}.db`;
+    if (!customPath) SessionDb.createDefaultDir();
+    this.path = customPath ?? Path.join(SessionDb.defaultDatabaseDir, `${sessionId}.db`);
     this.db = new Database(this.path, { readonly, fileMustExist });
     if (env.enableSqliteWal) {
       this.db.unsafeMode(false);
@@ -257,14 +258,14 @@ export default class SessionDb {
     return this.byId.get(sessionId);
   }
 
-  public static createDir(): void {
+  public static createDefaultDir(): void {
     if (!this.hasInitialized) {
-      Fs.mkdirSync(this.databaseDir, { recursive: true });
+      Fs.mkdirSync(this.defaultDatabaseDir, { recursive: true });
       this.hasInitialized = true;
     }
   }
 
-  public static get databaseDir(): string {
+  public static get defaultDatabaseDir(): string {
     return `${Core.dataDir}/hero-sessions`;
   }
 }
