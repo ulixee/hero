@@ -311,7 +311,8 @@ test('cannot detect a proxy of args passed into a proxied function', async () =>
   
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl");
-  const result =  gl.getParameter.apply(gl, proxyOfArgs);
+  gl.getExtension('WEBGL_debug_renderer_info')
+  const result = gl.getParameter.apply(gl, proxyOfArgs);
   return { path, result };
  })()`);
   expect(result.path).not.toContain('<anonymuos>');
