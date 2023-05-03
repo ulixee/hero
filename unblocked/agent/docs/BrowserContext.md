@@ -47,6 +47,7 @@ Create a new [Page](./Page.md) in this context.
 ## Hooks
 
 - onNewPage(page: [Page](./Page.md)): Promise<void> - Called before a new Page environment is allowed to load.
+- onNewFrameProcess(frame: [Frame](./Frame.md)): Promise<void> - Called when a Frame is created in it's own process (oopif).
 - onNewWorker(worker: [Worker](./Worker.md)): Promise<void> - Called before a new Worker environment is allowed to run.
 - onDevtoolsPanelAttached(devtoolsSession: [DevtoolsSession](./DevtoolsSession.md)): Promise<any> - Called when a Devtools Panel attaches to this Browser.
 - onDevtoolsPanelDetached(devtoolsSession: [DevtoolsSession](./DevtoolsSession.md)): Promise<any> - Called when a Devtools Panel closes.
