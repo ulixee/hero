@@ -8,11 +8,6 @@ import { IncomingMessage, RequestListener, Server } from 'http';
 import * as https from 'https';
 import { Agent } from 'https';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import * as HttpProxyAgent from 'http-proxy-agent';
-import * as HttpsProxyAgent from 'https-proxy-agent';
-import * as Koa from 'koa';
-import * as KoaRouter from '@koa/router';
-import * as KoaMulter from '@koa/multer';
 import * as net from 'net';
 import * as tls from 'tls';
 import * as http2 from 'http2';
@@ -23,6 +18,11 @@ import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocke
 import MitmEnv from '@ulixee/unblocked-agent-mitm/env'; // eslint-disable-line import/no-extraneous-dependencies
 import Logger from '@ulixee/commons/lib/Logger';
 import { Helpers, TestLogger } from './index';
+import HttpProxyAgent = require('http-proxy-agent');
+import HttpsProxyAgent = require('https-proxy-agent');
+import Koa = require('koa');
+import KoaRouter = require('@koa/router');
+import KoaMulter = require('@koa/multer');
 
 const { log } = Logger(module);
 

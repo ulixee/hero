@@ -2,7 +2,7 @@ import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as http2 from 'http2';
 import * as stream from 'stream';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import { getTlsConnection, httpGetWithSocket } from '@ulixee/unblocked-agent-testing/helpers';
 import * as https from 'https';
 import { IncomingMessage } from 'http';

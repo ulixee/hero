@@ -1,10 +1,8 @@
 import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
-import * as HttpProxyAgent from 'http-proxy-agent';
 import * as Url from 'url';
 import { AddressInfo, Socket } from 'net';
-import * as WebSocket from 'ws';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
@@ -17,6 +15,8 @@ import { parseRawHeaders } from '../lib/Utils';
 import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
 import env from '../env';
 import { MitmProxy } from '../index';
+import HttpProxyAgent = require('http-proxy-agent');
+import WebSocket = require('ws');
 
 const mocks = {
   httpRequestHandler: {

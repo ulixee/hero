@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment = require('moment');
 import * as net from 'net';
 import { promises as dns } from 'dns';
 import { createPromise } from '@ulixee/commons/lib/utils';

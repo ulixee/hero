@@ -1,5 +1,5 @@
 import * as http from 'http';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import * as net from 'net';
 import ResourceType from '../interfaces/ResourceType';
 import extractRequestDetails from './extractRequestDetails';

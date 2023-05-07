@@ -6,7 +6,7 @@ import {
   httpGetWithSocket,
   readableToBuffer,
 } from '@ulixee/unblocked-agent-testing/helpers';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import * as socks5 from 'simple-socks';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as http2 from 'http2';

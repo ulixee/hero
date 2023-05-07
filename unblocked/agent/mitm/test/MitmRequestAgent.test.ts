@@ -2,8 +2,6 @@ import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import { URL } from 'url';
 import * as https from 'https';
 import * as net from 'net';
-import * as WebSocket from 'ws';
-import * as HttpProxyAgent from 'http-proxy-agent';
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { getProxyAgent, runHttpsServer } from '@ulixee/unblocked-agent-testing/helpers';
 import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
@@ -12,6 +10,8 @@ import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import { MitmProxy } from '../index';
+import WebSocket = require('ws');
+import HttpProxyAgent = require('http-proxy-agent');
 
 const mocks = {
   HeadersHandler: {
