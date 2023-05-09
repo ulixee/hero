@@ -439,9 +439,9 @@ Takes a screenshot of the current contents rendered in the browser.
 
 ### tab.triggerFlowHandlers *()* {#trigger-flow-handler}
 
-Check the state of all [FlowHandlers](#register-flow-handler) and trigger them to run if they match the current page state.
+Check the state of all [FlowHandlers](#register-flow-handler) and trigger the first one that matches the current page state. Returns the name of the triggered FlowHandler (if one was triggered), and returns the names of all FlowHandler who's state match the current page state.
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<{triggeredFlowHandler?: string; matchedFlowHandlers: string[]}>`
 
 ### tab.validateState *(state)* {#validate-state}
 
