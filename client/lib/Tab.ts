@@ -296,7 +296,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
 
   public async triggerFlowHandlers(): Promise<{triggeredFlowHandler?: string; matchedFlowHandlers: string[]}> {
     const coreTab = await this.#coreTabPromise;
-    const coreResult = await coreTab.triggerFlowHandlers()
+    const coreResult = await coreTab.triggerFlowHandlers();
     return {
       triggeredFlowHandler: coreResult.triggeredFlowHandler?.name,
       matchedFlowHandlers: coreResult.matchedFlowHandlers.map((handler) => handler.name),
