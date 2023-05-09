@@ -15938,5 +15938,45 @@
     "id": "Firefox-112.0--OS X-Ventura",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/112.0",
     "osId": "mac-os-13"
+  },
+  {
+    "id": "Chrome-113.0--OS X-High Sierra",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-10-13"
+  },
+  {
+    "id": "Chrome-113.0--OS X-Catalina",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-10-15"
+  },
+  {
+    "id": "Chrome-113.0--OS X-Mojave",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-10-14"
+  },
+  {
+    "id": "Chrome-113.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Chrome-113.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Chrome-113.0--OS X-Big Sur",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-11"
+  },
+  {
+    "id": "Chrome-113.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-12"
+  },
+  {
+    "id": "Chrome-113.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    "osId": "mac-os-13"
   }
 ]
