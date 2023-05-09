@@ -80,7 +80,7 @@ test('can handle multiple simultaneous handlers', async () => {
     () => Promise.resolve(),
   );
 
-  await expect(hero.activeTab.triggerFlowHandlers()).resolves.toBe(undefined);
+  await expect(hero.activeTab.triggerFlowHandlers()).resolves.toHaveProperty('matchedFlowHandlers');
 });
 
 test('bubbles up handler errors to the line of code that triggers the handlers', async () => {
