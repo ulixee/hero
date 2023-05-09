@@ -590,7 +590,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     return await this.activeTab.registerFlowHandler(name, state, handlerCallbackFn);
   }
 
-  public async triggerFlowHandlers(): Promise<void> {
+  public async triggerFlowHandlers(): Promise<{triggeredFlowHandler?: string; matchedFlowHandlers: string[]}> {
     return await this.activeTab.triggerFlowHandlers();
   }
 
