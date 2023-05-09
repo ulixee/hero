@@ -114,8 +114,8 @@ export default class CoreTab implements IJsPathEventTarget {
           retryNumber: i,
         } as any;
 
-        const keepGoing = await this.triggerFlowHandlers();
-        if (!keepGoing) break;
+        const { triggeredFlowHandler } = await this.triggerFlowHandlers();
+        if (!triggeredFlowHandler) break;
 
         if (this.flowCommands.isRunning) throw error;
 
@@ -186,12 +186,13 @@ export default class CoreTab implements IJsPathEventTarget {
       command?.command === 'FrameEnvironment.interact' ||
       command?.command === CoreTab.waitForStateCommandPlaceholder
     ) {
-      return await this.triggerFlowHandlers();
+      const { triggeredFlowHandler } = await this.triggerFlowHandlers();
+      return triggeredFlowHandler !== undefined;
     }
     return false;
   }
 
-  public async triggerFlowHandlers(): Promise<boolean> {
+  public async triggerFlowHandlers(): Promise<{triggeredFlowHandler?: IFlowHandler; matchedFlowHandlers: IFlowHandler[]}> {
     const matchingStates: IFlowHandler[] = [];
     await Promise.all(
       this.flowHandlers.map(async flowHandler => {
@@ -211,14 +212,14 @@ export default class CoreTab implements IJsPathEventTarget {
         }
       }),
     );
-    if (!matchingStates.length) return false;
+    if (!matchingStates.length) return { matchedFlowHandlers: matchingStates };
 
     try {
       const flowHandler = matchingStates[0];
       this.flowCommands.didRunFlowHandlers();
       this.commandQueue.setCommandMetadata({ activeFlowHandlerId: flowHandler.id });
       await flowHandler.handlerFn();
-      return true;
+      return { triggeredFlowHandler: flowHandler, matchedFlowHandlers: matchingStates };
     } finally {
       this.commandQueue.setCommandMetadata({ activeFlowHandlerId: undefined });
     }
