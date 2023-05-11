@@ -18,6 +18,7 @@ export default function jsonToSchemaCode(
 }
 
 function parseField(json: IAnySchemaJson, schemaImports: Set<string>, leadingSpaces = 0): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { typeName, element, fields, values, keys, ...config } = json as any;
   if (config.optional !== true) delete config.optional;
   schemaImports.add(typeName);
@@ -73,6 +74,7 @@ function parseObjectSchema(
   schemaImports: Set<string>,
   leadingSpaces = 0,
 ): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { typeName, fields, ...config } = json;
   if (config.optional !== true) delete config.optional;
 

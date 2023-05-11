@@ -1,17 +1,35 @@
-import { SourceMapConsumer } from 'source-map-js';
+import { AnyMap, originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
 import * as path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
 import SourceLoader from './SourceLoader';
 
-// ATTRIBUTION: forked from https://github.com/evanw/node-source-map-support
+// ATTRIBUTION: forked from https://github.com/cspotcode/node-source-map-support
 
 const sourceMapDataUrlRegex = /^data:application\/json[^,]+base64,/;
 const sourceMapUrlRegex =
   /(?:\/\/[@#][\s]*sourceMappingURL=([^\s'"]+)[\s]*$)|(?:\/\*[@#][\s]*sourceMappingURL=([^\s*'"]+)[\s]*(?:\*\/)[\s]*$)/gm;
 const fileUrlPrefix = 'file://';
 
+let kIsNodeError: symbol;
+try {
+  // Get a deliberate ERR_INVALID_ARG_TYPE
+  // TODO is there a better way to reliably get an instance of NodeError?
+  // @ts-ignore
+  path.resolve(123);
+} catch (e) {
+  const symbols = Object.getOwnPropertySymbols(e);
+  const symbol = symbols.find(s => {
+    return s.toString().indexOf('kIsNodeError') >= 0;
+  });
+  if (symbol) kIsNodeError = symbol;
+}
+
 export class SourceMapSupport {
-  private static sourceMapCache: { [source: string]: { map: SourceMapConsumer; url: string } } = {};
+  private static sourceMapCache: {
+    [source: string]: { map: TraceMap; url: string; rawMap: any };
+  } = {};
+
   private static resolvedPathCache: { [file_url: string]: string } = {};
   private static stackPathsToClear = new Set<string>();
 
@@ -29,7 +47,7 @@ export class SourceMapSupport {
   }
 
   static install(): void {
-    // ts-node does it's own translations
+    // ts-node does its own translations
     if (process.execArgv?.includes('ts-node')) return;
 
     if (!Error[Symbol.for('source-map-support')]) {
@@ -39,59 +57,49 @@ export class SourceMapSupport {
   }
 
   static getSourceFile(filename: string): { path: string; content?: string } {
-    this.sourceMapCache[filename] ??= this.retrieveSourceMap(filename);
-    if (!this.sourceMapCache[filename].map)
+    const sourceMap = this.retrieveSourceMap(filename);
+    if (!sourceMap.map)
       return {
         path: filename,
       };
 
-    let source = filename;
-    let content: string;
-    const sourceMap = this.sourceMapCache[filename];
-    sourceMap.map.eachMapping(mapping => {
-      if (source === filename) {
-        source = this.resolvePath(sourceMap.url, mapping.source);
-        content = sourceMap.map.sourceContentFor(mapping.source, true);
-      }
-    });
+    let sourceIndex = sourceMap.map.sources.indexOf(filename);
+    if (sourceIndex === -1) sourceIndex = sourceMap.map.resolvedSources.indexOf(filename);
+
+    if (sourceIndex === -1 && sourceMap.map.sources.length === 1) sourceIndex = 0;
+
+    const source = sourceIndex >= 0 ? sourceMap.map.resolvedSources[sourceIndex] : filename;
+    const content = SourceLoader.getFileContents(source);
     return { path: source, content };
-  }
-
-  static getSourceFilePaths(filename: string): string[] {
-    this.sourceMapCache[filename] ??= this.retrieveSourceMap(filename);
-    if (!this.sourceMapCache[filename].map) return [filename];
-
-    const sourcesByMappingSource = new Map<string, string>();
-    const sourceMap = this.sourceMapCache[filename];
-    sourceMap.map.eachMapping(mapping => {
-      if (!sourcesByMappingSource.has(mapping.source)) {
-        const resolvedPath = this.resolvePath(sourceMap.url, mapping.source);
-        sourcesByMappingSource.set(mapping.source, resolvedPath);
-      }
-    });
-    return [...sourcesByMappingSource.values()];
   }
 
   static getOriginalSourcePosition(
     position: ISourceCodeLocation,
     includeContent = false,
-  ): ISourceCodeLocation & { name?: string; content?: string; source?: string } {
-    this.sourceMapCache[position.filename] ??= this.retrieveSourceMap(position.filename);
+  ): ISourceCodeLocation & { name?: string; content?: string } {
+    const cacheKey = this.getCacheKey(position.filename);
+    let sourceMap = this.sourceMapCache[cacheKey];
+    if (!sourceMap) {
+      sourceMap = this.retrieveSourceMap(position.filename);
+    }
 
-    const sourceMap = this.sourceMapCache[position.filename];
-    if (sourceMap?.map) {
-      const originalPosition = sourceMap.map.originalPositionFor(position);
+    // Resolve the source URL relative to the URL of the source map
+    if (sourceMap && sourceMap.map) {
+      const originalPosition = originalPositionFor(sourceMap.map, position);
 
       // Only return the original position if a matching line was found
-      if (originalPosition.source) {
+      if (originalPosition.source !== null) {
+        // originalPosition.source has *already* been resolved against sourceMap.url
+        // so is *already* as absolute as possible.
+        // However, we want to ensure we output in same format as input: URL or native path
+        originalPosition.source = matchStyleOfPathOrUrl(position.filename, originalPosition.source);
         let content: string = null;
-        const filename = this.resolvePath(sourceMap.url, originalPosition.source);
         if (includeContent) {
-          content = sourceMap.map.sourceContentFor(originalPosition.source, true);
+          content = SourceLoader.getFileContents(originalPosition.source);
         }
         return {
           source: originalPosition.source,
-          filename,
+          filename: position.filename,
           column: originalPosition.column,
           line: originalPosition.line,
           name: originalPosition.name,
@@ -103,14 +111,23 @@ export class SourceMapSupport {
     return position;
   }
 
-  static retrieveSourceMap(source: string): { url: string; map: SourceMapConsumer; rawMap?: any } {
-    const fileData = SourceLoader.getFileContents(source, false);
+  static retrieveSourceMap(
+    source: string,
+    overrideSourceRoot?: string,
+  ): {
+    url: string;
+    map: TraceMap;
+    rawMap: any;
+  } {
+    const cacheKey = this.getCacheKey(source);
+    if (this.sourceMapCache[cacheKey]) return this.sourceMapCache[cacheKey];
 
     // Find the *last* sourceMappingURL to avoid picking up sourceMappingURLs from comments, strings, etc.
     let sourceMappingURL: string;
-    let sourceMapData: string;
+    let sourceMapData: string | any;
 
     let match: RegExpMatchArray;
+    const fileData = SourceLoader.getFileContents(source);
     // eslint-disable-next-line no-cond-assign
     while ((match = sourceMapUrlRegex.exec(fileData))) {
       sourceMappingURL = match[1];
@@ -122,30 +139,93 @@ export class SourceMapSupport {
         sourceMapData = Buffer.from(rawData, 'base64').toString();
         sourceMappingURL = source;
       } else {
-        sourceMappingURL = this.resolvePath(source, sourceMappingURL);
+        // Support source map URLs relative to the source URL
+        sourceMappingURL = supportRelativeURL(source, sourceMappingURL);
         sourceMapData = SourceLoader.getFileContents(sourceMappingURL);
       }
     }
 
-    if (!sourceMapData) {
-      return {
+    if (sourceMapData) {
+      if (overrideSourceRoot) {
+        const sourceMapJson = JSON.parse(sourceMapData);
+        sourceMapJson.sourceRoot = overrideSourceRoot;
+        sourceMapJson.sources = sourceMapJson.sources.map(x => {
+          // make relative to new source root
+          if (x.startsWith('..')) return x.substring(1);
+          return x;
+        });
+        sourceMapData = sourceMapJson;
+      }
+      // eslint-disable-next-line no-multi-assign
+      const sourceMap = {
+        url: sourceMappingURL,
+        map: new AnyMap(sourceMapData, sourceMappingURL),
+        rawMap: sourceMapData,
+      };
+      this.sourceMapCache[cacheKey] = sourceMap;
+
+      // Load all sources stored inline with the source map into the file cache
+      // to pretend like they are already loaded. They may not exist on disk.
+      if (sourceMap.map.sourcesContent) {
+        sourceMap.map.resolvedSources.forEach((resolvedSource, i) => {
+          const contents = sourceMap.map.sourcesContent[i];
+          if (contents) {
+            SourceLoader.setFileContents(resolvedSource, contents);
+          }
+        });
+      } else {
+        const content = sourceMap.map.resolvedSources.map(x => SourceLoader.getFileContents(x));
+        if (content.some(x => x !== null)) sourceMap.map.sourcesContent = content;
+      }
+    } else {
+      // eslint-disable-next-line no-multi-assign
+      this.sourceMapCache[cacheKey] = {
         url: null,
         map: null,
+        rawMap: null,
       };
     }
 
-    const rawData = JSON.parse(sourceMapData);
-    return {
-      url: sourceMappingURL,
-      map: new SourceMapConsumer(rawData),
-      rawMap: rawData,
-    };
+    return this.sourceMapCache[cacheKey];
+  }
+
+  public static getCacheKey(pathOrFileUrl): string {
+    if (this.resolvedPathCache[pathOrFileUrl]) return this.resolvedPathCache[pathOrFileUrl];
+
+    let result = pathOrFileUrl.trim();
+
+    try {
+      if (pathOrFileUrl.startsWith(fileUrlPrefix)) {
+        // Must normalize spaces to %20, stuff like that
+        result = new URL(pathOrFileUrl).toString();
+      } else if (!result.startsWith('node:')) {
+        result = pathToFileURL(pathOrFileUrl).toString();
+      }
+    } catch {
+      // keep original url
+    }
+    this.resolvedPathCache[pathOrFileUrl] = result;
+    return result;
   }
 
   private static prepareStackTrace(error: Error, stack: NodeJS.CallSite[]): string {
-    const name = error.name ?? error[Symbol.toStringTag] ?? error.constructor?.name ?? 'Error';
-    const message = error.message ?? '';
-    const errorString = `${name}: ${message}`;
+    // node gives its own errors special treatment.  Mimic that behavior
+    // https://github.com/nodejs/node/blob/3cbaabc4622df1b4009b9d026a1a970bdbae6e89/lib/internal/errors.js#L118-L128
+    // https://github.com/nodejs/node/pull/39182
+    let errorString: string;
+
+    if (kIsNodeError) {
+      if (kIsNodeError in error) {
+        errorString = `${error.name} [${(error as any).code}]: ${error.message}`;
+      } else {
+        errorString = ErrorPrototypeToString(error);
+      }
+    } else {
+      const name = error.name ?? error[Symbol.toStringTag] ?? error.constructor?.name ?? 'Error';
+      const message = error.message ?? '';
+      errorString = message ? `${name}: ${message}` : name;
+    }
+
     // track fn name as we go backwards through stack
     const processedStack = [];
     let containingFnName: string = null;
@@ -161,20 +241,19 @@ export class SourceMapSupport {
             line: frame.getLineNumber(),
             column: frame.getColumnNumber() - 1,
           });
-          if (position.filename !== filename) {
+          if (position.source) {
             const fnName = containingFnName ?? frame.getFunctionName();
             for (const toReplace of this.stackPathsToClear) {
-              if (position.filename.startsWith(toReplace)) {
-                position.filename = position.filename.replace(toReplace, '');
+              if (position.source.startsWith(toReplace)) {
+                position.source = position.source.replace(toReplace, '');
               }
             }
-
             containingFnName = position.name;
             frame = new Proxy(frame, {
               get(target: NodeJS.CallSite, p: string | symbol): any {
                 if (p === 'getFunctionName') return () => fnName;
-                if (p === 'getFileName') return () => position.filename;
-                if (p === 'getScriptNameOrSourceURL') return () => position.filename;
+                if (p === 'getFileName') return () => position.source;
+                if (p === 'getScriptNameOrSourceURL') return () => position.source;
                 if (p === 'getLineNumber') return () => position.line;
                 if (p === 'getColumnNumber') return () => position.column + 1;
                 if (p === 'toString') return CallSiteToString.bind(frame);
@@ -190,41 +269,24 @@ export class SourceMapSupport {
     }
     return errorString + processedStack.join('');
   }
-
-  private static resolvePath(base: string, relative: string): string {
-    if (!base) return relative;
-    const key = `${base}__${relative}`;
-
-    if (!this.resolvedPathCache[key]) {
-      let protocol = base.startsWith(fileUrlPrefix) ? fileUrlPrefix : '';
-
-      let basePath = path.dirname(base).slice(protocol.length);
-
-      // handle file:///C:/ paths
-      if (protocol && /^\/\w:/.test(basePath)) {
-        protocol += '/';
-        basePath = basePath.slice(1);
-      }
-
-      this.resolvedPathCache[key] = protocol + path.resolve(basePath, relative);
-    }
-    return this.resolvedPathCache[key];
-  }
 }
 
 SourceMapSupport.install();
 
-// Converted from the V8 source code at:
-// https://github.com/v8/v8/blob/dc712da548c7fb433caed56af9a021d964952728/src/objects/stack-frame-info.cc#L344-L393
-function CallSiteToString(
-  this: NodeJS.CallSite & {
-    getScriptNameOrSourceURL(): string;
-    isAsync(): boolean;
-    isPromiseAll?(): boolean;
-    isPromiseAny?(): boolean;
-    getPromiseIndex?(): number;
-  },
-): string {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const ErrorPrototypeToString = err => Error.prototype.toString.call(err);
+
+// This is copied almost verbatim from the V8 source code at
+// https://code.google.com/p/v8/source/browse/trunk/src/messages.js
+// Update 2022-04-29:
+//    https://github.com/v8/v8/blob/98f6f100c5ab8e390e51422747c4ef644d5ac6f2/src/builtins/builtins-callsite.cc#L175-L179
+//    https://github.com/v8/v8/blob/98f6f100c5ab8e390e51422747c4ef644d5ac6f2/src/objects/call-site-info.cc#L795-L804
+//    https://github.com/v8/v8/blob/98f6f100c5ab8e390e51422747c4ef644d5ac6f2/src/objects/call-site-info.cc#L717-L750
+// The implementation of wrapCallSite() used to just forward to the actual source
+// code of CallSite.prototype.toString but unfortunately a new release of V8
+// did something to the prototype chain and broke the shim. The only fix I
+// could find was copy/paste.
+function CallSiteToString(): string {
   let fileName;
   let fileLocation = '';
   if (this.isNative()) {
@@ -299,4 +361,82 @@ function CallSiteToString(
     line += ` (${fileLocation})`;
   }
   return line;
+}
+
+function isAbsoluteUrl(input: string): boolean {
+  return schemeRegex.test(input);
+}
+
+// Matches the scheme of a URL, eg "http://"
+const schemeRegex = /^[\w+.-]+:\/\//;
+function isSchemeRelativeUrl(input: string): boolean {
+  return input.startsWith('//');
+}
+
+// Support URLs relative to a directory, but be careful about a protocol prefix
+// in case we are in the browser (i.e. directories may start with "http://" or "file:///")
+function supportRelativeURL(file: string, url: string): string {
+  if (!file) return url;
+  // given that this happens within error formatting codepath, probably best to
+  // fallback instead of throwing if anything goes wrong
+  try {
+    // if should output a URL
+    if (isAbsoluteUrl(file) || isSchemeRelativeUrl(file)) {
+      if (isAbsoluteUrl(url) || isSchemeRelativeUrl(url)) {
+        return new URL(url, file).toString();
+      }
+      if (path.isAbsolute(url)) {
+        return new URL(pathToFileURL(url), file).toString();
+      }
+      // url is relative path or URL
+      return new URL(url.replace(/\\/g, '/'), file).toString();
+    }
+
+    // if should output a path (unless URL is something like https://)
+    if (path.isAbsolute(file)) {
+      if (url.startsWith(fileUrlPrefix)) {
+        return fileURLToPath(url);
+      }
+      if (isSchemeRelativeUrl(url)) {
+        return fileURLToPath(new URL(url, fileUrlPrefix));
+      }
+      if (isAbsoluteUrl(url)) {
+        // url is a non-file URL
+        // Go with the URL
+        return url;
+      }
+      if (path.isAbsolute(url)) {
+        // Normalize at all?  decodeURI or normalize slashes?
+        return path.normalize(url);
+      }
+      // url is relative path or URL
+      return path.join(file, '..', decodeURI(url));
+    }
+    // If we get here, file is relative.
+    // Shouldn't happen since node identifies modules with absolute paths or URLs.
+    // But we can take a stab at returning something meaningful anyway.
+    if (isAbsoluteUrl(url) || isSchemeRelativeUrl(url)) {
+      return url;
+    }
+    return path.join(file, '..', url);
+  } catch (e) {
+    return url;
+  }
+}
+
+// Return pathOrUrl in the same style as matchStyleOf: either a file URL or a native path
+function matchStyleOfPathOrUrl(matchStyleOf: string, pathOrUrl: string): string {
+  try {
+    if (isAbsoluteUrl(matchStyleOf) || isSchemeRelativeUrl(matchStyleOf)) {
+      if (isAbsoluteUrl(pathOrUrl) || isSchemeRelativeUrl(pathOrUrl)) return pathOrUrl;
+      if (path.isAbsolute(pathOrUrl)) return pathToFileURL(pathOrUrl).toString();
+    } else if (path.isAbsolute(matchStyleOf)) {
+      if (isAbsoluteUrl(pathOrUrl) || isSchemeRelativeUrl(pathOrUrl)) {
+        return fileURLToPath(new URL(pathOrUrl, fileUrlPrefix));
+      }
+    }
+    return pathOrUrl;
+  } catch (e) {
+    return pathOrUrl;
+  }
 }

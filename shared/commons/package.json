@@ -6,12 +6,13 @@
   "license": "MIT",
   "dependencies": {
     "bech32": "^2.0.0",
-    "devtools-protocol": "^0.0.981744",
+    "devtools-protocol": "^0.0.1137505",
     "https-proxy-agent": "^5.0.0",
     "semver": "^7.3.7",
-    "source-map-js": "^1.0.1"
+    "@jridgewell/trace-mapping": "^0.3.18"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.3"
+    "@types/better-sqlite3": "^7.6.4",
+    "source-map-js": "^1.0.2"
   }
 }

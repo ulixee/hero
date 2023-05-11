@@ -55,4 +55,4 @@ test('can check Prerelease Semvers', () => {
 
 test('can handle v in front of versions', () => {
   expect(isSemverSatisfied('v2.0.0-alpha.1', '2.0.0-alpha.1')).toBeTruthy();
-})
+});

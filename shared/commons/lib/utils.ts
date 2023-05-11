@@ -1,6 +1,5 @@
 import * as net from 'net';
 import IResolvablePromise from '../interfaces/IResolvablePromise';
-import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
 import Resolvable from './Resolvable';
 
 export function assert(value: unknown, message?: string, reject?): void {
@@ -11,6 +10,16 @@ export function assert(value: unknown, message?: string, reject?): void {
   } else {
     throw error;
   }
+}
+
+export function toUrl(hostOrUrlFragment: string, defaultProtocol = 'ws:'): URL {
+  if (!hostOrUrlFragment) return null;
+
+  defaultProtocol = defaultProtocol.replaceAll('/', '');
+  if (!hostOrUrlFragment.includes('://')) {
+    hostOrUrlFragment = `${defaultProtocol}//${hostOrUrlFragment}`;
+  }
+  return new URL(hostOrUrlFragment);
 }
 
 export function isPortInUse(port: number | string): Promise<boolean> {

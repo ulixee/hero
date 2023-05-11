@@ -1,5 +1,5 @@
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';

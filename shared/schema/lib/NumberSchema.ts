@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert = require('assert');
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
 
 export interface INumberSchemaConfig<TOptional extends boolean = boolean>

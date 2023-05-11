@@ -1,10 +1,11 @@
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { toUrl } from '@ulixee/commons/lib/utils';
 import DisconnectedError from '../errors/DisconnectedError';
 import { isWsOpen, sendWsCloseUnexpectedError, wsSend } from './WsUtils';
 import ITransportToCore, { ITransportToCoreEvents } from '../interfaces/ITransportToCore';
@@ -121,15 +122,7 @@ export default class WsTransportToCore<
   }
 
   private setHost(host: string): void {
-    if (!host.includes('://')) {
-      this.host = `ws://${host}`;
-    } else {
-      this.host = host;
-    }
-    if (!this.host.startsWith('ws') && !this.host.startsWith('http')) {
-      const url = new URL(this.host);
-      url.protocol = 'ws:';
-      this.host = url.href;
-    }
+    const url = toUrl(host);
+    this.host = url.href;
   }
 }

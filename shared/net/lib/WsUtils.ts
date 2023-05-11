@@ -1,4 +1,4 @@
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 const CLOSE_UNEXPECTED_ERROR = 1011;

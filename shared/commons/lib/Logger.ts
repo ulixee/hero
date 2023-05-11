@@ -126,6 +126,7 @@ function translateValueToPrintable(value: any, depth = 0): any {
   }
   if (Buffer.isBuffer(value)) {
     if ((value as Buffer).length <= 256) return `0x${value.toString('hex')}`;
+    return `<Buffer: ${(value as Buffer).byteLength} bytes>`;
   }
 
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {

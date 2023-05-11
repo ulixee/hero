@@ -30,6 +30,8 @@ export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void 
           { recursive: true, persistent: false },
           this.reload.bind(this, true),
         );
+      } else {
+        Fs.watchFile(this.configPath, { persistent: false }, this.reload.bind(this, true));
       }
     };
     this.reload();

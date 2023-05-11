@@ -1,6 +1,6 @@
-import * as moment from 'moment';
+import moment = require('moment');
 import { URL } from 'url';
-import * as assert from 'assert';
+import assert = require('assert');
 import BaseSchema, { IBaseConfig, isDefined } from './BaseSchema';
 
 export interface IStringSchemaConfig<TOptional extends boolean = boolean>

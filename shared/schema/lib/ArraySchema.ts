@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert = require('assert');
 import BaseSchema, { IBaseConfig } from './BaseSchema';
 
 export interface IArraySchemaConfig<E extends BaseSchema<any>, TOptional extends boolean = boolean>

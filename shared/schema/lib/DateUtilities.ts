@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert = require('assert');
 import moment = require('moment');
 
 const Units = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'] as const;

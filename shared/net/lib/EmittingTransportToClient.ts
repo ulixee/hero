@@ -1,6 +1,7 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
 import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
 import IApiHandlers from '../interfaces/IApiHandlers';
 import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
@@ -34,3 +35,5 @@ export default class EmittingTransportToClient<
     return Promise.resolve();
   }
 }
+
+addGlobalInstance(EmittingTransportToClient);

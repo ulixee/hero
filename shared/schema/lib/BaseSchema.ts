@@ -1,6 +1,5 @@
-import * as assert from 'assert';
+import assert = require('assert');
 import IValidationResult, { IValidationError } from '../interfaces/IValidationResult';
-import { ObjectSchema } from '../index';
 
 export interface IBaseConfig<TOptional extends boolean = boolean> {
   optional?: TOptional;

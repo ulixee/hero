@@ -1,5 +1,5 @@
 import { sha256 } from '@ulixee/commons/lib/hashUtils';
-import * as assert from 'assert';
+import assert = require('assert');
 import MerkleTree from '@ulixee/crypto/lib/MerkleTree';
 import { IMerkleProof } from '@ulixee/specification';
 import IAddressSettings, {

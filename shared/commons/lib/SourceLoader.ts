@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import ISourceCodeLocation from '../interfaces/ISourceCodeLocation';
 import { SourceMapSupport } from './SourceMapSupport';
@@ -28,30 +28,35 @@ export default class SourceLoader {
       this.sourceLines[sourcePosition.filename] = file.split(/\r?\n/);
     }
 
-    (sourcePosition as any).code = this.sourceLines[sourcePosition.filename][sourcePosition.line - 1];
+    (sourcePosition as any).code =
+      this.sourceLines[sourcePosition.filename][sourcePosition.line - 1];
     return sourcePosition as any;
   }
 
   static getFileContents(filepath: string, cache = true): string {
-    if (cache && this.fileContentsCache[filepath]) return this.fileContentsCache[filepath];
+    const cacheKey = SourceMapSupport.getCacheKey(filepath);
+    if (cache && this.fileContentsCache[cacheKey]) return this.fileContentsCache[cacheKey];
 
-    const originalFilepath = filepath;
     // Trim the path to make sure there is no extra whitespace.
-    let lookupFilepath: string | URL = filepath.trim();
+    filepath = filepath.trim();
     if (filepath.startsWith('file://')) {
-      lookupFilepath = new URL(filepath);
+      filepath = fileURLToPath(filepath);
     }
 
     let data: string = null;
     try {
-      data = fs.readFileSync(lookupFilepath, 'utf8');
+      data = fs.readFileSync(filepath, 'utf8');
     } catch (err) {
       // couldn't read
     }
     if (cache) {
-      this.fileContentsCache[filepath] = data;
-      this.fileContentsCache[originalFilepath] = data;
+      this.fileContentsCache[cacheKey] = data;
     }
     return data;
+  }
+
+  static setFileContents(filepath: string, data: string): void {
+    const cacheKey = SourceMapSupport.getCacheKey(filepath);
+    this.fileContentsCache[cacheKey] = data;
   }
 }
