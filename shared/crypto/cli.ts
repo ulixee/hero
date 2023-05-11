@@ -143,7 +143,7 @@ export default function cliCommands(): Command {
     .option('-k, --privateKey <key>', 'The private key bytes')
     .option(
       '-f, --filename <path>',
-      'Save this Identity to a filepath. If not specified, will be placed in <CACHE>/identities.',
+      'Save this Identity to a filepath. If not specified, will be placed in <DATA>/identities.',
     )
     .option('-p, --passphrase <phrase>', 'Save identity to a file with a passphrase.')
     .option(

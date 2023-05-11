@@ -19,6 +19,22 @@ export function getCacheDirectory(): string {
   throw new Error(`Unsupported platform: ${process.platform}`);
 }
 
+export function getDataDirectory(): string {
+  if (process.platform === 'linux') {
+    return process.env.XDG_DATA_HOME || Path.join(os.homedir(), '.local', 'share');
+  }
+
+  if (process.platform === 'darwin') {
+    return Path.join(os.homedir(), 'Library', 'Application Support');
+  }
+
+  if (process.platform === 'win32') {
+    return process.env.LOCALAPPDATA || Path.join(os.homedir(), 'AppData', 'Local');
+  }
+
+  throw new Error(`Unsupported platform: ${process.platform}`);
+}
+
 const homeDirReplace = new RegExp(os.homedir(), 'g');
 
 export function cleanHomeDir(str: string): string {

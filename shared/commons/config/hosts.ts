@@ -1,12 +1,12 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import { getCacheDirectory } from '../lib/dirUtils';
+import { getDataDirectory } from '../lib/dirUtils';
 import { isSemverSatisfied } from '../lib/VersionUtils';
 import { isPortInUse } from '../lib/utils';
 import { TypedEventEmitter } from '../lib/eventUtils';
 
 export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void }> {
-  public static global = new UlixeeHostsConfig(Path.join(getCacheDirectory(), 'ulixee'));
+  public static global = new UlixeeHostsConfig(Path.join(getDataDirectory(), 'ulixee'));
 
   public hostByVersion: IUlixeeHostsConfig['hostByVersion'] = {};
   #watchHandle: Fs.FSWatcher;

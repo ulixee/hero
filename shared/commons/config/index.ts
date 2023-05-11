@@ -1,6 +1,6 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import { getCacheDirectory } from '../lib/dirUtils';
+import { getDataDirectory } from '../lib/dirUtils';
 import { safeOverwriteFile } from '../lib/fileUtils';
 import Callsite from '../lib/Callsite';
 
@@ -12,7 +12,7 @@ export default class UlixeeConfig {
 
   public static isCacheEnabled = process.env.NODE_END === 'production';
 
-  private static globalConfigDirectory = Path.join(getCacheDirectory(), 'ulixee');
+  private static globalConfigDirectory = Path.join(getDataDirectory(), 'ulixee');
   private static globalConfig: UlixeeConfig;
 
   private static configDirectoryName = '.ulixee';
