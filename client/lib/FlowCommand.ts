@@ -7,7 +7,7 @@ import DomStateHandler from './DomStateHandler';
 import IFlowCommand from '../interfaces/IFlowCommand';
 import CoreCommandQueue from './CoreCommandQueue';
 
-export default class FlowCommand<T= void> implements IFlowCommand {
+export default class FlowCommand<T = void> implements IFlowCommand {
   public retryNumber = 0;
 
   public get isComplete(): Promise<boolean> {
@@ -68,7 +68,7 @@ export default class FlowCommand<T= void> implements IFlowCommand {
         if (this.isFlowStateChanged) continue;
         // if not complete, trigger flow handlers to retry (catch will trigger on its own)
         const { triggeredFlowHandler } = await this.coreTab.triggerFlowHandlers();
-        const shouldRetry = triggeredFlowHandler !== undefined
+        const shouldRetry = triggeredFlowHandler !== undefined;
         if (!shouldRetry) {
           throw new Error(
             'The FlowCommand cannot be completed. The Exit State is not satisfied and no FlowHandlers were triggered.',

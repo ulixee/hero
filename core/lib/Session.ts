@@ -819,7 +819,7 @@ export default class Session
       throw new Error(`Failed to select a browser engine${extraMessage}`);
     }
 
-    const { sessionName, scriptInvocationMeta, ...optionsToStore } = providedOptions;
+    const { sessionName: _name, scriptInvocationMeta, ...optionsToStore } = providedOptions;
 
     this.db.session.insert(
       this.getConfiguration(),
