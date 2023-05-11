@@ -77,7 +77,7 @@ it('native function', () => {
 
   for (const stack of [full, inline]) {
     expect(stack[0]).toBe('Error: 1');
-    expect(stack[1]).toMatch(/[/\\].original\.js/);
+    expect(stack[1]).toMatch(/\.original\.js/);
     expect(stack[2]).toMatch(/at Array\.map \((native|<anonymous>)\)/);
   }
 });
