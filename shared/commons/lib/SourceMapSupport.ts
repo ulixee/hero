@@ -31,6 +31,7 @@ export class SourceMapSupport {
   } = {};
 
   private static resolvedPathCache: { [file_url: string]: string } = {};
+  private static cacheKeys: { [file_url: string]: string } = {};
   private static stackPathsToClear = new Set<string>();
 
   static clearStackPath(stackPath: string): void {
@@ -39,6 +40,7 @@ export class SourceMapSupport {
 
   static resetCache(): void {
     this.sourceMapCache = {};
+    this.cacheKeys = {};
     this.resolvedPathCache = {};
   }
 
@@ -77,11 +79,7 @@ export class SourceMapSupport {
     position: ISourceCodeLocation,
     includeContent = false,
   ): ISourceCodeLocation & { name?: string; content?: string } {
-    const cacheKey = this.getCacheKey(position.filename);
-    let sourceMap = this.sourceMapCache[cacheKey];
-    if (!sourceMap) {
-      sourceMap = this.retrieveSourceMap(position.filename);
-    }
+    const sourceMap = this.retrieveSourceMap(position.filename);
 
     // Resolve the source URL relative to the URL of the source map
     if (sourceMap && sourceMap.map) {
@@ -163,6 +161,10 @@ export class SourceMapSupport {
         rawMap: sourceMapData,
       };
       this.sourceMapCache[cacheKey] = sourceMap;
+      // Overwrite trace-mapping's resolutions, because they do not handle Windows paths the way we want.
+      sourceMap.map.resolvedSources = sourceMap.map.sources.map(s =>
+        supportRelativeURL(sourceMap.url, s),
+      );
 
       // Load all sources stored inline with the source map into the file cache
       // to pretend like they are already loaded. They may not exist on disk.
@@ -190,7 +192,7 @@ export class SourceMapSupport {
   }
 
   public static getCacheKey(pathOrFileUrl): string {
-    if (this.resolvedPathCache[pathOrFileUrl]) return this.resolvedPathCache[pathOrFileUrl];
+    if (this.cacheKeys[pathOrFileUrl]) return this.cacheKeys[pathOrFileUrl];
 
     let result = pathOrFileUrl.trim();
 
@@ -204,8 +206,28 @@ export class SourceMapSupport {
     } catch {
       // keep original url
     }
-    this.resolvedPathCache[pathOrFileUrl] = result;
+    this.cacheKeys[pathOrFileUrl] = result;
     return result;
+  }
+
+  private static resolvePath(base: string, relative: string): string {
+    if (!base) return relative;
+    const key = `${base}__${relative}`;
+
+    if (!this.resolvedPathCache[key]) {
+      let protocol = base.startsWith(fileUrlPrefix) ? fileUrlPrefix : '';
+
+      let basePath = path.dirname(base).slice(protocol.length);
+
+      // handle file:///C:/ paths
+      if (protocol && /^\/\w:/.test(basePath)) {
+        protocol += '/';
+        basePath = basePath.slice(1);
+      }
+
+      this.resolvedPathCache[key] = protocol + path.resolve(basePath, relative);
+    }
+    return this.resolvedPathCache[key];
   }
 
   private static prepareStackTrace(error: Error, stack: NodeJS.CallSite[]): string {
@@ -363,12 +385,12 @@ function CallSiteToString(): string {
   return line;
 }
 
+// Matches the scheme of a URL, eg "http://"
+const schemeRegex = /^[\w+.-]+:\/\//;
 function isAbsoluteUrl(input: string): boolean {
   return schemeRegex.test(input);
 }
 
-// Matches the scheme of a URL, eg "http://"
-const schemeRegex = /^[\w+.-]+:\/\//;
 function isSchemeRelativeUrl(input: string): boolean {
   return input.startsWith('//');
 }
