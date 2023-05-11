@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: [14, 16, 18]
+        node-version: [16,18,20]
         include:
-          - node-version: 16.x
+          - node-version: 18.x
             os: ubuntu-latest
             browser: chrome-97-0
 

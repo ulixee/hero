@@ -4,9 +4,6 @@
   "description": "Helpers and stubs for testing",
   "main": "index.js",
   "private": true,
-  "engines": {
-    "node": ">=13.2.0"
-  },
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
