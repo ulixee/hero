@@ -53,7 +53,7 @@ export default class DomStateGenerator {
       get db(): SessionDb {
         return SessionDb.getCached(sessionId, false);
       },
-      dbLocation: SessionDb.databaseDir,
+      dbLocation: SessionDb.defaultDatabaseDir,
       loadingRange: [...loadingRange],
       timelineRange: timelineRange ? [...timelineRange] : undefined,
     });

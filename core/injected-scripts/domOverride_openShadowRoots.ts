@@ -60,7 +60,7 @@ proxyFunction(Element.prototype, 'attachShadow', (func, thisArg, argArray) => {
           if (parentNode && (parentNode as ShadowRoot)?.host) {
             parentElement = (parentNode as ShadowRoot).host;
             top.hasShadowHost = true;
-            top.index = ArrayIndexOfCache.call(parentNode.children, element)
+            top.index = ArrayIndexOfCache.call(parentNode.children, element);
           }
         }
         path.unshift(top);

@@ -94,7 +94,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     const pending = this.findPendingRecords(x => x[0] === id);
     if (pending.length) return pending.pop();
 
-    return this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
+    return <IResourcesRecord>this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
   }
 
   public async getMeta(id: number, includeBody: boolean): Promise<IResourceMeta> {
@@ -126,7 +126,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     if (includeBody) {
       columns.push('responseData', 'requestPostData', 'responseEncoding');
     }
-    const record: IResourcesRecord = this.db
+    const record = <IResourcesRecord>this.db
       .prepare(
         `select ${columns.toString()}
         from ${this.tableName} where id=?`,
@@ -345,7 +345,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     const whereClause = hasResponse
       ? ' where (responseData is not null or redirectedToUrl is not null)'
       : '';
-    const records = this.db
+    const records: Partial<IResourcesRecord>[] = this.db
       .prepare(
         `select frameId, requestUrl, responseUrl, statusCode, requestMethod, id, tabId, type, redirectedToUrl, responseHeaders 
 from ${this.tableName}${whereClause}`,
@@ -374,7 +374,9 @@ from ${this.tableName}${whereClause}`,
     IResourcesRecord,
     'responseEncoding' | 'responseHeaders' | 'statusCode' | 'responseData'
   > {
-    const record = this.db
+    const record = <
+      Pick<IResourcesRecord, 'responseEncoding' | 'responseHeaders' | 'statusCode' | 'responseData'>
+    >this.db
       .prepare(
         `select responseEncoding, responseHeaders, statusCode, responseData from ${this.tableName} where id=? limit 1`,
       )
@@ -389,9 +391,11 @@ from ${this.tableName}${whereClause}`,
     let record = pendingRecords.find(x => !!x.requestPostData);
 
     if (!record) {
-      record = this.db
-        .prepare(`select requestPostData from ${this.tableName} where id=? limit 1`)
-        .get(resourceId);
+      record = <any>(
+        this.db
+          .prepare(`select requestPostData from ${this.tableName} where id=? limit 1`)
+          .get(resourceId)
+      );
     }
 
     return record?.requestPostData ? Buffer.from(record.requestPostData) : null;
@@ -403,7 +407,7 @@ from ${this.tableName}${whereClause}`,
     let record = pendingRecords.find(x => !!x.responseData);
 
     if (!record) {
-      record = this.db
+      record = <any>this.db
         .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
         .get(resourceId);
     }

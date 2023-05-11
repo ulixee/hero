@@ -18,7 +18,7 @@ export default class DetachedResourcesTable extends SqliteTable<IDetachedResourc
   }
 
   public getByName(name: string): IDetachedResourcesRecord[] {
-    return this.db.prepare(`select * from ${this.tableName} where name=:name`).all({ name });
+    return <any>this.db.prepare(`select * from ${this.tableName} where name=:name`).all({ name });
   }
 
   public insert(

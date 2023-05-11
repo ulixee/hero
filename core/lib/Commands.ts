@@ -33,7 +33,7 @@ export default class Commands
   }
 
   public get last(): ICommandMeta | undefined {
-    return this.db.commands.last
+    return this.db.commands.last;
   }
 
   public get lastId(): number {

@@ -3,9 +3,7 @@ import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import { formatJsPath } from '../lib/CommandFormatter';
 
-export default class DetachedElementsTable extends SqliteTable<
-  IDetachedElement & { id?: number }
-> {
+export default class DetachedElementsTable extends SqliteTable<IDetachedElement & { id?: number }> {
   private idCounter = 0;
   constructor(db: SqliteDatabase) {
     super(
@@ -54,14 +52,15 @@ export default class DetachedElementsTable extends SqliteTable<
   }
 
   public getByName(name: string): IDetachedElement[] {
-    return this.db
-      .prepare(`select * from ${this.tableName} where name=:name order by id asc`)
-      .all({ name });
+    return <any>(
+      this.db
+        .prepare(`select * from ${this.tableName} where name=:name order by id asc`)
+        .all({ name })
+    );
   }
 
   public allNames(): string[] {
-    const names = this.db.prepare(`select name from ${this.tableName}`).all();
-    return [...new Set(names.map(x => x.name))];
+    return <string[]>this.db.prepare(`select distinct name from ${this.tableName}`).pluck().all();
   }
 
   public updateHtml(element: IDetachedElement): void {

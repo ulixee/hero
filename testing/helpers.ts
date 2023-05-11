@@ -4,12 +4,9 @@ import * as Url from 'url';
 import { URL } from 'url';
 import * as querystring from 'querystring';
 import * as http from 'http';
-import { IncomingMessage, RequestListener, Server } from 'http';
+import { RequestListener, Server } from 'http';
 import * as https from 'https';
-import { Agent } from 'https';
 import { createPromise } from '@ulixee/commons/lib/utils';
-import * as HttpProxyAgent from 'http-proxy-agent';
-import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as Koa from 'koa';
 import * as KoaRouter from '@koa/router';
 import * as KoaMulter from '@koa/multer';
@@ -19,8 +16,6 @@ import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core, { Session, Tab } from '@ulixee/hero-core';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
-import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocketSession';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import { IJsPath } from '@ulixee/js-path';
 import FrameEnvironment from '@ulixee/hero-core/lib/FrameEnvironment';
@@ -221,95 +216,6 @@ export async function runHttpServer(
   return httpServer;
 }
 
-export function httpRequest(
-  urlStr: string,
-  method: string,
-  proxyHost: string,
-  proxyAuth?: string,
-  headers: { [name: string]: string } = {},
-  response?: (res: IncomingMessage) => any,
-  postData?: Buffer,
-): Promise<string> {
-  const createdPromise = createPromise();
-  const { promise, resolve, reject } = createdPromise;
-  const url = new URL(urlStr);
-  const urlPort = extractPort(url);
-  const urlPath = [url.pathname, url.search].join('');
-  const options: any = {
-    host: url.hostname,
-    port: urlPort,
-    method,
-    path: urlPath,
-    headers: headers || {},
-    rejectUnauthorized: false,
-  };
-
-  if (proxyHost) {
-    options.agent = getProxyAgent(url, proxyHost, proxyAuth);
-  }
-
-  const client = url.protocol === 'https:' ? https : http;
-  const req = client.request(options, (res): void => {
-    if (createdPromise.isResolved) return;
-    let data = '';
-    if (response) response(res);
-    res.on('end', () => resolve(data));
-    res.on('data', chunk => (data += chunk));
-  });
-  req.on('error', reject);
-  if (postData) req.write(postData);
-  req.end();
-
-  return promise;
-}
-
-export function getProxyAgent(url: URL, proxyHost: string, auth?: string): Agent {
-  const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
-  const opts = Url.parse(proxyHost);
-  opts.auth = auth;
-  return ProxyAgent(opts);
-}
-
-export function httpGet(
-  urlStr: string,
-  proxyHost: string,
-  proxyAuth?: string,
-  headers: { [name: string]: string } = {},
-) {
-  return httpRequest(urlStr, 'GET', proxyHost, proxyAuth, headers);
-}
-
-export async function http2Get(
-  host: string,
-  headers: { [':path']: string; [name: string]: string },
-  sessionId: string,
-  proxyUrl?: string,
-): Promise<string> {
-  const hostUrl = new URL(host);
-  const socketSession = new MitmSocketSession(log, {
-    clientHelloId: 'Chrome79',
-    rejectUnauthorized: false,
-  });
-  Helpers.needsClosing.push(socketSession);
-
-  const tlsConnection = getTlsConnection(
-    Number(hostUrl.port ?? 443),
-    hostUrl.hostname,
-    false,
-    proxyUrl,
-  );
-  Helpers.onClose(() => tlsConnection.close());
-  await tlsConnection.connect(socketSession);
-
-  const client = http2.connect(host, {
-    createConnection: () => tlsConnection.socket,
-  });
-  Helpers.onClose(() => client.close());
-  const responseStream = await client.request(headers);
-  await new Promise(resolve => responseStream.once('response', resolve));
-  return (await readableToBuffer(responseStream)).toString();
-}
-
 export async function runHttp2Server(
   handler: (request: http2.Http2ServerRequest, response: http2.Http2ServerResponse) => void,
 ): Promise<ITestHttpServer<http2.Http2SecureServer>> {
@@ -357,41 +263,6 @@ export async function runHttp2Server(
   return httpServer;
 }
 
-export function httpGetWithSocket(
-  url: string,
-  clientOptions: https.RequestOptions,
-  socket: net.Socket,
-): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    let isResolved = false;
-    socket.once('close', () => {
-      if (isResolved) return;
-      reject(new Error('Socket closed before resolve'));
-    });
-    socket.once('error', err => {
-      if (isResolved) return;
-      reject(err);
-    });
-    const request = https.get(
-      url,
-      {
-        ...clientOptions,
-        agent: null,
-        createConnection: () => socket,
-      },
-      async res => {
-        isResolved = true;
-        const buffer = await readableToBuffer(res);
-        resolve(buffer.toString('utf8'));
-      },
-    );
-    request.on('error', err => {
-      if (isResolved) return;
-      reject(err);
-    });
-  });
-}
-
 let domListenerId = 1;
 export async function waitForElement(jsPath: IJsPath, frame: FrameEnvironment): Promise<void> {
   const listener = frame.tab.addDomStateListener(`${(domListenerId += 1)}`, {
@@ -420,26 +291,6 @@ export async function waitForElement(jsPath: IJsPath, frame: FrameEnvironment): 
       }
     });
   });
-}
-
-let sessionId = 0;
-
-export function getTlsConnection(
-  serverPort: number,
-  host = 'localhost',
-  isWebsocket = false,
-  proxyUrl?: string,
-): MitmSocket {
-  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, log, {
-    host,
-    port: String(serverPort),
-    servername: host,
-    isWebsocket,
-    isSsl: true,
-    proxyUrl,
-  });
-  Helpers.onClose(() => tlsConnection.close());
-  return tlsConnection;
 }
 
 export function getLogo(): Buffer {

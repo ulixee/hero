@@ -29,7 +29,7 @@ it('can operate when unsafe eval not on', async () => {
   const tab = session.getTab(meta.tabId);
 
   await tab.goto(inputUrl);
-  await tab.waitForLoad(LoadStatus.DomContentLoaded)
+  await tab.waitForLoad(LoadStatus.DomContentLoaded);
   const input = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
   expect(input.value).toBe('');
   const x = await tab.execJsPath(['document', ['querySelector', 'body'], 'scrollTop']);

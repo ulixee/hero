@@ -1,4 +1,4 @@
-import { INodePointer } from '@ulixee/js-path'
+import { INodePointer } from '@ulixee/js-path';
 
 class Fetcher {
   public static createRequest(input: string | number, init?: RequestInit): INodePointer {

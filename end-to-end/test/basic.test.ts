@@ -41,7 +41,7 @@ describe('basic Full Client tests', () => {
     await Promise.all(heros.map(x => x.close()));
 
     await new Promise(resolve => setTimeout(resolve, 600));
-    expect(disconnectSpy).toHaveBeenCalledTimes(0)
+    expect(disconnectSpy).toHaveBeenCalledTimes(0);
 
     const hero = new HeroClient({ connectionToCore });
     heros.push(hero);

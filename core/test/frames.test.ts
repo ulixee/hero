@@ -15,7 +15,7 @@ test('can wait for sub-frames to load', async () => {
   Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession();
   const tab = Session.getTab(meta);
-  Helpers.needsClosing.push(tab.session)
+  Helpers.needsClosing.push(tab.session);
   koaServer.get('/main', ctx => {
     ctx.body = `
         <body>
@@ -50,7 +50,7 @@ test('should allow query selectors in cross-domain frames', async () => {
   const meta = await connection.createSession();
 
   const session = Session.get(meta.sessionId);
-  Helpers.needsClosing.push(session)
+  Helpers.needsClosing.push(session);
   const tab = Session.getTab(meta);
   koaServer.get('/iframePage', ctx => {
     ctx.body = `

@@ -46,7 +46,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
     tabId: number,
     filter: Omit<IStorageChangesEntry, 'tabId' | 'timestamp' | 'value' | 'meta'>,
   ): IStorageChangesEntry {
-    return this.db
+    return <any>this.db
       .prepare(
         `select * from ${this.tableName}
                 where tabId = ? and securityOrigin = :securityOrigin
@@ -61,7 +61,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
     startTime: number,
     endTime: number,
   ): IStorageChangesEntry[] {
-    return this.db
+    return <any[]>this.db
       .prepare(
         `select * from ${this.tableName} where tabId = ? and timestamp >= ? and timestamp <= ?`,
       )
@@ -71,7 +71,7 @@ export default class StorageChangesTable extends SqliteTable<IStorageChangesEntr
   public getChangesByTabIdAndTime(): { tabId: number; timestamp: number; count: number }[] {
     if (!this.hasLoadedCounts) {
       this.hasLoadedCounts = true;
-      const timestamps = this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
+      const timestamps = <any[]>this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
       for (const { timestamp, tabId } of timestamps) {
         this.trackChangeTime(tabId, timestamp);
       }

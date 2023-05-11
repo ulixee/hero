@@ -10,5 +10,5 @@ export default class DisconnectedFromCoreError extends DisconnectedError {
   }
 }
 
-addGlobalInstance(DisconnectedFromCoreError)
+addGlobalInstance(DisconnectedFromCoreError);
 registerSerializableErrorType(DisconnectedFromCoreError);

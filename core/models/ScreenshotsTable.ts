@@ -30,16 +30,20 @@ export default class ScreenshotsTable extends SqliteTable<IScreenshot> {
         if (record[0] === lookupTimestamp && record[1] === tabId) return record[2] as Buffer;
       }
     }
-    const record = this.db
-      .prepare(`select image from ${this.tableName} where tabId=? and timestamp=?`)
-      .get(tabId, lookupTimestamp);
-    return record.image;
+    return <Buffer>(
+      this.db
+        .prepare(`select image from ${this.tableName} where tabId=? and timestamp=?`)
+        .pluck()
+        .get(tabId, lookupTimestamp)
+    );
   }
 
   public getScreenshotTimesByTabId(): ScreenshotsTable['screenshotTimesByTabId'] {
     if (this.hasLoadedCounts) return this.screenshotTimesByTabId;
     this.hasLoadedCounts = true;
-    const timestamps = this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all();
+    const timestamps = <Omit<IScreenshot, 'image'>[]>(
+      this.db.prepare(`select timestamp, tabId from ${this.tableName}`).all()
+    );
     for (const { timestamp, tabId } of timestamps) {
       this.trackScreenshotTime(tabId, timestamp);
     }

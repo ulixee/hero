@@ -1,4 +1,4 @@
-import * as Database from 'better-sqlite3';
+import Database = require('better-sqlite3');
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import Log from '@ulixee/commons/lib/Logger';

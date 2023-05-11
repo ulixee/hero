@@ -17,7 +17,9 @@ export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessag
   }
 
   public getMessages(resourceId: number): IWebsocketMessageRecord[] {
-    return this.db.prepare(`select * from ${this.tableName} where resourceId=?`).all(resourceId);
+    return <any>(
+      this.db.prepare(`select * from ${this.tableName} where resourceId=?`).all(resourceId)
+    );
   }
 
   public getTranslatedMessages(resourceId: number): IWebsocketMessage[] {

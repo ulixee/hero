@@ -7,11 +7,8 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
-    "./lib/DomExtender": "./lib/DomExtender.js",
-    "./lib/internal": "./lib/internal.js",
-    "./lib/extendables": "./lib/extendables.js",
-    "./lib/CallsiteLocator": "./lib/CallsiteLocator.js",
-    "./lib/ScriptInstance": "./lib/ScriptInstance.js"
+    "./lib/*": "./lib/*.js",
+    "./connections/*": "./connections/*.js"
   },
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",

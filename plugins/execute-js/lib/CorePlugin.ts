@@ -13,7 +13,9 @@ export default class ExecuteJsCorePlugin extends CorePlugin {
   ): Promise<any> {
     const { fnName, fnSerialized, isolateFromWebPageEnvironment } = args;
     frame ??= page.mainFrame;
-    const result = await frame.evaluate<any>(fnSerialized, isolateFromWebPageEnvironment);
+    const result = await frame.evaluate<any>(fnSerialized, isolateFromWebPageEnvironment, {
+      includeCommandLineAPI: true,
+    });
 
     if ((result as any)?.error) {
       this.logger.error<any>(fnName, { error: result.error });

@@ -5,7 +5,7 @@
     "outDir": "./build",
     "noImplicitOverride": true
   },
-  "include": ["./**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
+  "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
     "**/tsconfig*.json",
     "node_modules",

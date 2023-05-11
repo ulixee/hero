@@ -213,10 +213,9 @@ export default class Core {
     ShutdownHandler.register(this.shutdown);
 
     if (process.env.NODE_ENV !== 'test') {
-      process.on('uncaughtExceptionMonitor', async (error: Error) => {
+      process.on('uncaughtExceptionMonitor', (error: Error, origin) => {
         if (!error || error[hasBeenLoggedSymbol]) return;
-        log.error('UnhandledError(fatal)', { error, sessionId: null });
-        if (shouldShutdownOnSignals) await ShutdownHandler.run();
+        log.error('UnhandledError(fatal)', { error, origin, sessionId: null });
       });
       process.on('unhandledRejection', (error: Error) => {
         if (!error || error[hasBeenLoggedSymbol]) return;

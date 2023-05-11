@@ -1,6 +1,6 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import * as WebSocket from 'ws';
+import WebSocket = require('ws');
 import Core from '@ulixee/hero-core';
 import { WsTransportToClient } from '@ulixee/net';
 import { version } from '@ulixee/hero-core/package.json';
