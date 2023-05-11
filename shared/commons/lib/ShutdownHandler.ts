@@ -14,12 +14,16 @@ export default class ShutdownHandler {
   private static readonly onShutdownFns: {
     fn: (signal?: ShutdownSignal) => Promise<any> | any;
     callsite: string;
+    runWithDisabledSignals?: boolean;
   }[] = [];
 
-  public static register(onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | any): void {
+  public static register(
+    onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | any,
+    runWithDisabledSignals?: boolean,
+  ): void {
     this.registerSignals();
     const callsite = new Error().stack.split(/\r?\n/).slice(2, 3).shift().trim();
-    this.onShutdownFns.push({ fn: onShutdownFn, callsite });
+    this.onShutdownFns.push({ fn: onShutdownFn, callsite, runWithDisabledSignals });
   }
 
   public static unregister(onShutdownFn: (signal?: ShutdownSignal) => Promise<any> | any): void {
@@ -47,7 +51,6 @@ export default class ShutdownHandler {
     code?: number,
     isManual = false,
   ): Promise<void> {
-    if (this.disableSignals && !isManual) return;
     if (this.hasRunHandlers) return;
     this.hasRunHandlers = true;
 
@@ -56,8 +59,13 @@ export default class ShutdownHandler {
       sessionId: null,
     });
 
+    const keepList = [];
     while (this.onShutdownFns.length) {
       const entry = this.onShutdownFns.shift();
+      if (this.disableSignals && !isManual && !entry.runWithDisabledSignals) {
+        keepList.push(entry);
+        continue;
+      }
 
       log.stats('ShutdownHandler.execute', {
         signal,
@@ -75,6 +83,7 @@ export default class ShutdownHandler {
         });
       }
     }
+    this.onShutdownFns.push(...keepList);
 
     log.stats('ShutdownHandler.shutdownComplete', {
       signal,
