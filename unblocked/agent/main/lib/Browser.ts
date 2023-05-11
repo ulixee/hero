@@ -355,7 +355,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
         // eslint-disable-next-line no-console
         console.warn(
           'WARNING: Agent is being run under "root" user - disabling Chrome sandbox! ' +
-            'Run under regular user to get rid of this warning.',
+            'Run under regular user to get rid of this warning, or pass in `noChromeSandbox: true` to the constructor arguments.',
         );
         launchArgs.push('--no-sandbox');
       }

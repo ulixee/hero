@@ -61,7 +61,7 @@ export default async function runBrowserstack(): Promise<void> {
 
 export function cleanProfiles(): void {
   const removePluginIds = process.argv[1]?.split(',')?.map(x => x.trim()) ?? [];
-  console.log('REMOVING plugin-ids', removePluginIds)
+  console.log('REMOVING plugin-ids', removePluginIds);
   // remove files of plugins we want to rerun, comment this out on subsequent runs
   if (removePluginIds.length) {
     BrowserProfiler.cleanPluginProfiles(removePluginIds);

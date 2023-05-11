@@ -152,7 +152,7 @@ describe('emulator', () => {
     Helpers.needsClosing.push(agent);
     const page = await agent.newPage();
     await page.goto(koaServer.baseUrl);
-    await page.waitForLoad('DomContentLoaded')
+    await page.waitForLoad('DomContentLoaded');
     const descriptorsJson = await page.evaluate<string>(
       'JSON.stringify(Object.getOwnPropertyDescriptors(Navigator.prototype))',
     );

@@ -20,7 +20,7 @@ export default function findUaClientHintsPlatformVersion(osId: string): string[]
   const uaClientHintsPlatformVersions: string[] = [];
   if (osId.startsWith('windows')) {
     let version = osId.replace('windows-', '');
-    if (!version.includes('-')) version += '-0'
+    if (!version.includes('-')) version += '-0';
     for (const [release, platform] of Object.entries(data.windowsUniversalApiMap)) {
       if (!release.startsWith(version)) continue;
       uaClientHintsPlatformVersions.push(platform);

@@ -107,11 +107,11 @@ const browserstackSettings = {
   projectName: 'Double Agent',
 };
 
-function getChromeOptions({ browser, browser_version }: IBrowserstackAgent): {
+function getChromeOptions({ browser, browser_version: browserVersion }: IBrowserstackAgent): {
   args: string[];
   excludeSwitches: string[];
 } {
-  const [majorVersion] = browser_version.split('.').map(x => Number(x));
+  const [majorVersion] = browserVersion.split('.').map(x => Number(x));
   const args: string[] = [
     '--disable-blink-features=AutomationControlled',
     '--disable-site-isolation-trials',
@@ -129,9 +129,9 @@ function getChromeOptions({ browser, browser_version }: IBrowserstackAgent): {
   };
 }
 
-function shouldBypassSecurity({ os, os_version }): boolean {
+function shouldBypassSecurity({ os, os_version: osVersion }): boolean {
   // El Capitan has a root cert issue that doesn't work with LetsEncrypt certs (says connection is not private)
-  if (os === 'OS X' && (os_version === 'El Capitan' || os_version === 'Yosemite')) {
+  if (os === 'OS X' && (osVersion === 'El Capitan' || osVersion === 'Yosemite')) {
     return true;
   }
   return false;
@@ -139,42 +139,37 @@ function shouldBypassSecurity({ os, os_version }): boolean {
 
 function getSeleniumVersion({
   browser,
-  browser_version,
+  browser_version: browserVersion,
   os,
-  os_version,
+  os_version: osVersion,
 }: IBrowserstackAgent): string {
-  const [majorVersion] = browser_version.split('.').map(x => Number(x));
+  const [majorVersion] = browserVersion.split('.').map(x => Number(x));
   if (
     os === 'OS X' &&
-    os_version === 'Snow Leopard' &&
+    osVersion === 'Snow Leopard' &&
     browser === 'Safari' &&
-    browser_version === '5.1'
+    browserVersion === '5.1'
   ) {
     return '2.5';
   }
   if (
     os === 'OS X' &&
-    os_version === 'Mountain Lion' &&
+    osVersion === 'Mountain Lion' &&
     browser === 'Safari' &&
-    browser_version === '6.2'
+    browserVersion === '6.2'
   ) {
     return '3.5.2';
   }
-  if (os === 'OS X' && os_version === 'Snow Leopard') {
+  if (os === 'OS X' && osVersion === 'Snow Leopard') {
     return '2.46.0';
   }
   if (browser === 'Opera') {
     return '2.43.1';
   }
-  if (
-    browser === 'Firefox' &&
-    browser_version === '4.0' &&
-    os === 'OS X' &&
-    os_version === 'Lion'
-  ) {
+  if (browser === 'Firefox' && browserVersion === '4.0' && os === 'OS X' && osVersion === 'Lion') {
     return '2.37.0';
   }
-  if (browser === 'Firefox' && os_version === 'XP') {
+  if (browser === 'Firefox' && osVersion === 'XP') {
     return '2.53.1';
   }
   if (browser === 'Firefox' && majorVersion < 45) {

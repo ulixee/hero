@@ -9,7 +9,7 @@ import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 let browser: Browser;
-let httpServer: ITestKoaServer
+let httpServer: ITestKoaServer;
 let context: BrowserContext;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {

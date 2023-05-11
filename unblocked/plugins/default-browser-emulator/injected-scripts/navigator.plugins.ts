@@ -138,7 +138,7 @@ const pluginList: Plugin[] = args.plugins.map(fakeP => {
   proxyFunction(
     plugin,
     'namedItem',
-    (_, __, argArray) => {
+    (target, thisArg, argArray) => {
       if (!argArray || !argArray.length) return ProxyOverride.callOriginal;
       const match = pluginMimes.find(x => x.type === argArray[0]);
       if (match) return createMime(match);
