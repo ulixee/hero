@@ -31,8 +31,5 @@
     "node-fetch": "^2.6.1",
     "p-queue": "^6.3.0",
     "selenium-webdriver": "4.4.0"
-  },
-  "engines": {
-    "node": ">=12.0.0"
   }
 }
