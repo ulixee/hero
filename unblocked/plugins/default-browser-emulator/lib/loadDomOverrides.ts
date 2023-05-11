@@ -12,7 +12,9 @@ export default function loadDomOverrides(
   const domOverrides = new DomOverridesBuilder();
 
   const deviceProfile = emulationProfile.deviceProfile;
-  const isHeadless = emulationProfile.browserEngine.isHeaded !== true && emulationProfile.browserEngine.isHeadlessNew !== true;
+  const isHeadless =
+    emulationProfile.browserEngine.isHeaded !== true &&
+    emulationProfile.browserEngine.isHeadlessNew !== true;
 
   domOverrides.add('navigator.hardwareConcurrency', {
     concurrency: deviceProfile.hardwareConcurrency,
@@ -98,9 +100,13 @@ export default function loadDomOverrides(
   domOverrides.add('window.outerHeight', {
     frameBorderHeight: frame.frameBorderHeight,
   });
+  if (Number(emulationProfile.browserEngine.fullVersion.split('.')[0]) >= 109) {
+    domOverrides.add('performance');
+  }
   domOverrides.add('window.screen', {
     unAvailHeight: frame.screenGapTop + frame.screenGapBottom,
     unAvailWidth: frame.screenGapLeft + frame.screenGapRight,
+    colorDepth: emulationProfile.viewport.colorDepth,
   });
 
   return domOverrides;

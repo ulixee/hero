@@ -54,7 +54,7 @@ proxySetter(self.HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
         }
 
         // use original self properties (no window yet)
-        return ReflectCached.get(self, key);
+        return ReflectCached.get(target, key);
       },
     });
 
