@@ -3457,5 +3457,31 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-113-0": {
+    "id": "firefox-113-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "113",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-113-0": {
+    "id": "edge-113-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "113",
+      "minor": "0",
+      "build": "1774",
+      "patch": "35"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
