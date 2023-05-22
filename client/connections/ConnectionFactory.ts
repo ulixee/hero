@@ -1,10 +1,10 @@
+import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
 import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
-import ConnectionToHeroCore from './ConnectionToHeroCore';
 import CallsiteLocator from '../lib/CallsiteLocator';
+import ConnectionToHeroCore from './ConnectionToHeroCore';
 
 const { version } = require('../package.json');
 
@@ -70,11 +70,14 @@ npx @ulixee/cloud start
     };
 
     connection.connect(true).then(onError).catch(onError);
-    ShutdownHandler.register(() => connection.disconnect());
+    const closeFn = (): Promise<any> => connection.disconnect();
+    ShutdownHandler.register(closeFn);
+    connection.once('disconnected', () => ShutdownHandler.unregister(closeFn));
 
     return connection;
   }
 }
+
 try {
   require.resolve('@ulixee/cloud');
   ConnectionFactory.hasLocalCloudPackage = true;

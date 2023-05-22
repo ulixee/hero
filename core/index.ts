@@ -1,29 +1,29 @@
-import * as Fs from 'fs';
-import * as Path from 'path';
-import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
+import DefaultHumanEmulator from '@ulixee/default-human-emulator';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 import { ICorePluginClass } from '@ulixee/hero-interfaces/ICorePlugin';
+import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
-import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
-import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import Pool from '@ulixee/unblocked-agent/lib/Pool';
-import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
-import DefaultHumanEmulator from '@ulixee/default-human-emulator';
-import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
+import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
+import Pool from '@ulixee/unblocked-agent/lib/Pool';
+import { LocationTrigger } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import * as Fs from 'fs';
+import * as Path from 'path';
+import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
 import NetworkDb from './dbs/NetworkDb';
 import { dataDir } from './env';
-import Tab from './lib/Tab';
 import Session from './lib/Session';
-import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
+import Tab from './lib/Tab';
 
 const { log } = Log(module);
 
@@ -191,7 +191,6 @@ export default class Core {
       this.networkDb?.close();
 
       if (this.onShutdown) this.onShutdown();
-      await ShutdownHandler.run();
       isClosing.resolve();
     } catch (error) {
       isClosing.reject(error);
