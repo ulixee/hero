@@ -1,5 +1,6 @@
-import Callsite from '@ulixee/commons/lib/Callsite';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import Callsite from '@ulixee/commons/lib/Callsite';
+import * as Path from 'path';
 
 const AwaitedDomPath = require
   .resolve('@ulixee/awaited-dom/package.json')
@@ -8,10 +9,9 @@ const HeroLibPath = require.resolve('./Hero').replace(/\/Hero\.(?:ts|js)/, '');
 
 export default class CallsiteLocator {
   public static readonly ignoreModulePaths = ['node:internal', AwaitedDomPath, HeroLibPath];
+  public static readonly ignoreModulePathFragments = [`${Path.sep}node_modules`];
 
-  constructor(
-    readonly entrypoint: string = Callsite.getEntrypoint(),
-  ) {}
+  constructor(readonly entrypoint: string = Callsite.getEntrypoint()) {}
 
   public getCurrent(): ISourceCodeLocation[] {
     const stack = Callsite.getSourceCodeLocation(module.filename);
@@ -22,7 +22,10 @@ export default class CallsiteLocator {
       const { filename } = callsite;
       if (!filename) continue;
 
-      if (CallsiteLocator.ignoreModulePaths.find(x => filename.startsWith(x))) {
+      if (CallsiteLocator.ignoreModulePaths.some(x => filename.startsWith(x))) {
+        continue;
+      }
+      if (CallsiteLocator.ignoreModulePathFragments.some(x => filename.includes(x))) {
         continue;
       }
       if (filename.endsWith(this.entrypoint)) {
