@@ -1,37 +1,37 @@
-import * as Database from 'better-sqlite3';
-import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import * as Database from 'better-sqlite3';
+import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import * as Fs from 'fs';
 import * as Path from 'path';
-import ResourcesTable from '../models/ResourcesTable';
-import DomChangesTable from '../models/DomChangesTable';
+import env from '../env';
+import Core from '../index';
+import AwaitedEventsTable from '../models/AwaitedEventsTable';
 import CommandsTable from '../models/CommandsTable';
-import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
+import DetachedElementsTable from '../models/DetachedElementsTable';
+import DetachedResourcesTable from '../models/DetachedResourcesTable';
+import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
+import DomChangesTable from '../models/DomChangesTable';
+import FlowCommandsTable from '../models/FlowCommandsTable';
+import FlowHandlersTable from '../models/FlowHandlersTable';
+import FocusEventsTable from '../models/FocusEventsTable';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
-import PageLogsTable from '../models/PageLogsTable';
-import SessionTable from '../models/SessionTable';
+import InteractionStepsTable from '../models/InteractionStepsTable';
 import MouseEventsTable from '../models/MouseEventsTable';
-import FocusEventsTable from '../models/FocusEventsTable';
+import OutputTable from '../models/OutputTable';
+import PageLogsTable from '../models/PageLogsTable';
+import ResourceStatesTable from '../models/ResourceStatesTable';
+import ResourcesTable from '../models/ResourcesTable';
+import ScreenshotsTable from '../models/ScreenshotsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
-import ScreenshotsTable from '../models/ScreenshotsTable';
-import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
-import TabsTable from '../models/TabsTable';
-import ResourceStatesTable from '../models/ResourceStatesTable';
-import SocketsTable from '../models/SocketsTable';
-import Core from '../index';
-import StorageChangesTable from '../models/StorageChangesTable';
-import AwaitedEventsTable from '../models/AwaitedEventsTable';
-import DetachedElementsTable from '../models/DetachedElementsTable';
+import SessionTable from '../models/SessionTable';
 import SnippetsTable from '../models/SnippetsTable';
-import DetachedResourcesTable from '../models/DetachedResourcesTable';
-import OutputTable from '../models/OutputTable';
-import FlowHandlersTable from '../models/FlowHandlersTable';
-import FlowCommandsTable from '../models/FlowCommandsTable';
-import InteractionStepsTable from '../models/InteractionStepsTable';
-import env from '../env';
+import SocketsTable from '../models/SocketsTable';
+import StorageChangesTable from '../models/StorageChangesTable';
+import TabsTable from '../models/TabsTable';
+import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 
 const { log } = Log(module);
 
@@ -96,7 +96,7 @@ export default class SessionDb {
     if (!customPath) SessionDb.createDefaultDir();
     this.path = customPath ?? Path.join(SessionDb.defaultDatabaseDir, `${sessionId}.db`);
     this.db = new Database(this.path, { readonly, fileMustExist });
-    if (env.enableSqliteWal) {
+    if (env.enableSqliteWal && !dbOptions.readonly) {
       this.db.unsafeMode(false);
       this.db.pragma('journal_mode = WAL');
     }
