@@ -327,12 +327,15 @@ registerNamespaceMapping((ns, active, skip) => {
       /agent\/.*/,
       /plugins\/.*/,
       /net\/.*/,
+      /crypto\/.*/,
+      /commons\/.*/,
       /cloud\/.*/,
       /datastore[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,
       /DevtoolsSessionLogger/,
+      /^lib\/.*/,
     );
   } else if (ns === 'ulx') {
     active.push(

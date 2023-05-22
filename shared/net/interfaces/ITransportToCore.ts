@@ -1,8 +1,8 @@
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
+import IApiHandlers from './IApiHandlers';
+import ICoreEventPayload from './ICoreEventPayload';
 import ICoreRequestPayload from './ICoreRequestPayload';
 import ICoreResponsePayload from './ICoreResponsePayload';
-import ICoreEventPayload from './ICoreEventPayload';
-import IApiHandlers from './IApiHandlers';
 
 export default interface ITransportToCore<
   ApiHandlers extends IApiHandlers = any,

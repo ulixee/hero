@@ -5,5 +5,5 @@ module.exports = {verbose: false,
   collectCoverage: false,
   transform: {},
   testTimeout: 15e3,
-  reporters: ['default', 'jest-summary-reporter']
+  reporters: ['default', ['github-actions', { silent: false }], 'summary'],
 };
