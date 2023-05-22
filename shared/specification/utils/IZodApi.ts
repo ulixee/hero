@@ -14,9 +14,9 @@ export type IZodApiTypes = { args: z.Schema; result: z.Schema };
 
 export type IZodApiSpec = { [command: string]: IZodApiTypes };
 
-export type IZodHandlers<Spec extends IZodApiSpec> = {
+export type IZodHandlers<Spec extends IZodApiSpec, TContext = any> = {
   [Api in keyof Spec]: (
     args: z.infer<Spec[Api]['args']>,
-    context?: any,
+    context?: TContext,
   ) => Promise<z.infer<Spec[Api]['result']>>;
 };
