@@ -79,6 +79,12 @@ export class SourceMapSupport {
     position: ISourceCodeLocation,
     includeContent = false,
   ): ISourceCodeLocation & { name?: string; content?: string } {
+    // already translated
+    if (position.source) {
+      if (includeContent && 'content' in position)
+        (position as any).content = SourceLoader.getFileContents(position.source);
+      return position;
+    }
     const sourceMap = this.retrieveSourceMap(position.filename);
 
     // Resolve the source URL relative to the URL of the source map

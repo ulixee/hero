@@ -28,14 +28,22 @@ export default class SourceLoader {
       this.sourceLines[sourcePosition.source] = file.split(/\r?\n/);
     }
 
-    (sourcePosition as any).code =
-      this.sourceLines[sourcePosition.source][sourcePosition.line - 1];
+    (sourcePosition as any).code = this.sourceLines[sourcePosition.source][sourcePosition.line - 1];
     return sourcePosition as any;
   }
 
+  static getSourceLines(codeLocation: ISourceCodeLocation): string[] {
+    if (!codeLocation) return [];
+
+    const source = this.getSource(codeLocation);
+    if (source?.code) return this.sourceLines[source.source];
+    return [];
+  }
+
   static getFileContents(filepath: string, cache = true): string {
+    if (!filepath) return null;
     const cacheKey = SourceMapSupport.getCacheKey(filepath);
-    if (cache && this.fileContentsCache[cacheKey]) return this.fileContentsCache[cacheKey];
+    if (cache && cacheKey in this.fileContentsCache) return this.fileContentsCache[cacheKey];
 
     // Trim the path to make sure there is no extra whitespace.
     let lookupFilepath: string | URL = filepath.trim();
