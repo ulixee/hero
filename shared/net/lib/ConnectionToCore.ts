@@ -128,6 +128,7 @@ export default class ConnectionToCore<
         host: this.transport.host,
         sessionId: null,
       });
+      this.connectPromise = null;
     } finally {
       resolvable.resolve();
     }
