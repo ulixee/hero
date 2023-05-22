@@ -3,9 +3,7 @@
     "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest"
   },
   "devDependencies": {
-    "jest": "^28.1.0",
-    "jest-environment-node": "^28.1.0",
-    "jest-summary-reporter": "^0.0.2",
+    "jest": "^29.5.0",
     "cross-env": "^7.0.3"
   }
 }

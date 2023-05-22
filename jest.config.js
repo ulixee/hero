@@ -50,7 +50,7 @@ module.exports = {
   globalSetup: './jest.setup.js',
   setupFilesAfterEnv: ['./jest.setupPerTest.js'],
   testTimeout: 15e3,
-  reporters: ['default', 'jest-summary-reporter'],
+  reporters: [['github-actions', { silent: false }], 'summary'],
   roots: workspaces.map(x => `${x}/`),
   moduleDirectories: ['node_modules', ...workspaces.map(x => `${x}/node_modules`)],
 };
