@@ -14,8 +14,8 @@ let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
   // remove the human emulator
   Core.defaultUnblockedPlugins = [DefaultBrowserEmulator];
-  await Core.start();
-  connectionToClient = Core.addConnection();
+  const core = await Core.start();
+  connectionToClient = core.addConnection();
   await connectionToClient.connect();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();

@@ -7,7 +7,8 @@ import { stringToRegex } from '../lib/Tab';
 
 let connection: ConnectionToHeroClient;
 beforeAll(() => {
-  connection = Core.addConnection();
+  const core = new Core();
+  connection = core.addConnection();
   Helpers.onClose(() => connection.disconnect(), true);
 });
 afterAll(Helpers.afterAll);

@@ -95,7 +95,7 @@ export default class CommandRecorder {
     } finally {
       const mainFrame = frame ?? (tab ?? session.getLastActiveTab())?.mainFrameEnvironment;
       commands.onFinished(commandMeta, result, mainFrame?.navigations?.top?.id);
-      this.logger.stats('Command.done', { result, parentLogId: id });
+      this.logger.stats('Command.done', { id: commandMeta.id, result, parentLogId: id });
     }
   }
 }

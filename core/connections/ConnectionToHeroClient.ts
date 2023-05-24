@@ -1,28 +1,27 @@
-import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
-import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
-import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { isSemverSatisfied } from '@ulixee/commons/lib/VersionUtils';
-import BrowserLaunchError from '@ulixee/unblocked-agent/errors/BrowserLaunchError';
-import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
+import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
 import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IConnectionToClient, {
   IConnectionToClientEvents,
 } from '@ulixee/net/interfaces/IConnectionToClient';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
+import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
+import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { ICommandPresetMeta } from '../lib/Commands';
-import RemoteEvents from '../lib/RemoteEvents';
+import BrowserLaunchError from '@ulixee/unblocked-agent/errors/BrowserLaunchError';
+import HeroCore from '../index';
 import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
+import { ICommandPresetMeta } from '../lib/Commands';
 import FrameEnvironment from '../lib/FrameEnvironment';
-import Core from '../index';
-import Tab from '../lib/Tab';
+import RemoteEvents from '../lib/RemoteEvents';
 import Session from '../lib/Session';
+import Tab from '../lib/Tab';
 
 const { version } = require('../package.json');
 
@@ -34,11 +33,15 @@ export default class ConnectionToHeroClient
 {
   public disconnectPromise: Promise<void>;
 
+  private get autoShutdownMillis(): number {
+    return this.core.clearIdleConnectionsAfterMillis;
+  }
+
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private activeCommandMessageIds = new Set<string>();
 
-  constructor(readonly transport: ITransportToClient<any>, public autoShutdownMillis: number = -1) {
+  constructor(readonly transport: ITransportToClient<any>, private core: HeroCore) {
     super();
     transport.on('message', message => this.handleRequest(message));
     transport.once('disconnected', error => this.disconnect(error));
@@ -107,7 +110,7 @@ export default class ConnectionToHeroClient
   }
 
   public async connect(
-    options: ICoreConfigureOptions & { version?: string } = {},
+    options: { maxConcurrentClientCount?: number; version?: string } = {},
   ): Promise<{ maxConcurrency: number }> {
     if (options.version) {
       if (!isSemverSatisfied(options.version, version)) {
@@ -116,10 +119,16 @@ export default class ConnectionToHeroClient
         );
       }
     }
+    if (
+      options.maxConcurrentClientCount &&
+      options.maxConcurrentClientCount < this.core.pool.maxConcurrentAgents
+    ) {
+      this.core.pool.maxConcurrentAgents = options.maxConcurrentClientCount;
+    }
     this.disconnectPromise = null;
-    await Core.start(options);
+    await this.core.start();
     return {
-      maxConcurrency: Core.pool.maxConcurrentAgents,
+      maxConcurrency: this.core.pool.maxConcurrentAgents,
     };
   }
 
@@ -155,6 +164,7 @@ export default class ConnectionToHeroClient
       log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
     } finally {
       resolvable.resolve();
+      this.core = null;
     }
   }
 
@@ -183,7 +193,7 @@ export default class ConnectionToHeroClient
     if (this.disconnectPromise) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
 
-    const { session, tab } = await Session.create(options);
+    const { session, tab } = await Session.create(options, this.core);
     const sessionId = session.id;
     if (!this.sessionIdToRemoteEvents.has(sessionId)) {
       const remoteEvents = new RemoteEvents(session, this.sendEvent);

@@ -6,8 +6,12 @@ import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToHeroClient;
+let core: Core;
+
 beforeAll(async () => {
-  connectionToClient = Core.addConnection() as ConnectionToHeroClient;
+  core = await Core.start();
+  Helpers.onClose(core.close, true);
+  connectionToClient = core.addConnection() as ConnectionToHeroClient;
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });

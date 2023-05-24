@@ -3,15 +3,16 @@ import { Helpers } from '@ulixee/hero-testing';
 import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
+let core: Core;
 beforeAll(async () => {
-  await Core.start();
+  core = await Core.start();
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('can wait for sub-frames to load', async () => {
-  const connection = Core.addConnection();
+  const connection = core.addConnection();
   Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession();
   const tab = Session.getTab(meta);
@@ -45,7 +46,7 @@ test('can wait for sub-frames to load', async () => {
 });
 
 test('should allow query selectors in cross-domain frames', async () => {
-  const connection = Core.addConnection();
+  const connection = core.addConnection();
   Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession();
 

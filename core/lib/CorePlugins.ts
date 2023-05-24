@@ -35,7 +35,11 @@ export default class CorePlugins implements ICorePlugins {
   private agent: Agent;
   private getSessionSummary: IOptionsCreate['getSessionSummary'];
 
-  constructor(agent: Agent, options: IOptionsCreate) {
+  constructor(
+    agent: Agent,
+    options: IOptionsCreate,
+    private corePluginsById: { [id: string]: ICorePluginClass },
+  ) {
     const { dependencyMap, corePluginPaths, getSessionSummary } = options;
     this.agent = agent;
 
@@ -48,8 +52,9 @@ export default class CorePlugins implements ICorePlugins {
 
     this.logger = agent.logger.createChild(module);
 
-    for (const plugin of Object.values(Core.corePluginsById)) {
-      const shouldActivate = plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary()) ?? true;
+    for (const plugin of Object.values(corePluginsById)) {
+      const shouldActivate =
+        plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary()) ?? true;
       if (shouldActivate) this.use(plugin);
     }
 
@@ -111,7 +116,7 @@ export default class CorePlugins implements ICorePlugins {
     for (const [clientPluginId, corePluginIds] of Object.entries(dependencyMap)) {
       for (const corePluginId of corePluginIds) {
         if (this.instanceById[corePluginId]) continue;
-        if (Core.corePluginsById[corePluginId]) continue;
+        if (this.corePluginsById[corePluginId]) continue;
         this.logger.info(`Dynamically requiring ${corePluginId} requested by ${clientPluginId}`);
         const Plugin = requirePlugins<ICorePluginClass>(corePluginId, PluginTypes.CorePlugin)[0];
         if (!Plugin) throw new Error(`Could not find ${corePluginId}`);
@@ -123,7 +128,7 @@ export default class CorePlugins implements ICorePlugins {
 
   private loadCorePluginPaths(corePluginPaths: string[]): void {
     for (const corePluginPath of corePluginPaths) {
-      if (Core.corePluginsById[corePluginPath]) continue;
+      if (this.corePluginsById[corePluginPath]) continue;
       const Plugins = requirePlugins<ICorePluginClass>(corePluginPath, PluginTypes.CorePlugin);
       Plugins.forEach(Plugin => this.use(Plugin));
     }

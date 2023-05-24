@@ -1,25 +1,26 @@
 import Database = require('better-sqlite3');
-import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import Log from '@ulixee/commons/lib/Logger';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import * as fs from 'fs';
-import CertificatesTable from '../models/CertificatesTable';
-import Core from '../index';
+import * as Path from 'path';
 import env from '../env';
+import CertificatesTable from '../models/CertificatesTable';
 
 const { log } = Log(module);
 
 export default class NetworkDb {
-  private static hasInitialized = false;
   public readonly certificates: CertificatesTable;
   private db: SqliteDatabase;
   private readonly batchInsert: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor() {
-    NetworkDb.createDir();
-    this.db = new Database(NetworkDb.databasePath);
+  constructor(private databaseDir: string) {
+    try {
+      fs.mkdirSync(databaseDir, { recursive: true });
+    } catch {}
+    this.db = new Database(Path.join(databaseDir, 'network.db'));
     this.certificates = new CertificatesTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     if (env.enableSqliteWal) {
@@ -63,20 +64,5 @@ export default class NetworkDb {
   public flush(): void {
     if (!this.db || this.db.readonly) return;
     this.batchInsert.immediate();
-  }
-
-  public static createDir(): void {
-    if (!this.hasInitialized) {
-      fs.mkdirSync(this.databaseDir, { recursive: true });
-      this.hasInitialized = true;
-    }
-  }
-
-  public static get databaseDir(): string {
-    return Core.dataDir;
-  }
-
-  public static get databasePath(): string {
-    return `${this.databaseDir}/network.db`;
   }
 }

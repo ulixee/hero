@@ -81,7 +81,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
 
   protected async afterConnect(): Promise<void> {
     const connectOptions = <ICoreConfigureOptions>{
-      dataDir: this.options.dataDir,
+      maxConcurrentClientCount: this.options.maxConcurrency,
       version: this.options.version,
     };
     const connectResult = await this.sendRequest({

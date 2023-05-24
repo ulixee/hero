@@ -2,10 +2,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
-import * as Fs from 'fs';
-import * as Path from 'path';
 import env from '../env';
-import Core from '../index';
 import AwaitedEventsTable from '../models/AwaitedEventsTable';
 import CommandsTable from '../models/CommandsTable';
 import DetachedElementsTable from '../models/DetachedElementsTable';
@@ -21,8 +18,8 @@ import InteractionStepsTable from '../models/InteractionStepsTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import OutputTable from '../models/OutputTable';
 import PageLogsTable from '../models/PageLogsTable';
-import ResourceStatesTable from '../models/ResourceStatesTable';
 import ResourcesTable from '../models/ResourcesTable';
+import ResourceStatesTable from '../models/ResourceStatesTable';
 import ScreenshotsTable from '../models/ScreenshotsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
@@ -41,9 +38,6 @@ interface IDbOptions {
 }
 
 export default class SessionDb {
-  private static byId = new Map<string, SessionDb>();
-  private static hasInitialized = false;
-
   public get readonly(): boolean {
     return this.db?.readonly;
   }
@@ -90,11 +84,10 @@ export default class SessionDb {
   private db: SqliteDatabase;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor(sessionId: string, dbOptions: IDbOptions = {}, customPath?: string) {
+  constructor(sessionId: string, path: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = sessionId;
-    if (!customPath) SessionDb.createDefaultDir();
-    this.path = customPath ?? Path.join(SessionDb.defaultDatabaseDir, `${sessionId}.db`);
+    this.path = path;
     this.db = new Database(this.path, { readonly, fileMustExist });
     if (env.enableSqliteWal && !dbOptions.readonly) {
       this.db.unsafeMode(false);
@@ -200,7 +193,7 @@ export default class SessionDb {
     };
   }
 
-  public async close(deleteFile = false): Promise<void> {
+  public close(): void {
     clearInterval(this.saveInterval);
 
     if (this.db?.open) {
@@ -212,11 +205,10 @@ export default class SessionDb {
       return;
     }
 
-    SessionDb.byId.delete(this.sessionId);
-    this.db.close();
-    if (deleteFile) {
-      await Fs.promises.rm(this.path);
+    if (env.enableSqliteWal && !this.db.readonly) {
+      this.db.pragma('journal_mode = DELETE');
     }
+    this.db.close();
     this.db = null;
   }
 
@@ -234,38 +226,5 @@ export default class SessionDb {
         throw error;
       }
     }
-  }
-
-  public static getCached(
-    sessionId: string,
-    fileMustExist = false,
-    customPath?: string,
-  ): SessionDb {
-    if (sessionId.endsWith('.db')) sessionId = sessionId.split('.db').shift();
-    if (!this.byId.get(sessionId)?.db?.open) {
-      this.byId.set(
-        sessionId,
-        new SessionDb(
-          sessionId,
-          {
-            readonly: true,
-            fileMustExist,
-          },
-          customPath,
-        ),
-      );
-    }
-    return this.byId.get(sessionId);
-  }
-
-  public static createDefaultDir(): void {
-    if (!this.hasInitialized) {
-      Fs.mkdirSync(this.defaultDatabaseDir, { recursive: true });
-      this.hasInitialized = true;
-    }
-  }
-
-  public static get defaultDatabaseDir(): string {
-    return `${Core.dataDir}/hero-sessions`;
   }
 }

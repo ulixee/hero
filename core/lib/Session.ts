@@ -28,6 +28,7 @@ import { IEmulatorOptions } from '@ulixee/default-browser-emulator';
 import IViewport from '@ulixee/unblocked-specification/agent/browser/IViewport';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import * as Path from 'path';
+import ISessionRegistry from '../interfaces/ISessionRegistry';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
@@ -134,7 +135,11 @@ export default class Session
   protected readonly logSubscriptionId: number;
   protected events = new EventSubscriber();
 
-  protected constructor(readonly options: ISessionCreateOptions) {
+  private get sessionRegistry(): ISessionRegistry {
+    return this.core.sessionRegistry;
+  }
+
+  protected constructor(readonly options: ISessionCreateOptions, public core: Core) {
     super();
 
     for (const key of Object.keys(options)) {
@@ -157,7 +162,7 @@ export default class Session
     const customPath = options.sessionDbDirectory
       ? Path.join(options.sessionDbDirectory, `${this.id}.db`)
       : undefined;
-    this.db = new SessionDb(this.id, {}, customPath);
+    this.db = this.sessionRegistry.create(this.id, customPath);
     this.commands = new Commands(this.db);
 
     this.logger = log.createChild(module, { sessionId: this.id });
@@ -205,7 +210,7 @@ export default class Session
     return Promise.resolve();
   }
 
-  public getCollectedAssetNames(
+  public async getCollectedAssetNames(
     fromSessionId: string,
   ): Promise<{ resources: string[]; elements: string[]; snippets: string[] }> {
     let db = this.db;
@@ -213,29 +218,32 @@ export default class Session
       db.flush();
     } else {
       const customPath = this.getCustomSessionPath(fromSessionId);
-      db = SessionDb.getCached(fromSessionId, true, customPath);
+      db = await this.sessionRegistry.get(fromSessionId, customPath);
     }
     return DetachedAssets.getNames(db);
   }
 
-  public getSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
+  public async getSnippets(fromSessionId: string, name: string): Promise<IDataSnippet[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       const customPath = this.getCustomSessionPath(fromSessionId);
-      db = SessionDb.getCached(fromSessionId, true, customPath);
+      db = await this.sessionRegistry.get(fromSessionId, customPath);
     }
     return Promise.resolve(DetachedAssets.getSnippets(db, name));
   }
 
-  public getDetachedResources(fromSessionId: string, name: string): Promise<IDetachedResource[]> {
+  public async getDetachedResources(
+    fromSessionId: string,
+    name: string,
+  ): Promise<IDetachedResource[]> {
     let db = this.db;
     if (fromSessionId === this.id) {
       db.flush();
     } else {
       const customPath = this.getCustomSessionPath(fromSessionId);
-      db = SessionDb.getCached(fromSessionId, true, customPath);
+      db = await this.sessionRegistry.get(fromSessionId, customPath);
     }
     return DetachedAssets.getResources(db, name);
   }
@@ -251,7 +259,7 @@ export default class Session
       }
     } else {
       const customPath = this.getCustomSessionPath(fromSessionId);
-      db = SessionDb.getCached(fromSessionId, true, customPath);
+      db = await this.sessionRegistry.get(fromSessionId, customPath);
     }
     db.flush();
     return DetachedAssets.getElements(db, name);
@@ -417,7 +425,7 @@ export default class Session
     if (
       !force &&
       this.options.sessionKeepAlive &&
-      !Core.isClosing &&
+      !this.core.isClosing &&
       !this.commands.requiresScriptRestart
     ) {
       return await this.keepAlive();
@@ -455,11 +463,14 @@ export default class Session
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
     this.db.flush();
+    // NOTE: need to get sessionRegistry before cleaning up!
+    const sessionRegistry = this.sessionRegistry;
     this.cleanup();
 
     this.removeAllListeners();
+    this.db.close();
     try {
-      await this.db.close(this.options.sessionPersistence === false);
+      await sessionRegistry.onClosed(this.id, this.options.sessionPersistence === false);
     } catch (e) {
       /* no-op */
     }
@@ -544,7 +555,7 @@ export default class Session
       userAgentSelector: userAgent ?? userProfile?.userAgentString,
     };
 
-    this.agent = Core.pool.createAgent({
+    this.agent = this.core.pool.createAgent({
       options,
       customEmulatorConfig,
       logger: this.logger,
@@ -553,11 +564,15 @@ export default class Session
       commandMarker: this.commands,
     });
 
-    this.plugins = new CorePlugins(this.agent, {
-      corePluginPaths: options.corePluginPaths,
-      dependencyMap: options.dependencyMap,
-      getSessionSummary: this.getSummary.bind(this),
-    });
+    this.plugins = new CorePlugins(
+      this.agent,
+      {
+        corePluginPaths: options.corePluginPaths,
+        dependencyMap: options.dependencyMap,
+        getSessionSummary: this.getSummary.bind(this),
+      },
+      this.core.corePluginsById,
+    );
 
     // should come after plugins can initiate
     this.recordSession(providedOptions);
@@ -615,6 +630,7 @@ export default class Session
     this.browserContext = null;
     this.plugins = null;
     this.commands = null;
+    this.core = null;
   }
 
   private onResource(event: BrowserContext['resources']['EventTypes']['change']): void {
@@ -844,14 +860,15 @@ export default class Session
       : undefined;
   }
 
-  public static restoreOptionsFromSessionRecord(
+  public static async restoreOptionsFromSessionRecord(
     options: ISessionCreateOptions,
     resumeSessionId: string,
-  ): ISessionCreateOptions {
+    core: Core,
+  ): Promise<ISessionCreateOptions> {
     // if session not active, re-create
     let db: SessionDb;
     try {
-      db = SessionDb.getCached(resumeSessionId, true);
+      db = await core.sessionRegistry.get(resumeSessionId);
     } catch (err) {
       // not found
     }
@@ -859,7 +876,7 @@ export default class Session
       const data = [
         ''.padEnd(50, '-'),
         `------HERO SESSION ID`.padEnd(50, '-'),
-        `------${Core.dataDir}`.padEnd(50, '-'),
+        `------${core.dataDir}`.padEnd(50, '-'),
         `------${resumeSessionId ?? ''}`.padEnd(50, '-'),
         ''.padEnd(50, '-'),
       ].join('\n');
@@ -886,6 +903,7 @@ ${data}`,
 
   public static async create(
     options: ISessionCreateOptions,
+    core: Core,
   ): Promise<{ session: Session; tab: Tab; isSessionResume: boolean }> {
     let session: Session;
     let tab: Tab;
@@ -904,13 +922,13 @@ ${data}`,
         }
       }
       if (!session) {
-        Session.restoreOptionsFromSessionRecord(options, resumeSessionId);
+        await Session.restoreOptionsFromSessionRecord(options, resumeSessionId, core);
       }
     }
 
     if (!session) {
-      await Core.start();
-      session = new Session(options);
+      await core.start();
+      session = new Session(options, core);
 
       await session.openBrowser();
     }

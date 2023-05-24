@@ -1,25 +1,28 @@
-import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import Log from '@ulixee/commons/lib/Logger';
-import { IFrameNavigationRecord } from '@ulixee/hero-core/models/FrameNavigationsTable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import Core from '@ulixee/hero-core';
+import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import ISessionRegistry from '@ulixee/hero-core/interfaces/ISessionRegistry';
+import Session from '@ulixee/hero-core/lib/Session';
 import DomChangesTable, {
   IDomChangeRecord,
   IDomRecording,
 } from '@ulixee/hero-core/models/DomChangesTable';
-import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
-import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import { IFrameNavigationRecord } from '@ulixee/hero-core/models/FrameNavigationsTable';
+import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
+import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import IDomStateAssertionBatch from '@ulixee/hero-interfaces/IDomStateAssertionBatch';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import { IStorageChangesEntry } from '@ulixee/hero-core/models/StorageChangesTable';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
-import Session from '@ulixee/hero-core/lib/Session';
+import * as Path from 'path';
 import { NodeType } from './DomNode';
 import DomRebuilder from './DomRebuilder';
-import MirrorPage from './MirrorPage';
-import MirrorNetwork from './MirrorNetwork';
-import MirrorContext from './MirrorContext';
 import DomStateAssertions, { IFrameAssertions } from './DomStateAssertions';
+import MirrorContext from './MirrorContext';
+import MirrorNetwork from './MirrorNetwork';
+import MirrorPage from './MirrorPage';
 import XPathGenerator from './XPathGenerator';
 
 const { log } = Log(module);
@@ -35,7 +38,11 @@ export default class DomStateGenerator {
   private pendingEvaluate: Resolvable<void>;
   private isEvaluating = false;
 
-  constructor(readonly id: string, private emulateSessionId?: string) {}
+  private sessionRegistry: ISessionRegistry;
+
+  constructor(readonly id: string, private core: Core, private emulateSessionId?: string) {
+    this.sessionRegistry = core.sessionRegistry;
+  }
 
   public addSession(
     sessionDb: SessionDb,
@@ -44,16 +51,17 @@ export default class DomStateGenerator {
     timelineRange?: [start: number, end: number],
   ): void {
     const sessionId = sessionDb.sessionId;
+    const getSessionDb = this.getSessionDb.bind(this, sessionId);
     this.sessionsById.set(sessionId, {
       tabId,
       sessionId,
       needsProcessing: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
       // could get closed, so need to use getter
-      get db(): SessionDb {
-        return SessionDb.getCached(sessionId, false);
+      get db() {
+        return getSessionDb();
       },
-      dbLocation: SessionDb.defaultDatabaseDir,
+      dbLocation: Path.dirname(sessionDb.path),
       loadingRange: [...loadingRange],
       timelineRange: timelineRange ? [...timelineRange] : undefined,
     });
@@ -70,9 +78,10 @@ export default class DomStateGenerator {
     for (const session of this.sessionsById.values()) {
       session.mirrorPage = null;
     }
+    this.core = null;
   }
 
-  public import(savedState: IDomStateGeneratorAssertionBatch): void {
+  public async import(savedState: IDomStateGeneratorAssertionBatch): Promise<void> {
     this.startingAssertsByFrameId = {};
     const startingAssertions = this.startingAssertsByFrameId;
     for (const [frameId, type, args, comparison, result] of savedState.assertions) {
@@ -90,14 +99,16 @@ export default class DomStateGenerator {
       const sessionId = session.sessionId;
       let db: SessionDb;
       try {
-        db = SessionDb.getCached(sessionId, false);
+        db = await this.sessionRegistry.get(sessionId).catch(() => null);
       } catch (err) {
         // couldn't load
       }
+
+      const getSessionDb = this.getSessionDb.bind(this, sessionId);
       this.sessionsById.set(sessionId, {
         ...session,
-        get db(): SessionDb {
-          return SessionDb.getCached(sessionId, false);
+        get db(): Promise<SessionDb | null> {
+          return getSessionDb();
         },
         needsProcessing: !!db,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
@@ -185,8 +196,8 @@ export default class DomStateGenerator {
 
   private async doEvaluate(): Promise<void> {
     for (const session of this.sessionsById.values()) {
-      const { db, loadingRange, tabId, sessionId, needsProcessing } = session;
-
+      const { db: dbPromise, loadingRange, tabId, sessionId, needsProcessing } = session;
+      const db = await dbPromise;
       if (!needsProcessing || !db) continue;
 
       this.sessionAssertions.clearSessionAssertions(sessionId);
@@ -203,7 +214,7 @@ export default class DomStateGenerator {
 
       session.mainFrameIds = db.frames.mainFrameIds(tabId);
 
-      const lastNavigation = this.findLastNavigation(session);
+      const lastNavigation = await this.findLastNavigation(session);
       if (!lastNavigation) {
         continue;
       }
@@ -213,7 +224,7 @@ export default class DomStateGenerator {
       session.domRecording = DomChangesTable.toDomRecording(
         domChangeRecords,
         session.mainFrameIds,
-        session.db.frames.frameDomNodePathsById,
+        db.frames.frameDomNodePathsById,
       );
 
       session.domRecording.paintEvents = session.domRecording.paintEvents.filter(
@@ -303,7 +314,7 @@ export default class DomStateGenerator {
       if (session.mirrorPage.page) return;
     }
 
-    const networkInterceptor = MirrorNetwork.createFromSessionDb(session.db, session.tabId, {
+    const networkInterceptor = MirrorNetwork.createFromSessionDb(await session.db, session.tabId, {
       hasResponse: true,
       isGetOrDocument: true,
       ignoreJavascriptRequests: true,
@@ -313,27 +324,32 @@ export default class DomStateGenerator {
     session.mirrorPage = new MirrorPage(networkInterceptor, session.domRecording, false);
 
     const fromSessionId = this.emulateSessionId ?? session.sessionId;
-    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, false)
+    this.browserContext ??= MirrorContext.createFromSessionDb(fromSessionId, this.core, false)
       .then(context => context.once('close', this.clearContext.bind(this)))
       .catch(err => err);
 
     const context = await this.browserContext;
     if (context instanceof Error) throw context;
 
-    const sessionRecord = session.db.session.get();
-    await session.mirrorPage?.openInContext(context, session.sessionId, sessionRecord.viewport, page => {
-      return page.devtoolsSession
-        .send('Emulation.setLocaleOverride', {
-          locale: sessionRecord.locale,
-        })
-        .catch(error => {
-          // All pages in the same renderer share locale. All such pages belong to the same
-          // context and if locale is overridden for one of them its value is the same as
-          // we are trying to set so it's not a problem.
-          if (error.message.includes('Another locale override is already in effect')) return;
-          throw error;
-        });
-    });
+    const sessionRecord = (await session.db).session.get();
+    await session.mirrorPage?.openInContext(
+      context,
+      session.sessionId,
+      sessionRecord.viewport,
+      page => {
+        return page.devtoolsSession
+          .send('Emulation.setLocaleOverride', {
+            locale: sessionRecord.locale,
+          })
+          .catch(error => {
+            // All pages in the same renderer share locale. All such pages belong to the same
+            // context and if locale is overridden for one of them its value is the same as
+            // we are trying to set so it's not a problem.
+            if (error.message.includes('Another locale override is already in effect')) return;
+            throw error;
+          });
+      },
+    );
   }
 
   private processResources(resources: IResourceSummary[], sessionId: string): void {
@@ -357,6 +373,10 @@ export default class DomStateGenerator {
         result: null,
       });
     }
+  }
+
+  private getSessionDb(sessionId: string): Promise<SessionDb | null> {
+    return this.sessionRegistry.get(sessionId).catch(() => null);
   }
 
   private processStorageChanges(
@@ -495,16 +515,15 @@ export default class DomStateGenerator {
     });
   }
 
-  private findLastNavigation(session: IDomStateSession): IFrameNavigationRecord {
+  private async findLastNavigation(session: IDomStateSession): Promise<IFrameNavigationRecord> {
     let lastNavigation: IFrameNavigationRecord;
     const { tabId, db, loadingRange, sessionId } = session;
     const [, endTime] = loadingRange;
 
+    const { frameNavigations } = await db;
+
     // going in descending order
-    for (const nav of db.frameNavigations.getMostRecentTabNavigations(
-      tabId,
-      session.mainFrameIds,
-    )) {
+    for (const nav of frameNavigations.getMostRecentTabNavigations(tabId, session.mainFrameIds)) {
       if (nav.httpRespondedTime && !nav.httpRedirectedTime) {
         lastNavigation = nav;
         // if this was requested before the end time, use it
@@ -535,7 +554,7 @@ export interface IDomStateGeneratorAssertionBatch extends IDomStateAssertionBatc
 }
 
 export interface IDomStateSession {
-  db: SessionDb;
+  db: Promise<SessionDb>;
   dbLocation: string;
   sessionId: string;
   needsProcessing: boolean;
