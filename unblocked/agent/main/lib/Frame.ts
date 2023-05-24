@@ -128,7 +128,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public readonly pendingNewDocumentScripts: { script: string; isolated: boolean }[] = [];
   private defaultContextId: number;
   private isolatedContextId: number;
-  private readonly activeContextIds: Set<number>;
+  private activeContextIds: Set<number>;
   private internalFrame: PageFrame;
   private closedWithError: Error;
   private isClosing = false;
@@ -166,9 +166,13 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     this.onAttached(internalFrame);
   }
 
-  public async updateDevtoolsSession(devtoolsSession: DevtoolsSession): Promise<void> {
+  public async updateDevtoolsSession(
+    devtoolsSession: DevtoolsSession,
+    activeContextIds: Set<number>,
+  ): Promise<void> {
     if (this.devtoolsSession === devtoolsSession) return;
     this.devtoolsSession = devtoolsSession;
+    this.activeContextIds = activeContextIds;
     if (
       devtoolsSession === this.#framesManager.devtoolsSession ||
       devtoolsSession === this.parentFrame?.devtoolsSession
@@ -706,14 +710,12 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public removeContextId(executionContextId: number): void {
     if (this.defaultContextId === executionContextId) {
       this.defaultContextId = null;
-      this.defaultContextCreated = null;
     }
     if (this.isolatedContextId === executionContextId) this.isolatedContextId = null;
   }
 
   public clearContextIds(): void {
     this.defaultContextId = null;
-    this.defaultContextCreated = null;
     this.isolatedContextId = null;
   }
 

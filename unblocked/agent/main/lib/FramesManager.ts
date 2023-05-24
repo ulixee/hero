@@ -315,7 +315,13 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
 
     const frame = this.framesById.get(target.targetId);
     if (frame) {
-      await frame.updateDevtoolsSession(devtoolsSession);
+      if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
+        this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
+      }
+      await frame.updateDevtoolsSession(
+        devtoolsSession,
+        this.activeContextIdsBySessionId.get(devtoolsSession.id),
+      );
     }
   }
 
@@ -482,7 +488,10 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         // If an OOP iframes becomes a normal iframe again
         // it is first attached to the parent page before
         // the target is removed.
-        await frame.updateDevtoolsSession(devtoolsSession);
+        await frame.updateDevtoolsSession(
+          devtoolsSession,
+          this.activeContextIdsBySessionId.get(devtoolsSession.id),
+        );
       }
       return;
     }
