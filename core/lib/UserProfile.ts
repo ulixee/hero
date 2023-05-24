@@ -106,6 +106,9 @@ export default class UserProfile {
     const browserContext = session.browserContext;
     const isSecure = origins.some(x => x.startsWith('https://'));
     const storageRestoreDomain = `http${isSecure ? 's' : ''}://restore-hero-dom.org`;
+    session.mitmRequestSession.interceptorHandlers.push({
+      urls: [/:\/\/restore-hero-dom\.org.*/],
+    });
     try {
       browserContext.resources.isCollecting = false;
       page.storeEventsWithoutListeners = false;
@@ -205,6 +208,7 @@ ${script}
         }),
       );
 
+      session.mitmRequestSession.interceptorHandlers.pop();
       page.mainFrame.navigations.reset();
 
       // clear out frame state
