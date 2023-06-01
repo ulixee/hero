@@ -16,7 +16,7 @@ export default class ApiRegistry<IHandlerMetadata = any> {
     logger: IBoundLog,
   ) => IHandlerMetadata;
 
-  private handlersByCommand: { [command: string]: IAsyncFunc } = {};
+  public handlersByCommand: { [command: string]: IAsyncFunc } = {};
 
   constructor(endpoints: IApiHandler[] = []) {
     this.register(...endpoints);

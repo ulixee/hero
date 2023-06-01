@@ -23,6 +23,11 @@ export interface IConnectionToClientEvents<
   response: {
     request: ICoreRequestPayload<IClientApiSpec, TKeys>;
     response: ICoreResponsePayload<IClientApiSpec, TKeys>;
+    metadata: {
+      milliseconds: number;
+      startTime: number;
+      messageId: string;
+    };
   };
   event: { event: ICoreEventPayload<unknown> };
 }

@@ -61,6 +61,7 @@ export default class ConnectionToClient<
     if (!Array.isArray(args)) args = [apiRequest.args];
     if (this.handlerMetadata) args.push(this.handlerMetadata);
 
+    const startTime = Date.now();
     let data: any;
     try {
       const handler = this.apiHandlers[command];
@@ -77,7 +78,11 @@ export default class ConnectionToClient<
       responseId: messageId,
       data,
     };
-    this.emit('response', { request: apiRequest, response });
+    this.emit('response', {
+      request: apiRequest,
+      response,
+      metadata: { milliseconds: Date.now() - startTime, startTime, messageId },
+    });
     this.sendMessage(response);
   }
 
