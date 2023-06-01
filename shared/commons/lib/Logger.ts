@@ -18,8 +18,9 @@ class Log implements ILog {
   public useColors =
     process.env.NODE_DISABLE_COLORS !== 'true' && process.env.NODE_DISABLE_COLORS !== '1';
 
-  protected readonly boundContext: any = {};
+  public readonly boundContext: any = {};
   private readonly module: string;
+  private logtimeById: { [parentId: number]: number } = {};
 
   constructor(module: NodeModule, boundContext?: any) {
     this.module = module ? extractPathFromModule(module) : '';
@@ -69,11 +70,12 @@ class Log implements ILog {
     const params = Object.keys(printData).length ? [printData] : [];
     if (error) params.push(error);
 
+    const millisAddon = entry.millis ? ` ${entry.millis}ms` : '';
     // eslint-disable-next-line no-console
     console.log(
       `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${
         entry.action
-      }`,
+      }${millisAddon}`,
       ...params.map(x => inspect(x, false, null, this.useColors)),
     );
   }
@@ -95,11 +97,16 @@ class Log implements ILog {
     }
     logId += 1;
     const id = logId;
+    const timestamp = new Date();
+    const now = timestamp.getTime();
+    const startTime = parentId ? this.logtimeById[parentId] : now;
+    this.logtimeById[id] = now;
     const entry: ILogEntry = {
       id,
       sessionId,
       parentId,
-      timestamp: new Date(),
+      timestamp,
+      millis: now - startTime,
       action,
       data: logData,
       level,
@@ -125,7 +132,7 @@ function translateValueToPrintable(value: any, depth = 0): any {
     return `${value.toString()}n`;
   }
   if (Buffer.isBuffer(value)) {
-    if ((value as Buffer).length <= 256) return `0x${value.toString('hex')}`;
+    if ((value as Buffer).length <= 256) return `b64\\${value.toString('base64')}`;
     return `<Buffer: ${(value as Buffer).byteLength} bytes>`;
   }
 
@@ -244,6 +251,7 @@ export interface ILogEntry {
   parentId?: number;
   data?: any;
   level: LogLevel;
+  millis?: number;
 }
 
 type LogLevel = keyof typeof logLevels;
@@ -328,6 +336,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /plugins\/.*/,
       /net\/.*/,
       /crypto\/.*/,
+      /kad\/.*/,
       /commons\/.*/,
       /cloud\/.*/,
       /datastore[/-].*/,
@@ -344,6 +353,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /plugins\/.*/,
       /net\/.*/,
       /cloud\/.*/,
+      /kad\/.*/,
       /datastore[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,

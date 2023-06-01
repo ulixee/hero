@@ -4,6 +4,7 @@ export default interface ILog extends IBoundLog<ILogData> {
 }
 
 export interface IBoundLog<Base = any> {
+  boundContext: any;
   stats<T extends Base>(action: string, data?: T): number;
   info<T extends Base>(action: string, data?: T): number;
   warn<T extends Base>(action: string, data?: T): number;
