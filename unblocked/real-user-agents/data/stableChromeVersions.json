@@ -1,5 +1,16 @@
 [
   {
+    "id": "chrome-114-0",
+    "name": "chrome",
+    "majorVersion": 114,
+    "buildVersion": 5735,
+    "stablePatchesByOs": {
+      "mac": [90],
+      "win": [91],
+      "linux": [90]
+    }
+  },
+  {
     "id": "chrome-113-0",
     "name": "chrome",
     "majorVersion": 113,
