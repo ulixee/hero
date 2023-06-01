@@ -1,6 +1,6 @@
 import { bech32m } from 'bech32';
-import * as zlib from 'zlib';
 import { promisify } from 'util';
+import * as zlib from 'zlib';
 
 const inflateAsync = promisify<Buffer, Buffer>(zlib.inflate);
 const inflateRawAsync = promisify<Buffer, Buffer>(zlib.inflateRaw);
@@ -17,6 +17,24 @@ export function concatAsBuffer(...items: (string | number | Buffer)[]): Buffer {
       return Buffer.from(String(x));
     }),
   );
+}
+
+export function bufferToBigInt(buffer: Buffer): bigint {
+  return BigInt(`0x${buffer.toString('hex')}`);
+}
+
+export function xor(a: Buffer, b: Buffer): Buffer {
+  if (a.length !== b.length) {
+    throw new Error('Inputs should have the same length');
+  }
+
+  const result = Buffer.allocUnsafe(a.length);
+
+  for (let i = 0; i < a.length; i++) {
+    result[i] = a[i] ^ b[i];
+  }
+
+  return result;
 }
 
 export function bufferReplacer(key: string, value: any): any {

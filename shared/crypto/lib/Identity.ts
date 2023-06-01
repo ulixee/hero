@@ -105,7 +105,7 @@ export default class Identity {
       filepath = path.join(options?.relativeToPath ?? process.cwd(), filepath);
     }
     const data = readFileSync(filepath, 'utf8');
-    return this.loadFromPem(data, options);
+    return Identity.loadFromPem(data, options);
   }
 
   public static loadFromPem(data: string, options?: { keyPassphrase?: string }): Identity {
@@ -127,6 +127,10 @@ export default class Identity {
     return identity;
   }
 
+  public static getBytes(encoded: string): Buffer {
+    return decodeBuffer(encoded, Identity.encodingPrefix);
+  }
+
   public static async create(): Promise<Identity> {
     const key = await Ed25519.create();
     const pair = new Identity(key.privateKey);
@@ -136,7 +140,7 @@ export default class Identity {
 
   public static verify(identityBech32: string, hashedMessage: Buffer, signature: Buffer): boolean {
     if (!identityBech32) return false;
-    const publicKeyBytes = decodeBuffer(identityBech32, this.encodingPrefix);
+    const publicKeyBytes = Identity.getBytes(identityBech32);
 
     const publicKey = Ed25519.createPublicKeyFromBytes(publicKeyBytes);
     const isValid = Ed25519.verify(publicKey, hashedMessage, signature);
