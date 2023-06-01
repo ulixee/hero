@@ -12,7 +12,7 @@ import IConnectionToClient, {
   IConnectionToClientEvents,
 } from '@ulixee/net/interfaces/IConnectionToClient';
 import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
-import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
+import ITransport from '@ulixee/net/interfaces/ITransport';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 import BrowserLaunchError from '@ulixee/unblocked-agent/errors/BrowserLaunchError';
 import HeroCore from '../index';
@@ -41,7 +41,7 @@ export default class ConnectionToHeroClient
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private activeCommandMessageIds = new Set<string>();
 
-  constructor(readonly transport: ITransportToClient<any>, private core: HeroCore) {
+  constructor(readonly transport: ITransport, private core: HeroCore) {
     super();
     transport.on('message', message => this.handleRequest(message));
     transport.once('disconnected', error => this.disconnect(error));

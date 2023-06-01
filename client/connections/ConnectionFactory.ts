@@ -59,17 +59,6 @@ npx @ulixee/cloud start
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    const onError = (error: Error) => {
-      if (error) {
-        log.error('Error connecting to core', {
-          error,
-          sessionId: null,
-        });
-      }
-    };
-
-    connection.connect(true).then(onError).catch(onError);
     const closeFn = (): Promise<any> => connection.disconnect();
     ShutdownHandler.register(closeFn);
     connection.once('disconnected', () => ShutdownHandler.unregister(closeFn));

@@ -12,7 +12,7 @@ import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
-import ITransportToClient from '@ulixee/net/interfaces/ITransportToClient';
+import ITransport from '@ulixee/net/interfaces/ITransport';
 import EmittingTransportToClient from '@ulixee/net/lib/EmittingTransportToClient';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
@@ -124,7 +124,7 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
     ]);
   }
 
-  public addConnection(transportToClient?: ITransportToClient<any>): ConnectionToHeroClient {
+  public addConnection(transportToClient?: ITransport): ConnectionToHeroClient {
     transportToClient ??= new EmittingTransportToClient();
     const connection = new ConnectionToHeroClient(transportToClient, this);
     connection.once('disconnected', () => this.connections.delete(connection));
@@ -183,12 +183,14 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
         ...[...this.connections].map(x => x.disconnect().catch(err => err)),
         this.utilityBrowserContext?.then(x => x.close()).catch(err => err),
         this.pool?.close().catch(err => err),
-        this.sessionRegistry?.shutdown().catch(err => err),
       ]);
       shutDownErrors = shutDownErrors.filter(Boolean);
 
       this.utilityBrowserContext = null;
       this.networkDb?.close();
+      await this.sessionRegistry?.shutdown().catch(err => {
+        if (err) shutDownErrors.push(err);
+      });
 
       isClosing.resolve();
     } catch (error) {

@@ -33,7 +33,7 @@ describe('basic Core tests', () => {
     const didClose = new Promise(resolve => Session.events.on('closed', resolve));
     await core.close();
     expect(core.pool.activeAgentsCount).toBe(0);
-    await didClose;
+    await expect(didClose).resolves.toBeTruthy();
   });
 
   it('can delete session databases', async () => {

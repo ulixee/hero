@@ -31,20 +31,28 @@ export default class CoreSessions {
   ): Promise<CoreSession> {
     const sessionResolvable = new Resolvable<CoreSession>();
     void this.queue
-      .run<void>(async () => {
-        const sessionMeta = await this.connection.commandQueue.run<ISessionMeta>(
-          'Core.createSession',
-          options,
-        );
-        const coreSession = new CoreSession(sessionMeta, this.connection, options, callsiteLocator);
-        const id = coreSession.sessionId;
-        this.sessionsById.set(id, coreSession);
-        coreSession.once('close', () => this.sessionsById.delete(id));
+      .run<void>(
+        async () => {
+          const sessionMeta = await this.connection.commandQueue.run<ISessionMeta>(
+            'Core.createSession',
+            options,
+          );
+          const coreSession = new CoreSession(
+            sessionMeta,
+            this.connection,
+            options,
+            callsiteLocator,
+          );
+          const id = coreSession.sessionId;
+          this.sessionsById.set(id, coreSession);
+          coreSession.once('close', () => this.sessionsById.delete(id));
 
-        sessionResolvable.resolve(coreSession);
-        // wait for close before "releasing" this slot
-        await new Promise(resolve => coreSession.once('close', resolve));
-      }, this.sessionTimeoutMillis)
+          sessionResolvable.resolve(coreSession);
+          // wait for close before "releasing" this slot
+          await new Promise(resolve => coreSession.once('close', resolve));
+        },
+        { timeoutMillis: this.sessionTimeoutMillis },
+      )
       .catch(sessionResolvable.reject);
     return sessionResolvable.promise;
   }

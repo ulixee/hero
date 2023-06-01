@@ -28,7 +28,8 @@ const defaultMockedPayload = payload => {
 describe('basic Hero tests', () => {
   it('creates and closes a hero', async () => {
     const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
-    const hero = await new Hero({ connectionToCore });
+    const hero = new Hero({ connectionToCore });
+    await hero.connect();
     await hero.close();
 
     const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;
@@ -41,7 +42,8 @@ describe('basic Hero tests', () => {
 
   it('emits commandId events', async () => {
     const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
-    const hero = await new Hero({ connectionToCore });
+    const hero = new Hero({ connectionToCore });
+    await hero.connect();
     const events = [];
 
     void hero.on('command', (command, commandId, args) => {
@@ -68,7 +70,8 @@ describe('basic Hero tests', () => {
 
   it('includes callsites for commands', async () => {
     const connectionToCore = new MockConnectionToCore(defaultMockedPayload);
-    const hero = await new Hero({ connectionToCore });
+    const hero = new Hero({ connectionToCore });
+    await hero.connect();
     await hero.close();
 
     const outgoingCommands = connectionToCore.outgoingSpy.mock.calls;

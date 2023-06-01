@@ -1,19 +1,19 @@
-import Log from '@ulixee/commons/lib/Logger';
-import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
-import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
-import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
-import ITransportToCore from '@ulixee/net/interfaces/ITransportToCore';
 import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
+import Log from '@ulixee/commons/lib/Logger';
 import ICoreCommandRequestPayload from '@ulixee/hero-interfaces/ICoreCommandRequestPayload';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import ICoreListenerPayload from '@ulixee/hero-interfaces/ICoreListenerPayload';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import { ConnectionToCore, WsTransportToCore } from '@ulixee/net';
 import DisconnectedError from '@ulixee/net/errors/DisconnectedError';
 import ICoreResponsePayload from '@ulixee/net/interfaces/ICoreResponsePayload';
+import ITransport from '@ulixee/net/interfaces/ITransport';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
+import CallsiteLocator from '../lib/CallsiteLocator';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
-import CallsiteLocator from '../lib/CallsiteLocator';
 
 const { log } = Log(module);
 
@@ -24,7 +24,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
   private coreSessions: CoreSessions;
 
   constructor(
-    transport: ITransportToCore<any, any, ICoreCommandRequestPayload>,
+    transport: ITransport,
     options?: Omit<IConnectionToCoreOptions, 'host'>,
     callsiteLocator?: CallsiteLocator,
   ) {
@@ -140,7 +140,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
     const { meta, listenerId, data, lastCommandId } = payload;
     const session = this.getSession(meta.sessionId);
     session?.onEvent(meta, listenerId, data, lastCommandId);
-    this.emit('event', payload);
+    this.emit('event', { event: payload });
   }
 
   public static remote(address: string): ConnectionToHeroCore {
