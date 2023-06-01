@@ -1,21 +1,16 @@
-import { Command } from 'commander';
-import { APIError } from '@ulixee/commons/lib/errors';
-import { assert } from '@ulixee/commons/lib/utils';
-import { randomBytes } from 'crypto';
-import Identity from '@ulixee/crypto/lib/Identity';
-import * as Path from 'path';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import UlixeeConfig from '@ulixee/commons/config/index';
-import Address from './lib/Address';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import { assert } from '@ulixee/commons/lib/utils';
+import Identity from '@ulixee/crypto/lib/Identity';
+import { Command } from 'commander';
+import { randomBytes } from 'crypto';
+import * as Path from 'path';
 import IAddressSettings, { ISignerType } from './interfaces/IAddressSettings';
+import Address from './lib/Address';
 import Ed25519 from './lib/Ed25519';
 
 const logError = (err: Error): void => {
-  if (err instanceof APIError) {
-    console.log(`IDENTITIES API ERROR: ${err.toString()}`); // eslint-disable-line no-console
-  } else {
-    console.log(`\nIDENTITIES ERROR: ${err.message}\n`); // eslint-disable-line no-console
-  }
+  console.log(`\nIDENTITIES ERROR: ${err.message}\n`); // eslint-disable-line no-console
 };
 
 const { version } = require('./package.json');
