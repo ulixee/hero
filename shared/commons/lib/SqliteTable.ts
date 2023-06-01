@@ -6,6 +6,7 @@ type IRecord = (string | number | Buffer)[];
 
 export default abstract class SqliteTable<T> {
   protected readonly insertStatement: Statement;
+  protected readonly insertByKeyStatement: Statement;
   protected defaultSortOrder?: string;
   protected insertCallbackFn?: (records: T[]) => void;
 
@@ -24,6 +25,7 @@ export default abstract class SqliteTable<T> {
     if (!db.readonly) {
       this.db.exec(this.createTableStatement());
       this.insertStatement = this.db.prepare(this.buildInsertStatement());
+      this.insertByKeyStatement = this.db.prepare(this.buildInsertByKeyStatement());
     }
   }
 
@@ -61,6 +63,11 @@ export default abstract class SqliteTable<T> {
     this.addRecordToPublish(record);
   }
 
+  public insertObject(record: T): void {
+    this.insertByKeyStatement.run(record);
+    this.addRecordToPublish(record);
+  }
+
   public all(): T[] {
     const sort = this.defaultSortOrder ? ` ORDER BY ${this.defaultSortOrder}` : '';
     return this.db.prepare(`select * from ${this.tableName}${sort}`).all() as T[];
@@ -88,9 +95,20 @@ export default abstract class SqliteTable<T> {
     )}) VALUES (${params})`;
   }
 
-  private addRecordToPublish(record: IRecord): void {
+  protected buildInsertByKeyStatement(): string {
+    const keys = this.columns.map(x => x[0]);
+    const params = keys.map(x => `$${String(x)}`).join(', ');
+    const insertOrReplace = this.insertOrReplace ? ' OR REPLACE' : '';
+    return `INSERT${insertOrReplace} INTO ${this.tableName} (${keys.join(
+      ', ',
+    )}) VALUES (${params})`;
+  }
+
+  private addRecordToPublish(record: IRecord | T): void {
     if (!this.insertCallbackFn) return;
-    this.insertSubscriptionRecords.push(this.insertToObject(record));
+    this.insertSubscriptionRecords.push(
+      Array.isArray(record) ? this.insertToObject(record) : record,
+    );
     clearTimeout(this.subscriptionThrottle);
 
     if (Date.now() - this.lastSubscriptionPublishTime > 500) {
