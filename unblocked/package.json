@@ -35,7 +35,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
     "@commitlint/config-conventional": "^17.6.3",
-    "@ulixee/repo-tools": "^1.0.24",
+    "@ulixee/repo-tools": "^1.0.25",
     "@types/node": "^16.18.31",
     "@types/jest": "^29.5.1",
     "concurrently": "^6.2.1",
