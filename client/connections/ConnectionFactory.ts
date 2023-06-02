@@ -1,5 +1,4 @@
 import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
-import Log from '@ulixee/commons/lib/Logger';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { WsTransportToCore } from '@ulixee/net';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
@@ -7,8 +6,6 @@ import CallsiteLocator from '../lib/CallsiteLocator';
 import ConnectionToHeroCore from './ConnectionToHeroCore';
 
 const { version } = require('../package.json');
-
-const { log } = Log(module);
 
 export default class ConnectionFactory {
   public static hasLocalCloudPackage = false;
