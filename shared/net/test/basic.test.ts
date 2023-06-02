@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 
 test('it can transport over a direct connection (bridge)', async () => {
-  const bridge = new TransportBridge<typeof apiSpec>();
+  const bridge = new TransportBridge();
   new ConnectionToClient(bridge.transportToClient, apiSpec);
   const connectionToCore = new ConnectionToCore(bridge.transportToCore);
   await expect(

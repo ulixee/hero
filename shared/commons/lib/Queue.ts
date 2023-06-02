@@ -9,8 +9,8 @@ import getPrototypeOf = Reflect.getPrototypeOf;
 type AsyncCallback<T> = (value?: any) => Promise<T>;
 
 export default class Queue<TResult = any> extends TypedEventEmitter<{
-  completed: TResult;
-  error: Error;
+  'run-completed': TResult;
+  'run-error': Error;
   idle: void;
   stopped: { error?: Error };
 }> {
@@ -117,11 +117,11 @@ export default class Queue<TResult = any> extends TypedEventEmitter<{
       results.length = 0;
     };
 
-    this.on('completed', result => {
+    this.on('run-completed', result => {
       results.push(result);
       resolvable.resolve();
     });
-    this.on('error', err => {
+    this.on('run-error', err => {
       cleanup();
       resolvable.reject(err);
     });
@@ -191,9 +191,9 @@ export default class Queue<TResult = any> extends TypedEventEmitter<{
       }
 
       next.promise.resolve(res);
-      this.emit('completed', res);
+      this.emit('run-completed', res);
     } catch (error) {
-      this.emit('error', error);
+      this.emit('run-error', error);
       this.reject(next, error);
     } finally {
       this.activeCount -= 1;

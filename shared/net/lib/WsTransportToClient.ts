@@ -1,19 +1,19 @@
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import WebSocket = require('ws');
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { IncomingMessage } from 'http';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
-import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
+import { IncomingMessage } from 'http';
+import WebSocket = require('ws');
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 import { sendWsCloseUnexpectedError, wsSend } from './WsUtils';
-import IApiHandlers from '../interfaces/IApiHandlers';
 
-export default class WsTransportToClient<IClientApiSpec extends IApiHandlers, IEventSpec = any>
-  extends TypedEventEmitter<ITransportToClientEvents<IClientApiSpec>>
-  implements ITransportToClient<IClientApiSpec, IEventSpec>
+export default class WsTransportToClient
+  extends TypedEventEmitter<ITransportEvents>
+  implements ITransport
 {
   public remoteId: string;
+  public isConnected = true;
   private events = new EventSubscriber();
   constructor(private webSocket: WebSocket, private request: IncomingMessage) {
     super();
@@ -37,6 +37,7 @@ export default class WsTransportToClient<IClientApiSpec extends IApiHandlers, IE
   }
 
   private onClose(): void {
+    this.isConnected = false;
     this.emit('disconnected', null);
     this.events.close();
   }

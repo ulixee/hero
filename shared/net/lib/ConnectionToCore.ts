@@ -1,32 +1,33 @@
-import { bindFunctions } from '@ulixee/commons/lib/utils';
-import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import SessionClosedOrMissingError from '@ulixee/commons/lib/SessionClosedOrMissingError';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
-import ITransportToCore from '../interfaces/ITransportToCore';
-import PendingMessages from './PendingMessages';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import SessionClosedOrMissingError from '@ulixee/commons/lib/SessionClosedOrMissingError';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import DisconnectedError from '../errors/DisconnectedError';
-import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
 import IApiHandlers, { IApiSpec } from '../interfaces/IApiHandlers';
+import ICoreEventPayload from '../interfaces/ICoreEventPayload';
+import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
+import ITransport from '../interfaces/ITransport';
 import IUnixTime from '../interfaces/IUnixTime';
+import PendingMessages from './PendingMessages';
 
 const { log } = Log(module);
 
 export interface IConnectionToCoreEvents<IEventSpec> {
-  disconnected: void;
+  disconnected: Error | null;
   connected: void;
-  event: ICoreEventPayload<IEventSpec, any>;
+  event: { event: ICoreEventPayload<IEventSpec, any> };
 }
+
 export default class ConnectionToCore<
   TCoreApiHandlers extends IApiHandlers,
   TEventSpec,
 > extends TypedEventEmitter<IConnectionToCoreEvents<TEventSpec>> {
-  public connectPromise: IResolvablePromise<Error | null>;
+  public connectPromise: IResolvablePromise<void>;
   public disconnectPromise: Promise<void>;
 
   public connectStartTime: IUnixTime;
@@ -56,25 +57,33 @@ export default class ConnectionToCore<
   private isSendingConnect = false;
   private isSendingDisconnect = false;
 
-  constructor(public transport: ITransportToCore<TCoreApiHandlers, TEventSpec>) {
+  constructor(public transport: ITransport, skipConnect = false) {
     super();
     bindFunctions(this);
+
     this.events.once(transport, 'disconnected', this.onConnectionTerminated.bind(this));
     this.events.on(transport, 'message', this.onMessage.bind(this));
+
+    if (transport.isConnected && skipConnect) {
+      this.connectPromise = new Resolvable<void>();
+      this.connectPromise.resolve();
+    }
   }
 
-  public async connect(isAutoConnect = false, timeoutMs = 30e3): Promise<Error | null> {
+  public async connect(isAutoConnect = false, timeoutMs = 30e3): Promise<void> {
     if (!this.connectPromise) {
       this.didAutoConnect = isAutoConnect;
       this.connectStartTime = Date.now();
       this.connectPromise = new Resolvable();
       try {
-        const connectError = await this.transport.connect?.(timeoutMs);
-        if (connectError) throw connectError;
+        await this.transport.connect?.(timeoutMs);
 
         // disconnected during connect
-        if (this.hasActiveSessions() && this.disconnectPromise && !this.didAutoConnect) {
-          throw new DisconnectedError(this.transport.host);
+        if (this.hasActiveSessions() && !!this.disconnectPromise && !this.didAutoConnect) {
+          throw new DisconnectedError(
+            this.transport.host,
+            `Disconnecting during initial connection handshake to ${this.transport.host}`,
+          );
         }
 
         // can be resolved if canceled by a disconnect
@@ -89,11 +98,7 @@ export default class ConnectionToCore<
         this.transport.isConnected = true;
         this.transport.emit('connected');
       } catch (err) {
-        if (this.didAutoConnect) {
-          this.connectPromise.resolve(err);
-        } else {
-          this.connectPromise.reject(err, true);
-        }
+        this.connectPromise.reject(err, true);
       }
     }
 
@@ -147,8 +152,7 @@ export default class ConnectionToCore<
     const isConnect = this.isSendingConnect;
     const isDisconnect = this.isSendingDisconnect;
     if (!isConnect && !isDisconnect) {
-      const result = await this.connect();
-      if (result) throw result;
+      await this.connect();
     }
 
     const { promise, id } = this.pendingMessages.create(timeoutMs, isConnect || isDisconnect);
@@ -191,8 +195,6 @@ export default class ConnectionToCore<
       this.onResponse(payload);
     } else if ('listenerId' in payload || 'eventType' in payload) {
       this.onEvent(payload);
-    } else {
-      throw new Error(`message could not be processed: ${JSON.stringify(payload)}`);
     }
   }
 
@@ -216,7 +218,7 @@ export default class ConnectionToCore<
   }
 
   protected onEvent(event: ICoreEventPayload<TEventSpec, any>): void {
-    this.emit('event', event);
+    this.emit('event', { event });
   }
 
   protected async onConnectionTerminated(): Promise<void> {

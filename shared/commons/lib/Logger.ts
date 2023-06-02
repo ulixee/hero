@@ -260,15 +260,19 @@ interface ILogBuilder {
   log: ILog;
 }
 
+const moduleNamesByPath: { [fullPath: string]: string } = {};
 function extractPathFromModule(module: NodeModule): string {
   const fullPath = typeof module === 'string' ? module : module.filename || module.id || '';
-  return fullPath
-    .replace(/^(.*)[/\\]unblocked[/\\](.+)$/, '$2')
-    .replace(/^(.*)[/\\]ulixee[/\\](.+)$/, '$2')
-    .replace(/^(.*)[/\\]payments[/\\](.+)$/, '$2')
-    .replace(/^(.*)[/\\]@ulixee[/\\](.+)$/, '$2')
-    .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
-    .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
+  if (!moduleNamesByPath[fullPath]) {
+    moduleNamesByPath[fullPath] = fullPath
+      .replace(/^(.*)[/\\]unblocked[/\\](.+)$/, '$2')
+      .replace(/^(.*)[/\\]ulixee[/\\](.+)$/, '$2')
+      .replace(/^(.*)[/\\]payments[/\\](.+)$/, '$2')
+      .replace(/^(.*)[/\\]@ulixee[/\\](.+)$/, '$2')
+      .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
+      .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
+  }
+  return fullPath;
 }
 
 /// LOG FILTERING //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,12 +287,15 @@ export function registerNamespaceMapping(
 }
 
 function isEnabled(modulePath: string): boolean {
-  if (process.env.ULX_DEBUG === '1' || process.env.ULX_DEBUG === 'true') return true;
+  if (
+    process.env.ULX_DEBUG === '1' ||
+    process.env.ULX_DEBUG === 'true' ||
+    process.env.ULX_DEBUG === '*'
+  )
+    return true;
+
   if (modulePath in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[modulePath];
 
-  if (modulePath[modulePath.length - 1] === '*') {
-    return true;
-  }
   if (logFilters.namespaces.active.has('*')) return true;
 
   for (const ns of logFilters.skip) {
@@ -323,29 +330,14 @@ function loadNamespaces(namespaces: string): void {
       logFilters.namespaces.inactive.add(part.slice(1));
     } else {
       logFilters.namespaces.active.add(part);
+      if (part === 'ulx*' || part === 'ulx:*') logFilters.namespaces.active.add('*');
     }
   }
 }
 
 registerNamespaceMapping((ns, active, skip) => {
   if (ns.includes('ulx:*') || ns.includes('ulx*') || ns === '*') {
-    active.push(
-      /desktop[/-]?.*/,
-      /hero[/-].*/,
-      /agent\/.*/,
-      /plugins\/.*/,
-      /net\/.*/,
-      /crypto\/.*/,
-      /kad\/.*/,
-      /commons\/.*/,
-      /cloud\/.*/,
-      /datastore[/-].*/,
-      /mainchain[/-].*/,
-      /sidechain[/-].*/,
-      /ramps[/-].*/,
-      /DevtoolsSessionLogger/,
-      /^lib\/.*/,
-    );
+    active.push(/.*/);
   } else if (ns === 'ulx') {
     active.push(
       /hero[/-].*/,
@@ -353,18 +345,17 @@ registerNamespaceMapping((ns, active, skip) => {
       /plugins\/.*/,
       /net\/.*/,
       /cloud\/.*/,
-      /kad\/.*/,
       /datastore[/-].*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,
     );
-    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
+    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/, /kad\/.*/);
   } else if (ns.includes('ulx:desktop')) {
     active.push(/desktop[/-]?.*/);
-  } else if (ns === 'ulx:mitm') {
+  } else if (ns.includes('ulx:mitm')) {
     active.push(/agent[/-]mitm.*/);
-  } else if (ns.includes('ulx:devtools') || ns === '*') {
+  } else if (ns.includes('ulx:devtools')) {
     active.push(/DevtoolsSessionLogger/);
   } else if (ns.includes('hero')) {
     active.push(/^hero[/-].*/, /net\/.*/);

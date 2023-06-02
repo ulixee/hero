@@ -2,7 +2,7 @@ import Logger from '@ulixee/commons/lib/Logger';
 import { IncomingMessage, ServerResponse } from 'http';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import HttpTransportToClient from './HttpTransportToClient';
-import ITransportToClient from '../interfaces/ITransportToClient';
+import ITransport from '../interfaces/ITransport';
 import ConnectionToClient from './ConnectionToClient';
 import { IAsyncFunc } from '../interfaces/IApiHandlers';
 import IApiHandler from '../interfaces/IApiHandler';
@@ -33,7 +33,7 @@ export default class ApiRegistry<IHandlerMetadata = any> {
   }
 
   public createConnection(
-    transport: ITransportToClient<any>,
+    transport: ITransport,
     handlerMetadata?: IHandlerMetadata,
   ): ConnectionToClient<any, any> {
     const connection = new ConnectionToClient(transport, this.handlersByCommand);

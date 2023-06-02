@@ -1,36 +1,23 @@
-import '@ulixee/commons/lib/SourceMapSupport';
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import addGlobalInstance from '@ulixee/commons/lib/addGlobalInstance';
-import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
-import IApiHandlers from '../interfaces/IApiHandlers';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import '@ulixee/commons/lib/SourceMapSupport';
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 
 let counter = 0;
 
-export default class EmittingTransportToClient<
-    IClientApiSpec extends IApiHandlers,
-    IEventSpec = any,
-  >
-  extends TypedEventEmitter<
-    ITransportToClientEvents<IClientApiSpec> & {
-      outbound: ICoreResponsePayload<IClientApiSpec, any> | ICoreEventPayload<IEventSpec, any>;
-    }
-  >
-  implements
-    ITransportToClient<IClientApiSpec, IEventSpec>,
-    ITypedEventEmitter<
-      ITransportToClientEvents<IClientApiSpec> & {
-        outbound: ICoreResponsePayload<IClientApiSpec, any> | ICoreEventPayload<IEventSpec, any>;
-      }
-    >
+type TEvents = ITransportEvents & {
+  outbound: any;
+};
+
+export default class EmittingTransportToClient
+  extends TypedEventEmitter<TEvents>
+  implements ITransport, ITypedEventEmitter<TEvents>
 {
   remoteId = String((counter += 1));
+  isConnected = true;
 
-  send(
-    message: ICoreResponsePayload<IClientApiSpec, any> | ICoreEventPayload<IEventSpec, any>,
-  ): Promise<void> {
+  send(message: any): Promise<void> {
     this.emit('outbound', message);
     return Promise.resolve();
   }

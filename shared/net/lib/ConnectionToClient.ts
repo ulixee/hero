@@ -1,12 +1,12 @@
-import Log from '@ulixee/commons/lib/Logger';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Log from '@ulixee/commons/lib/Logger';
 import IApiHandlers from '../interfaces/IApiHandlers';
-import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
-import ITransportToClient from '../interfaces/ITransportToClient';
 import IConnectionToClient, { IConnectionToClientEvents } from '../interfaces/IConnectionToClient';
+import ICoreEventPayload from '../interfaces/ICoreEventPayload';
+import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
+import ITransport from '../interfaces/ITransport';
 
 const { log } = Log(module);
 
@@ -22,14 +22,13 @@ export default class ConnectionToClient<
   public handlerMetadata?: IHandlerMetadata;
 
   private events = new EventSubscriber();
-  constructor(
-    readonly transport: ITransportToClient<IClientApiHandlers, IEventSpec>,
-    readonly apiHandlers: IClientApiHandlers,
-  ) {
+  constructor(readonly transport: ITransport, readonly apiHandlers: IClientApiHandlers) {
     super();
 
-    this.events.on(transport, 'message', message => this.handleRequest(message));
-    this.events.once(transport, 'disconnected', error => this.disconnect(error));
+    if (transport) {
+      this.events.on(transport, 'message', message => this.handleRequest(message));
+      this.events.once(transport, 'disconnected', error => this.disconnect(error));
+    }
   }
 
   public disconnect(error?: Error): Promise<void> {
@@ -56,6 +55,8 @@ export default class ConnectionToClient<
   protected async handleRequest<T extends keyof IClientApiHandlers & string>(
     apiRequest: ICoreRequestPayload<IClientApiHandlers, T>,
   ): Promise<void> {
+    if (!('messageId' in apiRequest) && !('command' in apiRequest)) return;
+
     const { command, messageId } = apiRequest;
     let args: any[] = apiRequest.args ?? [];
     if (!Array.isArray(args)) args = [apiRequest.args];

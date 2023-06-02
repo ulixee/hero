@@ -1,11 +1,10 @@
-import EmittingTransportToClient from '../lib/EmittingTransportToClient';
+import ITransport from '../interfaces/ITransport';
 import ConnectionToClient from '../lib/ConnectionToClient';
-import IApiHandlers from '../interfaces/IApiHandlers';
-import ITransportToClient from '../interfaces/ITransportToClient';
+import EmittingTransportToClient from '../lib/EmittingTransportToClient';
 
 test('should route messages from client to the right API', () => {
   const apis = { 'Api.test': jest.fn() };
-  const clientTransport = new EmittingTransportToClient<IApiHandlers>();
+  const clientTransport = new EmittingTransportToClient();
   const connection = new ConnectionToClient(clientTransport, apis);
 
   connection.transport.emit('message', {
@@ -18,7 +17,7 @@ test('should route messages from client to the right API', () => {
 });
 
 test('should call disconnect once on a connection', async () => {
-  const clientTransport: ITransportToClient<any> = new EmittingTransportToClient();
+  const clientTransport: ITransport = new EmittingTransportToClient();
   const connection = new ConnectionToClient(clientTransport, {});
   clientTransport.disconnect = jest.fn();
 

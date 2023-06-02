@@ -1,16 +1,15 @@
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
-import EmittingTransportToCore from './EmittingTransportToCore';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import EmittingTransportToClient from './EmittingTransportToClient';
-import IApiHandlers from '../interfaces/IApiHandlers';
+import EmittingTransportToCore from './EmittingTransportToCore';
 
-export default class TransportBridge<IClientApiSpec extends IApiHandlers, IEventSpec = any> {
-  public transportToClient = new EmittingTransportToClient<IClientApiSpec, IEventSpec>();
-  public transportToCore = new EmittingTransportToCore<IClientApiSpec, IEventSpec>();
+export default class TransportBridge {
+  public transportToClient = new EmittingTransportToClient();
+  public transportToCore = new EmittingTransportToCore();
 
   constructor(public shouldSerialize = false, private serializationMarker: string = 'DIRECT') {
-    this.transportToClient.on('outbound', (msg) => this.sendToTransport(msg, this.transportToCore));
-    this.transportToCore.on('outbound', (msg) => this.sendToTransport(msg, this.transportToClient));
+    this.transportToClient.on('outbound', msg => this.sendToTransport(msg, this.transportToCore));
+    this.transportToCore.on('outbound', msg => this.sendToTransport(msg, this.transportToClient));
   }
 
   private async sendToTransport(

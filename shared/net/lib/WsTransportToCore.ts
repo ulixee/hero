@@ -1,27 +1,18 @@
-import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
-import WebSocket = require('ws');
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { toUrl } from '@ulixee/commons/lib/utils';
+import WebSocket = require('ws');
 import DisconnectedError from '../errors/DisconnectedError';
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 import { isWsOpen, sendWsCloseUnexpectedError, wsSend } from './WsUtils';
-import ITransportToCore, { ITransportToCoreEvents } from '../interfaces/ITransportToCore';
-import IApiHandlers from '../interfaces/IApiHandlers';
-import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
 
-export default class WsTransportToCore<
-    ApiHandlers extends IApiHandlers = any,
-    EventSpec = any,
-    RequestPayload = ICoreRequestPayload<IApiHandlers, any>,
-    ResponsePayload = ICoreResponsePayload<IApiHandlers, any> | ICoreEventPayload<EventSpec, any>,
-  >
-  extends TypedEventEmitter<ITransportToCoreEvents<ApiHandlers, EventSpec, ResponsePayload>>
-  implements ITransportToCore<ApiHandlers, EventSpec, RequestPayload, ResponsePayload>
+export default class WsTransportToCore
+  extends TypedEventEmitter<ITransportEvents>
+  implements ITransport
 {
   public host: string;
 
@@ -45,7 +36,7 @@ export default class WsTransportToCore<
     this.hostPromise = Promise.resolve(host).then(this.setHost);
   }
 
-  public async send(payload: RequestPayload): Promise<void> {
+  public async send(payload: any): Promise<void> {
     await this.connect();
 
     const message = TypeSerializer.stringify(payload);

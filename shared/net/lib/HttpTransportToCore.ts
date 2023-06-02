@@ -1,24 +1,18 @@
-import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import * as https from 'https';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as http from 'http';
 import { ClientRequest, IncomingHttpHeaders } from 'http';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
-import ITransportToCore, { ITransportToCoreEvents } from '../interfaces/ITransportToCore';
-import IApiHandlers from '../interfaces/IApiHandlers';
-import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
+import * as https from 'https';
 import RemoteError from '../errors/RemoteError';
+import IApiHandlers from '../interfaces/IApiHandlers';
+import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 
-export default class HttpTransportToCore<
-    ApiHandlers extends IApiHandlers = any,
-    RequestPayload = ICoreRequestPayload<IApiHandlers, any>,
-    ResponsePayload = ICoreResponsePayload<IApiHandlers, any> | ICoreEventPayload<never, any>,
-  >
-  extends TypedEventEmitter<ITransportToCoreEvents<ApiHandlers, never, ResponsePayload>>
-  implements ITransportToCore<ApiHandlers, never, RequestPayload, ResponsePayload>
+export default class HttpTransportToCore
+  extends TypedEventEmitter<ITransportEvents>
+  implements ITransport
 {
   public readonly host: string;
 
@@ -43,7 +37,7 @@ export default class HttpTransportToCore<
     this.disconnect = this.disconnect.bind(this);
   }
 
-  public async send(payload: RequestPayload): Promise<void> {
+  public async send(payload: any): Promise<void> {
     await this.connect();
 
     const message = Buffer.from(TypeSerializer.stringify(payload));

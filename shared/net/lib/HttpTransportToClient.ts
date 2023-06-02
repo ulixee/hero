@@ -1,33 +1,29 @@
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import '@ulixee/commons/lib/SourceMapSupport';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import { IncomingMessage, ServerResponse } from 'http';
-import { URL } from 'url';
-import '@ulixee/commons/lib/SourceMapSupport';
 import * as QueryString from 'querystring';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ITransportToClient, { ITransportToClientEvents } from '../interfaces/ITransportToClient';
-import IApiHandlers from '../interfaces/IApiHandlers';
+import { URL } from 'url';
 import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '../interfaces/ICoreResponsePayload';
-import ICoreEventPayload from '../interfaces/ICoreEventPayload';
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 
 const Kb = 1e3;
 
-export default class HttpTransportToClient<IClientApiSpec extends IApiHandlers, IEventSpec = any>
-  extends TypedEventEmitter<ITransportToClientEvents<IClientApiSpec>>
-  implements ITransportToClient<IClientApiSpec, IEventSpec>
+export default class HttpTransportToClient
+  extends TypedEventEmitter<ITransportEvents>
+  implements ITransport
 {
   private static requestCounter = 1;
 
   public remoteId: string;
+  public isConnected = true;
 
   constructor(public request: IncomingMessage, private response: ServerResponse) {
     super();
     this.remoteId = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
   }
 
-  public send(
-    message: ICoreResponsePayload<IClientApiSpec, any> | ICoreEventPayload<IEventSpec, any>,
-  ): Promise<void> {
+  public send(message: any): Promise<void> {
     const res = this.response;
 
     try {

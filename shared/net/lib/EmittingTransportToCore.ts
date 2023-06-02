@@ -1,28 +1,26 @@
-import '@ulixee/commons/lib/SourceMapSupport';
 import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ITransportToCore, { ITransportToCoreEvents } from '../interfaces/ITransportToCore';
-import IApiHandlers from '../interfaces/IApiHandlers';
-import ICoreRequestPayload from '../interfaces/ICoreRequestPayload';
+import '@ulixee/commons/lib/SourceMapSupport';
+import ITransport, { ITransportEvents } from '../interfaces/ITransport';
 
-export default class EmittingTransportToCore<ApiHandlers extends IApiHandlers = any, Events = any>
+export default class EmittingTransportToCore
   extends TypedEventEmitter<
-    ITransportToCoreEvents<ApiHandlers, Events> & {
-      outbound: ICoreRequestPayload<ApiHandlers, any>;
+    ITransportEvents & {
+      outbound: any;
     }
   >
   implements
-    ITransportToCore<ApiHandlers, Events>,
+    ITransport,
     ITypedEventEmitter<
-      ITransportToCoreEvents<ApiHandlers, Events> & {
-        outbound: ICoreRequestPayload<ApiHandlers, any>;
+      ITransportEvents & {
+        outbound: any;
       }
     >
 {
   host = 'direct';
   isConnected = true;
 
-  send(message: ICoreRequestPayload<ApiHandlers, any>): Promise<void> {
+  send(message: any): Promise<void> {
     this.emit('outbound', message);
     return Promise.resolve();
   }
