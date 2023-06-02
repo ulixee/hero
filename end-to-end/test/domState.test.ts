@@ -156,11 +156,11 @@ test('surfaces errors in assertions', async () => {
     },
   };
 
-  await expect(hero.activeTab.waitForState(domState)).rejects.toThrowError(
+  await expect(hero.activeTab.waitForState(domState)).rejects.toThrow(
     'test.includes is not a function',
   );
 
-  await expect(hero.activeTab.validateState(domState)).rejects.toThrowError(
+  await expect(hero.activeTab.validateState(domState)).rejects.toThrow(
     'test.includes is not a function',
   );
 });
@@ -192,7 +192,7 @@ test('surfaces errors in query selectors that are invalid (vs simply not there)'
     },
   });
 
-  await expect(hero.activeTab.waitForState(state)).rejects.toThrowError('not a valid selector');
+  await expect(hero.activeTab.waitForState(state)).rejects.toThrow('not a valid selector');
 });
 
 async function openBrowser(path: string) {

@@ -94,7 +94,7 @@ test('should allow query selectors in cross-domain frames', async () => {
       ['querySelector', 'h1'],
       'textContent',
     ]),
-  ).rejects.toThrowError();
+  ).rejects.toThrow();
 
   const frameMetas = await tab.getFrameEnvironments();
   const frames = await Promise.all(

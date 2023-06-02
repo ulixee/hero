@@ -171,7 +171,7 @@ describe('basic Full Client tests', () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
-    await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
+    await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrow(
       "Chrome won't allow you to set cookies on a blank tab.",
     );
   });

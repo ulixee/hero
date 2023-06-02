@@ -203,7 +203,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
         resumeSessionId: 'notreal',
         resumeSessionStartLocation: 'sessionStart',
       }),
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
   });
 });
 

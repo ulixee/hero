@@ -99,7 +99,7 @@ describe('Connection tests', () => {
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
     ConnectionFactory.hasLocalCloudPackage = true;
-    expect(() => ConnectionFactory.createConnection({})).toThrowError(
+    expect(() => ConnectionFactory.createConnection({})).toThrow(
       'Ulixee Cloud is not started',
     );
   });
@@ -109,7 +109,7 @@ describe('Connection tests', () => {
     const next = VersionUtils.nextVersion(version);
     await UlixeeHostsConfig.global.setVersionHost(next, null);
     ConnectionFactory.hasLocalCloudPackage = false;
-    expect(() => ConnectionFactory.createConnection({})).toThrowError(
+    expect(() => ConnectionFactory.createConnection({})).toThrow(
       'compatible Hero Core was not found',
     );
   });

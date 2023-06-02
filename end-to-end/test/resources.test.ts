@@ -177,7 +177,7 @@ describe('basic resource tests', () => {
 
     const waitForResource = hero.waitForResource({ type: 'Fetch' });
     // eslint-disable-next-line jest/valid-expect
-    const waitError = expect(waitForResource).rejects.toThrowError('disconnected');
+    const waitError = expect(waitForResource).rejects.toThrow('disconnected');
     await hero.close();
     await waitError;
   });
