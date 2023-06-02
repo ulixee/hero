@@ -272,7 +272,7 @@ function extractPathFromModule(module: NodeModule): string {
       .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
       .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
   }
-  return fullPath;
+  return moduleNamesByPath[fullPath];
 }
 
 /// LOG FILTERING //////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -23,7 +23,7 @@
     "@commitlint/cli": "^17.6.3",
     "@commitlint/config-conventional": "^17.6.3",
     "@types/node": "^16.18.31",
-    "@ulixee/repo-tools": "^1.0.24",
+    "@ulixee/repo-tools": "^1.0.25",
     "cross-env": "^7.0.3",
     "@types/jest": "^29.5.1",
     "jest": "^29.5.0",
