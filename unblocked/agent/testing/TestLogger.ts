@@ -25,7 +25,7 @@ export default class TestLogger implements ILog {
   public static testNumber = 0;
   public readonly level = env.isLogDebug ? 'stats' : 'error';
 
-  protected readonly boundContext: any = {};
+  public readonly boundContext: any = {};
   private readonly module: string;
 
   constructor(readonly outPath: string, module: NodeModule, boundContext?: any) {
