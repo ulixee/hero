@@ -8,12 +8,14 @@ import ConnectionToHeroClient from '../connections/ConnectionToHeroClient';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToHeroClient;
+let core: Core;
 const onEventFn = jest.fn();
 
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
   const transport = new EmittingTransportToClient();
-  connection = Core.addConnection(transport);
+  core = await Core.start();
+  connection = core.addConnection(transport);
   Helpers.onClose(() => connection.disconnect(), true);
   transport.on('outbound', payload => {
     if ((payload as ICoreListenerPayload).listenerId) {

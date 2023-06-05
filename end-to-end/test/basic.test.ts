@@ -5,7 +5,10 @@ import TransportBridge from '@ulixee/net/lib/TransportBridge';
 import HeroClient, { ConnectionToHeroCore } from '@ulixee/hero';
 
 let koaServer;
+let core: HeroCore;
 beforeAll(async () => {
+  core = new HeroCore();
+  Helpers.onClose(core.close, true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -25,7 +28,7 @@ describe('basic Full Client tests', () => {
   it("doesn't automatically close an idle connection", async () => {
     const bridge = new TransportBridge();
     const connectionToCore = new ConnectionToHeroCore(bridge.transportToCore);
-    HeroCore.addConnection(bridge.transportToClient);
+    core.addConnection(bridge.transportToClient);
     Helpers.onClose(() => connectionToCore.disconnect());
     const disconnectSpy = jest.spyOn(connectionToCore, 'disconnect');
 
@@ -168,7 +171,7 @@ describe('basic Full Client tests', () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
-    await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
+    await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrow(
       "Chrome won't allow you to set cookies on a blank tab.",
     );
   });

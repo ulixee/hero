@@ -260,16 +260,6 @@ export default class TimetravelTicks {
     return newTick;
   }
 
-  public static loadFromDb(
-    sessionId: string,
-    timelineRange?: [startTime: number, endTime?: number],
-  ): TimetravelTicks {
-    const sessionDb = SessionDb.getCached(sessionId);
-    const timetravel = new TimetravelTicks(sessionDb, timelineRange);
-    timetravel.load();
-    return timetravel;
-  }
-
   public static loadDomRecording(
     sessionDb: SessionDb,
   ): { tabId: number; domRecording: IDomRecording }[] {

@@ -7,7 +7,8 @@ import { stringToRegex } from '../lib/Tab';
 
 let connection: ConnectionToHeroClient;
 beforeAll(() => {
-  connection = Core.addConnection();
+  const core = new Core();
+  connection = core.addConnection();
   Helpers.onClose(() => connection.disconnect(), true);
 });
 afterAll(Helpers.afterAll);
@@ -53,7 +54,7 @@ test('loads http2 resources', async () => {
             pushStream.end(Helpers.getLogo());
           },
         ),
-      ).toThrowError();
+      ).toThrow();
     }
     res.stream.respond({
       ':status': 200,
@@ -97,7 +98,7 @@ test('records a single resource for failed mitm requests', async () => {
   });
   const goToPromise = tab.goto(`http://localhost:2344/not-there`);
 
-  await expect(goToPromise).rejects.toThrowError();
+  await expect(goToPromise).rejects.toThrow();
   // @ts-ignore
   const mitmErrorsByUrl = session.resources.mitmErrorsByUrl;
   expect(mitmErrorsByUrl.get(`http://localhost:2344/not-there`)).toHaveLength(1);

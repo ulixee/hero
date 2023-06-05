@@ -15,7 +15,8 @@ import Core from '../index';
 let koaServer: ITestKoaServer;
 let connection: ConnectionToHeroClient;
 beforeAll(async () => {
-  connection = Core.addConnection();
+  const core = new Core();
+  connection = core.addConnection();
   await connection.connect();
   Helpers.onClose(() => connection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();

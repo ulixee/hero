@@ -36,7 +36,7 @@ export default class DetachedElements {
   }
 
   getRawDetailsByElement(element: Element): IDetachedElement {
-    return this.#rawDetailsByElement.get(element)  ;
+    return this.#rawDetailsByElement.get(element);
   }
 
   async get(name: string): Promise<Element> {
@@ -49,7 +49,6 @@ export default class DetachedElements {
 
   async getAll(name: string): Promise<Element[]> {
     const detachedElements = await this.getRawDetails(name);
-    if (detachedElements.length === 0) return null;
     return detachedElements.map(x => {
       const element = DetachedElement.load(x.outerHTML);
       this.#rawDetailsByElement.set(element, detachedElements[0]);

@@ -1,10 +1,13 @@
-import { Helpers } from '@ulixee/hero-testing/index';
-import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session } from '@ulixee/hero-core';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { Helpers } from '@ulixee/hero-testing/index';
 import TimetravelTicks from '../player/TimetravelTicks';
 
 let koaServer: ITestKoaServer;
+let core: Core;
 beforeAll(async () => {
+  core = new Core();
+  Helpers.onClose(core.close, true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/api-test', ctx => {
     ctx.body = `<body>
@@ -27,7 +30,7 @@ afterAll(Helpers.afterAll);
 describe('basic Timetravel Ticks tests', () => {
   let sessionId: string;
   beforeAll(async () => {
-    const connection = Core.addConnection();
+    const connection = core.addConnection();
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession({
       scriptInvocationMeta: {
@@ -50,7 +53,9 @@ describe('basic Timetravel Ticks tests', () => {
   });
 
   it('can get the ticks for a session', async () => {
-    const tabDetails = TimetravelTicks.loadFromDb(sessionId).tabs;
+    const sessionDb = await core.sessionRegistry.get(sessionId);
+    const timetravelTicks = new TimetravelTicks(sessionDb);
+    const tabDetails = timetravelTicks.load();
     expect(tabDetails).toHaveLength(1);
     expect(tabDetails[0].ticks.length).toBeGreaterThanOrEqual(4);
     expect(tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(4);

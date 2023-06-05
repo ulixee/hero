@@ -37,7 +37,7 @@ describe('basic connection tests', () => {
     const hero1 = new Hero();
     Helpers.needsClosing.push(hero1);
 
-    await expect(hero1).rejects.toThrowError(
+    await expect(hero1.connect()).rejects.toThrow(
       'Ulixee Cloud failed to launch Chrome',
     );
     expect(logError).toHaveBeenCalledTimes(1);

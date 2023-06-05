@@ -40,7 +40,7 @@ describe('basic waitForElement tests', () => {
 
     await expect(
       tab.querySelector('a#notthere').$waitForExists({ timeoutMs: 500 }),
-    ).rejects.toThrowError(/Timeout waiting for element to exist/);
+    ).rejects.toThrow(/Timeout waiting for element to exist/);
   });
 
   it('will wait for an element to be visible', async () => {
@@ -119,7 +119,7 @@ describe('basic waitForElement tests', () => {
     const { tab } = await createSession();
     await tab.goto(`${koaServer.baseUrl}/waitForElementBadQs`);
 
-    await expect(tab.querySelector('button-title="test"').$waitForVisible()).rejects.toThrowError(
+    await expect(tab.querySelector('button-title="test"').$waitForVisible()).rejects.toThrow(
       'valid selector',
     );
   });

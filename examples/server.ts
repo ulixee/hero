@@ -14,6 +14,7 @@ import { IncomingMessage } from 'http';
 class CoreServer {
   public addressPromise: Promise<string>;
   private wsServer: WebSocket.Server;
+  private core: Core;
 
   constructor(port: number) {
     this.addressPromise = new Promise<string>(resolve => {
@@ -28,7 +29,7 @@ class CoreServer {
   }
 
   public async open(): Promise<void> {
-    await Core.start();
+    this.core = await Core.start();
     const address = await this.addressPromise;
     await UlixeeHostsConfig.global.setVersionHost(version, address);
     ShutdownHandler.register(() => UlixeeHostsConfig.global.setVersionHost(version, null));
@@ -47,7 +48,7 @@ class CoreServer {
 
   private handleWsConnection(ws: WebSocket, req: IncomingMessage): void {
     const transport = new WsTransportToClient(ws, req);
-    const connection = Core.addConnection(transport);
+    const connection = this.core.addConnection(transport);
     ShutdownHandler.register(() => connection.disconnect());
   }
 }

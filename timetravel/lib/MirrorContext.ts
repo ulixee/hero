@@ -1,6 +1,6 @@
+import Log from '@ulixee/commons/lib/Logger';
 import Core, { Session } from '@ulixee/hero-core';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import Log from '@ulixee/commons/lib/Logger';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 
 const { log } = Log(module);
@@ -8,9 +8,10 @@ const { log } = Log(module);
 export default class MirrorContext {
   public static async createFromSessionDb(
     sessionId: string,
+    core: Core,
     headed = true,
   ): Promise<BrowserContext> {
-    const options = Session.restoreOptionsFromSessionRecord({}, sessionId);
+    const options = await Session.restoreOptionsFromSessionRecord({}, sessionId, core);
     delete options.resumeSessionId;
     delete options.resumeSessionStartLocation;
     options.showChromeInteractions = headed;
@@ -18,22 +19,25 @@ export default class MirrorContext {
 
     const logger = log.createChild(module, { sessionId });
 
-    const agent = Core.pool.createAgent({
+    const agent = core.pool.createAgent({
       options,
       logger,
       deviceProfile: options?.userProfile?.deviceProfile,
       id: sessionId,
     });
 
-    // eslint-disable-next-line no-new
-    new CorePlugins(agent, {
-      getSessionSummary() {
-        return {
-          id: sessionId,
-          options,
-        };
+    const _ = new CorePlugins(
+      agent,
+      {
+        getSessionSummary() {
+          return {
+            id: sessionId,
+            options,
+          };
+        },
       },
-    });
+      core.corePluginsById,
+    );
 
     return await agent.open();
   }

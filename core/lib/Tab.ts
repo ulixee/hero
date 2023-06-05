@@ -1,60 +1,59 @@
-import Log from '@ulixee/commons/lib/Logger';
-import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
-import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
-import Timer from '@ulixee/commons/lib/Timer';
-import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
-import { createPromise } from '@ulixee/commons/lib/utils';
-import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
-import { IJsPath } from '@ulixee/js-path';
-import { IInteractionGroups } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
-import {
-  ILoadStatus,
-  ILocationTrigger,
-  LoadStatus,
-} from '@ulixee/unblocked-specification/agent/browser/Location';
-import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
-import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
-import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
-import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
-import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
-import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
-import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
-import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISourceCodeLocation from '@ulixee/commons/interfaces/ISourceCodeLocation';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import Timer from '@ulixee/commons/lib/Timer';
+import { createPromise } from '@ulixee/commons/lib/utils';
+import { injectedSourceUrl } from '@ulixee/default-browser-emulator/lib/DomOverridesBuilder';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import IDetachedElement from '@ulixee/hero-interfaces/IDetachedElement';
 import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
+import IDomStateListenArgs from '@ulixee/hero-interfaces/IDomStateListenArgs';
+import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
+import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
+import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
+import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
+import MirrorPage from '@ulixee/hero-timetravel/lib/MirrorPage';
+import { IJsPath } from '@ulixee/js-path';
 import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import FrameNavigations from '@ulixee/unblocked-agent/lib/FrameNavigations';
 import FrameNavigationsObserver from '@ulixee/unblocked-agent/lib/FrameNavigationsObserver';
 import Page from '@ulixee/unblocked-agent/lib/Page';
 import { IWebsocketMessage } from '@ulixee/unblocked-agent/lib/WebsocketMessages';
-import { injectedSourceUrl } from '@ulixee/default-browser-emulator/lib/DomOverridesBuilder';
+import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
+import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
+import IFileChooserPrompt from '@ulixee/unblocked-specification/agent/browser/IFileChooserPrompt';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
+import {
+  ILoadStatus,
+  ILocationTrigger,
+  LoadStatus,
+} from '@ulixee/unblocked-specification/agent/browser/Location';
+import { IInteractionGroups } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
+import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
+import { IDomChangeRecord } from '../models/DomChangesTable';
+import { IFocusRecord } from '../models/FocusEventsTable';
+import { IMouseEventRecord } from '../models/MouseEventsTable';
+import ScreenshotsTable from '../models/ScreenshotsTable';
+import { IScrollRecord } from '../models/ScrollEventsTable';
+import { IStorageChangesEntry } from '../models/StorageChangesTable';
 import CommandRecorder from './CommandRecorder';
+import { ICommandableTarget } from './CommandRunner';
+import DomStateListener from './DomStateListener';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
-import { IDomChangeRecord } from '../models/DomChangesTable';
-import { ICommandableTarget } from './CommandRunner';
-import DomStateListener from './DomStateListener';
-import ScreenshotsTable from '../models/ScreenshotsTable';
-import { IStorageChangesEntry } from '../models/StorageChangesTable';
-import { IRemoteEmitFn, IRemoteEventListener } from '../interfaces/IRemoteEventListener';
-import { IMouseEventRecord } from '../models/MouseEventsTable';
-import { IScrollRecord } from '../models/ScrollEventsTable';
-import { IFocusRecord } from '../models/FocusEventsTable';
-import Core from '../index';
 
 const { log } = Log(module);
 
@@ -472,7 +471,10 @@ export default class Tab
     );
   }
 
-  public async goto(url: string, options?: { timeoutMs?: number, referrer?: string }): Promise<IResourceMeta> {
+  public async goto(
+    url: string,
+    options?: { timeoutMs?: number; referrer?: string },
+  ): Promise<IResourceMeta> {
     return await this.page.goto(url, options);
   }
 
@@ -554,7 +556,7 @@ export default class Tab
     const paintIndex = this.mirrorPage.getPaintIndex(detachedElement.domChangesTimestamp);
     try {
       await this.mirrorPage.openInContext(
-        await Core.getUtilityContext(),
+        await this.session.core.getUtilityContext(),
         this.sessionId,
         this.session.viewport,
       );

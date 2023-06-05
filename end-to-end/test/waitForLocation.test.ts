@@ -200,7 +200,7 @@ describe('basic waitForLocation change detections', () => {
     await hero.waitForPaintingStable();
     expect(await hero.url).toBe(`${koaServer.baseUrl}/loaded2`);
 
-    await expect(hero.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrowError(
+    await expect(hero.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrow(
       'Timeout',
     );
     await hero.close();

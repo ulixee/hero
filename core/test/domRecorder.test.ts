@@ -21,7 +21,8 @@ beforeAll(async () => {
       }
     },
   );
-  connectionToClient = Core.addConnection();
+  const core = new Core();
+  connectionToClient = core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });

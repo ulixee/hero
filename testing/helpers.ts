@@ -352,10 +352,12 @@ export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOn
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
 }
 
+let core: Core;
 export async function createSession(
   options?: ISessionCreateOptions,
 ): Promise<{ session: Session; tab: Tab }> {
-  const connection = Core.addConnection();
+  core ??= await Core.start();
+  const connection = core.addConnection();
   Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession(options);
   const tab = Session.getTab(meta);

@@ -13,8 +13,10 @@ import MirrorNetwork from '../lib/MirrorNetwork';
 inspect.defaultOptions.depth = 5;
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToHeroClient;
+let core: Core;
 beforeAll(async () => {
-  connectionToClient = Core.addConnection();
+  core = await Core.start();
+  connectionToClient = core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/empty', ctx => {
@@ -264,7 +266,7 @@ describe('MirrorPage tests', () => {
 });
 
 async function createMirrorPage(tab: Tab, isDebug = false): Promise<MirrorPage> {
-  const mirrorContext = await MirrorContext.createFromSessionDb(tab.session.id, false);
+  const mirrorContext = await MirrorContext.createFromSessionDb(tab.session.id, core, false);
   Helpers.needsClosing.push(mirrorContext);
   const domRecording = DomChangesTable.toDomRecording(
     tab.session.db.domChanges.all(),

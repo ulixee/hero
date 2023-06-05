@@ -1,13 +1,14 @@
-import * as readline from 'readline';
-import { ReadLine } from 'readline';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import * as readline from 'readline';
+import { ReadLine } from 'readline';
 
 export default class CoreKeepAlivePrompt {
   public readonly message: string;
   private cliPrompt: ReadLine;
 
   constructor(message: string, private onQuit: () => Promise<any>) {
+    this.close = this.close.bind(this);
     if (/yes|1|true/i.test(process.env.ULX_CLI_NOPROMPT)) return;
 
     this.message = `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`;
@@ -35,11 +36,12 @@ export default class CoreKeepAlivePrompt {
         }
       }
     });
-    ShutdownHandler.register(() => this.close());
+    ShutdownHandler.register(this.close);
     this.cliPrompt.prompt(true);
   }
 
   public close(): void {
+    ShutdownHandler.unregister(this.close);
     if (this.cliPrompt) {
       this.cliPrompt.close();
       this.cliPrompt = null;

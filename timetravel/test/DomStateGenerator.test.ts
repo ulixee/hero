@@ -6,8 +6,9 @@ import DomStateGenerator from '../lib/DomStateGenerator';
 import DomStateAssertions from '../lib/DomStateAssertions';
 
 let koaServer: ITestKoaServer;
+let core: Core;
 beforeAll(async () => {
-  await Core.start();
+  core = await Core.start();
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
@@ -35,7 +36,7 @@ describe('domStateGenerator', () => {
       `;
     });
 
-    const domStateGenerator = new DomStateGenerator('1');
+    const domStateGenerator = new DomStateGenerator('1', core);
     async function run() {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
       const { tab, session } = await createSession();
@@ -87,7 +88,7 @@ describe('domStateGenerator', () => {
       `;
     });
 
-    const domStateGenerator = new DomStateGenerator('id');
+    const domStateGenerator = new DomStateGenerator('id', core);
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -129,7 +130,7 @@ describe('domStateGenerator', () => {
       `;
     });
 
-    const domStateGenerator = new DomStateGenerator('id');
+    const domStateGenerator = new DomStateGenerator('id', core);
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -158,7 +159,7 @@ describe('domStateGenerator', () => {
 
   test('can track storage changes', async () => {
     koaServer.get('/storage', ctx => {
-      ctx.set('set-cookie', `test=${  ctx.query.state}`);
+      ctx.set('set-cookie', `test=${ctx.query.state}`);
       ctx.body = `
   <body>
     <h1>Storage Page</h1>
@@ -192,7 +193,7 @@ describe('domStateGenerator', () => {
       `;
     });
 
-    const domStateGenerator = new DomStateGenerator('id');
+    const domStateGenerator = new DomStateGenerator('id', core);
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -241,7 +242,7 @@ describe('domStateGenerator', () => {
       ctx.body = `<body><h1>Page 1</h1></body>`;
     });
 
-    const domStateGenerator = new DomStateGenerator('id');
+    const domStateGenerator = new DomStateGenerator('id', core);
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -295,7 +296,7 @@ describe('domStateGenerator', () => {
       ctx.body = `ok ${ctx.query.param}`;
     });
 
-    const domStateGenerator = new DomStateGenerator('id');
+    const domStateGenerator = new DomStateGenerator('id', core);
     async function run() {
       // just give some time randomization
       await new Promise(resolve => setTimeout(resolve, Math.random() * 2e3));
@@ -342,7 +343,7 @@ describe('domStateGenerator', () => {
       domStateGenerator.addSession(session.db, tab.id, [startTime, Date.now()]);
     }
 
-    const psg1 = new DomStateGenerator('id');
+    const psg1 = new DomStateGenerator('id', core);
 
     await Promise.all([run(psg1), run(psg1), run(psg1), run(psg1)]);
 
@@ -353,8 +354,8 @@ describe('domStateGenerator', () => {
     expect(state1.assertions.length).toBeGreaterThanOrEqual(3);
     expect(state1.sessions).toHaveLength(4);
 
-    const psg2 = new DomStateGenerator('id');
-    psg2.import(state1);
+    const psg2 = new DomStateGenerator('id', core);
+    await psg2.import(state1);
 
     changeTitle = true;
     // add sessions to the second round

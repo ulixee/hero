@@ -35,7 +35,7 @@ Each Hero instance creates a private environment with its own cache, cookies, se
 
 Creates a new sandboxed browser instance with [unique user session and fingerprints](../overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
 
-You can optionally await an instance (or constructor) to cause the connection to the underlying Hero to be initialized. If you don't await, the connection will be established on the first call.
+A connection to the underlying Hero [Core](../advanced-concepts/client-vs-core.md) will be established on the first call.
 
 Note: If you provide a `name` that has already been used to name another instance then a counter will be appended to your string to ensure its uniqueness. However, it's only unique within a single NodeJs process (i.e., rerunning your script will reset the counter).
 
@@ -43,9 +43,8 @@ Note: If you provide a `name` that has already been used to name another instanc
 const Hero = require('@ulixee/hero-playground');
 
 (async () => {
-  // connection established here
-  const hero = await new Hero({
-    userAgent: '~ mac 13.1 & chrome > 14',
+  const hero = new Hero({
+    userAgent: '~ mac 13.1 & chrome >= 112',
   });
 })();
 ```
@@ -89,7 +88,7 @@ const Hero = require('@ulixee/hero-playground');
     - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/unblocked/blob/46e1894b5089660d62ac71c18d601e7c47795447/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81).
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
     - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
-  - sessionPersistence `boolean`. Do not save the [Session](../advanced-concepts/sessions.md) database if set to `false`. Defaults to `true` so you can troubleshoot errors, and load/extract data from previous sessions. 
+  - sessionPersistence `boolean`. Do not save the [Session](../advanced-concepts/sessions.md) database if set to `false`. Defaults to `true` so you can troubleshoot errors, and load/extract data from previous sessions.
 
 ## Properties
 

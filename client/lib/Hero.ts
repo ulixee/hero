@@ -152,8 +152,8 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
       corePluginPaths: [],
     } as ISessionOptions;
 
-    this.#callsiteLocator = callsiteLocator ??
-      new CallsiteLocator(this.#options.scriptInvocationMeta.entrypoint);
+    this.#callsiteLocator =
+      callsiteLocator ?? new CallsiteLocator(this.#options.scriptInvocationMeta.entrypoint);
 
     if (Hero.defaults.shutdownOnProcessSignals === false) {
       ShutdownHandler.disableSignals = true;
@@ -590,27 +590,11 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     return await this.activeTab.registerFlowHandler(name, state, handlerCallbackFn);
   }
 
-  public async triggerFlowHandlers(): Promise<{triggeredFlowHandler?: string; matchedFlowHandlers: string[]}> {
+  public async triggerFlowHandlers(): Promise<{
+    triggeredFlowHandler?: string;
+    matchedFlowHandlers: string[];
+  }> {
     return await this.activeTab.triggerFlowHandlers();
-  }
-
-  /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-  public async then<TResult1 = Hero, TResult2 = never>(
-    onfulfilled?:
-      | ((value: Omit<Hero, 'then'>) => PromiseLike<TResult1> | TResult1)
-      | undefined
-      | null,
-    onrejected?: ((reason: any) => PromiseLike<TResult2> | TResult2) | undefined | null,
-  ): Promise<TResult1 | TResult2> {
-    try {
-      this.then = null;
-      await this.#getCoreSessionOrReject();
-      return onfulfilled(this);
-    } catch (err) {
-      if (onrejected) return onrejected(err);
-      throw err;
-    }
   }
 
   public toJSON(): any {
@@ -678,6 +662,10 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
       return;
     }
     return await super.removeEventListener(eventType, listenerFn);
+  }
+
+  public async connect(): Promise<void> {
+    await this.#getCoreSessionOrReject();
   }
 
   #getCoreSessionOrReject(): Promise<CoreSession> {
