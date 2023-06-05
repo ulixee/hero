@@ -1,9 +1,9 @@
-import { TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import { browserEngineOptions } from '@ulixee/unblocked-agent-testing/browserUtils';
-import { TestServer } from './server';
-import { attachFrame, detachFrame, navigateFrame, waitForVisible } from './_pageTestUtils';
-import { Browser, BrowserContext, Page } from '../index';
+import { TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import IBrowser from '@ulixee/unblocked-specification/agent/browser/IBrowser';
+import { Browser, BrowserContext, Page } from '../index';
+import { attachFrame, detachFrame, navigateFrame, waitForVisible } from './_pageTestUtils';
+import { TestServer } from './server';
 
 describe('Frames Out of Process', () => {
   let server: TestServer;
@@ -14,8 +14,8 @@ describe('Frames Out of Process', () => {
   beforeAll(async () => {
     server = await TestServer.create(0);
     browser = new Browser(browserEngineOptions, {
-      onNewBrowser(browser: IBrowser) {
-        browser.engine.launchArguments.push('--site-per-process', '--host-rules=MAP * 127.0.0.1');
+      onNewBrowser(b: IBrowser) {
+        b.engine.launchArguments.push('--site-per-process', '--host-rules=MAP * 127.0.0.1');
       },
     });
     await browser.launch();
@@ -45,7 +45,7 @@ describe('Frames Out of Process', () => {
       return frame.url.endsWith('/empty.html');
     });
     await attachFrame(page, 'frame1', server.emptyPage);
-    await attachFrame(page, 'frame2', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame2', `${server.crossProcessBaseUrl}/empty.html`);
     await framePromise;
     expect(page.frames.filter(x => x.parentId === page.mainFrame.id)).toHaveLength(2);
   });
@@ -53,12 +53,12 @@ describe('Frames Out of Process', () => {
   it('should track navigations within OOP iframes', async () => {
     await page.goto(server.emptyPage);
     const framePromise = page.waitOn('frame-navigated', ({ frame }) => {
-      return frame.url === server.crossProcessBaseUrl + '/empty.html';
+      return frame.url === `${server.crossProcessBaseUrl}/empty.html`;
     });
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     const { frame } = await framePromise;
     expect(frame.url).toContain('/empty.html');
-    await navigateFrame(page, 'frame1', server.crossProcessBaseUrl + '/assets/frame.html');
+    await navigateFrame(page, 'frame1', `${server.crossProcessBaseUrl}/assets/frame.html`);
     expect(frame.url).toContain('/assets/frame.html');
   });
 
@@ -68,7 +68,7 @@ describe('Frames Out of Process', () => {
     await attachFrame(page, 'frame1', server.emptyPage);
     const { frame } = await framePromise;
     expect(frame.isOopif()).toBe(false);
-    await navigateFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await navigateFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     expect(frame.isOopif()).toBe(true);
     await navigateFrame(page, 'frame1', server.emptyPage);
     expect(frame.isOopif()).toBe(false);
@@ -78,12 +78,12 @@ describe('Frames Out of Process', () => {
   it('should support frames within OOP frames', async () => {
     await page.goto(server.emptyPage);
     const frame1Promise = page.waitOn('frame-navigated', ({ frame }) => {
-      return frame.url === server.crossProcessBaseUrl + '/frames/one-frame.html';
+      return frame.url === `${server.crossProcessBaseUrl}/frames/one-frame.html`;
     });
     const frame2Promise = page.waitOn('frame-navigated', ({ frame }) => {
-      return frame.url === server.crossProcessBaseUrl + '/frames/frame.html';
+      return frame.url === `${server.crossProcessBaseUrl}/frames/frame.html`;
     });
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/frames/one-frame.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/frames/one-frame.html`);
 
     const [{ frame: frame1 }, { frame: frame2 }] = await Promise.all([
       frame1Promise,
@@ -101,7 +101,7 @@ describe('Frames Out of Process', () => {
 
     const { frame } = await framePromise;
     expect(frame.isOopif()).toBe(false);
-    await navigateFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await navigateFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     expect(frame.isOopif()).toBe(true);
     await detachFrame(page, 'frame1');
     if (browser.majorVersion >= 109) expect(page.frames).toHaveLength(1);
@@ -115,7 +115,7 @@ describe('Frames Out of Process', () => {
     const { frame } = await framePromise;
     expect(frame.isOopif()).toBe(false);
     const nav = frame.waitForLoad({ loadStatus: 'JavascriptReady' });
-    await navigateFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await navigateFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     await nav;
     expect(frame.isOopif()).toBe(true);
     await detachFrame(page, 'frame1');
@@ -125,7 +125,7 @@ describe('Frames Out of Process', () => {
   it('should keep track of a frames OOP state', async () => {
     await page.goto(server.emptyPage);
     const framePromise = page.waitOn('frame-created');
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     const { frame } = await framePromise;
     expect(frame.url).toContain('/empty.html');
     await navigateFrame(page, 'frame1', server.emptyPage);
@@ -135,7 +135,7 @@ describe('Frames Out of Process', () => {
   it('should support evaluating in oop iframes', async () => {
     await page.goto(server.emptyPage);
     const framePromise = page.waitOn('frame-created');
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     const { frame } = await framePromise;
     await frame.evaluate(`(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -153,7 +153,7 @@ describe('Frames Out of Process', () => {
   it('should provide access to elements', async () => {
     await page.goto(server.emptyPage);
     const framePromise = page.waitOn('frame-created');
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
 
     const { frame } = await framePromise;
     await frame.evaluate(`(() => {
@@ -172,15 +172,15 @@ describe('Frames Out of Process', () => {
     })()`);
     await waitForVisible(frame as any, '#test-button');
     await frame.click('#test-button');
-    await waitForVisible(frame as any, '#clicked');
+    await expect(waitForVisible(frame as any, '#clicked')).resolves.toBeTruthy();
   });
 
   it('should report oopif frames', async () => {
     context.targetsById.clear();
-    const frame = page.waitOn('frame-navigated', ({ frame }) => {
-      return frame.url.endsWith('/oopif.html');
+    const frame = page.waitOn('frame-navigated', event => {
+      return event.frame.url.endsWith('/oopif.html');
     });
-    await page.goto(server.baseUrl + '/dynamic-oopif.html');
+    await page.goto(`${server.baseUrl}/dynamic-oopif.html`);
     await frame;
     expect([...context.targetsById.values()].filter(x => x.type === 'iframe')).toHaveLength(1);
     expect(page.frames.length).toBe(2);
@@ -208,13 +208,13 @@ describe('Frames Out of Process', () => {
     const oopIframePromise = page.waitOn('frame-navigated', ({ frame }) => {
       return frame.url.endsWith('/oopif.html');
     });
-    await page.goto(server.baseUrl + '/dynamic-oopif.html');
+    await page.goto(`${server.baseUrl}/dynamic-oopif.html`);
     const { frame: oopIframe } = await oopIframePromise;
-    await attachFrame(oopIframe as any, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(oopIframe as any, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
 
-    const frame1 = oopIframe.childFrames[0]!;
+    const frame1 = oopIframe.childFrames[0];
     expect(frame1.url).toMatch(/empty.html$/);
-    await navigateFrame(oopIframe as any, 'frame1', server.crossProcessBaseUrl + '/oopif.html');
+    await navigateFrame(oopIframe as any, 'frame1', `${server.crossProcessBaseUrl}/oopif.html`);
     expect(frame1.url).toMatch(/oopif.html$/);
     await frame1.evaluate(
       `location.href= "${server.crossProcessBaseUrl}/oopif.html#navigate-within-document"`,
@@ -229,7 +229,7 @@ describe('Frames Out of Process', () => {
   it('clickablePoint, boundingBox, boxModel should work for elements inside OOPIFs', async () => {
     await page.goto(server.emptyPage);
     const framePromise = page.waitOn('frame-created');
-    await attachFrame(page, 'frame1', server.crossProcessBaseUrl + '/empty.html');
+    await attachFrame(page, 'frame1', `${server.crossProcessBaseUrl}/empty.html`);
     const { frame } = await framePromise;
     await page.evaluate(`(() => {
       document.body.style.border = '50px solid black';

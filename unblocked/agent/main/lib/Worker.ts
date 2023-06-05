@@ -1,19 +1,19 @@
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import Protocol from 'devtools-protocol';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { IWorker, IWorkerEvents } from '@ulixee/unblocked-specification/agent/browser/IWorker';
-import { createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { createPromise } from '@ulixee/commons/lib/utils';
+import { IWorker, IWorkerEvents } from '@ulixee/unblocked-specification/agent/browser/IWorker';
+import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import Protocol from 'devtools-protocol';
 import BrowserContext from './BrowserContext';
+import ConsoleMessage from './ConsoleMessage';
 import DevtoolsSession from './DevtoolsSession';
 import NetworkManager from './NetworkManager';
-import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
-import TargetInfo = Protocol.Target.TargetInfo;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
+import TargetInfo = Protocol.Target.TargetInfo;
 
 export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker {
   public readonly browserContext: BrowserContext;
@@ -135,6 +135,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       .then(this.resumeAfterEmulation.bind(this))
       .catch(async error => {
         if (error instanceof CanceledPromiseError) return;
+        // eslint-disable-next-line promise/no-nesting
         await this.resumeAfterEmulation().catch(() => null);
         this.logger.warn('Emulator.onNewWorkerError', {
           error,

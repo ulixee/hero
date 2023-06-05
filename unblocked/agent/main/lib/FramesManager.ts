@@ -283,7 +283,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   ): Frame | null {
     for (const frame of this.framesById.values()) {
       const isMatch = frame.navigations.pendingResourceId(browserRequestId, requestedUrl, finalUrl);
-      if (!!isMatch) return frame;
+      if (isMatch) return frame;
     }
   }
 
@@ -528,11 +528,9 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     if (devtoolsSession === this.devtoolsSession) {
       this.mainFrameId = frame.id;
       this.recordFrame(devtoolsSession, frame, true);
-    } else {
-      if (!this.framesById.has(frame.id)) {
+    } else if (!this.framesById.has(frame.id)) {
         this.recordFrame(devtoolsSession, frame, true);
       }
-    }
 
     this.attachedFrameIds.add(frame.id);
 

@@ -17,9 +17,9 @@ import { Cookie } from 'tough-cookie';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IBrowserRequestMatcher from '@ulixee/unblocked-agent-mitm/interfaces/IBrowserRequestMatcher';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import IMitmRequestContext from '@ulixee/unblocked-agent-mitm/interfaces/IMitmRequestContext';
 import { IMitmRequestPendingBrowserRequest, IResourceEvents } from '../interfaces/IResourceEvents';
 import BrowserContext from './BrowserContext';
-import IMitmRequestContext from '@ulixee/unblocked-agent-mitm/interfaces/IMitmRequestContext';
 
 export default class Resources
   extends TypedEventEmitter<IResourceEvents>

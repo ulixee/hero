@@ -1,6 +1,6 @@
 import { BrowserUtils, TestLogger, Helpers } from '@ulixee/unblocked-agent-testing/index';
-import { Browser } from '../index';
 import * as Os from 'os';
+import { Browser } from '../index';
 import BrowserLaunchError from '../errors/BrowserLaunchError';
 
 afterEach(Helpers.afterEach);
@@ -30,7 +30,7 @@ describe('launchProcess', () => {
     browserEngine.executablePath = 'random-invalid-path';
     const browser = new Browser(browserEngine);
     Helpers.needsClosing.push(browser);
-    await expect(browser.launch()).rejects.toThrowError('Failed to launch');
+    await expect(browser.launch()).rejects.toThrow('Failed to launch');
   });
 
   it('should be callable twice', async () => {

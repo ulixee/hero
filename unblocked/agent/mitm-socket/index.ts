@@ -33,6 +33,7 @@ export default class MitmSocket
     settings?: { id: number; value: number }[];
     acceptCh?: { domain: string; headers: string[] };
   };
+
   public socket: net.Socket;
   public dnsResolvedIp: string;
   public remoteAddress: string;

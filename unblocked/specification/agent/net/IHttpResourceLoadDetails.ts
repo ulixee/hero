@@ -1,8 +1,8 @@
 import { URL } from 'url';
+import type { IEventSubscriber } from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import IResourceType from './IResourceType';
 import IHttpHeaders from './IHttpHeaders';
 import OriginType from './OriginType';
-import type { IEventSubscriber } from '@ulixee/commons/interfaces/IRegisteredEventListener';
 
 export default interface IHttpResourceLoadDetails {
   id: number;

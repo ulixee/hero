@@ -1,10 +1,10 @@
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Frame from './Frame';
 import Page from './Page';
 import NetworkManager from './NetworkManager';
 import DevtoolsSession from './DevtoolsSession';
 import DomStorageTracker from './DomStorageTracker';
 import BrowserContext from './BrowserContext';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 
 export default class FrameOutOfProcess {
   public page: Page;

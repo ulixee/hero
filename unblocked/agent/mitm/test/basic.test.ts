@@ -6,6 +6,8 @@ import { AddressInfo, Socket } from 'net';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
+import HttpProxyAgent = require('http-proxy-agent');
+import WebSocket = require('ws');
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
@@ -15,8 +17,6 @@ import { parseRawHeaders } from '../lib/Utils';
 import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
 import env from '../env';
 import { MitmProxy } from '../index';
-import HttpProxyAgent = require('http-proxy-agent');
-import WebSocket = require('ws');
 
 const mocks = {
   httpRequestHandler: {
@@ -53,11 +53,11 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(0);
 
     const res = await Helpers.httpGet(httpServer.url, proxyHost, session.getProxyCredentials());
     expect(res.includes('Hello')).toBeTruthy();
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
 
     await mitmServer.close();
   });
@@ -73,7 +73,7 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(0);
 
     let rawHeaders: string[] = null;
     const res = await Helpers.httpRequest(
@@ -88,7 +88,7 @@ describe('basic MitM tests', () => {
     );
     const headers = parseRawHeaders(rawHeaders);
     expect(res.includes('Hello')).toBeTruthy();
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
     expect(headers['x-test']).toHaveLength(2);
 
     await mitmServer.close();
@@ -104,12 +104,12 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(0);
 
     env.allowInsecure = true;
     const res = await Helpers.httpGet(server.baseUrl, proxyHost, session.getProxyCredentials());
     expect(res.includes('Secure as anything!')).toBeTruthy();
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
     env.allowInsecure = false;
   });
 
@@ -160,7 +160,7 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(0);
 
     const res = await Helpers.httpGet(
       `http://localhost:${serverPort}`,
@@ -170,7 +170,7 @@ describe('basic MitM tests', () => {
     expect(res).toBe('Ok');
     expect(headers['proxy-authorization']).not.toBeTruthy();
 
-    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
   });
 
   it('should strip proxy headers', async () => {

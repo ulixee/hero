@@ -1,15 +1,14 @@
 import type ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
-import type IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
-import IPoint from './IPoint';
 import { IJsPath } from '@ulixee/js-path';
-import { NavigationReason } from './NavigationReason';
-import IJsPathFunctions from './IJsPathFunctions';
-import { IFrameNavigations } from './IFrameNavigations';
-import { ILoadStatus } from './Location';
-import INavigation from './INavigation';
 import { IElementInteractVerification, IInteractionGroups } from '../interact/IInteractions';
-import { IPage } from './IPage';
 import IDevtoolsSession from './IDevtoolsSession';
+import { IFrameNavigations } from './IFrameNavigations';
+import IJsPathFunctions from './IJsPathFunctions';
+import INavigation from './INavigation';
+import { IPage } from './IPage';
+import IPoint from './IPoint';
+import { ILoadStatus } from './Location';
+import { NavigationReason } from './NavigationReason';
 
 export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
   frameId: number; // assigned id unique to the browser context

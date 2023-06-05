@@ -1,11 +1,11 @@
-import { LookupAddress, promises as nodeDns } from 'dns';
-import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
-import { INetworkHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
-import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
-import { Dns } from '../lib/Dns';
-import RequestSession from '../handlers/RequestSession';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import AgentEnv from '@ulixee/unblocked-agent/env';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
+import AgentEnv from '@ulixee/unblocked-agent/env'; // eslint-disable-line import/no-extraneous-dependencies
+import { INetworkHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import { LookupAddress, promises as nodeDns } from 'dns';
+import RequestSession from '../handlers/RequestSession';
+import { Dns } from '../lib/Dns';
+import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 
 const CloudFlare = {
   host: '1.1.1.1',
@@ -25,6 +25,8 @@ const Quad9 = {
   host: '9.9.9.9',
   servername: 'dns.quad9.net',
 };
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Quad9_2 = {
   host: '149.112.112.112',
   servername: 'dns.quad9.net',
@@ -80,10 +82,7 @@ describe('DnsOverTlsSocket', () => {
     Quad9_2,
   ]);
   beforeAll(() => {
-    testDnsSocket = new DnsOverTlsSocket(
-      { dnsOverTlsConnection: dnsOverTlsConnection },
-      requestSession,
-    );
+    testDnsSocket = new DnsOverTlsSocket({ dnsOverTlsConnection }, requestSession);
   });
   afterAll(() => {
     testDnsSocket.close();

@@ -1,9 +1,9 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import { browserEngineOptions } from '@ulixee/unblocked-agent-testing/browserUtils';
-import { TestServer } from './server';
-import { attachFrame, setContent } from './_pageTestUtils';
-import Agent from '../lib/Agent';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import { Browser, BrowserContext, Page } from '../index';
+import Agent from '../lib/Agent';
+import { attachFrame, setContent } from './_pageTestUtils';
+import { TestServer } from './server';
 
 describe('Frames', () => {
   let server: TestServer;
@@ -39,7 +39,7 @@ describe('Frames', () => {
     let count = 0;
     // @ts-expect-error
     const contexts = contextPage.framesManager.activeContextIdsBySessionId.values();
-    for (const context of contexts) count += context.size;
+    for (const _ of contexts) count += context.size;
     return count;
   }
 
@@ -529,7 +529,7 @@ describe('Frames', () => {
           ['querySelector', 'h1'],
           'textContent',
         ]),
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       await Promise.all(page.frames.map(x => x.waitForLoad({ loadStatus: 'DomContentLoaded' })));
       const innerFrame = page.frames.find(x => x.url === 'http://framesy.org/page');

@@ -1,6 +1,6 @@
+import INodeVisibility from '@ulixee/js-path/interfaces/INodeVisibility';
 import { Page } from '../index';
 import Frame from '../lib/Frame';
-import INodeVisibility from '@ulixee/js-path/interfaces/INodeVisibility';
 import ConsoleMessage from '../lib/ConsoleMessage';
 
 export async function attachFrame(

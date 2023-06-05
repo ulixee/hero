@@ -17,12 +17,12 @@ import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
 import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocketSession';
 import MitmEnv from '@ulixee/unblocked-agent-mitm/env'; // eslint-disable-line import/no-extraneous-dependencies
 import Logger from '@ulixee/commons/lib/Logger';
-import { Helpers, TestLogger } from './index';
 import HttpProxyAgent = require('http-proxy-agent');
 import HttpsProxyAgent = require('https-proxy-agent');
 import Koa = require('koa');
 import KoaRouter = require('@koa/router');
 import KoaMulter = require('@koa/multer');
+import { Helpers, TestLogger } from './index';
 
 const { log } = Logger(module);
 

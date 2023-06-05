@@ -87,7 +87,7 @@ describe.each([
     });
     const { page, agent } = await createAgent(enableMitm);
     const connectSpy = jest.spyOn(agent.mitmRequestSession.requestAgent, 'createSocketConnection');
-    await expect(page.goto(startingUrl, { timeoutMs: 100 })).rejects.toThrowError('Timeout');
+    await expect(page.goto(startingUrl, { timeoutMs: 100 })).rejects.toThrow('Timeout');
     timeoutResolve();
     if (enableMitm) {
       expect(connectSpy.mock.calls[0][1]).toEqual(100);

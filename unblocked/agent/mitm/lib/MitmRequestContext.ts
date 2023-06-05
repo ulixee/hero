@@ -1,29 +1,24 @@
-import { URL } from 'url';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
+import { IBrowserResourceRequest } from '@ulixee/unblocked-specification/agent/browser/IBrowserNetworkEvents';
+import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
+import IResourceRequest from '@ulixee/unblocked-specification/agent/net/IResourceRequest';
+import IResourceResponse from '@ulixee/unblocked-specification/agent/net/IResourceResponse';
+import OriginType, { isOriginType } from '@ulixee/unblocked-specification/agent/net/OriginType';
 import * as http from 'http';
 import * as http2 from 'http2';
-import IResourceRequest from '@ulixee/unblocked-specification/agent/net/IResourceRequest';
 import { TLSSocket } from 'tls';
-import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
-import OriginType, { isOriginType } from '@ulixee/unblocked-specification/agent/net/OriginType';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IHttpHeaders from '@ulixee/unblocked-specification/agent/net/IHttpHeaders';
-import IResourceResponse from '@ulixee/unblocked-specification/agent/net/IResourceResponse';
-import { IBrowserResourceRequest } from '@ulixee/unblocked-specification/agent/browser/IBrowserNetworkEvents';
-import HttpResponseCache from './HttpResponseCache';
+import { URL } from 'url';
+import CacheHandler from '../handlers/CacheHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
-import CacheHandler from '../handlers/CacheHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import { parseRawHeaders } from './Utils';
 import ResourceState from '../interfaces/ResourceState';
+import HttpResponseCache from './HttpResponseCache';
+import { parseRawHeaders } from './Utils';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
-  private static nextId(): number {
-    this.contextIdCounter += 1;
-    if (!Number.isSafeInteger(this.contextIdCounter)) this.contextIdCounter = 1;
-    return this.contextIdCounter;
-  }
 
   public static createFromResourceRequest(
     resourceLoadDetails: IBrowserResourceRequest,
@@ -288,5 +283,11 @@ export default class MitmRequestContext {
       ctx.responseUrl = ctx.redirectedToUrl;
       ctx.requestSession.trackResourceRedirects(ctx);
     }
+  }
+
+  private static nextId(): number {
+    this.contextIdCounter += 1;
+    if (!Number.isSafeInteger(this.contextIdCounter)) this.contextIdCounter = 1;
+    return this.contextIdCounter;
   }
 }

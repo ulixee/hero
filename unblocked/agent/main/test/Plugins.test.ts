@@ -70,8 +70,8 @@ test('should only allow take the last implementation of playInteractions', async
 
   const plugins = new Plugins({}, [Plugins1, Plugins2]);
   await plugins.playInteractions([], jest.fn(), null);
-  expect(play1Fn).not.toBeCalled();
-  expect(play2Fn).toBeCalledTimes(1);
+  expect(play1Fn).not.toHaveBeenCalled();
+  expect(play2Fn).toHaveBeenCalledTimes(1);
 });
 
 test("plugin implementations should be called in the order they're installed", async () => {
@@ -98,7 +98,7 @@ test("plugin implementations should be called in the order they're installed", a
 
   const plugins = new Plugins({}, [Plugins1, Plugins2]);
   await plugins.onNewPage({} as any);
-  expect(newPage1Fn).toBeCalledTimes(1);
-  expect(newPage2Fn).toBeCalledTimes(1);
+  expect(newPage1Fn).toHaveBeenCalledTimes(1);
+  expect(newPage2Fn).toHaveBeenCalledTimes(1);
   expect(callOrder).toEqual([newPage1Fn, newPage2Fn]);
 });

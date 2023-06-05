@@ -89,7 +89,7 @@ test('should be able to handle an http2->http2 request', async () => {
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('h2 secure as anything!');
 
-  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+  expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
   const call = mocks.MitmRequestContext.create.mock.calls[0];
   expect(call[0].isUpgrade).toBe(false);
   expect(call[0].clientToProxyRequest).toBeInstanceOf(http2.Http2ServerRequest);
@@ -129,7 +129,7 @@ test('should send response header arrays through proxy', async () => {
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('headers done');
 
-  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+  expect(mocks.httpRequestHandler.onRequest).toHaveBeenCalledTimes(1);
   const headers = parseRawHeaders(await h2Headers);
   expect(headers['x-test']).toHaveLength(2);
 });

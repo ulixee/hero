@@ -269,7 +269,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     context.responseBodySize = 0;
 
     for await (const chunk of serverToProxyResponse) {
-      let buffer = chunk as Buffer;
+      const buffer = chunk as Buffer;
       context.responseBodySize += buffer.length;
       const data = context.cacheHandler.onResponseData(buffer);
       this.safeWriteToClient(data);

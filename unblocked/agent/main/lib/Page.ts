@@ -14,48 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Protocol from 'devtools-protocol';
-import { IPage, IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { assert, createPromise } from '@ulixee/commons/lib/utils';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Timer from '@ulixee/commons/lib/Timer';
+import { assert, createPromise } from '@ulixee/commons/lib/utils';
+import { IJsPath } from '@ulixee/js-path';
+import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
+import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
+import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import { IPage, IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
+import { ILoadStatus, LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import {
   IElementInteractVerification,
   IInteractionGroup,
   InteractionCommand,
 } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
+import Protocol from 'devtools-protocol';
 import * as Url from 'url';
-import Timer from '@ulixee/commons/lib/Timer';
-import { ILoadStatus, LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
-import { IJsPath } from '@ulixee/js-path';
-import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
-import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
-import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
-import { IFrame, IFrameEvents } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import IWaitForOptions from '../interfaces/IWaitForOptions';
+import BrowserContext from './BrowserContext';
+import ConsoleMessage from './ConsoleMessage';
 import DevtoolsSession from './DevtoolsSession';
-import NetworkManager from './NetworkManager';
+import DomStorageTracker, { IDomStorageEvents } from './DomStorageTracker';
+import Frame from './Frame';
+import FramesManager from './FramesManager';
 import { Keyboard } from './Keyboard';
 import Mouse from './Mouse';
-import FramesManager from './FramesManager';
-import BrowserContext from './BrowserContext';
+import NetworkManager from './NetworkManager';
 import { Worker } from './Worker';
-import ConsoleMessage from './ConsoleMessage';
-import Frame from './Frame';
-import IWaitForOptions from '../interfaces/IWaitForOptions';
-import DomStorageTracker, { IDomStorageEvents } from './DomStorageTracker';
+import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
+import JavascriptDialogClosedEvent = Protocol.Page.JavascriptDialogClosedEvent;
+import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
+import Viewport = Protocol.Page.Viewport;
+import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
-import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
-import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
-import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
-import Viewport = Protocol.Page.Viewport;
-import JavascriptDialogClosedEvent = Protocol.Page.JavascriptDialogClosedEvent;
 
 export interface IPageCreateOptions {
   groupName?: string;
@@ -452,7 +452,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       format,
       quality,
       clip,
-      captureBeyondViewport: captureBeyondViewport, // added in chrome 87 works since 89
+      captureBeyondViewport, // added in chrome 87 works since 89
     } as Protocol.Page.CaptureScreenshotRequest);
 
     const timestamp = Date.now();
@@ -493,7 +493,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
 
   async reset(): Promise<void> {
     if (this.isClosing || this.closePromise.isResolved) return this.closePromise.promise;
-    if (!!this.devtoolsSession.isConnected()) return;
+    if (this.devtoolsSession.isConnected()) return;
     this.mainFrame.navigations.reset();
     this.networkManager.reset();
     this.framesManager.reset();

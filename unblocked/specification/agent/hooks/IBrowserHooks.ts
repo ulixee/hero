@@ -1,10 +1,10 @@
+import Protocol from 'devtools-protocol';
 import IDevtoolsSession from '../browser/IDevtoolsSession';
 import { IPage } from '../browser/IPage';
 import { IWorker } from '../browser/IWorker';
 import IBrowser from '../browser/IBrowser';
 import IBrowserUserConfig from '../browser/IBrowserUserConfig';
 import IBrowserContext from '../browser/IBrowserContext';
-import Protocol from 'devtools-protocol';
 import TargetInfo = Protocol.Target.TargetInfo;
 import { IFrame } from '../browser/IFrame';
 

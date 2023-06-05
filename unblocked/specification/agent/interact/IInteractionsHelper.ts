@@ -1,6 +1,6 @@
 import type { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import IMouseResult from './IMouseResult';
 import { IJsPath, INodePointer, INodeVisibility } from '@ulixee/js-path';
+import IMouseResult from './IMouseResult';
 import IPoint from '../browser/IPoint';
 import { IMousePosition } from './IInteractions';
 import IRect from '../browser/IRect';

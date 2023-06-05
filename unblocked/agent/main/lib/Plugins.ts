@@ -25,9 +25,9 @@ import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDev
 import ChromeApp from '@ulixee/chrome-app';
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import ChromeEngine from './ChromeEngine';
 import Interactor from './Interactor';
-import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 
 type ICallbackFn = (...args: any[]) => Promise<void> | void;
 

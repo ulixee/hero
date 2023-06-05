@@ -1,45 +1,45 @@
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import Timer from '@ulixee/commons/lib/Timer';
+import IJsPath from '@ulixee/js-path/interfaces/IJsPath';
 import {
   IFrame,
   IFrameEvents,
   ILifecycleEvents,
 } from '@ulixee/unblocked-specification/agent/browser/IFrame';
-import { URL } from 'url';
-import Protocol from 'devtools-protocol';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
-import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
 import IWindowOffset from '@ulixee/unblocked-specification/agent/browser/IWindowOffset';
-import {
-  IElementInteractVerification,
-  IInteractionGroups,
-} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
-import { IInteractHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import {
   ILoadStatus,
   ILocationTrigger,
   LoadStatus,
 } from '@ulixee/unblocked-specification/agent/browser/Location';
-import Timer from '@ulixee/commons/lib/Timer';
-import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
+import { IInteractHooks } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import {
+  IElementInteractVerification,
+  IInteractionGroups,
+} from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import Protocol from 'devtools-protocol';
+import { URL } from 'url';
 import ProtocolError from '../errors/ProtocolError';
-import DevtoolsSession from './DevtoolsSession';
+import IWaitForOptions from '../interfaces/IWaitForOptions';
 import ConsoleMessage from './ConsoleMessage';
-import FramesManager, { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
-import { NavigationLoader } from './NavigationLoader';
-import { JsPath } from './JsPath';
-import MouseListener from './MouseListener';
-import Page from './Page';
-import Interactor from './Interactor';
+import DevtoolsSession from './DevtoolsSession';
 import FrameNavigations from './FrameNavigations';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import IWaitForOptions from '../interfaces/IWaitForOptions';
-import IJsPath from '@ulixee/js-path/interfaces/IJsPath';
 import FrameOutOfProcess from './FrameOutOfProcess';
+import FramesManager, { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
+import Interactor from './Interactor';
+import { JsPath } from './JsPath';
+import MouseListener from './MouseListener';
+import { NavigationLoader } from './NavigationLoader';
+import Page from './Page';
 import PageFrame = Protocol.Page.Frame;
 
 const ContextNotFoundCode = -32000;
@@ -48,7 +48,7 @@ const InPageNavigationLoaderPrefix = 'inpage';
 export default class Frame extends TypedEventEmitter<IFrameEvents> implements IFrame {
   // TODO: switch this to "id" and migrate "id" to "devtoolsId"
   public readonly frameId: number;
-  public didSwapOutOfProcess: boolean = false;
+  public didSwapOutOfProcess = false;
   public get id(): string {
     return this.internalFrame.id;
   }
@@ -111,10 +111,12 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public get hooks(): IInteractHooks {
     return this.page.browserContext.hooks;
   }
+
   public navigations: FrameNavigations;
 
   public navigationsObserver: FrameNavigationsObserver;
   public devtoolsSession: DevtoolsSession;
+  public readonly pendingNewDocumentScripts: { script: string; isolated: boolean }[] = [];
 
   private outOfProcess: FrameOutOfProcess;
 
@@ -125,7 +127,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   private readonly parentFrame: Frame | null;
   private defaultLoaderId: string;
   private startedLoaderId: string;
-  public readonly pendingNewDocumentScripts: { script: string; isolated: boolean }[] = [];
   private defaultContextId: number;
   private isolatedContextId: number;
   private activeContextIds: Set<number>;

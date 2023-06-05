@@ -8,9 +8,9 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { arch } from 'os';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { PipeTransport } from './PipeTransport';
 import env from '../env';
-import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 
 const { log } = Log(module);
 

@@ -1,5 +1,6 @@
 import type IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import type ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
+import { IJsPath } from '@ulixee/js-path';
 import { IFrame, IFrameManagerEvents } from './IFrame';
 import { IKeyboard, IMouse } from '../interact/IInput';
 import { IBrowserNetworkEvents } from './IBrowserNetworkEvents';
@@ -8,7 +9,6 @@ import IDevtoolsSession from './IDevtoolsSession';
 import IDialog from './IDialog';
 import IBrowserContext from './IBrowserContext';
 import IScreenshotOptions from './IScreenshotOptions';
-import { IJsPath } from '@ulixee/js-path';
 import IExecJsPathResult from './IExecJsPathResult';
 import IFileChooserPrompt from './IFileChooserPrompt';
 import { IInteractionGroups } from '../interact/IInteractions';

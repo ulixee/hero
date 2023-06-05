@@ -1,7 +1,7 @@
-import IExecJsPathResult from './IExecJsPathResult';
 import { IElementRect, IJsPath, INodePointer } from '@ulixee/js-path';
+import IExecJsPathResult from './IExecJsPathResult';
 
-import IPoint from '../browser/IPoint';
+import IPoint from "./IPoint";
 
 const getNodePointerFnName = '__getNodePointer__';
 const getClientRectFnName = '__getClientRect__';

@@ -35,6 +35,7 @@ export class TestServer {
   public get emptyPage() {
     return this.url('empty.html');
   }
+
   public port: number;
 
   private readonly server: http.Server | https.Server;

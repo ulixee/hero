@@ -9,6 +9,8 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IBrowserHooks, IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import * as os from 'os';
+import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
+import * as Path from 'path';
 import { Connection } from './Connection';
 import BrowserContext, { IBrowserContextCreateOptions } from './BrowserContext';
 import DevtoolsSession from './DevtoolsSession';
@@ -18,9 +20,7 @@ import env from '../env';
 import DevtoolsPreferences from './DevtoolsPreferences';
 import Page, { IPageCreateOptions } from './Page';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
-import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
 import ChromeEngine from './ChromeEngine';
-import * as Path from 'path';
 import GetVersionResponse = Protocol.Browser.GetVersionResponse;
 import TargetInfo = Protocol.Target.TargetInfo;
 
@@ -164,11 +164,11 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     } catch (err) {
       await this.process.close();
 
-      let launchError: BrowserLaunchError;
       // give it a second to read errors
       const processError = await this.process.isProcessFunctionalPromise.catch(error => error);
 
       let message = 'Failed to launch Chrome!';
+      // eslint-disable-next-line no-ex-assign
       if (err.code === 'EPIPE' && processError) err = processError;
       if (err.code !== 'EPIPE') {
         message += ` ${err.message}`;
@@ -176,10 +176,10 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
 
       if (this.process.launchStderr.length) {
         message +=
-          `\n\n\nSometimes a reason can be found in the Chrome Stderr logs:\n\t` +
-          this.process.launchStderr.join('\n\t');
+          `\n\n\nSometimes a reason can be found in the Chrome Stderr logs:\n\t${ 
+          this.process.launchStderr.join('\n\t')}`;
       }
-      launchError = new BrowserLaunchError(message, err.stack.split(/\r?\n/).slice(1).join('\n'));
+      const launchError = new BrowserLaunchError(message, err.stack.split(/\r?\n/).slice(1).join('\n'));
 
       this.launchPromise.reject(launchError);
       log.stats('Browser.LaunchError', {

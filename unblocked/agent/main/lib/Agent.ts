@@ -1,26 +1,25 @@
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import '@ulixee/commons/lib/SourceMapSupport';
 import { RequestSession } from '@ulixee/unblocked-agent-mitm';
-import Log from '@ulixee/commons/lib/Logger';
 import MitmProxy from '@ulixee/unblocked-agent-mitm/lib/MitmProxy';
-import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import { nanoid } from 'nanoid';
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
-import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IEmulationProfile, {
   IEmulationOptions,
 } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
-import Plugins from './Plugins';
-import ICommandMarker from '../interfaces/ICommandMarker';
-import Page from './Page';
-import Browser from './Browser';
-import Pool from './Pool';
-import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
+import { nanoid } from 'nanoid';
 import env from '../env';
+import ICommandMarker from '../interfaces/ICommandMarker';
+import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
+import Browser from './Browser';
 import BrowserContext from './BrowserContext';
+import Page from './Page';
+import Plugins from './Plugins';
+import Pool from './Pool';
 
 const { log } = Log(module);
 

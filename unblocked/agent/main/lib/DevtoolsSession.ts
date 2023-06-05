@@ -26,11 +26,11 @@ import IDevtoolsSession, {
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
 } from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
+import Log from '@ulixee/commons/lib/Logger';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import ProtocolError from '../errors/ProtocolError';
 import { Connection } from './Connection';
-import Log from '@ulixee/commons/lib/Logger';
 import RemoteObject = Protocol.Runtime.RemoteObject;
-import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 
 const { log } = Log(module);
 /**

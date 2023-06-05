@@ -3,9 +3,9 @@ import * as http from 'http';
 import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { ITestHttpServer } from '@ulixee/unblocked-agent-testing/helpers';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
-import { Pool } from '../index';
 import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { Pool } from '../index';
 
 let httpServer: ITestHttpServer<http.Server>;
 
@@ -78,7 +78,7 @@ describe('Pool tests', () => {
 
     await page.close();
 
-    expect(allPagesClosed).toBeCalledTimes(1);
+    expect(allPagesClosed).toHaveBeenCalledTimes(1);
     await pool.close();
   });
 
@@ -106,10 +106,10 @@ describe('Pool tests', () => {
 
     await page.close();
 
-    expect(browserWindowsClosed).toBeCalledTimes(0);
+    expect(browserWindowsClosed).toHaveBeenCalledTimes(0);
     await page2.close();
     await didCallPromise.promise;
-    expect(browserWindowsClosed).toBeCalledTimes(1);
+    expect(browserWindowsClosed).toHaveBeenCalledTimes(1);
     await pool.close();
   });
 
@@ -132,7 +132,7 @@ describe('Pool tests', () => {
     expect(browsers.size).toBe(1);
 
     const browser1 = [...browsers.values()][0];
-    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+    expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(0);
 
     const browserEngine: IBrowserEngine = {
       ...browser1.engine,
@@ -142,15 +142,15 @@ describe('Pool tests', () => {
     const browser2 = await pool.getBrowser(browserEngine, {});
 
     expect(browsers.size).toBe(2);
-    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+    expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(0);
 
     await page.close();
     await browser1.close();
-    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+    expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(0);
 
     await browser2.close();
     await allBrowsersTriggered.promise;
-    expect(allBrowsersClosedEvent).toBeCalledTimes(1);
+    expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(1);
     await pool.close();
   });
 

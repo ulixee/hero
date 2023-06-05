@@ -5,13 +5,13 @@ import * as net from 'net';
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { getProxyAgent, runHttpsServer } from '@ulixee/unblocked-agent-testing/helpers';
 import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
+import WebSocket = require('ws');
+import HttpProxyAgent = require('http-proxy-agent');
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import { MitmProxy } from '../index';
-import WebSocket = require('ws');
-import HttpProxyAgent = require('http-proxy-agent');
 
 const mocks = {
   HeadersHandler: {
