@@ -39,7 +39,7 @@ describe('Frames', () => {
     let count = 0;
     // @ts-expect-error
     const contexts = contextPage.framesManager.activeContextIdsBySessionId.values();
-    for (const _ of contexts) count += context.size;
+    for (const ctx of contexts) count += ctx.size;
     return count;
   }
 
