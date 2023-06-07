@@ -451,6 +451,7 @@ export default class Session
     });
 
     const closedEvent = { waitForPromise: null };
+    this.db.isClosing = true;
     this.emit('closed', closedEvent);
     await closedEvent.waitForPromise;
 

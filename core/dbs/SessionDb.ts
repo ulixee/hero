@@ -75,6 +75,7 @@ export default class SessionDb {
   public readonly tabs: TabsTable;
   public readonly output: OutputTable;
   public readonly sessionId: string;
+  public isClosing = false;
 
   public keepAlive = false;
 

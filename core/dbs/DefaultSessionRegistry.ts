@@ -35,7 +35,7 @@ export default class DefaultSessionRegistry implements ISessionRegistry {
   // eslint-disable-next-line @typescript-eslint/require-await
   public async get(sessionId: string, customPath?: string): Promise<SessionDb> {
     if (sessionId.endsWith('.db')) sessionId = sessionId.slice(0, -3);
-    if (!this.byId[sessionId]?.isOpen) {
+    if (!this.byId[sessionId]?.isOpen || this.byId[sessionId]?.isClosing) {
       const dbPath = this.resolvePath(sessionId, customPath);
       this.byId[sessionId] = new SessionDb(sessionId, dbPath, {
         readonly: true,
@@ -47,12 +47,12 @@ export default class DefaultSessionRegistry implements ISessionRegistry {
 
   public async onClosed(sessionId: string, isDeleteRequested: boolean): Promise<void> {
     const entry = this.byId[sessionId];
+    delete this.byId[sessionId];
     if (entry && isDeleteRequested) {
       try {
         await Fs.promises.rm(entry.path);
       } catch {}
     }
-    delete this.byId[sessionId];
   }
 
   public shutdown(): Promise<void> {

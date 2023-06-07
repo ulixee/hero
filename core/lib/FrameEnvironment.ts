@@ -501,7 +501,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async onShadowDomPushed(payload: string): Promise<void> {
-    await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, true);
+    try {
+      await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, true);
+    } catch {}
   }
 
   public onPageRecorderEvents(results: PageRecorderResultSet): boolean {
