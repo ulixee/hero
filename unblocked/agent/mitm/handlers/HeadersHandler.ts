@@ -71,7 +71,7 @@ export default class HeadersHandler {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
     }
 
-    if (!ctx.resourceType || ctx.resourceType === 'Fetch') {
+    if (!ctx.resourceType || ctx.resourceType === 'Fetch' || HeadersHandler.isWorkerDest(ctx, 'shared')) {
       // if fetch, we need to wait for the browser request so we can see if we should use xhr order or fetch order
       await ctx.browserHasRequested;
     }

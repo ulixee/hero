@@ -8,8 +8,6 @@ export default function setWorkerDomOverrides(
   worker: IWorker,
 ): Promise<any[]> {
   const script = domOverrides.build('worker', [
-    'Error.captureStackTrace',
-    'Error.constructor',
     'console.debug',
     'navigator.deviceMemory',
     'navigator.hardwareConcurrency',

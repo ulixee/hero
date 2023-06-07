@@ -5,6 +5,7 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
+import * as Path from 'path';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -319,31 +320,58 @@ test('cannot detect a proxy of args passed into a proxied function', async () =>
   expect(result.result).toBe('Intel Inc.');
 });
 
-test('should get the correct platform from a nested srcdoc iframe', async () => {
+test('should get the correct platform from a nested cross-domain srcdoc iframe', async () => {
+  koaServer.get('/nested-platform', ctx => {
+    ctx.body = `<html><body><h1>hi</h1>
+<iframe src='http://127.0.0.1:${koaServer.baseHost.split(':').pop()}/platform-iframe'></iframe>
+</body></html>`;
+  });
+  koaServer.get('/platform-iframe', ctx => {
+    ctx.body = `<html><head><script async src='./platform.js' type='text/javascript'></script></head></html>`;
+  });
+  koaServer.get('/platform.js', async ctx => {
+    ctx.set('content-type', 'application/javascript');
+    ctx.body = `let iframe = document.createElement("iframe");
+    iframe.srcdoc = "/**/";
+    iframe.setAttribute("style", "display: none;");
+    document.head.appendChild(iframe);
+    
+    const nav = iframe.contentWindow.navigator;
+    document.head.removeChild(iframe);
+    iframe = null;
+    
+    fetch('/js-result', {
+      method: 'POST',
+      body: JSON.stringify( { win: window.navigator.platform, iframe: nav.platform }),
+    })`;
+  });
+
+  const result = new Promise<{ win: string; iframe: string }>(resolve => {
+    koaServer.post('/js-result', async ctx => {
+      const body = (await Helpers.readableToBuffer(ctx.req)).toString();
+      ctx.body = 'ok';
+      const data = JSON.parse(body);
+      resolve(data);
+    });
+  });
+
   const agent = pool.createAgent({
     logger,
+    customEmulatorConfig: { userAgentSelector: `~ win & chrome = 112` },
   });
+  agent.hook({
+    onNewBrowser(b) {
+      b.engine.launchArguments.push('--site-per-process', '--host-rules=MAP * 127.0.0.1');
+    },
+  });
+
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
+  await page.goto(`${koaServer.baseUrl}/nested-platform`);
   await page.waitForLoad('DomContentLoaded');
-  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain(
-    '<h1>Example Domain</h1>',
-  );
-  const result = await page.evaluate<{ win: string; iframe: string }>(`(async () => {
-  var iframe = document.createElement("iframe");
-  iframe.srcdoc = "/**/";
-  iframe.setAttribute("style", "display: none;");
-  document.head.appendChild(iframe);
-  
-  const navigator = iframe.contentWindow.navigator;
-  document.head.removeChild(iframe);
-  
-  return { win :window.navigator.platform, iframe: navigator.platform };
- })()`);
 
-  expect(result.iframe).toBe(result.win);
+  const { win, iframe } = await result;
+  expect(win).toBe(iframe);
 });
 
 test('should get the correct webgl vendor from a nested srcdoc iframe', async () => {
@@ -852,7 +880,7 @@ describe('Proxy detections', () => {
 it('should emulate in a shared worker', async () => {
   const hasAllResults = new Resolvable<void>();
   const jsonResults: string[] = [];
-  let postResolvable = new Resolvable<void>();
+  const iterations = 1;
   const httpsServer = await Helpers.runHttpsServer(async (req, res) => {
     res.setHeader('access-control-allow-origin', '*');
     if (req.url === '/test.html') {
@@ -885,6 +913,105 @@ it('should emulate in a shared worker', async () => {
         }
   
         const checks = [];
+        for (let index = 0; index < 5; index++) {
+          checks.push(check());
+        }
+        await Promise.all(checks)
+        
+       await fetch('/worker-result', {
+          method: 'POST',
+          body: JSON.stringify(results),
+        });
+     })();
+		</script>
+</body></html>`);
+    } else if (req.url.includes('worker-result')) {
+      const result = await Helpers.readableToBuffer(req);
+      jsonResults.push(result.toString());
+      if (jsonResults.length === iterations) {
+        hasAllResults.resolve();
+      }
+
+      res.end('');
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const body = Fs.readFileSync(`${__dirname}/assets/worker2.js`);
+      res.setHeader('etag', 'W/"69-18719828fba"');
+      res.setHeader('content-type', 'application/javascript; charset=utf-8');
+      res.end(body);
+    }
+  });
+
+  await Promise.allSettled(
+    Array(iterations)
+      .fill(0)
+      .map(async () => {
+        const agent = pool.createAgent({ logger });
+        Helpers.needsClosing.push(agent);
+        const page = await agent.newPage();
+        await page.goto(`${httpsServer.baseUrl}/test.html`);
+      }),
+  );
+
+  await hasAllResults;
+  const results = jsonResults.map(x => JSON.parse(x));
+  expect(results).toHaveLength(iterations);
+
+  const resultWithUnmasked: any[] = [];
+
+  for (const result of results) {
+    const hardware = new Set(result.map(x => x.hardwareConcurrency));
+    const ua = new Set(result.map(x => x.userAgent));
+    if (ua.size > 1 || hardware.size > 1)
+      resultWithUnmasked.push({ hardware: [...hardware], ua: [...ua] });
+  }
+  expect(resultWithUnmasked).toHaveLength(0);
+});
+
+it('should emulate in a blob shared worker', async () => {
+  const hasAllResults = new Resolvable<void>();
+  const jsonResults: string[] = [];
+  const iterations = 2;
+
+  const httpsServer = await Helpers.runHttpsServer(async (req, res) => {
+    res.setHeader('access-control-allow-origin', '*');
+    if (req.url === '/test.html') {
+      res.end(`<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<script>
+      const { hardwareConcurrency, userAgent, deviceMemory } = navigator;
+		  const results = [{ hardwareConcurrency, userAgent, deviceMemory }];
+      
+      (async () => {
+        async function check() {
+          const { port } = new SharedWorker(URL.createObjectURL(new Blob([
+            "const { hardwareConcurrency, userAgent, deviceMemory } = navigator;",
+            "onconnect = e => {",
+            "  const port = e.ports[0];",
+            "  port.postMessage({ hardwareConcurrency, userAgent, deviceMemory });",
+            "  port.close();",
+            "};"
+         ], { type: 'application/javascript' })));
+  
+          port.start();
+  
+          await new Promise(resolve => {
+            port.addEventListener("message", e => {
+              port.close();
+              results.push(e.data);
+              resolve();
+            });
+          })
+        }
+  
+        const checks = [];
         for (let index = 0; index < 20; index++) {
           checks.push(check());
         }
@@ -899,36 +1026,33 @@ it('should emulate in a shared worker', async () => {
 </body></html>`);
     } else if (req.url.includes('worker-result')) {
       const result = await Helpers.readableToBuffer(req);
-      postResolvable.resolve();
       jsonResults.push(result.toString());
-      if (jsonResults.length === 10) {
+      if (jsonResults.length === iterations) {
         hasAllResults.resolve();
       }
 
       res.end('');
-    } else {
-      await new Promise(resolve => setTimeout(resolve, 50));
-      const body = Fs.readFileSync(`${__dirname}/assets/worker2.js`);
-      res.setHeader('etag', 'W/"69-18719828fba"');
-      res.setHeader('content-type', 'application/javascript; charset=utf-8');
-      res.end(body);
     }
   });
-  const agent = pool.createAgent({ logger });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  for (let i = 0; i < 10; i += 1) {
-    postResolvable = new Resolvable<void>();
+
+  for (let i = 0; i < iterations; i += 1) {
+    const agent = pool.createAgent({ logger });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
     await page.goto(`${httpsServer.baseUrl}/test.html`);
-    await postResolvable;
   }
 
   await hasAllResults;
   const results = jsonResults.map(x => JSON.parse(x));
-  expect(results).toHaveLength(10);
+  expect(results).toHaveLength(iterations);
+
+  const resultWithUnmasked: any[] = [];
 
   for (const result of results) {
-    expect([...new Set(result.map(x => x.hardwareConcurrency))]).toHaveLength(1);
-    expect([...new Set(result.map(x => x.userAgent))]).toHaveLength(1);
+    const hardware = new Set(result.map(x => x.hardwareConcurrency));
+    const ua = new Set(result.map(x => x.userAgent));
+    if (ua.size > 1 || hardware.size > 1)
+      resultWithUnmasked.push({ hardware: [...hardware], ua: [...ua] });
   }
+  expect(resultWithUnmasked).toHaveLength(0);
 });

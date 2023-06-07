@@ -225,6 +225,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
       params: event.params,
       result: event.result,
       error: event.error,
+      devtoolsSessionId: event.sessionId,
     });
   }
 }

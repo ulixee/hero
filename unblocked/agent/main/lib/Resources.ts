@@ -74,6 +74,16 @@ export default class Resources
     this.events.on(requestSession, 'response', this.onMitmResponse.bind(this));
     this.events.on(requestSession, 'http-error', this.onMitmError.bind(this));
     requestSession.browserRequestMatcher = this;
+    requestSession.hooks.push({
+      beforeHttpResponse: this.beforeHttpResponse.bind(this),
+    });
+  }
+
+  public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
+    if (HeadersHandler.isWorkerDest(resource, 'shared')) {
+      const worker = this.browserContext.workersById.get(resource.browserRequestId);
+      await worker.isInitializationSent;
+    }
   }
 
   public setNavigationConnectTimeoutMs(url: string, timeoutMs: number): void {
@@ -280,9 +290,7 @@ export default class Resources
     pendingBrowserRequest.mitmResourceId = mitmResource.id;
     pendingBrowserRequest.isHttp2Push = mitmResource.isHttp2Push;
 
-    // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
     if (
-      HeadersHandler.isWorkerDest(mitmResource, 'shared', 'service') ||
       mitmResource.resourceType === 'Websocket' ||
       // if navigate and empty, this is likely a download - it won't trigger in chrome
       (HeadersHandler.getRequestHeader(mitmResource, 'sec-fetch-mode') === 'navigate' &&

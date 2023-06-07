@@ -31,7 +31,7 @@ describe('user agent and platform', () => {
     `userAgentData.mobile`,
     `userAgentData.platform`,
     `userAgentData.brands`,
-    'connection.rtt'
+    'connection.rtt',
   ];
 
   it('should be able to configure a userAgent', async () => {
@@ -85,7 +85,7 @@ describe('user agent and platform', () => {
 
     const requestUserAgentStrings: string[] = [];
 
-    koaServer.get('/agent-test', (ctx) => {
+    koaServer.get('/agent-test', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html lang="en">
 <h1>Agent Test</h1>
@@ -93,12 +93,12 @@ describe('user agent and platform', () => {
 </html>`;
     });
 
-    koaServer.get('/frame', (ctx) => {
+    koaServer.get('/frame', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html><body>
 <script>
   const data = {
-    ${propsToGet.map((x) => `'${x}': navigator.${x}`).join(',\n')}
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
   };
   
   navigator.userAgentData.getHighEntropyValues(['platformVersion', 'architecture', 'bitness', 'model', 'uaFullVersion'])
@@ -113,8 +113,8 @@ describe('user agent and platform', () => {
 </body></html>`;
     });
 
-    const frameXhr = new Promise<object>((resolve) => {
-      koaServer.post('/frame-xhr', async (ctx) => {
+    const frameXhr = new Promise<object>(resolve => {
+      koaServer.post('/frame-xhr', async ctx => {
         requestUserAgentStrings.push(ctx.get('user-agent'));
         const body = JSON.parse((await Helpers.readableToBuffer(ctx.req)).toString());
         resolve(body);
@@ -166,7 +166,7 @@ describe('user agent and platform', () => {
           `<html lang="en">
 <script>
   var startPageVars = {
-    ${propsToGet.map((x) => `'${x}': navigator.${x}`).join(',\n')}
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
   };
 </script>
 <body><a href="${koaServer.baseUrl}/page2">link</a></body></html>`,
@@ -176,12 +176,12 @@ describe('user agent and platform', () => {
       }
     });
 
-    koaServer.get('/page1', (ctx) => {
+    koaServer.get('/page1', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html lang="en"><body><a href="${httpsServer.baseUrl}/s2-page1">link</a></body></html>`;
     });
 
-    koaServer.get('/page2', (ctx) => {
+    koaServer.get('/page2', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html lang="en"><body><h1>Last Page</h1></body></html>`;
     });
@@ -241,21 +241,36 @@ describe('user agent and platform', () => {
     const agentMeta = await agent.emulationProfile.userAgentOption;
 
     const requestUserAgentStrings: string[] = [];
-
-    koaServer.get('/workers-test', (ctx) => {
+    koaServer.get('/workers-test', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html lang="en">
-<script>new Worker("worker.js").postMessage('');</script>
+<script>
+new Worker("worker.js").postMessage('');
+
+const blob = new Blob([${`onmessage = () => {
+  const data = {
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
+  };
+  fetch('http://${koaServer.baseHost}/worker-blob-xhr', {
+   method: 'POST',
+   body: JSON.stringify(data)
+  });
+}`
+        .split('\n')
+        .map(x => `"${x}"`)
+        .join('\n,')}], { type: 'application/javascript' });
+const blobUrl = URL.createObjectURL(blob);
+new Worker(blobUrl).postMessage('');
+</script>
 </html>`;
     });
 
-    koaServer.get('/worker.js', (ctx) => {
+    koaServer.get('/worker.js', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.set('content-type', 'application/javascript');
       ctx.body = `onmessage = () => {
-
   const data = {
-    ${propsToGet.map((x) => `'${x}': navigator.${x}`).join(',\n')}
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
   };
   fetch('/worker-xhr', {
    method: 'POST',
@@ -264,8 +279,16 @@ describe('user agent and platform', () => {
 }`;
     });
 
-    const xhr = new Promise<object>((resolve) => {
-      koaServer.post('/worker-xhr', async (ctx) => {
+    const xhr = new Promise<object>(resolve => {
+      koaServer.post('/worker-xhr', async ctx => {
+        requestUserAgentStrings.push(ctx.get('user-agent'));
+        const body = JSON.parse((await Helpers.readableToBuffer(ctx.req)).toString());
+        resolve(body);
+        ctx.body = 'Ok';
+      });
+    });
+    const blobXhr = new Promise<object>(resolve => {
+      koaServer.post('/worker-blob-xhr', async ctx => {
         requestUserAgentStrings.push(ctx.get('user-agent'));
         const body = JSON.parse((await Helpers.readableToBuffer(ctx.req)).toString());
         resolve(body);
@@ -276,6 +299,7 @@ describe('user agent and platform', () => {
     const page = await agent.newPage();
     await page.goto(`${koaServer.baseUrl}/workers-test`);
     const params = await xhr;
+    const blobParams = await blobXhr;
 
     for (const useragent of requestUserAgentStrings) {
       expect(useragent).toBe(agentMeta.string);
@@ -284,7 +308,9 @@ describe('user agent and platform', () => {
     for (const prop of propsToGet) {
       const windowValue = await page.evaluate(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
+      expect(blobParams[prop]).toStrictEqual(windowValue);
       expect(`${prop}=${params[prop]}`).toStrictEqual(`${prop}=${windowValue}`);
+      expect(`${prop}=${blobParams[prop]}`).toStrictEqual(`${prop}=${windowValue}`);
     }
   });
 
@@ -296,7 +322,7 @@ describe('user agent and platform', () => {
 
     const requestUserAgentStrings: string[] = [];
 
-    koaServer.get('/sw-test', (ctx) => {
+    koaServer.get('/sw-test', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.body = `<html lang="en">
 <h1>Service Worker Test</h1>
@@ -317,7 +343,7 @@ describe('user agent and platform', () => {
 </html>`;
     });
 
-    koaServer.get('/service-worker.js', (ctx) => {
+    koaServer.get('/service-worker.js', ctx => {
       requestUserAgentStrings.push(ctx.get('user-agent'));
       ctx.set('content-type', 'application/javascript');
       ctx.body = `
@@ -336,7 +362,7 @@ self.addEventListener('message', async event => {
   const clients = await self.clients.matchAll();
 
   const result = {
-    ${propsToGet.map((x) => `'${x}': navigator.${x}`).join(',\n')}
+    ${propsToGet.map(x => `'${x}': navigator.${x}`).join(',\n')}
   };
   const data = JSON.stringify(result);
 
@@ -344,8 +370,8 @@ self.addEventListener('message', async event => {
 });`;
     });
 
-    const xhr = new Promise<object>((resolve) => {
-      koaServer.post('/service-xhr', async (ctx) => {
+    const xhr = new Promise<object>(resolve => {
+      koaServer.post('/service-xhr', async ctx => {
         requestUserAgentStrings.push(ctx.get('user-agent'));
         const body = JSON.parse((await Helpers.readableToBuffer(ctx.req)).toString());
         resolve(body);
@@ -386,7 +412,7 @@ self.addEventListener('message', async event => {
         jsonResult.resolve(result.toString());
         res.end('');
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 50));
         const body = Fs.readFileSync(`${__dirname}/assets/worker.js`);
         res.setHeader('etag', 'W/"602f25aa-573c"');
         res.setHeader('content-type', 'application/javascript; charset=utf-8');

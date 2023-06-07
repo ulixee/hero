@@ -32,7 +32,7 @@ export function configureBrowserLaunchArgs(
      *  AvoidUnnecessaryBeforeUnloadCheckSync = allow about:blank nav
      *  MediaRouter,DialMediaRouteProvider (don't lookup local area casting options)
      */
-    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,AvoidUnnecessaryBeforeUnloadCheckSync,OutOfBlinkCors,GlobalMediaControls,MediaRouter,DialMediaRouteProvider',
+    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,AvoidUnnecessaryBeforeUnloadCheckSync,OutOfBlinkCors,GlobalMediaControls,MediaRouter,DialMediaRouteProvider,OptimizationHints',
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.

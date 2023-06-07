@@ -15,7 +15,7 @@ export default async function setPageDomOverrides(
     promises.push(pageOrFrame.addPageCallback(name, fn, false, devtoolsSession));
   }
   // overrides happen in main frame
-  promises.push(pageOrFrame.addNewDocumentScript(script.script, false));
+  promises.push(pageOrFrame.addNewDocumentScript(script.script, false, devtoolsSession));
 
   await Promise.all(promises);
 }

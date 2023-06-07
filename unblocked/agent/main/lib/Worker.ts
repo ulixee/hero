@@ -82,8 +82,14 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
         throw err;
       }),
       this.devtoolsSession.send('Runtime.enable'),
+      this.type === 'shared_worker'
+        ? this.devtoolsSession.send('Network.setCacheDisabled', { cacheDisabled: true })
+        : null,
       this.initializeEmulation(hooks as IBrowserContextHooks),
-      this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
+      // service worker will lock up without this!
+      this.type === 'service_worker'
+        ? this.devtoolsSession.send('Runtime.runIfWaitingForDebugger')
+        : null,
     ]);
 
     setImmediate(() => this.initializationSent.resolve());
@@ -122,7 +128,9 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   }
 
   private initializeEmulation(hooks: IBrowserContextHooks): Promise<any> {
-    if (!hooks.onNewWorker) return;
+    if (!hooks.onNewWorker) {
+      return this.devtoolsSession.send('Runtime.runIfWaitingForDebugger');
+    }
 
     return Promise.all([
       hooks.onNewWorker(this),
