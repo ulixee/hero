@@ -13,7 +13,10 @@ export default class WindowFraming {
     this.browserId = config.browserId;
 
     for (const userAgentId of userAgentIds) {
-      const profile = BrowserProfiler.getProfile<IDomProfile>('browser-dom-environment', userAgentId);
+      const profile = BrowserProfiler.getProfile<IDomProfile>(
+        'browser-dom-environment',
+        userAgentId,
+      );
       const { operatingSystemId } = BrowserProfiler.extractMetaFromUserAgentId(userAgentId);
       const window = (profile.data as any).https.window;
       const screenGapTop = Number(window.screen.availTop._$value);
@@ -32,6 +35,8 @@ export default class WindowFraming {
         screenGapBottom,
         frameBorderWidth,
         frameBorderHeight,
+        devicePixelRatio: window.devicePixelRatio,
+        colorDepth: window.screen.colorDepth,
       };
 
       const minimumFraming = this.data || { ...framing };
@@ -81,4 +86,6 @@ interface IWindowFraming {
   screenGapBottom: number;
   frameBorderWidth: number;
   frameBorderHeight: number;
+  devicePixelRatio: number;
+  colorDepth: number;
 }

@@ -100,4 +100,6 @@ export interface IDataWindowFraming {
   screenGapBottom: number;
   frameBorderWidth: number;
   frameBorderHeight: number;
+  colorDepth?: number;
+  devicePixelRatio?: number;
 }
