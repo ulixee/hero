@@ -3497,5 +3497,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-114-0": {
+    "id": "edge-114-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "114",
+      "minor": "0",
+      "build": "1823",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
