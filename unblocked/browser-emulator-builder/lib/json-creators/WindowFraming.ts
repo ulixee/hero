@@ -35,8 +35,8 @@ export default class WindowFraming {
         screenGapBottom,
         frameBorderWidth,
         frameBorderHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        colorDepth: window.screen.colorDepth,
+        devicePixelRatio: window.devicePixelRatio._$value,
+        colorDepth: window.screen.colorDepth._$value,
       };
 
       const minimumFraming = this.data || { ...framing };
