@@ -1,7 +1,7 @@
 {
   "mac-os-13--chrome-114-0": {
     "id": "mac-os-13--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -2063,7 +2063,7 @@
   },
   "mac-os-12--chrome-114-0": {
     "id": "mac-os-12--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -5459,7 +5459,7 @@
   },
   "mac-os-11--chrome-114-0": {
     "id": "mac-os-11--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -9191,7 +9191,7 @@
   },
   "mac-os-10-15--chrome-114-0": {
     "id": "mac-os-10-15--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -12571,7 +12571,7 @@
   },
   "mac-os-10-14--chrome-114-0": {
     "id": "mac-os-10-14--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -16136,7 +16136,7 @@
   },
   "mac-os-10-13--chrome-114-0": {
     "id": "mac-os-10-13--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [106, 90],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
@@ -32842,7 +32842,7 @@
   },
   "windows-11--chrome-114-0": {
     "id": "windows-11--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [110, 91],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": ["13.0.0", "14.0.0"],
@@ -35544,7 +35544,7 @@
   },
   "windows-10--chrome-114-0": {
     "id": "windows-10--chrome-114-0",
-    "allPatchVersions": [126, 125, 124, 123, 122, 121, 120, 119, 118, 117],
+    "allPatchVersions": [127, 126, 125, 124, 123, 122, 121, 120, 119, 118],
     "stablePatchVersions": [110, 91],
     "browserBaseVersion": [114, 0, 5735, null],
     "uaClientHintsPlatformVersions": [
