@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **browser-emulator:** fix color depth export ([bc2c76d](https://github.com/ulixee/unblocked/commit/bc2c76dd37e167feb293c4693fa97ba0b75f181e))
+
+
+### Features
+
+* **plugins:** include default color depth ([166d3b4](https://github.com/ulixee/unblocked/commit/166d3b4e1db94c2665324c524dfc6390cd0e64ba))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/unblocked-browser-emulator-builder

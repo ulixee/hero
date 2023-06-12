@@ -13,7 +13,7 @@
     "prod": "cd build && yarn workspace @double-agent/collect-controller prod"
   },
   "devDependencies": {
-    "@ulixee/repo-tools": "^1.0.25",
+    "@ulixee/repo-tools": "^1.0.26",
     "typescript": "^5.0.4"
   },
   "workspaces": {

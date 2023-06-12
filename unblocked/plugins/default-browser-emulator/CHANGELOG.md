@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **emulator:** require debug ext for webgl params ([ed5e43f](https://github.com/ulixee/unblocked/commit/ed5e43fd0ec7b200090d34ecf1856ade95b17e59))
+* **plugins:** failing test ([b0574e4](https://github.com/ulixee/unblocked/commit/b0574e4bf6c2f17db8fe72475c06da065d493234))
+* rollback nanoid upgrade. broke requirejs ([50c2000](https://github.com/ulixee/unblocked/commit/50c2000cd7785ca54e1845412e211716d9dbaf4e))
+
+
+### Features
+
+* **plugins:** include default color depth ([166d3b4](https://github.com/ulixee/unblocked/commit/166d3b4e1db94c2665324c524dfc6390cd0e64ba))
+* test for console.debug ([3f140b8](https://github.com/ulixee/unblocked/commit/3f140b82c54a13fd2f3faaf687932b7b28e53066))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 

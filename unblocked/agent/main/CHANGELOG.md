@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **agent:** handle oopif execution contexts ([9640a06](https://github.com/ulixee/unblocked/commit/9640a06523a43a74799d9231425d4007a76cdfbc))
+* build issue ([096610b](https://github.com/ulixee/unblocked/commit/096610b8b285ba2b12506caa95fcc6d72d4db3d6))
+* rollback nanoid upgrade. broke requirejs ([50c2000](https://github.com/ulixee/unblocked/commit/50c2000cd7785ca54e1845412e211716d9dbaf4e))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 

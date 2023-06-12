@@ -1,15 +1,14 @@
 {
   "name": "@double-agent/collect-controller",
-  "version": "2.0.0-alpha.21",
+  "version": "2.0.0-alpha.22",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.21",
-    "@double-agent/config": "2.0.0-alpha.21",
-    "@ulixee/commons": "2.0.0-alpha.21",
-    "@ulixee/real-user-agents": "2.0.0-alpha.21",
-    "tar": "^6.1.15",
+    "@double-agent/collect": "2.0.0-alpha.22",
+    "@double-agent/config": "2.0.0-alpha.22",
+    "@ulixee/commons": "2.0.0-alpha.22",
+    "@ulixee/real-user-agents": "2.0.0-alpha.22",
     "axios": "^0.21.1",
     "cookie": "^0.4.0",
     "diff": "^4.0.2",
@@ -18,14 +17,15 @@
     "p-queue": "^6.2.1",
     "path-to-regexp": "^6.1.0",
     "source-map-support": "^0.5.16",
+    "tar": "^6.1.15",
     "ws": "^7.4.6"
   },
   "devDependencies": {
     "@types/archiver": "^5.3.1",
     "@types/cookie": "^0.3.3",
     "@types/diff": "^4.0.2",
+    "@types/tar": "^6.1.5",
     "@types/uuid": "^7.0.2",
-    "@types/ws": "^7.2.2",
-    "@types/tar": "^6.1.5"
+    "@types/ws": "^7.2.2"
   }
 }
