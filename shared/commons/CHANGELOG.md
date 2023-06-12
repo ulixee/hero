@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/shared/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **commons:** change default settings to data dir ([c6d5a34](https://github.com/ulixee/shared/commit/c6d5a3412e6876448e17734013ee76222d4c4e43))
+* **commons:** don’t retranslate source maps ([7d7ddf3](https://github.com/ulixee/shared/commit/7d7ddf3584e7d6ca48a66530ad2c94e15b366ab7))
+* **commons:** handle relative source map content ([2fa4cbc](https://github.com/ulixee/shared/commit/2fa4cbc6304c7547f98d0d64c68d62c827ddc921))
+* **commons:** windows relative urls not working ([d575fce](https://github.com/ulixee/shared/commit/d575fcef6b9cf953f562811d1adc7f7e323c3993))
+* souce map tests ([675602b](https://github.com/ulixee/shared/commit/675602b9c24b04a002ecb1939cee08276288799e))
+
+
+### Features
+
+* **commons:** add priority to queue; lru cache ([f25caad](https://github.com/ulixee/shared/commit/f25caad300260aee6724f6daecc3dec110c28cce))
+* **commons:** add shutdown handlers to always run ([a6c6609](https://github.com/ulixee/shared/commit/a6c660964939cdbc65951f2857e13c4405256242))
+* **commons:** add timestamps to logging ([a953f70](https://github.com/ulixee/shared/commit/a953f70c8d37e7b41d0d885d65ab93a23d7830e0))
+* **commons:** buffer xor, toBigInt ([3d3c18a](https://github.com/ulixee/shared/commit/3d3c18af6cdb0dffa413b15c440a588b768f1ff2))
+* **commons:** sql inserts with named keys ([21b1ac8](https://github.com/ulixee/shared/commit/21b1ac86f4e071f00127c7277eb653cc1ec63553))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/shared/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/commons

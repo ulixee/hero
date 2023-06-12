@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/shared/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **commons:** handle relative source map content ([2fa4cbc](https://github.com/ulixee/shared/commit/2fa4cbc6304c7547f98d0d64c68d62c827ddc921))
+* **net:** clear out connection once connected ([6969a48](https://github.com/ulixee/shared/commit/6969a489eae0fdf5efe5d7784885062fde9aa94b))
+
+
+### Features
+
+* **net:** add core response time logging ([3d0d894](https://github.com/ulixee/shared/commit/3d0d8941addc132b4eba8dcdd8067c1d95e8437c))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/shared/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/net

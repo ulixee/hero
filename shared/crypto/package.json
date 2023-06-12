@@ -1,13 +1,13 @@
 {
   "name": "@ulixee/crypto",
-  "version": "2.0.0-alpha.21",
+  "version": "2.0.0-alpha.22",
   "description": "Common crypto tools for Ulixee",
   "license": "MIT",
   "bin": "./bin/cli.js",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.21",
-    "@ulixee/crypto": "2.0.0-alpha.21",
-    "@ulixee/specification": "2.0.0-alpha.21",
+    "@ulixee/commons": "2.0.0-alpha.22",
+    "@ulixee/crypto": "2.0.0-alpha.22",
+    "@ulixee/specification": "2.0.0-alpha.22",
     "bignumber.js": "^9.0.2",
     "commander": "^9.3.0"
   }

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/shared/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **commons:** change default settings to data dir ([c6d5a34](https://github.com/ulixee/shared/commit/c6d5a3412e6876448e17734013ee76222d4c4e43))
+* **commons:** handle relative source map content ([2fa4cbc](https://github.com/ulixee/shared/commit/2fa4cbc6304c7547f98d0d64c68d62c827ddc921))
+
+
+### Features
+
+* **commons:** add priority to queue; lru cache ([f25caad](https://github.com/ulixee/shared/commit/f25caad300260aee6724f6daecc3dec110c28cce))
+* **commons:** buffer xor, toBigInt ([3d3c18a](https://github.com/ulixee/shared/commit/3d3c18af6cdb0dffa413b15c440a588b768f1ff2))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/shared/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/crypto
