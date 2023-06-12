@@ -407,7 +407,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       context.name === '' && context.auxData.isDefault === true && type === 'default';
     const isIsolatedWorld = context.name === ISOLATED_WORLD && type === 'isolated';
     if (isDefault || isIsolatedWorld) {
-      frame?.addContextId(context.id, isDefault);
+      frame?.addContextId(context.id, isDefault, context.origin);
     }
   }
 
@@ -529,8 +529,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       this.mainFrameId = frame.id;
       this.recordFrame(devtoolsSession, frame, true);
     } else if (!this.framesById.has(frame.id)) {
-        this.recordFrame(devtoolsSession, frame, true);
-      }
+      this.recordFrame(devtoolsSession, frame, true);
+    }
 
     this.attachedFrameIds.add(frame.id);
 
@@ -548,7 +548,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     const { id, parentId } = newFrame;
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);
-      if (isFrameTreeRecurse) frame.onAttached(newFrame);
+      if (isFrameTreeRecurse || (frame.isOopif() && newFrame.url)) frame.onAttached(newFrame);
       this.domStorageTracker.track(frame.securityOrigin);
       return frame;
     }

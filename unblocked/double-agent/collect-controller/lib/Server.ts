@@ -1,17 +1,17 @@
-import * as url from 'url';
-import { createReadStream, createWriteStream, existsSync, promises as Fs, rmSync } from 'fs';
-import * as Path from 'path';
-import * as http from 'http';
-import { pathToRegexp } from 'path-to-regexp';
 import Collect from '@double-agent/collect';
 import Plugin from '@double-agent/collect/lib/Plugin';
 import IUserAgentToTest from '@double-agent/config/interfaces/IUserAgentToTest';
-import { createGzip } from 'zlib';
+import { createWriteStream, existsSync, promises as Fs, rmSync } from 'fs';
+import * as http from 'http';
+import * as Tar from 'tar';
+import * as Path from 'path';
+import { pathToRegexp } from 'path-to-regexp';
 import { PassThrough } from 'stream';
-import archiver = require('archiver');
+import * as url from 'url';
+import { createGzip } from 'zlib';
 import IAssignment, { AssignmentType } from '../interfaces/IAssignment';
-import buildAssignment from './buildAssignment';
 import buildAllAssignments from './buildAllAssignments';
+import buildAssignment from './buildAssignment';
 
 interface IRequestParams {
   userId: string;
@@ -384,15 +384,18 @@ function extractAssignmentProfilesDir(activeScraper: IActiveUser, assignment: IA
 }
 
 async function pipeDirToStream(dirPath: string, stream: any): Promise<void> {
-  const archive = archiver('zip', { gzip: true, zlib: { level: 9 } });
-  if (await existsAsync(dirPath)) {
-    const fileNames = await Fs.readdir(dirPath);
-    for (const fileName of fileNames) {
-      archive.append(createReadStream(`${dirPath}/${fileName}`), { name: fileName });
-    }
-  }
-  archive.pipe(stream);
-  const isFinished = new Promise<void>(resolve => archive.on('close', resolve));
-  await archive.finalize();
-  await isFinished;
+  await new Promise<void>(async (resolve, reject) => {
+    Tar.create(
+      {
+        gzip: true,
+        cwd: dirPath,
+        portable: true,
+        filter: path => !path.startsWith('.'),
+      },
+      await Fs.readdir(dirPath),
+    )
+      .pipe(stream)
+      .on('error', reject)
+      .on('finish', resolve);
+  });
 }

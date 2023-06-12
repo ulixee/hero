@@ -110,5 +110,12 @@ export default function loadDomOverrides(
     colorDepth: emulationProfile.viewport.colorDepth ?? frame.colorDepth,
   });
 
+  domOverrides.registerWorkerOverrides(
+    'console.debug',
+    'navigator.deviceMemory',
+    'navigator.hardwareConcurrency',
+    'navigator',
+    'WebGLRenderingContext.prototype.getParameter',
+  );
   return domOverrides;
 }

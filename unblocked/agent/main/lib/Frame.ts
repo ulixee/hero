@@ -172,6 +172,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     activeContextIds: Set<number>,
   ): Promise<void> {
     if (this.devtoolsSession === devtoolsSession) return;
+
     this.devtoolsSession = devtoolsSession;
     this.activeContextIds = activeContextIds;
     if (
@@ -183,6 +184,9 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     }
 
     this.outOfProcess = new FrameOutOfProcess(this.page, this);
+    if (!this.url) {
+      this.defaultLoaderId = this.activeLoaderId;
+    }
     await this.outOfProcess.initialize();
   }
 
@@ -325,6 +329,9 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   async waitForLoad(
     options?: IWaitForOptions & { loadStatus?: ILoadStatus },
   ): Promise<INavigation> {
+    if (this.isOopif() && !this.url) {
+      await new Promise(resolve => this.events.once(this, 'frame-navigated', resolve));
+    }
     return await this.navigationsObserver.waitForLoad(
       options?.loadStatus ?? LoadStatus.JavascriptReady,
       options,
@@ -720,11 +727,13 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     this.isolatedContextId = null;
   }
 
-  public addContextId(executionContextId: number, isDefault: boolean): void {
+  public addContextId(executionContextId: number, isDefault: boolean, origin: string): void {
     if (isDefault) {
       this.defaultContextId = executionContextId;
       this.defaultContextCreated?.resolve();
     } else {
+      // if an existing context is isolated, and this context has the full security origin, take the unrestricted one
+      if (!!this.getActiveContextId(true) && origin !== '') return;
       this.isolatedContextId = executionContextId;
     }
   }
@@ -813,7 +822,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       const { executionContextId } = isolatedWorld;
       if (!this.activeContextIds.has(executionContextId)) {
         this.activeContextIds.add(executionContextId);
-        this.addContextId(executionContextId, false);
+        this.addContextId(executionContextId, false, '');
         this.getFrameElementDevtoolsNodeId().catch(() => null);
       }
 

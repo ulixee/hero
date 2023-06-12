@@ -26,6 +26,7 @@ export async function startChromeAndLoadUrl(
     '--no-default-browser-check',
     '--no-first-run',
     '--use-mock-keychain',
+    '--disable-features=MediaRouter,DialMediaRouteProvider' // remove chrome window prompt
   ];
   if (headType === 'headless') {
     if (majorVersion >= 109) {

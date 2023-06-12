@@ -209,4 +209,4 @@ function handleCloneObject(target, thisArg, argArray) {
   }
 }
 proxyFunction(self, 'postMessage', handleCloneObject);
-proxyFunction(self, 'structuredClone', handleCloneObject);
+if ('structuredClone' in self) proxyFunction(self, 'structuredClone', handleCloneObject);

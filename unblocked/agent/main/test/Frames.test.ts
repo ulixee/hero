@@ -1,5 +1,6 @@
 import { browserEngineOptions } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
+import { inspect } from 'util';
 import { Browser, BrowserContext, Page } from '../index';
 import Agent from '../lib/Agent';
 import { attachFrame, setContent } from './_pageTestUtils';
@@ -22,6 +23,7 @@ describe('Frames', () => {
   afterEach(async () => {
     await page.close().catch(() => null);
     server.reset();
+    await Helpers.afterEach();
   });
 
   beforeEach(async () => {
@@ -33,6 +35,7 @@ describe('Frames', () => {
     await server.stop();
     await context.close().catch(() => null);
     await browser.close();
+    await Helpers.afterAll();
   });
 
   function getContexts(contextPage: Page): number {
@@ -484,6 +487,11 @@ describe('Frames', () => {
       const agent = new Agent({
         browserEngine: browser.engine,
         logger: TestLogger.forTest(module),
+      });
+      agent.hook({
+        onNewBrowser(b) {
+          b.engine.launchArguments.push('--site-per-process', '--host-rules=MAP * 127.0.0.1');
+        },
       });
       Helpers.needsClosing.push(agent);
       await agent.open();

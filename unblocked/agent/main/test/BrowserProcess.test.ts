@@ -4,6 +4,7 @@ import { Browser } from '../index';
 import BrowserLaunchError from '../errors/BrowserLaunchError';
 
 afterEach(Helpers.afterEach);
+afterAll(Helpers.afterAll);
 beforeEach(async () => {
   TestLogger.testNumber += 1;
 });

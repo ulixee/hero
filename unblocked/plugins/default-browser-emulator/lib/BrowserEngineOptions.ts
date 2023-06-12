@@ -1,6 +1,6 @@
-import { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
-import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
 import ChromeApp from '@ulixee/chrome-app';
+import IBrowserEngineOption from '@ulixee/unblocked-specification/agent/browser/IBrowserEngineOption';
+import { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
 import DataLoader from './DataLoader';
 
 type IBrowserEngineOptionAndVersion = IBrowserEngineOption & { version: IVersion };

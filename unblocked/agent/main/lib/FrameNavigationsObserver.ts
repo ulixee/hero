@@ -36,7 +36,7 @@ export default class FrameNavigationsObserver {
 
   constructor(navigations: FrameNavigations) {
     this.navigations = navigations;
-    this.logger = navigations.logger.createChild(module);
+    this.logger = navigations.logger.createChild(module, { frameId: navigations.frame.frameId });
     navigations.on('status-change', this.onLoadStatusChange.bind(this));
   }
 
@@ -70,7 +70,9 @@ export default class FrameNavigationsObserver {
     assert(LoadStatus[status], `Invalid load status: ${status}`);
     if (!this.navigations.top && this.navigations.frame.isDefaultUrl) {
       await this.navigations.frame.waitForDefaultLoader();
-      if (status === LoadStatus.JavascriptReady) return;
+      if (status === LoadStatus.JavascriptReady) {
+        return;
+      }
     }
 
     if (!options?.doNotIncrementMarker) {
@@ -79,7 +81,14 @@ export default class FrameNavigationsObserver {
     }
 
     const top = this.navigations.top;
-    if (top && top.statusChanges.has(status)) return Promise.resolve(top);
+    if (top && top.statusChanges.has(status)) {
+      this.logger.info(`Frame.waitForLoad:resolved(${status})`, {
+        url: top.requestedUrl,
+        loader: top.loaderId,
+        status: Object.fromEntries(top.statusChanges),
+      });
+      return Promise.resolve(top);
+    }
 
     const promise = this.createStatusTriggeredPromise(
       status,

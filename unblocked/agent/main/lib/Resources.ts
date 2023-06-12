@@ -82,6 +82,8 @@ export default class Resources
   public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
     if (HeadersHandler.isWorkerDest(resource, 'shared')) {
       const worker = this.browserContext.workersById.get(resource.browserRequestId);
+      // chrome won't resolve this in time on chrome 97. works as of 103. Could possibly be more versions that don't work
+      if (this.browserContext.browser.majorVersion < 98) return;
       await worker.isInitializationSent;
     }
   }

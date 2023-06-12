@@ -68,7 +68,7 @@ test('it should be able to add polyfills', async () => {
       _$flags: '',
     },
     'new()': {
-      _$constructorException: "TypeError: Cannot read property '0' of undefined",
+      _$protos: ['ObjectTest.prototype', 'Object.prototype'],
       _$type: 'constructor',
     },
     _$type: 'function',
@@ -143,7 +143,7 @@ test('it should be able to remove properties', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.baseUrl),
-    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
   expect(await page.mainFrame.evaluate(`!!window.Atomics`, false)).not.toBeTruthy();
@@ -172,7 +172,7 @@ test('it should be able to change properties', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.baseUrl),
-    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
   const protocolToString = await page.mainFrame.evaluate(
@@ -218,7 +218,7 @@ test('it should be able to change property order', async () => {
   await new Promise(setImmediate);
   await Promise.all([
     page.navigate(httpServer.baseUrl),
-    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
   const keyOrder = (await page.mainFrame.evaluate(
@@ -265,7 +265,7 @@ test('it should be able to change window property order', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.baseUrl),
-    page.mainFrame.waitOn('frame-lifecycle', (event) => event.name === 'load'),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
   const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
 

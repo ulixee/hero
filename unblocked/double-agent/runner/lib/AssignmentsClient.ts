@@ -1,11 +1,10 @@
-import fetch from 'node-fetch';
 import IAssignment from '@double-agent/collect-controller/interfaces/IAssignment';
 import Config from '@double-agent/config';
+import { promises as Fs } from 'fs';
+import fetch from 'node-fetch';
 import * as qs from 'querystring';
 import { Stream } from 'stream';
-import * as unzipper from 'unzipper';
-import { existsAsync } from '@ulixee/commons/lib/fileUtils';
-import { promises as Fs } from 'fs';
+import * as Tar from 'tar';
 
 export { IAssignment };
 
@@ -21,23 +20,36 @@ export default class AssignmentsClient {
       userId: this.userId,
     });
 
-    if (!(await existsAsync(filesDir))) await Fs.mkdir(filesDir, { recursive: true });
-
-    await new Promise<void>((resolve) => {
-      filesStream.pipe(unzipper.Extract({ path: filesDir })).on('finish', resolve);
+    await Fs.mkdir(filesDir, { recursive: true }).catch(() => null);
+    await new Promise((resolve, reject) => {
+      filesStream
+        .pipe(
+          Tar.extract({
+            cwd: filesDir,
+            preserveOwner: false,
+          }),
+        )
+        .on('finish', resolve)
+        .on('error', reject);
     });
-    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   async downloadAll(filesDir: string): Promise<void> {
     const filesStream = await this.get<Stream>(`/download`, { userId: this.userId });
 
-    if (!(await existsAsync(filesDir))) await Fs.mkdir(filesDir, { recursive: true });
+    await Fs.mkdir(filesDir, { recursive: true }).catch(() => null);
 
-    await new Promise<void>((resolve) => {
-      filesStream.pipe(unzipper.Extract({ path: filesDir })).on('finish', resolve);
+    await new Promise((resolve, reject) => {
+      filesStream
+        .pipe(
+          Tar.extract({
+            cwd: filesDir,
+            preserveOwner: false,
+          }),
+        )
+        .on('finish', resolve)
+        .on('error', reject);
     });
-    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   async activate(assignmentId: string): Promise<IAssignment> {

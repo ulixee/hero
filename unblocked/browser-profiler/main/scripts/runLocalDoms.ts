@@ -1,6 +1,7 @@
 import '@ulixee/commons/lib/SourceMapSupport';
 import '../env'; // load our env before DA
 import '@double-agent/config/load';
+import { execSync } from 'child_process';
 import { existsSync, promises as Fs, rmSync } from 'fs';
 import * as Path from 'path';
 import Axios from 'axios';
@@ -35,6 +36,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const defaultShouldRunDockers = Boolean(JSON.parse(process.env.RUN_DOCKERS ?? 'false'));
 const defaultShouldRunLocal = Boolean(JSON.parse(process.env.RUN_LOCAL ?? 'true'));
+const defaultShouldCommit = Boolean(JSON.parse(process.env.COMMIT ?? 'false'));
 
 const baseDomsDir = Path.resolve(BrowserProfiler.profiledDoms, 'local');
 const tmpDir = Path.resolve(BrowserProfiler.profiledDoms, '.tmp');
@@ -43,6 +45,7 @@ if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true });
 export default async function runLocalDoms(
   shouldRunDockers = defaultShouldRunDockers,
   shouldRunLocal = defaultShouldRunLocal,
+  shouldCommit = defaultShouldCommit,
 ): Promise<void> {
   const browserEngineOptions = await getStableChromeVersions(10);
 
@@ -63,7 +66,12 @@ export default async function runLocalDoms(
   }
 
   // cleanup tmp dir
-  if (await existsAsync(tmpDir)) await Fs.rm(tmpDir, { recursive: true });
+  // if (await existsAsync(tmpDir)) await Fs.rm(tmpDir, { recursive: true });
+  if (shouldCommit) {
+    execSync(`git commit -am "chore(local-doms): generate profiles" && git push`, {
+      cwd: BrowserProfiler.dataDir,
+    });
+  }
 }
 
 // HELPERS
@@ -110,7 +118,7 @@ async function runDockerChromes(
         url,
         automationType,
         Config.runner.assignmentsHost?.includes('//localhost'),
-        Number(majorVersion)
+        Number(majorVersion),
       );
       await isFinishedPromise;
       stopDocker(dockerName);
@@ -150,7 +158,7 @@ async function runLocalChromes(
   if (!todoList.length) return;
 
   await installChrome(fullVersion);
-  const executablePath = await getChromeExecutablePath(fullVersion);
+  const executablePath = getChromeExecutablePath(fullVersion);
   console.log('USING ', executablePath);
 
   for (const { headType, automationType, folderName } of todoList) {
@@ -161,7 +169,13 @@ async function runLocalChromes(
     const urls = extractDomAssignmentUrl(assignment);
     for (const url of urls) {
       const isFinishedPromise = waitUntilDomAssignmentFinishes(assignment, url);
-      await startChromeAndLoadUrl(executablePath, url, headType, automationType, Number(majorVersion));
+      await startChromeAndLoadUrl(
+        executablePath,
+        url,
+        headType,
+        automationType,
+        Number(majorVersion),
+      );
       await isFinishedPromise;
       await stopChrome();
     }

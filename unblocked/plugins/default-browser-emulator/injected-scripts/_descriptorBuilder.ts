@@ -25,27 +25,44 @@ function createError(message: string, type?: { new (msg: string): any }) {
   return cleanErrorStack(errType);
 }
 
-function newObjectConstructor(newProps: IDescriptor) {
-  return function() {
+function newObjectConstructor(newProps: IDescriptor, path: string, invocation?: string | Function) {
+  return function () {
     if (newProps._$constructorException) {
       throw createError(newProps._$constructorException);
     }
-    Object.setPrototypeOf(this, getObjectAtPath(newProps._$protos[0]));
+
+    if (
+      !new.target &&
+      invocation &&
+      !newProps['_$$value()'] &&
+      !ObjectCached.values(newProps).some(x => x['_$$value()'])
+    ) {
+      if (typeof invocation === 'function') return invocation(...arguments);
+      if (invocation.startsWith('TypeError'))
+        throw new TypeError(invocation.replace('TypeError: ', ''));
+      return invocation;
+    }
     const props = Object.entries(newProps);
     const obj = {};
+    Object.setPrototypeOf(
+      obj,
+      prototypesByPath[newProps._$protos[0]] ?? getObjectAtPath(newProps._$protos[0]),
+    );
     for (const [prop, value] of props) {
       if (prop.startsWith('_$')) continue;
       let propName: string | symbol = prop;
       if (propName.startsWith('Symbol(')) {
         propName = Symbol.for(propName.match(/Symbol\((.+)\)/)[1]);
       }
-      Object.defineProperty(obj, propName, buildDescriptor(value));
+      Object.defineProperty(obj, propName, buildDescriptor(value, `${path}.${prop}`));
     }
     return obj;
   };
 }
 
-function buildDescriptor(entry: IDescriptor) {
+const prototypesByPath: { [path: string]: PropertyDescriptor } = {};
+
+function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
   const attrs: PropertyDescriptor = {};
   const flags = entry._$flags || '';
   if (flags.includes('c')) attrs.configurable = true;
@@ -74,9 +91,25 @@ function buildDescriptor(entry: IDescriptor) {
     overriddenFns.set(attrs.set, entry._$set);
   }
 
+  let prototypeDescriptor: PropertyDescriptor;
+  if (entry.prototype) {
+    prototypeDescriptor = buildDescriptor(entry.prototype, `${path}.prototype`);
+
+    if (!entry.prototype._$flags || !entry.prototype._$flags.includes('w')) {
+      prototypeDescriptor.writable = false;
+    }
+    if (entry._$function) {
+      overriddenFns.set(prototypeDescriptor.value.constructor, entry._$function);
+    }
+    prototypesByPath[`${path}.prototype`] = prototypeDescriptor.value;
+  }
+
+  // do after prototypes are created
   if (entry._$function) {
     const newProps = entry['new()'];
-    if (!newProps) {
+    if (newProps) {
+      attrs.value = newObjectConstructor(newProps, path, entry._$invocation);
+    } else {
       // use function call just to get a function that doesn't create prototypes on new
       // bind to an empty object so we don't modify the original
       attrs.value = new Proxy(Function.prototype.call.bind({}), {
@@ -84,13 +117,20 @@ function buildDescriptor(entry: IDescriptor) {
           return entry._$invocation;
         },
       });
-    } else {
-      attrs.value = newObjectConstructor(newProps);
     }
     if (entry._$invocation !== undefined) {
       Object.setPrototypeOf(attrs.value, Function.prototype);
       delete attrs.value.prototype;
       delete attrs.value.constructor;
+    }
+
+    if (prototypeDescriptor && newProps) {
+      Object.defineProperty(prototypeDescriptor.value, 'constructor', {
+        value: attrs.value,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      });
     }
     overriddenFns.set(attrs.value, entry._$function);
   }
@@ -101,11 +141,12 @@ function buildDescriptor(entry: IDescriptor) {
       attrs.value = {};
     }
     if (entry._$protos) {
-      attrs.value = Object.setPrototypeOf(attrs.value, getObjectAtPath(entry._$protos[0]));
+      const proto = prototypesByPath[entry._$protos[0]] ?? getObjectAtPath(entry._$protos[0]);
+      attrs.value = Object.setPrototypeOf(attrs.value, proto);
     }
 
     for (const [prop, value] of props) {
-      if (prop.startsWith('_$')) continue;
+      if (prop.startsWith('_$') || prop === 'new()') continue;
       if (prop === 'arguments' || prop === 'caller') continue;
       let propName: string | number | symbol = prop;
       if (propName.startsWith('Symbol(')) {
@@ -115,21 +156,11 @@ function buildDescriptor(entry: IDescriptor) {
           propName = Symbol.for(symbolName);
         }
       }
-      const descriptor = buildDescriptor(value);
+      let descriptor: PropertyDescriptor;
       if (propName === 'prototype') {
-        Object.defineProperty(descriptor.value, 'constructor', {
-          // Blake: changed this from props on TS. is it right?
-          value: newObjectConstructor(value),
-          writable: true,
-          enumerable: false,
-          configurable: true,
-        });
-        if (!entry.prototype._$flags || !entry.prototype._$flags.includes('w')) {
-          descriptor.writable = false;
-        }
-        if (entry._$function) {
-          overriddenFns.set(descriptor.value.constructor, entry._$function);
-        }
+        descriptor = prototypeDescriptor;
+      } else {
+        descriptor = buildDescriptor(value, `${path}.${prop}`);
       }
       Object.defineProperty(attrs.value, propName, descriptor);
     }

@@ -40,7 +40,7 @@ jobs:
       - name: Yarn build
         run: yarn build
 
-      - name: Yarn build
+      - name: Force Generate Profiles
         run: yarn workspace @ulixee/unblocked-browser-emulator-builder generate force
 
       - id: browser-data-checkin

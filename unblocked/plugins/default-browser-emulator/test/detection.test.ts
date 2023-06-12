@@ -5,7 +5,7 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
-import * as Path from 'path';
+import { platform } from 'os';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -357,7 +357,7 @@ test('should get the correct platform from a nested cross-domain srcdoc iframe',
 
   const agent = pool.createAgent({
     logger,
-    customEmulatorConfig: { userAgentSelector: `~ win & chrome = 112` },
+    customEmulatorConfig: { userAgentSelector: `~ win` },
   });
   agent.hook({
     onNewBrowser(b) {
@@ -469,7 +469,10 @@ test('stack overflow test should match chrome', async () => {
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`;
-  if (browserVersion < 112 && browserVersion > 97) {
+  if (
+    (browserVersion < 112 && browserVersion > 97) ||
+    (browserVersion > 112 && platform() !== 'darwin')
+  ) {
     // replace first line only pre-112
     stack = stack.replace(
       `at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`,

@@ -139,5 +139,5 @@ if (args.updateLoadTimes) {
     property.csi['new()'][name]['_$$value()'] = func;
   }
 }
-const descriptor = buildDescriptor(property);
+const descriptor = buildDescriptor(property, 'self.chrome');
 addDescriptorAfterProperty('self', prevProperty, 'chrome', descriptor);

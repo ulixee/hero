@@ -12,7 +12,7 @@
     "commander": "^9.0.0",
     "node-fetch": "^2.6.1",
     "p-queue": "^6.6.2",
-    "unzipper": "^0.10.11"
+    "tar": "^6.1.15"
   },
   "devDependencies": {
     "@types/unzipper": "^0.10.5"

@@ -18,6 +18,12 @@ export default class DomOverridesBuilder {
   private readonly alwaysPageScripts = new Set<INewDocumentInjectedScript>();
   private readonly alwaysWorkerScripts = new Set<INewDocumentInjectedScript>();
 
+  private workerOverrides = new Set<string>();
+
+  public getWorkerOverrides(): string[] {
+    return [...this.workerOverrides];
+  }
+
   public build(
     type: 'worker' | 'page' = 'page',
     scriptNames?: string[],
@@ -25,25 +31,35 @@ export default class DomOverridesBuilder {
     script: string;
     callbacks: INewDocumentInjectedScript['callback'][];
   } {
-    const scripts = [];
+    const scripts = new Map<string, string>();
     const callbacks = [];
     for (const [name, script] of this.scriptsByName) {
       const shouldIncludeScript = scriptNames ? scriptNames.includes(name) : true;
       if (shouldIncludeScript) {
-        scripts.push(script);
+        scripts.set(name, script);
       }
     }
+
     if (type === 'page') {
+      let counter = 0;
       for (const script of this.alwaysPageScripts) {
         if (script.callback) callbacks.push(script.callback);
-        if (script.script) scripts.push(script.script);
+        if (script.script) scripts.set(`alwaysPageScript${counter}`, script.script);
+        counter += 1;
       }
     } else if (type === 'worker') {
+      let counter = 0;
       for (const script of this.alwaysWorkerScripts) {
         if (script.callback) callbacks.push(script.callback);
-        if (script.script) scripts.push(script.script);
+        if (script.script) scripts.set(`alwaysWorkerScript${counter}`, script.script);
+        counter += 1;
       }
     }
+
+    const shouldNotRunInWorker: (name: string) => boolean = name => {
+      if (name.startsWith('alwaysWorkerScript')) return false;
+      return !this.workerOverrides.has(name);
+    };
 
     const catchHandling =
       process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development'
@@ -67,13 +83,26 @@ ${utilsScript}
   
   if (runMap.has(self)) return;
   runMap.add(self);
+  const isWorker = !self.document && "WorkerGlobalScope" in self;
   
-  ${scripts.map(x => `try { ${x} } catch(e) {${catchHandling}}`).join('\n\n')}
+  ${[...scripts]
+    .map(([name, script]) => {
+      let snippet = '';
+      if (shouldNotRunInWorker(name)) snippet += `if (!isWorker) {\n`;
+      snippet += `try { ${script} } catch(e) {${catchHandling}}`;
+      if (shouldNotRunInWorker(name)) snippet += '\n}';
+      return snippet;
+    })
+    .join('\n\n')}
 })();
 
 })();
 //# sourceURL=${injectedSourceUrl}`.replace(/\/\/# sourceMap.+/g, ''),
     };
+  }
+
+  public registerWorkerOverrides(...names: string[]): void {
+    for (const name of names) this.workerOverrides.add(name);
   }
 
   public add(name: string, args: any = {}): void {

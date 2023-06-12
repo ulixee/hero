@@ -23,6 +23,8 @@ const ObjectCached = {
   defineProperty: Object.defineProperty.bind(Object),
   create: Object.create.bind(Object),
   entries: Object.entries.bind(Object),
+  values: Object.values.bind(Object),
+  keys: Object.keys.bind(Object),
   getOwnPropertyDescriptors: Object.getOwnPropertyDescriptors.bind(Object),
   getOwnPropertyDescriptor: Object.getOwnPropertyDescriptor.bind(Object),
 };
@@ -387,6 +389,11 @@ function addDescriptorAfterProperty(
     return;
   }
 
+  if (owner === self) {
+    ObjectCached.defineProperty(owner, propertyName, descriptor);
+    return reorderNonConfigurableDescriptors(path, propertyName, prevProperty, propertyName);
+  }
+
   let hasPassedProperty = false;
   for (const [key, existingDescriptor] of ObjectCached.entries(descriptors)) {
     if (hasPassedProperty) {
@@ -399,6 +406,98 @@ function addDescriptorAfterProperty(
       hasPassedProperty = true;
     }
   }
+}
+
+const reordersByObject = new WeakMap<
+  any,
+  { propertyName: string; prevProperty: string; throughProperty: string }[]
+>();
+
+proxyFunction(Object, 'getOwnPropertyDescriptors', (target, thisArg, argArray) => {
+  const descriptors = ReflectCached.apply(target, thisArg, argArray);
+  const reorders = reordersByObject.get(thisArg) ?? reordersByObject.get(argArray?.[0]);
+  if (reorders) {
+    const keys = Object.keys(descriptors);
+    for (const { propertyName, prevProperty, throughProperty } of reorders) {
+      adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+    }
+    const finalDescriptors = {};
+    for (const key of keys) {
+      finalDescriptors[key] = descriptors[key];
+    }
+    return finalDescriptors;
+  }
+  return descriptors;
+});
+
+proxyFunction(Object, 'getOwnPropertyNames', (target, thisArg, argArray) => {
+  const keys = ReflectCached.apply(target, thisArg, argArray);
+
+  const reorders = reordersByObject.get(thisArg) ?? reordersByObject.get(argArray?.[0]);
+  if (reorders) {
+    for (const { propertyName, prevProperty, throughProperty } of reorders) {
+      adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+    }
+  }
+  return keys;
+});
+
+proxyFunction(Object, 'keys', (target, thisArg, argArray) => {
+  const keys = ReflectCached.apply(target, thisArg, argArray);
+
+  const reorders = reordersByObject.get(thisArg) ?? reordersByObject.get(argArray?.[0]);
+  if (reorders) {
+    for (const { propertyName, prevProperty, throughProperty } of reorders) {
+      adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+    }
+  }
+  return keys;
+});
+
+function reorderNonConfigurableDescriptors(
+  objectPath,
+  propertyName,
+  prevProperty,
+  throughProperty,
+) {
+  const objectAtPath = getObjectAtPath(objectPath);
+  if (!reordersByObject.has(objectAtPath)) reordersByObject.set(objectAtPath, []);
+  const reorders = reordersByObject.get(objectAtPath);
+  reorders.push({ prevProperty, propertyName, throughProperty });
+}
+
+function reorderDescriptor(path, propertyName, prevProperty, throughProperty) {
+  const owner = getObjectAtPath(path);
+
+  const descriptor = Object.getOwnPropertyDescriptor(owner, propertyName);
+  if (!descriptor) {
+    console.log(`Can't redefine a non-existent property descriptor: ${path} -> ${propertyName}`);
+    return;
+  }
+  const prevDescriptor = Object.getOwnPropertyDescriptor(owner, prevProperty);
+  if (!prevDescriptor) {
+    console.log(
+      `Can't redefine a non-existent prev property descriptor: ${path} -> ${propertyName}, prev =${prevProperty}`,
+    );
+    return;
+  }
+
+  const descriptors = Object.getOwnPropertyDescriptors(owner);
+  const keys = Object.keys(owner);
+  adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+
+  for (const key of keys) {
+    const keyDescriptor = descriptors[key];
+    delete owner[key];
+    Object.defineProperty(owner, key, keyDescriptor);
+  }
+}
+
+function adjustKeyOrder(keys, propertyName, prevProperty, throughProperty) {
+  const currentIndex = keys.indexOf(propertyName);
+  const throughPropIndex = keys.indexOf(throughProperty) - currentIndex + 1;
+  const props = keys.splice(currentIndex, throughPropIndex);
+  keys.splice(keys.indexOf(prevProperty) + 1, 0, ...props);
 }
 
 if (typeof module === 'object' && typeof module.exports === 'object') {
