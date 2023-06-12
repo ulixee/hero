@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/ulixee/hero/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
+
+
+### Bug Fixes
+
+* **client:** disconnect connections on shutdown ([648f8db](https://github.com/ulixee/hero/commit/648f8db3a832833d61978502c75010f6b107addf))
+* **client:** lint issues ([cc90f4f](https://github.com/ulixee/hero/commit/cc90f4fe3ef7fed8d48f5269842214ddff3ead5c))
+* **core:** bypass restore-hero-dom.org in headed ([c0753e8](https://github.com/ulixee/hero/commit/c0753e8dcfe33791349a49a3c3bdf1ee458137a6))
+* **core:** handle db closing timing ([0ad0175](https://github.com/ulixee/hero/commit/0ad0175bfcd20fc6402196235a6e0c63c3987feb))
+* **core:** only add wal mode if not readonly db ([f74ecc4](https://github.com/ulixee/hero/commit/f74ecc4ffc20d126ed5f379b2d221b9352fdf71b))
+* **core:** oopifs not injecting hero ([cc1e12b](https://github.com/ulixee/hero/commit/cc1e12b5ff975d1027f733ee655d8068d5b18385))
+* **timetravel:** rollback update to defaultDbDir ([8daedec](https://github.com/ulixee/hero/commit/8daedec9d64e2ee8223d2018b1f517a5c41941fb))
+
+
+### Features
+
+* **core:** allow configuring session directory ([9fda9b9](https://github.com/ulixee/hero/commit/9fda9b9d5560a3bfaf3b74c477746fbab9eded38))
+* **core:** session registry ([fd10317](https://github.com/ulixee/hero/commit/fd10317a1219b1aefffd5b8162021a43c8ca6dc5))
+* expose triggerFlowHandler internal data ([#229](https://github.com/ulixee/hero/issues/229)) ([5ceb89c](https://github.com/ulixee/hero/commit/5ceb89ccf94a86a6d7dd8bd5465495f4539e12fb))
+
+
+
+
+
 # [2.0.0-alpha.21](https://github.com/ulixee/hero/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/hero-monorepo

@@ -1,11 +1,11 @@
 {
   "name": "@ulixee/hero-plugin-utils",
-  "version": "2.0.0-alpha.21",
+  "version": "2.0.0-alpha.22",
   "description": "Base classes to build hero plugins",
   "scripts": {},
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.21",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.21",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.21"
+    "@ulixee/commons": "2.0.0-alpha.22",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.22",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.22"
   }
 }

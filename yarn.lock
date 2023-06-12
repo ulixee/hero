@@ -2237,17 +2237,17 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.18"
 
-"@ulixee/chrome-112-0@^5615.121.7":
-  version "5615.138.8"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-112-0/-/chrome-112-0-5615.138.8.tgz#24778505aa78ec2a97e0f6dfbcb763db874a5bb9"
-  integrity sha512-sPdxvl7CD6yHyXGFTbiw+PaV3M9irgKUjl+cmivyv9LPNEm5GsfCj/tPut7Eot8S+Q8kO3yAWM+kusB8xvaYcg==
+"@ulixee/chrome-113-0@^5672.127.8":
+  version "5672.127.8"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-113-0/-/chrome-113-0-5672.127.8.tgz#6e6ff2fb393e10ab5321ade6058a3aff8d0b6d23"
+  integrity sha512-zbVEf6ZZWUF10JhqVQFptN6do2VmiSywX/NW4ByDT6IuFbQUheLuw9jHpA9IvO+8e180hklMX+QOKFPUTBUJqg==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
-"@ulixee/chrome-98-0@^4758.109.6":
-  version "4758.109.8"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-98-0/-/chrome-98-0-4758.109.8.tgz#3d05d99ab9ac8cb9180f0aad8f50c708aec836a1"
-  integrity sha512-91ONrh4W3f3ZwiG7j1UB9XS30aJoM7gt6N1X40GnJVmXsAN2bTvrjf7pkNdkQQLahZHtS6va3A+BU1e3Epgqvw==
+"@ulixee/chrome-114-0@^5735.91.8":
+  version "5735.91.8"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-114-0/-/chrome-114-0-5735.91.8.tgz#0ca87baaaceb56131d726a4f3ecf8bb221620a13"
+  integrity sha512-X/WlSphkIOI6PDFq8kyKudmwD20sFrECI3sp8l8hmz8pnpQ5t4shpj5/Ry1G03wzvcHKb/qvu7WwqlmRUOC4cQ==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
@@ -2269,10 +2269,10 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@^1.0.25":
-  version "1.0.25"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.25.tgz#f82a57b27e6bcefbe1012686ca9ccf9b82e0ca20"
-  integrity sha512-+DaiOr8vMu5oBY4vpe2CXAiIrmOAwLyNAQTgKVoyoTb489OP0RQ4YQ/zPoW8SdqSmoGXWOZuO3OsUyQ/py0+0w==
+"@ulixee/repo-tools@^1.0.26":
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.26.tgz#c664401802fadb795ca759330e73a601332d51c6"
+  integrity sha512-tK8dMp8gS+cV4ubqYFYeUU/vaOUwoozdKXTCkpqcImdOYU34jXoZyOJaaLjudH0Y3L+w3DoMdakLb/6TdIujtQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.59.6"
     "@typescript-eslint/parser" "^5.59.6"
