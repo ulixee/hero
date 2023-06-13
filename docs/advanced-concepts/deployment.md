@@ -56,7 +56,9 @@ import { ConnectionToHeroCore } from '@ulixee/hero';
 
 const bridge = new TransportBridge();
 const connectionToCore = new ConnectionToHeroCore(bridge.transportToCore);
-HeroCore.addConnection(bridge.transportToClient);
+
+const heroCore = new HeroCore();
+heroCore.addConnection(bridge.transportToClient);
 
 async function main() {
   // hero will connect directly
@@ -82,8 +84,11 @@ import * as WebSocket from 'ws';
 import * as http from 'http';
 import * as https from 'https';
 
+const heroCore = new HeroCore();
+
 // Attach Hero to your Http or Https Server
 async function bindHeroCore(yourHttpServer: http.Server | https.Server) {
+  
   const wsServer = new WebSocket.Server({
     server: yourHttpServer,
   });
@@ -91,7 +96,7 @@ async function bindHeroCore(yourHttpServer: http.Server | https.Server) {
     // OPTIONAl: it's configured to listen on a path
     if (req.url.startsWith('/hero')) {
       const transport = new WsTransportToClient(ws, req);
-      HeroCore.addConnection(transport);
+      heroCore.addConnection(transport);
     }
   });
 }
