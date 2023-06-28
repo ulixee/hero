@@ -231,6 +231,13 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
     return core;
   }
 
+  public static addConnection(transportToClient?: ITransport): ConnectionToHeroClient {
+    if (!this.instances.length) {
+      new HeroCore();
+    }
+    return this.instances[0].addConnection(transportToClient);
+  }
+
   public static async shutdown(): Promise<any> {
     if (this.isShuttingDown) return this.isShuttingDown;
     ShutdownHandler.unregister(this.shutdown);

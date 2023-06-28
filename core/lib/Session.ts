@@ -414,9 +414,9 @@ export default class Session
       for (const tab of this.tabsById.values()) {
         promises.push(tab.close());
       }
-      await Promise.all(promises);
+      await Promise.allSettled(promises);
     } catch (error) {
-      log.error('Session.CloseTabsError', { error, sessionId: this.id });
+      this.logger.warn('Session.CloseTabsError', { error });
     }
   }
 
@@ -438,38 +438,46 @@ export default class Session
 
     this.awaitedEventEmitter.emit('close');
     this.emit('closing');
-    const start = log.info('Session.Closing', {
-      sessionId: this.id,
-    });
+    const start = this.logger.info('Session.Closing');
 
-    await this.closeTabs();
-    await this.agent?.close();
+    await this.closeTabs().catch(() => null);
+    await this.agent?.close()?.catch(() => null);
 
-    log.stats('Session.Closed', {
-      sessionId: this.id,
+    this.logger.stats('Session.Closed', {
       parentLogId: start,
     });
 
     const closedEvent = { waitForPromise: null };
     this.db.isClosing = true;
-    this.emit('closed', closedEvent);
-    await closedEvent.waitForPromise;
+    try {
+      this.emit('closed', closedEvent);
+      await closedEvent.waitForPromise;
+    } catch (error) {
+      this.logger.warn('Session.closeError', { error });
+    }
 
     this.events.close();
     this.commandRecorder.cleanup();
     this.plugins.cleanup();
 
-    // should go last so we can capture logs
-    this.db.session.close(Date.now());
-    LogEvents.unsubscribe(this.logSubscriptionId);
-    loggerSessionIdNames.delete(this.id);
-    this.db.flush();
+    try {
+      // should go last so we can capture logs
+      this.db.session.close(Date.now());
+      this.db.flush();
+    } catch (error) {
+      this.logger.warn('Session.closeDbSessionError', { error });
+    }
+
     // NOTE: need to get sessionRegistry before cleaning up!
     const sessionRegistry = this.sessionRegistry;
     this.cleanup();
 
     this.removeAllListeners();
-    this.db.close();
+
+    try {
+      this.db.close();
+    } catch {}
+
     try {
       await sessionRegistry.onClosed(this.id, this.options.sessionPersistence === false);
     } catch (e) {
@@ -478,6 +486,8 @@ export default class Session
 
     const databasePath = this.db.path;
     Session.events.emit('closed', { id: this.id, databasePath });
+    LogEvents.unsubscribe(this.logSubscriptionId);
+    loggerSessionIdNames.delete(this.id);
   }
 
   public addRemoteEventListener(

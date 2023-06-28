@@ -31,7 +31,7 @@ import Hero from '@ulixee/hero';
 ```
 
 If you'd like to customize log output, you can inject your own logger so long as it supports these methods:
-
+- `boundContext: any;`: the context data bound to the given logger
 - `stats(action: string, data?: ILogData): number`
 - `info(action: string, data?: ILogData): number`
 - `warn(action: string, data?: ILogData): number`
@@ -50,6 +50,7 @@ const Logger = require('@ulixee/commons/Logger');
 let logId = 0;
 
 class CustomLogger {
+  boundContext: any;
   level: string;
   constructor(module, boundContext) {
     this.boundContext = boundContext;
