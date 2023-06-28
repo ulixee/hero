@@ -86,7 +86,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       this.plugins,
       this.logger,
       this.plugins.profile.upstreamProxyUrl,
-      this.plugins.profile.upstreamProxyUseLocalDns
+      this.plugins.profile.upstreamProxyUseLocalDns,
     );
     this.enableMitm = !env.disableMitm && !this.plugins.profile.options.disableMitm;
 
@@ -164,17 +164,29 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
     this.isClosing = new Resolvable();
     try {
       await this.browserContext?.close();
-      try {
-        this.mitmRequestSession.close();
-      } catch (error) {
-        this.logger.error('Agent.CloseMitmRequestSessionError', { error, sessionId: this.id });
-      }
-      this.isolatedMitm?.close();
+    } catch (error) {
+      this.logger.warn('Agent.CloseBrowserContextError', { error });
+    }
 
+    try {
+      this.mitmRequestSession.close();
+    } catch (error) {
+      this.logger.warn('Agent.CloseMitmRequestSessionError', { error });
+    }
+
+    try {
+      this.isolatedMitm?.close();
+    } catch (error) {
+      this.logger.warn('Agent.CloseIsolatedError', { error });
+    }
+
+    try {
       this.emit('close');
       this.events.close();
       this.plugins.onClose();
       this.cleanup();
+    } catch (error) {
+      this.logger.warn('Agent.CloseError', { parentLogId: id, error });
     } finally {
       this.logger.stats('Agent.Closed', { parentLogId: id });
       this.isClosing.resolve();
