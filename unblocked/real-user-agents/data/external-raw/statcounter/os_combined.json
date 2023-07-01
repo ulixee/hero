@@ -1,13 +1,13 @@
 {
-  "fromMonthYear": "2023-05",
-  "toMonthYear": "2023-06",
-  "lastModified": "2023-06-01T07:16:59.295Z",
+  "fromMonthYear": "2023-06",
+  "toMonthYear": "2023-07",
+  "lastModified": "2023-07-01T07:17:59.801Z",
   "results": {
-    "Windows": ["52.49", "0"],
-    "OS X": ["33.77", "0"],
-    "Chrome OS": ["7.47", "0"],
-    "Unknown": ["4.31", "0"],
-    "Linux": ["1.95", "0"],
-    "Other": ["0.01", "0"]
+    "Windows": ["54.97", "0"],
+    "OS X": ["33.91", "0"],
+    "Chrome OS": ["8.3", "0"],
+    "Linux": ["1.97", "0"],
+    "Unknown": ["0.83", "0"],
+    "Other": ["0.02", "0"]
   }
 }
