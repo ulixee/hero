@@ -11,6 +11,7 @@ import type {
   ISuperStyleSheet,
   ISuperHTMLElement,
 } from '@ulixee/awaited-dom/base/interfaces/super';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import {
   IElement,
   IHTMLCollection,
@@ -66,6 +67,7 @@ export {
   ISuperDocument,
   ISuperText,
   IElement,
+  IUserProfile,
   INode,
   IHTMLElement,
   INodeList,

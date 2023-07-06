@@ -30,6 +30,7 @@ const {
   ISuperStyleSheet,
   ISuperDocument,
   ISuperText,
+  IUserProfile,
   IElement,
   INode,
   IHTMLElement,
@@ -72,6 +73,7 @@ export {
   IHTMLElement,
   INodeList,
   IHTMLCollection,
+  IUserProfile,
 };
 
 export default cjsImport.default;
