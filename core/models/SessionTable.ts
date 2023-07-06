@@ -28,6 +28,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['uaClientHintsPlatformVersion', 'TEXT'],
         ['startDate', 'INTEGER'],
         ['closeDate', 'INTEGER'],
+        ['scriptProductId', 'TEXT'],
         ['scriptVersion', 'TEXT'],
         ['scriptRunId', 'TEXT'],
         ['scriptRuntime', 'TEXT'],
@@ -117,6 +118,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       configuration.uaClientHintsPlatformVersion,
       startDate,
       null,
+      scriptInvocationMeta?.productId,
       scriptInvocationMeta?.version,
       scriptInvocationMeta?.runId,
       scriptInvocationMeta?.runtime,
@@ -185,6 +187,7 @@ export interface ISessionRecord {
   operatingSystemVersion: string;
   startDate: number;
   closeDate: number;
+  scriptProductId: string;
   scriptVersion: string;
   scriptRunId: string;
   scriptRuntime: string;

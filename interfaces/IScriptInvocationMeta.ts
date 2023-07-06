@@ -1,9 +1,10 @@
 export default interface IScriptInvocationMeta {
   entrypoint: string;
   entryFunction?: string;
+  productId: string;
   version: string;
-  runId?: string;
   runtime?: string;
+  runId?: string;
   workingDirectory?: string;
   execPath?: string;
   execArgv?: string[];

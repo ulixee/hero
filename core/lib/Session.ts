@@ -43,6 +43,8 @@ import { IOutputChangeRecord } from '../models/OutputTable';
 import env from '../env';
 import DetachedAssets from './DetachedAssets';
 
+const { version } = require('../package.json');
+
 const { log } = Log(module);
 
 export default class Session
@@ -545,7 +547,8 @@ export default class Session
     const providedOptions = { ...options };
     // set default script instance if not provided
     options.scriptInvocationMeta ??= {
-      version: 'na',
+      version,
+      productId: 'Hero',
       workingDirectory: process.cwd(),
       entrypoint: Callsite.getEntrypoint(),
     };

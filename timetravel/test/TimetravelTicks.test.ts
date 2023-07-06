@@ -34,6 +34,7 @@ describe('basic Timetravel Ticks tests', () => {
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession({
       scriptInvocationMeta: {
+        productId: 'hero',
         workingDirectory: process.cwd(),
         entrypoint: 'testEntrypoint.js',
         version: '1234',
