@@ -51,16 +51,13 @@ export default class DomStateGenerator {
     timelineRange?: [start: number, end: number],
   ): void {
     const sessionId = sessionDb.sessionId;
-    const getSessionDb = this.getSessionDb.bind(this, sessionId);
+    const db = this.sessionRegistry.retain(sessionId).catch(() => null);
     this.sessionsById.set(sessionId, {
       tabId,
       sessionId,
       needsProcessing: true,
       mainFrameIds: sessionDb.frames.mainFrameIds(),
-      // could get closed, so need to use getter
-      get db() {
-        return getSessionDb();
-      },
+      db,
       dbLocation: Path.dirname(sessionDb.path),
       loadingRange: [...loadingRange],
       timelineRange: timelineRange ? [...timelineRange] : undefined,
@@ -97,19 +94,11 @@ export default class DomStateGenerator {
     }
     for (const session of savedState.sessions) {
       const sessionId = session.sessionId;
-      let db: SessionDb;
-      try {
-        db = await this.sessionRegistry.get(sessionId).catch(() => null);
-      } catch (err) {
-        // couldn't load
-      }
+      const db = await this.sessionRegistry.retain(sessionId).catch(() => null as SessionDb);
 
-      const getSessionDb = this.getSessionDb.bind(this, sessionId);
       this.sessionsById.set(sessionId, {
         ...session,
-        get db(): Promise<SessionDb | null> {
-          return getSessionDb();
-        },
+        db: Promise.resolve(db),
         needsProcessing: !!db,
         mainFrameIds: db?.frames.mainFrameIds(session.tabId),
       });
@@ -373,10 +362,6 @@ export default class DomStateGenerator {
         result: null,
       });
     }
-  }
-
-  private getSessionDb(sessionId: string): Promise<SessionDb | null> {
-    return this.sessionRegistry.get(sessionId).catch(() => null);
   }
 
   private processStorageChanges(

@@ -48,34 +48,33 @@ export default class SessionDb {
 
   public readonly path: string;
 
-  public readonly commands: CommandsTable;
-  public readonly frames: FramesTable;
-  public readonly frameNavigations: FrameNavigationsTable;
-  public readonly sockets: SocketsTable;
-  public readonly resources: ResourcesTable;
-  public readonly resourceStates: ResourceStatesTable;
-  public readonly websocketMessages: WebsocketMessagesTable;
-  public readonly domChanges: DomChangesTable;
-  public readonly detachedElements: DetachedElementsTable;
-  public readonly detachedResources: DetachedResourcesTable;
-  public readonly snippets: SnippetsTable;
-  public readonly interactions: InteractionStepsTable;
-  public readonly flowHandlers: FlowHandlersTable;
-  public readonly flowCommands: FlowCommandsTable;
-  public readonly pageLogs: PageLogsTable;
-  public readonly sessionLogs: SessionLogsTable;
-  public readonly session: SessionTable;
-  public readonly mouseEvents: MouseEventsTable;
-  public readonly focusEvents: FocusEventsTable;
-  public readonly scrollEvents: ScrollEventsTable;
-  public readonly storageChanges: StorageChangesTable;
-  public readonly screenshots: ScreenshotsTable;
-  public readonly devtoolsMessages: DevtoolsMessagesTable;
-  public readonly awaitedEvents: AwaitedEventsTable;
-  public readonly tabs: TabsTable;
-  public readonly output: OutputTable;
+  public commands: CommandsTable;
+  public frames: FramesTable;
+  public frameNavigations: FrameNavigationsTable;
+  public sockets: SocketsTable;
+  public resources: ResourcesTable;
+  public resourceStates: ResourceStatesTable;
+  public websocketMessages: WebsocketMessagesTable;
+  public domChanges: DomChangesTable;
+  public detachedElements: DetachedElementsTable;
+  public detachedResources: DetachedResourcesTable;
+  public snippets: SnippetsTable;
+  public interactions: InteractionStepsTable;
+  public flowHandlers: FlowHandlersTable;
+  public flowCommands: FlowCommandsTable;
+  public pageLogs: PageLogsTable;
+  public sessionLogs: SessionLogsTable;
+  public session: SessionTable;
+  public mouseEvents: MouseEventsTable;
+  public focusEvents: FocusEventsTable;
+  public scrollEvents: ScrollEventsTable;
+  public storageChanges: StorageChangesTable;
+  public screenshots: ScreenshotsTable;
+  public devtoolsMessages: DevtoolsMessagesTable;
+  public awaitedEvents: AwaitedEventsTable;
+  public tabs: TabsTable;
+  public output: OutputTable;
   public readonly sessionId: string;
-  public isClosing = false;
 
   public keepAlive = false;
 
@@ -98,6 +97,92 @@ export default class SessionDb {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
 
+    this.attach();
+
+    if (!readonly) {
+      this.batchInsert = this.db.transaction(() => {
+        for (const table of this.tables) {
+          try {
+            table.runPendingInserts();
+          } catch (error) {
+            if (String(error).match('attempt to write a readonly database')) {
+              clearInterval(this.saveInterval);
+              this.db = null;
+            }
+            log.error('SessionDb.flushError', {
+              sessionId: this.sessionId,
+              error: String(error),
+              table: table.tableName,
+            });
+          }
+        }
+      });
+    }
+  }
+
+  public getCollectedAssetNames(): { resources: string[]; elements: string[]; snippets: string[] } {
+    const snippets = new Set<string>();
+    for (const snippet of this.snippets.all()) {
+      snippets.add(snippet.name);
+    }
+    const resources = new Set<string>();
+    for (const resource of this.detachedResources.all()) {
+      resources.add(resource.name);
+    }
+
+    const elementNames = this.detachedElements.allNames();
+
+    return {
+      snippets: [...snippets],
+      resources: [...resources],
+      elements: [...elementNames],
+    };
+  }
+
+  public close(): void {
+    clearInterval(this.saveInterval);
+
+    if (this.db?.open) {
+      this.flush();
+    }
+
+    if (env.enableSqliteWal && !this.db.readonly) {
+      this.db.pragma('journal_mode = DELETE');
+    }
+
+    if (this.keepAlive) {
+      this.db.readonly = true;
+      return;
+    }
+
+    this.db.close();
+    this.db = null;
+  }
+
+  public recycle(): void {
+    this.close();
+
+    this.db = new Database(this.path, { readonly: true });
+    this.attach();
+  }
+
+  public flush(): void {
+    if (this.batchInsert) {
+      try {
+        this.batchInsert.immediate();
+      } catch (error) {
+        if (
+          String(error).match(/attempt to write a readonly database/) ||
+          String(error).match(/database is locked/)
+        ) {
+          clearInterval(this.saveInterval);
+        }
+        throw error;
+      }
+    }
+  }
+
+  private attach(): void {
     this.commands = new CommandsTable(this.db);
     this.tabs = new TabsTable(this.db);
     this.frames = new FramesTable(this.db);
@@ -153,79 +238,5 @@ export default class SessionDb {
       this.awaitedEvents,
       this.output,
     );
-
-    if (!readonly) {
-      this.batchInsert = this.db.transaction(() => {
-        for (const table of this.tables) {
-          try {
-            table.runPendingInserts();
-          } catch (error) {
-            if (String(error).match('attempt to write a readonly database')) {
-              clearInterval(this.saveInterval);
-              this.db = null;
-            }
-            log.error('SessionDb.flushError', {
-              sessionId: this.sessionId,
-              error: String(error),
-              table: table.tableName,
-            });
-          }
-        }
-      });
-    }
-  }
-
-  public getCollectedAssetNames(): { resources: string[]; elements: string[]; snippets: string[] } {
-    const snippets = new Set<string>();
-    for (const snippet of this.snippets.all()) {
-      snippets.add(snippet.name);
-    }
-    const resources = new Set<string>();
-    for (const resource of this.detachedResources.all()) {
-      resources.add(resource.name);
-    }
-
-    const elementNames = this.detachedElements.allNames();
-
-    return {
-      snippets: [...snippets],
-      resources: [...resources],
-      elements: [...elementNames],
-    };
-  }
-
-  public close(): void {
-    clearInterval(this.saveInterval);
-
-    if (this.db?.open) {
-      this.flush();
-    }
-
-    if (this.keepAlive) {
-      this.db.readonly = true;
-      return;
-    }
-
-    if (env.enableSqliteWal && !this.db.readonly) {
-      this.db.pragma('journal_mode = DELETE');
-    }
-    this.db.close();
-    this.db = null;
-  }
-
-  public flush(): void {
-    if (this.batchInsert) {
-      try {
-        this.batchInsert.immediate();
-      } catch (error) {
-        if (
-          String(error).match(/attempt to write a readonly database/) ||
-          String(error).match(/database is locked/)
-        ) {
-          clearInterval(this.saveInterval);
-        }
-        throw error;
-      }
-    }
   }
 }

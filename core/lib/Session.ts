@@ -263,7 +263,6 @@ export default class Session
       const customPath = this.getCustomSessionPath(fromSessionId);
       db = await this.sessionRegistry.get(fromSessionId, customPath);
     }
-    db.flush();
     return DetachedAssets.getElements(db, name);
   }
 
@@ -450,7 +449,6 @@ export default class Session
     });
 
     const closedEvent = { waitForPromise: null };
-    this.db.isClosing = true;
     try {
       this.emit('closed', closedEvent);
       await closedEvent.waitForPromise;
@@ -477,11 +475,7 @@ export default class Session
     this.removeAllListeners();
 
     try {
-      this.db.close();
-    } catch {}
-
-    try {
-      await sessionRegistry.onClosed(this.id, this.options.sessionPersistence === false);
+      await sessionRegistry.close(this.id, this.options.sessionPersistence === false);
     } catch (e) {
       /* no-op */
     }

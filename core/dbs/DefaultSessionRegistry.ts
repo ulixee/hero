@@ -6,7 +6,9 @@ import ISessionRegistry from '../interfaces/ISessionRegistry';
 import SessionDb from './SessionDb';
 
 export default class DefaultSessionRegistry implements ISessionRegistry {
-  private byId: { [sessionId: string]: SessionDb } = {};
+  private byId: {
+    [sessionId: string]: { db: SessionDb; deleteRequested?: boolean; connections: number };
+  } = {};
 
   constructor(public defaultDir: string) {
     if (!Fs.existsSync(this.defaultDir)) Fs.mkdirSync(this.defaultDir, { recursive: true });
@@ -16,7 +18,7 @@ export default class DefaultSessionRegistry implements ISessionRegistry {
   public create(sessionId: string, customPath?: string): SessionDb {
     const dbPath = this.resolvePath(sessionId, customPath);
     const db = new SessionDb(sessionId, dbPath);
-    this.byId[sessionId] = db;
+    this.byId[sessionId] = { db, connections: 1 };
     return db;
   }
 
@@ -35,29 +37,60 @@ export default class DefaultSessionRegistry implements ISessionRegistry {
   // eslint-disable-next-line @typescript-eslint/require-await
   public async get(sessionId: string, customPath?: string): Promise<SessionDb> {
     if (sessionId.endsWith('.db')) sessionId = sessionId.slice(0, -3);
-    if (!this.byId[sessionId]?.isOpen || this.byId[sessionId]?.isClosing) {
-      const dbPath = this.resolvePath(sessionId, customPath);
-      this.byId[sessionId] = new SessionDb(sessionId, dbPath, {
-        readonly: true,
-        fileMustExist: true,
-      });
-    }
-    return this.byId[sessionId];
-  }
-
-  public async onClosed(sessionId: string, isDeleteRequested: boolean): Promise<void> {
     const entry = this.byId[sessionId];
-    delete this.byId[sessionId];
-    if (entry && isDeleteRequested) {
-      try {
-        await Fs.promises.rm(entry.path);
-      } catch {}
+    if (!entry?.db?.isOpen || entry?.connections === 0) {
+      const dbPath = this.resolvePath(sessionId, customPath);
+      this.byId[sessionId] = {
+        db: new SessionDb(sessionId, dbPath, {
+          readonly: true,
+          fileMustExist: true,
+        }),
+        connections: 1,
+      };
+    }
+    return this.byId[sessionId]?.db;
+  }
+
+  public async retain(sessionId: string, customPath?: string): Promise<SessionDb> {
+    if (sessionId.endsWith('.db')) sessionId = sessionId.slice(0, -3);
+    const entry = this.byId[sessionId];
+    if (!entry?.db?.isOpen) {
+      return this.get(sessionId, customPath);
+    }
+
+    if (entry) {
+      entry.connections += 1;
+      return entry.db;
     }
   }
 
-  public shutdown(): Promise<void> {
+  public async close(sessionId: string, isDeleteRequested: boolean): Promise<void> {
+    const entry = this.byId[sessionId];
+    if (!entry) return;
+    entry.connections -= 1;
+    entry.deleteRequested ||= isDeleteRequested;
+
+    if (entry.connections < 1) {
+      delete this.byId[sessionId];
+      entry.db.close();
+      if (entry.deleteRequested) {
+        try {
+          await Fs.promises.rm(entry.db.path);
+        } catch {}
+      }
+    } else if (!entry.db?.readonly) {
+      entry.db.recycle();
+    }
+  }
+
+  public async shutdown(): Promise<void> {
     for (const [key, value] of Object.entries(this.byId)) {
-      value.close();
+      value.db.close();
+      if (value.deleteRequested) {
+        try {
+          await Fs.promises.rm(value.db.path);
+        } catch {}
+      }
       delete this.byId[key];
     }
     return Promise.resolve();
