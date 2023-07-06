@@ -62,6 +62,10 @@ export default class Ed25519 {
   }
 
   static sign(keyObject: KeyObject, hashedMessage: Buffer): Buffer {
+    if (hashedMessage.byteLength !== 32)
+      throw new Error(
+        'Attempting to sign a non 256 bit value. Only provide hashed values to sign!!',
+      );
     return sign(null, hashedMessage, keyObject);
   }
 }

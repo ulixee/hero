@@ -13,7 +13,7 @@ export const identityValidation = z
   .length(61)
   .regex(
     /^id1[ac-hj-np-z02-9]{58}/,
-    'This is not a Ulixee identity (Bech32 encoded hash starting with "id1").',
+    'This is not a Ulixee identity (Bech32 encoded public key starting with "id1").',
   );
 
 export const hashValidation = z

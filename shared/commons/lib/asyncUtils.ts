@@ -38,3 +38,11 @@ export function first<T>(source: AsyncIterable<T>): Promise<T> {
     for await (const entry of source) return entry;
   })();
 }
+
+export function last<T>(source: AsyncIterable<T>): Promise<T> {
+  return (async () => {
+    let item: T;
+    for await (const entry of source) item = entry;
+    return item;
+  })();
+}
