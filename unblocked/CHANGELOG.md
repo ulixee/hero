@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.23](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
+
+
+### Bug Fixes
+
+* **agent:** improve cleanup of agent ([2220925](https://github.com/ulixee/unblocked/commit/2220925b06b278ab4e8b273ee00fca2041f4e444))
+
+
+
 # [2.0.0-alpha.22](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
 
 

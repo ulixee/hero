@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/unblocked-browser-profiler-dom-bridger",
-  "version": "2.0.0-alpha.22",
+  "version": "2.0.0-alpha.23",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -10,9 +10,9 @@
     "generate": "yarn generateRawMappings && yarn generatePathPatterns"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.22",
-    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.22",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.22",
+    "@ulixee/commons": "2.0.0-alpha.23",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.23",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.23",
     "lodash": "^4.17.20"
   }
 }

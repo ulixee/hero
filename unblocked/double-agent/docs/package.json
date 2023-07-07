@@ -1,6 +1,6 @@
 {
   "name": "@double-agent/docs",
-  "version": "2.0.0-alpha.22",
+  "version": "2.0.0-alpha.23",
   "main": "generator/index.js",
   "private": true,
   "license": "MIT",
@@ -8,7 +8,7 @@
     "start": "node generator/index.js"
   },
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.22",
-    "@double-agent/collect": "2.0.0-alpha.22"
+    "@double-agent/analyze": "2.0.0-alpha.23",
+    "@double-agent/collect": "2.0.0-alpha.23"
   }
 }
