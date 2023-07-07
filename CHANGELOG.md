@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.23](https://github.com/ulixee/hero/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
+
+
+### Bug Fixes
+
+* **core:** add db retention to session registry ([5af67e8](https://github.com/ulixee/hero/commit/5af67e82d5dc36e1d7b11cc11cee09520fec0fc7))
+* **core:** re-add static addConnection ([428d4b0](https://github.com/ulixee/hero/commit/428d4b07d7c60a2cbb869800b6760a2db2903284))
+
+
+### Features
+
+* **core:** add productId to scriptInvocationMeta ([7cb291d](https://github.com/ulixee/hero/commit/7cb291dc612f1c7a9369df62c2eca16e684984f9))
+
+
+
+
+
 # [2.0.0-alpha.22](https://github.com/ulixee/hero/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
 
 
