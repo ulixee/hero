@@ -16218,5 +16218,65 @@
     "id": "Firefox-114.0--OS X-Monterey",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0",
     "osId": "mac-os-12"
+  },
+  {
+    "id": "Firefox-115.0--Windows-8.1",
+    "string": "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "windows-8-1"
+  },
+  {
+    "id": "Firefox-115.0--Windows-8",
+    "string": "Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "windows-8"
+  },
+  {
+    "id": "Firefox-115.0--Windows-7",
+    "string": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "windows-7"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Sierra",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-10-12"
+  },
+  {
+    "id": "Firefox-115.0--OS X-High Sierra",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-10-13"
+  },
+  {
+    "id": "Firefox-115.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Mojave",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-10-14"
+  },
+  {
+    "id": "Firefox-115.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Catalina",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-10-15"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Big Sur",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-11"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-13"
+  },
+  {
+    "id": "Firefox-115.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "osId": "mac-os-12"
   }
 ]
