@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.23](https://github.com/ulixee/shared/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
+
+
+### Features
+
+* **commons:** add async iterator last function ([f4dd911](https://github.com/ulixee/shared/commit/f4dd9113341e37ce193455e5a55b30f99436daa9))
+
+
+
+
+
 # [2.0.0-alpha.22](https://github.com/ulixee/shared/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
 
 
