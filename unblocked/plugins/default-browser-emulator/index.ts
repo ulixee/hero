@@ -114,6 +114,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       this.data.windowBaseFraming,
       this.data.windowFraming,
     );
+    this.deviceProfile.viewport = emulationProfile.viewport;
     emulationProfile.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     if (emulationProfile.upstreamProxyUrl && !emulationProfile.upstreamProxyIpMask) {
@@ -301,6 +302,22 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
         return false;
       }
     }
+    if (emulationProfile.userAgentOption && !emulationProfile.browserEngine) {
+      try {
+        emulationProfile.browserEngine = DefaultBrowserEmulator.getBrowserEngine(
+          emulationProfile.userAgentOption,
+        );
+      } catch (e) {
+        emulationProfile.logger?.error(
+          'Failed to get a browser engine for the configured userAgentOption',
+          {
+            error: e,
+            userAgentOption: emulationProfile.userAgentOption,
+          },
+        );
+        return false;
+      }
+    }
     return true;
   }
 
@@ -310,6 +327,12 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
   } {
     const userAgentOption = selectUserAgentOption(userAgentSelector, userAgentOptions);
 
+    const browserEngine = this.getBrowserEngine(userAgentOption);
+
+    return { browserEngine, userAgentOption };
+  }
+
+  public static getBrowserEngine(userAgentOption: IUserAgentOption): IBrowserEngine {
     const { browserName, browserVersion } = userAgentOption;
     const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;
     const browserEngineOption = selectBrowserEngineOption(
@@ -317,8 +340,9 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       dataLoader.browserEngineOptions,
     );
 
-    const browserEngine = new BrowserEngine(browserEngineOption);
-    return { browserEngine, userAgentOption };
+    if (!browserEngineOption) throw new Error(`Unable to load BrowserEngine (${browserEngineId})`);
+
+    return new BrowserEngine(browserEngineOption);
   }
 
   public static default(): IBrowserEngine {
