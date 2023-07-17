@@ -563,6 +563,13 @@ export default class Session
       userAgentSelector: userAgent ?? userProfile?.userAgentString,
     };
 
+    if (userProfile) {
+      options.locale ??= userProfile.locale;
+      options.timezoneId ??= userProfile.timezoneId;
+      options.geolocation ??= userProfile.geolocation;
+      options.viewport ??= userProfile.deviceProfile?.viewport;
+    }
+
     this.agent = this.core.pool.createAgent({
       options,
       customEmulatorConfig,
@@ -570,6 +577,7 @@ export default class Session
       deviceProfile: userProfile?.deviceProfile,
       id: this.id,
       commandMarker: this.commands,
+      userAgentOption: userProfile?.userAgent,
     });
 
     this.plugins = new CorePlugins(

@@ -54,12 +54,16 @@ export default class UserProfile {
       }
     }
 
-    return {
+    return <IUserProfile>{
       cookies,
       storage: exportedStorage,
+      geolocation: session.emulationProfile.geolocation,
+      locale: session.emulationProfile.locale,
+      timezoneId: session.emulationProfile.timezoneId,
+      userAgent: session.emulationProfile.userAgentOption,
       userAgentString: session.emulationProfile.userAgentOption.string,
       deviceProfile: session.emulationProfile.deviceProfile,
-    } as IUserProfile;
+    };
   }
 
   public static async installCookies(session: Session): Promise<UserProfile> {
