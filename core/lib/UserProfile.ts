@@ -116,7 +116,6 @@ export default class UserProfile {
     try {
       browserContext.resources.isCollecting = false;
       page.storeEventsWithoutListeners = false;
-      page.runPageScripts = true;
 
       // eslint-disable-next-line require-await,@typescript-eslint/require-await
       await page.networkManager.setNetworkInterceptor(async ({ request, requestId }) => {
