@@ -339,6 +339,7 @@ export default class Session
     if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
       page = await this.browserContext.newPage({
         groupName: 'session',
+        runPageScripts: false,
         enableDomStorageTracker: false,
       });
       await UserProfile.installStorage(this, page);
