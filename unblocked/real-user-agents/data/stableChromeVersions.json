@@ -5,9 +5,9 @@
     "majorVersion": 115,
     "buildVersion": 5790,
     "stablePatchesByOs": {
-      "mac": [98],
-      "win": [99],
-      "linux": [98]
+      "mac": [102, 98],
+      "win": [102, 99],
+      "linux": [102, 98]
     }
   },
   {
