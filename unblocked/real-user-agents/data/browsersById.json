@@ -3549,5 +3549,18 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "safari-16-5": {
+    "id": "safari-16-5",
+    "name": "Safari",
+    "marketshare": 3.8,
+    "version": {
+      "major": "16",
+      "minor": "5",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }

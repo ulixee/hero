@@ -16318,5 +16318,10 @@
     "id": "Chrome-115.0--OS X-Monterey",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "osId": "mac-os-12"
+  },
+  {
+    "id": "Safari-16.5--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.1 Safari/605.1.15",
+    "osId": "mac-os-13"
   }
 ]
