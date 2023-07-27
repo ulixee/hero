@@ -3,6 +3,7 @@ import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMe
 import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import CoreTab from './CoreTab';
+import DetachedResource from './DetachedResource';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
@@ -73,8 +74,9 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
     throw new Error(subscribeErrorMessage);
   }
 
-  public $detach(): Promise<void> {
-    return this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+  public async $detach(): Promise<DetachedResource> {
+    const resource = await this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+    return new DetachedResource(resource);
   }
 
   public async $addToDetachedResources(name: string): Promise<void> {

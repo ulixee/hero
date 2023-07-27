@@ -1,10 +1,13 @@
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
+import { resourceLimits } from 'worker_threads';
 import CoreTab from './CoreTab';
+import DetachedResource from './DetachedResource';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
@@ -58,8 +61,9 @@ export default class Resource {
     return this.text.then(JSON.parse);
   }
 
-  public $detach(): Promise<void> {
-    return this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+  public async $detach(): Promise<DetachedResource> {
+    const resource = await this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+    return new DetachedResource(resource);
   }
 
   public async $addToDetachedResources(name: string): Promise<void> {

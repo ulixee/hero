@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.4",
-    "@ulixee/chrome-app": "1.0.2",
+    "@ulixee/chrome-app": "1.0.3",
     "@ulixee/hero": "2.0.0-alpha.23",
     "@ulixee/hero-testing": "2.0.0-alpha.23",
     "vue": "^2.6.12"

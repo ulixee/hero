@@ -174,7 +174,7 @@ Alter the object's values per Http2 Session.
 
 ### beforeHttpRequest<em>(request: IHttpResourceLoadDetails)</em>
 
-A callback is provided for each HTTP request where you are given the opportunity to re-order, re-case, and add or remove headers so that they resemble real browser requests. Headless Chrome is known to provide headers is different order on occasion from headed. See [https://github.com/ulixee/double-agent](https://github.com/ulixee/double-agent) for details.
+A callback is provided for each HTTP request where you are given the opportunity to re-order, re-case, and add or remove headers so that they resemble real browser requests. Headless Chrome is known to provide headers in different order on occasion from headed. See [https://github.com/ulixee/double-agent](https://github.com/ulixee/double-agent) for details.
 
 #### **Returns** `Promise` | `void`
 

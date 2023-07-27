@@ -335,7 +335,7 @@ export default class Tab
     }
   }
 
-  public async detachResource(name: string, resourceId: number, timestamp: number): Promise<void> {
+  public async detachResource(name: string, resourceId: number, timestamp: number): Promise<IDetachedResource> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
     this.session.db.detachedResources.insert(
@@ -363,6 +363,7 @@ export default class Tab
       detachedResource.websocketMessages = this.session.websocketMessages.getMessages(resourceId);
     }
     this.session.emit('collected-asset', { type: 'resource', asset: detachedResource });
+    return detachedResource;
   }
 
   public async getResourceProperty(

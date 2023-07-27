@@ -1,3 +1,4 @@
+import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from '@ulixee/js-path';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
@@ -253,7 +254,7 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.run('Tab.configure', options);
   }
 
-  public async detachResource(name: string, resourceId: number): Promise<void> {
+  public async detachResource(name: string, resourceId: number): Promise<IDetachedResource> {
     return await this.commandQueue.run('Tab.detachResource', name, resourceId, Date.now());
   }
 

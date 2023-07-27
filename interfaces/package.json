@@ -7,6 +7,6 @@
     "@ulixee/commons": "2.0.0-alpha.23",
     "@ulixee/js-path": "2.0.0-alpha.23",
     "@ulixee/unblocked-specification": "2.0.0-alpha.23",
-    "devtools-protocol": "^0.0.981744"
+    "devtools-protocol": "^0.0.1137505"
   }
 }

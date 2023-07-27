@@ -42,8 +42,8 @@
     "@commitlint/config-conventional": "^17.6.3",
     "@types/jest": "^29.5.1",
     "@types/node": "^16.18.31",
-    "@ulixee/repo-tools": "^1.0.26",
     "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/repo-tools": "^1.0.26",
     "cross-env": "^7.0.3",
     "decamelize": "^4.0.0",
     "husky": "^8.0.3",
@@ -85,7 +85,6 @@
     ]
   },
   "resolutions": {
-    "tough-cookie": "^4.0.0",
-    "**/ua-parser-js": "0.7.28"
+    "tough-cookie": "^4.0.0"
   }
 }

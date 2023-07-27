@@ -49,6 +49,8 @@ import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterPr
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { EventEmitter } from 'events';
+import DetachedElement from './DetachedElement';
+import DetachedResource from './DetachedResource';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -278,16 +280,24 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     }
   }
 
+
+  public async detach(
+    elementOrResource: Resource | WebsocketResource,
+  ): Promise<DetachedResource>;
+  public async detach(
+    elementOrResource: Resource | WebsocketResource,
+  ): Promise<DetachedElement>;
   public async detach(
     elementOrResource: Resource | WebsocketResource | IDomExtensionClass,
-  ): Promise<void> {
+  ): Promise<DetachedResource | DetachedElement> {
     if (elementOrResource instanceof Resource || elementOrResource instanceof WebsocketResource) {
-      await elementOrResource.$detach();
-    } else if (isDomExtensionClass(elementOrResource)) {
-      await elementOrResource.$detach();
-    } else {
-      throw new Error('The first argument must be an Element or Resource');
+      return await elementOrResource.$detach();
     }
+    if (isDomExtensionClass(elementOrResource)) {
+     return await elementOrResource.$detach();
+    }
+
+    throw new Error('The first argument must be an Element or Resource');
   }
 
   public close(): Promise<void> {
