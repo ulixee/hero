@@ -3562,5 +3562,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-115-0": {
+    "id": "edge-115-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "115",
+      "minor": "0",
+      "build": "1901",
+      "patch": "183"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
