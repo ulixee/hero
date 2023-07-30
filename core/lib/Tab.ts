@@ -17,7 +17,7 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
+import { IBlockedResourceType, InterceptedResource } from '@ulixee/hero-interfaces/ITabOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
@@ -258,6 +258,70 @@ export default class Tab
     interceptor.urls = blockedUrls;
   }
 
+  public setInterceptedResources(interceptedResources?: InterceptedResource[]): void {
+    const mitmSession = this.session.mitmRequestSession;
+
+    let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
+    if (!interceptor) {
+      mitmSession.interceptorHandlers.push({ types: [] });
+      interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
+    }
+
+    interceptor.handlerFn = async (url, type, request, response): Promise<boolean> => {
+      // Convert URL object to string for comparison
+      const requestUrl = url.toString();
+
+      if (interceptedResources) {
+        let intercepted = false;
+        for (const resource of interceptedResources) {
+          // Check if the request URL matches any of the provided URLs in the interceptedResources array
+          if (typeof resource.url === 'string' && requestUrl.includes(resource.url)) {
+            if (resource.body) {
+              // Replace the response body with the provided body
+              response.end(resource.body);
+            }
+            if (resource.statusCode) {
+              // Replace the response status code with the provided status code
+              response.statusCode = resource.statusCode;
+            }
+            if (resource.headers) {
+              // Replace the response headers with the provided headers
+              for (const [key, value] of Object.entries(resource.headers)) {
+                response.setHeader(key, value);
+              }
+            }
+
+            intercepted = true;
+
+            // Resource intercepted and manipulated
+          } else if (resource.url instanceof RegExp && resource.url.test(requestUrl)) {
+            if (resource.body) {
+              response.end(resource.body);
+            }
+
+            if (resource.statusCode) {
+              response.statusCode = resource.statusCode;
+            }
+
+            if (resource.headers) {
+              for (const [key, value] of Object.entries(resource.headers)) {
+                response.setHeader(key, value);
+              }
+            }
+
+            intercepted = true; // Resource intercepted and manipulated
+          }
+
+          if (intercepted) {
+            return true; // Resource intercepted, stop processing
+          }
+        }
+      }
+
+      return false; // Resource not intercepted, let it pass through
+    };
+  }
+
   public async close(): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
@@ -335,7 +399,11 @@ export default class Tab
     }
   }
 
-  public async detachResource(name: string, resourceId: number, timestamp: number): Promise<IDetachedResource> {
+  public async detachResource(
+    name: string,
+    resourceId: number,
+    timestamp: number,
+  ): Promise<IDetachedResource> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
     this.session.db.detachedResources.insert(
@@ -850,6 +918,9 @@ export default class Tab
     }
     if (this.session.options?.blockedResourceUrls) {
       await this.setBlockedResourceUrls(this.session.options.blockedResourceUrls);
+    }
+    if (this.session.options?.interceptedResources) {
+      await this.setInterceptedResources(this.session.options.interceptedResources);
     }
   }
 

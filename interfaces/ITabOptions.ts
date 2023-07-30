@@ -1,6 +1,7 @@
 export default interface ITabOptions {
   blockedResourceTypes?: IBlockedResourceType[];
   blockedResourceUrls?: (string | RegExp)[];
+  interceptedResources?: InterceptedResource[];
 }
 
 export enum BlockedResourceType {
@@ -14,6 +15,13 @@ export enum BlockedResourceType {
   BlockAssets = 'BlockAssets',
   All = 'All',
   None = 'None',
+}
+
+export interface InterceptedResource {
+  url: string | RegExp;
+  body?: string;
+  statusCode?: number;
+  headers?: { [key: string]: string };
 }
 
 export type IBlockedResourceType = keyof typeof BlockedResourceType;

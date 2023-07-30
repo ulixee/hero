@@ -280,13 +280,8 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     }
   }
 
-
-  public async detach(
-    elementOrResource: Resource | WebsocketResource,
-  ): Promise<DetachedResource>;
-  public async detach(
-    elementOrResource: Resource | WebsocketResource,
-  ): Promise<DetachedElement>;
+  public async detach(elementOrResource: Resource | WebsocketResource): Promise<DetachedResource>;
+  public async detach(elementOrResource: Resource | WebsocketResource): Promise<DetachedElement>;
   public async detach(
     elementOrResource: Resource | WebsocketResource | IDomExtensionClass,
   ): Promise<DetachedResource | DetachedElement> {
@@ -294,7 +289,7 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
       return await elementOrResource.$detach();
     }
     if (isDomExtensionClass(elementOrResource)) {
-     return await elementOrResource.$detach();
+      return await elementOrResource.$detach();
     }
 
     throw new Error('The first argument must be an Element or Resource');
