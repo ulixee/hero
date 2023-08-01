@@ -71,29 +71,30 @@ example.com
 ```
 
 ### Intercepted Resources
+
 This allows you to intercept resources and modify them before they are loaded. This is useful for modifying the response of a request.
 
 ```js
 const hero = new Hero({
-  interceptedUrls: [
+  interceptedResources: [
     {
       url: 'https://example.com',
-      body: "<div>Hello World!</div>"
+      body: '<div>Hello World!</div>',
     },
   ],
 });
 
 const heroStatus = new Hero({
-  interceptedUrls: [
+  interceptedResources: [
     {
       url: 'https://example.com',
-      statusCode: 404
+      statusCode: 404,
     },
   ],
 });
 
 const heroHeaders = new Hero({
-  interceptedUrls: [
+  interceptedResources: [
     {
       url: 'https://example.com',
       headers: [
@@ -139,7 +140,7 @@ An upstream proxy url should be a fully formatted url to the proxy. If your prox
 
 Configuration for Core should be performed before initialization.
 
-### Core.start *(options)* {#core-start}
+### Core.start _(options)_ {#core-start}
 
 Update existing settings.
 

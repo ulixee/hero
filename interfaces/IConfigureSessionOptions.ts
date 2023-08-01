@@ -11,5 +11,5 @@ export default interface IConfigureSessionOptions
     | 'upstreamProxyUseLocalDns'
     | 'blockedResourceTypes'
     | 'blockedResourceUrls'
-    | 'interceptedUrls'
+    | 'interceptedResources'
   > {}
