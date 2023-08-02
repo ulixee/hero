@@ -267,10 +267,11 @@ export default class Tab
       interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
     }
 
+    interceptor.urls = interceptedResources.map(x => x.url);
+
     interceptor.handlerFn = async (url, type, request, response): Promise<boolean> => {
       // Convert URL object to string for comparison
       const requestUrl = url.toString();
-
       if (interceptedResources) {
         let intercepted = false;
         for (const resource of interceptedResources) {

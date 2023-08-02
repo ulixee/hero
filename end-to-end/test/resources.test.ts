@@ -320,4 +320,82 @@ describe('basic resource tests', () => {
     expect(await resources[0].response.statusCode).toBe(200);
     expect(resources[0].type).toBe('Document');
   });
+
+  it('allows you to intercept requests: strings', async () => {
+    koaServer.get('/intercept-strings', ctx => {
+      ctx.body = `<html>
+        <head>
+          <title>hero</title>
+        </head>
+        <body>
+          Hero is a browser automation library.
+        </body>
+      </html>`;
+    });
+
+    const newBody = `
+    <html>
+      <head>
+        <title>hero</title>
+      </head>
+      <body>
+        Hero is a browser automation tool.
+      </body>
+    </html>`;
+
+    const hero = new Hero({
+      interceptedResources: [
+        {
+          url: 'intercept-strings',
+          body: newBody,
+        },
+      ],
+    });
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(`${koaServer.baseUrl}/intercept-strings`);
+    await hero.waitForPaintingStable();
+    const outerHtml = await hero.document.documentElement.outerHTML;
+    await new Promise(setImmediate);
+    expect(outerHtml).toContain('Hero is a browser automation tool.');
+  });
+
+  it('allows you to intercept requests: RegExp', async () => {
+    koaServer.get('/intercept-regexes', ctx => {
+      ctx.body = `<html>
+        <head>
+          <title>hero</title>
+        </head>
+        <body>
+          Hero is a browser automation library.
+        </body>
+      </html>`;
+    });
+
+    const newBody = `
+    <html>
+      <head>
+        <title>hero</title>
+      </head>
+      <body>
+        Hero is a browser automation tool.
+      </body>
+    </html>`;
+
+    const hero = new Hero({
+      interceptedResources: [
+        {
+          url: /intercept-regexes/,
+          body: newBody,
+        },
+      ],
+    });
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(`${koaServer.baseUrl}/intercept-regexes`);
+    await hero.waitForPaintingStable();
+    const outerHtml = await hero.document.documentElement.outerHTML;
+    await new Promise(setImmediate);
+    expect(outerHtml).toContain('Hero is a browser automation tool.');
+  });
 });
