@@ -70,6 +70,44 @@ example.com
 *example.com
 ```
 
+### Intercepted Resources
+
+This allows you to intercept resources and modify them before they are loaded. This is useful for modifying the response of a request.
+
+```js
+const hero = new Hero({
+  interceptedResources: [
+    {
+      url: 'https://example.com',
+      body: '<div>Hello World!</div>',
+    },
+  ],
+});
+
+const heroStatus = new Hero({
+  interceptedResources: [
+    {
+      url: 'https://example.com',
+      statusCode: 404,
+    },
+  ],
+});
+
+const heroHeaders = new Hero({
+  interceptedResources: [
+    {
+      url: 'https://example.com',
+      headers: [
+        {
+          name: 'Content-Type',
+          value: 'text/html',
+        },
+      ],
+    },
+  ],
+});
+```
+
 ### User Profile <div class="specs"><i>Connection</i><i>Hero</i></div>
 
 A user profile stores and restores Cookies, DOM Storage and IndexedDB records for an Hero. NOTE: the serialized user profile passed into an Hero instance is never modified. If you want to update a profile with changes, you should re-export and save it to the format you're persisting to.
@@ -102,7 +140,7 @@ An upstream proxy url should be a fully formatted url to the proxy. If your prox
 
 Configuration for Core should be performed before initialization.
 
-### Core.start *(options)* {#core-start}
+### Core.start _(options)_ {#core-start}
 
 Update existing settings.
 

@@ -77,6 +77,7 @@ const Hero = require('@ulixee/hero-playground');
     - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration.md#blocked-resources).
   - blockedResourceUrls: `(string | RegExp)[]`. Also controls browser resource loading. See for more information [here](../overview/configuration.md#blocked-urls).
+  - interceptedResources: `InterceptedResource[]` A list of resources to intercept and modify. See for more information [here](../overview/configuration.md#intercepted-resources).
   - showChrome `boolean`. A boolean whether to show the Chrome browser window. Can also be set with an env variable: `ULX_SHOW_CHROME=true`. Default `false`.
   - showChromeInteractions `boolean`. A boolean whether to inject user interactions to mimic headless mouse/keyboard activity. Default `false`.
   - showDevtools: `boolean` - Automatically show devtools when Chrome is open using `showChrome`. Default `false`.

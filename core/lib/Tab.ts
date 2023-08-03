@@ -17,7 +17,7 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
 import IResourceSummary from '@ulixee/hero-interfaces/IResourceSummary';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
+import { IBlockedResourceType, InterceptedResource } from '@ulixee/hero-interfaces/ITabOptions';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import MirrorNetwork from '@ulixee/hero-timetravel/lib/MirrorNetwork';
@@ -258,6 +258,42 @@ export default class Tab
     interceptor.urls = blockedUrls;
   }
 
+  public setInterceptedResources(interceptedResources?: InterceptedResource[]): void {
+    const mitmSession = this.session.mitmRequestSession;
+
+    if (interceptedResources) {
+      for (const resource of interceptedResources) {
+        if (resource) {
+          const interceptor = {
+            types: [],
+            urls: [resource.url],
+            handlerFn: async (url, type, request, response): Promise<boolean> => {
+              if (resource.statusCode) {
+                response.statusCode = resource.statusCode;
+              }
+
+              if (resource.headers) {
+                for (const [key, value] of Object.entries(resource.headers)) {
+                  response.setHeader(key, value);
+                }
+              }
+
+              if (resource.body) {
+                response.end(resource.body);
+              } else {
+                response.end();
+              }
+
+              return true;
+            },
+          };
+
+          mitmSession.interceptorHandlers.push(interceptor);
+        }
+      }
+    }
+  }
+
   public async close(): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
@@ -335,7 +371,11 @@ export default class Tab
     }
   }
 
-  public async detachResource(name: string, resourceId: number, timestamp: number): Promise<IDetachedResource> {
+  public async detachResource(
+    name: string,
+    resourceId: number,
+    timestamp: number,
+  ): Promise<IDetachedResource> {
     const resource = this.session.resources.get(resourceId);
     if (!resource) throw new Error('Unknown resource collected');
     this.session.db.detachedResources.insert(
@@ -850,6 +890,9 @@ export default class Tab
     }
     if (this.session.options?.blockedResourceUrls) {
       await this.setBlockedResourceUrls(this.session.options.blockedResourceUrls);
+    }
+    if (this.session.options?.interceptedResources) {
+      await this.setInterceptedResources(this.session.options.interceptedResources);
     }
   }
 
