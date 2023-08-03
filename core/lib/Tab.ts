@@ -261,66 +261,41 @@ export default class Tab
   public setInterceptedResources(interceptedResources?: InterceptedResource[]): void {
     const mitmSession = this.session.mitmRequestSession;
 
-    let interceptor = mitmSession.interceptorHandlers.find(x => x.types && !x.handlerFn);
-    if (!interceptor) {
-      mitmSession.interceptorHandlers.push({ types: [] });
-      interceptor = mitmSession.interceptorHandlers[mitmSession.interceptorHandlers.length - 1];
-    }
+    mitmSession.interceptorHandlers = mitmSession.interceptorHandlers.filter(
+      handler => handler.urls && handler.urls.length > 0,
+    );
 
-    interceptor.urls = interceptedResources.map(x => x.url);
-
-    interceptor.handlerFn = async (url, type, request, response): Promise<boolean> => {
-      // Convert URL object to string for comparison
-      const requestUrl = url.toString();
-      if (interceptedResources) {
-        let intercepted = false;
-        for (const resource of interceptedResources) {
-          // Check if the request URL matches any of the provided URLs in the interceptedResources array
-          if (typeof resource.url === 'string' && requestUrl.includes(resource.url)) {
-            if (resource.body) {
-              // Replace the response body with the provided body
-              response.end(resource.body);
-            }
-            if (resource.statusCode) {
-              // Replace the response status code with the provided status code
-              response.statusCode = resource.statusCode;
-            }
-            if (resource.headers) {
-              // Replace the response headers with the provided headers
-              for (const [key, value] of Object.entries(resource.headers)) {
-                response.setHeader(key, value);
+    if (interceptedResources) {
+      for (const resource of interceptedResources) {
+        if (resource) {
+          const interceptor = {
+            types: [],
+            urls: [resource.url],
+            handlerFn: async (url, type, request, response): Promise<boolean> => {
+              if (resource.statusCode) {
+                response.statusCode = resource.statusCode;
               }
-            }
 
-            intercepted = true;
-
-            // Resource intercepted and manipulated
-          } else if (resource.url instanceof RegExp && resource.url.test(requestUrl)) {
-            if (resource.body) {
-              response.end(resource.body);
-            }
-
-            if (resource.statusCode) {
-              response.statusCode = resource.statusCode;
-            }
-
-            if (resource.headers) {
-              for (const [key, value] of Object.entries(resource.headers)) {
-                response.setHeader(key, value);
+              if (resource.headers) {
+                for (const [key, value] of Object.entries(resource.headers)) {
+                  response.setHeader(key, value);
+                }
               }
-            }
 
-            intercepted = true; // Resource intercepted and manipulated
-          }
+              if (resource.body) {
+                response.end(resource.body);
+              } else {
+                response.end();
+              }
 
-          if (intercepted) {
-            return true; // Resource intercepted, stop processing
-          }
+              return true;
+            },
+          };
+
+          mitmSession.interceptorHandlers.push(interceptor);
         }
       }
-
-      return false; // Resource not intercepted, let it pass through
-    };
+    }
   }
 
   public async close(): Promise<void> {
