@@ -261,10 +261,6 @@ export default class Tab
   public setInterceptedResources(interceptedResources?: InterceptedResource[]): void {
     const mitmSession = this.session.mitmRequestSession;
 
-    mitmSession.interceptorHandlers = mitmSession.interceptorHandlers.filter(
-      handler => handler.urls && handler.urls.length > 0,
-    );
-
     if (interceptedResources) {
       for (const resource of interceptedResources) {
         if (resource) {
