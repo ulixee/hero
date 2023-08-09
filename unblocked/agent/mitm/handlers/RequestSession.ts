@@ -72,7 +72,7 @@ export default class RequestSession
     hooks: INetworkHooks,
     logger: IBoundLog,
     public upstreamProxyUrl?: string,
-    public upstreamProxyUseSystemDns?: boolean
+    public upstreamProxyUseSystemDns?: boolean,
   ) {
     super();
     this.logger = logger.createChild(module);
@@ -118,7 +118,14 @@ export default class RequestSession
     }
   }
 
-  public async willSendResponse(context: IMitmRequestContext): Promise<void> {
+  // NOTE: must change names from plugin callbacks or it will loop back here
+  public async willSendHttpRequestBody(context: IMitmRequestContext): Promise<void> {
+    for (const hook of this.hooks) {
+      await hook.beforeHttpRequestBody?.(context);
+    }
+  }
+
+  public async willSendHttpResponse(context: IMitmRequestContext): Promise<void> {
     context.setState(ResourceState.EmulationWillSendResponse);
 
     if (context.resourceType === 'Document' && context.status === 200) {
@@ -131,7 +138,13 @@ export default class RequestSession
     }
   }
 
-  public async haveSentResponse(context: IMitmRequestContext): Promise<void> {
+  public async willSendHttpResponseBody(context: IMitmRequestContext): Promise<void> {
+    for (const hook of this.hooks) {
+      await hook.beforeHttpResponseBody?.(context);
+    }
+  }
+
+  public async didSendHttpResponse(context: IMitmRequestContext): Promise<void> {
     for (const hook of this.hooks) {
       await hook.afterHttpResponse?.(context);
     }

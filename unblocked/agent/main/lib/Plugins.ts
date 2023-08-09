@@ -62,7 +62,9 @@ export default class Plugins implements IUnblockedPlugins {
     onHttp2SessionConnect: [],
     shouldBlockRequest: [],
     beforeHttpRequest: [],
+    beforeHttpRequestBody: [],
     beforeHttpResponse: [],
+    beforeHttpResponseBody: [],
     afterHttpResponse: [],
     websiteHasFirstPartyInteraction: [],
   };
@@ -228,8 +230,16 @@ export default class Plugins implements IUnblockedPlugins {
     await Promise.all(this.hooksByName.beforeHttpRequest.map(fn => fn(resource)));
   }
 
+  public async beforeHttpRequestBody(resource: IHttpResourceLoadDetails): Promise<void> {
+    await Promise.all(this.hooksByName.beforeHttpRequestBody.map(fn => fn(resource)));
+  }
+
   public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
     await Promise.all(this.hooksByName.beforeHttpResponse.map(fn => fn(resource)));
+  }
+
+  public async beforeHttpResponseBody(resource: IHttpResourceLoadDetails): Promise<void> {
+    await Promise.all(this.hooksByName.beforeHttpResponseBody.map(fn => fn(resource)));
   }
 
   public async afterHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {

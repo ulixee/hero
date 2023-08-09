@@ -57,7 +57,7 @@ export async function navigateFrame(
   }
 }
 
-export async function waitForVisible(frame: Frame, selector: string): Promise<INodeVisibility> {
+export async function waitForVisible(frame: Frame, selector: string, timeoutMs = 10e3): Promise<INodeVisibility> {
   let visibility: INodeVisibility;
   await wait(
     async () => {
@@ -66,7 +66,7 @@ export async function waitForVisible(frame: Frame, selector: string): Promise<IN
         return true;
       }
     },
-    { loopDelayMs: 100, timeoutMs: 10e3 },
+    { loopDelayMs: 100, timeoutMs },
   );
   return visibility;
 }

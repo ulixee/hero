@@ -316,11 +316,58 @@ Browsers and versions send specific HTTP header values and order that are consis
   - resourceType: [`IResourceType`](./agent/net/IResourceType.ts). The type of resource being requested.
   - originType: [`OriginType`](./agent/net/OriginType.ts). The type of origin (`none`,`same-origin`,`same-site`,`cross-site`).
 
+#### beforeHttpRequestBody(request)
+
+Callback before each HTTP request is written, but _after_ headers have been sent. This hook provides the opportunity to manipulate the request body before it's sent on to the upstream server.
+
+NOTE: if you change the body (`request.requestPostDataStream`), you likely need to modify the header content-length in `beforeHttpRequest`. At this point in the flow, it will have already been sent.
+
+- request: [`IHttpResourceLoadDetails`](./agent/net/IHttpResourceLoadDetails.ts). The request being made. Details listed below are relevant to headers.
+  - url: `URL`. The full destination URL.
+  - isServerHttp2: `boolean`. Is this an HTTP2 request (the headers are different for HTTP/1 and 2).
+  - method: `string`. The http method.
+  - requestPostDataStream `ReadableStream`. To intercept the stream, you might want to first drain the existing requestPostDataStream. To simply replace with a new body, you would do the following:
+```js
+  // drain first
+for await (const _ of request.requestPostDataStream) {}
+// send body. NOTE: we had to change out the content length before the body step
+request.requestPostDataStream = Readable.from(Buffer.from('Intercept request'));
+```
+
+
 #### beforeHttpResponse(resource)
 
 Callback before sending an HTTP response to the Browser. This can be used to track cookies on response, or implement a caching layer (ie, by tracking cache headers and sending on http request, then intercepting 304 response and sending a 200 + body).
 
 - resource: [`IHttpResourceLoadDetails`](./agent/net/IHttpResourceLoadDetails.ts). The HTTP request with a response available.
+
+#### beforeHttpResponseBody(resource)
+
+Callback before sending an HTTP response "body" to the Browser. This can be used to change the response send by a server. 
+
+NOTE: if you change the content length, you need to also change the header 'Content-Length' in `beforeHttpResponse`.
+
+
+```typescript
+async beforeHttpResponse(response: IHttpResourceLoadDetails): Promise<any> {
+  if (response.url.pathname === '/intercept-post') {
+    response.responseHeaders['Content-Length'] = 'Intercepted'.length.toString();
+  }
+},
+async beforeHttpResponseBody(response: IHttpResourceLoadDetails): Promise<any> {
+  if (response.url.pathname === '/intercept-post') {
+    // drain response body. 
+    // NOTE: we could also try to modify as we stream, but it's trickier
+    // to handle properly.
+    for await (const _ of response.responseBodyStream) {
+    }
+    response.responseBodyStream = Readable.from(Buffer.from('Intercepted'));
+  }
+}
+```
+
+- resource: [`IHttpResourceLoadDetails`](./agent/net/IHttpResourceLoadDetails.ts). The HTTP request with a response available.
+  - responseBodyStream `ReadableStream`. The response body stream. You can simply replace this variable, or you can modify the awaited iterator as it's streamed.
 
 #### afterHttpResponse(resource)
 

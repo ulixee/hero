@@ -4,7 +4,10 @@ import { createPromise } from '@ulixee/commons/lib/utils';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
+import { Readable } from 'stream';
 import { Pool } from '../index';
+import { waitForVisible } from './_pageTestUtils';
 
 const mocks = {
   MitmRequestContext: {
@@ -319,4 +322,71 @@ This is the main body
     'https://dataliberationfoundation.org/test.css',
     'https://dataliberationfoundation.org/dlfSite.png',
   ]);
+});
+
+
+test('should be able to intercept http requests and responses', async () => {
+  const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
+  agent.hook({
+    async beforeHttpRequest(request: IHttpResourceLoadDetails): Promise<any> {
+      if (request.url.pathname === '/intercept-post') {
+        // NOTE: need to delete the content length (or set to correct value)
+        delete request.requestHeaders['Content-Length'];
+      }
+    },
+    async beforeHttpRequestBody(request: IHttpResourceLoadDetails): Promise<any> {
+
+      if (request.url.pathname === '/intercept-post') {
+        // drain first
+        for await (const _ of request.requestPostDataStream) {}
+        // send body. NOTE: we had to change out the content length before the body step
+        request.requestPostDataStream = Readable.from(Buffer.from('Intercept request'));
+      }
+    },
+    async beforeHttpResponse(response: IHttpResourceLoadDetails): Promise<any> {
+      if (response.url.pathname === '/intercept-post') {
+        response.responseHeaders['Content-Length'] = 'Intercepted'.length.toString();
+      }
+    },
+    async beforeHttpResponseBody(response: IHttpResourceLoadDetails): Promise<any> {
+      if (response.url.pathname === '/intercept-post') {
+        for await (const _ of response.responseBodyStream) {
+        }
+        response.responseBodyStream = Readable.from(Buffer.from('Intercepted'));
+      }
+    }
+  });
+  const page = await agent.newPage();
+  const requestPost = new Resolvable<string>();
+  koa.post('/intercept-post', async ctx => {
+    let request = '';
+    for await (const chunk of ctx.req) {
+      request += chunk.toString();
+    }
+    requestPost.resolve(request);
+    ctx.body = 'Result';
+  });
+  koa.get('/intercept', async ctx => {
+    ctx.body = `<html>
+<body>
+<h1>Nothing</h1>
+</body>
+<script type='text/javascript'>
+ fetch('/intercept-post', {
+    method: 'POST',
+    body: 'Send',
+  })
+  .then(x => x.text())
+  .then(x => {
+    document.querySelector('h1').textContent = x;
+    document.body.classList.add('ready');
+  });
+</script>
+</html>`;
+  });
+  await page.goto(`${koa.baseUrl}/intercept`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+  await expect(requestPost).resolves.toBe('Intercept request');
+  await waitForVisible(page.mainFrame, 'body.ready', 5e3);
+  await expect(page.evaluate('document.querySelector("h1").textContent')).resolves.toBe('Intercepted');
 });

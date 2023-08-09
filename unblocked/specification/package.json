@@ -4,7 +4,7 @@
   "description": "Interfaces to interact with Unblocked Agent Plugins",
   "dependencies": {
     "@ulixee/js-path": "2.0.0-alpha.23",
-    "devtools-protocol": "^0.0.981744"
+    "devtools-protocol": "^0.0.1137505"
   },
   "devDependencies": {
     "@ulixee/commons": "2.0.0-alpha.23"

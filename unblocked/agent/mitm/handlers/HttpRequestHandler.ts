@@ -1,14 +1,14 @@
-import * as http from 'http';
-import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
-import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
+import * as http from 'http';
+import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import HeadersHandler from './HeadersHandler';
+import ResourceState from '../interfaces/ResourceState';
+import HttpResponseCache from '../lib/HttpResponseCache';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
 import BaseHttpHandler from './BaseHttpHandler';
-import HttpResponseCache from '../lib/HttpResponseCache';
-import ResourceState from '../interfaces/ResourceState';
+import HeadersHandler from './HeadersHandler';
 
 const { log } = Log(module);
 
@@ -117,7 +117,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return;
     }
 
-    await context.requestSession.willSendResponse(context);
+    await context.requestSession.willSendHttpResponse(context);
 
     try {
       this.writeResponseHead();
@@ -131,7 +131,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return this.onError('ServerToProxyToClient.ReadWriteResponseError', err);
     }
 
-    await context.requestSession.haveSentResponse(context);
+    await context.requestSession.didSendHttpResponse(context);
 
     context.setState(ResourceState.End);
     this.cleanup();
@@ -210,11 +210,15 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       }
     };
 
+    this.context.requestPostDataStream = clientToProxyRequest;
+    await this.context.requestSession.willSendHttpRequestBody(this.context);
+
     const data: Buffer[] = [];
-    for await (const chunk of clientToProxyRequest) {
+    for await (const chunk of this.context.requestPostDataStream) {
       data.push(chunk);
       proxyToServerRequest.write(chunk, onWriteError);
     }
+    delete this.context.requestPostDataStream;
 
     HeadersHandler.sendRequestTrailers(this.context);
     await new Promise(resolve => proxyToServerRequest.end(resolve));
@@ -267,13 +271,15 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
     context.responseBodySize = 0;
-
-    for await (const chunk of serverToProxyResponse) {
+    context.responseBodyStream = serverToProxyResponse;
+    await this.context.requestSession.willSendHttpResponseBody(this.context);
+    for await (const chunk of context.responseBodyStream) {
       const buffer = chunk as Buffer;
       context.responseBodySize += buffer.length;
       const data = context.cacheHandler.onResponseData(buffer);
       this.safeWriteToClient(data);
     }
+    delete this.context.responseBodyStream;
 
     if (context.cacheHandler.shouldServeCachedData) {
       this.safeWriteToClient(context.cacheHandler.cacheData);

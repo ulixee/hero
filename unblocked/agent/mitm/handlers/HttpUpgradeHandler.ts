@@ -97,14 +97,14 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
       responseMessage += `${serverResponse.rawHeaders[i]}: ${serverResponse.rawHeaders[i + 1]}\r\n`;
     }
     this.context.responseBodySize = 0;
-    await requestSession.willSendResponse(this.context);
+    await requestSession.willSendHttpResponse(this.context);
 
     this.context.setState(ResourceState.WriteProxyToClientResponseBody);
     clientSocket.write(`${responseMessage}\r\n`, error => {
       if (error) this.onError('ProxyToClient.UpgradeWriteError', error);
     });
 
-    await requestSession.haveSentResponse(this.context);
+    await requestSession.didSendHttpResponse(this.context);
 
     if (!serverSocket.readable || !serverSocket.writable) {
       this.context.setState(ResourceState.PrematurelyClosed);

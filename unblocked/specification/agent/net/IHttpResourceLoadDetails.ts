@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import { URL } from 'url';
 import type { IEventSubscriber } from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import IResourceType from './IResourceType';
@@ -29,6 +30,7 @@ export default interface IHttpResourceLoadDetails {
   requestHeaders: IHttpHeaders;
   requestTrailers?: IHttpHeaders;
   requestPostData?: Buffer;
+  requestPostDataStream?: Readable;
   status?: number;
   originalStatus?: number;
   statusMessage?: string;
@@ -39,6 +41,7 @@ export default interface IHttpResourceLoadDetails {
   responseTrailers?: IHttpHeaders;
   resourceType?: IResourceType;
   responseBodySize?: number;
+  responseBodyStream?: Readable;
   browserRequestId?: string;
   browserFrameId?: number;
   browserHasRequested?: Promise<void>;

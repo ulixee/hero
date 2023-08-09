@@ -23,6 +23,7 @@
     "@types/koa": "^2.11.3",
     "@types/koa__multer": "^2.0.2",
     "@types/koa__router": "^8.0.2",
-    "@types/node": "^16.18.31"
+    "@types/node": "^16.18.31",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.23"
   }
 }

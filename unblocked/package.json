@@ -35,9 +35,9 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.3",
     "@commitlint/config-conventional": "^17.6.3",
-    "@ulixee/repo-tools": "^1.0.26",
-    "@types/node": "^16.18.31",
     "@types/jest": "^29.5.1",
+    "@types/node": "^16.18.31",
+    "@ulixee/repo-tools": "^1.0.26",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "husky": "^8.0.3",
@@ -71,6 +71,5 @@
     "*.json": [
       "prettier --write"
     ]
-  },
-  "dependencies": {}
+  }
 }
