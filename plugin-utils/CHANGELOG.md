@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.24](https://github.com/ulixee/platform/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
+
+
+### Bug Fixes
+
+* **client:** detach not returning elements ([34a4340](https://github.com/ulixee/platform/commit/34a4340bfc4c8ef55430481caa7e2033e3019e4e))
+
+
+
+
+
 # [2.0.0-alpha.23](https://github.com/ulixee/platform/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
 
 **Note:** Version bump only for package @ulixee/hero-plugin-utils
