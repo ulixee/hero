@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.24](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
+
+
+### Features
+
+* **agent:** add request/response body intercept ([#71](https://github.com/ulixee/unblocked/issues/71)) ([d072414](https://github.com/ulixee/unblocked/commit/d072414c50d4800a6adfa2b0795b8f72c05bdf9f))
+* **specification:** add viewport to deviceprofile ([ea7e50e](https://github.com/ulixee/unblocked/commit/ea7e50e6c7c40656d4a4bb85580f2be9d7500373))
+
+
+
+
+
 # [2.0.0-alpha.23](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
 
 **Note:** Version bump only for package @ulixee/unblocked-specification
