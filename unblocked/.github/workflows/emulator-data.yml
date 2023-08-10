@@ -54,4 +54,5 @@ jobs:
         if: steps.browser-data-checkin.outputs.changes_detected == 'true'
         with:
           branch: main
+          push_options: '--no-verify'
           commit_message: 'chore(browser-emulator-builder): automatic update emulator data ref'

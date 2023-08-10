@@ -63,7 +63,7 @@ export async function startDockerAndLoadUrl(
 
   const hostArg = needsLocalHost ? `--add-host="${hostname}:${dockerHost}"` : '';
   const urlArg = hasDevtools ? 'about:blank' : url;
-  const command = `docker run --init --rm --name ${dockerName} --security-opt seccomp="./Docker-chrome.json" --ipc=host --shm-size='3gb' --cap-add=SYS_ADMIN ${hostArg} ${dockerArgs} ${dockerName} "${chromeArgs.join(
+  const command = `docker run --init --rm --name ${dockerName} --privileged --ipc=host --shm-size='3gb' --cap-add=SYS_ADMIN ${hostArg} ${dockerArgs} ${dockerName} "${chromeArgs.join(
     ' ',
   )}" "${urlArg}"`;
 
