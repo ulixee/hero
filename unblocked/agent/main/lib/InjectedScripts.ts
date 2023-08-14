@@ -26,7 +26,7 @@ window.ULX = {
   JsPath,
   MouseEvents
 };
-})('${pageEventsCallbackName}');`;
+})('${pageEventsCallbackName}');`.replaceAll(/# sourceMappingURL=.*\.js\.map/g, '');
 
 export default class InjectedScripts {
   public static JsPath = `ULX.JsPath`;
