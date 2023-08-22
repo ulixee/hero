@@ -3588,5 +3588,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-116-0": {
+    "id": "chrome-116-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "116",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
