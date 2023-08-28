@@ -1,6 +1,8 @@
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@ulixee/commons/lib/utils';
-import IUserAgentOption, { IVersion } from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
+import IUserAgentOption, {
+  IVersion,
+} from '@ulixee/unblocked-specification/plugin/IUserAgentOption';
 import RealUserAgents from '@ulixee/real-user-agents';
 import UserAgent from '@ulixee/real-user-agents/lib/UserAgent';
 import findUaClientHintsPlatformVersion from '@ulixee/real-user-agents/lib/findUaClientHintsPlatformVersion';
@@ -157,7 +159,15 @@ export default class UserAgentOptions {
     if (agent.stablePatchVersions.length) {
       patch = pickRandom(agent.stablePatchVersions);
     }
-    const uaClientHintsPlatformVersion = pickRandom(agent.uaClientHintsPlatformVersions);
+    const uaClientHintsPlatformVersion = agent.uaClientHintsPlatformVersions.length
+      ? pickRandom(agent.uaClientHintsPlatformVersions)
+      : `${[
+          agent.operatingSystemVersion.major,
+          agent.operatingSystemVersion.minor,
+          agent.operatingSystemVersion.build,
+        ]
+          .filter(x => x !== undefined && x !== null)
+          .join('.')}`;
 
     const userAgent = {
       browserName: cleanName(agent.browserName),

@@ -10,7 +10,7 @@ Source data can be updated by using `yarn update`.
    - `$ yarn update:useragents`
 2. Manually update Browser and OS Information with versions pushed out (used in Scraper Report):
    - data/manual/browserReleaseDates.json
-   - data/manual/osReleaseDates.json
+   - data/manual/osReleaseDates.json (updated by `scripts/importOsVersions.js`)
    - data/manual/browserDescriptions.json
    - data/manual/osDescriptions.json
    - data/os-mappings/macOsVersionAliasMap.json - any mappings of versions to "rollups"
