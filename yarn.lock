@@ -1817,6 +1817,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/better-sqlite3@^7.6.5":
+  version "7.6.5"
+  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-7.6.5.tgz#4b64b47467b4bf0572bc7df4614a524c4bd365eb"
+  integrity sha512-H3ZUx89KiPhYa9nalUXVVStSUFHuzYxt4yoazufpTTYW9rVUCzhh02V8CH2C8nE4libnK0UgFq5DFIe0DOhqow==
+  dependencies:
+    "@types/node" "*"
+
 "@types/body-parser@*":
   version "1.19.2"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.2.tgz#aea2059e28b7658639081347ac4fab3de166e6f0"
@@ -2194,10 +2201,10 @@
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
-"@ulixee/chrome-114-0@^5735.91.8":
-  version "5735.199.8"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-114-0/-/chrome-114-0-5735.199.8.tgz#670c379f0e2a9a7d202148a907b97f4d8a94421d"
-  integrity sha512-zjau/ScbH6M7NdnWu9+RIJfaG13Kg7H2JRCafzNKzN2AetT37bOPHCthE3WRLZXZ+7nzTPA8NvYm8tKKyp6pyg==
+"@ulixee/chrome-117-0@^5938.89.8":
+  version "5938.89.8"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-117-0/-/chrome-117-0-5938.89.8.tgz#d47ea993efda3f98e73f8336ab69e192b4e8d97c"
+  integrity sha512-OnssUVq/bMrRlKFYMOtfI+6fYZBuZzvLLwISPdR8jWdPg57VtLhOwB7joUL/UkPqX1Ne0uO6cKDgyk7GiTB2cg==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
@@ -2697,13 +2704,13 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.3.tgz#c51e809c81a4e354084422b9b26bad88249c517c"
   integrity sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==
 
-better-sqlite3@^8.4.0:
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-8.5.0.tgz#b13d12d0e477be69191a39628fc8b723ee1c79d4"
-  integrity sha512-vbPcv/Hx5WYdyNg/NbcfyaBZyv9s/NVbxb7yCeC5Bq1pVocNxeL2tZmSu3Rlm4IEOTjYdGyzWQgyx0OSdORBzw==
+better-sqlite3@^8.6.0:
+  version "8.6.0"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-8.6.0.tgz#a20717993742f816158f17e2cccd88a979e77e58"
+  integrity sha512-jwAudeiTMTSyby+/SfbHDebShbmC2MCH8mU2+DXi0WJfv13ypEJm47cd3kljmy/H130CazEvkf2Li//ewcMJ1g==
   dependencies:
     bindings "^1.5.0"
-    prebuild-install "^7.1.0"
+    prebuild-install "^7.1.1"
 
 big-integer@^1.6.44:
   version "1.6.51"
@@ -7332,7 +7339,7 @@ postcss@^8.4.14:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-prebuild-install@^7.1.0:
+prebuild-install@^7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-7.1.1.tgz#de97d5b34a70a0c81334fd24641f2a1702352e45"
   integrity sha512-jAXscXWMcCK8GgCoHOfIr0ODh5ai8mj63L2nWrjuAgXE6tDyYGnx4/8o/rCgU+B4JSyZBKbeZqzhtwtC3ovxjw==

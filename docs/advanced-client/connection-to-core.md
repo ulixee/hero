@@ -31,7 +31,7 @@ The provided settings configure the connection to `Core`. Note: some configurati
 - options `IConnectionToCoreOptions`. A set of settings that controls the creation of a "connection" to a `Hero Core`.
   - host `string`. An optional `hostname:port` url that will be used to establish a WebSocket Transport to a Hero Core running on another machine. If no host is provided, a connection to a "locally" running `Core` will be attempted.
   - maxConcurrency `number`. The max number of Heroes to allow to be created at the same time. Heroes are "active" until the created Hero is closed. If not provided, this number will match the max allowed by a `Core`.
-  - instanceTimeoutMillis `number`. The number of milliseconds to give each Hero in this connection to complete a session. A TimeoutError will be thrown if this time is exceeded.
+  - instanceTimeoutMillis `number`. The number of milliseconds to give each Hero in this connection to complete a session. A TimeoutError will be thrown if this time is exceeded. NOTE: the timer begins the moment a Hero instance is created, not when the session is actually instantiated. The backlog of local Heroes, along with the backlog on the Hero Core can impact when a session is actually created.
   - dataDir `string` defaults to `os.tmpdir()/.ulixee`. Directory to store session files and mitm certificates.
 - connection `ConnectionToHeroCore`. A pre-initialized connection to a `Hero Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
 
