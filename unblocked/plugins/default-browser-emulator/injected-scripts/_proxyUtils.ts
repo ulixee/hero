@@ -325,24 +325,34 @@ function defaultProxyApply<T, K extends keyof T>(
   args: [target: any, thisArg: T, argArray: any[]],
   overrideFn?: (target?: T[K], thisArg?: T, argArray?: any[]) => T[K] | ProxyOverride,
 ): any {
-  if (overrideFn) {
-    try {
-      const result = overrideFn(...args);
-      if (result !== ProxyOverride.callOriginal) {
-        // @ts-expect-error
-        if (result && result.then && result.catch) {
-          // @ts-expect-error
-          return result.catch(err => {
-            throw cleanErrorStack(err);
-          });
-        }
-        return result;
-      }
-    } catch (err) {
-      throw cleanErrorStack(err);
-    }
+  if (!overrideFn) {
+    return ReflectCached.apply(...args);
   }
-  return ReflectCached.apply(...args);
+  let result: T[K] | ProxyOverride;
+  try {
+    result = overrideFn(...args);
+  } catch (err) {
+    throw cleanErrorStack(err);
+  }
+  if (result === ProxyOverride.callOriginal) {
+    return ReflectCached.apply(...args);
+  }
+  // Try to make clean error stacks for tenables, but don't crash if
+  // for some reason this doesn't work. Crashing here could have
+  // a huge impact on other things.
+  try {
+    // @ts-expect-error
+    if (result && result.then && typeof result.then === 'function') {
+      // @ts-expect-error
+      return result.then(r => r, err => {
+          throw cleanErrorStack(err);
+      });
+    }
+  } catch {
+    // Just return without the modified cleanErrorStack behaviour.
+    // We don't like this, but this is much better then crashing here.
+  }
+  return result;
 }
 
 function getDescriptorInHierarchy<T, K extends keyof T>(obj: T, prop: K) {
