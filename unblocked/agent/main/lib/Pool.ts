@@ -103,7 +103,7 @@ export default class Pool extends TypedEventEmitter<{
     });
 
     if (this.hasAvailability) {
-      await this.waitForAgentClose(agent);
+       this.registerActiveAgent(agent);
       return;
     }
 
@@ -216,7 +216,7 @@ export default class Pool extends TypedEventEmitter<{
     }
   }
 
-  protected waitForAgentClose(agent: Agent): void {
+  protected registerActiveAgent(agent: Agent): void {
     this.#activeAgentsCount += 1;
     try {
       this.events.once(agent, 'close', this.onAgentClosed.bind(this, agent.id));
@@ -231,7 +231,7 @@ export default class Pool extends TypedEventEmitter<{
     this.#activeAgentsCount -= 1;
     this.agentsById.delete(closedAgentId);
 
-    this.logger.info('ReleasingAgent', {
+    this.logger.info('Pool.ReleasingAgent', {
       maxConcurrentAgents: this.maxConcurrentAgents,
       activeAgentsCount: this.activeAgentsCount,
       waitingForAvailability: this.#waitingForAvailability.length,
@@ -242,7 +242,7 @@ export default class Pool extends TypedEventEmitter<{
 
     const { agent, promise } = this.#waitingForAvailability.shift();
 
-    this.waitForAgentClose(agent);
+    this.registerActiveAgent(agent);
     promise.resolve();
   }
 

@@ -137,11 +137,7 @@ describe('Page.navigate', () => {
       await page.goto('data:text/html,hello');
       const nodeVersion = process.version.replace('v', '').split('.').map(Number);
 
-      if (nodeVersion[0] >= 18) {
-        expect(page.mainFrame.url).toBe('data://text/html,hello');
-      } else {
-        expect(page.mainFrame.url).toBe('data:text/html,hello');
-      }
+      expect(page.mainFrame.url).toBe('data://text/html,hello');
     });
 
     it('should set last url in redirect chain', async () => {

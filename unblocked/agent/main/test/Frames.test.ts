@@ -317,7 +317,7 @@ describe('Frames', () => {
         `<iframe src="${server.crossProcessBaseUrl}/x-frame-options-deny.html"></iframe>`,
       );
       expect(page.frames).toHaveLength(2);
-      await page.frames[1].waitForNavigationLoader();
+      await new Promise(resolve => setTimeout(resolve, 1e3));
       // CHROME redirects to chrome-error://chromewebdata/, not sure about other browsers
       expect(page.frames[1].url).not.toMatch('/x-frame-options-deny.html');
     });

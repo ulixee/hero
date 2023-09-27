@@ -21,13 +21,13 @@ jobs:
         include:
           - node-version: 18.x
             os: ubuntu-latest
+            browser: chrome-116-0
+          - node-version: 18.x
+            os: ubuntu-latest
+            browser: chrome-115-0
+          - node-version: 18.x
+            os: ubuntu-latest
             browser: chrome-113-0
-          - node-version: 18.x
-            os: ubuntu-latest
-            browser: chrome-111-0
-          - node-version: 18.x
-            os: ubuntu-latest
-            browser: chrome-109-0
           - node-version: 18.x
             os: ubuntu-latest
             browser: chrome-103-0

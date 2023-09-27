@@ -2233,10 +2233,10 @@
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
-"@ulixee/chrome-114-0@^5735.91.8":
-  version "5735.199.8"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-114-0/-/chrome-114-0-5735.199.8.tgz#670c379f0e2a9a7d202148a907b97f4d8a94421d"
-  integrity sha512-zjau/ScbH6M7NdnWu9+RIJfaG13Kg7H2JRCafzNKzN2AetT37bOPHCthE3WRLZXZ+7nzTPA8NvYm8tKKyp6pyg==
+"@ulixee/chrome-117-0@^5938.89.8":
+  version "5938.89.8"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-117-0/-/chrome-117-0-5938.89.8.tgz#d47ea993efda3f98e73f8336ab69e192b4e8d97c"
+  integrity sha512-OnssUVq/bMrRlKFYMOtfI+6fYZBuZzvLLwISPdR8jWdPg57VtLhOwB7joUL/UkPqX1Ne0uO6cKDgyk7GiTB2cg==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 

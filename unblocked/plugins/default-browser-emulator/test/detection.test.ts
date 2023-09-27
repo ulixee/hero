@@ -471,7 +471,8 @@ test('stack overflow test should match chrome', async () => {
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`;
   if (
     (browserVersion < 112 && browserVersion > 97) ||
-    (browserVersion > 112 && platform() !== 'darwin')
+    (browserVersion > 112 && browserVersion < 117 && platform() !== 'darwin')||
+    (browserVersion >= 117 && platform() !== 'win32')
   ) {
     // replace first line only pre-112
     stack = stack.replace(

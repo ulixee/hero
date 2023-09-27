@@ -858,6 +858,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   private updateUrl(): void {
     if (this.internalFrame.url) {
       this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
+
+      if (this.url.startsWith('data:') && !this.url.startsWith('data://')) {
+        this.url = `data://${this.url.substr('data:'.length)}`;
+      }
     } else {
       this.url = undefined;
     }
