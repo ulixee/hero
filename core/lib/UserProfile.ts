@@ -194,7 +194,6 @@ ${script}
             }
             return;
           }
-          await frame.waitForLifecycleEvent('DOMContentLoaded');
 
           await frame.evaluate(
             `(async function() {
