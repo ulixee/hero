@@ -665,6 +665,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   public onLifecycleEvent(name: string, timestamp?: number, pageLoaderId?: string): void {
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init' && pageLoaderId) {
+      this.defaultLoaderId ??= pageLoaderId;
       if (loaderId && this.defaultLoaderId && loaderId !== this.defaultLoaderId) {
         const defaultLoader = this.navigationLoadersById[this.defaultLoaderId];
         if (!defaultLoader.isNavigationComplete) {

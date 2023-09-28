@@ -5,7 +5,7 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
-import { platform } from 'os';
+import { arch, platform } from 'os';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -448,6 +448,7 @@ test('stack overflow test should match chrome', async () => {
   });
 
   await page.goto(`${koaServer.baseUrl}/betrayal`);
+
   await page.waitForLoad('DomContentLoaded');
   const result = await page.evaluate<{
     depth: number;
@@ -470,9 +471,9 @@ test('stack overflow test should match chrome', async () => {
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)
     at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`;
   if (
-    (browserVersion < 112 && browserVersion > 97) ||
-    (browserVersion > 112 && browserVersion < 117 && platform() !== 'darwin')||
-    (browserVersion >= 117 && platform() !== 'win32')
+    (browserVersion > 97 && browserVersion < 112) ||
+    (browserVersion >= 112 && browserVersion < 117 && platform() !== 'darwin') ||
+    (browserVersion >= 117 && platform() !== 'win32' && arch() !== "arm64")
   ) {
     // replace first line only pre-112
     stack = stack.replace(
