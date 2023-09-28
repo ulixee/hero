@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.25](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2023-09-28)
+
+
+### Bug Fixes
+
+* **agent:** don’t include sourcemaps for injected ([272764c](https://github.com/ulixee/unblocked/commit/272764cd60ead0b9364ecbbdfa9b97058d22a3b0))
+* **default-browser-emulator:** empty ua hints ([72d0344](https://github.com/ulixee/unblocked/commit/72d034407d84c9ee70989d855dc656f0cf6cf28a))
+* don't crash on promise like object ([#73](https://github.com/ulixee/unblocked/issues/73)) ([73fff18](https://github.com/ulixee/unblocked/commit/73fff18099797f86548f847cccd3825dccd8f661))
+* **real-user-agents:** data corrupted for sonoma ([182d7d9](https://github.com/ulixee/unblocked/commit/182d7d9f0350dd62f0a3637f89e249d5fa2319fc))
+* **real-user-agents:** identify mac sonoma ([0429d02](https://github.com/ulixee/unblocked/commit/0429d0205187b504ae1a4e2121dc7624a430c34f))
+
+
+### Features
+
+* update to chrome 117 ([#74](https://github.com/ulixee/unblocked/issues/74)) ([2d9c416](https://github.com/ulixee/unblocked/commit/2d9c416f24db87c8ff191c33c774abc0a75a4683))
+
+
+
+
+
 # [2.0.0-alpha.24](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
 
 

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.25](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2023-09-28)
+
+
+### Bug Fixes
+
+* **agent:** don’t include sourcemaps for injected ([272764c](https://github.com/ulixee/unblocked/commit/272764cd60ead0b9364ecbbdfa9b97058d22a3b0))
+
+
+### Features
+
+* update to chrome 117 ([#74](https://github.com/ulixee/unblocked/issues/74)) ([2d9c416](https://github.com/ulixee/unblocked/commit/2d9c416f24db87c8ff191c33c774abc0a75a4683))
+
+
+
+
+
 # [2.0.0-alpha.24](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
 
 
