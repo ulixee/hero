@@ -38,7 +38,7 @@ jobs:
           git init -b main
           git add -A
           git commit -m 'Auto-build Javascript files'
-          git push -f https://ulixee:${{ env.GH_TOKEN }}@github.com/ulixee/unblocked.git main:${{ github.ref_name }}-built-js
+          git push -f https://ulixee:${{ env.GH_TOKEN }}@github.com/${{github.repository}}.git main:${{ github.ref_name }}-built-js
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
