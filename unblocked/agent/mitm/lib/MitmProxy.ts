@@ -423,7 +423,7 @@ export default class MitmProxy {
     if ((error as any).code === 'ECONNRESET' || !socket.writable) {
       return;
     }
-    const kind = isHttp2 ? 'Http2.SessionError' : 'Http2.ClientError';
+    const kind = isHttp2 ? 'Http2.SessionError' : 'Http.ClientError';
     log.error(`Mitm.${kind}`, {
       sessionId: this.isolatedProxyForSessionId,
       error,

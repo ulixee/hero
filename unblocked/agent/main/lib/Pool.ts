@@ -240,10 +240,12 @@ export default class Pool extends TypedEventEmitter<{
       return;
     }
 
-    const { agent, promise } = this.#waitingForAvailability.shift();
+    while (this.#waitingForAvailability.length && this.hasAvailability) {
+      const { agent, promise } = this.#waitingForAvailability.shift();
 
-    this.registerActiveAgent(agent);
-    promise.resolve();
+      this.registerActiveAgent(agent);
+      promise.resolve();
+    }
   }
 
   private async startSharedMitm(): Promise<void> {
