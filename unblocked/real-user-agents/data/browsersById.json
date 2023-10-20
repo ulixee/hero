@@ -3694,5 +3694,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-118-0": {
+    "id": "edge-118-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "118",
+      "minor": "0",
+      "build": "2088",
+      "patch": "46"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
