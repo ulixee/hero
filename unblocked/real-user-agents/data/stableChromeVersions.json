@@ -5,9 +5,9 @@
     "majorVersion": 119,
     "buildVersion": 6045,
     "stablePatchesByOs": {
-      "mac": [123, 105],
-      "win": [124, 106],
-      "linux": [123, 105]
+      "mac": [159, 123, 105],
+      "win": [160, 124, 106],
+      "linux": [159, 123, 105]
     }
   },
   {
