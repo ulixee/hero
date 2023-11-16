@@ -110,7 +110,7 @@ function extractDiffValue(
 }
 
 function ignorePath(path: string): boolean {
-  return path !== 'window.DomExtractor';
+  return path === 'window.DomExtractor';
 }
 
 function processBridgeDiff(fileKey: string, diff, startingMap): void {
