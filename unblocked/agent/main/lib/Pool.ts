@@ -24,6 +24,7 @@ const { log } = Log(module);
 
 interface ICreatePoolOptions {
   maxConcurrentAgents?: number;
+  maxConcurrentAgentsPerBrowser?: number;
   certificateStore?: ICertificateStore;
   defaultBrowserEngine?: IBrowserEngine;
   plugins?: IUnblockedPluginClass[];
@@ -46,10 +47,14 @@ export default class Pool extends TypedEventEmitter<{
   }
 
   public maxConcurrentAgents = 10;
+  public maxConcurrentAgentsPerBrowser = 10;
   public readonly browsersById = new Map<string, Browser>();
   public readonly agentsById = new Map<string, Agent>();
   public sharedMitmProxy: MitmProxy;
   public plugins: IUnblockedPluginClass[] = [];
+
+  #agentsByBrowserId: { [browser_id: string]: number } = {};
+  #browserIdByAgentId: { [agent_id: string]: string } = {};
 
   #activeAgentsCount = 0;
   #waitingForAvailability: {
@@ -69,6 +74,7 @@ export default class Pool extends TypedEventEmitter<{
   constructor(readonly options: ICreatePoolOptions = {}) {
     super();
     this.maxConcurrentAgents = options.maxConcurrentAgents ?? 10;
+    this.maxConcurrentAgentsPerBrowser = options.maxConcurrentAgentsPerBrowser ?? 10;
     this.plugins = options.plugins ?? [];
     this.logger = options.logger?.createChild(module) ?? log.createChild(module, {});
   }
@@ -103,7 +109,7 @@ export default class Pool extends TypedEventEmitter<{
     });
 
     if (this.hasAvailability) {
-       this.registerActiveAgent(agent);
+      this.registerActiveAgent(agent);
       return;
     }
 
@@ -140,9 +146,16 @@ export default class Pool extends TypedEventEmitter<{
       }
       const browser = new Browser(engine, hooks, launchArgs);
 
-      const existing = this.browserWithEngine(browser.engine);
-      if (existing) return existing;
+      for (const existingBrowser of this.browsersById.values()) {
+        const agents = this.#agentsByBrowserId[existingBrowser.id] ?? 0;
+        if (agents < this.maxConcurrentAgentsPerBrowser && existingBrowser.isEqualEngine(engine)) {
+          this.#agentsByBrowserId[existingBrowser.id] += 1;
+          return existingBrowser;
+        }
+      }
 
+      this.#agentsByBrowserId[browser.id] ??= 0;
+      this.#agentsByBrowserId[browser.id] += 1;
       // ensure enough listeners is possible
       browser.setMaxListeners(this.maxConcurrentAgents * 5);
       this.browsersById.set(browser.id, browser);
@@ -230,6 +243,14 @@ export default class Pool extends TypedEventEmitter<{
   private onAgentClosed(closedAgentId: string): void {
     this.#activeAgentsCount -= 1;
     this.agentsById.delete(closedAgentId);
+    const browserId = this.#browserIdByAgentId[closedAgentId];
+    if (this.#agentsByBrowserId[browserId]) {
+      this.#agentsByBrowserId[browserId] -= 1;
+      if (this.#agentsByBrowserId[browserId] === 0) {
+        delete this.#agentsByBrowserId[browserId];
+      }
+      delete this.#browserIdByAgentId[closedAgentId];
+    }
 
     this.logger.info('Pool.ReleasingAgent', {
       maxConcurrentAgents: this.maxConcurrentAgents,
@@ -311,14 +332,6 @@ export default class Pool extends TypedEventEmitter<{
     const browser = this.browsersById.get(browserId);
     if (browser) {
       this.emit('browser-has-no-open-windows', { browser });
-    }
-  }
-
-  private browserWithEngine(engine: IBrowserEngine): Browser {
-    for (const existingBrowser of this.browsersById.values()) {
-      if (existingBrowser.isEqualEngine(engine)) {
-        return existingBrowser;
-      }
     }
   }
 }
