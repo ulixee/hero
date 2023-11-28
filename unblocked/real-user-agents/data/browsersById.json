@@ -3748,5 +3748,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-120-0": {
+    "id": "firefox-120-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "120",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
