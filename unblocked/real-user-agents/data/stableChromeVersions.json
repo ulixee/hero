@@ -6,7 +6,7 @@
     "buildVersion": 6099,
     "stablePatchesByOs": {
       "mac": [62],
-      "win": [63],
+      "win": [71, 63],
       "linux": [62]
     }
   },
