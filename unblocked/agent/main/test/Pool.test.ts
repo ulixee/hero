@@ -65,6 +65,34 @@ describe('Pool tests', () => {
     await pool.close();
   }, 15e3);
 
+
+  it('should be able to maximize sessions per browser', async () => {
+    const pool = new Pool({ maxConcurrentAgents: 4, maxConcurrentAgentsPerBrowser: 2, ...BrowserUtils.newPoolOptions });
+    Helpers.needsClosing.push(pool);
+    expect(pool.activeAgentsCount).toBe(0);
+
+    const agents = [];
+    for (let i = 0; i < 4; i += 1) {
+      const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
+      Helpers.needsClosing.push(agent);
+      const page = await agent.newPage();
+      await page.goto(`${httpServer.baseUrl}/pool${i + 1}`);
+      agents.push(agent);
+    }
+    expect(pool.activeAgentsCount).toBe(4);
+    expect(pool.browsersById.size).toBe(2);
+    [...pool.browsersById.values()].forEach(x => expect(x.browserContextsById.size).toBe(2));
+    const nextAgent = pool.createAgent({ logger: TestLogger.forTest(module) });
+    expect(pool.activeAgentsCount).toBe(4);
+    await agents.shift().close();
+    Helpers.needsClosing.push(nextAgent);
+    agents.push(nextAgent);
+    await nextAgent.newPage();
+    expect(pool.activeAgentsCount).toBe(4);
+
+    await Promise.all(agents.map(x => x.close()));
+  }, 15e3);
+
   it('should emit events when all pages are closed', async () => {
     const pool = new Pool(BrowserUtils.newPoolOptions);
     Helpers.needsClosing.push(pool);

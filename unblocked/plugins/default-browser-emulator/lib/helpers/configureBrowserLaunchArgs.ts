@@ -1,10 +1,5 @@
-import * as Path from 'path';
-import * as os from 'os';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
-import { nanoid } from 'nanoid';
 import { defaultScreen } from '../Viewports';
-
-const instanceId = nanoid(5);
 
 export function configureBrowserLaunchArgs(
   engine: IBrowserEngine,
@@ -63,17 +58,14 @@ export function configureBrowserLaunchArgs(
     '--no-startup-window',
   );
 
-  const dataDir = Path.join(os.tmpdir(), `${instanceId}-${engine.fullVersion.replace(/\./g, '-')}`);
-  engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
-  engine.userDataDir = dataDir;
-
   if (options.showChrome) {
     if (options.showDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
-  } else { if (process.platform === 'darwin') {
-    if (process.arch === 'arm64') {
-      engine.launchArguments.push('--use-gl=any');
+  } else {
+    if (process.platform === 'darwin') {
+      if (process.arch === 'arm64') {
+        engine.launchArguments.push('--use-gl=any');
+      }
     }
-  }
     engine.launchArguments.push(
       '--hide-scrollbars',
       '--mute-audio',

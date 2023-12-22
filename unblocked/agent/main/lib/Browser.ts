@@ -1,30 +1,32 @@
-import Protocol from 'devtools-protocol';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import { assert } from '@ulixee/commons/lib/utils';
 import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import IBrowser, { IBrowserEvents } from '@ulixee/unblocked-specification/agent/browser/IBrowser';
 import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrowserEngine';
 import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
-import IBrowser, { IBrowserEvents } from '@ulixee/unblocked-specification/agent/browser/IBrowser';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
-import { IBrowserHooks, IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
-import * as os from 'os';
 import { IBrowserContextHooks } from '@ulixee/unblocked-specification/agent/hooks/IBrowserHooks';
+import { IBrowserHooks, IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
+import Protocol from 'devtools-protocol';
+import { nanoid } from 'nanoid';
+import * as os from 'os';
 import * as Path from 'path';
-import { Connection } from './Connection';
-import BrowserContext, { IBrowserContextCreateOptions } from './BrowserContext';
-import DevtoolsSession from './DevtoolsSession';
-import BrowserProcess from './BrowserProcess';
-import BrowserLaunchError from '../errors/BrowserLaunchError';
 import env from '../env';
-import DevtoolsPreferences from './DevtoolsPreferences';
-import Page, { IPageCreateOptions } from './Page';
+import BrowserLaunchError from '../errors/BrowserLaunchError';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
+import BrowserContext, { IBrowserContextCreateOptions } from './BrowserContext';
+import BrowserProcess from './BrowserProcess';
 import ChromeEngine from './ChromeEngine';
+import { Connection } from './Connection';
+import DevtoolsPreferences from './DevtoolsPreferences';
+import DevtoolsSession from './DevtoolsSession';
+import Page, { IPageCreateOptions } from './Page';
 import GetVersionResponse = Protocol.Browser.GetVersionResponse;
 import TargetInfo = Protocol.Target.TargetInfo;
 
 const { log } = Log(module);
+
+const instanceId = nanoid(5);
 
 let browserIdCounter = 0;
 
@@ -94,8 +96,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       this.hooks = hooks;
       hooks.onNewBrowser?.(this, browserUserConfig);
     }
-
-    this.afterAllLaunchArgsApplied();
   }
 
   public async connect(transport: IConnectionTransport): Promise<Browser> {
@@ -140,6 +140,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     }
 
     try {
+      this.setUserDataDir();
       this.process = new BrowserProcess(this.engine);
       this.connection = new Connection(this.process.transport);
       this.devtoolsSession = this.connection.rootSession;
@@ -175,11 +176,14 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       }
 
       if (this.process.launchStderr.length) {
-        message +=
-          `\n\n\nSometimes a reason can be found in the Chrome Stderr logs:\n\t${ 
-          this.process.launchStderr.join('\n\t')}`;
+        message += `\n\n\nSometimes a reason can be found in the Chrome Stderr logs:\n\t${this.process.launchStderr.join(
+          '\n\t',
+        )}`;
       }
-      const launchError = new BrowserLaunchError(message, err.stack.split(/\r?\n/).slice(1).join('\n'));
+      const launchError = new BrowserLaunchError(
+        message,
+        err.stack.split(/\r?\n/).slice(1).join('\n'),
+      );
 
       this.launchPromise.reject(launchError);
       log.stats('Browser.LaunchError', {
@@ -250,10 +254,13 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   }
 
   public isEqualEngine(engine: IBrowserEngine): boolean {
-    return (
-      this.engine.executablePath === engine.executablePath &&
-      this.engine.launchArguments.toString() === engine.launchArguments.toString()
-    );
+    if (this.engine.executablePath !== engine.executablePath) return false;
+    for (let i = 0; i < engine.launchArguments.length; i += 1) {
+      const launchArg = engine.launchArguments[i];
+      if (launchArg.startsWith('--user-data-dir=')) continue;
+      if (this.engine.launchArguments[i] !== launchArg) return false;
+    }
+    return true;
   }
 
   public async close(): Promise<void | Error> {
@@ -297,6 +304,20 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     return !this.connection.isClosed;
   }
 
+  public setUserDataDir(): void {
+    if (this.engine.userDataDir) return;
+    const launchArgs = this.engine.launchArguments;
+    // headless=new requires a profile
+    if (!launchArgs.some(x => x.startsWith('--user-data-dir'))) {
+      const dataDir = Path.join(
+        os.tmpdir(),
+        `${instanceId}-${browserIdCounter}-${this.engine.fullVersion.replace(/\./g, '-')}`,
+      );
+      this.engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
+      this.engine.userDataDir = dataDir;
+    }
+  }
+
   protected bindDevtoolsEvents(): void {
     this.devtoolsSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
     this.devtoolsSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
@@ -319,20 +340,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     this.version = await this.devtoolsSession.send('Browser.getVersion');
 
     this.connection.once('disconnected', this.emit.bind(this, 'close'));
-  }
-
-  private afterAllLaunchArgsApplied(): void {
-    if (!this.engine.isHeadlessNew) return;
-    const launchArgs = this.engine.launchArguments;
-    // headless=new requires a profile
-    if (!launchArgs.some(x => x.startsWith('--user-data-dir'))) {
-      const dataDir = Path.join(
-        os.tmpdir(),
-        `${browserIdCounter}-${this.engine.fullVersion.replace(/\./g, '-')}`,
-      );
-      this.engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
-      this.engine.userDataDir = dataDir;
-    }
   }
 
   private applyDefaultLaunchArgs(options: IBrowserUserConfig): void {
@@ -387,12 +394,11 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     const isDevtoolsPanel = targetInfo.url.startsWith('devtools://devtools');
     const isContextLess = !targetInfo.browserContextId;
     if (
-      isContextLess || (
-        event.targetInfo.type === 'page' &&
+      isContextLess ||
+      (event.targetInfo.type === 'page' &&
         !isDevtoolsPanel &&
         this.connectOnlyToPageTargets &&
-        !this.connectOnlyToPageTargets[targetInfo.targetId]
-      )
+        !this.connectOnlyToPageTargets[targetInfo.targetId])
     ) {
       if (this.debugLog) {
         log.stats('Not connecting to target', { event, sessionId: null });
