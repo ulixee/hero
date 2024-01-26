@@ -34,7 +34,7 @@ export default class ConnectionToHeroClient
   public disconnectPromise: Promise<void>;
 
   private get autoShutdownMillis(): number {
-    return this.core.clearIdleConnectionsAfterMillis;
+    return this.core?.clearIdleConnectionsAfterMillis ?? 0;
   }
 
   private autoShutdownTimer: NodeJS.Timer;

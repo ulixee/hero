@@ -3,6 +3,7 @@ import type ISessionRegistry from '@ulixee/hero-core/interfaces/ISessionRegistry
 
 export default interface ICoreConfigureOptions {
   maxConcurrentClientCount?: number;
+  maxConcurrentClientsPerBrowser?: number;
   dataDir?: string;
   defaultUnblockedPlugins?: IUnblockedPluginClass[];
   shouldShutdownOnSignals?: boolean;

@@ -109,6 +109,7 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
       dataDir: this.dataDir,
       logger: log.createChild(module),
       maxConcurrentAgents: options.maxConcurrentClientCount,
+      maxConcurrentAgentsPerBrowser: options.maxConcurrentClientsPerBrowser,
       plugins: options.defaultUnblockedPlugins ?? HeroCore.defaultUnblockedPlugins,
     });
 
