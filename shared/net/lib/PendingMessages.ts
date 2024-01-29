@@ -7,7 +7,7 @@ export default class PendingMessages<IPayload> {
   private readonly pendingRequestsById = new Map<string, IResolvablePromise<IPayload>>();
   private dontCancelIds = new Set<string>();
 
-  constructor(private marker: string = `\n${'------CONNECTION'.padEnd(50, '-')}\n`) {}
+  constructor(private marker = `\n${'------CONNECTION'.padEnd(50, '-')}\n`) {}
 
   public cancel(error: CanceledPromiseError): void {
     for (const id of this.pendingRequestsById.keys()) {

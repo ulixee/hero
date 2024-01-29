@@ -1,4 +1,4 @@
-import BaseSchema from './lib/BaseSchema';
+import BaseSchema, { IBaseConfig } from './lib/BaseSchema';
 import NumberSchema, { INumberSchemaConfig } from './lib/NumberSchema';
 import StringSchema, { IStringSchemaConfig } from './lib/StringSchema';
 import BigintSchema, { IBigintSchemaConfig } from './lib/BigintSchema';
@@ -39,8 +39,8 @@ export type IRecordSchemaType<T extends Record<string, BaseSchema<any, boolean>>
   ? { [K in keyof P]: P[K] }
   : never;
 
-export type ExtractSchemaType<T> = T extends BaseSchema<any, boolean>
-  ? T['$type']
+export type ExtractSchemaType<T> = T extends BaseSchema<infer U, boolean>
+  ? U
   : T extends Record<string, BaseSchema<any, boolean>>
   ? IRecordSchemaType<T>
   : unknown;
@@ -96,12 +96,15 @@ export function record<Values extends BaseSchema<any, boolean>, TOptional extend
 }
 
 export function object<
-  O extends Record<string, BaseSchema<any, boolean>>,
+  TOptional extends boolean = boolean,
+  S extends BaseSchema<any, boolean> & IBaseConfig<TOptional> = BaseSchema<any, boolean> & IBaseConfig<TOptional>,
+  O extends Record<string, S> = Record<string, S>,
+>(fields: O): ObjectSchema<O, false, S>;
+export function object<
+  S extends BaseSchema<any, boolean> = BaseSchema<any, boolean>,
+  O extends Record<string, S> = Record<string, S>,
   TOptional extends boolean = false,
->(config: IObjectSchemaConfig<O, TOptional>): ObjectSchema<O, false>;
-export function object<O extends Record<string, BaseSchema<any, boolean>>>(
-  fields: O,
-): ObjectSchema<O, false>;
+>(config: IObjectSchemaConfig<O, S, TOptional>): ObjectSchema<O, TOptional,S>;
 export function object(fieldsOrConfig): ObjectSchema<any> {
   if (
     !fieldsOrConfig.fields ||

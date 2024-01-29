@@ -5,8 +5,6 @@ import {
   buffer,
   date,
   ExtractSchemaType,
-  FilterOptionalKeys,
-  FilterRequiredKeys,
   number,
   object,
   string,
@@ -15,12 +13,15 @@ import ObjectSchema from '../lib/ObjectSchema';
 
 test('should be able to create an object schema', () => {
   const schema = object({
-    fields: {
-      one: boolean(),
-      two: string(),
-      three: number({ optional: true }),
-    },
+    one: boolean(),
+    two: string(),
+    three: number({ optional: true }),
   });
+  const testOptional: ExtractSchemaType<typeof schema> = {
+    one: true,
+    two: 'two',
+  };
+  expect(testOptional).toBeTruthy();
   expect(schema.validate({ one: true, two: '' }).success).toBe(true);
   expect(schema.validate({ one: true, two: '', three: 1 }).success).toBe(true);
   expect(schema.validate({ one: true, two: '', three: '' }).success).toBe(false);
@@ -62,9 +63,27 @@ test('should be able to create an object schema with nested objects', () => {
     nested: {
       four: 1,
     },
-    nestedWithFields: { seven: 2n, six: new Date() },
   };
   expect(nestedOptionalSchema).toBeTruthy();
+
+  const nestedBadTypeField: ExtractSchemaType<typeof record> = {
+    two: 'two',
+    nested: {
+      four: 1,
+    },
+    // @ts-expect-error
+    nestedWithFields: { bad: true, seven: 2n, six: new Date() },
+  };
+  expect(nestedBadTypeField).toBeTruthy();
+
+  const nestedOptionalField: ExtractSchemaType<typeof record> = {
+    two: 'two',
+    nested: {
+      four: 1,
+    },
+    nestedWithFields: { seven: 2n, six: new Date() },
+  };
+  expect(nestedOptionalField).toBeTruthy();
 
   const schema = object({
     fields: {
