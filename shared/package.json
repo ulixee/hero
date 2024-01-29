@@ -20,8 +20,8 @@
     "version:bump": "ulx-repo-version-bump"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.6.0",
-    "@commitlint/config-conventional": "^18.6.0",
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
     "@types/jest": "^29.5.11",
     "@types/node": "^16.18.31",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
