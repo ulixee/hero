@@ -3375,12 +3375,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ulixee/chrome-117-0@npm:^5938.89.8":
-  version: 5938.150.8
-  resolution: "@ulixee/chrome-117-0@npm:5938.150.8"
+"@ulixee/chrome-120-0@npm:^6099.225.8":
+  version: 6099.225.8
+  resolution: "@ulixee/chrome-120-0@npm:6099.225.8"
   dependencies:
     "@ulixee/chrome-app": "npm:^1.0.3"
-  checksum: 91a5172c5300028cf7b417717e0be76458110afb3b98b30288c2bc0e1d1d026bca1a81c7b80324d920f0bc9bbba356f1ff4c9facb73df19fc192c6c2ec6749ed
+  checksum: 78027d94fc6229c843c04bf81a4ba54e9e8031dd7cb139295351432c77e38e0a8a26f68f26c767e48f1024e7f81b6b40925f6dffc1e0ca1599015fa007afc47c
   languageName: node
   linkType: hard
 
@@ -3635,7 +3635,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ulixee/unblocked-agent@workspace:agent/main"
   dependencies:
-    "@ulixee/chrome-117-0": "npm:^5938.89.8"
+    "@ulixee/chrome-120-0": "npm:^6099.225.8"
     "@ulixee/chrome-app": "npm:^1.0.3"
     "@ulixee/commons": "npm:2.0.0-alpha.25"
     "@ulixee/js-path": "npm:2.0.0-alpha.25"

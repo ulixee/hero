@@ -18,26 +18,26 @@ jobs:
       - name: Install pcap
         run: sudo apt-get install -y libpcap-dev
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
           token: ${{ secrets.PAT }}
           repository: ulixee/browser-profile-data
           path: browser-profile-data
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
           submodules: 'recursive'
           path: unblocked
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
           repository: ulixee/shared
           path: shared
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: 'yarn'

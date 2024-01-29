@@ -39,8 +39,10 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 		} else if chromeVersion < 110 {
 		   // chrome 110 implemented shuffling
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_100)
-		} else {
+		} else if chromeVersion < 119 {
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_106_Shuffle)
+		} else {
+		    spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120)
 		}
 	} else {
 		// default to latest shuffle

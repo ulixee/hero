@@ -132,8 +132,7 @@ describe('BrowserContext', () => {
 
     it('should roundtrip cookie', async () => {
       await page.navigate(server.emptyPage);
-      // @see https://en.wikipedia.org/wiki/Year_2038_problem
-      const date = +new Date('1/1/2038');
+      const date = new Date().getTime() + 5000;
       const documentCookie = await page.evaluate(`(() => {
     const date = new Date(${date});
     document.cookie = 'username=John Doe;expires=' + date.toUTCString();
