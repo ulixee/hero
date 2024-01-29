@@ -185,7 +185,7 @@ export default class Session
     return this.commandRecorder.fnNames.has(method) || method === 'recordOutput';
   }
 
-  public shouldWaitForCommandLock(method: keyof Session): boolean {
+  public shouldWaitForCommandLock(method: string): boolean {
     return method !== 'resumeCommands';
   }
 

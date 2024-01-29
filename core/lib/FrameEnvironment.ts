@@ -139,6 +139,7 @@ export default class FrameEnvironment
       this.detachElement,
       this.execJsPath,
       this.fetch,
+      this.meta,
       this.getChildFrameEnvironment,
       this.getCookies,
       this.getJsValue,
@@ -245,8 +246,8 @@ export default class FrameEnvironment
     return await this.frame.jsPath.exec(jsPath);
   }
 
-  public meta(): IFrameMeta {
-    return this.toJSON();
+  public meta(): Promise<IFrameMeta> {
+    return Promise.resolve(this.toJSON());
   }
 
   public async detachElement(

@@ -86,7 +86,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
       version: this.options.version,
     };
     const connectResult = await this.sendRequest({
-      startTime: super.connectStartTime,
+      startTime: this.connectStartTime,
       command: 'Core.connect',
       args: [connectOptions],
     });
