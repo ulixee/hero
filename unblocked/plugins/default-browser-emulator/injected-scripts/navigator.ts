@@ -13,12 +13,11 @@ if ('webdriver' in self.navigator) {
 }
 
 if ('NetworkInformation' in self) {
-  proxyGetter(self.NetworkInformation.prototype as any, 'rtt', () => args.rtt, false);
+  proxyGetter((self.NetworkInformation as any).prototype as any, 'rtt', () => args.rtt, false);
 }
 
 if (args.userAgentData && 'userAgentData' in self.navigator) {
-  // @ts-expect-error
-  const userAgentData = self.navigator.userAgentData;
+  const userAgentData = self.navigator.userAgentData as any;
   function checkThisArg(thisArg, customMessage = ''): TypeError {
     // @ts-expect-error
     if (Object.getPrototypeOf(thisArg) !== self.NavigatorUAData.prototype) {

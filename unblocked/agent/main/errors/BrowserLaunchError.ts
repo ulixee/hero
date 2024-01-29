@@ -1,5 +1,5 @@
 export default class BrowserLaunchError extends Error {
-  constructor(message: string, stack: string, public isSandboxError: boolean = false) {
+  constructor(message: string, stack: string, public isSandboxError = false) {
     super(message);
     stack ??= this.stack;
     if (stack.startsWith('Error: ')) stack = stack.substring('Error: '.length);

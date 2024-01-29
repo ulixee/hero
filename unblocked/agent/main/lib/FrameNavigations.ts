@@ -121,6 +121,12 @@ export default class FrameNavigations
     loaderId: string,
     browserRequestId?: string,
   ): INavigation {
+    let isNewTop = true;
+    // if in page, make sure we're on the domain of the active url
+    if (reason === "inPage" && this.currentUrl) {
+      isNewTop = isSameOrigin(url, this.currentUrl);
+    }
+
     let nextTop: INavigation;
     if (this.currentUrl === url && this.top.loaderId === 'NO_LOADER_ASSIGNED') {
       nextTop = this.top;
@@ -142,11 +148,18 @@ export default class FrameNavigations
         resourceIdResolvable: createPromise(),
         browserRequestId,
       };
-      nextTop.resourceIdResolvable.promise
-        .then(this.resolveResourceId.bind(this, nextTop))
-        .catch(() => null);
-      this.history.push(nextTop);
       this.historyById[nextTop.id] = nextTop;
+
+      if (isNewTop) {
+        nextTop.resourceIdResolvable.promise
+          .then(this.resolveResourceId.bind(this, nextTop))
+          .catch(() => null);
+        this.history.push(nextTop);
+      } else {
+        // insert at 1 before last
+        const index = this.history.length - 1;
+        this.history.splice(index, 0, nextTop);
+      }
     }
     if (loaderId) this.historyByLoaderId[loaderId] = nextTop;
 
@@ -161,7 +174,14 @@ export default class FrameNavigations
     // if in-page, set the state to match current top
     if (reason === 'inPage') {
       if (this.top?.finalUrl === url) return;
-      const lastHttpResponse = this.lastHttpNavigationRequest;
+      let lastHttpResponse = this.lastHttpNavigationRequest;
+      if (!isNewTop) {
+        lastHttpResponse = this.findMostRecentHistory(
+          x =>
+            x.navigationReason === 'goto' &&
+            x.statusChanges.has(LoadStatus.HttpResponded) && isSameOrigin(url, x.finalUrl ?? x.requestedUrl),
+        );
+      }
       if (lastHttpResponse) {
         for (const state of lastHttpResponse.statusChanges.keys()) {
           if (isPageLoadedStatus(state)) {
@@ -174,7 +194,7 @@ export default class FrameNavigations
         nextTop.statusChanges.set(ContentPaint, nextTop.initiatedTime);
         nextTop.resourceIdResolvable.resolve(-1);
       }
-      shouldPublishLocationChange = true;
+      shouldPublishLocationChange = isNewTop;
       nextTop.finalUrl = url;
     } else {
       let isStillSameHttpPage = false;
@@ -190,8 +210,10 @@ export default class FrameNavigations
       }
     }
 
-    this.emit('navigation-requested', nextTop);
-    this.emit('change', { navigation: nextTop });
+    if (isNewTop) {
+      this.emit('navigation-requested', nextTop);
+      this.emit('change', { navigation: nextTop });
+    }
     if (shouldPublishLocationChange) {
       this.emit('status-change', {
         id: nextTop.id,
@@ -503,4 +525,14 @@ function isPageLoadedStatus(status: NavigationStatus): boolean {
     status === LoadStatus.AllContentLoaded ||
     status === LoadStatus.DomContentLoaded
   );
+}
+
+function isSameOrigin(url1: string, url2: string): boolean {
+  try {
+    const parsed1 = new URL(url1);
+    const parsed2 = new URL(url2);
+    return parsed1.origin === parsed2.origin;
+  } catch (err) {
+    return false;
+  }
 }

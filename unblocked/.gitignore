@@ -7,7 +7,6 @@ lerna-debug.log
 
 .idea/
 .history/
-.yarn/
 .vscode/
 
 build

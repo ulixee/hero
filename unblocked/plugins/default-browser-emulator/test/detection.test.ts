@@ -5,7 +5,6 @@ import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
-import { arch, platform } from 'os';
 import BrowserEmulator from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -415,7 +414,7 @@ test('should properly emulate memory', async () => {
     res.end('<html><body><h1>Hi</h1></body></html>');
   }, false);
   await page.goto(`${server.baseUrl}`);
-  const { deviceMemory, heapSize } = await page.evaluate(`(() => {
+  const { deviceMemory, heapSize } = await page.evaluate<any>(`(() => {
   const { deviceMemory } = navigator
  
   const heapSize = performance?.memory?.jsHeapSizeLimit || null;
@@ -426,6 +425,63 @@ test('should properly emulate memory', async () => {
   const heapSizeGb = heapSize ? +(heapSize / 1073741824).toFixed(1) : 0;
 
   expect(heapSizeGb).toBeLessThanOrEqual(deviceMemory);
+});
+
+test('stack overflow test should match chrome', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+
+  koaServer.get('/betrayal', ctx => {
+    ctx.body = `<html>
+<body>
+<h1>Page</h1>
+</body>
+<script>
+  let depth = 0;
+  let message = '';
+  let name = '';
+  let stack = '';
+  
+  function iWillBetrayYouWithMyLongName() {
+    try {
+      depth++;
+      iWillBetrayYouWithMyLongName();
+    } catch (e) {
+      message = e.message;
+      name = e.name;
+      stack = e.stack.toString();
+    }
+  }
+  
+  iWillBetrayYouWithMyLongName();
+  window.betrayalResult = {
+    depth,
+    message,
+    name,
+    stack
+  }
+</script>
+
+</html>
+    
+    `;
+  });
+
+  await page.goto(`${koaServer.baseUrl}/betrayal`);
+
+  await page.waitForLoad('DomContentLoaded');
+  const result = await page.evaluate<{
+    depth: number;
+    message: string;
+    name: string;
+    stack: string;
+  }>(`window.betrayalResult`);
+  expect(result.message).toBe('Maximum call stack size exceeded');
+  expect(result.name).toBe('RangeError');
+  expect(result.stack).toContain(`at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`);
 });
 
 test('should properly maintain stack traces in toString', async () => {

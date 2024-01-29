@@ -100,7 +100,7 @@ describe('Mouse', () => {
     // Firefox needs an extra frame here after typing or it will fail to set the scrollTop
     await page.evaluate(`new Promise(requestAnimationFrame)`);
     await page.evaluate(`(document.querySelector('textarea').scrollTop = 0)`);
-    const { x, y } = await page.evaluate(textareaDimensions);
+    const { x, y } = await page.evaluate<any>(textareaDimensions);
     await page.mouse.move(x + 2, y + 2);
     await page.mouse.down();
     await page.mouse.move(200, 200);

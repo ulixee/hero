@@ -143,7 +143,7 @@ export default class BrowserContext
 
     createTargetPromise.resolve();
     const idx = this.creatingTargetPromises.indexOf(createTargetPromise.promise);
-    if (idx >= 0) this.creatingTargetPromises.splice(idx, 1);
+    if (idx >= 0) void this.creatingTargetPromises.splice(idx, 1);
 
     let page = this.pagesById.get(targetId);
     if (!page) {

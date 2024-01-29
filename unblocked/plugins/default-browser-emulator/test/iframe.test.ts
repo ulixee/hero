@@ -379,7 +379,7 @@ test.skip('should not break recaptcha popup', async () => {
   ]);
   await new Promise(resolve => setTimeout(resolve, 1e3));
 
-  const { hasRecaptchaPopup } = await page.evaluate(`(() => {
+  const { hasRecaptchaPopup } = await page.evaluate<any>(`(() => {
     const hasRecaptchaPopup = !!document.querySelectorAll('iframe[title="recaptcha challenge"]')
       .length;
     return { hasRecaptchaPopup };

@@ -554,6 +554,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   /////// NAVIGATION ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   public initiateNavigation(url: string, loaderId: string): void {
+    this.waitTimeouts.length = 0;
+    this.defaultContextCreated = null;
     // chain current listeners to new promise
     this.setLoader(loaderId, url);
   }
@@ -609,24 +611,35 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (this.url === url) return;
     // we're using params on about:blank, so make sure to strip for url
     if (url.startsWith(DEFAULT_PAGE)) url = DEFAULT_PAGE;
+
+    let isForActiveDomain = false;
+    if (this.activeLoader) {
+      try {
+        const previousUrl = new URL(this.activeLoader.url);
+        if (url.startsWith(previousUrl.origin)) {
+          isForActiveDomain = true;
+        }
+      } catch {}
+    }
     this.url = url;
 
-    const isDomLoaded = this.activeLoader?.lifecycle?.DOMContentLoaded;
-
+    const isDomLoaded = isForActiveDomain && this.activeLoader?.lifecycle?.DOMContentLoaded;
     const loaderId = `${InPageNavigationLoaderPrefix}${(this.inPageCounter += 1)}`;
     this.setLoader(loaderId, url);
     if (isDomLoaded) {
       this.activeLoader.markLoaded();
     }
 
-    // set load state back to all loaded
-    this.navigations.onNavigationRequested(
-      'inPage',
-      this.url,
-      this.page.browserContext.commandMarker.lastId,
-      loaderId,
-    );
-    this.emit('frame-navigated', { frame: this, navigatedInDocument: true, loaderId });
+    if (isForActiveDomain) {
+      // set load state back to all loaded
+      this.navigations.onNavigationRequested(
+        'inPage',
+        this.url,
+        this.page.browserContext.commandMarker.lastId,
+        loaderId,
+      );
+      this.emit('frame-navigated', { frame: this, navigatedInDocument: true, loaderId });
+    }
   }
 
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////

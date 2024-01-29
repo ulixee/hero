@@ -37,15 +37,30 @@
     "@commitlint/config-conventional": "^17.6.3",
     "@types/jest": "^29.5.1",
     "@types/node": "^16.18.31",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
     "@ulixee/repo-tools": "^1.0.26",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.6.3",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-monorepo-cop": "^1.0.2",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
     "lerna": "^4.0.0",
     "lint-staged": "^13.2.2",
+    "prettier": "^3.2.4",
     "shx": "^0.3.3",
-    "typescript": "~4.7.3"
+    "typescript": "~5.3.3"
   },
   "workspaces": {
     "packages": [
@@ -61,8 +76,7 @@
       "browser-profiler/*",
       "browser-emulator-builder",
       "../shared/build/*"
-    ],
-    "nohoist": []
+    ]
   },
   "lint-staged": {
     "*.ts": [
