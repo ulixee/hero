@@ -13,6 +13,7 @@ void (async () => {
         'double-agent/**/.env*',
         'agent/testing/certs/*.pem',
         ".yarn/*",
+        ".yarn/*/*",
         ".yarnrc.yml",
         '-a',
         `${__dirname}/build`,
