@@ -2,15 +2,17 @@
 import { inspect } from 'util';
 import ILog, { ILogData } from '../interfaces/ILog';
 
-const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
+const hasBeenLoggedSymbol = Symbol.for('UlxHasBeenLogged');
 
-const logFilters = {
+global.UlxLogFilters ??= {
   envValue: null as string,
   active: [] as RegExp[],
   skip: [] as RegExp[],
   namespaces: { active: new Set<string>(), inactive: new Set<string>() },
   enabledNamesCache: {} as { [namespace: string]: boolean },
 };
+
+const logFilters = global.UlxLogFilters;
 
 let logId = 0;
 class Log implements ILog {
@@ -23,6 +25,9 @@ class Log implements ILog {
   private logtimeById: { [parentId: number]: number } = {};
 
   constructor(module: NodeModule, boundContext?: any) {
+    global.UlxLogPrototype ??= Log.prototype;
+    Object.setPrototypeOf(this, global.UlxLogPrototype);
+
     this.module = module ? extractPathFromModule(module) : '';
     if (boundContext) this.boundContext = boundContext;
     this.level = isEnabled(this.module) ? 'stats' : 'error';
@@ -199,43 +204,53 @@ declare global {
   function UlixeeLogCreator(module: NodeModule): {
     log: ILog;
   };
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlixeeLogClass: typeof Log;
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxLoggerSessionIdNames: Map<string, string>;
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxSubscriptions: Map<number, (log: ILogEntry) => any>;
 }
 
-global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
-  const log: ILog = new Log(module);
+if (!global.UlixeeLogCreator) {
+  global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
+    const log: ILog = new Log(module);
 
-  return {
-    log,
+    return {
+      log,
+    };
   };
-};
+}
+
+global.UlixeeLogClass ??= Log;
 
 export default function logger(module: NodeModule): ILogBuilder {
   return global.UlixeeLogCreator(module);
 }
 
-let idCounter = 0;
-
-const loggerSessionIdNames = new Map<string, string>();
+global.UlxLoggerSessionIdNames ??= new Map<string, string>();
+global.UlxSubscriptions ??= new Map();
+const loggerSessionIdNames = global.UlxLoggerSessionIdNames;
 
 class LogEvents {
-  private static subscriptions: { [id: number]: (log: ILogEntry) => any } = {};
+  private static subscriptions = global.UlxSubscriptions;
 
   public static unsubscribe(subscriptionId: number): void {
-    delete LogEvents.subscriptions[subscriptionId];
+    LogEvents.subscriptions.delete(subscriptionId);
   }
 
   public static subscribe(onLogFn: (log: ILogEntry) => any): number {
-    idCounter += 1;
-    const id = idCounter;
+    const id = LogEvents.subscriptions.size + 1;
     LogEvents.subscriptions[id] = onLogFn;
     return id;
   }
 
   public static broadcast(entry: ILogEntry): void {
-    Object.values(LogEvents.subscriptions).forEach(x => x(entry));
+    LogEvents.subscriptions.forEach(x => x(entry));
   }
 }
 
+global.UlixeeLogInstances ??= { Log, LogEvents };
 export { Log, LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
