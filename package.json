@@ -3,7 +3,7 @@
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "build": "yarn && yarn tsc && cd build && yarn",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",

@@ -108,11 +108,6 @@ export default class UserProfile {
       storageDomains: origins?.length,
     });
     const browserContext = session.browserContext;
-    const isSecure = origins.some(x => x.startsWith('https://'));
-    const storageRestoreDomain = `http${isSecure ? 's' : ''}://restore-hero-dom.org`;
-    session.mitmRequestSession.interceptorHandlers.push({
-      urls: [/:\/\/restore-hero-dom\.org.*/],
-    });
     try {
       browserContext.resources.isCollecting = false;
       page.storeEventsWithoutListeners = false;
@@ -120,22 +115,6 @@ export default class UserProfile {
       // eslint-disable-next-line require-await,@typescript-eslint/require-await
       await page.networkManager.setNetworkInterceptor(async ({ request, requestId }) => {
         const url = new URL(request.url);
-
-        if (url.href.includes(storageRestoreDomain)) {
-          return {
-            responseCode: 200,
-            requestId,
-            responseHeaders: [{ name: 'Content-Type', value: 'text/html' }],
-            body: Buffer.from(
-              `<html>
-<body>
-<h1>Restoring Dom Storage</h1>
-${origins.map(x => `<iframe src="${x}"></iframe>`).join('\n')}
-</body>
-</html>`,
-            ).toString('base64'),
-          };
-        }
         let script = '';
         const originStorage = domStorage[url.origin];
         const sessionStorage = originStorage?.sessionStorage;
@@ -170,7 +149,7 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
           requestId,
           body: Buffer.from(
             `<html><body class="${readyClass}">
-<h5>${url.origin}</h5>
+<h5>Loading UserProfile for ${url.origin}</h5>
 <script>
 ${script}
 </script>
@@ -179,38 +158,22 @@ ${script}
         };
       }, true);
 
-      // clear out frame state
-      await page.navigate(storageRestoreDomain);
-      while (page.frames.length <= origins.length) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
-
-      await Promise.all(
-        page.frames.map(async frame => {
-          if (frame === page.mainFrame) {
-            // no loader is set, so need to have special handling
-            if (!frame.activeLoader.lifecycle.load) {
-              await frame.waitOn('frame-lifecycle', x => x.name === 'load');
-            }
-            return;
-          }
-
-          await frame.evaluate(
-            `(async function() {
+      for (const origin of origins) {
+        await page.navigate(origin);
+        await page.mainFrame.evaluate(
+          `(async function() {
             while (!document.querySelector("body.ready")) {
               await new Promise(resolve => setTimeout(resolve, 20));
             }
           })()`,
-            false,
-            {
-              shouldAwaitExpression: true,
-              returnByValue: true,
-            },
-          );
-        }),
-      );
+          false,
+          {
+            shouldAwaitExpression: true,
+            returnByValue: true,
+          },
+        );
+      }
 
-      session.mitmRequestSession.interceptorHandlers.pop();
       page.mainFrame.navigations.reset();
 
       // clear out frame state
