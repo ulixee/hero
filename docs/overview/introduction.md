@@ -18,22 +18,10 @@ To get started using Hero in your project, we have a "playground" that allows yo
 npm i --save @ulixee/hero-playground
 ```
 
-or
-
-```bash
-yarn add @ulixee/hero-playground
-```
-
 You can drop the "-playground" whenever you want and use Hero directly (the core functionality is exactly the same):
 
 ```bash
 npm i --save @ulixee/hero
-```
-
-or
-
-```bash
-yarn add @ulixee/hero
 ```
 
 Just make sure your Ulixee development environment is setup and ready to go, such as making sure [`@ulixee/cloud`](https://ulixee.org/docs/cloud) is installed and running:

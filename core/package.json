@@ -37,7 +37,6 @@
     "@types/better-sqlite3": "^7.6.9",
     "@ulixee/chrome-app": "1.0.3",
     "@ulixee/hero": "2.0.0-alpha.25",
-    "@ulixee/hero-testing": "2.0.0-alpha.25",
-    "vue": "^2.6.12"
+    "@ulixee/hero-testing": "2.0.0-alpha.25"
   }
 }

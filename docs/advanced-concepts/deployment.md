@@ -44,7 +44,7 @@ const Hero = require('@ulixee/hero');
 If you want to run Hero all in one process, you'll want to run a fullstack deployment. Make sure you add both client and core to your project.
 
 ```bash
-yarn add @ulixee/hero @ulixee/hero-core
+npm i --save @ulixee/hero @ulixee/hero-core
 ```
 
 To connect your client and core, you'll create a transport bridge that will pipe commands back and forth.
@@ -74,7 +74,7 @@ If you have an existing HTTP server and you want to run your client code separat
 Add `@ulixee/hero-core` and `@ulixee/net` to your server project:
 
 ```bash
-yarn add @ulixee/hero-core @ulixee/net
+npm i --save @ulixee/hero-core @ulixee/net
 ```
 
 ```js
@@ -105,7 +105,7 @@ async function bindHeroCore(yourHttpServer: http.Server | https.Server) {
 Add `@ulixee/hero` to your client project:
 
 ```bash
-yarn add @ulixee/hero
+npm i --save @ulixee/hero
 ```
 
 ```js
