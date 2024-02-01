@@ -17,6 +17,6 @@
     "@ulixee/unblocked-agent-testing": "2.0.0-alpha.25",
     "proxy": "^1.0.1",
     "simple-socks": "^2.1.0",
-    "ws": "^7.4.6"
+    "ws": "^7.5.9"
   }
 }

@@ -12,7 +12,7 @@
     "diff": "^4.0.2",
     "source-map-support": "^0.5.16",
     "uuid": "^7.0.2",
-    "ws": "^7.4.6"
+    "ws": "^7.5.9"
   },
   "devDependencies": {
     "@types/diff": "^4.0.2"

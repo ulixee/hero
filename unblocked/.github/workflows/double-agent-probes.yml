@@ -45,14 +45,14 @@ jobs:
       - name: Create Probes
         run: yarn workspace @ulixee/double-agent-stacks 1
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         id: probe-data-checkin
         with:
           repository: ./double-agent/probe-data
           branch: main
           commit_message: "chore: automatic probe data"
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         if: steps.probe-data-checkin.outputs.changes_detected == 'true'
         with:
           branch: main

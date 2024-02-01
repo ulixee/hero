@@ -78,14 +78,14 @@ jobs:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         if: ${{ always() }}
         with:
           branch: main
           repository: ./browser-profile-data
           commit_message: "chore(profiles): automatic updates"
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         if: ${{ always() }}
         with:
           branch: main
