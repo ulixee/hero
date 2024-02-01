@@ -5,7 +5,7 @@
   "description": "Shared Ulixee and Unblocked projects",
   "license": "MIT",
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "build": "yarn && yarn tsc && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",
     "copy:dist": "ulx-repo-after-build --dist",
@@ -23,7 +23,7 @@
     "@commitlint/cli": "^18.6.0",
     "@commitlint/config-conventional": "^18.6.0",
     "@types/jest": "^29.5.11",
-    "@types/node": "^16.18.31",
+    "@types/node": "^18.19.10",
     "@ulixee/repo-tools": "^1.0.26",
     "cross-env": "^7.0.3",
     "husky": "^9.0.7",
