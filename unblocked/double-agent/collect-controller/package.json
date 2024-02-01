@@ -9,7 +9,7 @@
     "@double-agent/config": "2.0.0-alpha.25",
     "@ulixee/commons": "2.0.0-alpha.25",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",
-    "axios": "^0.21.1",
+    "axios": "^1.6.7",
     "cookie": "^0.4.0",
     "diff": "^4.0.2",
     "json5": "^2.1.2",
@@ -17,7 +17,7 @@
     "p-queue": "^6.2.1",
     "path-to-regexp": "^6.1.0",
     "source-map-support": "^0.5.16",
-    "tar": "^6.1.15",
+    "tar": "^6.2.0",
     "ws": "^7.4.6"
   },
   "devDependencies": {

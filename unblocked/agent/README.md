@@ -13,12 +13,6 @@ Unblocked Agent is an automated web browser that's built to be controlled from e
 npm i --save @ulixee/unblocked-agent
 ```
 
-or
-
-```shell script
-yarn add @ulixee/unblocked-agent
-```
-
 ## Usage
 
 ```js

@@ -11,7 +11,7 @@
     "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@types/node": "^16.18.31",
+    "@types/node": "^18.19.10",
     "@types/ws": "^7.4.7",
     "@ulixee/unblocked-agent": "2.0.0-alpha.25",
     "@ulixee/unblocked-agent-testing": "2.0.0-alpha.25",

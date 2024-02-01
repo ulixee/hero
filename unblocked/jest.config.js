@@ -2,8 +2,9 @@ const Fs = require('fs');
 const Path = require('path');
 const pkg = require('./package.json');
 
+const packages = Array.isArray(pkg.workspaces) ? pkg.workspaces : pkg.workspaces.packages ?? [];
 const workspaces = [];
-for (const packageGlob of pkg.workspaces.packages) {
+for (const packageGlob of packages) {
   if (packageGlob.startsWith('../')) continue;
 
   let workspacePath = packageGlob;
@@ -34,6 +35,7 @@ module.exports = {
   coverageReporters: ['text-summary', 'json'],
   coveragePathIgnorePatterns: [
     'node_modules',
+    '<rootDir>/.*/build',
     '<rootDir>/testing/*',
     '<rootDir>/.*/interfaces/*',
     '<rootDir>/.*/interfaces/*.[ts|js]',

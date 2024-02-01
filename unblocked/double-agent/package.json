@@ -13,21 +13,19 @@
     "prod": "cd build && yarn workspace @double-agent/collect-controller prod"
   },
   "devDependencies": {
-    "@ulixee/repo-tools": "^1.0.26",
+    "@ulixee/repo-tools": "^1.0.27",
     "typescript": "^5.3.3"
   },
-  "workspaces": {
-    "packages": [
-      "analyze",
-      "analyze/plugins/*",
-      "collect",
-      "collect/plugins/*",
-      "collect-controller",
-      "config",
-      "docs",
-      "tls-server",
-      "runner",
-      "../../shared/build/*"
-    ]
-  }
+  "workspaces": [
+    "analyze",
+    "analyze/plugins/*",
+    "collect",
+    "collect/plugins/*",
+    "collect-controller",
+    "config",
+    "docs",
+    "tls-server",
+    "runner",
+    "../../shared/build/*"
+  ]
 }

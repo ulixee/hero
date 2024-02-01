@@ -53,11 +53,6 @@ The returned properties will be calculated and returned as follows:
 npm i --save @ulixee/js-path
 ```
 
-or
-
-```shell script
-yarn add @ulixee/js-path
-```
 
 ## Contributing
 

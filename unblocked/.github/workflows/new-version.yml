@@ -21,7 +21,7 @@ jobs:
       - name: Build Sockets
         uses: goreleaser/goreleaser-action@v5
         with:
-          version: v1.16.2
+          version: v1.23.0
           args: release --rm-dist --debug --skip-validate
           workdir: ${{ github.workspace }}/agent/mitm-socket
         env:

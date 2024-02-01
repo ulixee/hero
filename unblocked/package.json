@@ -3,7 +3,7 @@
   "private": true,
   "description": "The Unblocking Bot-Blocker monorepo",
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "bump-version": "ulx-repo-version-bump",
     "build": "yarn && yarn tsc && cd ./build && cross-env ULX_MITM_REBUILD_SOCKET=1 yarn && pwd && yarn workspace @double-agent/config sync",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
@@ -30,16 +30,16 @@
   },
   "homepage": "https://ulixee.org/unblocked",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.8.1",
-    "@commitlint/config-conventional": "^17.8.1",
+    "@commitlint/cli": "^18.6.0",
+    "@commitlint/config-conventional": "^18.6.0",
     "@types/jest": "^29.5.11",
-    "@types/node": "^16.18.31",
+    "@types/node": "^18.19.10",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
-    "@ulixee/repo-tools": "^1.0.26",
+    "@ulixee/repo-tools": "^1.0.27",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
@@ -62,22 +62,20 @@
     "shx": "^0.3.3",
     "typescript": "~5.3.3"
   },
-  "workspaces": {
-    "packages": [
-      "agent/*",
-      "specification",
-      "js-path",
-      "real-user-agents",
-      "plugins/*",
-      "double-agent/*",
-      "double-agent/collect/plugins/*",
-      "double-agent/analyze/plugins/*",
-      "double-agent-stacks",
-      "browser-profiler/*",
-      "browser-emulator-builder",
-      "../shared/build/*"
-    ]
-  },
+  "workspaces": [
+    "agent/*",
+    "specification",
+    "js-path",
+    "real-user-agents",
+    "plugins/*",
+    "double-agent/*",
+    "double-agent/collect/plugins/*",
+    "double-agent/analyze/plugins/*",
+    "double-agent-stacks",
+    "browser-profiler/*",
+    "browser-emulator-builder",
+    "../shared/build/*"
+  ],
   "lint-staged": {
     "*.ts": [
       "eslint --fix"
@@ -86,5 +84,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@1.22.21+sha256.dbed5b7e10c552ba0e1a545c948d5473bc6c5a28ce22a8fd27e493e3e5eb6370"
 }

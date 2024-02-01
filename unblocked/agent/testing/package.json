@@ -5,7 +5,7 @@
   "main": "index.js",
   "private": true,
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "dependencies": {
     "@koa/multer": "^3.0.0",
@@ -23,7 +23,7 @@
     "@types/koa": "^2.11.3",
     "@types/koa__multer": "^2.0.2",
     "@types/koa__router": "^8.0.2",
-    "@types/node": "^16.18.31",
+    "@types/node": "^18.19.10",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.25"
   }
 }

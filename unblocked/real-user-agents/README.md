@@ -4,10 +4,10 @@ Real User Agents is a library created for use in the Unblocked and Ulixee projec
 
 ## Updating
 
-Source data can be updated by using `yarn update`.
+Source data can be updated by using `npm run update`.
 
 1. Update Browserstack UserAgent Strings
-   - `$ yarn update:useragents`
+   - `$ npm run update:useragents`
 2. Manually update Browser and OS Information with versions pushed out (used in Scraper Report):
    - data/manual/browserReleaseDates.json
    - data/manual/osReleaseDates.json (updated by `scripts/importOsVersions.js`)
@@ -17,18 +17,12 @@ Source data can be updated by using `yarn update`.
    - data/os-mappings/macNameToVersionMap.json - any mappings of versions to "rollups"
    - data/os-mappings/windowsToWindowsVersionMap.json - any mappings of windows versions
 3. Update Data
-   - `$ yarn update`
+   - `$ npm run update`
 
 ## Installation
 
 ```shell script
 npm i --save @ulixee/real-user-agents
-```
-
-or
-
-```shell script
-yarn add @ulixee/real-user-agents
 ```
 
 ## Contributing
