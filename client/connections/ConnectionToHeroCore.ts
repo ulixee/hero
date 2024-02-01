@@ -82,10 +82,11 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
   protected async afterConnect(): Promise<void> {
     const connectOptions = <ICoreConfigureOptions>{
       maxConcurrentClientCount: this.options.maxConcurrency,
+      maxConcurrentClientsPerBrowser: this.options.maxConcurrency,
       version: this.options.version,
     };
     const connectResult = await this.sendRequest({
-      startTime: super.connectStartTime,
+      startTime: this.connectStartTime,
       command: 'Core.connect',
       args: [connectOptions],
     });

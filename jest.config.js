@@ -3,7 +3,8 @@ const Path = require('path');
 const pkg = require('./package.json');
 
 const workspaces = [];
-for (const packageGlob of pkg.workspaces.packages) {
+const packages = Array.isArray(pkg.workspaces) ? pkg.workspaces : pkg.workspaces.packages ?? [];
+for (const packageGlob of packages) {
   if (packageGlob.startsWith('../')) continue;
 
   let workspacePath = packageGlob;

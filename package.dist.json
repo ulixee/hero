@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "^8.0.2"
   },
   "workspaces": {
     "packages": [

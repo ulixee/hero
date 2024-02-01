@@ -11,7 +11,7 @@ User Agent rotation is one of the ways developers have traditionally provided "n
 As the versions of browsers have gotten easier to differentiate, it is also becoming more common for a website to decide you are saying you run a Chrome version, but your features indicate otherwise. For this reason, Hero defaults to round-robining between real UserAgent strings that have been extracted by watching Chrome's auto-update tooling. A user can install multiple browsers:
 
 ```bash
-yarn add @ulixee/chrome-104-0 @ulixee/chrome-105-0 @ulixee/chrome-106-0
+npm i --save @ulixee/chrome-104-0 @ulixee/chrome-105-0 @ulixee/chrome-106-0
 ```
 
 When those browsers are installed, they will be automatically added to the round-robin of UserAgents. Whenever a new Hero instance is created, one of the installed Browsers is chosen at random, and a UserAgent string created by the [Unblocked RealUserAgents](https://github.com/ulixee/unblocked/tree/main/real-user-agents) project will be selected at random as well. Operating systems are rotated through Mac OS 10.10 to Mac OS 12, and Windows 7-11.

@@ -167,7 +167,7 @@ export default class CoreCommandQueue {
     await Promise.all(this.flushes);
 
     const idx = this.flushes.indexOf(flush);
-    if (idx >= 0) this.flushes.splice(idx, 1);
+    if (idx >= 0) void this.flushes.splice(idx, 1);
   }
 
   public async runOutOfBand<T>(command: string, ...args: any[]): Promise<T> {

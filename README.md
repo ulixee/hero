@@ -16,12 +16,6 @@ Check out our [website for more details](https://ulixee.org).
 npm i --save @ulixee/hero-playground
 ```
 
-or
-
-```shell script
-yarn add @ulixee/hero-playground
-```
-
 ## Usage
 
 Hero provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:

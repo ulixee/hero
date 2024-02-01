@@ -34,10 +34,10 @@ export default class ConnectionToHeroClient
   public disconnectPromise: Promise<void>;
 
   private get autoShutdownMillis(): number {
-    return this.core.clearIdleConnectionsAfterMillis;
+    return this.core?.clearIdleConnectionsAfterMillis ?? 0;
   }
 
-  private autoShutdownTimer: NodeJS.Timer;
+  private autoShutdownTimer: NodeJS.Timeout;
   private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private activeCommandMessageIds = new Set<string>();
 

@@ -430,6 +430,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
     await tab.close();
   });
 
+  // NOTE: Chrome 120 no longer supports localstorage set from a frame
   it('should store cross domain domStorage items', async () => {
     let profile: IUserProfile;
     {
@@ -451,21 +452,9 @@ localStorage.setItem('cross', '1');
         },
       });
 
-      koaServer.get('/cross-storage', ctx => {
-        ctx.body = `<body>
-<div>Cross Storage</div>
-<iframe src="http://dataliberationfoundation.org/storage"></iframe>
-<script>
-  localStorage.setItem('local', '2');
-</script>
-</body>`;
-      });
-
-      await tab.goto(`${koaServer.baseUrl}/cross-storage`);
-      await tab.waitForLoad('PaintingStable');
-      await tab.page.frames[1].waitForLifecycleEvent('load');
+      await tab.goto(`http://dataliberationfoundation.org/`);
+      await tab.waitForLoad('AllContentLoaded');
       profile = await tab.session.exportUserProfile();
-      expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
       await session.close();
     }
@@ -482,53 +471,24 @@ localStorage.setItem('cross', '1');
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html>
+<div id="cross"></div>
 <body>
 <script>
-window.parent.postMessage({message: localStorage.getItem('cross')}, "${koaServer.baseUrl}");
+    document.querySelector('#cross').innerHTML = localStorage.getItem('cross');
 </script>
 </body>
 </html>`);
           return true;
         },
       });
-      koaServer.get('/cross-storage2', ctx => {
-        ctx.body = `<body>
-<div id="local"></div>
-<div id="cross"></div>
-<iframe src="http://dataliberationfoundation.org/storage2"></iframe>
-<script>
-window.addEventListener('message', function(event) {
-    document.querySelector('#cross').innerHTML = event.data.message;
-    document.querySelector('#cross').classList.add('ready');
-});
-document.querySelector('#local').innerHTML = localStorage.getItem('local');
-</script>
-</body>`;
-      });
-      await tab.goto(`${koaServer.baseUrl}/cross-storage2`);
-      await tab.waitForLoad('PaintingStable');
+      await tab.goto(`http://dataliberationfoundation.org/`);
+      await tab.waitForLoad('DomContentLoaded');
       const localContent = await tab.execJsPath([
-        'document',
-        ['querySelector', '#local'],
-        'textContent',
-      ]);
-      expect(localContent.value).toBe('2');
-
-      await Helpers.waitForElement(
-        ['document', ['querySelector', '#cross.ready']],
-        tab.mainFrameEnvironment,
-      );
-      const crossContent = await tab.execJsPath([
         'document',
         ['querySelector', '#cross'],
         'textContent',
       ]);
-      expect(crossContent.value).toBe('1');
-      const history = tab.navigations.history;
-      await session.close();
-
-      expect(history).toHaveLength(1);
-      expect(history[0].finalUrl).toBe(`${koaServer.baseUrl}/cross-storage2`);
+      expect(localContent.value).toBe('1');
     }
   });
 });

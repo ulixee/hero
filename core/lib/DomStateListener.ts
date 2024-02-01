@@ -49,7 +49,7 @@ export default class DomStateListener extends TypedEventEmitter<IDomStateEvents>
 
   private batchAssertionsById = new Map<string, IBatchAssertion>();
   private commandFnsById = new Map<string, () => Promise<any>>();
-  private readonly checkInterval: NodeJS.Timer;
+  private readonly checkInterval: NodeJS.Timeout;
   private lastResults: any;
   private isStopping = false;
   private isCheckingState = false;

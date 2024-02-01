@@ -1,20 +1,18 @@
-import IDetachedResource from '@ulixee/hero-interfaces/IDetachedResource';
-import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
-import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
-import Timer from '@ulixee/commons/lib/Timer';
-import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import Timer from '@ulixee/commons/lib/Timer';
 import IResourceFilterProperties from '@ulixee/hero-interfaces/IResourceFilterProperties';
-import { resourceLimits } from 'worker_threads';
+import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
+import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
+import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
+import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
+import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
 import CoreTab from './CoreTab';
 import DetachedResource from './DetachedResource';
+import { InternalPropertiesSymbol } from './internal';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
-import { createWebsocketResource } from './WebsocketResource';
-import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import { InternalPropertiesSymbol } from './internal';
 import Tab, { getCoreTab } from './Tab';
-import IWaitForResourcesFilter from '../interfaces/IWaitForResourcesFilter';
+import { createWebsocketResource } from './WebsocketResource';
 
 export default class Resource {
   readonly #coreTabPromise: Promise<CoreTab>;
@@ -62,7 +60,9 @@ export default class Resource {
   }
 
   public async $detach(): Promise<DetachedResource> {
-    const resource = await this.#coreTabPromise.then(x => x.detachResource(undefined, this.#resourceMeta.id));
+    const resource = await this.#coreTabPromise.then(x =>
+      x.detachResource(undefined, this.#resourceMeta.id),
+    );
     return new DetachedResource(resource);
   }
 
