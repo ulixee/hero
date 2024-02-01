@@ -2,11 +2,13 @@ import * as Fs from 'fs';
 import IRequestContext from '@double-agent/collect/interfaces/IRequestContext';
 import Document from '@double-agent/collect/lib/Document';
 import Plugin, { IPluginPage } from '@double-agent/collect/lib/Plugin';
+import * as Path from 'path';
 import { IProfileData } from './interfaces/IProfile';
 import xhrScript from './xhrScript';
 
-const axiosJs = Fs.readFileSync(require.resolve('axios/dist/axios.min.js'));
-const axiosSourceMap = Fs.readFileSync(require.resolve('axios/dist/axios.min.map'));
+const axiosPath = require.resolve('axios').replace( `dist${Path.sep}node${Path.sep}axios`,`dist${Path.sep}browser${Path.sep}axios`);
+const axiosJs = Fs.readFileSync(axiosPath);
+const axiosSourceMap = Fs.readFileSync(`${axiosPath}.map`);
 
 export default class HttpHeadersPlugin extends Plugin {
   public initialize() {
