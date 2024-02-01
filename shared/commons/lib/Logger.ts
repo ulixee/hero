@@ -365,7 +365,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /sidechain[/-].*/,
       /ramps[/-].*/,
     );
-    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/, /kad\/.*/);
+    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
   } else if (ns.includes('ulx:desktop')) {
     active.push(/desktop[/-]?.*/);
   } else if (ns.includes('ulx:mitm')) {

@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.25",
-    "ws": "^7.4.6"
+    "ws": "^7.5.9"
   },
   "devDependencies": {
     "@types/ws": "^7.4.7"
