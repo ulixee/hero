@@ -3,7 +3,7 @@ import Resolvable from './Resolvable';
 
 export default class Timer {
   public readonly [Symbol.toStringTag] = 'Timer';
-  public readonly timeout: NodeJS.Timer;
+  public readonly timeout: NodeJS.Timeout;
 
   private readonly time = process.hrtime();
   private timeoutMessage = 'Timeout waiting';
@@ -82,6 +82,6 @@ export default class Timer {
 }
 
 interface IRegistry {
-  timeout: NodeJS.Timer;
+  timeout: NodeJS.Timeout;
   reject: (err: Error, noUnhandledRejections?: boolean) => any;
 }
