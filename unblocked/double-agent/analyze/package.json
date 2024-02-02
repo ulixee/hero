@@ -4,9 +4,6 @@
   "private": true,
   "main": "index.js",
   "license": "MIT",
-  "scripts": {
-    "initialize": "node initialize.js"
-  },
   "dependencies": {
     "@double-agent/collect": "2.0.0-alpha.25",
     "@double-agent/config": "2.0.0-alpha.25",

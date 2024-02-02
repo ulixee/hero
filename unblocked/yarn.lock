@@ -1828,10 +1828,21 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/repo-tools@^1.0.27":
-  version "1.0.27"
-  resolved "https://registry.npmjs.org/@ulixee/repo-tools/-/repo-tools-1.0.27.tgz"
-  integrity sha512-P887ZWkP3G+ocdb3bxWTbm7mHXMuTvpkTsGMci+Co4jVd0eObfP42jLVtuilsUiyWJ9a8i8WGbe6p1opbhTHqg==
+"@ulixee/commons@2.0.0-alpha.25":
+  version "2.0.0-alpha.25"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-2.0.0-alpha.25.tgz#e0ac28dede9d28d0edfb607d321ba498f2238c18"
+  integrity sha512-DNvGYzcSfhamRMalSSVL9SBc92tKizm2lE0pmcExiYzZZxk8NMO+9tIBE+437KOL+yhnwHYgS5UfObHAmAh4wA==
+  dependencies:
+    "@jridgewell/trace-mapping" "^0.3.18"
+    bech32 "^2.0.0"
+    devtools-protocol "^0.0.1137505"
+    https-proxy-agent "^5.0.0"
+    semver "^7.3.7"
+
+"@ulixee/repo-tools@^1.0.28":
+  version "1.0.28"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.28.tgz#28f5cdfcbc0730575cb8617207e5ab05efdc1833"
+  integrity sha512-z1pZJ/fwv0bVBiGHO553/kkjcqx4A9ag/XeoDJRtu7T367KkOcSLxfqCF8G3sYPcg1jpADKMzGfCYg6hj4ZhcQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.20.0"
     "@typescript-eslint/parser" "^6.20.0"

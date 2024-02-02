@@ -39,7 +39,7 @@
     "@types/node": "^18.19.10",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
-    "@ulixee/repo-tools": "^1.0.27",
+    "@ulixee/repo-tools": "^1.0.28",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
