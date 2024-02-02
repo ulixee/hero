@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.26](https://github.com/ulixee/platform/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-02-02)
+
+
+### Bug Fixes
+
+* **core:** user profile tests hanging ([c72447f](https://github.com/ulixee/platform/commit/c72447f475c334f7347fb4575e7195b15bb256ae))
+
+
+
+
+
 # [2.0.0-alpha.25](https://github.com/ulixee/platform/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2023-09-28)
 
 
