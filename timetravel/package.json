@@ -3,11 +3,11 @@
   "version": "2.0.0-alpha.25",
   "description": "The interface to playback and examine previous Hero sessions",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/hero-core": "2.0.0-alpha.25",
     "@ulixee/hero-interfaces": "2.0.0-alpha.25",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.25",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.25",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.26",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.26",
     "nanoid": "^3.3.6"
   },
   "devDependencies": {

@@ -8,7 +8,7 @@
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.25"
   },
   "devDependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.25",
     "@ulixee/hero": "2.0.0-alpha.25",
     "@ulixee/hero-core": "2.0.0-alpha.25",

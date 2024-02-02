@@ -4,22 +4,22 @@
   "description": "End to end Hero tests",
   "private": true,
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/execute-js-plugin": "2.0.0-alpha.25",
     "@ulixee/hero": "2.0.0-alpha.25",
     "@ulixee/hero-core": "2.0.0-alpha.25",
     "@ulixee/hero-interfaces": "2.0.0-alpha.25",
-    "@ulixee/net": "2.0.0-alpha.25"
+    "@ulixee/net": "2.0.0-alpha.26"
   },
   "devDependencies": {
     "@ulixee/awaited-dom": "1.4.2",
-    "@ulixee/default-browser-emulator": "2.0.0-alpha.25",
-    "@ulixee/default-human-emulator": "2.0.0-alpha.25",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.26",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.26",
     "@ulixee/hero-plugin-utils": "2.0.0-alpha.25",
     "@ulixee/hero-testing": "2.0.0-alpha.25",
     "@ulixee/hero-timetravel": "2.0.0-alpha.25",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.25",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.25",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.26",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.26",
     "ws": "^7.5.9"
   }
 }
