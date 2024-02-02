@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/collect",
-  "version": "2.0.0-alpha.25",
+  "version": "2.0.0-alpha.26",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@double-agent/collect-controller": "2.0.0-alpha.25",
-    "@double-agent/config": "2.0.0-alpha.25",
-    "@double-agent/tls-server": "2.0.0-alpha.25",
+    "@double-agent/collect-controller": "2.0.0-alpha.26",
+    "@double-agent/config": "2.0.0-alpha.26",
+    "@double-agent/tls-server": "2.0.0-alpha.26",
     "@ulixee/commons": "2.0.0-alpha.26",
     "axios": "^1.6.7",
     "cookie": "^0.4.0",

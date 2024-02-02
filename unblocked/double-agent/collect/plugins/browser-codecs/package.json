@@ -1,12 +1,12 @@
 {
   "name": "@double-agent/collect-browser-codecs",
-  "version": "2.0.0-alpha.25",
+  "version": "2.0.0-alpha.26",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Collects the audio, video and WebRTC codecs of the browser",
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.25",
+    "@double-agent/collect": "2.0.0-alpha.26",
     "csv-parse": "^4.8.5",
     "source-map-support": "^0.5.16"
   }
