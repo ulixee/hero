@@ -18,7 +18,7 @@
     "@double-agent/collect-controller": "2.0.0-alpha.25",
     "@double-agent/config": "2.0.0-alpha.25",
     "@double-agent/runner": "2.0.0-alpha.25",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/default-browser-emulator": "2.0.0-alpha.25",
     "@ulixee/default-human-emulator": "2.0.0-alpha.25",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",

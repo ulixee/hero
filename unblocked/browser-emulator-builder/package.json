@@ -18,7 +18,7 @@
     "@double-agent/collect-http-ua-hints": "2.0.0-alpha.25",
     "@double-agent/collect-http2-session": "2.0.0-alpha.25",
     "@double-agent/collect-tls-clienthello": "2.0.0-alpha.25",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",
     "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.25",
     "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.25",

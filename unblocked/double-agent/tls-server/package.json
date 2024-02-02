@@ -7,6 +7,6 @@
   "description": "TLS server for capturing clienthello",
   "dependencies": {
     "@double-agent/config": "2.0.0-alpha.25",
-    "@ulixee/commons": "2.0.0-alpha.25"
+    "@ulixee/commons": "2.0.0-alpha.26"
   }
 }

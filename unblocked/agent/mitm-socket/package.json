@@ -8,7 +8,7 @@
     "build-install": "npm run build"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/unblocked-specification": "2.0.0-alpha.25",
     "nanoid": "^3.3.6"
   },

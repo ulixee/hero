@@ -10,7 +10,7 @@
     "generate": "yarn generateRawMappings && yarn generatePathPatterns"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.25",
     "@ulixee/unblocked-specification": "2.0.0-alpha.25",
     "lodash": "^4.17.20"

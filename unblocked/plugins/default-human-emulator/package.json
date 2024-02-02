@@ -4,7 +4,7 @@
   "description": "Default human emulator based on Xetera/ghost-cursor",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/unblocked-specification": "2.0.0-alpha.25"
   },
   "devDependencies": {

@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",
     "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.25",
     "@ulixee/unblocked-specification": "2.0.0-alpha.25",

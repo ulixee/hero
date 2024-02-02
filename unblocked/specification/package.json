@@ -7,6 +7,6 @@
     "devtools-protocol": "^0.0.1137505"
   },
   "devDependencies": {
-    "@ulixee/commons": "2.0.0-alpha.25"
+    "@ulixee/commons": "2.0.0-alpha.26"
   }
 }

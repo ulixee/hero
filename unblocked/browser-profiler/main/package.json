@@ -20,7 +20,7 @@
     "@double-agent/runner": "2.0.0-alpha.25",
     "@types/selenium-webdriver": "^4.1.5",
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/double-agent-stacks": "2.0.0-alpha.25",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",
     "axios": "^1.6.7",

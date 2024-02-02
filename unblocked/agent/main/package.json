@@ -6,7 +6,7 @@
   "dependencies": {
     "@ulixee/chrome-121-0": "^6167.86.8",
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/js-path": "2.0.0-alpha.25",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.25",
     "@ulixee/unblocked-specification": "2.0.0-alpha.25",

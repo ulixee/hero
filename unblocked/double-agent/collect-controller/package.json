@@ -7,7 +7,7 @@
   "dependencies": {
     "@double-agent/collect": "2.0.0-alpha.25",
     "@double-agent/config": "2.0.0-alpha.25",
-    "@ulixee/commons": "2.0.0-alpha.25",
+    "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/real-user-agents": "2.0.0-alpha.25",
     "axios": "^1.6.7",
     "cookie": "^0.4.0",
