@@ -28,7 +28,7 @@
     "cross-env": "^7.0.3",
     "husky": "^9.0.7",
     "jest": "^29.7.0",
-    "lerna": "^8.0.2",
+    "lerna": "^4.0.0",
     "lint-staged": "^15.2.0",
     "shx": "^0.3.3",
     "typescript": "~5.3.3"
