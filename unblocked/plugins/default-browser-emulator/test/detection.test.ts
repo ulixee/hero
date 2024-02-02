@@ -481,7 +481,9 @@ test('stack overflow test should match chrome', async () => {
   }>(`window.betrayalResult`);
   expect(result.message).toBe('Maximum call stack size exceeded');
   expect(result.name).toBe('RangeError');
-  expect(result.stack).toContain(`at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`);
+  expect(result.stack).toContain(
+    `at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`,
+  );
 });
 
 test('should properly maintain stack traces in toString', async () => {
@@ -717,10 +719,12 @@ describe('Proxy detections', () => {
 
         const targetStackLine = ((error.stack || '').split('\n') || [])[1];
         if (method === '__proto__') {
-          const targetStack =
-            chromeVersion >= 102
-              ? `    at set __proto__ [as __proto__]`
-              : `    at Function.set __proto__ [as __proto__]`;
+          let targetStack = `    at Function.set __proto__ [as __proto__]`;
+          if (chromeVersion >= 121) {
+            targetStack = `    at set __proto__ (<anonymous>)`;
+          } else if (chromeVersion >= 102) {
+            targetStack = `    at set __proto__ [as __proto__]`;
+          }
           if (chromeVersion >= 102 && !targetStackLine.startsWith(targetStack)) {
             return `Stack doesnt have "${targetStack.trim()}": ${error.stack}`;
           }

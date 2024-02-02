@@ -1812,10 +1812,10 @@
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
-"@ulixee/chrome-120-0@^6099.225.8":
-  version "6099.225.8"
-  resolved "https://registry.npmjs.org/@ulixee/chrome-120-0/-/chrome-120-0-6099.225.8.tgz"
-  integrity sha512-W86E+tGbZoKmzVBwTnxPMozvG2G676xXa6MptwbrCT1Txx3v2NQKMDL9KUew4r+NSg0pmImN8s/8xhzVSI80LQ==
+"@ulixee/chrome-121-0@^6167.86.8":
+  version "6167.86.8"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-121-0/-/chrome-121-0-6167.86.8.tgz#433f59f75b9657b316f12b6c7d959c4aa0038f03"
+  integrity sha512-FcvH16fTBWJypsn2ODZueqp8I1gaq/4pzfeS/jTgids+FrivA4krvb74+1A+bh4R4shujTRyZYWMuC3NHmmREw==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
