@@ -4,7 +4,7 @@
     "dist": "lerna publish from-package"
   },
   "devDependencies": {
-    "lerna": "^8.0.2"
+    "lerna": "^4.0.0"
   },
   "workspaces": ["agent/*", "specification", "js-path", "real-user-agents", "plugins/*"]
 }
