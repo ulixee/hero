@@ -53,9 +53,6 @@ export default class Pool extends TypedEventEmitter<{
   public sharedMitmProxy: MitmProxy;
   public plugins: IUnblockedPluginClass[] = [];
 
-  #agentsByBrowserId: { [browser_id: string]: number } = {};
-  #browserIdByAgentId: { [agent_id: string]: string } = {};
-
   #activeAgentsCount = 0;
   #waitingForAvailability: {
     agent: Agent;
@@ -63,6 +60,8 @@ export default class Pool extends TypedEventEmitter<{
   }[] = [];
 
   protected logger: IBoundLog;
+  private readonly agentsByBrowserId: { [browserId: string]: number } = {};
+  private readonly browserIdByAgentId: { [agentId: string]: string } = {};
 
   private isClosing: Resolvable<void>;
   private mitmStartPromise: Promise<MitmProxy>;
@@ -131,6 +130,7 @@ export default class Pool extends TypedEventEmitter<{
 
   public async getBrowser(
     engine: IBrowserEngine,
+    agentId: string,
     hooks: IHooksProvider & { profile?: IEmulationProfile },
     launchArgs?: IBrowserUserConfig,
   ): Promise<Browser> {
@@ -147,15 +147,17 @@ export default class Pool extends TypedEventEmitter<{
       const browser = new Browser(engine, hooks, launchArgs);
 
       for (const existingBrowser of this.browsersById.values()) {
-        const agents = this.#agentsByBrowserId[existingBrowser.id] ?? 0;
+        const agents = this.agentsByBrowserId[existingBrowser.id] ?? 0;
         if (agents < this.maxConcurrentAgentsPerBrowser && existingBrowser.isEqualEngine(engine)) {
-          this.#agentsByBrowserId[existingBrowser.id] += 1;
+          this.agentsByBrowserId[existingBrowser.id] += 1;
+          this.browserIdByAgentId[agentId] = existingBrowser.id;
           return existingBrowser;
         }
       }
 
-      this.#agentsByBrowserId[browser.id] ??= 0;
-      this.#agentsByBrowserId[browser.id] += 1;
+      this.agentsByBrowserId[browser.id] ??= 0;
+      this.agentsByBrowserId[browser.id] += 1;
+      this.browserIdByAgentId[agentId] = browser.id;
       // ensure enough listeners is possible
       browser.setMaxListeners(this.maxConcurrentAgents * 5);
       this.browsersById.set(browser.id, browser);
@@ -243,13 +245,13 @@ export default class Pool extends TypedEventEmitter<{
   private onAgentClosed(closedAgentId: string): void {
     this.#activeAgentsCount -= 1;
     this.agentsById.delete(closedAgentId);
-    const browserId = this.#browserIdByAgentId[closedAgentId];
-    if (this.#agentsByBrowserId[browserId]) {
-      this.#agentsByBrowserId[browserId] -= 1;
-      if (this.#agentsByBrowserId[browserId] === 0) {
-        delete this.#agentsByBrowserId[browserId];
+    const browserId = this.browserIdByAgentId[closedAgentId];
+    if (this.agentsByBrowserId[browserId]) {
+      this.agentsByBrowserId[browserId] -= 1;
+      if (this.agentsByBrowserId[browserId] === 0) {
+        delete this.agentsByBrowserId[browserId];
       }
-      delete this.#browserIdByAgentId[closedAgentId];
+      delete this.browserIdByAgentId[closedAgentId];
     }
 
     this.logger.info('Pool.ReleasingAgent', {

@@ -6,6 +6,7 @@ import IBrowserEngine from '@ulixee/unblocked-specification/agent/browser/IBrows
 import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import { Pool } from '../index';
+import Agent from '../lib/Agent';
 
 let httpServer: ITestHttpServer<http.Server>;
 
@@ -65,13 +66,16 @@ describe('Pool tests', () => {
     await pool.close();
   }, 15e3);
 
-
   it('should be able to maximize sessions per browser', async () => {
-    const pool = new Pool({ maxConcurrentAgents: 4, maxConcurrentAgentsPerBrowser: 2, ...BrowserUtils.newPoolOptions });
+    const pool = new Pool({
+      maxConcurrentAgents: 4,
+      maxConcurrentAgentsPerBrowser: 2,
+      ...BrowserUtils.newPoolOptions,
+    });
     Helpers.needsClosing.push(pool);
     expect(pool.activeAgentsCount).toBe(0);
 
-    const agents = [];
+    const agents: Agent[] = [];
     for (let i = 0; i < 4; i += 1) {
       const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
       Helpers.needsClosing.push(agent);
@@ -81,14 +85,32 @@ describe('Pool tests', () => {
     }
     expect(pool.activeAgentsCount).toBe(4);
     expect(pool.browsersById.size).toBe(2);
+    // @ts-expect-error
+    const agentsByBrowserId = pool.agentsByBrowserId;
+    // @ts-expect-error
+    const browserIdByAgentId = pool.browserIdByAgentId;
+
+    expect(Object.keys(browserIdByAgentId).length).toBe(4);
+
+    expect(Object.keys(agentsByBrowserId).length).toBe(2);
+
     [...pool.browsersById.values()].forEach(x => expect(x.browserContextsById.size).toBe(2));
     const nextAgent = pool.createAgent({ logger: TestLogger.forTest(module) });
     expect(pool.activeAgentsCount).toBe(4);
-    await agents.shift().close();
+    const toClose = agents.shift();
+    const closeBrowserId = toClose.browserContext.browserId;
+    await toClose.close();
+    expect(pool.activeAgentsCount).toBe(3);
+
+    expect(Object.keys(browserIdByAgentId).length).toBe(3);
+    expect(Object.keys(agentsByBrowserId).length).toBe(2);
+    expect(agentsByBrowserId[closeBrowserId]).toBe(1);
     Helpers.needsClosing.push(nextAgent);
     agents.push(nextAgent);
     await nextAgent.newPage();
     expect(pool.activeAgentsCount).toBe(4);
+    expect(Object.keys(agentsByBrowserId).length).toBe(2);
+    expect(agentsByBrowserId[closeBrowserId]).toBe(2);
 
     await Promise.all(agents.map(x => x.close()));
   }, 15e3);
@@ -167,7 +189,7 @@ describe('Pool tests', () => {
       launchArguments: [...browser1.engine.launchArguments, 'test1'],
     };
 
-    const browser2 = await pool.getBrowser(browserEngine, {});
+    const browser2 = await pool.getBrowser(browserEngine, '2', {});
 
     expect(browsers.size).toBe(2);
     expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(0);

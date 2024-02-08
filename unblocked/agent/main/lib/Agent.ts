@@ -111,6 +111,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       await pool.waitForAvailability(this);
       const browser = await pool.getBrowser(
         this.options.browserEngine,
+        this.id,
         this.plugins,
         this.plugins.profile.options,
       );
