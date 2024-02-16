@@ -17713,5 +17713,10 @@
     "id": "Firefox-122.0--OS X-Sonoma",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0",
     "osId": "mac-os-14"
+  },
+  {
+    "id": "Safari-17.3--OS X-Sonoma",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
+    "osId": "mac-os-14"
   }
 ]

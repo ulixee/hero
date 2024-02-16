@@ -3840,5 +3840,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "safari-17-3": {
+    "id": "safari-17-3",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "17",
+      "minor": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
