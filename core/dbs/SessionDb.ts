@@ -92,6 +92,7 @@ export default class SessionDb {
     if (env.enableSqliteWal && !dbOptions.readonly) {
       this.db.unsafeMode(false);
       this.db.pragma('journal_mode = WAL');
+      this.db.pragma('synchronous = NORMAL');
     }
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();

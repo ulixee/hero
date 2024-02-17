@@ -26,6 +26,7 @@ export default class NetworkDb {
     if (env.enableSqliteWal) {
       this.db.unsafeMode(false);
       this.db.pragma('journal_mode = WAL');
+      this.db.pragma('synchronous = NORMAL');
     }
 
     this.tables = [this.certificates];

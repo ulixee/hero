@@ -59,7 +59,7 @@ export default ClientHelloPlugin extends ClientPlugin {
 ```
 
 ### ClientPlugin.type *required*
-This must always be set to `'ClientPlugin'`. It's how Hero differentiates between different plugin types. If your class extended the ClientPlugin base in @ulixee/utils then this is already set.
+This must always be set to `'ClientPlugin'`. It's how Hero differentiates between different plugin types. If your class extended the ClientPlugin base in @ulixee/platform-utils then this is already set.
 #### **Type**: `string` This must always be set to `'ClientPlugin'`.
 
 ### ClientPlugin.coreDependencyIds *optional*

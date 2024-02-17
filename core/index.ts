@@ -139,6 +139,7 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
     this.utilityBrowserContext = this.pool
       .getBrowser(
         DefaultBrowserEmulator.default(),
+        `utility-${this.id}`,
         {},
         {
           showChrome: false,
