@@ -141,6 +141,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
 
       return await this.createBrowserContext(browser);
     } catch (err) {
+      await this.close();
       this.isOpen.reject(err);
     } finally {
       this.isOpen.resolve(this.browserContext);
