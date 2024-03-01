@@ -28,7 +28,7 @@
     "@ulixee/unblocked-agent": "2.0.0-alpha.26",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.26",
     "@ulixee/unblocked-specification": "2.0.0-alpha.26",
-    "better-sqlite3": "^9.3.0",
+    "better-sqlite3": "^9.4.3",
     "moment": "^2.29.4",
     "nanoid": "^3.3.6",
     "ws": "^7.5.9"
