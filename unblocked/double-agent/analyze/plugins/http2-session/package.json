@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/analyze-http2-session",
-  "version": "2.0.0-alpha.26",
+  "version": "2.0.0-alpha.27",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes http2 session settings and frames",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.26",
-    "@double-agent/collect-http2-session": "2.0.0-alpha.26",
+    "@double-agent/analyze": "2.0.0-alpha.27",
+    "@double-agent/collect-http2-session": "2.0.0-alpha.27",
     "source-map-support": "^0.5.16"
   }
 }

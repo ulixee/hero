@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.27](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
+
+
+### Bug Fixes
+
+* **agent:** close agent if fails to open ([797731c](https://github.com/ulixee/unblocked/commit/797731c7b5c14438854addc272681d0302c369af))
+* **agent:** max agents per browser not working ([ac6e273](https://github.com/ulixee/unblocked/commit/ac6e273262da2d5d199026ac05f5b6347a2882f2))
+
+
+
+
+
 # [2.0.0-alpha.26](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-02-02)
 
 ### Bug Fixes

@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/analyze-http-assets",
-  "version": "2.0.0-alpha.26",
+  "version": "2.0.0-alpha.27",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes http header order, capitalization and default values for common document assets (images, fonts, media, scripts, stylesheet, etc)",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.26",
-    "@double-agent/collect-http-assets": "2.0.0-alpha.26",
+    "@double-agent/analyze": "2.0.0-alpha.27",
+    "@double-agent/collect-http-assets": "2.0.0-alpha.27",
     "source-map-support": "^0.5.16"
   }
 }
