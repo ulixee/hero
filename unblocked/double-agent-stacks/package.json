@@ -23,7 +23,7 @@
     "@ulixee/default-human-emulator": "2.0.0-alpha.26",
     "@ulixee/real-user-agents": "2.0.0-alpha.26",
     "@ulixee/unblocked-agent": "2.0.0-alpha.26",
-    "commander": "^9.2.0",
+    "commander": "^9.5.0",
     "puppeteer": "17.1.3",
     "selenium-webdriver": "4.4.0"
   },

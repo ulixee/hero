@@ -9,7 +9,7 @@
     "@double-agent/config": "2.0.0-alpha.26",
     "@ulixee/commons": "2.0.0-alpha.26",
     "@ulixee/real-user-agents": "2.0.0-alpha.26",
-    "commander": "^9.0.0",
+    "commander": "^9.5.0",
     "node-fetch": "^2.6.1",
     "p-queue": "^6.6.2",
     "tar": "^6.2.0"
