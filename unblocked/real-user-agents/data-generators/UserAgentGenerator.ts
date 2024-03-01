@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import compareVersions = require('compare-versions');
+import { compareVersions } from 'compare-versions';
 import IUserAgent from '../interfaces/IUserAgent';
 import { createBrowserId } from '../lib/BrowserUtils';
 import Browsers from '../lib/Browsers';

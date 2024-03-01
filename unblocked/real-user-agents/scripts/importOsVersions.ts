@@ -2,7 +2,7 @@ import '@ulixee/commons/lib/SourceMapSupport';
 import * as Fs from 'fs';
 import { Agent } from '@ulixee/unblocked-agent';
 import { readFileAsJson } from '@ulixee/commons/lib/fileUtils';
-import moment = require('moment');
+import *  as moment from 'moment';
 import { getDataFilePath } from '../lib/paths';
 
 export default async function importOsVersions(): Promise<void> {
