@@ -9,6 +9,6 @@
     "@ulixee/crypto": "2.0.0-alpha.26",
     "@ulixee/specification": "2.0.0-alpha.26",
     "bignumber.js": "^9.0.2",
-    "commander": "^9.3.0"
+    "commander": "^9.5.0"
   }
 }
