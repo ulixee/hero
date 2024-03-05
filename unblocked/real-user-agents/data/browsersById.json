@@ -3878,5 +3878,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-122-0": {
+    "id": "edge-122-0",
+    "name": "Edge",
+    "marketshare": 0.7,
+    "version": {
+      "major": "122",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
