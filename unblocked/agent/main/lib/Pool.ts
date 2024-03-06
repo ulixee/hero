@@ -149,6 +149,7 @@ export default class Pool extends TypedEventEmitter<{
       for (const existingBrowser of this.browsersById.values()) {
         const agents = this.agentsByBrowserId[existingBrowser.id] ?? 0;
         if (agents < this.maxConcurrentAgentsPerBrowser && existingBrowser.isEqualEngine(engine)) {
+          this.agentsByBrowserId[existingBrowser.id] ??= 0;
           this.agentsByBrowserId[existingBrowser.id] += 1;
           this.browserIdByAgentId[agentId] = existingBrowser.id;
           return existingBrowser;

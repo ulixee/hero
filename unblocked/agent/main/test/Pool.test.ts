@@ -111,9 +111,33 @@ describe('Pool tests', () => {
     expect(pool.activeAgentsCount).toBe(4);
     expect(Object.keys(agentsByBrowserId).length).toBe(2);
     expect(agentsByBrowserId[closeBrowserId]).toBe(2);
+    expect(pool.browsersById.size).toBe(2);
 
     await Promise.all(agents.map(x => x.close()));
   }, 15e3);
+
+  it('reuses the same browser', async () => {
+    const pool = new Pool({
+      maxConcurrentAgents: 1,
+      maxConcurrentAgentsPerBrowser: 1,
+    });
+    Helpers.needsClosing.push(pool);
+
+    for (let i = 0; i < 5; i += 1) {
+      const agent = pool.createAgent({
+        logger: TestLogger.forTest(module),
+      });
+      Helpers.needsClosing.push(agent);
+      const page = await agent.newPage();
+      await page.goto(`${httpServer.baseUrl}/pool${i + 1}`);
+
+      await expect(page.execJsPath(["document", "title"])).resolves.toBeTruthy();
+
+      await agent.close();
+      expect(pool.activeAgentsCount).toBe(0);
+      expect(pool.browsersById.size).toBe(1);
+    }
+  });
 
   it('should emit events when all pages are closed', async () => {
     const pool = new Pool(BrowserUtils.newPoolOptions);
