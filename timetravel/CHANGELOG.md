@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.28](https://github.com/ulixee/platform/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
+
+
+### Bug Fixes
+
+* **timetravel:** push dom changes one at a time ([b179075](https://github.com/ulixee/platform/commit/b1790754a93eaad33e1f71e42d8cc52f1e773159)), closes [#252](https://github.com/ulixee/platform/issues/252)
+
+
+
+
+
 # [2.0.0-alpha.27](https://github.com/ulixee/platform/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
