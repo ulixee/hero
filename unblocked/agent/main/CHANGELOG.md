@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
+
+
+### Bug Fixes
+
+* **agent:** browser not being reused ([9ff32c6](https://github.com/ulixee/unblocked/commit/9ff32c66aad929ac8abffee5698ec947d0e7cb2c))
+* **agent:** handle isOpen null during agent close ([e75c907](https://github.com/ulixee/unblocked/commit/e75c907379b9b87991b3e52d57e5d785d19d8320))
+* **agent:** still reject isOpen if fails ([e4114cd](https://github.com/ulixee/unblocked/commit/e4114cd18857f55141534d1f7ade18bab115e447))
+
+
+
+
+
 # [2.0.0-alpha.27](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
 
 
