@@ -65,7 +65,10 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
     return { address: null, password: this.id };
   }
 
-  constructor(private readonly options: IAgentCreateOptions = {}, readonly pool?: Pool) {
+  constructor(
+    private readonly options: IAgentCreateOptions = {},
+    readonly pool?: Pool,
+  ) {
     super();
     this.id = options.id ?? nanoid();
     if (!this.pool) {
@@ -139,14 +142,17 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
         isIncognito: this.isIncognito,
       });
 
-      return await this.createBrowserContext(browser);
+      const context = await this.createBrowserContext(browser);
+      this.isOpen?.resolve(context);
+      return context;
     } catch (err) {
+      const openPromise = this.isOpen;
       await this.close();
-      this.isOpen?.reject(err);
-    } finally {
-      this.isOpen?.resolve(this.browserContext);
+      if (openPromise) {
+        openPromise.reject(err);
+      }
+      return openPromise;
     }
-    return this.isOpen;
   }
 
   public async newPage(): Promise<Page> {
