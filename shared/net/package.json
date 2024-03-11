@@ -1,11 +1,11 @@
 {
   "name": "@ulixee/net",
-  "version": "2.0.0-alpha.27",
+  "version": "2.0.0-alpha.28",
   "private": true,
   "description": "Common networking for the Ulixee projects",
   "license": "MIT",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.27",
+    "@ulixee/commons": "2.0.0-alpha.28",
     "ws": "^7.5.9"
   },
   "devDependencies": {
