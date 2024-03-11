@@ -436,7 +436,9 @@ export default class MirrorPage extends TypedEventEmitter<{
         this.domRecording.paintEvents.push(paint);
         this.paintEventByTimestamp[paint.timestamp] = paint;
       } else {
-        existing.changeEvents.push(...paint.changeEvents);
+        for (const change of paint.changeEvents) {
+          existing.changeEvents.push(change);
+        }
         existing.changeEvents.sort((a, b) => {
           if (a.frameId === b.frameId) return a.eventIndex - b.eventIndex;
           return a.frameId - b.frameId;
@@ -458,7 +460,9 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   private onPageEvents(event: ITabEventParams['page-events']): void {
     const { domChanges } = event.records;
-    this.pendingDomChanges.push(...domChanges);
+    for (const record of domChanges) {
+      this.pendingDomChanges.push(record);
+    }
   }
 
   private async evaluate<T>(expression: string): Promise<T> {

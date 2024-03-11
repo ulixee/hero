@@ -94,7 +94,9 @@ class DomReplayer {
   }
 
   private applyDomChanges(changeEvents: IFrontendDomChangeEvent[], isReverse = false): void {
-    this.pendingDomChanges.push(...changeEvents);
+    for (const change of changeEvents) {
+      this.pendingDomChanges.push(change);
+    }
     if (document.readyState !== 'complete') {
       document.addEventListener('DOMContentLoaded', () => this.applyDomChanges([]), { once: true });
       return;
