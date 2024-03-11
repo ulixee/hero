@@ -1,0 +1,55 @@
+{
+  "name": "@ulixee/hero-monorepo",
+  "description": "The Web Browser Built for Scraping",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "contributors": [
+    "Caleb Clark",
+    "Blake Byrnes"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true,
+  "scripts": {
+    "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
+    "copy:dist": "ulx-repo-after-build --dist",
+    "copy:build": "ulx-repo-after-build",
+    "tsc": "tsc -b -i tsconfig.json && ulx-repo-after-build",
+    "clean": "tsc -b --clean  tsconfig.json",
+    "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest",
+    "test": "ulx-repo-after-build && cd build && yarn test:build",
+    "lint": "eslint --cache ./",
+    "version:check": "ulx-repo-version-check fix",
+    "version:bump": "ulx-repo-version-bump"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  },
+  "workspaces": {
+    "packages": [
+      "client",
+      "core",
+      "end-to-end",
+      "interfaces",
+      "testing",
+      "timetravel",
+      "plugin-utils",
+      "plugins/*"
+    ]
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  },
+  "packageManager": "yarn@1.22.21"
+}
