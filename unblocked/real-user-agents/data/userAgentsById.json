@@ -2,6 +2,8 @@
   "mac-os-14--chrome-122-0": {
     "id": "mac-os-14--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -9,9 +11,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -4124,6 +4124,8 @@
   "mac-os-13--chrome-122-0": {
     "id": "mac-os-13--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -4131,9 +4133,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -8658,6 +8658,8 @@
   "mac-os-12--chrome-122-0": {
     "id": "mac-os-12--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -8665,9 +8667,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -15183,6 +15183,8 @@
   "mac-os-11--chrome-122-0": {
     "id": "mac-os-11--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -15190,9 +15192,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -21986,6 +21986,8 @@
   "mac-os-10-15--chrome-122-0": {
     "id": "mac-os-10-15--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -21993,9 +21995,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -63037,6 +63037,8 @@
   "windows-11--chrome-122-0": {
     "id": "windows-11--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -63044,9 +63046,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
@@ -68524,6 +68524,8 @@
   "windows-10--chrome-122-0": {
     "id": "windows-10--chrome-122-0",
     "allPatchVersions": [
+      140,
+      139,
       138,
       137,
       136,
@@ -68531,9 +68533,7 @@
       134,
       133,
       132,
-      131,
-      130,
-      129
+      131
     ],
     "stablePatchVersions": [
       129,
