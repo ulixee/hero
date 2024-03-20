@@ -86,6 +86,10 @@ export default function loadDomOverrides(
   domOverrides.add('HTMLIFrameElement.prototype');
   domOverrides.add('SharedWorker.prototype');
 
+  if (emulationProfile.consoleLogPageJson) {
+    domOverrides.add('JSON.stringify');
+  }
+
   const locale = emulationProfile.locale;
   const voices = data.speech.voices?.map(x => {
     x.default = locale.includes(x.lang);

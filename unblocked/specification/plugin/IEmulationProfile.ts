@@ -23,6 +23,7 @@ export default interface IEmulationProfile<T = any> {
   upstreamProxyIpMask?: { publicIp?: string; proxyIp?: string; ipLookupService?: string };
   geolocation?: IGeolocation;
   dnsOverTlsProvider?: { host: string; servername: string; port?: number };
+  consoleLogPageJson?: boolean;
 }
 
 export type IEmulationOptions = IBrowserUserConfig &
