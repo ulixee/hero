@@ -640,6 +640,7 @@ test('should not have too much recursion in prototype', async () => {
   })();`);
 
   expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+  expect(error.stack.match(/Object.apply/g)).toBe(null);
   expect(error.name).toBe('TypeError');
 
   const error2 = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
@@ -658,7 +659,66 @@ test('should not have too much recursion in prototype', async () => {
   }
 })();`);
   expect(error2.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+  expect(error.stack.match(/Object.apply/g)).toBe(null);
   expect(error2.name).toBe('TypeError');
+});
+
+
+test('should not see any proxy details in an iframe', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const result = await page.evaluate<{ runMap: boolean, originalContentWindow:boolean }>(`(() => {
+      const frame = document.createElement('iframe');
+      document.body.appendChild(frame);
+      return {
+        runMap: !!(window.runMap || frame.runMap),
+        originalContentWindow: !!frame.originalContentWindow, 
+      }
+  })();`);
+  expect(result.runMap).toBe(false);
+  expect(result.originalContentWindow).toBe(false);
+});
+
+
+test('it should handle a null prototype', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    const frame = document.createElement('iframe');
+    frame.width = 0;
+    frame.height = 0;
+    frame.style = "position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;";
+    document.body.appendChild(frame);
+    const descriptor = Object.getOwnPropertyDescriptor(frame.contentWindow.console, 'debug');
+    
+    Object.setPrototypeOf.apply(Object, [descriptor.value, frame.contentWindow.console.debug]);
+    return true
+  } catch (error) {
+  console.log(error);
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+  expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+  expect(error.stack.match(/Object.apply/g)).toBe(null);
+  expect(error.name).toBe('TypeError');
 });
 
 describe('Proxy detections', () => {
@@ -809,6 +869,7 @@ describe('Proxy detections', () => {
     });
     Helpers.needsClosing.push(agent);
     const page = await agent.newPage();
+    page.on('console', console.log);
     await page.goto(`${koaServer.baseUrl}`);
 
     function getReflectSetProtoLie(apiFunction) {

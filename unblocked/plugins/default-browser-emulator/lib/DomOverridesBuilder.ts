@@ -68,11 +68,13 @@ export default class DomOverridesBuilder {
     return {
       callbacks,
       // NOTE: don't make this async. It can cause issues if you read a frame right after creation, for instance
-      script: `(function newDocumentScriptWrapper() {
+      script: `(function newDocumentScriptWrapper(scopedVars = {}) {
 // Worklet has no scope to override, but we can't detect until it loads
 if (typeof self === 'undefined' && typeof window === 'undefined') return;
 
-runMap = typeof runMap === 'undefined' ? new WeakSet() : runMap;
+if (!scopedVars.runMap) scopedVars.runMap = new WeakSet();
+const runMap = scopedVars.runMap;
+
 if (runMap.has(self)) return;
   
 const sourceUrl = '${injectedSourceUrl}';

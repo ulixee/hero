@@ -1,22 +1,23 @@
 // This bypass is based on the one from puppeteer-stealth-evasions
 
-declare let originalContentWindow;
-declare let frameWindowProxies;
-declare let hasRunNewDocumentScripts;
+declare let scopedVars: any;
 
-if (typeof frameWindowProxies === 'undefined') {
-  frameWindowProxies = new WeakMap();
-  hasRunNewDocumentScripts = new WeakSet();
+if (typeof scopedVars.frameWindowProxies === 'undefined') {
+  scopedVars.frameWindowProxies = new WeakMap();
+  scopedVars.hasRunNewDocumentScripts = new WeakSet();
 
-  originalContentWindow = Object.getOwnPropertyDescriptor(
+  scopedVars.originalContentWindow = Object.getOwnPropertyDescriptor(
     self.HTMLIFrameElement.prototype,
     'contentWindow',
   ).get;
 
   function getTrueContentWindow(frame: HTMLIFrameElement): Window {
-    return originalContentWindow.apply(frame);
+    return scopedVars.originalContentWindow.apply(frame);
   }
 }
+
+const frameWindowProxies = scopedVars.frameWindowProxies;
+const hasRunNewDocumentScripts = scopedVars.hasRunNewDocumentScripts;
 
 proxyGetter(self.HTMLIFrameElement.prototype, 'contentWindow', (target, iframe) => {
   if (frameWindowProxies.has(iframe) && iframe.isConnected) {

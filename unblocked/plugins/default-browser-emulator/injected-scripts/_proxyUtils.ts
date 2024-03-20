@@ -17,6 +17,8 @@ const ReflectCached = {
   getOwnPropertyDescriptor: Reflect.getOwnPropertyDescriptor.bind(Reflect),
 };
 
+const ErrorCached = Error;
+
 const ObjectCached = {
   setPrototypeOf: Object.setPrototypeOf.bind(Object),
   getPrototypeOf: Object.getPrototypeOf.bind(Object),
@@ -56,14 +58,16 @@ const fnToStringProxy = internalCreateFnProxy(
     if (overriddenFns.has(thisArg)) {
       return overriddenFns.get(thisArg);
     }
-    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
-    // if not indicates that we are doing a check across different windows
-    const hasSameProto = ObjectCached.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
-      thisArg.toString,
-    );
-    if (hasSameProto === false) {
-      // Pass the call on to the local Function.prototype.toString instead
-      return thisArg.toString(...(args ?? []));
+    if (thisArg !== null && thisArg !== undefined) {
+      // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
+      // if not indicates that we are doing a check across different windows
+      const hasSameProto = ObjectCached.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
+        thisArg.toString,
+      );
+      if (hasSameProto === false) {
+        // Pass the call on to the local Function.prototype.toString instead
+        return thisArg.toString(...(args ?? []));
+      }
     }
 
     try {
@@ -93,17 +97,24 @@ ObjectCached.defineProperty(Function.prototype, 'toString', {
 
 /////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-let isObjectSetPrototypeOf = false;
+let isObjectSetPrototypeOf = 0;
+let undefinedPrototypeString: string[] = [];
+try {
+  Object.setPrototypeOf(undefined, null);
+} catch (err) {
+  undefinedPrototypeString = err.stack.split(/\r?\n/);
+}
+
 const nativeToStringObjectSetPrototypeOfString = `${Object.setPrototypeOf}`;
 Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
   apply(target: (o: any, proto: object | null) => any, thisArg: any, argArray: any[]): any {
-    isObjectSetPrototypeOf = true;
+    isObjectSetPrototypeOf += 1;
     try {
-      return ReflectCached.apply(...arguments);
+      return ReflectCached.apply(...arguments, 1);
     } catch (error) {
       throw cleanErrorStack(error, null, false, true, true);
     } finally {
-      isObjectSetPrototypeOf = false;
+      isObjectSetPrototypeOf -= 1;
     }
   },
 });
@@ -126,6 +137,9 @@ function cleanErrorStack(
 
   const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
   const stack = error.stack.split(/\r?\n/);
+  if (stack[0] === undefinedPrototypeString[0]) {
+    stack[2] = undefinedPrototypeString[1];
+  }
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
@@ -189,8 +203,17 @@ function internalCreateFnProxy(
       if (newPrototype === proxy || newPrototype?.__proto__ === proxy) {
         protoTarget = target;
       }
+      let isFromObjectSetPrototypeOf = isObjectSetPrototypeOf > 0;
+      if (!isFromObjectSetPrototypeOf) {
+        const stack = new ErrorCached().stack.split(/\r?\n/);
+
+        if (stack[1].includes('Object.setPrototypeOf') && stack[1].includes(sourceUrl) && !stack[2].includes('Reflect.setPrototypeOf')) {
+          isFromObjectSetPrototypeOf = true;
+        }
+      }
+
       try {
-        const caller = isObjectSetPrototypeOf ? ObjectCached : ReflectCached;
+        const caller = isFromObjectSetPrototypeOf ? ObjectCached : ReflectCached;
         return caller.setPrototypeOf(target, protoTarget);
       } catch (error) {
         throw cleanErrorStack(error, null, false, true);
@@ -344,9 +367,12 @@ function defaultProxyApply<T, K extends keyof T>(
     // @ts-expect-error
     if (result && result.then && typeof result.then === 'function') {
       // @ts-expect-error
-      return result.then(r => r, err => {
+      return result.then(
+        r => r,
+        err => {
           throw cleanErrorStack(err);
-      });
+        },
+      );
     }
   } catch {
     // Just return without the modified cleanErrorStack behaviour.
