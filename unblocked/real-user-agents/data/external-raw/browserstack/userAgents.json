@@ -17823,5 +17823,75 @@
     "id": "Edge-122.0--OS X-Sonoma",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
     "osId": "mac-os-14"
+  },
+  {
+    "id": "Chrome-123.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Chrome-123.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Chrome-123.0--OS X-Catalina",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "mac-os-10-15"
+  },
+  {
+    "id": "Firefox-124.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Firefox-124.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Chrome-123.0--OS X-Big Sur",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "mac-os-11"
+  },
+  {
+    "id": "Firefox-124.0--OS X-Catalina",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "mac-os-10-15"
+  },
+  {
+    "id": "Firefox-124.0--OS X-Big Sur",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "mac-os-11"
+  },
+  {
+    "id": "Chrome-123.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "mac-os-13"
+  },
+  {
+    "id": "Firefox-124.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "mac-os-12"
+  },
+  {
+    "id": "Firefox-124.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "mac-os-13"
+  },
+  {
+    "id": "Chrome-123.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "mac-os-12"
+  },
+  {
+    "id": "Chrome-123.0--OS X-Sonoma",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "osId": "mac-os-14"
+  },
+  {
+    "id": "Firefox-124.0--OS X-Sonoma",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "osId": "mac-os-14"
   }
 ]
