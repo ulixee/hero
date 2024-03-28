@@ -53,9 +53,11 @@ export default async function runLocalDoms(
     const major = String(browserEngineOption.major);
     if (shouldRunDockers) {
       const latestLinux = browserEngineOption.versions.find(x => x.linux);
-      const fullVersion = latestLinux.fullVersion;
-      await runDockerChromes(fullVersion, major, 1);
-      await runDockerChromes(fullVersion, major, 2);
+      const fullVersion = latestLinux?.fullVersion;
+      if (fullVersion) {
+        await runDockerChromes(fullVersion, major, 1);
+        await runDockerChromes(fullVersion, major, 2);
+      }
     }
     if (shouldRunLocal) {
       const latest = browserEngineOption.versions.find(x => x.mac);
