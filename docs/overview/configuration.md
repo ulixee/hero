@@ -37,18 +37,18 @@ One of the best ways to optimize Hero's memory and CPU is setting `blockedResour
 
 <p class="show-table-header show-bottom-border minimal-row-height"></p>
 
-| Options          | Description                                                        |
-| ---------------- | ------------------------------------------------------------------ |
-| `JsRuntime`      | Executes JS in webpage. Requires `AwaitedDOM`.                     |
-| `BlockJsAssets`  | Blocks all referenced script assets.                               |
-| `BlockCssAssets` | Blocks all referenced CSS assets.                                  |
-| `BlockImages`    | Blocks all referenced images on page.                              |
-| `BlockFonts`     | Blocks all referenced fonts on page.                               |
-| `BlockIcons`     | Blocks all referenced icons on page.                               |
-| `BlockMedia`     | Blocks all referenced media on page.                               |
-| `BlockAssets`    | Shortcut for `BlockJsAssets`, `BlockCssAssets` and `BlockImages`.  |
-| `All`            | Blocks all of the resources above. Only retrieves window.response. |
-| `None`           | No assets are blocked. `default`                                   |
+| Options             | Description                                                             |
+| ------------------- | ----------------------------------------------------------------------- |
+| `JsRuntime`         | Executes JS in webpage. Requires `AwaitedDOM`.                          |
+| `BlockJsResources`  | Blocks all referenced script assets.                                    |
+| `BlockCssResources` | Blocks all referenced CSS assets.                                       |
+| `BlockImages`       | Blocks all referenced images on page.                                   |
+| `BlockFonts`        | Blocks all referenced fonts on page.                                    |
+| `BlockIcons`        | Blocks all referenced icons on page.                                    |
+| `BlockMedia`        | Blocks all referenced media on page.                                    |
+| `BlockAssets`       | Shortcut for `BlockJsResources`, `BlockCssResources` and `BlockImages`. |
+| `All`               | Blocks all of the resources above. Only retrieves window.response.      |
+| `None`              | No assets are blocked. `default`                                        |
 
 As you'll notice above, some features are dependent on others and therefore automatically enable other features.
 

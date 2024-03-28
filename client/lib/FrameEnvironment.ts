@@ -1,5 +1,9 @@
 import StateMachine from '@ulixee/awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode, ISuperNodeList } from '@ulixee/awaited-dom/base/interfaces/super';
+import {
+  ISuperElement,
+  ISuperNode,
+  ISuperNodeList,
+} from '@ulixee/awaited-dom/base/interfaces/super';
 import AwaitedPath from '@ulixee/awaited-dom/base/AwaitedPath';
 import { IRequestInit } from '@ulixee/awaited-dom/base/interfaces/official';
 import SuperDocument from '@ulixee/awaited-dom/impl/super-klasses/SuperDocument';
@@ -230,14 +234,13 @@ export default class FrameEnvironment {
       this.document,
       null,
       orderedNodeResults
-        ? XPathResult.ORDERED_NODE_ITERATOR_TYPE
-        : XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+        ? XPathResult.ORDERED_NODE_SNAPSHOT_TYPE
+        : XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
     );
+    const nodeLength = await results.snapshotLength;
     const nodes: ISuperNode[] = [];
-    let node: ISuperNode;
-    // eslint-disable-next-line no-cond-assign
-    while ((node = await results.iterateNext())) {
-      nodes.push(node);
+    for (let i = 0; i < nodeLength; i++) {
+      nodes.push(results.snapshotItem(i));
     }
     return nodes;
   }
