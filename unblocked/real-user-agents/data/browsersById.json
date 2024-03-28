@@ -3918,5 +3918,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-123-0": {
+    "id": "edge-123-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "123",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
