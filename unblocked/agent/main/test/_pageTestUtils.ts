@@ -71,6 +71,18 @@ export async function waitForVisible(frame: Frame, selector: string, timeoutMs =
   return visibility;
 }
 
+export async function waitForExists(frame: Frame, selector: string, timeoutMs = 10e3): Promise<void> {
+  await wait(
+    async () => {
+      const visibility = await frame.jsPath.getNodeVisibility(['document', ['querySelector', selector]]);
+      if (visibility.nodeExists) {
+        return true;
+      }
+    },
+    { loopDelayMs: 100, timeoutMs },
+  );
+}
+
 function wait(
   callbackFn: () => Promise<boolean>,
   options: { timeoutMs?: number; loopDelayMs?: number } = {},

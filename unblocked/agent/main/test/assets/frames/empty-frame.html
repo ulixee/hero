@@ -1,0 +1,15 @@
+<html>
+  <body>
+    <p>This test includes an iframe with an about:blank src into which we inject javascript</p>
+    <iframe id="frame1" src="about:blank"></iframe>
+    <script>
+      function Load() {
+        const frameEl = document.getElementById('frame1');
+        const frameWin = frameEl.contentWindow;
+        const el = document.createElement('div');
+        el.textContent = 'injected text';
+        frameWin.document.body.appendChild(el);
+      }
+    </script>
+  </body>
+</html>

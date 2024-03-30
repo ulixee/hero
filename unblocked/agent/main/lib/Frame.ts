@@ -604,6 +604,11 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       loader.setNavigationResult(frame.url);
     }
 
+    if (this.isDefaultUrl && this.parentId && !this.navigations.top) {
+      const top = this.navigations.onNavigationRequested('newFrame', this.url, 0, loader.id);
+      this.navigations.setPageReady(top, Date.now());
+    }
+
     this.emit('frame-navigated', { frame: this, loaderId: frame.loaderId });
   }
 

@@ -3,7 +3,7 @@ import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import { inspect } from 'util';
 import { Browser, BrowserContext, Page } from '../index';
 import Agent from '../lib/Agent';
-import { attachFrame, setContent } from './_pageTestUtils';
+import { attachFrame, setContent, waitForExists } from './_pageTestUtils';
 import { TestServer } from './server';
 
 describe('Frames', () => {
@@ -113,6 +113,18 @@ describe('Frames', () => {
       ]);
       expect(a1).toBe(1);
       expect(a2).toBe(2);
+    });
+
+    it('should be able to wait for JavascriptReady in a srcdoc frame', async () => {
+      await page.goto(`${server.baseUrl}/frames/empty-frame.html`);
+      await expect(page.waitForLoad('AllContentLoaded', { timeoutMs: 1000 })).resolves.toBeTruthy();
+      await waitForExists(page.mainFrame, '#frame1', 1000);
+      if (page.frames.length === 1) {
+        await page.waitOn('frame-created', ev => ev.frame.id === 'frame1', 2000);
+      }
+      await expect(
+        page.frames[1].waitForLoad({ loadStatus: 'JavascriptReady', timeoutMs:1000 }),
+      ).resolves.toBeTruthy();
     });
 
     it('should work in iframes that failed initial navigation', async () => {
