@@ -25,9 +25,6 @@ class Log implements ILog {
   private logtimeById: { [parentId: number]: number } = {};
 
   constructor(module: NodeModule, boundContext?: any) {
-    global.UlxLogPrototype ??= Log.prototype;
-    Object.setPrototypeOf(this, global.UlxLogPrototype);
-
     this.module = module ? extractPathFromModule(module) : '';
     if (boundContext) this.boundContext = boundContext;
     this.level = isEnabled(this.module) ? 'stats' : 'error';
@@ -215,6 +212,11 @@ declare global {
 if (!global.UlixeeLogCreator) {
   global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
     const log: ILog = new Log(module);
+
+    // This code ensures a single version of Log is used across all @ulixee/commons that are loaded into memory.
+    // We don't update it if an injected logger is used.
+    global.UlxLogPrototype ??= Log.prototype;
+    Object.setPrototypeOf(log, global.UlxLogPrototype);
 
     return {
       log,
