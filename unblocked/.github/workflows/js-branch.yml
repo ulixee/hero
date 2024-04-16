@@ -2,7 +2,6 @@ name: 'Publish a built Javascript Branch'
 
 on:
   push:
-    branches:
   workflow_dispatch:
 
 jobs:
