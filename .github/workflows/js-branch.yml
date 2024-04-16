@@ -2,8 +2,11 @@ name: 'Publish a built Javascript Branch'
 
 on:
   push:
-    branches:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
