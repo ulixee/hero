@@ -2,6 +2,7 @@
   "mac-os-14--chrome-123-0": {
     "id": "mac-os-14--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -10,8 +11,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       124,
@@ -26,6 +26,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -46,6 +47,7 @@
   "mac-os-14--chrome-122-0": {
     "id": "mac-os-14--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -54,8 +56,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -71,6 +72,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -115,6 +117,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -161,6 +164,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -205,6 +209,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -249,6 +254,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -294,6 +300,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -339,6 +346,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -383,6 +391,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -427,6 +436,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -470,6 +480,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -513,6 +524,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -556,6 +568,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -600,6 +613,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -642,6 +656,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -686,6 +701,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -730,6 +746,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -774,6 +791,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -817,6 +835,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -859,6 +878,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -902,6 +922,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -944,6 +965,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -987,6 +1009,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1031,6 +1054,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1075,6 +1099,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1118,6 +1143,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1160,6 +1186,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1204,6 +1231,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1246,6 +1274,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1290,6 +1319,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1332,6 +1362,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1375,6 +1406,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1420,6 +1452,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -1464,6 +1497,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "14.4.1",
       "14.4.0",
       "14.3.1",
       "14.3.0",
@@ -4206,6 +4240,7 @@
   "mac-os-13--chrome-123-0": {
     "id": "mac-os-13--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -4214,8 +4249,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       124,
@@ -4230,6 +4264,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4259,6 +4294,7 @@
   "mac-os-13--chrome-122-0": {
     "id": "mac-os-13--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -4267,8 +4303,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -4284,6 +4319,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4337,6 +4373,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4392,6 +4429,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4445,6 +4483,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4498,6 +4537,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4552,6 +4592,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4606,6 +4647,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4659,6 +4701,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4712,6 +4755,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4764,6 +4808,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4816,6 +4861,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4868,6 +4914,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4921,6 +4968,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -4972,6 +5020,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5025,6 +5074,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5078,6 +5128,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5131,6 +5182,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5183,6 +5235,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5234,6 +5287,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5286,6 +5340,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5337,6 +5392,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5389,6 +5445,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5442,6 +5499,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5495,6 +5553,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5547,6 +5606,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5598,6 +5658,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5651,6 +5712,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5702,6 +5764,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5755,6 +5818,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5806,6 +5870,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5858,6 +5923,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5912,6 +5978,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -5965,6 +6032,7 @@
       null
     ],
     "uaClientHintsPlatformVersions": [
+      "13.6.6",
       "13.6.5",
       "13.6.4",
       "13.6.3",
@@ -8831,6 +8899,7 @@
   "mac-os-12--chrome-123-0": {
     "id": "mac-os-12--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -8839,8 +8908,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       124,
@@ -8890,6 +8958,7 @@
   "mac-os-12--chrome-122-0": {
     "id": "mac-os-12--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -8898,8 +8967,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -15453,6 +15521,7 @@
   "mac-os-11--chrome-123-0": {
     "id": "mac-os-11--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -15461,8 +15530,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       124,
@@ -15521,6 +15589,7 @@
   "mac-os-11--chrome-122-0": {
     "id": "mac-os-11--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -15529,8 +15598,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -22362,6 +22430,7 @@
   "mac-os-10-15--chrome-123-0": {
     "id": "mac-os-10-15--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -22370,8 +22439,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       124,
@@ -22406,6 +22474,7 @@
   "mac-os-10-15--chrome-122-0": {
     "id": "mac-os-10-15--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -22414,8 +22483,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -63497,6 +63565,7 @@
   "windows-11--chrome-123-0": {
     "id": "windows-11--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -63505,8 +63574,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       123,
@@ -63535,6 +63603,7 @@
   "windows-11--chrome-122-0": {
     "id": "windows-11--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -63543,8 +63612,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
@@ -69060,6 +69128,7 @@
   "windows-10--chrome-123-0": {
     "id": "windows-10--chrome-123-0",
     "allPatchVersions": [
+      133,
       132,
       131,
       130,
@@ -69068,8 +69137,7 @@
       127,
       126,
       125,
-      124,
-      123
+      124
     ],
     "stablePatchVersions": [
       123,
@@ -69110,6 +69178,7 @@
   "windows-10--chrome-122-0": {
     "id": "windows-10--chrome-122-0",
     "allPatchVersions": [
+      171,
       170,
       169,
       168,
@@ -69118,8 +69187,7 @@
       165,
       164,
       163,
-      162,
-      161
+      162
     ],
     "stablePatchVersions": [
       129,
