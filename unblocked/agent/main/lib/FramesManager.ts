@@ -226,7 +226,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       if (event.name === name) {
         await this.isReady;
         const frame = this.getFrameForExecutionContext(event.executionContextId);
-        onCallback(event.payload, frame);
+        if (frame) onCallback(event.payload, frame);
       }
     });
   }
