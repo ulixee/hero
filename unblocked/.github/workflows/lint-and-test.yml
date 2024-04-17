@@ -66,7 +66,7 @@ jobs:
           go-version: '1.20'
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.3
+        uses: microsoft/setup-msbuild@v2
         if: ${{ matrix.os == 'windows-latest' }}
 
       - name: Clone ulixee/shared
