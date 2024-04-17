@@ -68,35 +68,41 @@ export default class DomOverridesBuilder {
     return {
       callbacks,
       // NOTE: don't make this async. It can cause issues if you read a frame right after creation, for instance
-      script: `(function newDocumentScriptWrapper(scopedVars = {}) {
-// Worklet has no scope to override, but we can't detect until it loads
-if (typeof self === 'undefined' && typeof window === 'undefined') return;
+      script: `
+(function newDocumentScriptWrapper(scopedVars = {}) {
+  // Worklet has no scope to override, but we can't detect until it loads
+  if (typeof self === 'undefined' && typeof window === 'undefined') return;
 
-if (!scopedVars.runMap) scopedVars.runMap = new WeakSet();
-const runMap = scopedVars.runMap;
+  if (!scopedVars.runMap) scopedVars.runMap = new WeakSet();
+  const runMap = scopedVars.runMap;
 
-if (runMap.has(self)) return;
-  
-const sourceUrl = '${injectedSourceUrl}';
-${utilsScript}
-
-(function newDocumentScript(selfOverride) {
-  if (selfOverride) self = selfOverride;
-  
   if (runMap.has(self)) return;
-  runMap.add(self);
-  const isWorker = !self.document && "WorkerGlobalScope" in self;
-  
-  ${[...scripts]
-    .map(([name, script]) => {
-      let snippet = '';
-      if (shouldNotRunInWorker(name)) snippet += `if (!isWorker) {\n`;
-      snippet += `try { ${script} } catch(e) {${catchHandling}}`;
-      if (shouldNotRunInWorker(name)) snippet += '\n}';
-      return snippet;
-    })
-    .join('\n\n')}
-})();
+
+  const sourceUrl = '${injectedSourceUrl}';
+  ${utilsScript}
+
+  (function newDocumentScript(selfOverride) {
+    const originalSelf = self;
+    if (selfOverride) self = selfOverride;
+
+    try {
+      if (runMap.has(self)) return;
+      runMap.add(self);
+      const isWorker = !self.document && "WorkerGlobalScope" in self;
+
+      ${[...scripts]
+        .map(([name, script]) => {
+          let snippet = '';
+          if (shouldNotRunInWorker(name)) snippet += `if (!isWorker) {\n`;
+          snippet += `try { ${script} } catch(e) {${catchHandling}}`;
+          if (shouldNotRunInWorker(name)) snippet += '\n}';
+          return snippet;
+        })
+        .join('\n\n')}
+    } finally {
+      self = originalSelf;
+    }
+  })();
 
 })();
 //# sourceURL=${injectedSourceUrl}`.replace(/\/\/# sourceMap.+/g, ''),

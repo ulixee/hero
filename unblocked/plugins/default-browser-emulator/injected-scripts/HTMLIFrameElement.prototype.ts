@@ -4,7 +4,6 @@ declare let scopedVars: any;
 
 if (typeof scopedVars.frameWindowProxies === 'undefined') {
   scopedVars.frameWindowProxies = new WeakMap();
-  scopedVars.hasRunNewDocumentScripts = new WeakSet();
 
   scopedVars.originalContentWindow = Object.getOwnPropertyDescriptor(
     self.HTMLIFrameElement.prototype,
@@ -17,7 +16,6 @@ if (typeof scopedVars.frameWindowProxies === 'undefined') {
 }
 
 const frameWindowProxies = scopedVars.frameWindowProxies;
-const hasRunNewDocumentScripts = scopedVars.hasRunNewDocumentScripts;
 
 proxyGetter(self.HTMLIFrameElement.prototype, 'contentWindow', (target, iframe) => {
   if (frameWindowProxies.has(iframe) && iframe.isConnected) {
@@ -39,11 +37,8 @@ proxySetter(self.HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
           // see if the window has been allocated
           const contentWindow = getTrueContentWindow(iframe);
           if (contentWindow) {
-            if (!hasRunNewDocumentScripts.has(contentWindow)) {
-              hasRunNewDocumentScripts.add(contentWindow);
-              newDocumentScript(contentWindow);
-              frameWindowProxies.delete(iframe);
-            }
+            newDocumentScript(contentWindow);
+            frameWindowProxies.delete(iframe);
             return contentWindow.document;
           }
           return null;
