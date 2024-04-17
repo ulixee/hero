@@ -26,7 +26,7 @@ export default function createHttpRequestHandler(
   ): Promise<void> {
     if (req.method === 'HEAD') {
       // BrowserStack sends head requests to check if a domain is active. not part of the tests..
-      console.log('HEAD request inbound. Should not be getting this.', req.url, req.headers);
+      console.log('HEAD request inbound. Should not be getting this.', String(req.url).replace(/\n|\r/g, ''), String(req.headers).replace(/\n|\r/g, ''));
       res.end();
       return;
     }
@@ -37,7 +37,7 @@ export default function createHttpRequestHandler(
 
     if (!isRecognizedDomain(requestUrl.host, [MainDomain, SubDomain, CrossDomain])) {
       req.socket.destroy();
-      console.warn('Invalid domain used to access site', req.url, req.headers.host);
+      console.warn('Invalid domain used to access site', String(req.url).replace(/\n|\r/g, ''), String(req.headers.host).replace(/\n|\r/g, ''));
       return;
     }
 
@@ -78,7 +78,7 @@ export default function createHttpRequestHandler(
         res.writeHead(404).end(JSON.stringify({ message: 'Not found' }));
       }
     } catch (err) {
-      console.log('Request error %s %s', req.method, req.url, err);
+      console.log('Request error %s %s', req.method, String(req.url).replace(/\n|\r/g, ''), err);
       res.writeHead(500, err.message).end();
     }
   };
