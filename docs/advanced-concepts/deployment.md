@@ -51,7 +51,7 @@ To connect your client and core, you'll create a transport bridge that will pipe
 
 ```javascript
 import HeroCore from '@ulixee/hero-core';
-import TransportBridge from '@ulixee/net/lib/TransportBridge';
+import { TransportBridge } from '@ulixee/net';
 import { ConnectionToHeroCore } from '@ulixee/hero';
 
 const bridge = new TransportBridge();
@@ -79,7 +79,7 @@ npm i --save @ulixee/hero-core @ulixee/net
 
 ```js
 import HeroCore from '@ulixee/hero-core';
-import WsTransportToClient from '@ulixee/net/lib/WsTransportToClient';
+import { WsTransportToClient } from '@ulixee/net';
 import * as WebSocket from 'ws';
 import * as http from 'http';
 import * as https from 'https';
