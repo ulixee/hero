@@ -207,7 +207,11 @@ function internalCreateFnProxy(
       if (!isFromObjectSetPrototypeOf) {
         const stack = new ErrorCached().stack.split(/\r?\n/);
 
-        if (stack[1].includes('Object.setPrototypeOf') && stack[1].includes(sourceUrl) && !stack[2].includes('Reflect.setPrototypeOf')) {
+        if (
+          stack[1].includes('Object.setPrototypeOf') &&
+          stack[1].includes(sourceUrl) &&
+          !stack[2].includes('Reflect.setPrototypeOf')
+        ) {
           isFromObjectSetPrototypeOf = true;
         }
       }
@@ -348,18 +352,23 @@ function defaultProxyApply<T, K extends keyof T>(
   args: [target: any, thisArg: T, argArray: any[]],
   overrideFn?: (target?: T[K], thisArg?: T, argArray?: any[]) => T[K] | ProxyOverride,
 ): any {
-  if (!overrideFn) {
-    return ReflectCached.apply(...args);
+  let result: T[K] | ProxyOverride = ProxyOverride.callOriginal;
+  if (overrideFn) {
+    try {
+      result = overrideFn(...args);
+    } catch (err) {
+      throw cleanErrorStack(err);
+    }
   }
-  let result: T[K] | ProxyOverride;
-  try {
-    result = overrideFn(...args);
-  } catch (err) {
-    throw cleanErrorStack(err);
-  }
+
   if (result === ProxyOverride.callOriginal) {
-    return ReflectCached.apply(...args);
+    try {
+      result = ReflectCached.apply(...args);
+    } catch (err) {
+      throw cleanErrorStack(err);
+    }
   }
+
   // Try to make clean error stacks for tenables, but don't crash if
   // for some reason this doesn't work. Crashing here could have
   // a huge impact on other things.
