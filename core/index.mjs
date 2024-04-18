@@ -1,6 +1,6 @@
 import cjsImport from './index.js';
 
-const { BrowserEmulators, HumanEmulators } = cjsImport;
+const { Tab, Session, LocationTrigger } = cjsImport;
 
-export { BrowserEmulators, HumanEmulators };
+export { Tab, Session, LocationTrigger };
 export default cjsImport.default;
