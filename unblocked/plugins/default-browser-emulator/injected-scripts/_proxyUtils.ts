@@ -42,7 +42,7 @@ const ObjectCached = {
         if (argArray?.length) proxyToTarget.set(result, argArray[0]);
         return result;
       } catch (err) {
-        throw cleanErrorStack(err, null, false, true);
+        throw cleanErrorStack(err, { stripStartingReflect: true });
       }
     },
   });
@@ -73,17 +73,19 @@ const fnToStringProxy = internalCreateFnProxy(
     try {
       return target.apply(thisArg, args);
     } catch (error) {
-      cleanErrorStack(error, (line, i) => {
-        if (i === 1 && line.includes('Object.toString')) {
-          const thisProto = ObjectCached.getPrototypeOf(thisArg);
-          if (
-            proxyToTarget.has(thisProto) &&
-            (overriddenFns.has(thisProto) || overriddenFns.has(target))
-          ) {
-            return line.replace('Object.toString', 'Function.toString');
+      cleanErrorStack(error, {
+        replaceLineFn: (line, i) => {
+          if (i === 1 && line.includes('Object.toString')) {
+            const thisProto = ObjectCached.getPrototypeOf(thisArg);
+            if (
+              proxyToTarget.has(thisProto) &&
+              (overriddenFns.has(thisProto) || overriddenFns.has(target))
+            ) {
+              return line.replace('Object.toString', 'Function.toString');
+            }
           }
-        }
-        return line;
+          return line;
+        },
       });
       throw error;
     }
@@ -107,12 +109,15 @@ try {
 
 const nativeToStringObjectSetPrototypeOfString = `${Object.setPrototypeOf}`;
 Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
-  apply(target: (o: any, proto: object | null) => any, thisArg: any, argArray: any[]): any {
+  apply(): any {
     isObjectSetPrototypeOf += 1;
     try {
       return ReflectCached.apply(...arguments, 1);
     } catch (error) {
-      throw cleanErrorStack(error, null, false, true, true);
+      throw cleanErrorStack(error, {
+        stripStartingReflect: true,
+        skipDuplicate: /.*setPrototypeOf/,
+      });
     } finally {
       isObjectSetPrototypeOf -= 1;
     }
@@ -128,22 +133,37 @@ declare let sourceUrl: string;
 
 function cleanErrorStack(
   error: Error,
-  replaceLineFn?: (line: string, index: number) => string,
-  startAfterSourceUrl = false,
-  stripStartingReflect = false,
-  stripFirstStackLine = false,
+  opts: {
+    replaceLineFn?: (line: string, index: number) => string;
+    startAfterSourceUrl?: boolean;
+    stripStartingReflect?: boolean;
+    skipDuplicate?: RegExp;
+    skipFirst?: RegExp;
+  } = {
+    startAfterSourceUrl: false,
+    stripStartingReflect: false,
+  },
 ) {
   if (!error.stack) return error;
 
+  const { replaceLineFn, startAfterSourceUrl, stripStartingReflect, skipDuplicate } = opts;
   const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
   const stack = error.stack.split(/\r?\n/);
   if (stack[0] === undefinedPrototypeString[0]) {
     stack[2] = undefinedPrototypeString[1];
   }
   const newStack = [];
+  let matchedSkipDuplicate = false;
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
-    if (stripFirstStackLine && i === 1 && line.includes(' at ')) continue;
+    if (skipDuplicate) {
+      if (skipDuplicate.test(line)) {
+        if (matchedSkipDuplicate) continue;
+        matchedSkipDuplicate = true;
+      } else {
+        matchedSkipDuplicate = false;
+      }
+    }
     if (stripStartingReflect && line.includes(' Reflect.')) continue;
     if (line.includes(sourceUrl)) {
       if (startAfterSourceUrl === true) {
@@ -182,7 +202,7 @@ function proxyConstructor<T, K extends keyof T>(
       try {
         return ReflectCached.construct(...arguments);
       } catch (err) {
-        throw cleanErrorStack(err, null, false, true);
+        throw cleanErrorStack(err, { stripStartingReflect: true });
       }
     },
   });
@@ -220,7 +240,7 @@ function internalCreateFnProxy(
         const caller = isFromObjectSetPrototypeOf ? ObjectCached : ReflectCached;
         return caller.setPrototypeOf(target, protoTarget);
       } catch (error) {
-        throw cleanErrorStack(error, null, false, true);
+        throw cleanErrorStack(error, { stripStartingReflect: true });
       }
     },
     get(target: any, p: string | symbol, receiver: any): any {
@@ -234,7 +254,7 @@ function internalCreateFnProxy(
       try {
         return ReflectCached.get(target, p, receiver);
       } catch (err) {
-        throw cleanErrorStack(err, null, false, true);
+        throw cleanErrorStack(err, { stripStartingReflect: true });
       }
     },
     set(target: any, p: string | symbol, value: any, receiver: any): boolean {
@@ -252,7 +272,7 @@ function internalCreateFnProxy(
       try {
         return ReflectCached.set(...arguments);
       } catch (err) {
-        throw cleanErrorStack(err, null, false, true);
+        throw cleanErrorStack(err, { stripStartingReflect: true });
       }
     },
   });

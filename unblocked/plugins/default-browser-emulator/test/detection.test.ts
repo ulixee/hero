@@ -663,7 +663,6 @@ test('should not have too much recursion in prototype', async () => {
   expect(error2.name).toBe('TypeError');
 });
 
-
 test('should not see any proxy details in an iframe', async () => {
   const agent = pool.createAgent({
     logger,
@@ -673,7 +672,7 @@ test('should not see any proxy details in an iframe', async () => {
   await page.goto(`${koaServer.baseUrl}`);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
 
-  const result = await page.evaluate<{ runMap: boolean, originalContentWindow:boolean }>(`(() => {
+  const result = await page.evaluate<{ runMap: boolean; originalContentWindow: boolean }>(`(() => {
       const frame = document.createElement('iframe');
       document.body.appendChild(frame);
       return {
@@ -685,6 +684,35 @@ test('should not see any proxy details in an iframe', async () => {
   expect(result.originalContentWindow).toBe(false);
 });
 
+test('should get correct outerWidth for frame', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const result = await page.evaluate<{
+    frameContentWindowOuterWidth: number;
+    outerWidth: number;
+    innerWidth: number;
+  }>(`(() => {
+      const frame = document.createElement('iframe');
+      frame.srcdoc =  "/**/";
+      frame.width = 0;
+      frame.height = 0;
+      frame.style = "position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;";
+      document.body.appendChild(frame);
+      return {
+        frameContentWindowOuterWidth: frame.contentWindow.outerWidth, 
+        outerWidth: window.outerWidth,
+        innerWidth: window.innerWidth
+      }
+  })();`);
+  expect(result.outerWidth).toBe(result.frameContentWindowOuterWidth);
+  expect(result.outerWidth).toBeGreaterThanOrEqual(result.innerWidth);
+});
 
 test('it should handle a null prototype', async () => {
   const agent = pool.createAgent({
@@ -718,6 +746,32 @@ test('it should handle a null prototype', async () => {
 })();`);
   expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
   expect(error.stack.match(/Object.apply/g)).toBe(null);
+  expect(error.name).toBe('TypeError');
+});
+
+test('it should handle an undefined setPrototype', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    Object.setPrototypeOf.call(undefined, () => {})
+  } catch (error) {
+  console.log(error);
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+  expect(error.stack.match(/at setPrototypeOf/g)).toHaveLength(1);
   expect(error.name).toBe('TypeError');
 });
 
