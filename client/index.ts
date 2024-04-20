@@ -32,6 +32,7 @@ import { Command } from './interfaces/IInteractions';
 import { Hero, HeroReplay, FrameEnvironment, Tab, Resource, WebsocketResource } from './lib/extendables';
 import ConnectionToHeroCore from './connections/ConnectionToHeroCore';
 import DetachedElement from './lib/DetachedElement';
+import './env';
 
 export default Hero;
 
