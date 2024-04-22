@@ -116,7 +116,7 @@ Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
     } catch (error) {
       throw cleanErrorStack(error, {
         stripStartingReflect: true,
-        skipDuplicate: /.*setPrototypeOf/,
+        skipDuplicate: /at .*setPrototypeOf/,
       });
     } finally {
       isObjectSetPrototypeOf -= 1;

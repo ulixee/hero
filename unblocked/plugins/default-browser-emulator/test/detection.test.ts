@@ -736,7 +736,6 @@ test('it should handle a null prototype', async () => {
     Object.setPrototypeOf.apply(Object, [descriptor.value, frame.contentWindow.console.debug]);
     return true
   } catch (error) {
-  console.log(error);
     return {
       name: error.constructor.name,
       message: error.message,
@@ -763,7 +762,6 @@ test('it should handle an undefined setPrototype', async () => {
   try {
     Object.setPrototypeOf.call(undefined, () => {})
   } catch (error) {
-  console.log(error);
     return {
       name: error.constructor.name,
       message: error.message,
@@ -772,6 +770,32 @@ test('it should handle an undefined setPrototype', async () => {
   }
 })();`);
   expect(error.stack.match(/at setPrototypeOf/g)).toHaveLength(1);
+  expect(error.name).toBe('TypeError');
+});
+
+test('it should handle an undefined setPrototype for fn', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    Object.setPrototypeOf(undefined, [])
+  } catch (error) {
+  console.log(error);
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+  expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
   expect(error.name).toBe('TypeError');
 });
 
