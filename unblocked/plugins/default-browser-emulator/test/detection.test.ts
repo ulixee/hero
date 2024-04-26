@@ -129,51 +129,6 @@ test('should not be denied for notifications but prompt for permissions', async 
   expect(permissions.permissionState).toBe('prompt');
 });
 
-test('should not leave markers on permissions.query.toString', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  await page.goto(`${koaServer.baseUrl}`);
-  const perms: any = await page.evaluate(`(() => {
-    const permissions = window.navigator.permissions;
-    return {
-      hasDirectQueryProperty: permissions.hasOwnProperty('query'),
-      queryToString: permissions.query.toString(),
-      queryToStringToString: permissions.query.toString.toString(),
-      queryToStringHasProxyHandler: permissions.query.toString.hasOwnProperty('[[Handler]]'),
-      queryToStringHasProxyTarget: permissions.query.toString.hasOwnProperty('[[Target]]'),
-      queryToStringHasProxyRevoked: permissions.query.toString.hasOwnProperty('[[IsRevoked]]'),
-    }
-  })();`);
-  expect(perms.hasDirectQueryProperty).toBe(false);
-  expect(perms.queryToString).toBe('function query() { [native code] }');
-  expect(perms.queryToStringToString).toBe('function toString() { [native code] }');
-  expect(perms.queryToStringHasProxyHandler).toBe(false);
-  expect(perms.queryToStringHasProxyTarget).toBe(false);
-  expect(perms.queryToStringHasProxyRevoked).toBe(false);
-});
-
-test('should not recurse the toString function', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  await page.goto(`${koaServer.baseUrl}`);
-  const isHeadless = await page.evaluate(`(() => {
-    let gotYou = 0;
-    const spooky = /./;
-    spooky.toString = function() {
-      gotYou += 1;
-      return 'spooky';
-    };
-    console.debug(spooky);
-    return gotYou > 1;
-  })();`);
-  expect(isHeadless).toBe(false);
-});
 
 test('should not call evaluate on a stack getter in debug', async () => {
   const agent = pool.createAgent({
@@ -290,33 +245,6 @@ test('should not see polyfill error overrides', async () => {
    
  })()`);
   expect(result).not.toContain('anonymuos');
-});
-
-test('cannot detect a proxy of args passed into a proxied function', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
-  const result = await page.evaluate<{ path: string; result: string }>(`(async () => {
-  let path = ''
-  const proxyOfArgs = new Proxy([37445], { 
-     get(target,prop, receiver) { 
-       path = new Error().stack.slice(8); 
-       return Reflect.get(target,prop, receiver)
-     }
-  })
-  
-  const canvas = document.createElement("canvas");
-  const gl = canvas.getContext("webgl");
-  gl.getExtension('WEBGL_debug_renderer_info')
-  const result = gl.getParameter.apply(gl, proxyOfArgs);
-  return { path, result };
- })()`);
-  expect(result.path).not.toContain('<anonymuos>');
-  expect(result.result).toBe('Intel Inc.');
 });
 
 test('should get the correct platform from a nested cross-domain srcdoc iframe', async () => {
@@ -549,6 +477,52 @@ test('should properly maintain stack traces in toString', async () => {
   expect(proxiedGetterStack.stack.split('\n')[1]).toContain('at Object.toString');
 }, 120e3);
 
+test('should not leave stack trace markers on permissions.query.toString', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  await page.goto(`${koaServer.baseUrl}`);
+  const perms: any = await page.evaluate(`(() => {
+    const permissions = window.navigator.permissions;
+    return {
+      hasDirectQueryProperty: permissions.hasOwnProperty('query'),
+      queryToString: permissions.query.toString(),
+      queryToStringToString: permissions.query.toString.toString(),
+      queryToStringHasProxyHandler: permissions.query.toString.hasOwnProperty('[[Handler]]'),
+      queryToStringHasProxyTarget: permissions.query.toString.hasOwnProperty('[[Target]]'),
+      queryToStringHasProxyRevoked: permissions.query.toString.hasOwnProperty('[[IsRevoked]]'),
+    }
+  })();`);
+  expect(perms.hasDirectQueryProperty).toBe(false);
+  expect(perms.queryToString).toBe('function query() { [native code] }');
+  expect(perms.queryToStringToString).toBe('function toString() { [native code] }');
+  expect(perms.queryToStringHasProxyHandler).toBe(false);
+  expect(perms.queryToStringHasProxyTarget).toBe(false);
+  expect(perms.queryToStringHasProxyRevoked).toBe(false);
+});
+
+test('should not recurse the toString function', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  await page.goto(`${koaServer.baseUrl}`);
+  const isHeadless = await page.evaluate(`(() => {
+    let gotYou = 0;
+    const spooky = /./;
+    spooky.toString = function() {
+      gotYou += 1;
+      return 'spooky';
+    };
+    console.debug(spooky);
+    return gotYou > 1;
+  })();`);
+  expect(isHeadless).toBe(false);
+});
+
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
   const agent = pool.createAgent({
@@ -614,76 +588,6 @@ test('should not leave stack trace markers when calling in page functions', asyn
   );
 });
 
-test('should not have too much recursion in prototype', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad(LocationStatus.AllContentLoaded);
-
-  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
-    const apiFunction = Object.getOwnPropertyDescriptor(Navigator.prototype, 'deviceMemory').get;
-
-    try {
-      Object.setPrototypeOf(apiFunction, apiFunction) + ''
-      return true
-    } catch (error) {
-    console.log(error)
-      return {
-        name: error.constructor.name,
-        message: error.message,
-        stack: error.stack,
-      }
-    }
-  })();`);
-
-  expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
-  expect(error.stack.match(/Object.apply/g)).toBe(null);
-  expect(error.name).toBe('TypeError');
-
-  const error2 = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
-  const apiFunction = WebGL2RenderingContext.prototype.getParameter;
-
-  try {
-    Object.setPrototypeOf(apiFunction, apiFunction) + ''
-    return true
-  } catch (error) {
-  console.log(error)
-    return {
-      name: error.constructor.name,
-      message: error.message,
-      stack: error.stack,
-    }
-  }
-})();`);
-  expect(error2.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
-  expect(error.stack.match(/Object.apply/g)).toBe(null);
-  expect(error2.name).toBe('TypeError');
-});
-
-test('should not see any proxy details in an iframe', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad(LocationStatus.AllContentLoaded);
-
-  const result = await page.evaluate<{ runMap: boolean; originalContentWindow: boolean }>(`(() => {
-      const frame = document.createElement('iframe');
-      document.body.appendChild(frame);
-      return {
-        runMap: !!(window.runMap || frame.runMap),
-        originalContentWindow: !!frame.originalContentWindow, 
-      }
-  })();`);
-  expect(result.runMap).toBe(false);
-  expect(result.originalContentWindow).toBe(false);
-});
-
 test('should get correct outerWidth for frame', async () => {
   const agent = pool.createAgent({
     logger,
@@ -712,91 +616,6 @@ test('should get correct outerWidth for frame', async () => {
   })();`);
   expect(result.outerWidth).toBe(result.frameContentWindowOuterWidth);
   expect(result.outerWidth).toBeGreaterThanOrEqual(result.innerWidth);
-});
-
-test('it should handle a null prototype', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad(LocationStatus.AllContentLoaded);
-
-  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
-
-  try {
-    const frame = document.createElement('iframe');
-    frame.width = 0;
-    frame.height = 0;
-    frame.style = "position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;";
-    document.body.appendChild(frame);
-    const descriptor = Object.getOwnPropertyDescriptor(frame.contentWindow.console, 'debug');
-    
-    Object.setPrototypeOf.apply(Object, [descriptor.value, frame.contentWindow.console.debug]);
-    return true
-  } catch (error) {
-    return {
-      name: error.constructor.name,
-      message: error.message,
-      stack: error.stack,
-    }
-  }
-})();`);
-  expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
-  expect(error.stack.match(/Object.apply/g)).toBe(null);
-  expect(error.name).toBe('TypeError');
-});
-
-test('it should handle an undefined setPrototype', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad(LocationStatus.AllContentLoaded);
-
-  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
-
-  try {
-    Object.setPrototypeOf.call(undefined, () => {})
-  } catch (error) {
-    return {
-      name: error.constructor.name,
-      message: error.message,
-      stack: error.stack,
-    }
-  }
-})();`);
-  expect(error.stack.match(/at setPrototypeOf/g)).toHaveLength(1);
-  expect(error.name).toBe('TypeError');
-});
-
-test('it should handle an undefined setPrototype for fn', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad(LocationStatus.AllContentLoaded);
-
-  const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
-
-  try {
-    Object.setPrototypeOf(undefined, [])
-  } catch (error) {
-  console.log(error);
-    return {
-      name: error.constructor.name,
-      message: error.message,
-      stack: error.stack,
-    }
-  }
-})();`);
-  expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
-  expect(error.name).toBe('TypeError');
 });
 
 describe('Proxy detections', () => {
@@ -997,6 +816,242 @@ describe('Proxy detections', () => {
     expect(error.stack).not.toContain('Object.get');
     expect(error.stack).not.toContain('Reflect');
     expect(error.stack.split('\n').length).toBeGreaterThan(1);
+  });
+
+  test('should handle an undefined setPrototype', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    Object.setPrototypeOf.call(undefined, () => {})
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should handle an undefined setPrototype for fn', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    Object.setPrototypeOf(undefined, [])
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should handle setPrototype.call with undefined', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+ try {
+    Object.setPrototypeOf.call(console.debug, console.debug, undefined)
+    return true
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
+    expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should correctly bubble anonymous object prototype', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+ try {
+    Object.setPrototypeOf.apply({}, [console.debug, console.debug])
+    return true
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should not see any proxy details in an iframe', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const result = await page.evaluate<{
+      runMap: boolean;
+      originalContentWindow: boolean;
+    }>(`(() => {
+      const frame = document.createElement('iframe');
+      document.body.appendChild(frame);
+      return {
+        runMap: !!(window.runMap || frame.runMap),
+        originalContentWindow: !!frame.originalContentWindow, 
+      }
+  })();`);
+    expect(result.runMap).toBe(false);
+    expect(result.originalContentWindow).toBe(false);
+  });
+
+  test('cannot detect a proxy of args passed into a proxied function', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    const result = await page.evaluate<{ path: string; result: string }>(`(async () => {
+  let path = ''
+  const proxyOfArgs = new Proxy([37445], { 
+     get(target,prop, receiver) { 
+       path = new Error().stack.slice(8); 
+       return Reflect.get(target,prop, receiver)
+     }
+  })
+  
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl");
+  gl.getExtension('WEBGL_debug_renderer_info')
+  const result = gl.getParameter.apply(gl, proxyOfArgs);
+  return { path, result };
+ })()`);
+    expect(result.path).not.toContain('<anonymuos>');
+    expect(result.result).toBe('Intel Inc.');
+  });
+
+  test('should not have too much recursion in prototype', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+    const apiFunction = Object.getOwnPropertyDescriptor(Navigator.prototype, 'deviceMemory').get;
+
+    try {
+      Object.setPrototypeOf(apiFunction, apiFunction) + ''
+      return true
+    } catch (error) {
+      return {
+        name: error.constructor.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    }
+  })();`);
+
+    expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.stack.match(/Object.apply/g)).toBe(null);
+    expect(error.name).toBe('TypeError');
+
+    const error2 = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+  const apiFunction = WebGL2RenderingContext.prototype.getParameter;
+
+  try {
+    Object.setPrototypeOf(apiFunction, apiFunction) + ''
+    return true
+  } catch (error) {
+  console.log(error)
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error2.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.stack.match(/Object.apply/g)).toBe(null);
+    expect(error2.name).toBe('TypeError');
+  });
+
+  test('should handle a null prototype', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+  try {
+    const frame = document.createElement('iframe');
+    frame.width = 0;
+    frame.height = 0;
+    frame.style = "position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;";
+    document.body.appendChild(frame);
+    const descriptor = Object.getOwnPropertyDescriptor(frame.contentWindow.console, 'debug');
+    
+    Object.setPrototypeOf.apply(Object, [descriptor.value, frame.contentWindow.console.debug]);
+    return true
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.stack.match(/Object.apply/g)).toBe(null);
+    expect(error.name).toBe('TypeError');
   });
 });
 

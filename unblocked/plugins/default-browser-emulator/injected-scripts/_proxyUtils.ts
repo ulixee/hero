@@ -112,11 +112,20 @@ Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
   apply(): any {
     isObjectSetPrototypeOf += 1;
     try {
-      return ReflectCached.apply(...arguments, 1);
+      return ReflectCached.apply(...arguments);
     } catch (error) {
       throw cleanErrorStack(error, {
         stripStartingReflect: true,
-        skipDuplicate: /at .*setPrototypeOf/,
+        replaceLineFn(line, i) {
+          if (i === 1 && line.includes(' Proxy.setPrototypeOf')) {
+            return line.replace(' Proxy.setPrototypeOf', ' Object.setPrototypeOf');
+          }
+          if (i === 1 && line.includes(' Function.setPrototypeOf')) {
+            return undefined;
+          }
+          return line;
+
+        },
       });
     } finally {
       isObjectSetPrototypeOf -= 1;
@@ -137,7 +146,6 @@ function cleanErrorStack(
     replaceLineFn?: (line: string, index: number) => string;
     startAfterSourceUrl?: boolean;
     stripStartingReflect?: boolean;
-    skipDuplicate?: RegExp;
     skipFirst?: RegExp;
   } = {
     startAfterSourceUrl: false,
@@ -146,25 +154,21 @@ function cleanErrorStack(
 ) {
   if (!error.stack) return error;
 
-  const { replaceLineFn, startAfterSourceUrl, stripStartingReflect, skipDuplicate } = opts;
+  const {
+    replaceLineFn,
+    startAfterSourceUrl,
+    stripStartingReflect,
+  } = opts;
   const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
   const stack = error.stack.split(/\r?\n/);
   if (stack[0] === undefinedPrototypeString[0]) {
     stack[2] = undefinedPrototypeString[1];
   }
   const newStack = [];
-  let matchedSkipDuplicate = false;
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
-    if (skipDuplicate) {
-      if (skipDuplicate.test(line)) {
-        if (matchedSkipDuplicate) continue;
-        matchedSkipDuplicate = true;
-      } else {
-        matchedSkipDuplicate = false;
-      }
-    }
-    if (stripStartingReflect && line.includes(' Reflect.')) continue;
+
+    if (i === 1 && stripStartingReflect && line.includes(' Reflect.')) continue;
     if (line.includes(sourceUrl)) {
       if (startAfterSourceUrl === true) {
         newStack.length = 1;
@@ -172,6 +176,7 @@ function cleanErrorStack(
       continue;
     }
     if (replaceLineFn) line = replaceLineFn(line, i);
+    if (!line) continue;
     newStack.push(line);
   }
   error.stack = newStack.join(split);
@@ -240,7 +245,7 @@ function internalCreateFnProxy(
         const caller = isFromObjectSetPrototypeOf ? ObjectCached : ReflectCached;
         return caller.setPrototypeOf(target, protoTarget);
       } catch (error) {
-        throw cleanErrorStack(error, { stripStartingReflect: true });
+        throw cleanErrorStack(error);
       }
     },
     get(target: any, p: string | symbol, receiver: any): any {
