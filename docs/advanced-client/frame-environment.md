@@ -30,7 +30,7 @@ Returns a reference to the document of the frameEnvironment.
 
 An identifier for the frameEnvironment.
 
-#### **Type**: `Promise<string>`
+#### **Type**: `Promise<number>`
 
 ### frameEnvironment.isAllContentLoaded {#is-all-content-loaded}
 
