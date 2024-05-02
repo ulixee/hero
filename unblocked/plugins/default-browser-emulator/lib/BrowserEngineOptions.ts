@@ -20,7 +20,13 @@ export default class BrowserEngineOptions {
       if (!this.default) {
         if (this.browserIdsNeedingDataFiles.has(id) || this.getInstalled(id)) {
           throw new Error(
-            `The Default Browser Engine specified in your environment does not have Emulation Data Files installed. You'll need to generate data files for ${id}`,
+            `The Default Browser Engine specified in your environment does not have Emulation Data Files installed.:\n\n
+            
+----------- update to the latest data files using ----------
+        
+         npx @ulixee/default-browser-emulator update
+        
+------------------------------------------------------------`,
           );
         }
         throw new Error(`The Default Browser Engine specified in your environment is not installed\n\n
