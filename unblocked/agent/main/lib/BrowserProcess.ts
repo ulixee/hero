@@ -11,25 +11,36 @@ import { arch } from 'os';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { PipeTransport } from './PipeTransport';
 import env from '../env';
+import { WebsocketTransport } from './WebsocketTransport';
 
 const { log } = Log(module);
 
 export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
-  public readonly transport: PipeTransport;
+  public readonly transport: PipeTransport | WebsocketTransport;
 
   public isProcessFunctionalPromise = new Resolvable<boolean>();
   public launchStderr: string[] = [];
   private processKilled = false;
   private readonly launchedProcess: ChildProcess;
+  private remoteDebuggingUrl?: Resolvable<string>;
 
-  constructor(private browserEngine: IBrowserEngine, private processEnv?: NodeJS.ProcessEnv) {
+  constructor(
+    private browserEngine: IBrowserEngine,
+    private processEnv?: NodeJS.ProcessEnv,
+  ) {
     super();
 
     bindFunctions(this);
     this.launchedProcess = this.launch();
     this.bindProcessEvents();
 
-    this.transport = new PipeTransport(this.launchedProcess);
+    if (browserEngine.useRemoteDebuggingPort) {
+      this.remoteDebuggingUrl = new Resolvable<string>();
+      this.transport = new WebsocketTransport(this.remoteDebuggingUrl.promise);
+    } else {
+      this.transport = new PipeTransport(this.launchedProcess);
+    }
+
     this.transport.connectedPromise
       .then(() => this.isProcessFunctionalPromise.resolve(true))
       .catch(err => setTimeout(() => this.isProcessFunctionalPromise.reject(err), 1.1e3));
@@ -88,6 +99,14 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
     });
     readline.createInterface({ input: stderr }).on('line', line => {
       if (!line) return;
+
+      if (this.remoteDebuggingUrl?.isResolved === false) {
+        const match = line.match(/DevTools listening on (.*)/);
+        if (match) {
+          this.remoteDebuggingUrl.resolve(match[1].trim());
+        }
+      }
+
       this.launchStderr.push(line);
       // don't grow in perpetuity!
       if (this.launchStderr.length > 100) {

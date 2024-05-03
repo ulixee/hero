@@ -10,5 +10,6 @@ export default interface IBrowserEngine {
 
   isHeaded?: boolean;
   isHeadlessNew?: boolean;
+  useRemoteDebuggingPort?: boolean;
   verifyLaunchable?(): Promise<any>;
 }

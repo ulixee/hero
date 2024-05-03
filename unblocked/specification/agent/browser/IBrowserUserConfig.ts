@@ -6,4 +6,5 @@ export default interface IBrowserUserConfig {
   disableIncognito?: boolean;
   disableMitm?: boolean;
   noChromeSandbox?: boolean;
+  useRemoteDebuggingPort?: boolean;
 }

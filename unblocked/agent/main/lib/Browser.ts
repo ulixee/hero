@@ -88,6 +88,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     browserUserConfig ??= {};
     browserUserConfig.disableGpu ??= env.disableGpu;
     browserUserConfig.noChromeSandbox ??= env.noChromeSandbox;
+    browserUserConfig.useRemoteDebuggingPort ??= env.useRemoteDebuggingPort;
     browserUserConfig.showChrome ??= env.showChrome;
 
     this.applyDefaultLaunchArgs(browserUserConfig);
@@ -142,12 +143,18 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     try {
       this.setUserDataDir();
       this.process = new BrowserProcess(this.engine);
+
       this.connection = new Connection(this.process.transport);
       this.devtoolsSession = this.connection.rootSession;
 
       this.bindDevtoolsEvents();
 
-      await Promise.all([this.testConnection(), this.process.isProcessFunctionalPromise]);
+      // Pipe transport needs data send to detect if it is connected/functional
+      this.process.transport.send('');
+      await this.process.isProcessFunctionalPromise;
+      // Needs to be after isProcessFunctionalPromise to make sure our transport is ready
+      await this.testConnection();
+
       this.process.once('close', () => this.emit('close'));
 
       this.launchPromise.resolve();
@@ -367,8 +374,14 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
         launchArgs.push('--no-sandbox');
       }
     }
+    if (options.useRemoteDebuggingPort) {
+      this.engine.useRemoteDebuggingPort = true;
+      launchArgs.push('--remote-debugging-port=0');
+    } else {
+      launchArgs.push('--remote-debugging-pipe');
+    }
 
-    launchArgs.push('--remote-debugging-pipe', '--ignore-certificate-errors');
+    launchArgs.push('--ignore-certificate-errors');
 
     this.engine.isHeaded = options.showChrome === true;
     if (!this.engine.isHeaded) {
