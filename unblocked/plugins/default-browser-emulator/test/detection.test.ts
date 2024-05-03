@@ -911,7 +911,7 @@ describe('Proxy detections', () => {
     const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
 
  try {
-    Object.setPrototypeOf.call(console.debug, console.debug, undefined)
+    Object.setPrototypeOf.call(console.debug, [console.debug])
     return true
   } catch (error) {
     return {
@@ -922,7 +922,74 @@ describe('Proxy detections', () => {
   }
 })();`);
     expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
-    expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should handle setPrototype.apply with undefined', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+ try {
+    Object.setPrototypeOf.apply(console.debug, [console.debug, console.debug])
+    return true
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
+    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    expect(error.name).toBe('TypeError');
+  });
+
+  test('should handle proxied setPrototype', async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+    const error = await page.evaluate<{ message: string; name: string; stack: string }>(`(() => {
+
+ try {
+    const p = new Proxy(console, {
+        apply() {
+          return Reflect.apply(...arguments)
+        },
+        get() {
+          return Reflect.get(...arguments)
+        },
+        set() {
+          return Reflect.set(...arguments)
+        },
+      })
+
+      Object.setPrototypeOf.apply(p.debug, console.debug)
+      return true
+  } catch (error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+    expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
+    expect(error.stack.match(/at Object.setPrototypeOf/g)).toBeNull();
+    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
     expect(error.name).toBe('TypeError');
   });
 

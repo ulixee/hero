@@ -75,13 +75,13 @@ const fnToStringProxy = internalCreateFnProxy(
     } catch (error) {
       cleanErrorStack(error, {
         replaceLineFn: (line, i) => {
-          if (i === 1 && line.includes('Object.toString')) {
+          if (i === 1 && line.includes('at Object.toString')) {
             const thisProto = ObjectCached.getPrototypeOf(thisArg);
             if (
               proxyToTarget.has(thisProto) &&
               (overriddenFns.has(thisProto) || overriddenFns.has(target))
             ) {
-              return line.replace('Object.toString', 'Function.toString');
+              return line.replace('at Object.toString', 'at Function.toString');
             }
           }
           return line;
@@ -100,31 +100,32 @@ ObjectCached.defineProperty(Function.prototype, 'toString', {
 /////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
 
 let isObjectSetPrototypeOf = 0;
-let undefinedPrototypeString: string[] = [];
-try {
-  Object.setPrototypeOf(undefined, null);
-} catch (err) {
-  undefinedPrototypeString = err.stack.split(/\r?\n/);
-}
 
 const nativeToStringObjectSetPrototypeOfString = `${Object.setPrototypeOf}`;
 Object.setPrototypeOf = new Proxy(Object.setPrototypeOf, {
   apply(): any {
+    let isFunction = false;
     isObjectSetPrototypeOf += 1;
     try {
+      isFunction = arguments[1] && typeof arguments[1] === 'function';
       return ReflectCached.apply(...arguments);
     } catch (error) {
       throw cleanErrorStack(error, {
         stripStartingReflect: true,
-        replaceLineFn(line, i) {
-          if (i === 1 && line.includes(' Proxy.setPrototypeOf')) {
-            return line.replace(' Proxy.setPrototypeOf', ' Object.setPrototypeOf');
-          }
-          if (i === 1 && line.includes(' Function.setPrototypeOf')) {
-            return undefined;
+        replaceLineFn(line, i, prevLine) {
+          if (i === 1 || i === 2) {
+            if (prevLine.match(/at (?:Function|Object)\.setPrototypeOf/)) return undefined;
+            if (line.includes('at Proxy.setPrototypeOf')) {
+              const replacement = isFunction
+                ? 'at Function.setPrototypeOf'
+                : 'at Object.setPrototypeOf';
+              return line.replace('at Proxy.setPrototypeOf', replacement);
+            }
+            if (line.includes('at Function.setPrototypeOf') && !isFunction) {
+              return undefined;
+            }
           }
           return line;
-
         },
       });
     } finally {
@@ -143,7 +144,7 @@ declare let sourceUrl: string;
 function cleanErrorStack(
   error: Error,
   opts: {
-    replaceLineFn?: (line: string, index: number) => string;
+    replaceLineFn?: (line: string, index: number, prevLine: string) => string;
     startAfterSourceUrl?: boolean;
     stripStartingReflect?: boolean;
     skipFirst?: RegExp;
@@ -154,28 +155,23 @@ function cleanErrorStack(
 ) {
   if (!error.stack) return error;
 
-  const {
-    replaceLineFn,
-    startAfterSourceUrl,
-    stripStartingReflect,
-  } = opts;
+  const { replaceLineFn, startAfterSourceUrl, stripStartingReflect } = opts;
   const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
   const stack = error.stack.split(/\r?\n/);
-  if (stack[0] === undefinedPrototypeString[0]) {
-    stack[2] = undefinedPrototypeString[1];
-  }
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
 
-    if (i === 1 && stripStartingReflect && line.includes(' Reflect.')) continue;
+    if (i === 1 && stripStartingReflect && line.includes('at Reflect.')) continue;
     if (line.includes(sourceUrl)) {
       if (startAfterSourceUrl === true) {
         newStack.length = 1;
       }
       continue;
     }
-    if (replaceLineFn) line = replaceLineFn(line, i);
+    if (replaceLineFn) {
+      line = replaceLineFn(line, i, newStack[newStack.length - 1]);
+    }
     if (!line) continue;
     newStack.push(line);
   }
