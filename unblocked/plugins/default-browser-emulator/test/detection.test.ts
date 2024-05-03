@@ -360,6 +360,32 @@ test('should properly emulate memory', async () => {
   expect(heapSizeGb).toBeLessThanOrEqual(deviceMemory);
 });
 
+test('should not overflow on console.debug', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  await page.goto(`${koaServer.baseUrl}`);
+  const { stack } = await page.evaluate<any>(`(() => {
+    const m = new Proxy(console.debug, { 
+        apply() { 
+            return Reflect.apply(...arguments) 
+        }
+    });
+
+    try {
+      Object.setPrototypeOf(console.debug, m)
+      Object.setPrototypeOf(console.debug, m)
+      return { stack: 'no error' }
+    } catch(err) {
+      return { stack: err.stack };
+    }
+})()`);
+  expect(stack).toBe('no error');
+});
+
 test('stack overflow test should match chrome', async () => {
   const agent = pool.createAgent({
     logger,

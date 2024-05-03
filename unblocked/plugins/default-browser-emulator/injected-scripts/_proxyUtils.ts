@@ -225,7 +225,11 @@ function internalCreateFnProxy(
     apply: onApply,
     setPrototypeOf(target: any, newPrototype: any): boolean {
       let protoTarget = newPrototype;
-      if (newPrototype === proxy || newPrototype?.__proto__ === proxy) {
+      let newPrototypeProto;
+      try {
+        newPrototypeProto = newPrototype?.__proto__;
+      } catch {}
+      if (newPrototype === proxy || newPrototypeProto === proxy) {
         protoTarget = target;
       }
       let isFromObjectSetPrototypeOf = isObjectSetPrototypeOf > 0;
