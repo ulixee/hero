@@ -130,7 +130,7 @@ test('should not be denied for notifications but prompt for permissions', async 
 });
 
 
-test('should not call evaluate on a stack getter in debug', async () => {
+test('should not call evaluate on a stack getter when using console for logging', async () => {
   const agent = pool.createAgent({
     logger,
   });
@@ -140,24 +140,29 @@ test('should not call evaluate on a stack getter in debug', async () => {
   koaServer.get('/debug', ctx => {
     ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
   <script>
-    window.didCallGetter = false;
+    window.getterCalled = 0;
     const error = new Error();
     window.Object.defineProperty(error, 'stack', {
       configurable: false,
       enumerable: false,
       get: function () {
-        window.didCallGetter = true;
+        window.getterCalled += 1;
         document.querySelector('#result').innerText = 'called';
         return '';
       }
     });
+    console.trace(error);
     console.debug(error);
+    console.info(error);
+    console.warn(error);
+    console.error(error);
+    console.log(error);
 </script></html>`;
   });
   await page.goto(`${koaServer.baseUrl}/debug`);
   await page.waitForLoad('DomContentLoaded');
-  const allowStackGetter = await page.evaluate<boolean>('window.didCallGetter');
-  expect(allowStackGetter).toBe(false);
+  const allowStackGetter = await page.evaluate<number>('window.getterCalled');
+  expect(allowStackGetter).toBe(0);
 });
 
 test('should be able to post message', async () => {

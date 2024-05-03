@@ -82,7 +82,7 @@ export default function loadDomOverrides(
     domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
   }
   domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
-  domOverrides.add('console.debug');
+  domOverrides.add('console');
   domOverrides.add('HTMLIFrameElement.prototype');
   domOverrides.add('SharedWorker.prototype');
 
@@ -115,7 +115,7 @@ export default function loadDomOverrides(
   });
 
   domOverrides.registerWorkerOverrides(
-    'console.debug',
+    'console',
     'navigator.deviceMemory',
     'navigator.hardwareConcurrency',
     'navigator',
