@@ -1,19 +1,30 @@
-// Logging error on any of these levels triggers a getter, which could be proxied.
-// The same could technically be done for any object so to prevent detection here
-// we use json stringify, so we ignore all of this dangerous logic while still
-// logging as much as possible of the original object.
-const logLevels = ['trace', 'debug', 'info', 'warn', 'error', 'log'] as const;
-const reflectCached = ReflectCached;
-
-for (const logLevel of logLevels) {
-  proxyFunction(console, logLevel, (target, thisArg, args) => {
-    const safeArgs = args.map(arg => {
-      if (typeof arg === 'object') {
-        return JSON.stringify(arg, null, 2);
-      }
-      return arg;
-    });
-
-    return reflectCached.apply(target, thisArg, safeArgs);
+ObjectCached.keys(console).forEach(key => {
+  proxyFunction(console, key, (target, thisArg, args) => {
+    args = replaceErrorStackWithOriginal(args);
+    return ReflectCached.apply(target, thisArg, args);
   });
+});
+
+const defaultErrorStackGetter = Object.getOwnPropertyDescriptor(new Error(''), 'stack').get;
+
+function replaceErrorStackWithOriginal(object: unknown) {
+  if (!object || typeof object !== 'object') {
+    return object;
+  }
+
+  if (object instanceof Error) {
+    if (ObjectCached.getOwnPropertyDescriptor(object, 'stack')?.get === defaultErrorStackGetter) {
+      return object;
+    }
+
+    const error = new Error(`Unblocked stealth created new error from: ${JSON.stringify(object)}`);
+    error.stack = `${error.message}\n   Stack removed to prevent leaking debugger active (error stack was proxied)`;
+    return error;
+  }
+
+  if (object instanceof Array) {
+    return object.map(item => replaceErrorStackWithOriginal(item));
+  }
+
+  return ObjectCached.values(object).map(item => replaceErrorStackWithOriginal(item));
 }

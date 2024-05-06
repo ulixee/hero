@@ -140,29 +140,35 @@ test('should not call evaluate on a stack getter when using console for logging'
   koaServer.get('/debug', ctx => {
     ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
   <script>
-    window.getterCalled = 0;
+    window.keys = [];
     const error = new Error();
     window.Object.defineProperty(error, 'stack', {
       configurable: false,
       enumerable: false,
       get: function () {
-        window.getterCalled += 1;
-        document.querySelector('#result').innerText = 'called';
-        return '';
+        window.keys.push(window.keys.at(-1));
+        return 'proxied stack';
       }
     });
-    console.trace(error);
-    console.debug(error);
-    console.info(error);
-    console.warn(error);
-    console.error(error);
-    console.log(error);
+    Object.keys(console).forEach(key => {
+      try {
+        window.keys.push(key);
+        console[key](error);
+        console[key]([error]);
+        console[key]({outer: error});
+        console[key]({outer: [error]});
+        // These don't trigger in normal chrome
+        console[key]({outer: {inner: error}});
+        console[key]({outer: {inner: [error]}});
+      } catch (error) {}
+      window.keys.pop(-1);
+    })
 </script></html>`;
   });
   await page.goto(`${koaServer.baseUrl}/debug`);
   await page.waitForLoad('DomContentLoaded');
-  const allowStackGetter = await page.evaluate<number>('window.getterCalled');
-  expect(allowStackGetter).toBe(0);
+  const keys = await page.evaluate<string[]>('window.keys');
+  expect(keys).toHaveLength(0);
 });
 
 test('should be able to post message', async () => {
