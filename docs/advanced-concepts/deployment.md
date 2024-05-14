@@ -125,3 +125,52 @@ import * as http from 'http';
 const server = new http.Server();
 await new Promise(resolve => server.listen(8080, resolve));
 ```
+
+## Secure deployment via Nginx, SSL and Basic Auth
+When publically exposing a port, e.g. for `@ulixee/cloud`, you should make sure that (1) traffic is secured via SSL (default websocket communication of hero is without any encryption) and that (2) only your services can access the port.
+
+An nginx reverse proxy provides a solution for both problems: Adding SSL via Let's Encrypt (free) and securing access by both IP and Basic Authentication (username and password).
+
+Prerequisites: You have to own a domain in order to obtain an SSL certificate. You could setup an A record for a subdomain, if you'd like to use the root domain for something else. The following code examples have been tested on Ubuntu Ubuntu 22 LTS.
+
+#### Step-by-step:
+
+1. Install nginx for our proxy solution: `sudo apt-get  install nginx`
+2. Install cerbot for generating SSL certificates: `sudo apt install certbot python3-certbot-nginx`
+3. Obtain SSL certificate: `sudo certbot certonly --nginx`
+4. Create an Nginx configuration - make sure to replace `your_domain.com` with your domain (previously chosen for the SSL certificate) and `xx.xx.xxx.xxx` with the IP addresses you intend to use: `sudo nano /etc/nginx/sites-available/websocket` and add the following:
+```console
+server {
+    listen 443 ssl;
+    server_name your_domain.com;
+
+    ssl_certificate /etc/letsencrypt/live/your_domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your_domain.com/privkey.pem;
+
+    # add IP addresses to allow
+    allow xx.xx.xxx.xxx;
+    allow xx.xx.xxx.xxx;
+    deny all;
+    
+    location / {
+        auth_basic "Restricted Access";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        
+        proxy_pass http://localhost:1818;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+}
+```
+5. Choose a username for Basic Auth - replace `username` with your chosen username: `sudo sh -c "echo -n 'username:' >> /etc/nginx/.htpasswd"`
+6. Choose a password for Basic Auth: `sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"`
+7. Activate the configuration via a symlink, test it and on success, restart the Nginx service:
+```console
+sudo ln -s /etc/nginx/sites-available/websocket /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+8. Make sure `hero-cloud` is running locally on port `1818` (for `docker run` use `-p "127.0.0.1:1818:1818"`) - you could use any other port, but you have to set it in the Nginx configuration file above.
+9. Connect via `wss://username:password@your_domain.com` instead of `ws://your_domain:port`
