@@ -3972,5 +3972,31 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-125-0": {
+    "id": "chrome-125-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "125",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-126-0": {
+    "id": "firefox-126-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "126",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
