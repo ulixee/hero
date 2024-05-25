@@ -6,10 +6,12 @@
     "buildVersion": 6422,
     "stablePatchesByOs": {
       "mac": [
+        113,
         77,
         61
       ],
       "win": [
+        113,
         77,
         61
       ],
