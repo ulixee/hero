@@ -3998,5 +3998,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-125-0": {
+    "id": "edge-125-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "125",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
