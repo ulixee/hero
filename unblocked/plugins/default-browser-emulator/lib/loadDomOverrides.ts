@@ -2,7 +2,6 @@ import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulation
 import IBrowserData from '../interfaces/IBrowserData';
 import IUserAgentData from '../interfaces/IUserAgentData';
 import DomOverridesBuilder from './DomOverridesBuilder';
-import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
 
 export default function loadDomOverrides(
   emulationProfile: IEmulationProfile,
@@ -37,22 +36,6 @@ export default function loadDomOverrides(
     videoDevice: deviceProfile.videoDevice,
   });
 
-  if (isHeadless) {
-    domOverrides.add('Notification.permission');
-    domOverrides.add('Permission.prototype.query');
-
-    const windowChrome = data.windowChrome;
-    if (windowChrome) {
-      domOverrides.add('window.chrome', {
-        updateLoadTimes: true,
-        polyfill: {
-          property: windowChrome.chrome,
-          prevProperty: windowChrome.prevProperty,
-        },
-      });
-    }
-  }
-
   const domPolyfill = data.domPolyfill;
   if (domPolyfill) {
     if (domPolyfill?.add?.length) {
@@ -77,13 +60,8 @@ export default function loadDomOverrides(
     }
   }
 
-  const windowNavigator = data.windowNavigator;
-  if (isHeadless) {
-    domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
-  }
   domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
   domOverrides.add('console');
-  domOverrides.add('HTMLIFrameElement.prototype');
   domOverrides.add('SharedWorker.prototype');
 
   if (emulationProfile.consoleLogPageJson) {
@@ -99,12 +77,7 @@ export default function loadDomOverrides(
     domOverrides.add('speechSynthesis.getVoices', { voices });
   }
   const frame = data.windowFraming;
-  domOverrides.add('window.outerWidth', {
-    frameBorderWidth: frame.frameBorderWidth,
-  });
-  domOverrides.add('window.outerHeight', {
-    frameBorderHeight: frame.frameBorderHeight,
-  });
+
   if (Number(emulationProfile.browserEngine.fullVersion.split('.')[0]) >= 109) {
     domOverrides.add('performance');
   }

@@ -6,6 +6,7 @@ import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import * as http from 'http';
 import { createPromise } from '@ulixee/commons/lib/utils';
+import IHttpSocketAgent from '@ulixee/unblocked-specification/agent/net/IHttpSocketAgent';
 import lookupPublicIp, { IpLookupServices } from '../lib/helpers/lookupPublicIp';
 import BrowserEmulator from '../index';
 
@@ -23,7 +24,7 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('can resolve a v4 address', async () => {
-  await expect(lookupPublicIp()).resolves.toBeTruthy();
+  await expect(ipLookupWithRetries()).resolves.toBeTruthy();
 });
 
 test('can resolve an ip address with a mitm socket', async () => {
@@ -34,11 +35,11 @@ test('can resolve an ip address with a mitm socket', async () => {
   mitmServer.registerSession(session, false);
   Helpers.needsClosing.push(session);
 
-  await expect(lookupPublicIp(IpLookupServices.aws, session.requestAgent)).resolves.toBeTruthy();
+  await expect(ipLookupWithRetries(session.requestAgent)).resolves.toBeTruthy();
 });
 
 test('should override webrtc ip', async () => {
-  const publicIp = await lookupPublicIp();
+  const publicIp = await ipLookupWithRetries();
   const proxy = await startProxy();
   const proxyPort = proxy.address().port;
   const agent = await pool.createAgent({
@@ -60,14 +61,14 @@ test('should override webrtc ip', async () => {
     proxyIp: '1.1.1.1',
   });
   const resultCandidates = await page.evaluate<string[]>(webrtcScript);
-  if(resultCandidates.length) {
+  if (resultCandidates.length) {
     expect(resultCandidates.filter(x => x.includes('1.1.1.1')).length).toBeGreaterThanOrEqual(0);
     expect(resultCandidates.find(x => x.includes(publicIp))).toBeFalsy();
   }
 });
 
 test('should override webrtc ip when mitm disabled', async () => {
-  const publicIp = await lookupPublicIp();
+  const publicIp = await ipLookupWithRetries();
   const proxy = await startProxy();
   const proxyPort = proxy.address().port;
   const agent = await pool.createAgent({
@@ -93,6 +94,15 @@ test('should override webrtc ip when mitm disabled', async () => {
   expect(resultCandidates.length).toBeGreaterThanOrEqual(1);
   expect(resultCandidates.find(x => x.includes(publicIp))).toBeFalsy();
 });
+
+async function ipLookupWithRetries(agent?: IHttpSocketAgent): Promise<string> {
+  for (const service of Object.values(IpLookupServices)) {
+    try {
+      return await lookupPublicIp(service, agent);
+    } catch {}
+  }
+  throw new Error('Ip lookup failed');
+}
 
 async function startProxy() {
   const proxyPromise = createPromise();

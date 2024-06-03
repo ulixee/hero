@@ -122,7 +122,7 @@ describe.each([
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const resources = page.browserContext.resources.getForTab(page.tabId);
-    expect(resources).toHaveLength(20);
+    expect(resources.filter(x => !x.url.endsWith("favicon.ico"))).toHaveLength(20);
   });
 
   it('can goto a page multiple times', async () => {

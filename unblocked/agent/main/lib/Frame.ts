@@ -41,6 +41,7 @@ import MouseListener from './MouseListener';
 import { NavigationLoader } from './NavigationLoader';
 import Page from './Page';
 import PageFrame = Protocol.Page.Frame;
+import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 
 const ContextNotFoundCode = -32000;
 const InPageNavigationLoaderPrefix = 'inpage';
@@ -590,7 +591,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     }
   }
 
-  public onNavigated(frame: PageFrame): void {
+  public onNavigated(frame: PageFrame, navigatedEvent: FrameNavigatedEvent): void {
     this.internalFrame = frame;
     this.updateUrl();
 
@@ -607,6 +608,15 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (this.isDefaultUrl && this.parentId && !this.navigations.top) {
       const top = this.navigations.onNavigationRequested('newFrame', this.url, 0, loader.id);
       this.navigations.setPageReady(top, Date.now());
+    }
+
+    if (navigatedEvent.type === 'BackForwardCacheRestore') {
+      this.navigations.onNavigationRequested(
+        'goForwardOrBack',
+        this.url,
+        this.page.browserContext.commandMarker.lastId,
+        loader.id,
+      );
     }
 
     this.emit('frame-navigated', { frame: this, loaderId: frame.loaderId });
@@ -656,8 +666,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   }
 
   public async waitForDefaultLoader(): Promise<void> {
-    const hasLoaderError = await this.navigationLoadersById[this.defaultLoaderId]
-      ?.navigationResolver;
+    const hasLoaderError =
+      await this.navigationLoadersById[this.defaultLoaderId]?.navigationResolver;
     if (hasLoaderError instanceof Error) throw hasLoaderError;
     await this.page.isReady;
   }

@@ -7,12 +7,10 @@ import { Browser } from '@ulixee/unblocked-agent';
 import Page from '@ulixee/unblocked-agent/lib/Page';
 import { TestLogger } from '@ulixee/unblocked-agent-testing';
 import BrowserEmulator from '../index';
-import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import { emulatorDataDir } from '../paths';
 import DomExtractor = require('./DomExtractor');
 
 let chrome;
-let prevProperty: string;
 let browser: Browser;
 
 beforeEach(Helpers.beforeEach);
@@ -23,7 +21,7 @@ beforeAll(async () => {
     emulatorDataDir,
     `as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}/window-chrome.json`,
   );
-  ({ chrome, prevProperty } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any);
+  ({ chrome } = JSON.parse(Fs.readFileSync(windowChromePath, 'utf8')) as any);
   browser = new Browser(selectBrowserMeta.browserEngine, defaultHooks);
   Helpers.onClose(() => browser.close(), true);
   await browser.launch();
@@ -36,13 +34,6 @@ const debug = process.env.DEBUG || false;
 test('it should mimic a chrome object', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  const script = getOverrideScript('window.chrome', {
-    polyfill: {
-      property: chrome,
-      prevProperty,
-    },
-  }).script;
-  await page.addNewDocumentScript(script, false);
   await Promise.all([
     page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
@@ -80,16 +71,6 @@ test('it should mimic a chrome object', async () => {
 test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  await page.addNewDocumentScript(
-    getOverrideScript('window.chrome', {
-      updateLoadTimes: true,
-      polyfill: {
-        property: chrome,
-        prevProperty,
-      },
-    }).script,
-    false,
-  );
   await Promise.all([
     page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),

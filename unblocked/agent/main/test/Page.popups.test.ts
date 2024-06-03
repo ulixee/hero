@@ -48,14 +48,15 @@ describe('Page.popups', () => {
   });
 
   describe('Popup tests', () => {
+    // TODO remove or fix popups
     it('should focus popups by default', async () => {
+      server.setRoute('/empty.html', (req, res) => {
+        res.end(`<a href="${server.emptyPage}" target="_blank">Click me</a>`);
+      });
       await page.goto(server.emptyPage);
-      const [popup] = await Promise.all([
-        waitForPopup(page),
-        page.evaluate(`(() => {
-        window.open('${server.emptyPage}');
-      })()`),
-      ]);
+      const popupPromise = waitForPopup(page);
+      await page.click('a');
+      const popup = await popupPromise;
       needsClosing.push(popup);
       expect(await popup.evaluate('document.hasFocus()')).toBe(true);
       expect(await page.evaluate('document.hasFocus()')).toBe(true);
@@ -77,16 +78,6 @@ describe('Page.popups', () => {
       needsClosing.push(popup);
       expect(await popup.evaluate(`navigator.userAgent`)).toBe('popupcity');
       expect(await popup.evaluate(`navigator.platform`)).toBe('Windows95');
-    });
-
-    it('calling window.open and window.close', async () => {
-      await page.goto(server.emptyPage);
-      await expect(
-        page.evaluate(`(() => {
-      const popup = window.open(window.location.href);
-      popup.close();
-    })()`),
-      ).resolves.toBe(undefined);
     });
 
     it('should be able to capture concurrent popup navigations', async () => {

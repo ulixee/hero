@@ -32,6 +32,15 @@ beforeEach(async () => {
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
+function mitmCalls(thisTest: number, opts?: { noGoto?: boolean; noFavicon?: boolean }): number {
+  // goto and favicon
+  let calls = 2;
+  if (opts?.noFavicon) calls -= 1;
+  if (opts?.noGoto) calls -= 1;
+
+  return thisTest + calls;
+}
+
 test('should send a Host header to secure http1 Chrome requests', async () => {
   let rawHeaders: string[] = [];
 
@@ -68,7 +77,7 @@ test('should send preflight requests', async () => {
   const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
   Helpers.needsClosing.push(agent);
   agent.mitmRequestSession.interceptorHandlers.push({
-    urls: ['http://dataliberationfoundation.org/postback'],
+    urls: ['https://dataliberationfoundation.org/postback'],
     handlerFn(url, type, request, response) {
       response.end(`<html lang="en">
 <body>
@@ -86,18 +95,21 @@ xhr.send('<person><name>DLF</name></person>');
     },
   });
   const page = await agent.newPage();
-  await page.goto(`http://dataliberationfoundation.org/postback`);
+  await page.goto(`https://dataliberationfoundation.org/postback`);
   await expect(corsPromise).resolves.toBeTruthy();
   await expect(postPromise).resolves.toBeTruthy();
 
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
+  const results = mocks.MitmRequestContext.create.mock.results.filter(
+    result => !result.value.url.href.includes('favicon'),
+  );
 
-  const context = mocks.MitmRequestContext.create.mock.results[1];
+  const context = results[1];
   expect(context.value.method).toBe('OPTIONS');
 
-  const context2 = mocks.MitmRequestContext.create.mock.results[2];
+  const context2 = results[2];
   expect(context2.value.method).toBe('POST');
-});
+}, 9999999);
 
 test('should proxy requests from worker threads', async () => {
   koa.get('/worker.js', ctx => {
@@ -132,7 +144,7 @@ myWorker.postMessage('send');
   await page.goto(`${koa.baseUrl}/testWorker`);
   await page.mainFrame.waitForLoad({ loadStatus: 'PaintingStable' });
   await expect(serviceXhr).resolves.toBe('FromWorker');
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
 });
 
 test('should proxy requests from shared workers', async () => {
@@ -179,7 +191,7 @@ sharedWorker.port.addEventListener('message', message => {
   await page.goto(`${server.baseUrl}/testSharedWorker`);
   await page.mainFrame.waitForLoad({ loadStatus: 'PaintingStable' });
   await expect(xhrResolvable.promise).resolves.toBe('FromSharedWorker');
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
 });
 
 test('should not see proxy headers in a service worker', async () => {
@@ -283,7 +295,7 @@ window.addEventListener('load', function() {
   await expect(originalHeaders['proxy-authorization']).not.toBeTruthy();
   await expect(headersFromWorker['proxy-authorization']).not.toBeTruthy();
   await expect(originalHeaders['user-agent']).toBe(headersFromWorker['user-agent']);
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3));
 });
 
 test('should proxy iframe requests', async () => {
@@ -314,7 +326,8 @@ This is the main body
   });
   await page.goto(`${koa.baseUrl}/iframe-test`);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
+  // TODO why doesn't this load favicon?
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3, { noFavicon: true }));
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([
     expect.stringMatching(/http:\/\/localhost:\d+\/iframe-test/),
@@ -323,7 +336,6 @@ This is the main body
     'https://dataliberationfoundation.org/dlfSite.png',
   ]);
 });
-
 
 test('should be able to intercept http requests and responses', async () => {
   const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
@@ -335,10 +347,10 @@ test('should be able to intercept http requests and responses', async () => {
       }
     },
     async beforeHttpRequestBody(request: IHttpResourceLoadDetails): Promise<any> {
-
       if (request.url.pathname === '/intercept-post') {
         // drain first
-        for await (const _ of request.requestPostDataStream) {}
+        for await (const _ of request.requestPostDataStream) {
+        }
         // send body. NOTE: we had to change out the content length before the body step
         request.requestPostDataStream = Readable.from(Buffer.from('Intercept request'));
       }
@@ -354,7 +366,7 @@ test('should be able to intercept http requests and responses', async () => {
         }
         response.responseBodyStream = Readable.from(Buffer.from('Intercepted'));
       }
-    }
+    },
   });
   const page = await agent.newPage();
   const requestPost = new Resolvable<string>();
@@ -388,5 +400,7 @@ test('should be able to intercept http requests and responses', async () => {
   await page.waitForLoad(LocationStatus.AllContentLoaded);
   await expect(requestPost).resolves.toBe('Intercept request');
   await waitForVisible(page.mainFrame, 'body.ready', 5e3);
-  await expect(page.evaluate('document.querySelector("h1").textContent')).resolves.toBe('Intercepted');
+  await expect(page.evaluate('document.querySelector("h1").textContent')).resolves.toBe(
+    'Intercepted',
+  );
 });

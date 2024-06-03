@@ -423,7 +423,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     if (!frame.parentId) {
       this.clearChildFrames();
     }
-    frame.onNavigated(navigatedEvent.frame);
+    frame.onNavigated(navigatedEvent.frame, navigatedEvent);
     this.emit('frame-navigated', { frame, loaderId: navigatedEvent.frame.loaderId });
     if (!frame.isDefaultUrl && !frame.parentId && devtoolsSession === this.devtoolsSession) {
       this.pendingNewDocumentScripts.length = 0;
@@ -710,7 +710,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   private onResourceFailed(event: IPageEvents['resource-failed']): void {
     const { resource } = event;
     const loadError = Resources.translateResourceError(resource);
-
     const frame = this.framesById.get(resource.frameId);
 
     const resourceMeta = this.resources.onBrowserRequestFailed(

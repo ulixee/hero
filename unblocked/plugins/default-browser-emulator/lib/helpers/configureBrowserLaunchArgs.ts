@@ -48,7 +48,6 @@ export function configureBrowserLaunchArgs(
     '--enable-auto-reload', // Enable auto-reload of error pages.
 
     '--password-store=basic', // Avoid potential instability of using Gnome Keyring or KDE wallet.
-    '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs
     '--allow-running-insecure-content',
 
     `--window-size=${defaultScreen.width},${defaultScreen.height}`,

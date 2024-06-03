@@ -3,6 +3,7 @@ export type NavigationReason =
   | 'goto'
   | 'goBack'
   | 'goForward'
+  | 'goForwardOrBack'
   | 'userGesture'
   | 'inPage'
   | 'newFrame';

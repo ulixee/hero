@@ -22,7 +22,7 @@ export default class FrameNavigations
   implements IFrameNavigations
 {
   public get top(): INavigation {
-    return this.history.length > 0 ? this.history[this.history.length - 1] : null;
+    return this.history.at(-1);
   }
 
   // last navigation not loaded in-page
@@ -43,7 +43,10 @@ export default class FrameNavigations
   private readonly historyById: Record<number, INavigation> = {};
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
-  constructor(readonly frame: Frame, logger: IBoundLog) {
+  constructor(
+    readonly frame: Frame,
+    logger: IBoundLog,
+  ) {
     super();
     this.logger = logger.createChild(module);
     this.setEventsToLog(this.logger, ['navigation-requested', 'status-change']);
@@ -123,7 +126,7 @@ export default class FrameNavigations
   ): INavigation {
     let isNewTop = true;
     // if in page, make sure we're on the domain of the active url
-    if (reason === "inPage" && this.currentUrl) {
+    if (reason === 'inPage' && this.currentUrl) {
       isNewTop = isSameOrigin(url, this.currentUrl);
     }
 
@@ -179,7 +182,8 @@ export default class FrameNavigations
         lastHttpResponse = this.findMostRecentHistory(
           x =>
             x.navigationReason === 'goto' &&
-            x.statusChanges.has(LoadStatus.HttpResponded) && isSameOrigin(url, x.finalUrl ?? x.requestedUrl),
+            x.statusChanges.has(LoadStatus.HttpResponded) &&
+            isSameOrigin(url, x.finalUrl ?? x.requestedUrl),
         );
       }
       if (lastHttpResponse) {
@@ -196,6 +200,12 @@ export default class FrameNavigations
       }
       shouldPublishLocationChange = isNewTop;
       nextTop.finalUrl = url;
+    } else if (reason === 'goForwardOrBack') {
+      nextTop.statusChanges.set(LoadStatus.HttpRequested, nextTop.initiatedTime);
+      nextTop.statusChanges.set(LoadStatus.HttpResponded, nextTop.initiatedTime);
+      nextTop.statusChanges.set(LoadStatus.AllContentLoaded, nextTop.initiatedTime);
+      nextTop.statusChanges.set(ContentPaint, nextTop.initiatedTime);
+      nextTop.resourceIdResolvable.resolve(-1);
     } else {
       let isStillSameHttpPage = false;
       if (nextTop.requestedUrl?.includes('#') && this.lastHttpNavigationRequest) {
@@ -258,7 +268,8 @@ export default class FrameNavigations
     }
     // if we already have this status at top level, this is a new nav
     else if (
-      top.statusChanges.has(LoadStatus.HttpRequested) === true &&
+      top.statusChanges.has(LoadStatus.HttpRequested) &&
+      // (top.statusChanges.size === 1 && top.statusChanges.has('ContentPaint'))) &&
       // add new entries for redirects
       (!this.historyByLoaderId[loaderId] || redirectedFromUrl)
     ) {

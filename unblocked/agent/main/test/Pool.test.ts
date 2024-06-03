@@ -131,7 +131,7 @@ describe('Pool tests', () => {
       const page = await agent.newPage();
       await page.goto(`${httpServer.baseUrl}/pool${i + 1}`);
 
-      await expect(page.execJsPath(["document", "title"])).resolves.toBeTruthy();
+      await expect(page.execJsPath(['document', 'title'])).resolves.toBeTruthy();
 
       await agent.close();
       expect(pool.activeAgentsCount).toBe(0);
@@ -208,9 +208,15 @@ describe('Pool tests', () => {
     const browser1 = [...browsers.values()][0];
     expect(allBrowsersClosedEvent).toHaveBeenCalledTimes(0);
 
+    // TODO we fixed this in test here, should browser.ts always assign new dataDir. Seems this
+    // behaviour is good so we can always pass it, but then you have to know what you are doing.
     const browserEngine: IBrowserEngine = {
       ...browser1.engine,
-      launchArguments: [...browser1.engine.launchArguments, 'test1'],
+      userDataDir: undefined,
+      launchArguments: [
+        ...browser1.engine.launchArguments.filter(arg => !arg.includes('--user-data-dir=')),
+        'test2',
+      ],
     };
 
     const browser2 = await pool.getBrowser(browserEngine, '2', {});

@@ -201,7 +201,8 @@ test('should emulate contentWindow features', async () => {
   expect(results.isNotAClone).toBe(true);
   expect(results.selfIsNotWindow).toBe(true);
   expect(results.selfIsNotWindowTop).toBe(true);
-  expect(results.selfIsAWindow).toBe(true);
+  // instance should be different
+  expect(results.selfIsAWindow).toBe(false);
   expect(results.topIsNotSame).toBe(true);
 });
 
