@@ -7,7 +7,7 @@ ENV CHROME_URL=$chrome_url
 ENV CHROME_FOLDER=$chrome_folder
 
 RUN apt-get update \
-    && apt-get install -qy ca-certificates wget unzip fonts-freefont-ttf libxss1 --no-install-recommends \
+    && apt-get install -qy ca-certificates wget unzip fonts-freefont-ttf libxss1 socat --no-install-recommends \
     && wget -O chrome.tar.gz "${CHROME_URL}" --progress=bar --no-check-certificate \
     && tar -xf chrome.tar.gz \
     && apt install -qqy "./${CHROME_FOLDER}/install-dependencies.deb" \
