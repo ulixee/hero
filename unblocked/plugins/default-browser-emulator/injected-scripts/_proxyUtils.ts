@@ -394,7 +394,7 @@ function defaultProxyApply<T, K extends keyof T>(
     }
   }
 
-  // Try to make clean error stacks for tenables, but don't crash if
+  // Try to make clean error stacks for thenables, but don't crash if
   // for some reason this doesn't work. Crashing here could have
   // a huge impact on other things.
   try {

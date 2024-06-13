@@ -418,9 +418,14 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     navigatedEvent: FrameNavigatedEvent,
   ): Promise<void> {
     await this.isReady;
+    const startUrl = this.main?.url;
     const frame = this.recordFrame(devtoolsSession, navigatedEvent.frame);
     // if main frame, clear out other frames
     if (!frame.parentId) {
+      if (startUrl !== navigatedEvent.frame.url) {
+        this.attachedFrameIds.clear();
+        this.attachedFrameIds.add(frame.id);
+      }
       this.clearChildFrames();
     }
     frame.onNavigated(navigatedEvent.frame, navigatedEvent);
