@@ -64,7 +64,9 @@ describe('Core events tests', () => {
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
     // TODO: this should really be 2; it's emitting base document as an resource
-    expect(onEventFn.mock.calls).toHaveLength(4);
+    expect(
+      onEventFn.mock.calls.map(x => x[0].data[0].url).filter(x => !x.includes('favicon.ico')),
+    ).toHaveLength(4);
   }, 10e3);
 
   it('removes event listeners', async () => {

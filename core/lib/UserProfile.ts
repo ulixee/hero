@@ -148,7 +148,7 @@ for (const [key,value] of ${JSON.stringify(localStorage)}) {
           responseCode: 200,
           requestId,
           body: Buffer.from(
-            `<html><body class="${readyClass}">
+            `<html><head><link rel="icon" href="data:,"></head><body class="${readyClass}">
 <h5>Loading UserProfile for ${url.origin}</h5>
 <script>
 ${script}

@@ -400,6 +400,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
             domain: cookie.domain,
           },
         ]);
+        await new Promise(setImmediate);
         return true;
       }
     }
@@ -411,6 +412,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         url: this.frame.url,
       },
     ]);
+    await new Promise(setImmediate);
     return true;
   }
 

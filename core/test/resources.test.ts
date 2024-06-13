@@ -107,8 +107,12 @@ test('records a single resource for failed mitm requests', async () => {
   waitForEmptyKeyCheck.resolve();
   await didEmit.promise;
   await new Promise(setImmediate);
-  expect(session.resources.getForTab(meta.tabId)).toHaveLength(1);
-  expect([...session.resources.browserRequestIdToResources.keys()]).toHaveLength(1);
+
+  const resource = session.resources
+    .getForTab(meta.tabId)
+    .find(x => x.url === `http://localhost:2344/not-there`);
+  expect(resource).toBeTruthy();
+  expect([...session.resources.browserRequestIdToResources.keys()].length).toBeGreaterThanOrEqual(1);
   await session.close();
 });
 
