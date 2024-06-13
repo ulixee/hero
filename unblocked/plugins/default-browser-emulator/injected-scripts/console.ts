@@ -13,12 +13,23 @@ function replaceErrorStackWithOriginal(object: unknown) {
   }
 
   if (object instanceof Error) {
-    if (ObjectCached.getOwnPropertyDescriptor(object, 'stack')?.get === defaultErrorStackGetter) {
+    const nameDesc =
+      Object.getOwnPropertyDescriptor(object, 'name') ??
+      Object.getOwnPropertyDescriptor(Object.getPrototypeOf(object), 'name');
+    const { message: msgDesc, stack: stackDesc } = Object.getOwnPropertyDescriptors(object);
+
+    const isSafeName = nameDesc.hasOwnProperty('value');
+    const isSafeMsg = msgDesc.hasOwnProperty('value');
+    const isSafeStack = stackDesc?.get === defaultErrorStackGetter;
+
+    if (isSafeName && isSafeMsg && isSafeStack) {
       return object;
     }
 
-    const error = new Error(`Unblocked stealth created new error from: ${JSON.stringify(object)}`);
-    error.stack = `${error.message}\n   Stack removed to prevent leaking debugger active (error stack was proxied)`;
+    const name = isSafeName ? object.name : 'NameNotSafe';
+    const msg = isSafeMsg ? object.message : 'message removed because its not safe';
+    const error = new Error(`Unblocked stealth created new error from ${name}: ${msg}`);
+    error.stack = `${msg}\n   Stack removed to prevent leaking debugger active`;
     return error;
   }
 
