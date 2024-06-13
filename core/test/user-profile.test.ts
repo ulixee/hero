@@ -439,7 +439,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       const session = tab.session;
       Helpers.needsClosing.push(session);
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['http://dataliberationfoundation.org/*'],
+        urls: ['https://dataliberationfoundation.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html><body><p>frame body</p>
@@ -452,10 +452,10 @@ localStorage.setItem('cross', '1');
         },
       });
 
-      await tab.goto(`http://dataliberationfoundation.org/`);
+      await tab.goto(`https://dataliberationfoundation.org/`);
       await tab.waitForLoad('AllContentLoaded');
       profile = await tab.session.exportUserProfile();
-      expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
+      expect(profile.storage['https://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
       await session.close();
     }
     {
@@ -467,7 +467,7 @@ localStorage.setItem('cross', '1');
       Helpers.needsClosing.push(session);
 
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['http://dataliberationfoundation.org/*'],
+        urls: ['https://dataliberationfoundation.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html>
@@ -481,7 +481,7 @@ localStorage.setItem('cross', '1');
           return true;
         },
       });
-      await tab.goto(`http://dataliberationfoundation.org/`);
+      await tab.goto(`https://dataliberationfoundation.org/`);
       await tab.waitForLoad('DomContentLoaded');
       const localContent = await tab.execJsPath([
         'document',

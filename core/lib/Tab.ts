@@ -359,7 +359,9 @@ export default class Tab
     mitmSession.interceptorHandlers.unshift({
       urls: [origin],
       handlerFn(url, type, request, response) {
-        response.end(`<html lang="en"><body>Empty</body></html>`);
+        response.end(
+          `<html lang="en"><head><link rel="icon" href="data:,"></head><body>Empty</body></html>`,
+        );
         return true;
       },
     });

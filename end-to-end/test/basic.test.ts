@@ -138,6 +138,7 @@ describe('basic Full Client tests', () => {
           'CookieSub=sub; domain=.ulixee.org',
         ]);
         response.end(`<html lang='en'>
+<head><link rel="icon" href="data:,"></head>
 <body>
 <h1>Page Title</h1>
 </body>
@@ -147,6 +148,7 @@ describe('basic Full Client tests', () => {
     });
 
     await hero.goto(`https://ulixee.org`);
+    await hero.activeTab.waitForLoad('DomContentLoaded');
     const cookieStorage = hero.activeTab.cookieStorage;
     {
       expect(await cookieStorage.length).toBe(2);
