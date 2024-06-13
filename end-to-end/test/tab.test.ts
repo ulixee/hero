@@ -66,6 +66,23 @@ describe('Multi-tab scenarios', () => {
     expect(hero.activeTab).toBe(tab1);
   });
 
+  it('can open a new tab programatically', async () => {
+    const hero = new Hero();
+    Helpers.needsClosing.push(hero);
+
+    await hero.goto(`${koaServer.baseUrl}/tabTest`);
+    await hero.waitForPaintingStable();
+    expect(await hero.tabs).toHaveLength(1);
+    expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/tabTest`);
+
+    const tab2 = await hero.newTab();
+    expect(await hero.tabs).toHaveLength(2);
+    expect(await tab2.url).toBe('about:blank');
+    await tab2.goto(`${koaServer.baseUrl}/newTab`);
+    await tab2.waitForLoad('AllContentLoaded');
+    expect(await tab2.url).toBe(`${koaServer.baseUrl}/newTab`);
+  });
+
   it('can wait for resources in each tab', async () => {
     koaServer.get('/logo.png', ctx => {
       ctx.set('Content-Type', 'image/png');
