@@ -312,6 +312,13 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     }));
   }
 
+  public async newTab(): Promise<Tab> {
+    const coreTab = this.#getCoreSessionOrReject().then(x => x.newTab());
+    const tab = createTab(this, coreTab, this.#callsiteLocator);
+    this.#tabs.push(tab);
+    return tab;
+  }
+
   public async closeTab(tab: Tab): Promise<void> {
     const tabIdx = this.#tabs.indexOf(tab);
     this.#tabs.splice(tabIdx, 1);
@@ -320,6 +327,12 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     }
     const coreTab = await getCoreTab(tab);
     await coreTab.close();
+  }
+
+  public async focusTab(tab: Tab): Promise<void> {
+    const coreTab = await getCoreTab(tab);
+    await coreTab.focusTab();
+    this.#activeTab = tab;
   }
 
   public async findResource(
@@ -334,12 +347,6 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     options?: { sinceCommandId: number },
   ): Promise<Resource[]> {
     return await this.activeTab.findResources(filter, options);
-  }
-
-  public async focusTab(tab: Tab): Promise<void> {
-    const coreTab = await getCoreTab(tab);
-    await coreTab.focusTab();
-    this.#activeTab = tab;
   }
 
   public async getSnippet<T = any>(key: string): Promise<T> {
@@ -373,8 +380,8 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
     },
   ): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
-      .coreFramePromise;
+    coreFrame ??=
+      await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol].coreFramePromise;
     let interaction: IInteraction = { click: mousePosition };
     if (!isMousePositionXY(mousePosition)) {
       interaction = {
@@ -396,21 +403,21 @@ export default class Hero extends AwaitedEventTarget<IHeroEvents> {
   public async interact(...interactions: IInteractions): Promise<void> {
     if (!interactions.length) return;
     let coreFrame = await getCoreFrameForInteractions(interactions);
-    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
-      .coreFramePromise;
+    coreFrame ??=
+      await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol].coreFramePromise;
     await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePositionXY | ISuperElement): Promise<void> {
     let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
-    coreFrame ??= await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
-      .coreFramePromise;
+    coreFrame ??=
+      await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol].coreFramePromise;
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
-    const coreFrame = await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol]
-      .coreFramePromise;
+    const coreFrame =
+      await this.activeTab.mainFrameEnvironment[InternalPropertiesSymbol].coreFramePromise;
     await Interactor.run(
       coreFrame,
       typeInteractions.map(t => ({ type: t })),

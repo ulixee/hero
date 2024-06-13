@@ -111,6 +111,11 @@ export default class CoreSession
     return this.commandQueue.run('Session.getHeroMeta');
   }
 
+  public async newTab(): Promise<CoreTab> {
+    const meta = await this.commandQueue.run<ISessionMeta>('Session.newTab');
+    return this.addTab(meta);
+  }
+
   public async getTabs(): Promise<CoreTab[]> {
     const tabSessionMetas = await this.commandQueue.run<ISessionMeta[]>('Session.getTabs');
     for (const tabMeta of tabSessionMetas) {

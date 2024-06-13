@@ -108,7 +108,7 @@ Modify any value in the object to change it session-wide.
 
 #### **Returns** `void`
 
-### onNewBrowser<em>(browser, launchArgs)</em> *optional*
+### onNewBrowser<em>(browser, userConfig)</em> *optional*
 
 This is called every time a new browser engine is started, which may not be every session. A Core Plugin can add to the launch arguments that will sent to the process creation of the browser:
 - For Chrome, a list can be found [here](https://peter.sh/experiments/chromium-command-line-switches/)

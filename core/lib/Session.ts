@@ -193,6 +193,10 @@ export default class Session
     return this.tabsById.get(id);
   }
 
+  public newTab(): Promise<Tab> {
+    return this.createTab();
+  }
+
   public getTabs(): Promise<Tab[]> {
     return Promise.resolve([...this.tabsById.values()].filter(x => !x.isClosing));
   }
@@ -602,6 +606,7 @@ export default class Session
       this.close,
       this.flush,
       this.exportUserProfile,
+      this.newTab,
       this.getTabs,
       this.getHeroMeta,
       this.addRemoteEventListener,
