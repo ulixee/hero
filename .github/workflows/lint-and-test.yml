@@ -24,7 +24,7 @@ jobs:
         include:
           - node-version: 18.x
             os: ubuntu-latest
-            browser: chrome-97-0
+            browser: chrome-114-0
 
     runs-on: ${{ matrix.os }}
 
