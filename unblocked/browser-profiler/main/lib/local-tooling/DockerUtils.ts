@@ -56,7 +56,7 @@ export async function startDockerAndLoadUrl(
     '--shm-size="3gb"',
     '--cap-add=SYS_ADMIN',
   ];
-  counter += 1;
+
   const chromeArgs = [
     '--allow-running-insecure-content',
     '--ignore-certificate-errors',

@@ -8,10 +8,6 @@ if (args.userAgentString) {
   );
 }
 
-if ('webdriver' in self.navigator) {
-  proxyGetter(self.navigator, 'webdriver', () => false, true);
-}
-
 if ('NetworkInformation' in self) {
   proxyGetter((self.NetworkInformation as any).prototype as any, 'rtt', () => args.rtt, false);
 }
@@ -47,7 +43,7 @@ if (args.userAgentData && 'userAgentData' in self.navigator) {
     if (!error) {
       try {
         // check if these work
-        await target.call(thisArg, argArray);
+        await ReflectCached.apply(target, thisArg, argArray);
       } catch (e) {
         error = e;
       }

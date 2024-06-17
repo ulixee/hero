@@ -10,6 +10,7 @@ export function getChromeDownloadUrlForLinux(fullVersion: string): string {
   return `https://github.com/ulixee/chrome-versions/releases/download/${fullVersion}/chrome_${fullVersion}_linux.tar.gz`;
 }
 
+let counter = 0;
 export async function startChromeAndLoadUrl(
   executablePath: string,
   url: string,
@@ -26,7 +27,8 @@ export async function startChromeAndLoadUrl(
     '--no-default-browser-check',
     '--no-first-run',
     '--use-mock-keychain',
-    '--disable-features=MediaRouter,DialMediaRouteProvider' // remove chrome window prompt
+    '--disable-features=MediaRouter,DialMediaRouteProvider', // remove chrome window prompt
+    `--user-data-dir=/tmp/${Date.now()}-${(counter += 1)}`,
   ];
   if (headType === 'headless') {
     if (majorVersion >= 109) {

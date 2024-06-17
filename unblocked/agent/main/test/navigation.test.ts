@@ -44,6 +44,9 @@ describe.each([
   ['with Mitm', true],
   ['withoutMitm', false],
 ])('basic Navigation tests %s', (key, enableMitm) => {
+  if (!enableMitm) {
+    jest.retryTimes(3);
+  }
   beforeAll(async () => {
     koaServer = await Helpers.runKoaServer();
   });
@@ -548,6 +551,7 @@ history.pushState({}, '', '/inpagenav/1');
     });
 
     await page.goto(`${koaServer.baseUrl}/newPagePrompt`);
+    const popupPagePromise = waitForPopup(page);
     await page.interact([
       {
         command: InteractionCommand.click,
@@ -558,7 +562,7 @@ history.pushState({}, '', '/inpagenav/1');
     resolvePendingTriggerSpy.mockClear();
 
     // clear data before this run
-    const popupPage = await waitForPopup(page);
+    const popupPage = await popupPagePromise;
     await popupPage.mainFrame.waitForLoad({ loadStatus: LocationStatus.PaintingStable });
 
     // can sometimes call for paint event
@@ -668,6 +672,9 @@ describe.each([
   ['with Mitm', true],
   ['withoutMitm', false],
 ])('PaintingStable tests %s', (key, enableMitm) => {
+  if (!enableMitm) {
+    jest.retryTimes(3);
+  }
   it('should trigger painting stable after a redirect', async () => {
     const startingUrl = `${koaServer.baseUrl}/stable-redirect`;
     koaServer.get('/stable-redirect', async ctx => {

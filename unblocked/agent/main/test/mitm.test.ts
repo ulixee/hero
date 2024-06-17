@@ -32,13 +32,17 @@ beforeEach(async () => {
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-function mitmCalls(thisTest: number, opts?: { noGoto?: boolean; noFavicon?: boolean }): number {
-  // goto and favicon
-  let calls = 2;
-  if (opts?.noFavicon) calls -= 1;
-  if (opts?.noGoto) calls -= 1;
-
-  return thisTest + calls;
+function mitmCalls(expectedCalls: number): number {
+  // Takes care of removing favicon from call mitm calls if needed.
+  // During testing favicon migth or migth not be called depending on
+  // speed of setup. To prevent flaky tests we ignore this.
+  const hasCalledFavicon = mocks.MitmRequestContext.create.mock.results.some(
+    result => result.value.url.href.includes('favicon'),
+  );
+  if (hasCalledFavicon) {
+    return expectedCalls + 1;
+  }
+  return expectedCalls;
 }
 
 test('should send a Host header to secure http1 Chrome requests', async () => {
@@ -99,7 +103,7 @@ xhr.send('<person><name>DLF</name></person>');
   await expect(corsPromise).resolves.toBeTruthy();
   await expect(postPromise).resolves.toBeTruthy();
 
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3));
   const results = mocks.MitmRequestContext.create.mock.results.filter(
     result => !result.value.url.href.includes('favicon'),
   );
@@ -144,7 +148,7 @@ myWorker.postMessage('send');
   await page.goto(`${koa.baseUrl}/testWorker`);
   await page.mainFrame.waitForLoad({ loadStatus: 'PaintingStable' });
   await expect(serviceXhr).resolves.toBe('FromWorker');
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3));
 });
 
 test('should proxy requests from shared workers', async () => {
@@ -191,7 +195,7 @@ sharedWorker.port.addEventListener('message', message => {
   await page.goto(`${server.baseUrl}/testSharedWorker`);
   await page.mainFrame.waitForLoad({ loadStatus: 'PaintingStable' });
   await expect(xhrResolvable.promise).resolves.toBe('FromSharedWorker');
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(2));
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3));
 });
 
 test('should not see proxy headers in a service worker', async () => {
@@ -295,7 +299,7 @@ window.addEventListener('load', function() {
   await expect(originalHeaders['proxy-authorization']).not.toBeTruthy();
   await expect(headersFromWorker['proxy-authorization']).not.toBeTruthy();
   await expect(originalHeaders['user-agent']).toBe(headersFromWorker['user-agent']);
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3));
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(4));
 });
 
 test('should proxy iframe requests', async () => {
@@ -326,8 +330,7 @@ This is the main body
   });
   await page.goto(`${koa.baseUrl}/iframe-test`);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
-  // TODO why doesn't this load favicon?
-  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(3, { noFavicon: true }));
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(mitmCalls(4));
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([
     expect.stringMatching(/http:\/\/localhost:\d+\/iframe-test/),

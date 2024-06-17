@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-13, windows-latest, ubuntu-latest]
         node-version: [18, 20]
         include:
           - node-version: 20.x
@@ -91,12 +91,13 @@ jobs:
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests
-        run: yarn jest --testTimeout=60000 --maxWorkers=2
+        run: yarn jest --testTimeout=60000 --maxWorkers=1
         working-directory: ./build
         env:
           ULX_DATA_DIR: .data-test
           NODE_ENV: test
           ULX_DEFAULT_BROWSER_ID: ${{ matrix.browser }}
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: 'Tar files'
         if: ${{ failure() }}

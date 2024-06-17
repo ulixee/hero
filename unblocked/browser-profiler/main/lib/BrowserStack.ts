@@ -16,6 +16,7 @@ export default class BrowserStack {
     const capabilities: webdriver.Capabilities = {
       ...browser,
       ...browserstackSettings,
+      ...(env.browserStackLocal ? browserstackLocalSettings : {}),
       'browserstack.selenium_version': getSeleniumVersion(browser),
       ...customCapabilities,
       acceptSslCert: shouldBypassSecurity(browser),
@@ -105,6 +106,12 @@ const browserstackSettings = {
   checkURL: 'false',
   buildName: 'Profiles',
   projectName: 'Double Agent',
+};
+
+const browserstackLocalSettings = {
+  acceptInsecureCerts: true,
+  'browserstack.local': true,
+  'browserstack.browserStackLocalOptions.forceLocal': true,
 };
 
 function getChromeOptions({ browser, browser_version: browserVersion }: IBrowserstackAgent): {

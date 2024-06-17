@@ -10,9 +10,9 @@
   "scripts": {
     "downloadData": "node ../../build/browser-profiler/main/scripts/cloneData.js",
     "cleanProfiles": "node -e 'require(\".../../build/browser-profiler/main/scripts/runBrowserstack.js\").cleanProfiles()'",
-    "profile:browserstack": "node -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstack.js\").default().catch(console.error)'",
-    "profile:dom-browserstack": "node -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstackDoms.js\").default()'",
-    "profile:dom-local": "node -e 'require(\"../../build/browser-profiler/main/scripts/runLocalDoms.js\").default()'"
+    "profile:browserstack": "node --inspect -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstack.js\").default().catch(console.error)'",
+    "profile:dom-browserstack": "node --inspect -e 'require(\"../../build/browser-profiler/main/scripts/runBrowserstackDoms.js\").default()'",
+    "profile:dom-local": "node --inspect -e 'require(\"../../build/browser-profiler/main/scripts/runLocalDoms.js\").default()'"
   },
   "dependencies": {
     "@double-agent/collect": "2.0.0-alpha.28",

@@ -1,3 +1,6 @@
+type OtherInvocationInfo = `` | `Async`;
+type OtherInvocationKey = `_$otherInvocation${OtherInvocationInfo}.${string}`;
+
 export default interface IDomDescriptor {
   _$flags?: string;
   _$type?: string;
@@ -11,6 +14,8 @@ export default interface IDomDescriptor {
   _$setToStringToString?: string;
   _$function?: string;
   _$invocation?: string;
+  _$isAsync?: string;
+  [key: OtherInvocationKey]: string;
   _$protos?: string[];
   'new()'?: IDomDescriptor;
   prototype?: IDomDescriptor;

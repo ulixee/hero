@@ -25,7 +25,12 @@ function createError(message: string, type?: { new (msg: string): any }) {
   return cleanErrorStack(errType);
 }
 
-function newObjectConstructor(newProps: IDescriptor, path: string, invocation?: string | Function) {
+function newObjectConstructor(
+  newProps: IDescriptor,
+  path: string,
+  invocation?: string | Function,
+  isAsync?: boolean,
+) {
   return function () {
     if (newProps._$constructorException) {
       throw createError(newProps._$constructorException);
@@ -38,9 +43,7 @@ function newObjectConstructor(newProps: IDescriptor, path: string, invocation?: 
       !ObjectCached.values(newProps).some(x => x['_$$value()'])
     ) {
       if (typeof invocation === 'function') return invocation(...arguments);
-      if (invocation.startsWith('TypeError'))
-        throw new TypeError(invocation.replace('TypeError: ', ''));
-      return invocation;
+      return invocationReturnOrThrow(invocation, isAsync);
     }
     const props = Object.entries(newProps);
     const obj = {};
@@ -108,13 +111,20 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
   if (entry._$function) {
     const newProps = entry['new()'];
     if (newProps) {
-      attrs.value = newObjectConstructor(newProps, path, entry._$invocation);
+      attrs.value = newObjectConstructor(newProps, path, entry._$invocation, entry._$isAsync);
     } else {
+      Object.keys(entry)
+        .filter((key): key is OtherInvocationKey => key.startsWith('_$otherInvocation'))
+        .forEach(key => OtherInvocationsTracker.addOtherInvocation(path, key, entry[key]));
+
       // use function call just to get a function that doesn't create prototypes on new
       // bind to an empty object so we don't modify the original
       attrs.value = new Proxy(Function.prototype.call.bind({}), {
-        apply() {
-          return entry._$invocation;
+        apply(_target, thisArg) {
+          const invocation =
+            OtherInvocationsTracker.getOtherInvocation(path, thisArg)?.invocation ??
+            entry._$invocation;
+          return invocationReturnOrThrow(invocation, entry._$isAsync);
         },
       });
     }
@@ -202,6 +212,116 @@ function getObjectAtPath(path) {
   return parts.parent;
 }
 
+function invocationToMaybeError(invocation: any): Error | undefined {
+  if (typeof invocation !== 'string') {
+    return;
+  }
+  const errorType = invocation.match(/(\w+Error): (.+)/);
+  if (!errorType) {
+    return;
+  }
+
+  if (errorType) {
+    return createError(invocation);
+  }
+}
+
+function invocationReturnOrThrow(invocation: any, isAsync?: boolean): any | Promise<any> {
+  const error = invocationToMaybeError(invocation);
+  if (isAsync && error) return Promise.reject(error);
+  if (isAsync) return Promise.resolve(invocation);
+  if (error) throw error;
+  return invocation;
+}
+
+/**
+ * At runtime we need to check if instances of objects are equal to the original ones. Just doing
+ * if instance == orginal wont work since we will be modifying original instances. Each plugin
+ * doesn't know about the others so it has no way of tracking original instances. To solve this we store all
+ * paths of instances we will need later and refresh instances when done modify. Refreshing should be done
+ * after all plugins are done modifying original instances, calling this multiple times before that is also possible
+ * if it is needed earlier.
+ */
+class PathToInstanceTracker {
+  private static pathsToTrack = new Set<string>();
+  private static instanceToPath = new Map<any, string>();
+
+  static addPath(path: string) {
+    this.pathsToTrack.add(path);
+  }
+
+  static getPath(instance: any) {
+    return this.instanceToPath.get(instance);
+  }
+
+  static updateAllReferences() {
+    this.instanceToPath.clear();
+    for (const path of this.pathsToTrack) {
+      this.instanceToPath.set(this.getInstanceForPath(path), path);
+    }
+  }
+
+  private static getInstanceForPath(path: string) {
+    const { parent, property } = getParentAndProperty(path);
+    return parent[property];
+  }
+}
+
+// Base Path and Other Path combined for efficient indexing
+type OtherInvocationWithBaseKey = `${string}...${string}`;
+
+/**
+ * This tracks all other invocations of a prototype functions. This means we use the same prototype but have
+ * bound/used a different 'this' object which could result in a different output.
+ */
+class OtherInvocationsTracker {
+  static basePaths = new Set<string>();
+  private static otherInvocations = new Map<
+    OtherInvocationWithBaseKey,
+    { invocation: any; isAsync: boolean }
+  >();
+
+  static addOtherInvocation(
+    basePath: string,
+    otherKey: OtherInvocationKey,
+    otherInvocation: any,
+  ) {
+    const [invocationKey, ...otherParts] = otherKey.split('.');
+    const otherPath = otherParts.join('.');
+    // Store this path so we can later check if we have the reference we expect
+    PathToInstanceTracker.addPath(otherPath);
+    this.basePaths.add(basePath);
+    this.otherInvocations.set(this.key(basePath, otherPath), {
+      invocation: otherInvocation,
+      isAsync: invocationKey.includes('Async'),
+    });
+  }
+
+  static getOtherInvocation(
+    basePath: string,
+    otherThis: any,
+  ): { invocation: any; path: string; isAsync: boolean } {
+    const otherPath = PathToInstanceTracker.getPath(otherThis);
+    if (!otherPath) {
+      return;
+    }
+
+    const info = this.otherInvocations.get(this.key(basePath, otherPath));
+    return {
+      path: otherPath,
+      invocation: info?.invocation,
+      isAsync: info?.isAsync,
+    };
+  }
+
+  private static key(basePath: string, otherPath: string): OtherInvocationWithBaseKey {
+    return `${basePath}....${otherPath}`;
+  }
+}
+
+type OtherInvocationInfo = `` | `Async`;
+type OtherInvocationKey = `_$otherInvocation${OtherInvocationInfo}.${string}`;
+
 declare interface IDescriptor {
   _$flags: string;
   _$type: string;
@@ -213,6 +333,8 @@ declare interface IDescriptor {
   '_$$value()'?: () => string;
   _$function?: string;
   _$invocation?: string;
+  _$isAsync?: boolean;
+  [key: OtherInvocationKey]: string;
   _$protos?: string[];
   'new()'?: IDescriptor;
   prototype: IDescriptor;

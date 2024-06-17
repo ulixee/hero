@@ -1,7 +1,7 @@
 import * as Fs from 'fs';
 import IBridgeType from '../interfaces/IBridgeType';
 
-const FOLDER_MATCH = /chrome-(8|9|10|11)[0-9]/;
+const FOLDER_MATCH = /chrome-(8|9|[1-9][0-9])[0-9]/;
 
 export function extractDirGroupsMap(
   bridge: [IBridgeType, IBridgeType],
@@ -34,7 +34,10 @@ export function extractDirGroupsMap(
 
 export function pathIsPatternMatch(path: string, pattern: string): boolean {
   if (pattern.charAt(0) === '*') {
-    return path.includes(pattern.substr(1));
+    return path.includes(pattern.slice(1));
   }
-  return path.startsWith(pattern);
+  // Split twice so we also match otherInvocationAsync, we always use otherInvocation prefix to
+  // split or match, so in case we need to encode more data (eg async) we can add it as a suffix.
+  const nestedPath = path.split('_$otherInvocation').at(1)?.split('.').slice(1).join('.');
+  return path.startsWith(pattern) || nestedPath?.startsWith(pattern);
 }

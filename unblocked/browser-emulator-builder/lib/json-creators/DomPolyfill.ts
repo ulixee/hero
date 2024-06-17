@@ -44,6 +44,7 @@ export default class DomPolyfillJson {
         DomBridger.removeHeadlessFromPolyfill(polyfill);
         // remove variations
         DomBridger.removeVariationsFromPolyfill(polyfill);
+        DomBridger.removeUnsupportedPropertiesFromPolyfill(polyfill);
 
         this.dataMap[emulateOsId] = this.dataMap[emulateOsId] || {};
         this.dataMap[emulateOsId][runtimeOsId] = polyfill;

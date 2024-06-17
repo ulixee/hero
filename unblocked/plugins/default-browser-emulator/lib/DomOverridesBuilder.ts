@@ -98,7 +98,9 @@ export default class DomOverridesBuilder {
           if (shouldNotRunInWorker(name)) snippet += '\n}';
           return snippet;
         })
-        .join('\n\n')}
+        .join('\n\n')};
+
+      PathToInstanceTracker.updateAllReferences();
     } finally {
       self = originalSelf;
     }
@@ -132,11 +134,12 @@ export default class DomOverridesBuilder {
   if (!document.documentElement) {
     new MutationObserver((list, observer) => {
       observer.disconnect();
-      ${wrapper}
+      ${wrapper};
     }).observe(document, {childList: true, subtree: true});
   } else {
-    ${wrapper}
+    ${wrapper};
   }
+
 `;
     }
     this.scriptsByName.set(name, wrapper);

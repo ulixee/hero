@@ -27,6 +27,7 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.performance.timing.domComplete',
     'window.performance.timing.loadEventStart',
     'window.performance.timing.loadEventEnd',
+    'window.Performance.prototype.getEntries',
     'window.chrome.loadTimes',
     'window.chrome.csi',
     'window.Animation.new().ready.timeline.currentTime',
@@ -42,12 +43,21 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.AudioContext.new().destination.context.sampleRate',
     'window.AudioContext.new().sampleRate',
     'window.navigator.connection.rtt',
-    'window.navigation.currentEntry'
+    'window.navigation.currentEntry',
+    'window.performance.timing.toJSON',
+    'window.performance.toJSON',
+    'window.performance.now',
+    'window.document.documentElement.getInnerHTML',
+    'window.webkitRTCPeerConnection.new().createOffer',
+    'window.RTCPeerConnection.new().createOffer',
+    'window.crypto.randomUUID',
+    'window.navigator.storage.estimate',
   ];
 
   public static override extraAddPatterns = [];
 
   public static override extraChangePatterns = [
+    'window.Intl.DateTimeFormat.new().resolvedOptions',
     'window.console.memory.usedJSHeapSize',
     'window.BaseAudioContext.prototype.state',
     'window.BaseAudioContext.prototype.onstatechange',
@@ -72,6 +82,7 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.AudioContext.new().destination.context.currentTime',
     'window.AudioContext.new().currentTime',
     'window.document.fonts.ready',
+    'window.ScrollTimeline',
   ];
 
   public static override ignoredExtraPatterns = [];
@@ -106,9 +117,11 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     /window.chrome.csi/,
     /window.chrome.loadTimes/,
 
+    /window.Intl.DateTimeFormat/,
     /navigator.appVersion/,
     /navigator.userAgent/,
     /Document.new.+lastModified/,
+    /window.ScrollTimeline/,
 
     /window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable/,
 

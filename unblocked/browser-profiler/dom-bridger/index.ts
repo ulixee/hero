@@ -46,6 +46,30 @@ export default class DomBridger {
     polyfill.remove = polyfill.remove.filter(x => !isVariationChange(x.path, x.propertyName));
     polyfill.add = polyfill.add.filter(x => !isVariationChange(x.path, x.propertyName));
   }
+
+  public static removeUnsupportedPropertiesFromPolyfill(polyfill: IDomPolyfill): void {
+    polyfill.modify = polyfill.modify.filter(
+      x => !isUnsupportedProperty(x.path, x.propertyName, x.property),
+    );
+    polyfill.remove = polyfill.remove.filter(
+      x => !isUnsupportedProperty(x.path, x.propertyName, null),
+    );
+    polyfill.add = polyfill.add.filter(
+      x => !isUnsupportedProperty(x.path, x.propertyName, x.property),
+    );
+  }
+}
+
+function isUnsupportedProperty(path: string, propertyName: string, property: any): boolean {
+  if (property === 'Promise-like') {
+    return true;
+  }
+
+  if (typeof property === 'string' && property.includes('but only 0 present')) {
+    return true;
+  }
+
+  return false;
 }
 
 function isVariationChange(path: string, propertyName: string): boolean {
@@ -72,7 +96,8 @@ function isDevtoolsIndicator(path: string, propertyName: string): boolean {
   if (devtoolsIndicators.added.some(pattern => pathIsPatternMatch(path, pattern))) return true;
   if (devtoolsIndicators.extraAdded.some(pattern => pathIsPatternMatch(path, pattern))) return true;
   if (devtoolsIndicators.changed.some(pattern => pathIsPatternMatch(path, pattern))) return true;
-  if (devtoolsIndicators.extraChanged.some(pattern => pathIsPatternMatch(path, pattern))) return true;
+  if (devtoolsIndicators.extraChanged.some(pattern => pathIsPatternMatch(path, pattern)))
+    return true;
   return false;
 }
 

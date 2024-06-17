@@ -44,10 +44,10 @@ NOTE: The latter half of this approach is still in flux and needs work to improv
 
 5. Create Bridges. Examine output in `browser-profiler-data/dom-bridges/path-patterns` and `browser-profiler-data/dom-bridges/raw-mappings` to flag anything that should be ignored when generating emulators and running double agent.
 
-- `$ yarn bridge`
+- `$ yarn workspace @ulixee/unblocked-browser-profiler-dom-bridger generate`
 
-6. Create Emulator Data (from ../browser-emulator-builder)
+1. Create Emulator Data (from ../browser-emulator-builder)
 
-- `$ yarn generate`
+- `$ yarn workspace @ulixee/unblocked-browser-emulator-builder generate`
 
 7. Commit data to Browser Profiler, Emulator Data, etc

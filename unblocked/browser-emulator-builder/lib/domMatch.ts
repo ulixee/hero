@@ -35,7 +35,7 @@ export function isAllowedValueDifference(diff: IDiff): boolean {
   return false;
 }
 
-const explicitExportsToIgnore = ['window.navigator', 'window.chrome'];
+const explicitExportsToIgnore = ['window.chrome'];
 
 export function isExplicitExport(path: string): boolean {
   return explicitExportsToIgnore.some(x => path.startsWith(x));

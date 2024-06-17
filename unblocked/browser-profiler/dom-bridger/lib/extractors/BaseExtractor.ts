@@ -12,22 +12,17 @@ export default abstract class BaseExtractor {
 
   public patternsHandledElsewhere: string[];
 
-  public definitePathsFound: Set<string> = new Set();
-  public extraPathsFound: Set<string> = new Set();
+  public definitePathsFound = new Set<string>();
+  public extraPathsFound = new Set<string>();
 
-  private definitePathsMap: {
-    added: Set<string>;
-    removed: Set<string>;
-    changed: Set<string>;
-    changedOrder: Set<string>;
-  } = {
-    added: new Set(),
-    removed: new Set(),
-    changed: new Set(),
-    changedOrder: new Set(),
+  private definitePathsMap = {
+    added: new Set<string>(),
+    removed: new Set<string>(),
+    changed: new Set<string>(),
+    changedOrder: new Set<string>(),
   };
 
-  private regexpsUsedForMatch: Set<RegExp> = new Set();
+  private regexpsUsedForMatch = new Set<RegExp>();
 
   constructor(rawMappings: any) {
     for (const pathType of Object.keys(this.definitePathsMap)) {
