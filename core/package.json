@@ -5,7 +5,8 @@
   "exports": {
     ".": {
       "import": "./index.mjs",
-      "require": "./index.cjs"
+      "require": "./index.cjs",
+      "types": "./index.d.ts"
     },
     "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
