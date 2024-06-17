@@ -27,7 +27,7 @@ const localToBrowserstack = BrowserProfiler.loadDataFile(
 );
 
 async function generatePathPatterns(): Promise<void> {
-  const browserEngineOptions = await getStableChromeVersions(10);
+  const browserEngineOptions = await getStableChromeVersions(15);
   const browserIds = browserEngineOptions.map(x => x.id);
 
   const instanceExtractor = new InstanceChangeExtractor(instanceToInstanceMappings);

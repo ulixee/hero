@@ -47,7 +47,7 @@ export default async function runLocalDoms(
   shouldRunLocal = defaultShouldRunLocal,
   shouldCommit = defaultShouldCommit,
 ): Promise<void> {
-  const browserEngineOptions = await getStableChromeVersions(10);
+  const browserEngineOptions = await getStableChromeVersions(15);
 
   for (const browserEngineOption of browserEngineOptions) {
     const major = String(browserEngineOption.major);
