@@ -8,8 +8,14 @@
       "require": "./index.cjs",
       "types": "./index.d.ts"
     },
-    "./lib/*": "./lib/*.js",
-    "./connections/*": "./connections/*.js"
+    "./lib/*": {
+      "default": "./lib/*.js",
+      "types": "./lib/*.d.ts"
+    },
+    "./connections/*": {
+      "default": "./connections/*.js",
+      "types": "./connections/*.d.ts"
+    }
   },
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",

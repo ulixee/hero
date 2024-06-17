@@ -9,12 +9,27 @@
       "types": "./index.d.ts"
     },
     "./package.json": "./package.json",
-    "./lib/*": "./lib/*.js",
+    "./lib/*": {
+      "default": "./lib/*.js",
+      "types": "./lib/*.d.ts"
+    },
     "./dbs": "./dbs",
-    "./dbs/*": "./dbs/*.js",
-    "./models/*": "./models/*.js",
-    "./connections/*": "./connections/*.js",
-    "./apis/*": "./apis/*.js"
+    "./dbs/*": {
+      "default": "./dbs/*.js",
+      "types": "./dbs/*.d.ts"
+    },
+    "./models/*": {
+      "default": "./models/*.js",
+      "types": "./models/*.d.ts"
+    },
+    "./connections/*": {
+      "default": "./connections/*.js",
+      "types": "./connections/*.d.ts"
+    },
+    "./apis/*": {
+      "default": "./apis/*.js",
+      "types": "./apis/*.d.ts"
+    }
   },
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",
