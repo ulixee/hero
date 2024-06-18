@@ -3,7 +3,6 @@
   "private": true,
   "version": "2.0.0-alpha.28",
   "dependencies": {
-    "@ulixee/chrome-113-0": "^5672.127.8",
     "@ulixee/js-path": "2.0.0-alpha.28",
     "@ulixee/unblocked-agent": "2.0.0-alpha.28"
   }

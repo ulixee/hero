@@ -115,6 +115,8 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
     } else {
       Object.keys(entry)
         .filter((key): key is OtherInvocationKey => key.startsWith('_$otherInvocation'))
+        // Not supported currently
+        .filter((key)=> !key.includes('new()'))
         .forEach(key => OtherInvocationsTracker.addOtherInvocation(path, key, entry[key]));
 
       // use function call just to get a function that doesn't create prototypes on new
@@ -287,7 +289,8 @@ class OtherInvocationsTracker {
     otherInvocation: any,
   ) {
     const [invocationKey, ...otherParts] = otherKey.split('.');
-    const otherPath = otherParts.join('.');
+    // Remove key/property from path
+    const otherPath = otherParts.slice(0, -1).join('.');
     // Store this path so we can later check if we have the reference we expect
     PathToInstanceTracker.addPath(otherPath);
     this.basePaths.add(basePath);

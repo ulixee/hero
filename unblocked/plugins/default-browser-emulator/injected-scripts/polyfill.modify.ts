@@ -12,6 +12,11 @@ for (const itemToModify of args.itemsToModify || []) {
       continue;
     }
 
+    // Currently not supported
+    if (itemToModify.path.includes('new()')) {
+      continue;
+    }
+
     const parts = getParentAndProperty(itemToModify.path);
     const property = parts.property;
     const parent = parts.parent;
@@ -41,22 +46,21 @@ for (const itemToModify of args.itemsToModify || []) {
       // Create single proxy on original prototype so 'this' rebinding is possible.
       if (!OtherInvocationsTracker.basePaths.has(itemToModify.path)) {
         proxyFunction(parent, property, (target, thisArg, argArray) => {
-          const { invocation, isAsync } = OtherInvocationsTrackerHere.getOtherInvocation(
+          const otherInvocation = OtherInvocationsTrackerHere.getOtherInvocation(
             itemToModify.path,
             thisArg,
           );
 
-          return invocation !== undefined
-            ? invocationReturnOrThrowHere(invocation, isAsync)
+          return otherInvocation !== undefined
+            ? invocationReturnOrThrowHere(otherInvocation.invocation, otherInvocation.isAsync)
             : ReflectCachedHere.apply(target, thisArg, argArray);
         });
       }
 
-      // We need to remove the actuall property
-      const otherPath = itemToModify.propertyName.split('.').slice(0, -1).join('.');
+      const otherKey = itemToModify.propertyName;
       OtherInvocationsTracker.addOtherInvocation(
         itemToModify.path,
-        otherPath,
+        otherKey,
         itemToModify.property,
       );
     }

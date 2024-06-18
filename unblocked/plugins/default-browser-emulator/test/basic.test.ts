@@ -29,7 +29,7 @@ describe('emulator', () => {
     let firstBrowserEngine: IBrowserEngine;
     {
       const agent = pool.createAgent({
-        customEmulatorConfig: { userAgentSelector: '~ mac = 10.14' },
+        customEmulatorConfig: { userAgentSelector: '~ mac = 14' },
         logger,
       });
       Helpers.needsClosing.push(agent);

@@ -2213,13 +2213,6 @@
     "@typescript-eslint/types" "6.20.0"
     eslint-visitor-keys "^3.4.1"
 
-"@ulixee/chrome-113-0@^5672.127.8":
-  version "5672.127.8"
-  resolved "https://registry.npmjs.org/@ulixee/chrome-113-0/-/chrome-113-0-5672.127.8.tgz"
-  integrity sha512-zbVEf6ZZWUF10JhqVQFptN6do2VmiSywX/NW4ByDT6IuFbQUheLuw9jHpA9IvO+8e180hklMX+QOKFPUTBUJqg==
-  dependencies:
-    "@ulixee/chrome-app" "^1.0.3"
-
 "@ulixee/chrome-124-0@^6367.208.10":
   version "6367.208.10"
   resolved "https://registry.yarnpkg.com/@ulixee/chrome-124-0/-/chrome-124-0-6367.208.10.tgz#32a874efdc837487d14899da721ced4b51b3a463"

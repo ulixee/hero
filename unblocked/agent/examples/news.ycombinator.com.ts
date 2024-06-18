@@ -1,11 +1,8 @@
 import { Agent } from '@ulixee/unblocked-agent';
 import { IJsPath } from '@ulixee/js-path';
 
-const Chrome113 = require('@ulixee/chrome-113-0');
-
 async function run() {
   const agent = new Agent({
-    browserEngine: new Chrome113(),
     options: {
       showChrome: true,
     },
