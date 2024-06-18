@@ -47,29 +47,20 @@ export default class DomBridger {
     polyfill.add = polyfill.add.filter(x => !isVariationChange(x.path, x.propertyName));
   }
 
-  public static removeUnsupportedPropertiesFromPolyfill(polyfill: IDomPolyfill): void {
+  public static removeCustomCallbackFromPolyfill(
+    polyfill: IDomPolyfill,
+    callback: (path: string, propertyName: string, value: any) => boolean,
+  ): void {
     polyfill.modify = polyfill.modify.filter(
-      x => !isUnsupportedProperty(x.path, x.propertyName, x.property),
+      x => !callback(x.path, x.propertyName, x.property),
     );
     polyfill.remove = polyfill.remove.filter(
-      x => !isUnsupportedProperty(x.path, x.propertyName, null),
+      x => !callback(x.path, x.propertyName, null),
     );
     polyfill.add = polyfill.add.filter(
-      x => !isUnsupportedProperty(x.path, x.propertyName, x.property),
+      x => !callback(x.path, x.propertyName, x.property),
     );
   }
-}
-
-function isUnsupportedProperty(path: string, propertyName: string, property: any): boolean {
-  if (property === 'Promise-like') {
-    return true;
-  }
-
-  if (typeof property === 'string' && property.includes('but only 0 present')) {
-    return true;
-  }
-
-  return false;
 }
 
 function isVariationChange(path: string, propertyName: string): boolean {

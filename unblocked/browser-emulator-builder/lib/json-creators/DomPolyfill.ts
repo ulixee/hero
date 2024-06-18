@@ -44,7 +44,8 @@ export default class DomPolyfillJson {
         DomBridger.removeHeadlessFromPolyfill(polyfill);
         // remove variations
         DomBridger.removeVariationsFromPolyfill(polyfill);
-        DomBridger.removeUnsupportedPropertiesFromPolyfill(polyfill);
+        // remove stuff not support by our polyfill plugin
+        DomBridger.removeCustomCallbackFromPolyfill(polyfill, filterNotSupportedByPolyfillPlugin);
 
         this.dataMap[emulateOsId] = this.dataMap[emulateOsId] || {};
         this.dataMap[emulateOsId][runtimeOsId] = polyfill;
@@ -112,6 +113,35 @@ export default class DomPolyfillJson {
     }
     return true;
   }
+}
+
+function filterNotSupportedByPolyfillPlugin(
+  path: string,
+  propertyName: string,
+  value: any,
+): boolean {
+  // DomExtractor timedout and produced this output
+  if (value === 'Promise-like') {
+    return true;
+  }
+
+  // Function needs multiple arguments
+  if (typeof value === 'string' && value.includes('but only 0 present')) {
+    return true;
+  }
+
+  // Handled by other plugin
+  const pathsToIgnore = ['window.navigator.platform'];
+  if (pathsToIgnore.includes(path)) {
+    return true;
+  }
+
+  // Currently we don't support creating otherInvocations with new()
+  if (propertyName.includes('_$otherInvocation') && propertyName.includes('new()')) {
+    return true;
+  }
+
+  return false;
 }
 
 function getFoundationDomOsIds(forBrowserId: string): string[] {
