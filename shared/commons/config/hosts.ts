@@ -6,7 +6,9 @@ import { isPortInUse } from '../lib/utils';
 import { TypedEventEmitter } from '../lib/eventUtils';
 
 export default class UlixeeHostsConfig extends TypedEventEmitter<{ change: void }> {
-  public static global = new UlixeeHostsConfig(Path.join(getDataDirectory(), 'ulixee'));
+  public static get global(): UlixeeHostsConfig {
+    return new UlixeeHostsConfig(Path.join(getDataDirectory(), 'ulixee'));
+  }
 
   public hostByVersion: IUlixeeHostsConfig['hostByVersion'] = {};
   #watchHandle: Fs.FSWatcher;

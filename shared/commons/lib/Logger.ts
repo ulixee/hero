@@ -2,6 +2,21 @@
 import { inspect } from 'util';
 import ILog, { ILogData } from '../interfaces/ILog';
 
+declare global {
+  function UlixeeLogCreator(module: NodeModule): {
+    log: ILog;
+  };
+
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxLogPrototype: Log;
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxLogFilters: any;
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxLoggerSessionIdNames: Map<string, string>;
+  // eslint-disable-next-line no-var,vars-on-top
+  var UlxSubscriptions: Map<number, (log: ILogEntry) => any>;
+}
+
 const hasBeenLoggedSymbol = Symbol.for('UlxHasBeenLogged');
 
 global.UlxLogFilters ??= {
@@ -122,8 +137,13 @@ class Log implements ILog {
   }
 }
 
-function translateValueToPrintable(value: any, depth = 0): any {
+function translateValueToPrintable(key: string, value: any, depth = 0): any {
   if (value === undefined || value === null) return;
+
+  if (key === 'password' || key === 'suri') {
+    return '********';
+  }
+
   if (value instanceof Error) {
     return value.toString();
   }
@@ -150,11 +170,11 @@ function translateValueToPrintable(value: any, depth = 0): any {
 
   if (typeof value === 'object') {
     if (Array.isArray(value)) {
-      return value.map(x => translateValueToPrintable(x, depth + 1));
+      return value.map((x, i) => translateValueToPrintable(i as any, x, depth + 1));
     }
     const result: any = {};
-    for (const [key, subValue] of Object.entries(value)) {
-      result[key] = translateValueToPrintable(subValue, depth + 1);
+    for (const [subKey, subValue] of Object.entries(value)) {
+      result[subKey] = translateValueToPrintable(subKey, subValue, depth + 1);
     }
     return result;
   }
@@ -188,7 +208,7 @@ export function translateToPrintable(
       continue;
     }
 
-    const printable = translateValueToPrintable(value);
+    const printable = translateValueToPrintable(key, value);
     if (printable === null || printable === undefined) continue;
     printData[key] = printable;
   }
@@ -197,17 +217,6 @@ export function translateToPrintable(
 
 const logLevels = { stats: 0, info: 1, warn: 2, error: 3 };
 
-declare global {
-  function UlixeeLogCreator(module: NodeModule): {
-    log: ILog;
-  };
-  // eslint-disable-next-line no-var,vars-on-top
-  var UlixeeLogClass: typeof Log;
-  // eslint-disable-next-line no-var,vars-on-top
-  var UlxLoggerSessionIdNames: Map<string, string>;
-  // eslint-disable-next-line no-var,vars-on-top
-  var UlxSubscriptions: Map<number, (log: ILogEntry) => any>;
-}
 
 if (!global.UlixeeLogCreator) {
   global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
@@ -223,8 +232,6 @@ if (!global.UlixeeLogCreator) {
     };
   };
 }
-
-global.UlixeeLogClass ??= Log;
 
 export default function logger(module: NodeModule): ILogBuilder {
   return global.UlixeeLogCreator(module);

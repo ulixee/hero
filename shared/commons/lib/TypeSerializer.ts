@@ -173,8 +173,9 @@ export default class TypeSerializer {
       }
 
       if (ArrayBuffer.isView(value)) {
-        // @ts-ignore
-        const binary = new TextDecoder('utf8').decode(value.buffer);
+        const binary = Array.from(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))
+          .map(byte => String.fromCharCode(byte))
+          .join('');
         return {
           __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
@@ -186,8 +187,7 @@ export default class TypeSerializer {
         };
       }
       if (value instanceof ArrayBuffer) {
-        // @ts-ignore
-        const binary = new TextDecoder('utf8').decode(value);
+        const binary = Array.from(new Uint8Array(value)).map(byte => String.fromCharCode(byte)).join('');
         return {
           __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
@@ -219,8 +219,10 @@ export default class TypeSerializer {
       }
 
       const decoded = globalThis.atob(value);
-      // @ts-ignore
-      const uint8Array = new TextEncoder().encode(decoded);
+      const uint8Array = new Uint8Array(new ArrayBuffer(decoded.length));
+      for (let i = 0; i < decoded.length; i++) {
+        uint8Array[i] = decoded.charCodeAt(i);
+      }
       if (!entry.args) return uint8Array;
 
       const { arrayType, byteOffset, byteLength } = entry.args;
