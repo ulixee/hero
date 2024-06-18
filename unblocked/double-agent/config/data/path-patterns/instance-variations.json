@@ -38,9 +38,18 @@
     "window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable",
     "window.console.memory.jsHeapSizeLimit",
     "window.performance.memory.jsHeapSizeLimit",
+    "window.performance.timing.toJSON",
+    "window.performance.now",
+    "window.performance.toJSON",
+    "window.document.documentElement.getInnerHTML",
+    "window.crypto.randomUUID",
+    "window.navigator.storage.estimate",
     "window.navigator.connection.rtt",
     "window.navigator.appVersion",
     "window.navigator.userAgent",
+    "window.webkitRTCPeerConnection.new().createOffer",
+    "window.RTCPeerConnection.new().createOffer",
+    "window.Performance.prototype.getEntries",
     "window.AudioContext.new().destination.context.sampleRate",
     "window.AudioContext.new().sampleRate"
   ],
@@ -69,6 +78,8 @@
     "window.navigator.connection.onchange",
     "window.navigator.connection.effectiveType",
     "window.navigator.connection.saveData",
+    "window.Intl.DateTimeFormat.new().resolvedOptions",
+    "window.ScrollTimeline",
     "window.BarcodeDetector.getSupportedFormats"
   ]
 }
