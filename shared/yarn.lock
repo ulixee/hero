@@ -1940,10 +1940,10 @@
     "@typescript-eslint/types" "6.20.0"
     eslint-visitor-keys "^3.4.1"
 
-"@ulixee/repo-tools@^1.0.29":
-  version "1.0.29"
-  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.29.tgz#aa90ea63b8bbfa7a84ac081988ae3d6acee00fe1"
-  integrity sha512-cga/4OfcTN5GxYSHhPdXHEZFykUt4uIqkl+T4QZ5rH4CXndt8pq4SvoQw1KSG9u3eNMu+yHmLc4iMZGYS/UavA==
+"@ulixee/repo-tools@^1.0.31":
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/@ulixee/repo-tools/-/repo-tools-1.0.31.tgz#53e261239af01d9ecc6443fa7be393f08b0f9419"
+  integrity sha512-jgIGgzIUTcPkTctmXE5jWUATcCkwQmxWk8uqpCIkUO72dg82MRYXNYhcycSDcxcbRte4JRoQ9wmTmjQW4V3LfA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.20.0"
     "@typescript-eslint/parser" "^6.20.0"
@@ -1962,7 +1962,7 @@
     eslint-plugin-promise "^6.1.1"
     prettier "^3.2.4"
     pretty-quick "^4.0.0"
-    typescript "^5.3.3"
+    typescript "^5.4.5"
 
 "@ungap/structured-clone@^1.2.0":
   version "1.2.0"
@@ -7661,7 +7661,12 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
-typescript@^5.3.3, typescript@~5.3.3:
+typescript@^5.4.5:
+  version "5.4.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
+  integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
+
+typescript@~5.3.3:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
