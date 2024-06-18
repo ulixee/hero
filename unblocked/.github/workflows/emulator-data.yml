@@ -16,17 +16,20 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT }}
           ref: main
+          token: ${{ secrets.PAT }}
           submodules: 'recursive'
+          path: unblocked
 
-      - name: Clone Profile Data
-        run: git clone https://github.com/ulixee/browser-profile-data.git
-        working-directory: ..
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT }}
+          repository: ulixee/browser-profile-data
+          path: browser-profile-data
 
       - name: Clone ulixee/shared
         run: git clone https://github.com/ulixee/shared.git
-        working-directory: ..
 
       - uses: actions/setup-node@v4
         with:
@@ -35,18 +38,26 @@ jobs:
 
       - name: Install ulixee/shared
         run: yarn build
-        working-directory: ../shared
+        working-directory: shared
 
       - name: Yarn build
         run: yarn build
+        working-directory: unblocked
 
       - name: Force Generate Profiles
         run: yarn workspace @ulixee/unblocked-browser-emulator-builder generate force
+        working-directory: unblocked
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: main
+          repository: browser-profile-data
+          commit_message: "chore(dom-bridges): automatic updates"
 
       - id: browser-data-checkin
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          repository: browser-emulator-builder/data
+          repository: unblocked/browser-emulator-builder/data
           branch: main
           commit_message: 'chore(browser-emulator-builder): automatic emulator data update'
 
@@ -54,5 +65,6 @@ jobs:
         if: steps.browser-data-checkin.outputs.changes_detected == 'true'
         with:
           branch: main
+          repository: unblocked
           push_options: '--no-verify'
           commit_message: 'chore(browser-emulator-builder): automatic update emulator data ref'

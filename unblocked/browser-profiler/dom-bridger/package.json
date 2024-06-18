@@ -7,7 +7,7 @@
   "scripts": {
     "generateRawMappings": "node --inspect ../../build/browser-profiler/dom-bridger/scripts/generateRawMappings.js",
     "generatePathPatterns": "node --inspect ../../build/browser-profiler/dom-bridger/scripts/generatePathPatterns.js",
-    "generate": "yarn generateRawMappings && yarn generatePathPatterns"
+    "generate": "yarn generatePathPatterns && yarn generateRawMappings"
   },
   "dependencies": {
     "@ulixee/commons": "2.0.0-alpha.28",
