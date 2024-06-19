@@ -47,9 +47,13 @@
     "window.navigator.connection.rtt",
     "window.navigator.appVersion",
     "window.navigator.userAgent",
+    "window.document.hasFocus",
+    "window.navigator.clipboard.readText",
+    "window.navigator.mediaDevices.enumerateDevices",
     "window.webkitRTCPeerConnection.new().createOffer",
     "window.RTCPeerConnection.new().createOffer",
     "window.Performance.prototype.getEntries",
+    "window.navigator.requestMIDIAccess",
     "window.AudioContext.new().destination.context.sampleRate",
     "window.AudioContext.new().sampleRate"
   ],
