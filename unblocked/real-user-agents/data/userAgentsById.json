@@ -2,16 +2,16 @@
   "mac-os-14--chrome-126-0": {
     "id": "mac-os-14--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -47,6 +47,7 @@
   "mac-os-14--chrome-125-0": {
     "id": "mac-os-14--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -55,8 +56,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -281,6 +281,7 @@
   "mac-os-14--chrome-120-0": {
     "id": "mac-os-14--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -289,8 +290,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       234,
@@ -4528,16 +4528,16 @@
   "mac-os-13--chrome-126-0": {
     "id": "mac-os-13--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -4582,6 +4582,7 @@
   "mac-os-13--chrome-125-0": {
     "id": "mac-os-13--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -4590,8 +4591,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -4861,6 +4861,7 @@
   "mac-os-13--chrome-120-0": {
     "id": "mac-os-13--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -4869,8 +4870,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       234,
@@ -9502,16 +9502,16 @@
   "mac-os-12--chrome-126-0": {
     "id": "mac-os-12--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -9560,6 +9560,7 @@
   "mac-os-12--chrome-125-0": {
     "id": "mac-os-12--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -9568,8 +9569,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -9859,6 +9859,7 @@
   "mac-os-12--chrome-120-0": {
     "id": "mac-os-12--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -9867,8 +9868,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       234,
@@ -16417,16 +16417,16 @@
   "mac-os-11--chrome-126-0": {
     "id": "mac-os-11--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -16484,6 +16484,7 @@
   "mac-os-11--chrome-125-0": {
     "id": "mac-os-11--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -16492,8 +16493,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -16828,6 +16828,7 @@
   "mac-os-11--chrome-120-0": {
     "id": "mac-os-11--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -16836,8 +16837,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       234,
@@ -23646,16 +23646,16 @@
   "mac-os-10-15--chrome-126-0": {
     "id": "mac-os-10-15--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -23689,6 +23689,7 @@
   "mac-os-10-15--chrome-125-0": {
     "id": "mac-os-10-15--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -23697,8 +23698,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -23913,6 +23913,7 @@
   "mac-os-10-15--chrome-120-0": {
     "id": "mac-os-10-15--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -23921,8 +23922,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       234,
@@ -65035,16 +65035,16 @@
   "windows-11--chrome-126-0": {
     "id": "windows-11--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -65072,6 +65072,7 @@
   "windows-11--chrome-125-0": {
     "id": "windows-11--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -65080,8 +65081,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -65266,6 +65266,7 @@
   "windows-11--chrome-120-0": {
     "id": "windows-11--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -65274,8 +65275,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       225,
@@ -70828,16 +70828,16 @@
   "windows-10--chrome-126-0": {
     "id": "windows-10--chrome-126-0",
     "allPatchVersions": [
+      154,
+      153,
+      134,
+      133,
       132,
       131,
       130,
       129,
       128,
-      127,
-      126,
-      125,
-      124,
-      123
+      127
     ],
     "stablePatchVersions": [
       115,
@@ -70877,6 +70877,7 @@
   "windows-10--chrome-125-0": {
     "id": "windows-10--chrome-125-0",
     "allPatchVersions": [
+      209,
       208,
       207,
       206,
@@ -70885,8 +70886,7 @@
       203,
       202,
       201,
-      200,
-      199
+      200
     ],
     "stablePatchVersions": [
       142,
@@ -71131,6 +71131,7 @@
   "windows-10--chrome-120-0": {
     "id": "windows-10--chrome-120-0",
     "allPatchVersions": [
+      315,
       314,
       313,
       312,
@@ -71139,8 +71140,7 @@
       309,
       308,
       307,
-      306,
-      305
+      306
     ],
     "stablePatchVersions": [
       225,
