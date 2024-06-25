@@ -582,6 +582,7 @@ export default class Session
       id: this.id,
       commandMarker: this.commands,
       userAgentOption: userProfile?.userAgent,
+      plugins: options.unblockedPlugins,
     });
 
     this.plugins = new CorePlugins(

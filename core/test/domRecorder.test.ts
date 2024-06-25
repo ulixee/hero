@@ -12,6 +12,7 @@ let connectionToClient: ConnectionToHeroClient;
 beforeAll(async () => {
   Core.defaultUnblockedPlugins.push(
     class BasicHumanEmulator {
+      static id = 'BasicHumanEmulator';
       async playInteractions(interactionGroups, runFn): Promise<void> {
         for (const group of interactionGroups) {
           for (const step of group) {
