@@ -90,6 +90,7 @@ const Hero = require('@ulixee/hero-playground');
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
     - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
   - sessionPersistence `boolean`. Do not save the [Session](../advanced-concepts/sessions.md) database if set to `false`. Defaults to `true` so you can troubleshoot errors, and load/extract data from previous sessions.
+  - pluginConfigs `Record<PluginId=string, boolean | object>`: object use to configure hero core and unblocked plugins. Object is indexed with the id of a specific plugin. Storing `true` will always enable the plugin (if loaded) and skip shouldEnable function. Same for `false` but that will disable it instead. It also possible to storing a custom `object` in there that the plugin can then use to configure itself.
 
 ## Properties
 

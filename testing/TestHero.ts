@@ -5,7 +5,7 @@ import TransportBridge from '@ulixee/net/lib/TransportBridge';
 let core: Core;
 export default class TestHero extends DefaultHero {
   constructor(createOptions: IHeroCreateOptions = {}) {
-    createOptions.connectionToCore = TestHero.getDirectConnectionToCore();
+    createOptions.connectionToCore ??= TestHero.getDirectConnectionToCore();
     super(createOptions);
   }
 

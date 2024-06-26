@@ -9,12 +9,14 @@ import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import Agent from '@ulixee/unblocked-agent/lib/Agent';
+import { PluginConfigs } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import Core from '../index';
 
 interface IOptionsCreate {
   dependencyMap?: IDependencyMap;
   corePluginPaths?: string[];
   getSessionSummary?: () => ISessionSummary;
+  pluginConfigs?: PluginConfigs;
 }
 
 interface IDependencyMap {
@@ -34,6 +36,7 @@ export default class CorePlugins implements ICorePlugins {
   private readonly logger: IBoundLog;
   private agent: Agent;
   private getSessionSummary: IOptionsCreate['getSessionSummary'];
+  private pluginConfigs: PluginConfigs;
 
   constructor(
     agent: Agent,
@@ -41,6 +44,7 @@ export default class CorePlugins implements ICorePlugins {
     private corePluginsById: { [id: string]: ICorePluginClass },
   ) {
     const { dependencyMap, corePluginPaths, getSessionSummary } = options;
+    this.pluginConfigs = options.pluginConfigs ?? {};
     this.agent = agent;
 
     if (getSessionSummary) this.getSessionSummary = getSessionSummary;
@@ -53,9 +57,14 @@ export default class CorePlugins implements ICorePlugins {
     this.logger = agent.logger.createChild(module);
 
     for (const plugin of Object.values(corePluginsById)) {
-      const shouldActivate =
-        plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary()) ?? true;
-      if (shouldActivate) this.use(plugin);
+      const config = this.pluginConfigs[plugin.id];
+      // true shortcircuits and skips shouldActivate check, we also skip running the shouldActivate function.
+      const shouldActivate = (): boolean | undefined =>
+        plugin.shouldActivate?.(agent.emulationProfile, getSessionSummary(), config);
+      if (config !== true && (config === false || shouldActivate() === false)) {
+        continue;
+      }
+      this.use(plugin);
     }
 
     if (Core.allowDynamicPluginLoading) {
@@ -101,11 +110,14 @@ export default class CorePlugins implements ICorePlugins {
 
   public use(CorePlugin: ICorePluginClass): void {
     if (this.instanceById[CorePlugin.id]) return;
+
+    const config = this.pluginConfigs[CorePlugin.id];;
     const corePlugin = new CorePlugin({
       emulationProfile: this.agent.emulationProfile,
       logger: this.logger,
       corePlugins: this,
       sessionSummary: this.sessionSummary,
+      customConfig: typeof config === 'boolean' ? undefined : config,
     });
     this.instances.push(corePlugin);
     this.instanceById[corePlugin.id] = corePlugin;

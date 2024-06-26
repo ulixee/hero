@@ -15,7 +15,7 @@ afterEach(Helpers.afterEach);
 describe('basic connection tests', () => {
   it('should throw an error informing how to install dependencies', async () => {
     class CustomEmulator extends DefaultBrowserEmulator {
-      public static id = 'emulate-test';
+      public static override id = 'emulate-test';
       public override onNewBrowser() {
         // don't change launch args so it doesn't reuse a previous one
       }

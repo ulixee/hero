@@ -582,6 +582,8 @@ export default class Session
       id: this.id,
       commandMarker: this.commands,
       userAgentOption: userProfile?.userAgent,
+      plugins: options.unblockedPlugins,
+      pluginConfigs: options.pluginConfigs,
     });
 
     this.plugins = new CorePlugins(
@@ -590,6 +592,7 @@ export default class Session
         corePluginPaths: options.corePluginPaths,
         dependencyMap: options.dependencyMap,
         getSessionSummary: this.getSummary.bind(this),
+        pluginConfigs: options.pluginConfigs,
       },
       this.core.corePluginsById,
     );

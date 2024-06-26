@@ -1,4 +1,5 @@
 import { IEmulationOptions } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
+import { IUnblockedPluginClass, PluginConfigs } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IUserProfile from './IUserProfile';
 import ISessionOptions from './ISessionOptions';
 import IScriptInvocationMeta from './IScriptInvocationMeta';
@@ -24,4 +25,7 @@ export default interface ISessionCreateOptions extends ISessionOptions, IEmulati
   showChromeAlive?: boolean;
   desktopConnectionId?: string;
   showChromeInteractions?: boolean;
+  // Config use to configure all unblocked, and hero core plugins
+  pluginConfigs?: PluginConfigs;
+  unblockedPlugins?: IUnblockedPluginClass[];
 }
