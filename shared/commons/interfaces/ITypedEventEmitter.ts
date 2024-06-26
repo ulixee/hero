@@ -1,3 +1,5 @@
+import IRegisteredEventListener from './IRegisteredEventListener';
+
 export default interface ITypedEventEmitter<T> {
   on<K extends keyof T & (string | symbol)>(
     eventType: K,
@@ -42,4 +44,8 @@ export default interface ITypedEventEmitter<T> {
   ): this;
 
   removeAllListeners(event?: string | symbol): this;
+  addEventEmitter<K extends keyof T & (string | symbol)>(
+    emitter: ITypedEventEmitter<T>,
+    eventTypes: K[],
+  ): IRegisteredEventListener[];
 }

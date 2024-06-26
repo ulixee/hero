@@ -291,7 +291,6 @@ function extractPathFromModule(module: NodeModule): string {
     moduleNamesByPath[fullPath] = fullPath
       .replace(/^(.*)[/\\]unblocked[/\\](.+)$/, '$2')
       .replace(/^(.*)[/\\]ulixee[/\\](.+)$/, '$2')
-      .replace(/^(.*)[/\\]payments[/\\](.+)$/, '$2')
       .replace(/^(.*)[/\\]@ulixee[/\\](.+)$/, '$2')
       .replace(/^(.*)[/\\]commons[/\\](.+)$/, '$2')
       .replace(/^.*[/\\]packages[/\\](.+)$/, '$1');
@@ -370,6 +369,7 @@ registerNamespaceMapping((ns, active, skip) => {
       /net\/.*/,
       /cloud\/.*/,
       /datastore[/-].*/,
+      /broker\/.*/,
       /mainchain[/-].*/,
       /sidechain[/-].*/,
       /ramps[/-].*/,

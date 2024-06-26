@@ -21,7 +21,7 @@ export async function copyDir(fromDir: string, toDir: string): Promise<void> {
 }
 
 export async function readFileAsJson<T>(path: string): Promise<T> {
-  const buffer = await Fs.readFile(path, 'utf8');
+  const buffer = await Fs.readFile(path, 'utf8').catch(() => null);
   if (!buffer) return null;
   return JSON.parse(buffer) as T;
 }
