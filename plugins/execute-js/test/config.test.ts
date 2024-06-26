@@ -5,9 +5,23 @@ import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateO
 import ICorePlugin, { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import type IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import type { PluginCustomConfig } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import { TransportBridge } from '@ulixee/net';
+import { ConnectionToHeroCore } from '@ulixee/hero';
 
+let core: Core;
+let connectionToCore: ConnectionToHeroCore;
 afterAll(Helpers.afterAll);
-afterEach(Helpers.afterEach);
+afterEach(async () => {
+  await Helpers.afterEach();
+  await core.close();
+});
+
+beforeEach(async () => {
+  core = await Core.start();
+  const bridge = new TransportBridge();
+  core.addConnection(bridge.transportToClient);
+  connectionToCore = new ConnectionToHeroCore(bridge.transportToCore);
+});
 
 test('it should receive a custom config', async () => {
   const testConfig = { test: 'testData' };
@@ -30,18 +44,21 @@ test('it should receive a custom config', async () => {
       return true;
     }
   }
-  Core.use(TestingExecuteJsCorePlugin1);
 
+  core.use(TestingExecuteJsCorePlugin1);
   const hero = new Hero({
+    connectionToCore,
     pluginConfigs: {
       [TestingExecuteJsCorePlugin1.id]: testConfig,
     },
   });
+
   Helpers.onClose(() => hero.close(), true);
 
   await hero.sessionId;
   expect(constructor).toHaveBeenCalledWith(testConfig);
   expect(shouldActivate).toHaveBeenCalledWith(testConfig);
+  await hero.close();
 });
 
 test('it should not activate if config === false', async () => {
@@ -60,7 +77,7 @@ test('it should not activate if config === false', async () => {
       return true;
     }
   }
-  Core.use(TestingExecuteJsCorePlugin2);
+  core.use(TestingExecuteJsCorePlugin2);
 
   const hero = new Hero({
     pluginConfigs: {
@@ -72,6 +89,7 @@ test('it should not activate if config === false', async () => {
   await hero.sessionId;
   expect(shouldActivate).not.toHaveBeenCalled();
   expect(constructor).not.toHaveBeenCalled();
+  await hero.close();
 });
 
 test('it should skip shouldActivate if config === true', async () => {
@@ -90,7 +108,7 @@ test('it should skip shouldActivate if config === true', async () => {
       return false;
     }
   }
-  Core.use(TestingExecuteJsCorePlugin3);
+  core.use(TestingExecuteJsCorePlugin3);
 
   const hero = new Hero({
     pluginConfigs: {
@@ -102,4 +120,5 @@ test('it should skip shouldActivate if config === true', async () => {
   await hero.sessionId;
   expect(shouldActivate).not.toHaveBeenCalled();
   expect(constructor).toHaveBeenCalled();
+  await hero.close();
 });

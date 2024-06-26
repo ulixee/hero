@@ -12,6 +12,7 @@
     "@ulixee/execute-js-plugin": "2.0.0-alpha.28",
     "@ulixee/hero": "2.0.0-alpha.28",
     "@ulixee/hero-core": "2.0.0-alpha.28",
+    "@ulixee/net": "2.0.0-alpha.28",
     "@ulixee/hero-testing": "2.0.0-alpha.28"
   }
 }
