@@ -1,5 +1,8 @@
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
-import IUnblockedPlugin from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import IUnblockedPlugin, {
+  PluginCustomConfig,
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import { IPage } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { PluginTypes } from './IPluginTypes';
@@ -11,13 +14,14 @@ export default interface ICorePlugin extends ICorePluginMethods, IUnblockedPlugi
   readonly sessionSummary?: ISessionSummary;
 }
 
-export interface ICorePluginClass {
+export interface ICorePluginClass<C extends object = any> {
   id: string;
   type: keyof typeof PluginTypes;
   new (createOptions: ICorePluginCreateOptions): ICorePlugin;
   shouldActivate?(
     emulationProfile: IEmulationProfile<unknown>,
     sessionSummary: ISessionSummary,
+    customConfig?: PluginCustomConfig<C>,
   ): boolean;
 }
 
