@@ -388,12 +388,13 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       launchArgs.push('--remote-debugging-pipe');
     }
 
-    this.engine.isHeaded = options.showChrome === true;
+    this.engine.isHeaded ||= options.showChrome === true;
+    // If we're headed, we can support new headless mode
     if (!this.engine.isHeaded) {
       const majorVersion = this.engine.fullVersion.split('.').map(Number)[0];
       if (majorVersion < 114) {
         throw new Error(
-          `ERROR: Running unblocked headless with chrome < 114 is not supported anymore.
+          `ERROR: Running unblocked headless with chrome < 114 (${majorVersion}) is not supported anymore.
             This is because we rely on the new headless mode of recent chrome versions.
             To fix this problem either use a newer chrome version or run unblocked in headed (showChrome) mode.`);
       }

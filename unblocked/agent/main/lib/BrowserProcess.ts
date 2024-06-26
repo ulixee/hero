@@ -141,6 +141,10 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
           launchedProcess.kill('SIGKILL');
         }
         launchedProcess.emit('exit');
+        try {
+          launchedProcess.stdio.forEach(io => io?.destroy());
+        } catch {}
+        launchedProcess.unref();
         await closed;
       }
     } catch (e) {

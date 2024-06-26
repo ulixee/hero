@@ -89,6 +89,9 @@ export default abstract class BaseIpcHandler {
         // don't log epipes
       }
 
+      try {
+        this.child.stdio.forEach(io => io?.destroy());
+      } catch {}
       this.child.kill('SIGINT');
       this.child.unref();
     }
