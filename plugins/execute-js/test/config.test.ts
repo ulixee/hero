@@ -11,65 +11,95 @@ afterEach(Helpers.afterEach);
 
 test('it should receive a custom config', async () => {
   const testConfig = { test: 'testData' };
-  class TestingExecuteJsCorePlugin extends CorePlugin {
+  const constructor = jest.fn();
+  const shouldActivate = jest.fn();
+
+  class TestingExecuteJsCorePlugin1 extends CorePlugin {
+    static override id = 'TestingExecuteJsCorePlugin1';
     constructor(opts: ICorePluginCreateOptions) {
       super(opts);
-      expect(opts.customConfig).toEqual(testConfig);
+      constructor(opts.customConfig);
     }
 
-    shouldActivate?(
+    static shouldActivate?(
       _emulationProfile: IEmulationProfile<unknown>,
       _sessionSummary: ISessionSummary,
       customConfig?: PluginCustomConfig,
     ): boolean {
-      expect(customConfig).toEqual(testConfig);
+      shouldActivate(customConfig);
       return true;
     }
   }
-  Core.use(TestingExecuteJsCorePlugin);
+  Core.use(TestingExecuteJsCorePlugin1);
 
   const hero = new Hero({
     pluginConfigs: {
-      [TestingExecuteJsCorePlugin.id]: testConfig,
+      [TestingExecuteJsCorePlugin1.id]: testConfig,
     },
   });
   Helpers.onClose(() => hero.close(), true);
 
   await hero.sessionId;
-  await hero.close();
+  expect(constructor).toHaveBeenCalledWith(testConfig);
+  expect(shouldActivate).toHaveBeenCalledWith(testConfig);
 });
 
 test('it should not activate if config === false', async () => {
   const constructor = jest.fn();
   const shouldActivate = jest.fn();
 
-  class TestingExecuteJsCorePlugin extends CorePlugin implements ICorePlugin {
+  class TestingExecuteJsCorePlugin2 extends CorePlugin implements ICorePlugin {
+    static override id = 'TestingExecuteJsCorePlugin2';
     constructor(opts: ICorePluginCreateOptions) {
       super(opts);
       constructor();
     }
 
-    shouldActivate?(
-      _emulationProfile: IEmulationProfile<unknown>,
-      _sessionSummary: ISessionSummary,
-      _customConfig?: PluginCustomConfig,
-    ): boolean {
+    static shouldActivate(): boolean {
       shouldActivate();
       return true;
     }
   }
-  Core.use(TestingExecuteJsCorePlugin);
+  Core.use(TestingExecuteJsCorePlugin2);
 
   const hero = new Hero({
     pluginConfigs: {
-      [TestingExecuteJsCorePlugin.id]: false,
+      [TestingExecuteJsCorePlugin2.id]: false,
     },
   });
   Helpers.onClose(() => hero.close(), true);
 
   await hero.sessionId;
-  await hero.close();
-
   expect(shouldActivate).not.toHaveBeenCalled();
   expect(constructor).not.toHaveBeenCalled();
+});
+
+test('it should skip shouldActivate if config === true', async () => {
+  const constructor = jest.fn();
+  const shouldActivate = jest.fn();
+
+  class TestingExecuteJsCorePlugin3 extends CorePlugin implements ICorePlugin {
+    static override id = 'TestingExecuteJsCorePlugin3';
+    constructor(opts: ICorePluginCreateOptions) {
+      super(opts);
+      constructor();
+    }
+
+    static shouldActivate(): boolean {
+      shouldActivate();
+      return false;
+    }
+  }
+  Core.use(TestingExecuteJsCorePlugin3);
+
+  const hero = new Hero({
+    pluginConfigs: {
+      [TestingExecuteJsCorePlugin3.id]: true,
+    },
+  });
+  Helpers.onClose(() => hero.close(), true);
+
+  await hero.sessionId;
+  expect(shouldActivate).not.toHaveBeenCalled();
+  expect(constructor).toHaveBeenCalled();
 });
