@@ -251,6 +251,7 @@ describe('Pool tests', () => {
 
     @UnblockedPluginClassDecorator
     class TestPlugin {
+      static id = 'TestPlugin';
       static shouldActivate(profile: IEmulationProfile): boolean {
         profile.upstreamProxyUrl = upstreamProxyUrl;
         profile.options.disableMitm = true;

@@ -46,6 +46,9 @@ import IUserAgentData from './interfaces/IUserAgentData';
 import UserAgentOptions from './lib/UserAgentOptions';
 import BrowserEngineOptions from './lib/BrowserEngineOptions';
 
+import { name } from './package.json';
+import IBrowserEmulatorConfig, { InjectedScript } from './interfaces/IBrowserEmulatorConfig';
+
 // Configuration to rotate out the default browser id. Used for testing different browsers via cli
 const defaultBrowserId = process.env.ULX_DEFAULT_BROWSER_ID;
 
@@ -63,12 +66,23 @@ export interface IEmulatorOptions {
 
 let hasWarnedAboutProxyIp = false;
 
+const allEnabled = Object.values(InjectedScript).reduce((acc, value) => {
+  return { ...acc, [value]: true };
+}, {} as IBrowserEmulatorConfig);
+
+export const defaultConfig = {
+  ...allEnabled,
+  [InjectedScript.JSON_STRINGIFY]: false,
+};
+
 @UnblockedPluginClassDecorator
 export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUnblockedPlugin<T> {
+  public static id = name;
   // Should the system attempt to manipulate tcp settings to match the emulated OS. NOTE that this can affect tcp performance.
   public static enableTcpEmulation = false;
   public readonly logger: IBoundLog;
   public readonly emulationProfile: IEmulationProfile<T>;
+  public readonly config: IBrowserEmulatorConfig;
 
   public get userAgentString(): string {
     return this.emulationProfile.userAgentOption.string;
@@ -84,6 +98,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
 
   protected get domOverridesBuilder(): DomOverridesBuilder {
     this.#domOverridesBuilder ??= loadDomOverrides(
+      this.config,
       this.emulationProfile,
       this.data,
       this.userAgentData,
@@ -96,7 +111,8 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
 
   #domOverridesBuilder: DomOverridesBuilder;
 
-  constructor(emulationProfile: IEmulationProfile<T>) {
+  constructor(emulationProfile: IEmulationProfile<T>, config?: IBrowserEmulatorConfig) {
+    this.config = config ?? defaultConfig;
     this.logger = emulationProfile.logger ?? log.createChild(module);
     this.emulationProfile = emulationProfile;
     this.data = dataLoader.as(emulationProfile.userAgentOption) as any;
@@ -169,7 +185,7 @@ export default class DefaultBrowserEmulator<T = IEmulatorOptions> implements IUn
       this.logger.info('PublicIp Lookup', {
         ...upstreamProxyIpMask,
       });
-      this.domOverridesBuilder.add('webrtc', {
+      this.domOverridesBuilder.add(InjectedScript.WEBRTC, {
         localIp: upstreamProxyIpMask.publicIp,
         proxyIp: upstreamProxyIpMask.proxyIp,
       });

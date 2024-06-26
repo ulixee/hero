@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import INewDocumentInjectedScript from '../interfaces/INewDocumentInjectedScript';
+import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
 const injectedSourceUrl = '<anonymuos>';
 const cache: { [name: string]: string } = {};
@@ -115,7 +116,7 @@ export default class DomOverridesBuilder {
     for (const name of names) this.workerOverrides.add(name);
   }
 
-  public add(name: string, args: any = {}): void {
+  public add(name: InjectedScript, args: any = {}): void {
     let script = cache[name];
     if (!script) {
       if (!fs.existsSync(`${__dirname}/../injected-scripts/${name}.js`)) {
@@ -124,8 +125,6 @@ export default class DomOverridesBuilder {
       script = fs.readFileSync(`${__dirname}/../injected-scripts/${name}.js`, 'utf8');
     }
     if (shouldCache) cache[name] = script;
-
-    if (name === 'errors') args.sourceUrl = injectedSourceUrl;
 
     let wrapper = this.wrapScript(name, script, args);
 
@@ -186,7 +185,7 @@ export default class DomOverridesBuilder {
 }
 
 export function getOverrideScript(
-  name: string,
+  name: InjectedScript,
   args?: any,
 ): { script: string; callbacks: INewDocumentInjectedScript['callback'][] } {
   const injected = new DomOverridesBuilder();

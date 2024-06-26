@@ -7,6 +7,7 @@ import BrowserContext from '@ulixee/unblocked-agent/lib/BrowserContext';
 import { TestLogger } from '@ulixee/unblocked-agent-testing';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
+import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
 let browser: Browser;
 let httpServer: ITestKoaServer;
@@ -91,7 +92,7 @@ test(
       _$value: 'I am chrome',
     };
     await page.addNewDocumentScript(
-      getOverrideScript('polyfill.add', {
+      getOverrideScript(InjectedScript.POLYFILL_ADD, {
         itemsToAdd: [
           {
             path: 'window',
@@ -143,7 +144,7 @@ test('it should be able to remove properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.remove', {
+    getOverrideScript(InjectedScript.POLYFILL_REMOVE, {
       itemsToRemove: [
         { path: 'window', propertyName: 'Atomics' },
         { path: 'window.Array', propertyName: 'from' },
@@ -164,7 +165,7 @@ test('it should be able to change properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.modify', {
+    getOverrideScript(InjectedScript.POLYFILL_MODIFY, {
       itemsToModify: [
         {
           path: 'window.Navigator.prototype.registerProtocolHandler.name',
@@ -207,7 +208,7 @@ test('it should be able to change property order', async () => {
   )) as string[];
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.reorder', {
+    getOverrideScript(InjectedScript.POLYFILL_REORDER, {
       itemsToReorder: [
         {
           path: 'window.Navigator.prototype',
@@ -268,7 +269,7 @@ test('it should be able to change window property order', async () => {
     },
   ];
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.reorder', {
+    getOverrideScript(InjectedScript.POLYFILL_REORDER, {
       itemsToReorder,
     }).script,
     false,

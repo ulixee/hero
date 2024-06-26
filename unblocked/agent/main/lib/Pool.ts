@@ -13,7 +13,10 @@ import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
-import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import {
+  IUnblockedPluginClass,
+  UnblockedPluginConfig,
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Browser from './Browser';
@@ -28,6 +31,7 @@ interface ICreatePoolOptions {
   certificateStore?: ICertificateStore;
   defaultBrowserEngine?: IBrowserEngine;
   plugins?: IUnblockedPluginClass[];
+  pluginConfigs?: UnblockedPluginConfig;
   dataDir?: string;
   logger?: IBoundLog;
 }
@@ -52,6 +56,7 @@ export default class Pool extends TypedEventEmitter<{
   public readonly agentsById = new Map<string, Agent>();
   public sharedMitmProxy: MitmProxy;
   public plugins: IUnblockedPluginClass[] = [];
+  public pluginConfigs: UnblockedPluginConfig = {};
 
   #activeAgentsCount = 0;
   #waitingForAvailability: {
@@ -94,6 +99,7 @@ export default class Pool extends TypedEventEmitter<{
       };
     }
     options.plugins ??= [...this.plugins];
+    options.pluginConfigs ??= structuredClone(this.pluginConfigs);
     const agent = new Agent(options, this);
     this.agentsById.set(agent.id, agent);
     this.emit('agent-created', { agent });

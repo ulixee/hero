@@ -1,5 +1,8 @@
+const mode = args.mode;
+
 ObjectCached.keys(console).forEach(key => {
   proxyFunction(console, key, (target, thisArg, args) => {
+    if (mode === 'disableConsole') return undefined;
     args = replaceErrorStackWithOriginal(args);
     return ReflectCached.apply(target, thisArg, args);
   });

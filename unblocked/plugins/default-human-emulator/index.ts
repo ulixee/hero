@@ -19,6 +19,7 @@ import IUnblockedPlugin, {
 } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import generateVector from './generateVector';
+import { name } from './package.json';
 
 const { log } = logger(module);
 
@@ -26,6 +27,7 @@ const { log } = logger(module);
 
 @UnblockedPluginClassDecorator
 export default class DefaultHumanEmulator implements IUnblockedPlugin {
+  public static id = name;
   public static overshootSpread = 2;
   public static overshootRadius = 5;
   public static overshootThreshold = 250;
@@ -511,7 +513,7 @@ export default class DefaultHumanEmulator implements IUnblockedPlugin {
 
 async function delay(millis: number): Promise<void> {
   if (!millis) return;
-  await new Promise<void>((resolve) => setTimeout(resolve, Math.floor(millis)).unref());
+  await new Promise<void>(resolve => setTimeout(resolve, Math.floor(millis)).unref());
 }
 
 function splitIntoMaxLengthSegments(total: number, maxValue: number): number[] {

@@ -10,7 +10,7 @@ import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHoo
 import IEmulationProfile, {
   IEmulationOptions,
 } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
-import { IUnblockedPluginClass } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import { IUnblockedPluginClass, UnblockedPluginConfig } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import { nanoid } from 'nanoid';
 import env from '../env';
 import ICommandMarker from '../interfaces/ICommandMarker';
@@ -26,6 +26,7 @@ const { log } = Log(module);
 export interface IAgentCreateOptions extends Omit<IEmulationProfile, keyof IEmulationOptions> {
   id?: string;
   plugins?: IUnblockedPluginClass[];
+  pluginConfigs?: UnblockedPluginConfig;
   commandMarker?: ICommandMarker;
 }
 
@@ -83,7 +84,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
         sessionId: this.id,
       });
 
-    this.plugins = new Plugins(options, options.plugins);
+    this.plugins = new Plugins(options, options.plugins, options.pluginConfigs);
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.plugins,

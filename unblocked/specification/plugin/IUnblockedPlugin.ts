@@ -13,10 +13,21 @@ export default interface IUnblockedPlugin<T = any> extends IHooksProvider {
   onClose?(): void;
 }
 
-export interface IUnblockedPluginClass<T = any> {
-  shouldActivate?(emulationProfile: IEmulationProfile<T>): boolean;
-  new (emulationProfile?: IEmulationProfile<T>): IUnblockedPlugin<T>;
+export interface IUnblockedPluginClass<C extends object = any, T = any> {
+  id: string;
+  shouldActivate?(emulationProfile: IEmulationProfile<T>, customConfig?: PluginCustomConfig<C>): boolean;
+  new (emulationProfile: IEmulationProfile<T>, customConfig?: C): IUnblockedPlugin<T>;
 }
+
+// True = always enabled -> this will skip shouldEnable
+// False = never enabled
+// Config = passed to shouldEnable and constructor, plugin can handle accordingly
+export type UnblockedPluginConfig<C extends object = any> = PluginIsEnabledOrDisabled | PluginCustomConfig<C>;
+export type PluginIsEnabledOrDisabled = boolean;
+export type PluginCustomConfig<C extends object = any> = C;
+
+// key = plugin.id
+export type PluginConfigs = Record<string, UnblockedPluginConfig>;
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

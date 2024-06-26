@@ -17,6 +17,7 @@ import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulation
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { UnblockedPluginClassDecorator } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import DomOverridesBuilder from '../DomOverridesBuilder';
+import { InjectedScript } from '../../interfaces/IBrowserEmulatorConfig';
 
 @UnblockedPluginClassDecorator
 export default class FirstPartyCookiesPlugin implements IHooksProvider {
@@ -84,7 +85,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
   public onNewPage(page: IPage): Promise<any> {
     const cookieCallbackName = 'HeroSetCookie';
     const domOverrides = new DomOverridesBuilder();
-    domOverrides.add('Document.prototype.cookie', {
+    domOverrides.add(InjectedScript.DOCUMENT_PROTOTYPE_COOKIE, {
       callbackName: cookieCallbackName,
     });
     const scripts = domOverrides.build();

@@ -10,6 +10,7 @@ import { getOverrideScript, injectedSourceUrl } from '../lib/DomOverridesBuilder
 import { proxyFunction } from '../injected-scripts/_proxyUtils';
 import BrowserEmulator from '../index';
 import DomExtractor = require('./DomExtractor');
+import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
 const { log } = Log(module);
 const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
@@ -73,7 +74,7 @@ test('should override a function and clean error stacks', async () => {
     page.on('console', console.log);
   }
   await page.addNewDocumentScript(
-    getOverrideScript('navigator.deviceMemory', {
+    getOverrideScript(InjectedScript.NAVIGATOR_DEVICE_MEMORY, {
       memory: '4gb',
     }).script,
     false,

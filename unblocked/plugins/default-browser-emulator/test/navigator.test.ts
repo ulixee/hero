@@ -8,6 +8,7 @@ import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import parseNavigatorPlugins from '../lib/utils/parseNavigatorPlugins';
 import { emulatorDataDir } from '../paths';
+import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
 const logger = TestLogger.forTest(module);
 
@@ -45,7 +46,7 @@ test('it should not be able to detect incognito', async () => {
   }
 
   await page.addNewDocumentScript(
-    getOverrideScript('navigator.deviceMemory', {
+    getOverrideScript(InjectedScript.NAVIGATOR_DEVICE_MEMORY, {
       memory: 4,
       storageTib: 0.5,
       maxHeapSize: 2172649472,

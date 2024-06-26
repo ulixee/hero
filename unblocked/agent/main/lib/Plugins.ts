@@ -1,7 +1,7 @@
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IUnblockedPlugins from '@ulixee/unblocked-specification/plugin/IUnblockedPlugins';
 import IUnblockedPlugin, {
-  IUnblockedPluginClass,
+  IUnblockedPluginClass, PluginConfigs,
 } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import { URL } from 'url';
 import {
@@ -69,22 +69,35 @@ export default class Plugins implements IUnblockedPlugins {
     websiteHasFirstPartyInteraction: [],
   };
 
-  constructor(emulationProfile: IEmulationProfile, pluginClasses: IUnblockedPluginClass[]) {
+  constructor(
+    emulationProfile: IEmulationProfile,
+    pluginClasses: IUnblockedPluginClass[],
+    pluginConfigs: PluginConfigs = {},
+  ) {
     this.profile = emulationProfile ?? {};
     this.profile.options ??= {};
     Object.assign(this.profile, this.profile.options);
+    pluginClasses ??= [];
+    pluginConfigs ??= {};
 
     if (this.profile.browserEngine instanceof ChromeApp) {
       this.profile.browserEngine = new ChromeEngine(this.profile.browserEngine);
     }
 
-    if (pluginClasses?.length) {
-      const PluginClasses = pluginClasses.filter(x => x.shouldActivate?.(this.profile) ?? true);
-      for (const Plugin of PluginClasses) {
-        const plugin = new Plugin(this.profile);
-        this.instances.push(plugin);
-        this.hook(plugin, false);
+    for (const Plugin of pluginClasses) {
+      const config = pluginConfigs[Plugin.id];
+      let plugin: IUnblockedPlugin<any>;
+      // true shortcircuits and doesn't check shouldActivate
+      if (config === true) {
+        plugin = new Plugin(this.profile);
+      } else if (config === false || Plugin.shouldActivate?.(this.profile, config) === false) {
+        continue;
+      } else {
+        plugin = new Plugin(this.profile, config);
       }
+
+      this.instances.push(plugin);
+      this.hook(plugin, false);
     }
 
     if (!this.profile.browserEngine && !pluginClasses?.length) {
