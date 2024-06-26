@@ -1,15 +1,25 @@
-export function debounce(func: () => any, wait: number): () => void {
+export function debounce<T extends (...args: any[]) => void | Promise<void>>(
+  func: T,
+  wait: number,
+  maxWait?: number,
+): T {
   let timeout: NodeJS.Timeout;
+  let lastRun: number;
 
-  return function runLater() {
+  return function runLater(...args: any[]) {
     function later(): void {
       timeout = undefined;
-      func();
+      void func(...args);
     }
-
     clearTimeout(timeout);
-    timeout = setTimeout(later, wait).unref();
-  };
+
+    if (maxWait && Date.now() - lastRun > maxWait) {
+      void func(...args);
+    } else {
+      timeout = setTimeout(later, wait).unref();
+    }
+    lastRun = Date.now();
+  } as T;
 }
 
 export function length(source: AsyncIterable<unknown>): Promise<number> {

@@ -22,3 +22,18 @@ export function omit<T, Keys extends keyof T & string>(
   }
   return result;
 }
+
+export function pick<T, Keys extends keyof T & string>(
+  object: T,
+  keys: Keys[],
+): Pick<T, Exclude<keyof T, Keys>> {
+  object = Object(object);
+  const result = {} as any;
+
+  for (const [key, value] of Object.entries(object)) {
+    if (keys.includes(key as any)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}

@@ -2,13 +2,8 @@
   "extends": "./node_modules/@ulixee/repo-tools/tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "./build"
+    "outDir": "./build",
   },
-  "references": [
-    {
-      "path": "specification/tsconfig.json"
-    }
-  ],
   "include": ["./**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
     "**/tsconfig*.json",
@@ -17,6 +12,6 @@
     "specification",
     "node_modules",
     "**/node_modules",
-    "**/*.d.ts"
-  ]
+    "**/*.d.ts",
+  ],
 }

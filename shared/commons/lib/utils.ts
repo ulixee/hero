@@ -24,22 +24,29 @@ export function toUrl(hostOrUrlFragment: string, defaultProtocol = 'ws:'): URL {
 
 export function isPortInUse(port: number | string): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
-    const client = new net.Socket();
+    const server = net.createServer();
 
-    let isInUse = true;
-    client.once('error', err => {
-      if ((err as any).code === 'ECONNREFUSED') {
-        isInUse = false;
-        resolve(isInUse);
+    server.once('error', err => {
+      if ((err as any).code === 'EADDRINUSE') {
+        resolve(true); // Port is in use
       } else {
         reject(err);
       }
-      client.removeAllListeners().end().destroy().unref();
+      cleanup();
     });
-    client.connect(Number(port), () => {
-      resolve(isInUse);
-      client.removeAllListeners().end().destroy().unref();
+
+    server.once('listening', () => {
+      resolve(false);
+      cleanup();
     });
+
+    const cleanup = (): void => {
+      server.removeAllListeners();
+      server.unref();
+      server.close();
+    };
+
+    server.listen(Number(port));
   });
 }
 

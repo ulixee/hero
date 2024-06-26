@@ -14,6 +14,7 @@ export default class ApiRegistry<IHandlerMetadata = any> {
   public apiHandlerMetadataFn: (
     apiRequest: ICoreRequestPayload<any, any>,
     logger: IBoundLog,
+    remoteId: string,
   ) => IHandlerMetadata;
 
   public handlersByCommand: { [command: string]: IAsyncFunc } = {};
@@ -67,7 +68,7 @@ export default class ApiRegistry<IHandlerMetadata = any> {
       if (!Array.isArray(args)) args = [apiRequest.args];
 
       const handlerMetadata = this.apiHandlerMetadataFn
-        ? this.apiHandlerMetadataFn(apiRequest, logger)
+        ? this.apiHandlerMetadataFn(apiRequest, logger, transport.remoteId)
         : { logger };
       data = await handler(...args, handlerMetadata);
     } catch (error) {
