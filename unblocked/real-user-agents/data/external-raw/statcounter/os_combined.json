@@ -1,26 +1,26 @@
 {
-  "fromMonthYear": "2024-05",
-  "toMonthYear": "2024-06",
-  "lastModified": "2024-06-01T07:21:21.050Z",
+  "fromMonthYear": "2024-06",
+  "toMonthYear": "2024-07",
+  "lastModified": "2024-07-01T07:12:55.995Z",
   "results": {
     "Windows": [
-      "62.14",
+      "62.44",
       "0"
     ],
     "OS X": [
-      "24.68",
-      "0"
-    ],
-    "Chrome OS": [
-      "6.95",
-      "0"
-    ],
-    "Linux": [
-      "3.59",
+      "24.47",
       "0"
     ],
     "Unknown": [
-      "2.62",
+      "4.71",
+      "0"
+    ],
+    "Chrome OS": [
+      "4.59",
+      "0"
+    ],
+    "Linux": [
+      "3.79",
       "0"
     ],
     "Other": [
