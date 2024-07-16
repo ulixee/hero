@@ -20,6 +20,6 @@
     "@ulixee/hero-timetravel": "2.0.0-alpha.28",
     "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.28",
     "@ulixee/unblocked-specification": "2.0.0-alpha.28",
-    "ws": "^7.5.9"
+    "ws": "^8.18.0"
   }
 }
