@@ -31,7 +31,7 @@ describe('Websocket tests', () => {
       wss.handleUpgrade(request, socket as any, head, async (ws: WebSocket) => {
         ws.on('message', msg => {
           receivedMessages.push(msg.toString());
-          if (msg === 'Echo Message19') {
+          if (msg.toString() === 'Echo Message19') {
             serverMessagePromise.resolve();
           }
         });
@@ -80,7 +80,7 @@ describe('Websocket tests', () => {
     let messagesCtr = 0;
     await wsResource.on('message', message => {
       messagesCtr += 1;
-      if (message.message === 'Final message') {
+      if (message.message.toString() === 'Final message') {
         broadcast.resolve();
       }
     });
