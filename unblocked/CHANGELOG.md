@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **agent:** clear frames when url context changes ([#98](https://github.com/ulixee/unblocked/issues/98)) ([0eb95dc](https://github.com/ulixee/unblocked/commit/0eb95dcdcadb35c6a726ff2a1fd1d6eba1edb19e))
+* **agent:** create navigation for empty frame ([a043a7b](https://github.com/ulixee/unblocked/commit/a043a7b3cc143c883c3dfd168a78537d35a29222))
+* **agent:** don’t call page callbacks w/o frame ([9036ce8](https://github.com/ulixee/unblocked/commit/9036ce84c42d211489358c6c747f32802789ed85)), closes [#86](https://github.com/ulixee/unblocked/issues/86)
+* **agent:** don’t show headless warning if headed ([559f3bc](https://github.com/ulixee/unblocked/commit/559f3bcc43d80f536e82b5bf6e1284260da84f70))
+* **agent:** ws is buffer by default now ([3484224](https://github.com/ulixee/unblocked/commit/34842243c66131d2411169c545ed0e37f45f8214))
+* **browser-emulator:** properly clean error stack ([05521ad](https://github.com/ulixee/unblocked/commit/05521ad783fcd5c5ad7ad1ea7a7d611fdff0927a))
+* **browser-profiler:** need to call dom bridger ([cf3b226](https://github.com/ulixee/unblocked/commit/cf3b22610a87ddf50e778c36a3468ae461f28bf8))
+* console leaking info ([#89](https://github.com/ulixee/unblocked/issues/89)) ([c10c174](https://github.com/ulixee/unblocked/commit/c10c174f20112a13f8d5a7cb636dcb4f2bf8add6))
+* **default-browser-emulator:** console leaking debugger active ([#97](https://github.com/ulixee/unblocked/issues/97)) ([bdca4b0](https://github.com/ulixee/unblocked/commit/bdca4b00a61b90eb613ae37bc3c8442eadbbefcf))
+* **default-browser-emulator:** undefined destructure ([#99](https://github.com/ulixee/unblocked/issues/99)) ([02d2cf1](https://github.com/ulixee/unblocked/commit/02d2cf11ae0ccfa25186713f807b68b4131b0c55))
+* **dom-bridger:** update path patterns first ([f8e0d63](https://github.com/ulixee/unblocked/commit/f8e0d63de88f3de8e0ab647539bc823b8bd78f90))
+* don't crash on prototype overflow ([#90](https://github.com/ulixee/unblocked/issues/90)) ([cfdb498](https://github.com/ulixee/unblocked/commit/cfdb498ee25e3cd4001efbb25954892dd7809284))
+* even more console leaks ([#92](https://github.com/ulixee/unblocked/issues/92)) ([b9eea30](https://github.com/ulixee/unblocked/commit/b9eea30cf93b237c2439364c65da321fa507b39b))
+* **plugins:** correct error stack for setPrototype ([776aaa8](https://github.com/ulixee/unblocked/commit/776aaa8daa5bda5613e107a37a25f373204df0ca))
+* **plugins:** don’t scope emulator vars in window ([4775864](https://github.com/ulixee/unblocked/commit/477586429d1fb8147110e142783075d980f00026))
+* **plugins:** proxy issues with stack traces ([#91](https://github.com/ulixee/unblocked/issues/91)) ([14354f0](https://github.com/ulixee/unblocked/commit/14354f0d43fe3f2382ef046c69efaceac65c83a1))
+* **plugins:** stack for setPrototype ([f735eef](https://github.com/ulixee/unblocked/commit/f735eefcc7a3454ded032942542c26e0ba806e96))
+* stack traces in utils ([9ec622e](https://github.com/ulixee/unblocked/commit/9ec622e4eef8d276c6c8e8e16a1cc625da013239))
+
+
+### Features
+
+* **browser-emulator:** hide unhandled errors and rejections ([#102](https://github.com/ulixee/unblocked/issues/102)) ([bb6fa5e](https://github.com/ulixee/unblocked/commit/bb6fa5efb2d9e9d16f787e825c0387fffcbe7cda))
+* **browser:** instructions to update data files ([3bd93c0](https://github.com/ulixee/unblocked/commit/3bd93c0f21b281ee8d5ecfc8a6f7ef37faca3a87))
+* chrome remote debugger over websocket ([#88](https://github.com/ulixee/unblocked/issues/88)) ([964df92](https://github.com/ulixee/unblocked/commit/964df92e73557d95690f206fcf5fe77765fec07b))
+* make headless=new the default mode ([#95](https://github.com/ulixee/unblocked/issues/95)) ([c7297dd](https://github.com/ulixee/unblocked/commit/c7297dd0f90541fae430b28dc3c728df77591844))
+* **plugins:** ability to configure plugins ([5bc079b](https://github.com/ulixee/unblocked/commit/5bc079bba85f50a54457c41d5c6039041ceb1e9e))
+* **plugins:** option to output all json stringify ([009b032](https://github.com/ulixee/unblocked/commit/009b0325af3e4ffd61306414eb02ad7d25f3c6c2))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 

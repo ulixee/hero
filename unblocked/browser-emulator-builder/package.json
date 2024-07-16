@@ -1,31 +1,31 @@
 {
   "name": "@ulixee/unblocked-browser-emulator-builder",
-  "version": "2.0.0-alpha.28",
+  "version": "2.0.0-alpha.29",
   "private": true,
   "license": "MIT",
   "scripts": {
     "generate": "node --inspect ../build/browser-emulator-builder/scripts/generateEmulatorData"
   },
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.28",
-    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.28",
-    "@double-agent/collect": "2.0.0-alpha.28",
-    "@double-agent/collect-browser-codecs": "2.0.0-alpha.28",
-    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.28",
-    "@double-agent/collect-browser-fonts": "2.0.0-alpha.28",
-    "@double-agent/collect-browser-speech": "2.0.0-alpha.28",
-    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.28",
-    "@double-agent/collect-http-ua-hints": "2.0.0-alpha.28",
-    "@double-agent/collect-http2-session": "2.0.0-alpha.28",
-    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.28",
-    "@ulixee/commons": "2.0.0-alpha.28",
-    "@ulixee/real-user-agents": "2.0.0-alpha.28",
-    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.28",
-    "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.28",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.28",
+    "@double-agent/analyze": "2.0.0-alpha.29",
+    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.29",
+    "@double-agent/collect": "2.0.0-alpha.29",
+    "@double-agent/collect-browser-codecs": "2.0.0-alpha.29",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.29",
+    "@double-agent/collect-browser-fonts": "2.0.0-alpha.29",
+    "@double-agent/collect-browser-speech": "2.0.0-alpha.29",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.29",
+    "@double-agent/collect-http-ua-hints": "2.0.0-alpha.29",
+    "@double-agent/collect-http2-session": "2.0.0-alpha.29",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.29",
+    "@ulixee/commons": "2.0.0-alpha.29",
+    "@ulixee/real-user-agents": "2.0.0-alpha.29",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.29",
+    "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.29",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.29",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.28"
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.29"
   }
 }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **default-browser-emulator:** undefined destructure ([#99](https://github.com/ulixee/unblocked/issues/99)) ([02d2cf1](https://github.com/ulixee/unblocked/commit/02d2cf11ae0ccfa25186713f807b68b4131b0c55))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/unblocked-agent-examples

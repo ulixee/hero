@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **browser-profiler:** need to call dom bridger ([cf3b226](https://github.com/ulixee/unblocked/commit/cf3b22610a87ddf50e778c36a3468ae461f28bf8))
+* **dom-bridger:** update path patterns first ([f8e0d63](https://github.com/ulixee/unblocked/commit/f8e0d63de88f3de8e0ab647539bc823b8bd78f90))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/unblocked-browser-profiler-dom-bridger

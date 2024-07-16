@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **agent:** clear frames when url context changes ([#98](https://github.com/ulixee/unblocked/issues/98)) ([0eb95dc](https://github.com/ulixee/unblocked/commit/0eb95dcdcadb35c6a726ff2a1fd1d6eba1edb19e))
+* **agent:** create navigation for empty frame ([a043a7b](https://github.com/ulixee/unblocked/commit/a043a7b3cc143c883c3dfd168a78537d35a29222))
+* **agent:** don’t call page callbacks w/o frame ([9036ce8](https://github.com/ulixee/unblocked/commit/9036ce84c42d211489358c6c747f32802789ed85)), closes [#86](https://github.com/ulixee/unblocked/issues/86)
+* **agent:** don’t show headless warning if headed ([559f3bc](https://github.com/ulixee/unblocked/commit/559f3bcc43d80f536e82b5bf6e1284260da84f70))
+
+
+### Features
+
+* chrome remote debugger over websocket ([#88](https://github.com/ulixee/unblocked/issues/88)) ([964df92](https://github.com/ulixee/unblocked/commit/964df92e73557d95690f206fcf5fe77765fec07b))
+* make headless=new the default mode ([#95](https://github.com/ulixee/unblocked/issues/95)) ([c7297dd](https://github.com/ulixee/unblocked/commit/c7297dd0f90541fae430b28dc3c728df77591844))
+* **plugins:** ability to configure plugins ([5bc079b](https://github.com/ulixee/unblocked/commit/5bc079bba85f50a54457c41d5c6039041ceb1e9e))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 

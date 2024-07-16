@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Features
+
+* chrome remote debugger over websocket ([#88](https://github.com/ulixee/unblocked/issues/88)) ([964df92](https://github.com/ulixee/unblocked/commit/964df92e73557d95690f206fcf5fe77765fec07b))
+* make headless=new the default mode ([#95](https://github.com/ulixee/unblocked/issues/95)) ([c7297dd](https://github.com/ulixee/unblocked/commit/c7297dd0f90541fae430b28dc3c728df77591844))
+* **plugins:** ability to configure plugins ([5bc079b](https://github.com/ulixee/unblocked/commit/5bc079bba85f50a54457c41d5c6039041ceb1e9e))
+* **plugins:** option to output all json stringify ([009b032](https://github.com/ulixee/unblocked/commit/009b0325af3e4ffd61306414eb02ad7d25f3c6c2))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/unblocked-specification
