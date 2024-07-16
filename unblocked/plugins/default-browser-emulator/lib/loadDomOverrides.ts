@@ -2,10 +2,9 @@ import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulation
 import IBrowserData from '../interfaces/IBrowserData';
 import IUserAgentData from '../interfaces/IUserAgentData';
 import DomOverridesBuilder from './DomOverridesBuilder';
-import IBrowserEmulatorConfig, {
-  ConsolePatchModes,
-  InjectedScript,
-} from '../interfaces/IBrowserEmulatorConfig';
+import IBrowserEmulatorConfig, { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
+
+import { Args as ConsoleArgs } from '../injected-scripts/console';
 
 export default function loadDomOverrides(
   config: IBrowserEmulatorConfig,
@@ -30,9 +29,9 @@ export default function loadDomOverrides(
 
   const consoleConfig = config[InjectedScript.CONSOLE];
   if (consoleConfig) {
-    const mode: ConsolePatchModes = consoleConfig === true ? 'patchLeaks' : consoleConfig.mode;
-    domOverrides.add(InjectedScript.CONSOLE, { mode });
-    domOverrides.registerWorkerOverrides('console');
+    const mode: ConsoleArgs['mode'] = consoleConfig === true ? 'patchLeaks' : consoleConfig.mode;
+    domOverrides.add<ConsoleArgs>(InjectedScript.CONSOLE, { mode });
+    domOverrides.registerWorkerOverrides(InjectedScript.CONSOLE);
   }
 
   if (config[InjectedScript.JSON_STRINGIFY]) {
@@ -54,7 +53,7 @@ export default function loadDomOverrides(
       userAgentData,
       rtt: emulationProfile.deviceProfile.rtt,
     });
-    domOverrides.registerWorkerOverrides('navigator');
+    domOverrides.registerWorkerOverrides(InjectedScript.NAVIGATOR);
   }
 
   if (config[InjectedScript.NAVIGATOR_DEVICE_MEMORY]) {
@@ -63,7 +62,7 @@ export default function loadDomOverrides(
       storageTib: deviceProfile.deviceStorageTib,
       maxHeapSize: deviceProfile.maxHeapSize,
     });
-    domOverrides.registerWorkerOverrides('navigator.deviceMemory');
+    domOverrides.registerWorkerOverrides(InjectedScript.NAVIGATOR_DEVICE_MEMORY);
   }
 
   if (config[InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY]) {
@@ -123,12 +122,19 @@ export default function loadDomOverrides(
     });
   }
 
+  if (config[InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS]) {
+    domOverrides.add(InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS);
+    domOverrides.registerWorkerOverrides(InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS);
+  }
+
   if (config[InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS]) {
     domOverrides.add(
       InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
       deviceProfile.webGlParameters,
     );
-    domOverrides.registerWorkerOverrides('WebGLRenderingContext.prototype.getParameter');
+    domOverrides.registerWorkerOverrides(
+      InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
+    );
   }
 
   return domOverrides;

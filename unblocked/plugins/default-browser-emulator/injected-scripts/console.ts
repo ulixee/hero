@@ -1,8 +1,12 @@
-const mode = args.mode;
+export type Args = {
+  mode: 'disableConsole' | 'patchLeaks';
+};
+
+const typedArgs = args as Args;
 
 ObjectCached.keys(console).forEach(key => {
   proxyFunction(console, key, (target, thisArg, args) => {
-    if (mode === 'disableConsole') return undefined;
+    if (typedArgs.mode === 'disableConsole') return undefined;
     args = replaceErrorStackWithOriginal(args);
     return ReflectCached.apply(target, thisArg, args);
   });

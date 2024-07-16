@@ -317,19 +317,21 @@ test('should get the correct platform from a nested cross-domain srcdoc iframe',
   expect(win).toBe(iframe);
 });
 
-testIfNotOnGithubMac('should get the correct webgl vendor from a nested srcdoc iframe', async () => {
-  const agent = pool.createAgent({
-    logger,
-  });
-  Helpers.needsClosing.push(agent);
-  const page = await agent.newPage();
-  page.on('console', console.log);
-  await page.goto(`${koaServer.baseUrl}`);
-  await page.waitForLoad('DomContentLoaded');
-  await expect(page.evaluate('document.body.outerHTML')).resolves.toContain(
-    '<h1>Example Domain</h1>',
-  );
-  const result = await page.evaluate<{ vendor: string; src: string }>(`(async () => {
+testIfNotOnGithubMac(
+  'should get the correct webgl vendor from a nested srcdoc iframe',
+  async () => {
+    const agent = pool.createAgent({
+      logger,
+    });
+    Helpers.needsClosing.push(agent);
+    const page = await agent.newPage();
+    page.on('console', console.log);
+    await page.goto(`${koaServer.baseUrl}`);
+    await page.waitForLoad('DomContentLoaded');
+    await expect(page.evaluate('document.body.outerHTML')).resolves.toContain(
+      '<h1>Example Domain</h1>',
+    );
+    const result = await page.evaluate<{ vendor: string; src: string }>(`(async () => {
   var iframe = document.createElement("iframe");
   iframe.srcdoc = "/**/";
   iframe.setAttribute("style", "display: none;");
@@ -343,9 +345,10 @@ testIfNotOnGithubMac('should get the correct webgl vendor from a nested srcdoc i
   
   return { vendor, src: iframe.contentWindow.document.body.outerHTML };
  })()`);
-  expect(result.vendor).toBe('Intel Inc.');
-  expect(result.src).toBe('<body></body>');
-});
+    expect(result.vendor).toBe('Intel Inc.');
+    expect(result.src).toBe('<body></body>');
+  },
+);
 
 test('should properly emulate memory', async () => {
   const agent = pool.createAgent({
@@ -1342,4 +1345,65 @@ it('should emulate in a blob shared worker', async () => {
       resultWithUnmasked.push({ hardware: [...hardware], ua: [...ua] });
   }
   expect(resultWithUnmasked).toHaveLength(0);
+});
+
+test('should not trigger stack for unhandled error', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  // page.on('console', console.log);
+  koaServer.get('/debug', ctx => {
+    ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
+  <script>
+    window.getterCalled = false;
+    const error = new Error();
+    window.Object.defineProperty(error, 'stack', {
+      configurable: false,
+      enumerable: false,
+      get: function () {
+        window.getterCalled = true;
+        return 'proxied stack';
+      }
+    });
+    throw error;
+</script></html>`;
+  });
+  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.waitForLoad('DomContentLoaded');
+  const getterCalled = await page.evaluate<boolean>('window.getterCalled');
+  expect(getterCalled).toBeFalsy();
+});
+
+test('should not trigger stack for unhandled rejections', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  // page.on('console', console.log);
+  koaServer.get('/debug', ctx => {
+    ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
+  <script>
+    window.getterCalled = false;
+    const error = new Error();
+    window.Object.defineProperty(error, 'stack', {
+      configurable: false,
+      enumerable: false,
+      get: function () {
+        window.getterCalled = true;
+        return 'proxied stack';
+      }
+    });
+    async function test(){
+      throw error;
+    }
+    test();
+</script></html>`;
+  });
+  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.waitForLoad('DomContentLoaded');
+  const getterCalled = await page.evaluate<boolean>('window.getterCalled');
+  expect(getterCalled).toBeFalsy();
 });

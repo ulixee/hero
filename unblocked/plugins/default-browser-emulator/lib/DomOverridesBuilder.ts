@@ -71,6 +71,7 @@ export default class DomOverridesBuilder {
       // NOTE: don't make this async. It can cause issues if you read a frame right after creation, for instance
       script: `
 (function newDocumentScriptWrapper(scopedVars = {}) {
+  const exports = {};
   // Worklet has no scope to override, but we can't detect until it loads
   if (typeof self === 'undefined' && typeof window === 'undefined') return;
 
@@ -112,11 +113,11 @@ export default class DomOverridesBuilder {
     };
   }
 
-  public registerWorkerOverrides(...names: string[]): void {
+  public registerWorkerOverrides(...names: InjectedScript[]): void {
     for (const name of names) this.workerOverrides.add(name);
   }
 
-  public add(name: InjectedScript, args: any = {}): void {
+  public add<T>(name: InjectedScript, args?: T): void {
     let script = cache[name];
     if (!script) {
       if (!fs.existsSync(`${__dirname}/../injected-scripts/${name}.js`)) {
