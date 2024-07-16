@@ -12,7 +12,7 @@
     "semver": "^7.3.7"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.9",
+    "@types/better-sqlite3": "^7.6.11",
     "source-map-js": "^1.0.2"
   }
 }
