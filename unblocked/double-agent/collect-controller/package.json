@@ -18,7 +18,7 @@
     "path-to-regexp": "^6.1.0",
     "source-map-support": "^0.5.16",
     "tar": "^6.2.0",
-    "ws": "^7.5.9"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/archiver": "^5.3.1",
