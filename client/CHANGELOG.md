@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/platform/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* xpathSelectorAll broken if page changes ([c62d017](https://github.com/ulixee/platform/commit/c62d017509ee3f92bc93996d0bbb2a57123b12db)), closes [#257](https://github.com/ulixee/platform/issues/257)
+
+
+### Features
+
+* add ability to manually create a newTab ([c1f0017](https://github.com/ulixee/platform/commit/c1f0017549bbee215c3ca8c416e1ab4844e297b2)), closes [#268](https://github.com/ulixee/platform/issues/268)
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/platform/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/hero
