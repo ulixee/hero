@@ -301,7 +301,7 @@ describe('basic MitM tests', () => {
 
       wsServer.handleUpgrade(request, socket as Socket, head, async (ws: WebSocket) => {
         ws.on('message', msg => {
-          expect(msg).toMatch(/Hi\d+/);
+          expect(msg.toString()).toMatch(/Hi\d+/);
           serverMessages.push(msg);
           if (serverMessages.length === 20) serverMessagePromise.resolve();
         });
@@ -325,7 +325,7 @@ describe('basic MitM tests', () => {
     const msgs = [];
     wsClient.on('open', async () => {
       wsClient.on('message', msg => {
-        expect(msg).toMatch(/Message\d+/);
+        expect(msg.toString()).toMatch(/Message\d+/);
         msgs.push(msg);
         if (msgs.length === 20) {
           messagePromise.resolve();
