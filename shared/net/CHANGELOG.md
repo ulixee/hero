@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/shared/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **commons:** handle no json file ([28c6243](https://github.com/ulixee/shared/commit/28c6243d844928c65d050612e486382480f8ced2))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/shared/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/net

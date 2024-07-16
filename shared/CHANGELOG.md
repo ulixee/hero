@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/ulixee/shared/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+
+
+### Bug Fixes
+
+* **commons:** fix serializing uint8array ([d5b8c62](https://github.com/ulixee/shared/commit/d5b8c623c8ae7478b77cbc21ba699a937752d9b9))
+* **commons:** handle no json file ([28c6243](https://github.com/ulixee/shared/commit/28c6243d844928c65d050612e486382480f8ced2))
+* use this prototype ([#22](https://github.com/ulixee/shared/issues/22)) ([ff9a5ce](https://github.com/ulixee/shared/commit/ff9a5ced79e4fae570cbd74d137b8edb44f74130))
+
+
+
+
+
 # [2.0.0-alpha.28](https://github.com/ulixee/shared/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/shared-monorepo
