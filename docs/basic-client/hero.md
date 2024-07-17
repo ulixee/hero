@@ -379,7 +379,7 @@ Executes a series of mouse and keyboard interactions.
 
 Refer to the [Interactions page](./interactions.md) for details on how to construct an interaction.
 
-### hero.newTab*()* {#new-tab}
+### hero.newTab _()_ {#new-tab}
 
 Create a new tab. This will reuse the same Hero session, which can be useful for certain use cases, but should not be used for "different user activities". A Hero session is meant to emulate the behavior of a single user action, not as a platform for multiple activities. YMMV.
 
