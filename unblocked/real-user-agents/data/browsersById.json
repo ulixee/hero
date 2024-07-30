@@ -4064,5 +4064,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-127-0": {
+    "id": "chrome-127-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "127",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
