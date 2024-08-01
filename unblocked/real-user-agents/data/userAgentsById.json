@@ -2,6 +2,7 @@
   "mac-os-14--chrome-127-0": {
     "id": "mac-os-14--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -10,10 +11,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -45,6 +46,7 @@
   "mac-os-14--chrome-126-0": {
     "id": "mac-os-14--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -53,8 +55,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -326,6 +327,7 @@
   "mac-os-14--chrome-120-0": {
     "id": "mac-os-14--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -334,8 +336,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       234,
@@ -2556,6 +2557,25 @@
     "browserId": "chrome-61-0",
     "marketshare": 0
   },
+  "mac-os-14--edge-127-0": {
+    "id": "mac-os-14--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "14"
+    },
+    "operatingSystemId": "mac-os-14",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
   "mac-os-14--edge-126-0": {
     "id": "mac-os-14--edge-126-0",
     "allPatchVersions": [],
@@ -4592,6 +4612,7 @@
   "mac-os-13--chrome-127-0": {
     "id": "mac-os-13--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -4600,10 +4621,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -4644,6 +4665,7 @@
   "mac-os-13--chrome-126-0": {
     "id": "mac-os-13--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -4652,8 +4674,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -4979,6 +5000,7 @@
   "mac-os-13--chrome-120-0": {
     "id": "mac-os-13--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -4987,8 +5009,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       234,
@@ -7584,6 +7605,25 @@
     "browserId": "chrome-61-0",
     "marketshare": 0
   },
+  "mac-os-13--edge-127-0": {
+    "id": "mac-os-13--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "13"
+    },
+    "operatingSystemId": "mac-os-13",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
   "mac-os-13--edge-126-0": {
     "id": "mac-os-13--edge-126-0",
     "allPatchVersions": [],
@@ -9639,6 +9679,7 @@
   "mac-os-12--chrome-127-0": {
     "id": "mac-os-12--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -9647,10 +9688,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -9695,6 +9736,7 @@
   "mac-os-12--chrome-126-0": {
     "id": "mac-os-12--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -9703,8 +9745,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -10054,6 +10095,7 @@
   "mac-os-12--chrome-120-0": {
     "id": "mac-os-12--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -10062,8 +10104,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       234,
@@ -13455,6 +13496,25 @@
     "browserId": "chrome-40-0",
     "marketshare": 0
   },
+  "mac-os-12--edge-127-0": {
+    "id": "mac-os-12--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "12"
+    },
+    "operatingSystemId": "mac-os-12",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
   "mac-os-12--edge-126-0": {
     "id": "mac-os-12--edge-126-0",
     "allPatchVersions": [],
@@ -16631,6 +16691,7 @@
   "mac-os-11--chrome-127-0": {
     "id": "mac-os-11--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -16639,10 +16700,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -16696,6 +16757,7 @@
   "mac-os-11--chrome-126-0": {
     "id": "mac-os-11--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -16704,8 +16766,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -17109,6 +17170,7 @@
   "mac-os-11--chrome-120-0": {
     "id": "mac-os-11--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -17117,8 +17179,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       234,
@@ -20789,6 +20850,25 @@
     "browserId": "chrome-40-0",
     "marketshare": 0
   },
+  "mac-os-11--edge-127-0": {
+    "id": "mac-os-11--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "11"
+    },
+    "operatingSystemId": "mac-os-11",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
   "mac-os-11--edge-126-0": {
     "id": "mac-os-11--edge-126-0",
     "allPatchVersions": [],
@@ -23946,6 +24026,7 @@
   "mac-os-10-15--chrome-127-0": {
     "id": "mac-os-10-15--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -23954,10 +24035,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -23987,6 +24068,7 @@
   "mac-os-10-15--chrome-126-0": {
     "id": "mac-os-10-15--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -23995,8 +24077,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -24256,6 +24337,7 @@
   "mac-os-10-15--chrome-120-0": {
     "id": "mac-os-10-15--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -24264,8 +24346,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       234,
@@ -27239,6 +27320,26 @@
     "operatingSystemId": "mac-os-10-15",
     "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.$patch$ Safari/537.36",
     "browserId": "chrome-40-0",
+    "marketshare": 0
+  },
+  "mac-os-10-15--edge-127-0": {
+    "id": "mac-os-10-15--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "10",
+      "minor": "15"
+    },
+    "operatingSystemId": "mac-os-10-15",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
     "marketshare": 0
   },
   "mac-os-10-15--edge-126-0": {
@@ -65398,6 +65499,7 @@
   "windows-11--chrome-127-0": {
     "id": "windows-11--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -65406,10 +65508,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -65433,6 +65535,7 @@
   "windows-11--chrome-126-0": {
     "id": "windows-11--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -65441,8 +65544,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -65666,6 +65768,7 @@
   "windows-11--chrome-120-0": {
     "id": "windows-11--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -65674,8 +65777,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       225,
@@ -68527,6 +68629,25 @@
     "browserId": "chrome-37-0",
     "marketshare": 0
   },
+  "windows-11--edge-127-0": {
+    "id": "windows-11--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "11"
+    },
+    "operatingSystemId": "windows-11",
+    "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
   "windows-11--edge-126-0": {
     "id": "windows-11--edge-126-0",
     "allPatchVersions": [],
@@ -71247,6 +71368,7 @@
   "windows-10--chrome-127-0": {
     "id": "windows-10--chrome-127-0",
     "allPatchVersions": [
+      94,
       93,
       92,
       91,
@@ -71255,10 +71377,10 @@
       88,
       87,
       86,
-      85,
-      84
+      85
     ],
     "stablePatchVersions": [
+      89,
       73
     ],
     "browserBaseVersion": [
@@ -71294,6 +71416,7 @@
   "windows-10--chrome-126-0": {
     "id": "windows-10--chrome-126-0",
     "allPatchVersions": [
+      229,
       228,
       227,
       226,
@@ -71302,8 +71425,7 @@
       223,
       222,
       221,
-      220,
-      219
+      220
     ],
     "stablePatchVersions": [
       183,
@@ -71599,6 +71721,7 @@
   "windows-10--chrome-120-0": {
     "id": "windows-10--chrome-120-0",
     "allPatchVersions": [
+      319,
       318,
       317,
       316,
@@ -71607,8 +71730,7 @@
       313,
       312,
       311,
-      310,
-      309
+      310
     ],
     "stablePatchVersions": [
       225,
@@ -74830,6 +74952,25 @@
     "operatingSystemId": "windows-10",
     "pattern": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.$patch$ Safari/537.36",
     "browserId": "chrome-37-0",
+    "marketshare": 0
+  },
+  "windows-10--edge-127-0": {
+    "id": "windows-10--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "10"
+    },
+    "operatingSystemId": "windows-10",
+    "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
     "marketshare": 0
   },
   "windows-10--edge-126-0": {
