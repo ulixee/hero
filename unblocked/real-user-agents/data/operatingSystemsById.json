@@ -49,7 +49,7 @@
   "windows-10": {
     "id": "windows-10",
     "name": "Windows",
-    "marketshare": 9.8,
+    "marketshare": 9.9,
     "deviceCategory": "desktop",
     "version": {
       "major": "10"
@@ -164,7 +164,7 @@
   "mac-os-10-14": {
     "id": "mac-os-10-14",
     "name": "Mac OS",
-    "marketshare": 0,
+    "marketshare": 0.1,
     "deviceCategory": "desktop",
     "version": {
       "name": "Mojave",
@@ -202,7 +202,7 @@
   "windows-11": {
     "id": "windows-11",
     "name": "Windows",
-    "marketshare": 5.3,
+    "marketshare": 5.5,
     "deviceCategory": "desktop",
     "version": {
       "major": "11"
