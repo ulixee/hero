@@ -40,6 +40,16 @@ export default function loadDomOverrides(
 
   const domPolyfill = data.domPolyfill;
 
+  addOverrideWithConfigOrDefault(
+    InjectedScript.ERROR,
+    {
+      removeInjectedLines: true,
+      modifyWrongProxyAndObjectString: true,
+      skipDuplicateSetPrototypeLines: true,
+      applyStackTraceLimit: true,
+    },
+    true,
+  );
   addOverrideWithConfigOrDefault(InjectedScript.CONSOLE, { mode: 'patchLeaks' }, true);
 
   // TODO migrate others to new logic. This first requires proper types for all Plugin Args.
@@ -60,12 +70,12 @@ export default function loadDomOverrides(
     domOverrides.add(
       InjectedScript.NAVIGATOR,
       {
-      userAgentString: emulationProfile.userAgentOption.string,
-      platform: emulationProfile.windowNavigatorPlatform,
-      headless: isHeadless,
-      pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
-      userAgentData,
-      rtt: emulationProfile.deviceProfile.rtt,
+        userAgentString: emulationProfile.userAgentOption.string,
+        platform: emulationProfile.windowNavigatorPlatform,
+        headless: isHeadless,
+        pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
+        userAgentData,
+        rtt: emulationProfile.deviceProfile.rtt,
       },
       true,
     );
@@ -75,9 +85,9 @@ export default function loadDomOverrides(
     domOverrides.add(
       InjectedScript.NAVIGATOR_DEVICE_MEMORY,
       {
-      memory: deviceProfile.deviceMemory,
-      storageTib: deviceProfile.deviceStorageTib,
-      maxHeapSize: deviceProfile.maxHeapSize,
+        memory: deviceProfile.deviceMemory,
+        storageTib: deviceProfile.deviceStorageTib,
+        maxHeapSize: deviceProfile.maxHeapSize,
       },
       true,
     );
@@ -87,7 +97,7 @@ export default function loadDomOverrides(
     domOverrides.add(
       InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY,
       {
-      concurrency: deviceProfile.hardwareConcurrency,
+        concurrency: deviceProfile.hardwareConcurrency,
       },
       true,
     );

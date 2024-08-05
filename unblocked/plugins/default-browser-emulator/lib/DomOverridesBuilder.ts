@@ -9,7 +9,6 @@ const shouldCache = process.env.NODE_ENV === 'production';
 const utilsScript = [
   fs.readFileSync(`${__dirname}/../injected-scripts/_proxyUtils.js`, 'utf8'),
   fs.readFileSync(`${__dirname}/../injected-scripts/_descriptorBuilder.js`, 'utf8'),
-  // fs.readFileSync(`${__dirname}/../injected-scripts/_njson.js`, 'utf8'),
 ].join('\n');
 
 export { injectedSourceUrl };
