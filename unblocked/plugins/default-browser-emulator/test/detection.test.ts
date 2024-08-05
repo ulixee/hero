@@ -586,7 +586,7 @@ document.querySelector = (function (orig) {
   })();`);
 
   // for live variables, we shouldn't see markers of utils.js
-  const query = await page.evaluate('document.querySelector("h1")', false);
+  const query = await page.evaluate('document.querySelector("h1")');
   expect(query).toBe(
     'Error: QuerySelector Override Detection\n    at HTMLDocument.querySelector (<anonymous>:4:17)\n    at <anonymous>:1:10',
   );
@@ -621,13 +621,13 @@ test('should not leave stack trace markers when calling in page functions', asyn
   await page.goto(url);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
 
-  const pageFunction = await page.evaluate('errorCheck()', false);
+  const pageFunction = await page.evaluate('errorCheck()');
   expect(pageFunction).toBe(
     `Error: This is from inside\n    at errorCheck (${url}:6:17)\n    at <anonymous>:1:1`,
   );
 
   // for something created
-  const queryAllTest = await page.evaluate('document.querySelectorAll("h1")', false);
+  const queryAllTest = await page.evaluate('document.querySelectorAll("h1")');
   expect(queryAllTest).toBe(
     `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:11:19)\n    at <anonymous>:1:10`,
   );
@@ -1268,52 +1268,61 @@ it('should emulate in a blob shared worker', async () => {
     if (req.url === '/test.html') {
       res.end(`<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
-	</head>
-	<body>
-		<script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
       const { hardwareConcurrency, userAgent, deviceMemory } = navigator;
-		  const results = [{ hardwareConcurrency, userAgent, deviceMemory }];
-      
+      const results = [{ hardwareConcurrency, userAgent, deviceMemory }];
+
       (async () => {
         async function check() {
-          const { port } = new SharedWorker(URL.createObjectURL(new Blob([
-            "const { hardwareConcurrency, userAgent, deviceMemory } = navigator;",
-            "onconnect = e => {",
-            "  const port = e.ports[0];",
-            "  port.postMessage({ hardwareConcurrency, userAgent, deviceMemory });",
-            "  port.close();",
-            "};"
-         ], { type: 'application/javascript' })));
-  
+          const { port } = new SharedWorker(
+            URL.createObjectURL(
+              new Blob(
+                [
+                  "const { hardwareConcurrency, userAgent, deviceMemory } = navigator;",
+                  "onconnect = e => {",
+                  "  const port = e.ports[0];",
+                  "  port.postMessage({ hardwareConcurrency, userAgent, deviceMemory });",
+                  "  port.close();",
+                  "};",
+                ],
+                { type: 'application/javascript' }
+              )
+            )
+          );
+
           port.start();
-  
+
           await new Promise(resolve => {
             port.addEventListener("message", e => {
               port.close();
               results.push(e.data);
               resolve();
             });
-          })
+          });
         }
-  
+
         const checks = [];
         for (let index = 0; index < 20; index++) {
           checks.push(check());
         }
-        await Promise.all(checks)
-        
-       await fetch('/worker-result', {
+        await Promise.all(checks);
+
+        await fetch('/worker-result', {
           method: 'POST',
           body: JSON.stringify(results),
         });
-     })();
-		</script>
-</body></html>`);
+      })();
+    </script>
+  </body>
+</html>
+`);
     } else if (req.url.includes('worker-result')) {
       const result = await Helpers.readableToBuffer(req);
       jsonResults.push(result.toString());
@@ -1329,6 +1338,7 @@ it('should emulate in a blob shared worker', async () => {
     const agent = pool.createAgent({ logger });
     Helpers.needsClosing.push(agent);
     const page = await agent.newPage();
+    page.on('console', console.log);
     await page.goto(`${httpsServer.baseUrl}/test.html`);
   }
 

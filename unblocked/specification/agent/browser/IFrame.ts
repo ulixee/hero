@@ -48,8 +48,8 @@ export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
   evaluate<T>(
     expression: string,
-    isolateFromWebPageEnvironment?: boolean,
     options?: {
+      isolateFromWebPageEnvironment?: boolean,
       shouldAwaitExpression?: boolean;
       retriesWaitingForLoad?: number;
       returnByValue?: boolean;

@@ -19,14 +19,18 @@ export default class MouseListener {
       `${InjectedScripts.MouseEvents}.listenFor(${this.nodeId}, ${JSON.stringify(
         containerOffset,
       )})`,
-      this.frame.page.installJsPathIntoIsolatedContext,
+      {
+        isolateFromWebPageEnvironment: this.frame.page.installJsPathIntoIsolatedContext,
+      },
     );
   }
 
   public async didTriggerMouseEvent(): Promise<IMouseResult> {
     return await this.frame.evaluate<IMouseResult>(
       `${InjectedScripts.MouseEvents}.didTrigger(${this.nodeId})`,
-      this.frame.page.installJsPathIntoIsolatedContext,
+      {
+        isolateFromWebPageEnvironment: this.frame.page.installJsPathIntoIsolatedContext,
+      },
     );
   }
 
@@ -36,14 +40,15 @@ export default class MouseListener {
   ): Promise<[scrollX: number, scrollY: number]> {
     return await frame.evaluate(
       `${InjectedScripts.MouseEvents}.waitForScrollStop(${timeoutMs ?? 2e3})`,
-      frame.page.installJsPathIntoIsolatedContext,
+      {
+        isolateFromWebPageEnvironment: frame.page.installJsPathIntoIsolatedContext,
+      },
     );
   }
 
   public static async getWindowOffset(frame: Frame): Promise<IWindowOffset> {
-    return await frame.evaluate(
-      `${InjectedScripts.MouseEvents}.getWindowOffset()`,
-      frame.page.installJsPathIntoIsolatedContext,
-    );
+    return await frame.evaluate(`${InjectedScripts.MouseEvents}.getWindowOffset()`, {
+      isolateFromWebPageEnvironment: frame.page.installJsPathIntoIsolatedContext,
+    });
   }
 }

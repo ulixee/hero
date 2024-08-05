@@ -32,50 +32,53 @@ afterEach(Helpers.afterEach);
 const debug = process.env.DEBUG || false;
 const domExtractorTimeout = 180e3;
 
-test('it should mimic a chrome object', async () => {
-  if (browser.engine.fullVersion.split('.')[0] === '115') {
-    expect(true).toBe(true);
-    return;
-  }
-  const httpServer = await Helpers.runHttpServer();
-  const page = await createPage();
-  await Promise.all([
-    page.navigate(httpServer.baseUrl),
-    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
-  ]);
+test(
+  'it should mimic a chrome object',
+  async () => {
+    if (browser.engine.fullVersion.split('.')[0] === '115') {
+      expect(true).toBe(true);
+      return;
+    }
+    const httpServer = await Helpers.runHttpServer();
+    const page = await createPage();
+    await Promise.all([
+      page.navigate(httpServer.baseUrl),
+      page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    ]);
 
-  const structure = JSON.parse(
-    (await page.mainFrame.evaluate(
-      `new (${DomExtractor.toString()})('window').run(window, 'window', ['chrome'])`,
-      false,
-    )) as any,
-  ).window;
-  if (debug) console.log(inspect(structure.chrome, false, null, true));
+    const structure = JSON.parse(
+      (await page.mainFrame.evaluate(
+        `new (${DomExtractor.toString()})('window').run(window, 'window', ['chrome'])`,
+      )) as any,
+    ).window;
+    if (debug) console.log(inspect(structure.chrome, false, null, true));
 
-  // these values are getting out of order in recreation, but that doesn't impact anything
-  expect(structure.chrome._$type).toBe(chrome._$type);
-  expect(structure.chrome._$flags).toBe(chrome._$flags);
-  delete structure.chrome._$type;
-  delete structure.chrome._$flags;
-  delete chrome._$type;
-  delete chrome._$flags;
+    // these values are getting out of order in recreation, but that doesn't impact anything
+    expect(structure.chrome._$type).toBe(chrome._$type);
+    expect(structure.chrome._$flags).toBe(chrome._$flags);
+    delete structure.chrome._$type;
+    delete structure.chrome._$flags;
+    delete chrome._$type;
+    delete chrome._$flags;
 
-  const shouldFilterKey = key => {
-    return key === '_$value' || key === '_$invocation' || key === '_$isAsync';
-  };
+    const shouldFilterKey = key => {
+      return key === '_$value' || key === '_$invocation' || key === '_$isAsync';
+    };
 
-  const structureJson = JSON.stringify(structure.chrome, (key, value) => {
-    if (shouldFilterKey(key)) return undefined;
-    return value;
-  });
+    const structureJson = JSON.stringify(structure.chrome, (key, value) => {
+      if (shouldFilterKey(key)) return undefined;
+      return value;
+    });
 
-  const chromeJson = JSON.stringify(chrome, (key, value) => {
-    if (shouldFilterKey(key)) return undefined;
-    return value;
-  });
-  // must delete csi's invocation since it's different on each run
-  expect(structureJson).toBe(chromeJson);
-}, domExtractorTimeout);
+    const chromeJson = JSON.stringify(chrome, (key, value) => {
+      if (shouldFilterKey(key)) return undefined;
+      return value;
+    });
+    // must delete csi's invocation since it's different on each run
+    expect(structureJson).toBe(chromeJson);
+  },
+  domExtractorTimeout,
+);
 
 test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
@@ -86,14 +89,12 @@ test('it should update loadtimes and csi values', async () => {
   ]);
 
   const loadTimes = JSON.parse(
-    (await page.mainFrame.evaluate(`JSON.stringify(chrome.loadTimes())`, false)) as any,
+    (await page.mainFrame.evaluate(`JSON.stringify(chrome.loadTimes())`)) as any,
   );
   if (debug) console.log(inspect(loadTimes, false, null, true));
   expect(loadTimes.requestTime).not.toBe(chrome.loadTimes['new()'].requestTime._$value);
 
-  const csi = JSON.parse(
-    (await page.mainFrame.evaluate(`JSON.stringify(chrome.csi())`, false)) as any,
-  );
+  const csi = JSON.parse((await page.mainFrame.evaluate(`JSON.stringify(chrome.csi())`)) as any);
   if (debug) console.log(inspect(csi, false, null, true));
   expect(csi.pageT).not.toBe(chrome.csi['new()'].pageT._$value);
 

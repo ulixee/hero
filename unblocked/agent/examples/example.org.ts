@@ -12,9 +12,13 @@ async function run() {
   const outerHTML = await page.mainFrame.outerHTML();
   console.log('-- PRINTING outerHTML ---------------');
   console.log(outerHTML);
-  const title = await page.evaluate<string>('document.title', true);
+  const title = await page.evaluate<string>('document.title', {
+    isolatedFromWebPageEnvironment: true,
+  });
 
-  const intro = await page.evaluate<string>(`document.querySelector('p').textContent`, true);
+  const intro = await page.evaluate<string>(`document.querySelector('p').textContent`, {
+    isolatedFromWebPageEnvironment: true,
+  });
 
   console.log('-------------------------------------');
 

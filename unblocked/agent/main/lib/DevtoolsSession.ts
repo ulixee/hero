@@ -66,6 +66,7 @@ export default class DevtoolsSession
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
     sendInitiator?: object,
+    options?: { timeoutMs?: number },
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (!this.isConnected()) {
       throw new CanceledPromiseError(`Cancel Pending Promise (${method}): Target closed.`);
@@ -79,9 +80,10 @@ export default class DevtoolsSession
       id,
     };
     const timestamp = new Date();
+    const timeout = options?.timeoutMs ?? 60e3;
     const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>(
-      60e3,
-      `DevtoolsApiMessage did not respond after 60 seconds. (${method}, id=${id})`,
+      timeout,
+      `DevtoolsApiMessage did not respond after ${timeout/1000} seconds. (${method}, id=${id})`,
     );
     resolvable.promise.catch(err => {
       if (err instanceof TimeoutError)

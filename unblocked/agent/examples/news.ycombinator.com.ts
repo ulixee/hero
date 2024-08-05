@@ -30,7 +30,7 @@ async function run() {
     }
     return nodeIds;
   })()`,
-    true,
+    { isolatedFromWebPageEnvironment: true },
   );
   interface IRecord {
     nodeId: number;
@@ -68,7 +68,7 @@ async function run() {
       if (titleElem) record.url = titleElem.getAttribute('href');
       return record;
   })()`,
-      true,
+      { isolatedFromWebPageEnvironment: true },
     );
     stories.push(record);
   }
@@ -121,7 +121,7 @@ async function run() {
     const lastComment = Array.from(document.querySelectorAll('.commtext')).slice(-1).pop()
     return NodeTracker.watchNode(lastComment);
     })()`,
-      true,
+      { isolatedFromWebPageEnvironment: true },
     );
     await page.interact([
       {
