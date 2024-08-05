@@ -4,8 +4,6 @@ import IUserAgentData from '../interfaces/IUserAgentData';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserEmulatorConfig, { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
-import { Args as ConsoleArgs } from '../injected-scripts/console';
-
 export default function loadDomOverrides(
   config: IBrowserEmulatorConfig,
   emulationProfile: IEmulationProfile,
@@ -13,6 +11,21 @@ export default function loadDomOverrides(
   userAgentData: IUserAgentData,
 ): DomOverridesBuilder {
   const domOverrides = new DomOverridesBuilder();
+
+  const addOverrideWithConfigOrDefault = <T extends InjectedScript>(
+    injectedScript: T,
+    defaultConfig: IBrowserEmulatorConfig[T],
+    registerWorkerOverride = false,
+  ): void => {
+    const scriptConfig = config[injectedScript];
+    if (!scriptConfig) return;
+
+    domOverrides.add<IBrowserEmulatorConfig[T]>(
+      injectedScript,
+      scriptConfig === true ? defaultConfig : scriptConfig,
+      registerWorkerOverride,
+    );
+  };
 
   const deviceProfile = emulationProfile.deviceProfile;
   const isHeadless =
@@ -27,15 +40,14 @@ export default function loadDomOverrides(
 
   const domPolyfill = data.domPolyfill;
 
-  const consoleConfig = config[InjectedScript.CONSOLE];
-  if (consoleConfig) {
-    const mode: ConsoleArgs['mode'] = consoleConfig === true ? 'patchLeaks' : consoleConfig.mode;
-    domOverrides.add<ConsoleArgs>(InjectedScript.CONSOLE, { mode });
-    domOverrides.registerWorkerOverrides(InjectedScript.CONSOLE);
-  }
+  addOverrideWithConfigOrDefault(InjectedScript.CONSOLE, { mode: 'patchLeaks' }, true);
+
+  // TODO migrate others to new logic. This first requires proper types for all Plugin Args.
+  // This will also allow us to configure everything in special ways. In most occasions
+  // you would never want to do this, but this is very helpful for specific use-cases, e.g. testing.
 
   if (config[InjectedScript.JSON_STRINGIFY]) {
-    domOverrides.add(InjectedScript.JSON_STRINGIFY);
+    domOverrides.add(InjectedScript.JSON_STRINGIFY, undefined, true);
   }
 
   if (config[InjectedScript.MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES]) {
@@ -45,31 +57,40 @@ export default function loadDomOverrides(
   }
 
   if (config[InjectedScript.NAVIGATOR]) {
-    domOverrides.add(InjectedScript.NAVIGATOR, {
+    domOverrides.add(
+      InjectedScript.NAVIGATOR,
+      {
       userAgentString: emulationProfile.userAgentOption.string,
       platform: emulationProfile.windowNavigatorPlatform,
       headless: isHeadless,
       pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
       userAgentData,
       rtt: emulationProfile.deviceProfile.rtt,
-    });
-    domOverrides.registerWorkerOverrides(InjectedScript.NAVIGATOR);
+      },
+      true,
+    );
   }
 
   if (config[InjectedScript.NAVIGATOR_DEVICE_MEMORY]) {
-    domOverrides.add(InjectedScript.NAVIGATOR_DEVICE_MEMORY, {
+    domOverrides.add(
+      InjectedScript.NAVIGATOR_DEVICE_MEMORY,
+      {
       memory: deviceProfile.deviceMemory,
       storageTib: deviceProfile.deviceStorageTib,
       maxHeapSize: deviceProfile.maxHeapSize,
-    });
-    domOverrides.registerWorkerOverrides(InjectedScript.NAVIGATOR_DEVICE_MEMORY);
+      },
+      true,
+    );
   }
 
   if (config[InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY]) {
-    domOverrides.add(InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY, {
+    domOverrides.add(
+      InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY,
+      {
       concurrency: deviceProfile.hardwareConcurrency,
-    });
-    domOverrides.registerWorkerOverrides(InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY);
+      },
+      true,
+    );
   }
 
   if (
@@ -131,9 +152,7 @@ export default function loadDomOverrides(
     domOverrides.add(
       InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
       deviceProfile.webGlParameters,
-    );
-    domOverrides.registerWorkerOverrides(
-      InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
+      true,
     );
   }
 
