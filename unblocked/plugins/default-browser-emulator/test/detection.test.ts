@@ -8,6 +8,7 @@ import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Lo
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
 import BrowserEmulator from '../index';
+import { injectedSourceUrl } from '../lib/DomOverridesBuilder';
 
 // Some tests are broken on github macos so we don't run them there
 const testIfNotOnGithubMac =
@@ -142,7 +143,7 @@ test('should not call evaluate on a stack getter when using console for logging'
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
   // page.on('console', console.log);
-  koaServer.get('/debug', ctx => {
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
     ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
   <script>
     window.keys = [];
@@ -170,7 +171,7 @@ test('should not call evaluate on a stack getter when using console for logging'
     })
 </script></html>`;
   });
-  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.goto(`${koaServer.baseUrl}/${testSpecificPath()}`);
   await page.waitForLoad('DomContentLoaded');
   const keys = await page.evaluate<string[]>('window.keys');
   expect(keys).toHaveLength(0);
@@ -407,7 +408,7 @@ test('stack overflow test should match chrome', async () => {
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
 
-  koaServer.get('/betrayal', ctx => {
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
     ctx.body = `<html>
 <body>
 <h1>Page</h1>
@@ -443,7 +444,7 @@ test('stack overflow test should match chrome', async () => {
     `;
   });
 
-  await page.goto(`${koaServer.baseUrl}/betrayal`);
+  await page.goto(`${koaServer.baseUrl}/${testSpecificPath()}`);
 
   await page.waitForLoad('DomContentLoaded');
   const result = await page.evaluate<{
@@ -455,7 +456,7 @@ test('stack overflow test should match chrome', async () => {
   expect(result.message).toBe('Maximum call stack size exceeded');
   expect(result.name).toBe('RangeError');
   expect(result.stack).toContain(
-    `at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/betrayal:5:9)`,
+    `at iWillBetrayYouWithMyLongName (${koaServer.baseUrl}/${testSpecificPath()}:5:9)`,
   );
 });
 
@@ -597,7 +598,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
     logger,
   });
   Helpers.needsClosing.push(agent);
-  koaServer.get('/marker', ctx => {
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
     ctx.body = `
 <body>
 <h1>Marker Page</h1>
@@ -616,7 +617,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
 </body>
     `;
   });
-  const url = `${koaServer.baseUrl}/marker`;
+  const url = `${koaServer.baseUrl}/${testSpecificPath()}`;
   const page = await agent.newPage();
   await page.goto(url);
   await page.waitForLoad(LocationStatus.AllContentLoaded);
@@ -1067,9 +1068,9 @@ describe('Proxy detections', () => {
     await page.goto(`${koaServer.baseUrl}`);
     const result = await page.evaluate<{ path: string; result: string }>(`(async () => {
   let path = ''
-  const proxyOfArgs = new Proxy([37445], { 
-     get(target,prop, receiver) { 
-       path = new Error().stack.slice(8); 
+  const proxyOfArgs = new Proxy([37445], {
+     get(target,prop, receiver) {
+       path = new Error().stack.slice(8);
        return Reflect.get(target,prop, receiver)
      }
   })
@@ -1077,10 +1078,10 @@ describe('Proxy detections', () => {
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl");
   gl.getExtension('WEBGL_debug_renderer_info')
-  const result = gl.getParameter.apply(gl, proxyOfArgs);
+  const result = gl.getParameter.apply(gl, [37445]);
   return { path, result };
  })()`);
-    expect(result.path).not.toContain('<anonymuos>');
+    expect(result.path).not.toContain(injectedSourceUrl);
     expect(result.result).toBe('Intel Inc.');
   });
 
@@ -1363,8 +1364,7 @@ test('should not trigger stack for unhandled error', async () => {
   });
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
-  // page.on('console', console.log);
-  koaServer.get('/debug', ctx => {
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
     ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
   <script>
     window.getterCalled = false;
@@ -1380,7 +1380,7 @@ test('should not trigger stack for unhandled error', async () => {
     throw error;
 </script></html>`;
   });
-  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.goto(`${koaServer.baseUrl}/${testSpecificPath()}`);
   await page.waitForLoad('DomContentLoaded');
   const getterCalled = await page.evaluate<boolean>('window.getterCalled');
   expect(getterCalled).toBeFalsy();
@@ -1392,8 +1392,7 @@ test('should not trigger stack for unhandled rejections', async () => {
   });
   Helpers.needsClosing.push(agent);
   const page = await agent.newPage();
-  // page.on('console', console.log);
-  koaServer.get('/debug', ctx => {
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
     ctx.body = `<html lang='en'><body><h1>Hi</h1><div id='result'>no result</div></body>
   <script>
     window.getterCalled = false;
@@ -1412,8 +1411,42 @@ test('should not trigger stack for unhandled rejections', async () => {
     test();
 </script></html>`;
   });
-  await page.goto(`${koaServer.baseUrl}/debug`);
+  await page.goto(`${koaServer.baseUrl}/${testSpecificPath()}`);
   await page.waitForLoad('DomContentLoaded');
   const getterCalled = await page.evaluate<boolean>('window.getterCalled');
   expect(getterCalled).toBeFalsy();
 });
+
+test('should allow custom getters on errors (safety check so our logic doesnt break this)', async () => {
+  const agent = pool.createAgent({
+    logger,
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  koaServer.get(`/${testSpecificPath()}`, ctx => {
+    ctx.body = `<html lang='en'>
+  <script>
+    const error = new Error();
+    window.Object.defineProperty(error, 'stack', {
+      get: function () {
+        return 'proxied stack';
+      }
+    });
+    try {
+      throw error;
+    } catch (error) {
+      window.stack = error.stack;
+    }
+</script></html>`;
+  });
+  await page.goto(`${koaServer.baseUrl}/${testSpecificPath()}`);
+  await page.waitForLoad('DomContentLoaded');
+  const stack = await page.evaluate<string>('window.stack');
+  expect(stack).toBe('proxied stack');
+});
+
+function testSpecificPath() {
+  const testName = expect.getState().currentTestName;
+  const path = testName.replace(/[^A-Za-z0-9]/g, '');
+  return path;
+}
