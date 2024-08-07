@@ -241,7 +241,7 @@ test('Errors should not leak proxy objects, first simple edition: looking at err
 test('Errors should not leak proxy objects, second simple edition: looking at Error.captureStackTrace', async () => {
   function script() {
     function leak() {
-      const objWithStack = { stack: 'TODO' };
+      const objWithStack = { stack: 'stack' };
       Error.captureStackTrace(objWithStack);
       return objWithStack.stack;
     }
@@ -550,8 +550,7 @@ async function runScript<T extends AnyFunction | string>(poolToUse: Pool, fn: T)
       }
     })()
   `,
-    undefined,
-    { timeout: customtimeout },
+    { timeoutMs: customtimeout },
   );
 
   return output;

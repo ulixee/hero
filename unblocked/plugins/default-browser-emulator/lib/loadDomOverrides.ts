@@ -137,7 +137,7 @@ export default function loadDomOverrides(
   }
 
   if (config[InjectedScript.SHAREDWORKER_PROTOTYPE]) {
-    domOverrides.add(InjectedScript.SHAREDWORKER_PROTOTYPE);
+    domOverrides.add(InjectedScript.SHAREDWORKER_PROTOTYPE, undefined, true);
   }
 
   if (config[InjectedScript.SPEECH_SYNTHESIS_GETVOICES] && voices?.length) {

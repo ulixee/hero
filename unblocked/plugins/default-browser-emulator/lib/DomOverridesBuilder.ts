@@ -25,7 +25,7 @@ export default class DomOverridesBuilder {
   }
 
   public build(
-    type: 'worker' | 'page' = 'page',
+    type: 'worker' | 'service_worker' | 'shared_worker' | 'page' = 'page',
     scriptNames?: string[],
   ): {
     script: string;
@@ -47,7 +47,7 @@ export default class DomOverridesBuilder {
         if (script.script) scripts.set(`alwaysPageScript${counter}`, script.script);
         counter += 1;
       }
-    } else if (type === 'worker') {
+    } else if (type.includes('worker')) {
       let counter = 0;
       for (const script of this.alwaysWorkerScripts) {
         if (script.callback) callbacks.push(script.callback);
@@ -71,6 +71,7 @@ export default class DomOverridesBuilder {
       script: `
 (function newDocumentScriptWrapper(scopedVars = {}) {
   const exports = {};
+  const targetType = '${type}';
   // Worklet has no scope to override, but we can't detect until it loads
   if (typeof self === 'undefined' && typeof window === 'undefined') return;
 
@@ -116,7 +117,11 @@ export default class DomOverridesBuilder {
     for (const name of names) this.workerOverrides.add(name);
   }
 
-  public add<T = undefined>(name: InjectedScript, args: T = undefined , registerWorkerOverride = false): void {
+  public add<T = undefined>(
+    name: InjectedScript,
+    args: T = undefined,
+    registerWorkerOverride = false,
+  ): void {
     let script = cache[name];
     if (!script) {
       if (!fs.existsSync(`${__dirname}/../injected-scripts/${name}.js`)) {

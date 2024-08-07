@@ -121,7 +121,6 @@ enum ProxyOverride {
   callOriginal = '_____invoke_original_____',
 }
 
-
 function proxyConstructor<T, K extends keyof T>(
   owner: T,
   key: K,
