@@ -313,13 +313,6 @@ export default class BrowserContext
     }
   }
 
-  async attachToWorker(targetInfo: TargetInfo): Promise<void> {
-    await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
-      targetId: targetInfo.targetId,
-      flatten: true,
-    });
-  }
-
   async close(): Promise<void> {
     if (this.isClosing) return this.isClosing;
     const resolvable = new Resolvable<void>();
