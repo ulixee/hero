@@ -1,0 +1,49 @@
+{
+  "name": "@ulixee/hero",
+  "version": "2.0.0-alpha.29",
+  "description": "The client interface for Hero",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "contributors": [
+    "Caleb Clark",
+    "Blake Byrnes"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.cjs",
+      "types": "./index.d.ts"
+    },
+    "./lib/*": {
+      "default": "./lib/*.js",
+      "types": "./lib/*.d.ts"
+    },
+    "./connections/*": {
+      "default": "./connections/*.js",
+      "types": "./connections/*.d.ts"
+    }
+  },
+  "dependencies": {
+    "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/commons": "2.0.0-alpha.29",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.29",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.29",
+    "@ulixee/js-path": "2.0.0-alpha.29",
+    "@ulixee/net": "2.0.0-alpha.29",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.29",
+    "linkedom": "^0.14.11"
+  }
+}
