@@ -1,8 +1,10 @@
 import type { Args as ConsoleArgs } from '../injected-scripts/console';
+import type { Args as ErrorArgs } from '../injected-scripts/error';
 
 export default interface IBrowserEmulatorConfig {
   [InjectedScript.CONSOLE]: InjectedScriptConfig<ConsoleArgs>;
   [InjectedScript.DOCUMENT_PROTOTYPE_COOKIE]: InjectedScriptConfig;
+  [InjectedScript.ERROR]: InjectedScriptConfig<ErrorArgs>;
   [InjectedScript.JSON_STRINGIFY]: InjectedScriptConfig;
   [InjectedScript.MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES]: InjectedScriptConfig;
   [InjectedScript.NAVIGATOR_DEVICE_MEMORY]: InjectedScriptConfig;
@@ -25,6 +27,7 @@ export default interface IBrowserEmulatorConfig {
 export enum InjectedScript {
   CONSOLE = 'console',
   DOCUMENT_PROTOTYPE_COOKIE = 'Document.prototype.cookie',
+  ERROR = 'error',
   JSON_STRINGIFY = 'JSON.stringify',
   MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES = 'MediaDevices.prototype.enumerateDevices',
   NAVIGATOR_DEVICE_MEMORY = 'navigator.deviceMemory',

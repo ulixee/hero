@@ -241,7 +241,7 @@ describe('BrowserContext', () => {
     return promise;
   })('${server.baseUrl}/grid.html')`);
 
-      expect(await page.frames[1].evaluate('document.cookie', false)).toBe('frame-cookie=value');
+      expect(await page.frames[1].evaluate('document.cookie')).toBe('frame-cookie=value');
     });
 
     it('should(not) block third party cookies', async () => {

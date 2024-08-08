@@ -3,10 +3,9 @@ import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import INewDocumentInjectedScript from '../interfaces/INewDocumentInjectedScript';
 import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
-const injectedSourceUrl = '<anonymuos>';
+const injectedSourceUrl = `<anonymous-${Math.random()}>`;
 const cache: { [name: string]: string } = {};
 const shouldCache = process.env.NODE_ENV === 'production';
-
 const utilsScript = [
   fs.readFileSync(`${__dirname}/../injected-scripts/_proxyUtils.js`, 'utf8'),
   fs.readFileSync(`${__dirname}/../injected-scripts/_descriptorBuilder.js`, 'utf8'),
@@ -26,7 +25,7 @@ export default class DomOverridesBuilder {
   }
 
   public build(
-    type: 'worker' | 'page' = 'page',
+    type: 'worker' | 'service_worker' | 'shared_worker' | 'page' = 'page',
     scriptNames?: string[],
   ): {
     script: string;
@@ -48,7 +47,7 @@ export default class DomOverridesBuilder {
         if (script.script) scripts.set(`alwaysPageScript${counter}`, script.script);
         counter += 1;
       }
-    } else if (type === 'worker') {
+    } else if (type.includes('worker')) {
       let counter = 0;
       for (const script of this.alwaysWorkerScripts) {
         if (script.callback) callbacks.push(script.callback);
@@ -72,6 +71,7 @@ export default class DomOverridesBuilder {
       script: `
 (function newDocumentScriptWrapper(scopedVars = {}) {
   const exports = {};
+  const targetType = '${type}';
   // Worklet has no scope to override, but we can't detect until it loads
   if (typeof self === 'undefined' && typeof window === 'undefined') return;
 
@@ -117,7 +117,11 @@ export default class DomOverridesBuilder {
     for (const name of names) this.workerOverrides.add(name);
   }
 
-  public add<T>(name: InjectedScript, args?: T): void {
+  public add<T = undefined>(
+    name: InjectedScript,
+    args: T = undefined,
+    registerWorkerOverride = false,
+  ): void {
     let script = cache[name];
     if (!script) {
       if (!fs.existsSync(`${__dirname}/../injected-scripts/${name}.js`)) {
@@ -143,6 +147,9 @@ export default class DomOverridesBuilder {
 `;
     }
     this.scriptsByName.set(name, wrapper);
+    if (registerWorkerOverride) {
+      this.registerWorkerOverrides(name);
+    }
   }
 
   public addPageScript(
@@ -175,13 +182,16 @@ export default class DomOverridesBuilder {
   }
 
   private wrapScript(name: string, script: string, args: any = {}): string {
-    return `(function newDocumentScript_${name.replace(/\./g, '__')}(args) {
+    const strArgs = JSON.stringify(args);
+    return `
+try{
+(function newDocumentScript_${name.replace(/\./g, '__')}(args) {
   try {
     ${script};
   } catch(err) {
     console.log('Failed to initialize "${name}"', err);
   }
-})(${JSON.stringify(args)});`;
+})(${strArgs});}catch (error){console.log(error)}`;
   }
 }
 

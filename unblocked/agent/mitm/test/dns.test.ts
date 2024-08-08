@@ -88,14 +88,11 @@ describe('DnsOverTlsSocket', () => {
     testDnsSocket.close();
   });
 
-  test('should be able to lookup dns records', async () => {
-    const response = await testDnsSocket.lookupARecords('dataliberationfoundation.org');
-    expect(response.answers).toHaveLength(1);
-  });
-
-  test('should be able to reuse the socket', async () => {
+  test('should be able to lookup dns records and reuse the socket', async () => {
     const response = await testDnsSocket.lookupARecords('ulixee.org');
     expect(response.answers).toHaveLength(2);
+    const response2 = await testDnsSocket.lookupARecords('ulixee.org');
+    expect(response2.answers).toHaveLength(2);
   });
 
   test('should be able to lookup multiple records at once', async () => {

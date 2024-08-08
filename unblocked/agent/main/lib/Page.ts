@@ -277,8 +277,11 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     });
   }
 
-  evaluate<T>(expression: string, isolatedFromWebPageEnvironment = false): Promise<T> {
-    return this.mainFrame.evaluate<T>(expression, isolatedFromWebPageEnvironment);
+  evaluate<T>(
+    expression: string,
+    options?: { timeoutMs?: number, isolatedFromWebPageEnvironment?: boolean },
+  ): Promise<T> {
+    return this.mainFrame.evaluate<T>(expression, options);
   }
 
   async navigate(url: string, options: { referrer?: string } = {}): Promise<{ loaderId: string }> {
@@ -318,14 +321,17 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     }
     if (options?.referrer) {
       navigateOptions = {
-        referrer: options?.referrer
+        referrer: options?.referrer,
       };
     }
 
     const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
     const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
-    const loader = await timer.waitForPromise(this.navigate(formattedUrl, navigateOptions), timeoutMessage);
+    const loader = await timer.waitForPromise(
+      this.navigate(formattedUrl, navigateOptions),
+      timeoutMessage,
+    );
     this.mainFrame.navigations.assignLoaderId(navigation, loader.loaderId);
 
     const resourceId = await timer.waitForPromise(

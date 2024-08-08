@@ -8,7 +8,7 @@ export default function setWorkerDomOverrides(
   worker: IWorker,
 ): Promise<any[]> {
   const scriptNames = domOverrides.getWorkerOverrides();
-  const script = domOverrides.build('worker', scriptNames);
+  const script = domOverrides.build(worker.type, scriptNames);
   if (script.callbacks.length) {
     throw new Error("Workers can't create callbacks");
   }

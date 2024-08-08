@@ -257,12 +257,13 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
 
   public async evaluate<T>(
     expression: string,
-    isolateFromWebPageEnvironment?: boolean,
     options?: {
+      isolateFromWebPageEnvironment?: boolean;
       shouldAwaitExpression?: boolean;
       retriesWaitingForLoad?: number;
       returnByValue?: boolean;
       includeCommandLineAPI?: boolean;
+      timeoutMs?: number;
     },
   ): Promise<T> {
     // can't run javascript if active dialog!
@@ -275,6 +276,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     }
     const startUrl = this.url;
     const startOrigin = this.securityOrigin;
+    const isolateFromWebPageEnvironment = options?.isolateFromWebPageEnvironment ?? false;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     try {
       if (!contextId) {
@@ -292,6 +294,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
           awaitPromise: options?.shouldAwaitExpression ?? true,
         },
         this,
+        { timeoutMs: options?.timeoutMs },
       );
 
       if (result.exceptionDetails) {
@@ -316,7 +319,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
         }
         if (retries > 0) {
           // Cannot find context with specified id (ie, could be reloading or unloading)
-          return this.evaluate(expression, isolateFromWebPageEnvironment, {
+          return this.evaluate(expression, {
             ...(options ?? {}),
             retriesWaitingForLoad: retries - 1,
           });
@@ -445,8 +448,11 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     retVal += document.documentElement.outerHTML;
   return retVal;
 })()`,
-      this.page.installJsPathIntoIsolatedContext,
-      { shouldAwaitExpression: false, retriesWaitingForLoad: 1 },
+      {
+        shouldAwaitExpression: false,
+        retriesWaitingForLoad: 1,
+        isolateFromWebPageEnvironment: this.page.installJsPathIntoIsolatedContext,
+      },
     );
   }
 

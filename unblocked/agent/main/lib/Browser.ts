@@ -396,7 +396,8 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
         throw new Error(
           `ERROR: Running unblocked headless with chrome < 114 (${majorVersion}) is not supported anymore.
             This is because we rely on the new headless mode of recent chrome versions.
-            To fix this problem either use a newer chrome version or run unblocked in headed (showChrome) mode.`);
+            To fix this problem either use a newer chrome version or run unblocked in headed (showChrome) mode.`,
+        );
       }
 
       this.engine.isHeadlessNew = true;
@@ -534,10 +535,6 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.getBrowserContext(targetInfo.browserContextId);
       await context?.attachToTarget(targetInfo.targetId);
-    }
-    if (targetInfo.type === 'shared_worker') {
-      const context = this.getBrowserContext(targetInfo.browserContextId);
-      await context?.attachToWorker(targetInfo);
     }
   }
 

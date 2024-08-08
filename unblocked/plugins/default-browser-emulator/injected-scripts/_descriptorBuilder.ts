@@ -22,7 +22,7 @@ function createError(message: string, type?: { new (msg: string): any }) {
   if (!type) type = Error;
   // eslint-disable-next-line new-cap
   const errType = new type(message);
-  return cleanErrorStack(errType);
+  return errType;
 }
 
 function newObjectConstructor(

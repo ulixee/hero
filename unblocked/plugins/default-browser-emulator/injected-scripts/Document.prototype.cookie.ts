@@ -1,4 +1,3 @@
-declare let args: any;
 const triggerName = args.callbackName;
 
 if (!self[triggerName]) throw new Error('No cookie trigger');

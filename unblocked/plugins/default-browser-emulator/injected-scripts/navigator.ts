@@ -14,41 +14,29 @@ if ('NetworkInformation' in self) {
 
 if (args.userAgentData && 'userAgentData' in self.navigator) {
   const userAgentData = self.navigator.userAgentData as any;
-  function checkThisArg(thisArg, customMessage = ''): TypeError {
+  function checkThisArg(thisArg, customMessage = '') {
     // @ts-expect-error
     if (Object.getPrototypeOf(thisArg) !== self.NavigatorUAData.prototype) {
-      return new TypeError(`${customMessage}Illegal invocation`);
+      throw new TypeError(`${customMessage}Illegal invocation`);
     }
   }
 
   proxyGetter(userAgentData, 'brands', (_, thisArg) => {
-    const thisArgError = checkThisArg(thisArg);
-    if (thisArgError) throw cleanErrorStack(thisArgError);
+    checkThisArg(thisArg);
     const clonedValues = args.userAgentData.brands.map(x => ({ ...x }));
 
     return Object.seal(Object.freeze(clonedValues));
   });
   proxyGetter(userAgentData, 'platform', (_, thisArg) => {
-    const thisArgError = checkThisArg(thisArg);
-    if (thisArgError) throw cleanErrorStack(thisArgError);
-
+    checkThisArg(thisArg);
     return args.userAgentData.platform;
   });
   proxyFunction(userAgentData, 'getHighEntropyValues', async (target, thisArg, argArray) => {
     // TODO: pull Error messages directly from dom extraction files
-    let error = checkThisArg(
-      thisArg,
-      "Failed to execute 'getHighEntropyValues' on 'NavigatorUAData': ",
-    );
-    if (!error) {
-      try {
-        // check if these work
-        await ReflectCached.apply(target, thisArg, argArray);
-      } catch (e) {
-        error = e;
-      }
-    }
-    if (error) return Promise.reject(cleanErrorStack(error));
+    checkThisArg(thisArg, "Failed to execute 'getHighEntropyValues' on 'NavigatorUAData': ");
+    // check if these work
+    await ReflectCached.apply(target, thisArg, argArray);
+
     const props: any = {
       brands: Object.seal(Object.freeze(args.userAgentData.brands)),
       mobile: false,
@@ -74,56 +62,53 @@ proxyGetter(self.navigator, 'platform', () => args.platform, true);
 
 if ('setAppBadge' in self.navigator) {
   // @ts-ignore
-  proxyFunction(self.navigator, 'setAppBadge', (target, thisArg, argArray) => {
-    let error: TypeError;
+  proxyFunction(self.navigator, 'setAppBadge', async (target, thisArg, argArray) => {
     if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {
-      error = new TypeError("Failed to execute 'setAppBadge' on 'Navigator': Illegal invocation");
+      throw new TypeError("Failed to execute 'setAppBadge' on 'Navigator': Illegal invocation");
     } else if (argArray.length) {
       const arg = argArray[0];
       if (typeof arg === 'number') {
         if (arg < 0 || arg > Number.MAX_SAFE_INTEGER) {
-          error = new TypeError(
+          throw new TypeError(
             `Failed to execute 'setAppBadge' on 'Navigator': Value is outside the 'unsigned long long' value range.`,
           );
         }
       } else {
-        error = new TypeError(
+        throw new TypeError(
           `Failed to execute 'setAppBadge' on 'Navigator': Value is not of type 'unsigned long long'.`,
         );
       }
     }
-    if (error) return Promise.reject(cleanErrorStack(error));
-    return Promise.resolve(undefined);
+    return undefined;
   });
 }
 
 if ('clearAppBadge' in self.navigator) {
   // @ts-ignore
-  proxyFunction(self.navigator, 'clearAppBadge', (target, thisArg, argArray) => {
-    let error: TypeError;
+  proxyFunction(self.navigator, 'clearAppBadge', async (target, thisArg, argArray) => {
     if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {
-      error = new TypeError("Failed to execute 'clearAppBadge' on 'Navigator': Illegal invocation");
+      throw new TypeError("Failed to execute 'clearAppBadge' on 'Navigator': Illegal invocation");
     }
-    if (error) return Promise.reject(cleanErrorStack(error));
-    return Promise.resolve(undefined);
+    return undefined;
   });
 }
 
 if (args.headless === true && 'requestMediaKeySystemAccess' in self.navigator) {
-  proxyFunction(self.navigator, 'requestMediaKeySystemAccess', (target, thisArg, argArray) => {
-    if (argArray.length < 2) {
-      return ProxyOverride.callOriginal;
-    }
-    const [keySystem, configs] = argArray;
-    if (keySystem !== 'com.widevine.alpha' || [...configs].length < 1) {
-      return ProxyOverride.callOriginal;
-    }
-    return target
-      .call(thisArg, 'org.w3.clearkey', configs)
-      .then(x => {
-        proxyGetter(x, 'keySystem', () => keySystem);
-        return x;
-      })
-      .catch(err => cleanErrorStack(err));
-  });
+  proxyFunction(
+    self.navigator,
+    'requestMediaKeySystemAccess',
+    async (target, thisArg, argArray) => {
+      if (argArray.length < 2) {
+        return ProxyOverride.callOriginal;
+      }
+      const [keySystem, configs] = argArray;
+      if (keySystem !== 'com.widevine.alpha' || [...configs].length < 1) {
+        return ProxyOverride.callOriginal;
+      }
+
+      const result = await ReflectCached.apply(target, thisArg, ['org.w3.clearkey', configs]);
+      proxyGetter(result, 'keySystem', () => keySystem);
+      return result;
+    },
+  );
 }

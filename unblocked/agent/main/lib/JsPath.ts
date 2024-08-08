@@ -181,10 +181,9 @@ export class JsPath implements IJsPathFunctions {
         return JSON.stringify(x);
       })
       .join(', ')})`;
-    const result = await this.frame.evaluate<T>(
-      serializedFn,
-      this.frame.page.installJsPathIntoIsolatedContext,
-    );
+    const result = await this.frame.evaluate<T>(serializedFn, {
+      isolateFromWebPageEnvironment: this.frame.page.installJsPathIntoIsolatedContext,
+    });
 
     if ((result as any)?.error) {
       this.logger.error(fnName, { result });

@@ -17,7 +17,7 @@ for (const context of [
   proxyFunction(context, 'getParameter', function (originalFunction, thisArg, argArray) {
     const parameter = argArray && argArray.length ? argArray[0] : null;
     // call api to make sure signature goes through
-    const result = Reflect.apply(originalFunction, thisArg, argArray);
+    const result = ReflectCached.apply(originalFunction, thisArg, argArray);
     if (args[parameter]) {
       if (!result && !activatedDebugInfo.has(context)) {
         return result;

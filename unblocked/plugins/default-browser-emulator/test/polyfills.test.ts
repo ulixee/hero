@@ -117,7 +117,6 @@ test(
 
     const json = await page.mainFrame.evaluate(
       `new (${DomExtractor.toString()})('window').run(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
-      false,
     );
     const result = JSON.parse(json as any);
 
@@ -157,8 +156,8 @@ test('it should be able to remove properties', async () => {
     page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
-  expect(await page.mainFrame.evaluate(`!!window.Atomics`, false)).not.toBeTruthy();
-  expect(await page.mainFrame.evaluate(`!!Array.from`, false)).not.toBeTruthy();
+  expect(await page.mainFrame.evaluate(`!!window.Atomics`)).not.toBeTruthy();
+  expect(await page.mainFrame.evaluate(`!!Array.from`)).not.toBeTruthy();
 });
 
 test('it should be able to change properties', async () => {
@@ -188,11 +187,9 @@ test('it should be able to change properties', async () => {
 
   const protocolToString = await page.mainFrame.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.toString()`,
-    false,
   );
   const protocolName = await page.mainFrame.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.name`,
-    false,
   );
 
   expect(protocolName).toBe('notTheRightName');
@@ -204,7 +201,6 @@ test('it should be able to change property order', async () => {
 
   const startNavigatorKeys = (await page.mainFrame.evaluate(
     `Object.keys(window.Navigator.prototype)`,
-    false,
   )) as string[];
 
   await page.addNewDocumentScript(
@@ -234,7 +230,6 @@ test('it should be able to change property order', async () => {
 
   const keyOrder = (await page.mainFrame.evaluate(
     `Object.keys(window.Navigator.prototype)`,
-    false,
   )) as string[];
 
   const prop1Index = keyOrder.indexOf(startNavigatorKeys[10]);
@@ -246,7 +241,7 @@ test('it should be able to change property order', async () => {
 
 test('it should be able to change window property order', async () => {
   const page = await createPage();
-  const windowKeys = await page.mainFrame.evaluate(`Object.keys(window)`, false);
+  const windowKeys = await page.mainFrame.evaluate(`Object.keys(window)`);
 
   const itemsToReorder = [
     {
@@ -278,7 +273,7 @@ test('it should be able to change window property order', async () => {
     page.navigate(httpServer.baseUrl),
     page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
-  const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
+  const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`)) as string[];
 
   const prop1Index = windowKeysAfter.indexOf(windowKeys[10]);
   expect(windowKeysAfter[prop1Index - 1]).toBe(windowKeys[1]);
