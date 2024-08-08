@@ -271,7 +271,7 @@ test('should set user agent on cross origin frames', async () => {
       res.end(`<!DOCTYPE html>
       <html lang="en"><body>
 <div>Cross Storage</div>
-<iframe src="https://dataliberationfoundation.org/frame" sandbox='allow-scripts' ></iframe>
+<iframe src="https://ulixee.org/frame" sandbox='allow-scripts' ></iframe>
 </body>
       </html>`);
       return;
@@ -288,7 +288,7 @@ test('should set user agent on cross origin frames', async () => {
   const agent = await createAgent();
   const page = await createPage(agent);
   agent.mitmRequestSession.interceptorHandlers.push({
-    urls: ['https://dataliberationfoundation.org/*'],
+    urls: ['https://ulixee.org/*'],
     types: [],
     handlerFn(url: URL, type: IResourceType, request, response) {
       response.end(`<html><body><p>frame body</p>

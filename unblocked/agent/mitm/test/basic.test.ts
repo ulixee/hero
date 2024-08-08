@@ -129,7 +129,7 @@ describe('basic MitM tests', () => {
     const session = createSession(mitmServer, upstreamProxyHost);
 
     await Helpers.httpGet(
-      'https://dataliberationfoundation.org',
+      'https://ulixee.org',
       proxyHost,
       session.getProxyCredentials(),
     ).catch();

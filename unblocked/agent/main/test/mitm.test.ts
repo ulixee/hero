@@ -81,7 +81,7 @@ test('should send preflight requests', async () => {
   const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
   Helpers.needsClosing.push(agent);
   agent.mitmRequestSession.interceptorHandlers.push({
-    urls: ['https://dataliberationfoundation.org/postback'],
+    urls: ['https://ulixee.org/postback'],
     handlerFn(url, type, request, response) {
       response.end(`<html lang="en">
 <body>
@@ -99,7 +99,7 @@ xhr.send('<person><name>DLF</name></person>');
     },
   });
   const page = await agent.newPage();
-  await page.goto(`https://dataliberationfoundation.org/postback`);
+  await page.goto(`https://ulixee.org/postback`);
   await expect(corsPromise).resolves.toBeTruthy();
   await expect(postPromise).resolves.toBeTruthy();
 
@@ -308,9 +308,9 @@ test('should proxy iframe requests', async () => {
 
   agent.mitmRequestSession.interceptorHandlers.push({
     urls: [
-      'https://dataliberationfoundation.org/iframe',
-      'https://dataliberationfoundation.org/test.css',
-      'https://dataliberationfoundation.org/dlfSite.png',
+      'https://ulixee.org/iframe',
+      'https://ulixee.org/test.css',
+      'https://ulixee.org/dlfSite.png',
     ],
     handlerFn(url, type, request, response) {
       response.end(`<html lang="en">
@@ -324,7 +324,7 @@ test('should proxy iframe requests', async () => {
     ctx.body = `<html lang="en">
 <body>
 This is the main body
-<iframe src="https://dataliberationfoundation.org/iframe"></iframe>
+<iframe src="https://ulixee.org/iframe"></iframe>
 </body>
 </html>`;
   });
@@ -334,9 +334,9 @@ This is the main body
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([
     expect.stringMatching(/http:\/\/localhost:\d+\/iframe-test/),
-    'https://dataliberationfoundation.org/iframe',
-    'https://dataliberationfoundation.org/test.css',
-    'https://dataliberationfoundation.org/dlfSite.png',
+    'https://ulixee.org/iframe',
+    'https://ulixee.org/test.css',
+    'https://ulixee.org/dlfSite.png',
   ]);
 });
 
