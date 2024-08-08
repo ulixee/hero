@@ -53,6 +53,7 @@
     "@types/better-sqlite3": "^7.6.11",
     "@ulixee/chrome-app": "1.0.3",
     "@ulixee/hero": "2.0.0-alpha.29",
-    "@ulixee/hero-testing": "2.0.0-alpha.29"
+    "@ulixee/hero-testing": "2.0.0-alpha.29",
+    "node-gyp": "^10.2.0"
   }
 }
