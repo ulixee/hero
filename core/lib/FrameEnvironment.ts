@@ -239,7 +239,7 @@ export default class FrameEnvironment
   }
 
   public async getJsValue<T>(expression: string): Promise<T> {
-    return await this.frame.evaluate<T>(expression, false);
+    return await this.frame.evaluate<T>(expression, { isolateFromWebPageEnvironment: false });
   }
 
   public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
@@ -494,7 +494,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
       const results = await this.frame.evaluate<PageRecorderResultSet>(
         `window.flushPageRecorder()`,
-        true,
+        { isolateFromWebPageEnvironment: true },
       );
       return this.onPageRecorderEvents(results);
     } catch (error) {
@@ -505,7 +505,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public async onShadowDomPushed(payload: string): Promise<void> {
     try {
-      await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, true);
+      await this.frame.evaluate(`window.checkForShadowRoot(${payload})`, {
+        isolateFromWebPageEnvironment: true,
+      });
     } catch {}
   }
 
@@ -667,7 +669,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
-    const result = await this.frame.evaluate<T>(serializedFn, true);
+    const result = await this.frame.evaluate<T>(serializedFn, {
+      isolateFromWebPageEnvironment: true,
+    });
 
     if ((result as any)?.error) {
       this.logger.error(fnName, { result });

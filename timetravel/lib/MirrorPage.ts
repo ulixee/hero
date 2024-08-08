@@ -108,7 +108,9 @@ export default class MirrorPage extends TypedEventEmitter<{
 
       if (page[installedScriptsSymbol]) {
         promises.push(
-          page.mainFrame.evaluate(`window.domReplayer.reset()`, this.useIsolatedContext),
+          page.mainFrame.evaluate(`window.domReplayer.reset()`, {
+            isolateFromWebPageEnvironment: this.useIsolatedContext,
+          }),
         );
       } else {
         promises.push(
@@ -328,8 +330,7 @@ export default class MirrorPage extends TypedEventEmitter<{
      if (node) return node.outerHTML;
      return null;
    })()`,
-        this.useIsolatedContext,
-        { retriesWaitingForLoad: 2 },
+        { retriesWaitingForLoad: 2, isolateFromWebPageEnvironment: this.useIsolatedContext },
       );
       return { url, html };
     });
@@ -467,7 +468,8 @@ export default class MirrorPage extends TypedEventEmitter<{
 
   private async evaluate<T>(expression: string): Promise<T> {
     await this.isReady;
-    return await this.page.mainFrame.evaluate(expression, this.useIsolatedContext, {
+    return await this.page.mainFrame.evaluate(expression, {
+      isolateFromWebPageEnvironment: this.useIsolatedContext,
       retriesWaitingForLoad: 2,
     });
   }

@@ -40,7 +40,9 @@ export default class UserProfile {
           try {
             const liveData = await frame.evaluate<IDomStorageForOrigin>(
               `window.exportDomStorage(${databases})`,
-              true,
+              {
+                isolateFromWebPageEnvironment: true,
+              },
             );
             originStorage.localStorage = liveData.localStorage;
             originStorage.sessionStorage = liveData.sessionStorage;
@@ -166,8 +168,8 @@ ${script}
               await new Promise(resolve => setTimeout(resolve, 20));
             }
           })()`,
-          false,
           {
+            isolateFromWebPageEnvironment: false,
             shouldAwaitExpression: true,
             returnByValue: true,
           },
