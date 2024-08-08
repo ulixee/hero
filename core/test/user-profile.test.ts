@@ -86,7 +86,7 @@ describe('UserProfile cookie tests', () => {
       const session = tab.session;
       Helpers.needsClosing.push(session);
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['https://dataliberationfoundation.org/*'],
+        urls: ['https://ulixee.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.setHeader('Set-Cookie', [
@@ -99,7 +99,7 @@ describe('UserProfile cookie tests', () => {
       });
       koaServer.get('/cross-cookie', ctx => {
         ctx.cookies.set('cookietest', 'mainsite');
-        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie"/></body>`;
+        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://ulixee.org/cookie"/></body>`;
       });
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
@@ -126,7 +126,7 @@ describe('UserProfile cookie tests', () => {
       const sameCookies = createPromise<string>();
 
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['https://dataliberationfoundation.org/*'],
+        urls: ['https://ulixee.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           dlfCookies.resolve(request.headers.cookie);
@@ -136,7 +136,7 @@ describe('UserProfile cookie tests', () => {
       });
       koaServer.get('/cross-cookie2', ctx => {
         sameCookies.resolve(ctx.cookies.get('cookietest'));
-        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
+        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://ulixee.org/cookie2"/></body>`;
       });
       await tab.goto(`${koaServer.baseUrl}/cross-cookie2`);
       await tab.waitForLoad('PaintingStable');
@@ -439,7 +439,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       const session = tab.session;
       Helpers.needsClosing.push(session);
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['https://dataliberationfoundation.org/*'],
+        urls: ['https://ulixee.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html><body><p>frame body</p>
@@ -452,10 +452,10 @@ localStorage.setItem('cross', '1');
         },
       });
 
-      await tab.goto(`https://dataliberationfoundation.org/`);
+      await tab.goto(`https://ulixee.org/`);
       await tab.waitForLoad('AllContentLoaded');
       profile = await tab.session.exportUserProfile();
-      expect(profile.storage['https://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
+      expect(profile.storage['https://ulixee.org']?.localStorage).toHaveLength(1);
       await session.close();
     }
     {
@@ -467,7 +467,7 @@ localStorage.setItem('cross', '1');
       Helpers.needsClosing.push(session);
 
       session.mitmRequestSession.interceptorHandlers.push({
-        urls: ['https://dataliberationfoundation.org/*'],
+        urls: ['https://ulixee.org/*'],
         types: [],
         handlerFn(url: URL, type: IResourceType, request, response) {
           response.end(`<html>
@@ -481,7 +481,7 @@ localStorage.setItem('cross', '1');
           return true;
         },
       });
-      await tab.goto(`https://dataliberationfoundation.org/`);
+      await tab.goto(`https://ulixee.org/`);
       await tab.waitForLoad('DomContentLoaded');
       const localContent = await tab.execJsPath([
         'document',

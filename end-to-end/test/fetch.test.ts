@@ -13,7 +13,7 @@ describe('Fetch tests', () => {
     const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
-    await expect(hero.fetch('https://dataliberationfoundation.org')).rejects.toThrow(
+    await expect(hero.fetch('https://ulixee.org')).rejects.toThrow(
       'need to use a "goto"',
     );
   });

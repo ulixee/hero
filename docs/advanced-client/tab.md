@@ -139,8 +139,8 @@ Alias for [tab.mainFrameEnvironment.fetch](../advanced-client/frame-environment.
 #### **Returns**: [`Promise<Response>`](../awaited-dom/response)
 
 ```js
-const origin = 'https://dataliberationfoundation.org/';
-const getUrl = 'https://dataliberationfoundation.org/mission';
+const origin = 'https://ulixee.org/';
+const getUrl = 'https://ulixee.org/mission';
 
 await hero.goto(origin);
 const response = await hero.fetch(getUrl);
@@ -149,8 +149,8 @@ const response = await hero.fetch(getUrl);
 Http Post example with a body:
 
 ```js
-const origin = 'https://dataliberationfoundation.org/';
-const postUrl = 'https://dataliberationfoundation.org/nopost';
+const origin = 'https://ulixee.org/';
+const postUrl = 'https://ulixee.org/nopost';
 
 await hero.goto(origin);
 const response = await hero.fetch(postUrl, {
@@ -255,7 +255,7 @@ Alias for [tab.mainFrameEnvironment.getComputedStyle](../advanced-client/frame-e
 #### **Returns**: [`Promise<CssStyleDeclaration>`](../awaited-dom/css-style-declaration.md)
 
 ```js
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 const { document, getComputedStyle } = hero.activeTab;
 const selector = document.querySelector('h1');
 const style = await getComputedStyle(selector);
@@ -278,7 +278,7 @@ Alias for [tab.mainFrameEnvironment.getJsValue](../advanced-client/frame-environ
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 const navigatorAgent = await hero.activeTab.getJsValue(`navigator.userAgent`);
 ```
 
@@ -434,6 +434,7 @@ Takes a screenshot of the current contents rendered in the browser.
   - format `jpeg | png`. Image format type to create. Default `jpeg`.
   - jpegQuality `number`. Optional compression quality from 1 to 100 for jpeg images (100 is highest quality).
   - rectangle `IRect`. Optionally clip the screenshot to the given rectangle (eg, x, y, width, height). Includes a pixel scale.
+  - fullPage `boolean`. Optional. If true, the entire page will be captured, not just the viewport.
 
 #### **Returns**: `Promise<Buffer>` Buffer with image bytes in base64.
 
@@ -513,15 +514,15 @@ await hero.waitForState({
   },
 });
 
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 
 await hero.waitForState({
   all(assert) {
-    assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
+    assert(hero.url, 'https://ulixee.org'); // a value will be tested for equality
     assert(hero.isPaintingStable);
     assert(
       hero.document.querySelector('h1').textContent,
-      text => text === "It's Time to Open the Data Economy",
+      text => text.toLowerCase().includes("open data platform"),
     );
   },
 });
@@ -531,11 +532,11 @@ WaitForState can be optionally shortened to the callback:
 
 ```js
 await hero.waitForState(assert => {
-  assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
+  assert(hero.url, 'https://ulixee.org'); // a value will be tested for equality
   assert(hero.isPaintingStable);
   assert(
-    hero.document.querySelector('h1').textContent,
-    text => text === "It's Time to Open the Data Economy",
+    hero.document.querySelector('h1').textContent, 
+    text => text.toLowerCase().includes("open data platform"),
   );
 });
 ```

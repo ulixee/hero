@@ -5,7 +5,7 @@ const Hero = require('@ulixee/hero');
 //process.env.ULX_SHOW_CHROME = 'true';
 
 (async () => {
-  const url = `https://dataliberationfoundation.org/`;
+  const url = `https://ulixee.org/`;
   console.log('Opened Browser');
   const hero = new Hero({ showChromeInteractions: true, showChrome: true });
 

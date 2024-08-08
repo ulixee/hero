@@ -16,7 +16,7 @@ State is stored for all domains (origins) that are loaded into a window at the t
 When you restore a UserProfile, Hero will restore the Cookies, Dom Storage and IndexedDB records for all domains that are included in the state.
 
 ```js
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 const theStoredProfile = await hero.exportUserProfile();
 
 // ... some time later...

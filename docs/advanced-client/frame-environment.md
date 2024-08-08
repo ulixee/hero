@@ -100,13 +100,13 @@ Returns a constructor for a [Request](../awaited-dom/request.md) object that can
 
 ```js
 const { Request, fetch } = hero;
-const url = 'https://dataliberationfoundation.org';
+const url = 'https://ulixee.org/docs';
 const request = new Request(url, {
   headers: {
     'X-From': 'https://ulixee.org',
   },
 });
-const response = await fetch(request.md);
+const response = await fetch(request);
 ```
 
 #### **Type**: [`Request`](../awaited-dom/request.md)
@@ -127,8 +127,8 @@ Perform a native "fetch" request in the current frame environment.
 #### **Returns**: [`Promise<Response>`](../awaited-dom/response)
 
 ```js
-const origin = 'https://dataliberationfoundation.org/';
-const getUrl = 'https://dataliberationfoundation.org/mission';
+const origin = 'https://ulixee.org/';
+const getUrl = 'https://ulixee.org/docs/hero';
 
 await hero.goto(origin);
 const mainFrame = hero.mainFrameEnvironment;
@@ -138,8 +138,8 @@ const response = await mainFrame.fetch(getUrl);
 Http Post example with a body:
 
 ```js
-const origin = 'https://dataliberationfoundation.org/';
-const postUrl = 'https://dataliberationfoundation.org/nopost';
+const origin = 'https://ulixee.org/';
+const postUrl = 'https://ulixee.org/nopost';
 
 await hero.goto(origin);
 const mainFrame = hero.mainFrameEnvironment;
@@ -186,7 +186,7 @@ Perform a native `Window.getComputedStyle` request in the current frame context 
 #### **Returns**: [`Promise<CssStyleDeclaration>`](../awaited-dom/css-style-declaration.md)
 
 ```js
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 const { document, getComputedStyle } = hero.activeTab;
 const selector = document.querySelector('h1');
 const style = await getComputedStyle(selector);
@@ -236,7 +236,7 @@ Extract any publicly accessible javascript value from the FrameEnvironment.
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-await hero.goto('https://dataliberationfoundation.org');
+await hero.goto('https://ulixee.org');
 const navigatorAgent = await hero.activeFrame.getJsValue(`navigator.userAgent`);
 ```
 

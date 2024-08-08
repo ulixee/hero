@@ -496,7 +496,7 @@ Wait for a new tab to be created. This can occur either via a `window.open` from
 #### **Returns**: [`Promise<Tab>`](../advanced-client/tab.md)
 
 ```js
-const url = 'https://dataliberationfoundation.org/nopost';
+const url = 'https://ulixee.org/nopost';
 const { document, activeTab } = hero;
 
 await hero.goto('http://example.com');
