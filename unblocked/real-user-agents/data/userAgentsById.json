@@ -329,6 +329,7 @@
   "mac-os-14--chrome-120-0": {
     "id": "mac-os-14--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -337,8 +338,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       234,
@@ -5023,6 +5023,7 @@
   "mac-os-13--chrome-120-0": {
     "id": "mac-os-13--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -5031,8 +5032,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       234,
@@ -10139,6 +10139,7 @@
   "mac-os-12--chrome-120-0": {
     "id": "mac-os-12--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -10147,8 +10148,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       234,
@@ -17235,6 +17235,7 @@
   "mac-os-11--chrome-120-0": {
     "id": "mac-os-11--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -17243,8 +17244,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       234,
@@ -24423,6 +24423,7 @@
   "mac-os-10-15--chrome-120-0": {
     "id": "mac-os-10-15--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -24431,8 +24432,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       234,
@@ -69797,6 +69797,7 @@
   "windows-11--chrome-120-0": {
     "id": "windows-11--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -69805,8 +69806,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       225,
@@ -75771,6 +75771,7 @@
   "windows-10--chrome-120-0": {
     "id": "windows-10--chrome-120-0",
     "allPatchVersions": [
+      320,
       319,
       318,
       317,
@@ -75779,8 +75780,7 @@
       314,
       313,
       312,
-      311,
-      310
+      311
     ],
     "stablePatchVersions": [
       225,
