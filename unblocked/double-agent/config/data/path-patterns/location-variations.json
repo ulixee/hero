@@ -10,8 +10,8 @@
   "changedOrder": [],
   "extraAdded": [],
   "extraChanged": [
-    "window.Document.new().domain",
     "window.document.location",
+    "window.Document.new().domain",
     "window.document.URL",
     "window.document.documentURI",
     "window.document.documentElement.namespaceURI",

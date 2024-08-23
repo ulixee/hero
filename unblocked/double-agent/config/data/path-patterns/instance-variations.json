@@ -60,7 +60,11 @@
   "changedOrder": [],
   "extraAdded": [],
   "extraChanged": [
+    "window.Intl.DateTimeFormat.new().resolvedOptions",
     "window.console.memory.usedJSHeapSize",
+    "window.document.styleSheets",
+    "window.document.scripts",
+    "window.navigator.connection",
     "window.BaseAudioContext.prototype.currentTime",
     "window.BaseAudioContext.prototype.state",
     "window.BaseAudioContext.prototype.onstatechange",
@@ -73,16 +77,12 @@
     "window.AudioContext.new().state",
     "window.AudioContext.new().onstatechange",
     "window.document.readyState",
-    "window.document.scripts",
     "window.document.visibilityState",
     "window.document.webkitVisibilityState",
-    "window.document.styleSheets",
     "window.document.fonts.ready",
-    "window.navigator.connection",
     "window.navigator.connection.onchange",
     "window.navigator.connection.effectiveType",
     "window.navigator.connection.saveData",
-    "window.Intl.DateTimeFormat.new().resolvedOptions",
     "window.ScrollTimeline",
     "window.BarcodeDetector.getSupportedFormats"
   ]
