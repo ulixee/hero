@@ -18387,806 +18387,806 @@
   {
     "id": "Chrome-61.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.79 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-62.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-63.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-64.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.119 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-66.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.117 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-65.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-70.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-71.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-72.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-73.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-74.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-75.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-77.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-76.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.87 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-78.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-79.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-80.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-81.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-83.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-84.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-85.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-86.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-87.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-88.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-89.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-90.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-93.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-96.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-91.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-92.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-94.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-95.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-97.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-98.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-99.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-101.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-100.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-106.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-107.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-102.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-103.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-108.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-109.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-110.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-104.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-111.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-112.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-105.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-113.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-115.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-114.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-122.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-116.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-123.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-125.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-124.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-126.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Chrome-127.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-83.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36 Edg/83.0.478.37",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-81.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.92 Safari/537.36 Edg/81.0.416.53",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-80.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36 Edg/80.0.361.57",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-85.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36 Edg/85.0.564.41",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-84.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.40",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-86.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36 Edg/86.0.622.38",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-88.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36 Edg/88.0.705.50",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-90.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36 Edg/90.0.818.39",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-87.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36 Edg/87.0.664.41",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-89.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36 Edg/89.0.774.45",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-91.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36 Edg/91.0.864.37",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-92.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 Edg/92.0.902.55",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-93.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36 Edg/93.0.961.38",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-94.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36 Edg/94.0.992.31",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-95.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.30",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-96.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36 Edg/96.0.1054.34",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-99.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.36",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-97.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.55",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-98.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-100.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-101.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36 Edg/101.0.1210.32",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-102.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.33",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-106.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.37",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-107.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.24",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-103.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-109.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.49",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-108.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.41",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-105.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.25",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-110.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-104.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36 Edg/104.0.1293.47",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-111.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-112.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-113.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.35",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-114.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.37",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-115.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-116.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.54",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-123.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-122.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-125.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-126.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-124.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Edge-127.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Safari-18.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-70.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:70.0) Gecko/20100101 Firefox/70.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-72.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:72.0) Gecko/20100101 Firefox/72.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-71.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:71.0) Gecko/20100101 Firefox/71.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-73.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:73.0) Gecko/20100101 Firefox/73.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-74.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:74.0) Gecko/20100101 Firefox/74.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-75.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:75.0) Gecko/20100101 Firefox/75.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-77.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:77.0) Gecko/20100101 Firefox/77.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-76.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.0; rv:76.0) Gecko/20100101 Firefox/76.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-78.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:78.0) Gecko/20100101 Firefox/78.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-79.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:79.0) Gecko/20100101 Firefox/79.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-80.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:80.0) Gecko/20100101 Firefox/80.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-81.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:81.0) Gecko/20100101 Firefox/81.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-82.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:82.0) Gecko/20100101 Firefox/82.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-83.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:83.0) Gecko/20100101 Firefox/83.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-84.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:84.0) Gecko/20100101 Firefox/84.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-88.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:88.0) Gecko/20100101 Firefox/88.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-85.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:85.0) Gecko/20100101 Firefox/85.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-86.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:86.0) Gecko/20100101 Firefox/86.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-87.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-90.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:90.0) Gecko/20100101 Firefox/90.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-89.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-91.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0) Gecko/20100101 Firefox/91.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-92.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:92.0) Gecko/20100101 Firefox/92.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-93.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:93.0) Gecko/20100101 Firefox/93.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-95.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-96.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:96.0) Gecko/20100101 Firefox/96.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-94.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-97.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:97.0) Gecko/20100101 Firefox/97.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-102.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0) Gecko/20100101 Firefox/102.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-100.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-99.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-101.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-103.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:103.0) Gecko/20100101 Firefox/103.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-98.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-104.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:104.0) Gecko/20100101 Firefox/104.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-105.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-106.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:106.0) Gecko/20100101 Firefox/106.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-107.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:107.0) Gecko/20100101 Firefox/107.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-109.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/109.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-110.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-111.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-112.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/112.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-113.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/113.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-114.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-115.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-108.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:108.0) Gecko/20100101 Firefox/108.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-116.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/116.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-117.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-119.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-118.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/118.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-120.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-121.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-122.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-123.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-125.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-124.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-126.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-127.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-128.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   },
   {
     "id": "Firefox-129.0--OS X-Sequoia",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0",
-    "osId": "mac-os-Sequoia"
+    "osId": "mac-os-15"
   }
 ]
