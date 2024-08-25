@@ -246,15 +246,16 @@
     "releaseDate": "2023-09-26",
     "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
   },
-  "mac-os-Sequoia": {
-    "id": "mac-os-Sequoia",
+  "mac-os-15": {
+    "id": "mac-os-15",
     "name": "Mac OS",
     "marketshare": 0,
     "deviceCategory": "desktop",
     "version": {
-      "major": "Sequoia"
+      "name": "Sequoia",
+      "major": "15"
     },
-    "releaseDate": "unknown",
-    "description": ""
+    "releaseDate": "2024-07-23",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
   }
 }
