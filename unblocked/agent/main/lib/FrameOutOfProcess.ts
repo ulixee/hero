@@ -32,6 +32,7 @@ export default class FrameOutOfProcess {
       this.networkManager,
       page.logger,
       page.domStorageTracker.isEnabled,
+      this.devtoolsSession,
     );
   }
 

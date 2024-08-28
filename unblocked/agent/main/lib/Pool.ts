@@ -12,6 +12,7 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import IBrowserUserConfig from '@ulixee/unblocked-specification/agent/browser/IBrowserUserConfig';
+import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDevtoolsSession';
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import {
   IUnblockedPluginClass,
@@ -174,6 +175,7 @@ export default class Pool extends TypedEventEmitter<{
         'new-context',
         this.watchForContextPagesClosed.bind(this),
       );
+      this.events.on(browser, 'new-session', this.onSession.bind(this));
       this.events.once(browser, 'close', () => this.onBrowserClosed(browser.id, contextEvent));
 
       await browser.launch();
@@ -247,6 +249,10 @@ export default class Pool extends TypedEventEmitter<{
 
       throw err;
     }
+  }
+
+  private onSession(args: { session: IDevtoolsSession }): void {
+    args?.session?.setMaxListeners(this.maxConcurrentAgentsPerBrowser + 1);
   }
 
   private onAgentClosed(closedAgentId: string): void {

@@ -19,4 +19,5 @@ export default interface IBrowser extends ITypedEventEmitter<IBrowserEvents> {
 export interface IBrowserEvents {
   close: void;
   'new-context': { context: IBrowserContext };
+  'new-session': { session: IDevtoolsSession };
 }

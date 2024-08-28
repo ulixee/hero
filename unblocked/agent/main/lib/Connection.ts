@@ -21,7 +21,10 @@ import DevtoolsSession from './DevtoolsSession';
 
 const { log } = Log(module);
 
-export class Connection extends TypedEventEmitter<{ disconnected: void }> {
+export class Connection extends TypedEventEmitter<{
+  disconnected: void;
+  'on-attach': { session: DevtoolsSession };
+}> {
   public readonly rootSession: DevtoolsSession;
   public get isClosed(): boolean {
     return this.#isClosed || this.transport.isClosed;
@@ -69,6 +72,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     if (object.method === 'Target.attachedToTarget') {
       const session = new DevtoolsSession(this, object.params.targetInfo.type, devtoolsSessionId);
       this.sessionsById.set(devtoolsSessionId, session);
+      this.emit('on-attach', { session });
     }
     if (object.method === 'Target.detachedFromTarget') {
       const session = this.sessionsById.get(devtoolsSessionId);

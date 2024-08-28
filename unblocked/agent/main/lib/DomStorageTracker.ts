@@ -1,3 +1,4 @@
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
@@ -57,7 +58,7 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
     networkManager: NetworkManager,
     logger: IBoundLog,
     isEnabled: boolean,
-    session?: DevtoolsSession
+    session?: DevtoolsSession,
   ) {
     super();
     this.isEnabled = isEnabled;
@@ -68,7 +69,13 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
     this.storageByOrigin = storageByOrigin ?? {};
     this.logger = logger.createChild(module);
 
-    this.events.on(session, 'DOMStorage.domStorageItemAdded', this.onDomStorageAdded.bind(this));
+    this.onDomStorageAdded = this.onDomStorageAdded.bind(this);
+
+    if (session.listeners('DOMStorage.domStorageItemAdded').includes(this.onDomStorageAdded)) {
+      return;
+    }
+
+    this.events.on(session, 'DOMStorage.domStorageItemAdded', this.onDomStorageAdded);
     this.events.on(
       session,
       'DOMStorage.domStorageItemRemoved',
