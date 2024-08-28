@@ -4116,5 +4116,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-128-0": {
+    "id": "chrome-128-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "128",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
