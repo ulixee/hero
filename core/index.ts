@@ -103,7 +103,6 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
       new DefaultSessionRegistry(Path.join(this.dataDir, 'hero-sessions'));
     this.networkDb = new NetworkDb(this.dataDir);
     this.corePluginsById = { ...(HeroCore.defaultCorePluginsById ?? {}) };
-
     this.pool = new Pool({
       certificateStore: this.networkDb.certificates,
       dataDir: this.dataDir,
@@ -112,6 +111,7 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
       maxConcurrentAgentsPerBrowser: options.maxConcurrentClientsPerBrowser,
       plugins: options.defaultUnblockedPlugins ?? HeroCore.defaultUnblockedPlugins,
     });
+    this.setMaxListeners(this.pool.maxConcurrentAgents + 2);
 
     this.pool.addEventEmitter(this, [
       'all-browsers-closed',

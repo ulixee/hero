@@ -194,4 +194,28 @@ describe('basic Full Client tests', () => {
     await localStorage.removeItem('Test1');
     expect(await localStorage.length).toBe(0);
   });
+
+  it('should not emit max event listeners warning', async () => {
+    const warningHandler = jest.fn();
+
+    const stdout = process.stdout.write.bind(process.stdout);
+    process.stderr.write = (msg, cb) => {
+      if (msg.includes('MaxListenersExceededWarning')) {
+        warningHandler();
+      }
+      return stdout(msg, cb);
+    };
+    const promises = Array(30)
+      .fill(0)
+      .map(async () => {
+        const hero = new Hero();
+        Helpers.needsClosing.push(hero);
+
+        await hero.goto(`${koaServer.baseUrl}/`);
+        await hero.close();
+      });
+    await Promise.all(promises);
+    process.stderr.write = stdout;
+    expect(warningHandler).not.toHaveBeenCalled();
+  });
 });

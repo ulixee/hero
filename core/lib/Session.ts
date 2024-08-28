@@ -486,6 +486,7 @@ export default class Session
 
     const databasePath = this.db.path;
     Session.events.emit('closed', { id: this.id, databasePath });
+    delete Session.byId[this.id];
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.id);
   }
@@ -537,7 +538,6 @@ export default class Session
     }
     sessionId ??= nanoid();
     Session.byId[sessionId] = this;
-    Session.events.once('closed', ({ id }) => delete Session.byId[id]);
     return sessionId;
   }
 
