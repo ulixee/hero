@@ -48,4 +48,6 @@ export default interface ITypedEventEmitter<T> {
     emitter: ITypedEventEmitter<T>,
     eventTypes: K[],
   ): IRegisteredEventListener[];
+
+  setMaxListeners(n: number): this;
 }
