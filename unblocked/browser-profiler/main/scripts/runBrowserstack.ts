@@ -34,7 +34,8 @@ export default async function runBrowserstack(): Promise<void> {
 
     // too old for the double agent suite
     if (browser.name === 'Firefox' && Number(browser.version.major) < 63) continue;
-    if (browser.name === 'Chrome' && Number(browser.version.major) < 58) continue;
+    // TODO: The dom environment plugin hangs <= 94. Need to investigate for scraper report eventually
+    if (browser.name === 'Chrome' && Number(browser.version.major) < 95) continue;
     if (browser.name === 'Safari' && Number(browser.version.major) < 11) continue;
     // no support for Promises, lambdas... detections need refactor for support
     if (browser.name === 'IE') continue;

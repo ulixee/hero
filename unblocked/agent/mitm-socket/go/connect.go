@@ -200,6 +200,7 @@ type ConnectArgs struct {
 type SessionArgs struct {
 	IpcSocketPath      string
 	RejectUnauthorized bool
+	UserAgent           string
 	ClientHelloId      string
 	TcpTtl             int
 	TcpWindowSize      int

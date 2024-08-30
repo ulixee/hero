@@ -220,6 +220,7 @@ export default abstract class BaseIpcHandler {
 export interface IGoIpcOpts {
   mode?: 'certs' | 'proxy';
   storageDir?: string;
+  userAgent?: string;
   ipcSocketPath?: string;
   clientHelloId?: string;
   tcpTtl?: number;

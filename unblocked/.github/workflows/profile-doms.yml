@@ -39,6 +39,10 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: unblocked/yarn.lock
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
       - name: Install ulixee/shared
         run: yarn build
         working-directory: ./shared
