@@ -5,6 +5,7 @@ export default function configureSessionTls(
   emulationProfile: IEmulationProfile,
   settings: ITlsSettings,
 ): void {
-  const { browserName, browserVersion } = emulationProfile.userAgentOption;
+  const { browserName, browserVersion, string } = emulationProfile.userAgentOption;
   settings.tlsClientHelloId = `${browserName}-${browserVersion.major}`;
+  settings.proxyUseragent = string;
 }

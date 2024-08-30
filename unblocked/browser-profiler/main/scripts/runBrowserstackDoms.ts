@@ -39,6 +39,9 @@ export default async function runBrowserstack(): Promise<void> {
       continue;
     }
 
+    // TODO: The dom environment plugin hangs <= 94. Need to investigate for scraper report eventually
+    if (browser.name === 'Chrome' && Number(browser.version.major) < 95) continue;
+
     // 1. Does this need to run? Clean up as needed.
     const domDir = Path.join(baseDomsDir, `${userAgentId}--${features}`);
     if (await existsAsync(domDir)) {

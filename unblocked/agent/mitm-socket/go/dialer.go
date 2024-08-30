@@ -25,7 +25,7 @@ func Dial(addr string, connectArgs ConnectArgs, sessionArgs SessionArgs) (net.Co
 			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl)
 		}
 
-		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !sessionArgs.RejectUnauthorized)
+		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !sessionArgs.RejectUnauthorized, sessionArgs.UserAgent)
 	}
 
 	dialConn, err := dialer.Dial("tcp", addr)

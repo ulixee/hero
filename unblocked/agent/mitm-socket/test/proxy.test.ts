@@ -10,6 +10,7 @@ import WebSocket = require('ws');
 import * as socks5 from 'simple-socks';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import * as http2 from 'http2';
+import exp = require('node:constants');
 import MitmSocket from '../index';
 import MitmSocketSession from '../lib/MitmSocketSession';
 
@@ -26,6 +27,7 @@ beforeAll(() => {
   mitmSocketSession = new MitmSocketSession(TestLogger.forTest(module), {
     clientHelloId: 'chrome-114',
     rejectUnauthorized: false,
+    userAgent: 'Chrome',
   });
   Helpers.onClose(() => mitmSocketSession.close(), true);
 });
@@ -51,6 +53,9 @@ test('should be able to send a request through a proxy', async () => {
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
   expect(connect).toHaveBeenCalledTimes(1);
+  expect(connect.mock.calls[0][0].url).toBe(`localhost:${server.port}`);
+  console.log(connect.mock.calls[0][0].headers);
+  expect(connect.mock.calls[0][0].headers['user-agent']).toBe('Chrome');
 });
 
 test('should be able to send a request through a secure proxy with auth', async () => {

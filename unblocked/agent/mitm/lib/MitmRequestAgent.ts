@@ -47,6 +47,7 @@ export default class MitmRequestAgent {
       tcpTtl: tcpSettings?.tcpTtl,
       tcpWindowSize: tcpSettings?.tcpWindowSize,
       debug: env.isDebug,
+      userAgent: tlsSettings.proxyUseragent,
     });
     this.maxConnectionsPerOrigin =
       tlsSettings?.socketsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
