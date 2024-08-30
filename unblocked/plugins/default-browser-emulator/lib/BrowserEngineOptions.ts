@@ -24,7 +24,7 @@ export default class BrowserEngineOptions {
             
 ----------- update to the latest data files using ----------
         
-         npx @ulixee/default-browser-emulator update
+         npx @ulixee/default-browser-emulator update-unblocked-emulators
         
 ------------------------------------------------------------`,
           );

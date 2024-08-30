@@ -46,7 +46,7 @@ export default class SeleniumRunners {
       return false;
     } finally {
       this.runners.delete(runner);
-      await runner?.stop();
+      await runner?.stop().catch(() => null);
     }
   }
 }

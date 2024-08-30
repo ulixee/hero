@@ -34,15 +34,17 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 			// application settings added in chrome 91
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_83)
 		} else if chromeVersion < 98 {
-		   // chrome 98 removed tls 1.1, 1.0
+			// chrome 98 removed tls 1.1, 1.0
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_96)
 		} else if chromeVersion < 110 {
-		   // chrome 110 implemented shuffling
+			// chrome 110 implemented shuffling
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_100)
 		} else if chromeVersion < 119 {
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_106_Shuffle)
+		} else if chromeVersion < 124 {
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120)
 		} else {
-		    spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120)
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120_PQ)
 		}
 	} else {
 		// default to latest shuffle

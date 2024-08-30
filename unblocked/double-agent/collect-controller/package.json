@@ -17,7 +17,7 @@
     "p-queue": "^6.2.1",
     "path-to-regexp": "^6.1.0",
     "source-map-support": "^0.5.16",
-    "tar": "^6.2.0",
+    "tar": "^6.2.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {
