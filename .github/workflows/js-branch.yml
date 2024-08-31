@@ -34,7 +34,7 @@ jobs:
 
 
       - name: Install unblocked
-        run: yarn build
+        run: yarn build:simple
         working-directory: ../../unblocked
 
       - name: Build modules
