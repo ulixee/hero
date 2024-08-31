@@ -52,7 +52,7 @@ jobs:
         working-directory: ./shared
 
       - name: Install unblocked
-        run: yarn build
+        run: yarn build:simple
         working-directory: ./unblocked
 
       - name: Linux - Apt Install Chrome(s)

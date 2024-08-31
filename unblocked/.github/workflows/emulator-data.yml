@@ -42,7 +42,7 @@ jobs:
         working-directory: shared
 
       - name: Yarn build
-        run: yarn build
+        run: yarn build:simple
         working-directory: unblocked
 
       - name: Update Dom Bridges

@@ -6,6 +6,7 @@
     "prepare": "husky",
     "bump-version": "ulx-repo-version-bump",
     "build": "yarn --frozen-lockfile && yarn tsc && cd ./build && cross-env ULX_MITM_REBUILD_SOCKET=1 yarn && pwd && yarn workspace @double-agent/config sync",
+    "build:simple": "yarn --frozen-lockfile && yarn tsc && cd ./build && yarn && pwd && yarn workspace @double-agent/config sync",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist",
     "copy:build": "ulx-repo-after-build && ulx-repo-adjust-paths && node alsoCopy.js",
     "copy:dist": "ulx-repo-after-build --dist && shx cp -r \"browser-emulator-builder/data\" \"build-dist/plugins/default-browser-emulator\" && ulx-repo-adjust-paths build-dist",
