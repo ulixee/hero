@@ -39,16 +39,12 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: unblocked/yarn.lock
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
       - name: Install ulixee/shared
         run: yarn build
         working-directory: ./shared
 
       - name: Install unblocked
-        run: yarn build
+        run: yarn build:simple
         working-directory: ./unblocked
 
       - name: 'Collect new Browserstack Profiles'
