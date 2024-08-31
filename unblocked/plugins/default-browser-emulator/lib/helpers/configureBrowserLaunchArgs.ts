@@ -39,7 +39,7 @@ export function configureBrowserLaunchArgs(
     '--disable-skia-runtime-opts', // Do not use runtime-detected high-end CPU optimizations in Skia.
 
     '--use-fake-device-for-media-stream',
-
+    '--disable-search-engine-choice-screen', // Disable the default search engine prompt
     '--no-default-browser-check', //  Disable the default browser check, do not prompt to set it as such
     '--metrics-recording-only', // Disable reporting to UMA, but allows for collection
     '--no-first-run', // Skip first run wizards
