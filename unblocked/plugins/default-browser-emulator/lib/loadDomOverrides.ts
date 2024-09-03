@@ -10,22 +10,7 @@ export default function loadDomOverrides(
   data: IBrowserData,
   userAgentData: IUserAgentData,
 ): DomOverridesBuilder {
-  const domOverrides = new DomOverridesBuilder();
-
-  const addOverrideWithConfigOrDefault = <T extends InjectedScript>(
-    injectedScript: T,
-    defaultConfig: IBrowserEmulatorConfig[T],
-    registerWorkerOverride = false,
-  ): void => {
-    const scriptConfig = config[injectedScript];
-    if (!scriptConfig) return;
-
-    domOverrides.add<IBrowserEmulatorConfig[T]>(
-      injectedScript,
-      scriptConfig === true ? defaultConfig : scriptConfig,
-      registerWorkerOverride,
-    );
-  };
+  const domOverrides = new DomOverridesBuilder(config);
 
   const deviceProfile = emulationProfile.deviceProfile;
   const isHeadless =
@@ -40,131 +25,108 @@ export default function loadDomOverrides(
 
   const domPolyfill = data.domPolyfill;
 
-  addOverrideWithConfigOrDefault(
+  domOverrides.addOverrideAndUseConfig(
     InjectedScript.ERROR,
     {
       removeInjectedLines: true,
-      modifyWrongProxyAndObjectString: true,
-      skipDuplicateSetPrototypeLines: true,
       applyStackTraceLimit: true,
+      fixConsoleStack: true,
     },
-    true,
+    { registerWorkerOverride: true },
   );
-  addOverrideWithConfigOrDefault(InjectedScript.CONSOLE, { mode: 'patchLeaks' }, true);
 
-  // TODO migrate others to new logic. This first requires proper types for all Plugin Args.
-  // This will also allow us to configure everything in special ways. In most occasions
-  // you would never want to do this, but this is very helpful for specific use-cases, e.g. testing.
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.CONSOLE,
+    undefined,
+    { registerWorkerOverride: true },
+  );
 
-  if (config[InjectedScript.JSON_STRINGIFY]) {
-    domOverrides.add(InjectedScript.JSON_STRINGIFY, undefined, true);
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.JSON_STRINGIFY,
+    undefined,
+    { registerWorkerOverride: true },
+  );
+
+  domOverrides.addOverrideAndUseConfig(InjectedScript.MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES, {
+    groupId: deviceProfile.videoDevice?.groupId,
+    deviceId: deviceProfile.videoDevice?.deviceId,
+  });
+
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.NAVIGATOR,
+    {
+      userAgentString: emulationProfile.userAgentOption.string,
+      platform: emulationProfile.windowNavigatorPlatform,
+      headless: isHeadless,
+      pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
+      userAgentData,
+      rtt: emulationProfile.deviceProfile.rtt,
+    },
+    { registerWorkerOverride: true },
+  );
+
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.NAVIGATOR_DEVICE_MEMORY,
+    {
+      memory: deviceProfile.deviceMemory,
+      storageTib: deviceProfile.deviceStorageTib,
+      maxHeapSize: deviceProfile.maxHeapSize,
+    },
+    { registerWorkerOverride: true },
+  );
+
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY,
+    {
+      concurrency: deviceProfile.hardwareConcurrency,
+    },
+    { registerWorkerOverride: true },
+  );
+
+  if (Number(emulationProfile.browserEngine.fullVersion.split('.')[0]) >= 109) {
+    domOverrides.addOverrideAndUseConfig(InjectedScript.PERFORMANCE, undefined);
   }
 
-  if (config[InjectedScript.MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES]) {
-    domOverrides.add(InjectedScript.MEDIA_DEVICES_PROTOTYPE_ENUMERATE_DEVICES, {
-      videoDevice: deviceProfile.videoDevice,
-    });
-  }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.POLYFILL_ADD, {
+    itemsToAdd: domPolyfill?.add ?? [],
+  });
 
-  if (config[InjectedScript.NAVIGATOR]) {
-    domOverrides.add(
-      InjectedScript.NAVIGATOR,
-      {
-        userAgentString: emulationProfile.userAgentOption.string,
-        platform: emulationProfile.windowNavigatorPlatform,
-        headless: isHeadless,
-        pdfViewerEnabled: data.windowNavigator.navigator.pdfViewerEnabled?._$value,
-        userAgentData,
-        rtt: emulationProfile.deviceProfile.rtt,
-      },
-      true,
-    );
-  }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.POLYFILL_MODIFY, {
+    itemsToModify: domPolyfill?.modify ?? [],
+  });
 
-  if (config[InjectedScript.NAVIGATOR_DEVICE_MEMORY]) {
-    domOverrides.add(
-      InjectedScript.NAVIGATOR_DEVICE_MEMORY,
-      {
-        memory: deviceProfile.deviceMemory,
-        storageTib: deviceProfile.deviceStorageTib,
-        maxHeapSize: deviceProfile.maxHeapSize,
-      },
-      true,
-    );
-  }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.POLYFILL_REMOVE, {
+    itemsToRemove: domPolyfill?.remove ?? [],
+  });
 
-  if (config[InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY]) {
-    domOverrides.add(
-      InjectedScript.NAVIGATOR_HARDWARE_CONCURRENCY,
-      {
-        concurrency: deviceProfile.hardwareConcurrency,
-      },
-      true,
-    );
-  }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.POLYFILL_REORDER, {
+    itemsToReorder: domPolyfill?.reorder ?? [],
+  });
 
-  if (
-    config[InjectedScript.PERFORMANCE] &&
-    Number(emulationProfile.browserEngine.fullVersion.split('.')[0]) >= 109
-  ) {
-    domOverrides.add(InjectedScript.PERFORMANCE);
-  }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.SHAREDWORKER_PROTOTYPE, undefined, {
+    registerWorkerOverride: true,
+  });
 
-  if (domPolyfill) {
-    if (config[InjectedScript.POLYFILL_ADD] && domPolyfill?.add?.length) {
-      domOverrides.add(InjectedScript.POLYFILL_ADD, {
-        itemsToAdd: domPolyfill.add,
-      });
-    }
+  domOverrides.addOverrideAndUseConfig(InjectedScript.SPEECH_SYNTHESIS_GETVOICES, { voices });
 
-    if (config[InjectedScript.POLYFILL_MODIFY] && domPolyfill?.modify?.length) {
-      domOverrides.add(InjectedScript.POLYFILL_MODIFY, {
-        itemsToAdd: domPolyfill.modify,
-      });
-    }
+  const frame = data.windowFraming;
+  domOverrides.addOverrideAndUseConfig(InjectedScript.WINDOW_SCREEN, {
+    unAvailHeight: frame.screenGapTop + frame.screenGapBottom,
+    unAvailWidth: frame.screenGapLeft + frame.screenGapRight,
+    colorDepth: emulationProfile.viewport.colorDepth ?? frame.colorDepth,
+  });
 
-    if (config[InjectedScript.POLYFILL_REMOVE] && domPolyfill?.remove?.length) {
-      domOverrides.add(InjectedScript.POLYFILL_REMOVE, {
-        itemsToRemove: domPolyfill.remove,
-      });
-    }
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS,
+    { preventDefaultUncaughtError: true, preventDefaultUnhandledRejection: true },
+    { registerWorkerOverride: true },
+  );
 
-    if (config[InjectedScript.POLYFILL_REORDER] && domPolyfill?.reorder?.length) {
-      domOverrides.add(InjectedScript.POLYFILL_REORDER, {
-        itemsToReorder: domPolyfill.add,
-      });
-    }
-  }
-
-  if (config[InjectedScript.SHAREDWORKER_PROTOTYPE]) {
-    domOverrides.add(InjectedScript.SHAREDWORKER_PROTOTYPE, undefined, true);
-  }
-
-  if (config[InjectedScript.SPEECH_SYNTHESIS_GETVOICES] && voices?.length) {
-    domOverrides.add(InjectedScript.SPEECH_SYNTHESIS_GETVOICES, { voices });
-  }
-
-  if (config[InjectedScript.WINDOW_SCREEN]) {
-    const frame = data.windowFraming;
-    domOverrides.add(InjectedScript.WINDOW_SCREEN, {
-      unAvailHeight: frame.screenGapTop + frame.screenGapBottom,
-      unAvailWidth: frame.screenGapLeft + frame.screenGapRight,
-      colorDepth: emulationProfile.viewport.colorDepth ?? frame.colorDepth,
-    });
-  }
-
-  if (config[InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS]) {
-    domOverrides.add(InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS);
-    domOverrides.registerWorkerOverrides(InjectedScript.UNHANDLED_ERRORS_AND_REJECTIONS);
-  }
-
-  if (config[InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS]) {
-    domOverrides.add(
-      InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
-      deviceProfile.webGlParameters,
-      true,
-    );
-  }
+  domOverrides.addOverrideAndUseConfig(
+    InjectedScript.WEBGL_RENDERING_CONTEXT_PROTOTYPE_GETPARAMETERS,
+    deviceProfile.webGlParameters,
+    { registerWorkerOverride: true },
+  );
 
   return domOverrides;
 }
