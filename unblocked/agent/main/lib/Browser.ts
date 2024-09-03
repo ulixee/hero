@@ -355,10 +355,13 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   private applyDefaultLaunchArgs(options: IBrowserUserConfig): void {
     const launchArgs = [
       ...this.engine.launchArguments,
-      '--ignore-certificate-errors',
       '--no-startup-window',
       '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs
     ];
+
+    if (!options.disableMitm) {
+      launchArgs.push('--ignore-certificate-errors');
+    }
 
     if (options.proxyPort !== undefined && !launchArgs.some(x => x.startsWith('--proxy-server'))) {
       launchArgs.push(
