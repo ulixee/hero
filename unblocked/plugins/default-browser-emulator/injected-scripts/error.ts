@@ -20,18 +20,14 @@ Error.prepareStackTrace = prepareStackTrace;
 
 ObjectCached.defineProperty(self, 'Error', {
   // eslint-disable-next-line object-shorthand
-  value: function (this, msg) {
+  value: function Error(this, msg, opts) {
     // eslint-disable-next-line strict
     'use strict';
-    let constructor;
-    try {
-      constructor = this && ObjectCached.getPrototypeOf(this).constructor === Error;
-    } catch {}
-
-    if (!constructor) {
-      return ReflectCached.apply(OriginalError, this, [msg]);
+    const argArray = [msg, opts];
+    if (!new.target) {
+      return ReflectCached.apply(OriginalError, this, argArray);
     }
-    return ReflectCached.construct(OriginalError, [msg]);
+    return ReflectCached.construct(OriginalError, argArray, new.target);
   },
 });
 

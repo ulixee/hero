@@ -235,19 +235,14 @@ function runAndInjectProxyInStack(target: any, thisArg: any, argArray: any, prox
 
   ObjectCached.defineProperty(self, 'Proxy', {
     // eslint-disable-next-line object-shorthand
-    value: function (this, target, handler) {
+    value: function Proxy(this, target, handler) {
       // eslint-disable-next-line strict
       'use strict';
-      let constructor;
-      try {
-        constructor = this && ObjectCached.getPrototypeOf(this).constructor === Proxy;
-      } catch {}
-
-      if (!constructor) {
+      if (!new.target) {
         return ReflectCached.apply(OriginalProxy, this, [target, handler]);
       }
 
-      const result = ReflectCached.construct(OriginalProxy, [target, handler]);
+      const result = ReflectCached.construct(OriginalProxy, [target, handler], new.target);
       if (target && typeof target === 'object') proxyToTarget.set(result, target);
       return result;
     },

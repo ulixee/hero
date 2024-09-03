@@ -256,60 +256,60 @@ test('Errors should not leak proxy objects, second simple edition: looking at Er
 });
 
 test('Errors should not leak proxy objects, advanced edition: looking at Error.prepareStackTrace', async () => {
-    function script() {
-      let errorSeen;
-      let stackTracesSeen;
+  function script() {
+    let errorSeen;
+    let stackTracesSeen;
 
-      function leak() {
-        try {
-          // @ts-expect-error
-          document.boddfsqy.innerHTML = 'dfjksqlm';
-        } catch (e) {
-          return e.stack;
-        }
-      }
-
-      Error.prepareStackTrace = (error, stackTraces) => {
-        // This should already be ok if simply tests succeed but also check
-        // everything here is as expected in case we missed something.
-        errorSeen = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
-        // Fixing error.stack is one thing, but holly hell this leaks even more, good thing we can hide this
-        stackTracesSeen = stackTraces.map(callsite => {
-          const callsiteInfo = {};
-          for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(callsite))) {
-            // This doesn't work with JSON.toString, but also doesn't contain anything interesting so just drop it.
-            if (key === 'getThis') continue;
-            try {
-              callsiteInfo[key] = callsite[key]();
-            } catch {
-              // dont care
-            }
-          }
-          return callsiteInfo;
-        });
-
-        return error.stack;
-      };
-
-      // @ts-expect-error
-      console.info.leak = leak;
+    function leak() {
       try {
         // @ts-expect-error
-        console.info.leak();
+        document.boddfsqy.innerHTML = 'dfjksqlm';
       } catch (e) {
-        // trigger stack
-        const _stack = e.stack;
+        return e.stack;
       }
-
-      return { errorSeen, stackTracesSeen };
     }
 
-    const { output, referenceOutput } = await runScriptWithReference(script);
-    expect(output).toEqual(referenceOutput);
+    Error.prepareStackTrace = (error, stackTraces) => {
+      // This should already be ok if simply tests succeed but also check
+      // everything here is as expected in case we missed something.
+      errorSeen = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+      // Fixing error.stack is one thing, but holly hell this leaks even more, good thing we can hide this
+      stackTracesSeen = stackTraces.map(callsite => {
+        const callsiteInfo = {};
+        for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(callsite))) {
+          // This doesn't work with JSON.toString, but also doesn't contain anything interesting so just drop it.
+          if (key === 'getThis') continue;
+          try {
+            callsiteInfo[key] = callsite[key]();
+          } catch {
+            // dont care
+          }
+        }
+        return callsiteInfo;
+      });
+
+      return error.stack;
+    };
+
+    // @ts-expect-error
+    console.info.leak = leak;
+    try {
+      // @ts-expect-error
+      console.info.leak();
+    } catch (e) {
+      // trigger stack
+      const _stack = e.stack;
+    }
+
+    return { errorSeen, stackTracesSeen };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
 });
 
 test('Error should also not leak when using call with a proxy', async () => {
@@ -542,7 +542,7 @@ test('string expansion trigger should not reveal different .toString location', 
 
   const { output, referenceOutput } = await runScriptWithReference(script);
   expect(output).toEqual(referenceOutput);
-}, 999999);
+});
 
 test('Should not leak we are modifying functions because this changes for primitives', async () => {
   function script() {
@@ -553,6 +553,24 @@ test('Should not leak we are modifying functions because this changes for primit
     });
 
     return proxy.call('stringThisArg');
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('should not leak we modified error constructor', async () => {
+  function script() {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'Error');
+    const propertyDescriptors = Object.getOwnPropertyDescriptors(Error);
+
+    const fnStack = Error('stack 1').stack;
+    const classStack = new Error('stack 2').stack;
+
+    class Test extends Error {}
+    const testStack = new Test('test').stack;
+
+    return { descriptor, propertyDescriptors, fnStack, classStack, testStack };
   }
 
   const { output, referenceOutput } = await runScriptWithReference(script);

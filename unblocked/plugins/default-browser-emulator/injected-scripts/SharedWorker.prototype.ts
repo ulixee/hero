@@ -11,15 +11,10 @@ const originalSharedWorkerProperties = ObjectCached.getOwnPropertyDescriptors(Sh
 // shared workers created from blobs don't automatically pause in devtools, so we have to manipulate
 ObjectCached.defineProperty(self, 'SharedWorker', {
   // eslint-disable-next-line object-shorthand
-  value: function (this, scriptURL, options) {
+  value: function SharedWorker(this, scriptURL, options) {
     // eslint-disable-next-line strict
     'use strict';
-    let constructor;
-    try {
-      constructor = this && ObjectCached.getPrototypeOf(this).constructor === SharedWorker;
-    } catch {}
-
-    if (!constructor) {
+    if (!new.target) {
       return ReflectCached.apply(OriginalSharedWorker, this, [scriptURL, options]);
     }
 
@@ -28,7 +23,7 @@ ObjectCached.defineProperty(self, 'SharedWorker', {
       isBlob = scriptURL?.toString().startsWith('blob:');
     } catch {}
     if (!isBlob) {
-      return ReflectCached.construct(OriginalSharedWorker, [scriptURL, options]);
+      return ReflectCached.construct(OriginalSharedWorker, [scriptURL, options], new.target);
     }
 
     // read blob contents synchronously
@@ -40,7 +35,7 @@ ObjectCached.defineProperty(self, 'SharedWorker', {
     const script = createScript(text);
 
     const newBlob = new Blob([script]);
-    return ReflectCached.construct(OriginalSharedWorker, [URL.createObjectURL(newBlob), options]);
+    return ReflectCached.construct(OriginalSharedWorker, [URL.createObjectURL(newBlob), options], new.target);
   },
 });
 
