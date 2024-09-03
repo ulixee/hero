@@ -10,6 +10,15 @@ module.exports = {
       files: ['**/*.ts'],
       rules: {
         'no-restricted-globals': 'off',
+        'no-restricted-properties': [
+          'error',
+          ...Object.getOwnPropertyNames(Object).map(key => {
+            return { object: 'Object', property: key };
+          }),
+          ...Object.getOwnPropertyNames(Reflect).map(key => {
+            return { object: 'Reflect', property: key };
+          }),
+        ],
         'no-proto': 'off',
         'no-extend-native': 'off',
         'no-inner-declarations': 'off',
@@ -21,6 +30,7 @@ module.exports = {
         'prefer-rest-params': 'off',
         'func-names': 'off',
         'no-console': 'off',
+        'lines-around-directive': 'off',
       },
     },
   ],
