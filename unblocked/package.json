@@ -14,7 +14,8 @@
     "watch": "yarn tsc && tsc -b -w tsconfig.json",
     "test": "yarn copy:build && yarn test:build",
     "test:build": "cd ./build && cross-env ULX_DATA_DIR=.data-test NODE_ENV=test jest",
-    "test:debug": "yarn build && yarn copy:build && cd ./build && cross-env ULX_DATA_DIR=.data-test NODE_ENV=test node --inspect node_modules/.bin/jest --runInBand",
+    "test:debug": "yarn build && cd ./build && cross-env ULX_DATA_DIR=.data-test NODE_ENV=test node --inspect node_modules/.bin/jest --runInBand",
+    "test:debug:fast": "yarn tsc && cd ./build && cross-env ULX_DATA_DIR=.data-test NODE_ENV=test node --inspect node_modules/.bin/jest --runInBand",
     "lint": "eslint --cache ./",
     "version:check": "ulx-repo-version-check fix",
     "version:bump": "ulx-repo-version-bump"
