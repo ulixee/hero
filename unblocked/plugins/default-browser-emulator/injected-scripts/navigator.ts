@@ -79,38 +79,7 @@ replaceGetter(self.navigator, 'platform', () => typedArgs.platform, {
   onlyForInstance: true,
 });
 
-if ('setAppBadge' in self.navigator) {
-  // @ts-ignore
-  replaceFunction(self.navigator, 'setAppBadge', async (target, thisArg, argArray) => {
-    if (ObjectCached.getPrototypeOf(thisArg) !== Navigator.prototype) {
-      throw new TypeError("Failed to execute 'setAppBadge' on 'Navigator': Illegal invocation");
-    } else if (argArray.length) {
-      const arg = argArray[0];
-      if (typeof arg === 'number') {
-        if (arg < 0 || arg > Number.MAX_SAFE_INTEGER) {
-          throw new TypeError(
-            `Failed to execute 'setAppBadge' on 'Navigator': Value is outside the 'unsigned long long' value range.`,
-          );
-        }
-      } else {
-        throw new TypeError(
-          `Failed to execute 'setAppBadge' on 'Navigator': Value is not of type 'unsigned long long'.`,
-        );
-      }
-    }
-    return undefined;
-  });
-}
 
-if ('clearAppBadge' in self.navigator) {
-  // @ts-ignore
-  replaceFunction(self.navigator, 'clearAppBadge', async (target, thisArg, argArray) => {
-    if (ObjectCached.getPrototypeOf(thisArg) !== Navigator.prototype) {
-      throw new TypeError("Failed to execute 'clearAppBadge' on 'Navigator': Illegal invocation");
-    }
-    return undefined;
-  });
-}
 
 if (typedArgs.headless === true && 'requestMediaKeySystemAccess' in self.navigator) {
   replaceFunction(
