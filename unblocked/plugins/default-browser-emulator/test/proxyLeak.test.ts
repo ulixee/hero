@@ -577,6 +577,36 @@ test('should not leak we modified error constructor', async () => {
   expect(output).toEqual(referenceOutput);
 });
 
+test('should trigger user unhandledrejection', async () => {
+  async function script() {
+    const result = {
+      triggered: false,
+      defaultPrevented: null,
+      defaultPreventedAfterCall: null,
+    };
+    window.addEventListener('unhandledrejection', event => {
+      result.triggered = true;
+      result.defaultPrevented = event.defaultPrevented;
+
+      event.preventDefault();
+      result.defaultPreventedAfterCall = event.defaultPrevented;
+    });
+
+    async function thrower() {
+      throw new Error('async error');
+    }
+    void thrower();
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 200);
+    });
+    return result;
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
 // ** TEMPLATE for test **/
 
 test('template test', async () => {

@@ -13,10 +13,10 @@ if (typedArgs.preventDefaultUnhandledRejection) {
 }
 
 function preventDefault(event: ErrorEvent | PromiseRejectionEvent) {
+  let prevented = event.defaultPrevented;
   event.preventDefault();
 
   // Hide this, but make sure if they hide it we mimic normal behaviour
-  let prevented = event.defaultPrevented;
   replaceFunction(
     event,
     'preventDefault',
@@ -30,8 +30,8 @@ function preventDefault(event: ErrorEvent | PromiseRejectionEvent) {
   replaceGetter(
     event,
     'defaultPrevented',
-    (target, thisArg) => {
-      ReflectCached.get(target, thisArg);
+    (target, thisArg, argArray) => {
+      ReflectCached.apply(target, thisArg, argArray);
       return prevented;
     },
     { onlyForInstance: true },
