@@ -37,7 +37,7 @@ jobs:
         working-directory: ../shared
 
       - name: Yarn build
-        run: yarn build
+        run: yarn build:simple
 
       - name: Import Profiles
         run: yarn workspace @ulixee/double-agent-stacks 0
