@@ -1,7 +1,6 @@
 export type Args = {
+  fixConsoleStack: boolean;
   removeInjectedLines: boolean;
-  modifyWrongProxyAndObjectString: boolean;
-  skipDuplicateSetPrototypeLines: boolean;
   applyStackTraceLimit: boolean;
 };
 
@@ -13,25 +12,55 @@ if (typeof self === 'undefined') {
   return;
 }
 
-let stackTracelimit = Error.stackTraceLimit;
-Error.stackTraceLimit = 200;
+const OriginalError = Error;
+const originalErrorProperties = ObjectCached.getOwnPropertyDescriptors(Error);
 
-let customPrepareStackTrace: any | undefined;
+Error.stackTraceLimit = 10000;
+Error.prepareStackTrace = prepareStackTrace;
 
-const proxyThisTrackerHere = proxyThisTracker;
-const proxyToTargetHere = proxyToTarget;
-const getPrototypeSafeHere = getPrototypeSafe;
-function prepareStackAndStackTraces(error: Error, stackTraces?: NodeJS.CallSite[]) {
+ObjectCached.defineProperty(self, 'Error', {
+  // eslint-disable-next-line object-shorthand
+  value: function (this, msg) {
+    // eslint-disable-next-line strict
+    'use strict';
+    let constructor;
+    try {
+      constructor = this && ObjectCached.getPrototypeOf(this).constructor === Error;
+    } catch {}
+
+    if (!constructor) {
+      return ReflectCached.apply(OriginalError, this, [msg]);
+    }
+    return ReflectCached.construct(OriginalError, [msg]);
+  },
+});
+
+ObjectCached.defineProperties(Error, originalErrorProperties);
+Error.prototype.constructor = Error;
+toOriginalFn.set(Error, OriginalError);
+
+ObjectCached.getOwnPropertyNames(self).forEach(key => {
+  if (!key.includes('Error')) return;
+  const item = self[key];
+  if (OriginalError.isPrototypeOf(item) && ObjectCached.getPrototypeOf(item) === OriginalError) {
+    ObjectCached.setPrototypeOf(item, Error);
+  }
+});
+
+function prepareStackAndStackTraces(
+  error: Error,
+  stackTraces: NodeJS.CallSite[] = [],
+): { stack?: string; stackTraces: NodeJS.CallSite[] } {
   let stack = error.stack;
-  stackTraces ??= [];
+  const safeStackTraces: NodeJS.CallSite[] = [];
+  if (!stack) return { stack, stackTraces: safeStackTraces };
+
   const lines = stack.split('\n');
-  const safeLines = [];
-  const safeStackTraces = [];
+  const safeLines: string[] = [];
   // Chrome debugger generates these things one the fly for every letter you type in
   // devtools so it can dynamically generates previews, but this is super annoying when
   // working with debug points. Also we don't need to modify them because they only contain
   // a single first line, which never leaks any information
-
   if (lines.length <= 1) return { stack, stackTraces };
 
   // First line never leak
@@ -40,60 +69,78 @@ function prepareStackAndStackTraces(error: Error, stackTraces?: NodeJS.CallSite[
   // stack lines - first line = stackTraces array
   for (let i = 1; i < lines.length; i++) {
     let line = lines[i];
-    const stackTrace = stackTraces.at(i - 1);
+    let stackTrace = stackTraces.at(i - 1);
 
     // First line doesnt count for limit
-    if (safeLines.length > stackTracelimit && typedArgs.applyStackTraceLimit) break;
+    if (safeLines.length > Error.stackTraceLimit && typedArgs.applyStackTraceLimit) break;
 
-    if (setProtoTracker.has(error) && i === 1 && typedArgs.skipDuplicateSetPrototypeLines) continue;
-
-    if (line.includes(sourceUrl) && typedArgs.removeInjectedLines) {
-      continue;
+    if (typedArgs.fixConsoleStack && line.includes(sourceUrl) && line.includes('console.')) {
+      ({ line, stackTrace } = fixConsoleStack(line, stackTrace));
     }
 
-    const hideProxyLogic = () => {
-      if (!typedArgs.modifyWrongProxyAndObjectString) return;
-      if (!line.includes('Proxy') && !line.includes('Object')) return;
-
-      const nextLine = lines.at(i + 1);
-      if (!nextLine) return;
-
-      const name = nextLine.trim().split(' ').at(1);
-      if (!name?.includes('Internal-')) return;
-
-      let originalThis = proxyThisTrackerHere.get(name);
-      if (!originalThis) return;
-      if (originalThis instanceof WeakRef) originalThis = originalThis.deref();
-
-      let proxyTarget = originalThis;
-      while (proxyTarget) {
-        originalThis = proxyTarget;
-        proxyTarget =
-          proxyToTargetHere.get(originalThis) ??
-          proxyToTargetHere.get(getPrototypeSafeHere(originalThis));
-      }
-
-      const replacement = typeof originalThis === 'function' ? 'Function' : 'Object';
-      // Make sure to replace Object first, so we don't accidentally replace it.
-      line = line.replace('Object', replacement);
-      line = line.replace('Proxy', replacement);
-    };
-
-    hideProxyLogic();
+    if (line.includes(sourceUrl) && typedArgs.removeInjectedLines) continue;
 
     safeLines.push(line);
-    if (stackTrace) {
-      safeStackTraces.push(stackTrace);
-    }
+    if (stackTrace) safeStackTraces.push(stackTrace);
   }
 
   stack = safeLines.join('\n');
   return { stack, stackTraces: safeStackTraces };
 }
 
-Error.prepareStackTrace = (error, stackTraces) => {
+function fixConsoleStack(line: string, stackTrace?: NodeJS.CallSite) {
+  line = `${line.substring(0, 20)}(<anonymous>)`;
+  if (stackTrace) {
+    const originalProperties = ObjectCached.getOwnPropertyDescriptors(
+      ObjectCached.getPrototypeOf(stackTrace),
+    );
+    const writeableProperties = ObjectCached.getOwnPropertyDescriptors(
+      ObjectCached.getPrototypeOf(stackTrace),
+    );
+
+    ObjectCached.keys(writeableProperties).forEach(key => {
+      writeableProperties[key].writable = true;
+      writeableProperties[key].configurable = true;
+    });
+    const newProto = {};
+    ObjectCached.defineProperties(newProto, writeableProperties);
+    ObjectCached.setPrototypeOf(stackTrace, newProto);
+
+    [
+      'getScriptNameOrSourceURL',
+      'getLineNumber',
+      'getEnclosingLineNumber',
+      'getEnclosingColumnNumber',
+      'getColumnNumber',
+    ].forEach(key =>
+      replaceFunction(stackTrace as any, key, (target, thisArg, argArray) => {
+        const _result = ReflectCached.apply(target, thisArg, argArray);
+        return null;
+      }),
+    );
+
+    replaceFunction(stackTrace as any, 'getPosition', (target, thisArg, argArray) => {
+      const _result = ReflectCached.apply(target, thisArg, argArray);
+      return 0;
+    });
+
+    const ObjectCachedHere = ObjectCached;
+    ObjectCached.keys(originalProperties).forEach(key => {
+      ObjectCachedHere.defineProperty(newProto, key, {
+        ...ObjectCachedHere.getOwnPropertyDescriptor(newProto, key),
+        writable: originalProperties[key].writable,
+        configurable: originalProperties[key].configurable,
+      });
+    });
+  }
+
+  return { line, stackTrace };
+}
+
+function prepareStackTrace(error, stackTraces) {
   const { stack, stackTraces: safeStackTraces } = prepareStackAndStackTraces(error, stackTraces);
 
+  const customPrepareStackTrace = Error.prepareStackTrace;
   if (!customPrepareStackTrace) {
     return stack;
   }
@@ -110,43 +157,4 @@ Error.prepareStackTrace = (error, stackTraces) => {
     // Default behaviour when prepareStackTrace crashes
     return error.toString();
   }
-};
-
-const ErrorDescriptor = ObjectCached.getOwnPropertyDescriptor(self, 'Error');
-const ErrorProxy = internalCreateFnProxy({
-  target: Error,
-  inner: {
-    get: (target, p, receiver) => {
-      // Special property that other plugins can use to see if injected scripts are loaded
-      if (p === sourceUrl) return true;
-      if (p === 'prepareStackTrace') return customPrepareStackTrace;
-      if (p === 'stackTraceLimit') return stackTracelimit;
-      return ReflectCached.get(target, p, receiver);
-    },
-    set: (target, p, newValue, receiver) => {
-      if (p === 'prepareStackTrace') {
-        console.info('prepareStackTrace used by external user');
-        customPrepareStackTrace = newValue;
-        return true;
-      }
-      if (p === 'stackTraceLimit') {
-        stackTracelimit = newValue;
-        return true;
-      }
-      return ReflectCached.set(target, p, newValue, receiver);
-    },
-  },
-});
-
-ObjectCached.defineProperty(self, 'Error', {
-  ...ErrorDescriptor,
-  value: ErrorProxy,
-});
-
-proxyFunction(Error, 'captureStackTrace', (targetObj, thisArg, argArray) => {
-  const [obj, ...rest] = argArray as any;
-  const out = ReflectCached.apply(targetObj, thisArg, [obj, ...rest]);
-  const { stack } = prepareStackAndStackTraces(obj);
-  obj.stack = stack;
-  return out;
-});
+}
