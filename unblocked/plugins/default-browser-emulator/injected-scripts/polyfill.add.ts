@@ -1,4 +1,9 @@
-for (const itemToAdd of args.itemsToAdd || []) {
+export type Args = {
+  itemsToAdd: any[];
+};
+const typedArgs = args as Args;
+
+for (const itemToAdd of typedArgs.itemsToAdd) {
   try {
     if (itemToAdd.propertyName === 'getVideoPlaybackQuality') {
       itemToAdd.property['_$$value()'] = function () {
@@ -16,7 +21,11 @@ for (const itemToAdd of args.itemsToAdd || []) {
       ),
     );
   } catch (err) {
-    console.log(`ERROR adding polyfill ${itemToAdd.path}.${itemToAdd.propertyName}\n${err.stack}`);
+    let log = `ERROR adding polyfill ${itemToAdd.path}.${itemToAdd.propertyName}`;
+    if (err instanceof Error) {
+      log += `\n${err.stack}`;
+    }
+    console.error(log);
   }
 }
 

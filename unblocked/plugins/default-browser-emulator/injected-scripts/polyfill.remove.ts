@@ -1,8 +1,17 @@
-for (const itemToRemove of args.itemsToRemove || []) {
+export type Args = {
+  itemsToRemove: any[];
+};
+const typedArgs = args as Args;
+
+for (const itemToRemove of typedArgs.itemsToRemove) {
   try {
     const parent = getObjectAtPath(itemToRemove.path);
     delete parent[itemToRemove.propertyName];
   } catch (err) {
-    console.log(`ERROR deleting path ${itemToRemove.path}.${itemToRemove.propertyName}\n${err.toString()}`);
+    let log = `ERROR deleting prop ${itemToRemove.path}.${itemToRemove.propertyName}`;
+    if (err instanceof Error) {
+      log += `\n${err.stack}`;
+    }
+    console.error(log);
   }
 }
