@@ -28,10 +28,9 @@ afterEach(Helpers.afterEach, 30e3);
 
 // Modify these values for easy testing
 const config = {
-  modifyWrongProxyAndObjectString: true,
   removeInjectedLines: true,
-  skipDuplicateSetPrototypeLines: true,
   applyStackTraceLimit: true,
+  fixConsoleStack: true,
 } satisfies ErrorArgs;
 const debug = false; // True will increase timeouts and open chrome with debugger attached
 
@@ -256,10 +255,7 @@ test('Errors should not leak proxy objects, second simple edition: looking at Er
   expect(output).toEqual(referenceOutput);
 });
 
-// TODO hide this test somewhere as it seems they don't know this yet??? But we did fix so doesn't really hurt?
-test.failing(
-  'Errors should not leak proxy objects, advanced edition: looking at Error.prepareStackTrace',
-  async () => {
+test('Errors should not leak proxy objects, advanced edition: looking at Error.prepareStackTrace', async () => {
     function script() {
       let errorSeen;
       let stackTracesSeen;
@@ -314,9 +310,7 @@ test.failing(
 
     const { output, referenceOutput } = await runScriptWithReference(script);
     expect(output).toEqual(referenceOutput);
-  },
-  9999999,
-);
+});
 
 test('Error should also not leak when using call with a proxy', async () => {
   function script() {
@@ -385,7 +379,22 @@ test('Error should also not leak when using bind with a proxy', async () => {
       }
     }
 
-    return leak.bind(console.info)();
+    const bound = leak.bind(console.info);
+    return bound();
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('Bind should work as expected', async () => {
+  function script() {
+    function bla() {
+      return this.data;
+    }
+    const t = { data: 'test' };
+
+    return bla.bind(t).bind(undefined)();
   }
 
   const { output, referenceOutput } = await runScriptWithReference(script);
@@ -485,6 +494,71 @@ test('stacktrace length should be the same', async () => {
   expect(output).toEqual(referenceOutput);
 });
 
+test('string expansion should trigger', async () => {
+  function script() {
+    let toStringTriggered = false;
+    const t = {
+      toString() {
+        toStringTriggered = true;
+        return 'test';
+      },
+    };
+    console.info('%s', t);
+    return { toStringTriggered };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('string expansion trigger should not reveal different .toString location', async () => {
+  function script() {
+    const error = new Error();
+    let wrongStack = false;
+    let seenStackInName = '';
+    let nameStack = '';
+
+    Object.defineProperty(error, 'stack', {
+      get() {
+        return 'proxied stack';
+      },
+    });
+    const expectedStack = Object.getOwnPropertyDescriptor(error, 'stack');
+
+    Object.defineProperty(error, 'name', {
+      get() {
+        if (Object.getOwnPropertyDescriptor(this, 'stack').get !== expectedStack.get) {
+          wrongStack = true;
+        }
+        seenStackInName = this.stack;
+        nameStack = new Error().stack;
+        return 'name';
+      },
+    });
+
+    console.info(error);
+    return { wrongStack, seenStackInName, nameStack };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+}, 999999);
+
+test('Should not leak we are modifying functions because this changes for primitives', async () => {
+  function script() {
+    const proxy = new Proxy(Function.prototype.toString, {
+      apply(target, thisArg, argArray) {
+        return typeof thisArg;
+      },
+    });
+
+    return proxy.call('stringThisArg');
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
 // ** TEMPLATE for test **/
 
 test('template test', async () => {
@@ -518,7 +592,7 @@ async function runScript<T extends AnyFunction | string>(poolToUse: Pool, fn: T)
   const agent = poolToUse.createAgent({
     logger,
     options: { showChrome: debug && poolToUse === pool, showDevtools: debug },
-    customEmulatorConfig: {
+    pluginConfigs: {
       [BrowserEmulator.id]: {
         ...defaultConfig,
         [InjectedScript.ERROR]: config,
@@ -555,3 +629,57 @@ async function runScript<T extends AnyFunction | string>(poolToUse: Pool, fn: T)
 
   return output;
 }
+
+// Play with this test
+// eslint-disable-next-line jest/no-disabled-tests, jest/expect-expect
+test.skip('headful chrome for debugging', async () => {
+  const agent = pool.createAgent({
+    logger,
+    options: {
+      // useRemoteDebuggingPort: true,
+      showChrome: true,
+      // disableMitm: true,
+      // useRemoteDebuggingPort: true
+    },
+
+    pluginConfigs: {
+      [BrowserEmulator.id]: {
+        ...allDisabled,
+        'Document.prototype.cookie': true,
+        'JSON.stringify': false,
+        'MediaDevices.prototype.enumerateDevices': true,
+        'navigator.deviceMemory': true,
+        'navigator.hardwareConcurrency': true,
+        'polyfill.add': false,
+        'polyfill.modify': false,
+        'polyfill.remove': false,
+        'polyfill.reorder': false,
+        'RTCRtpSender.getCapabilities': true,
+        'SharedWorker.prototype': false,
+        'speechSynthesis.getVoices': true,
+        'WebGLRenderingContext.prototype.getParameter': false,
+        'window.screen': true,
+        console: true,
+        error: true,
+        navigator: true,
+        performance: true,
+        UnhandledErrorsAndRejections: true,
+        webrtc: true,
+
+        // ...defaultConfig,
+        // [InjectedScript.ERROR]: config,
+      } satisfies IBrowserEmulatorConfig,
+    },
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  const url = 'about:blank';
+  await page.goto(url).catch(() => undefined);
+  // eslint-disable-next-line promise/param-names
+  await new Promise(r => undefined);
+}, 999999999);
+
+const allDisabled = Object.values(InjectedScript).reduce((acc, value) => {
+  return { ...acc, [value]: false };
+}, {} as IBrowserEmulatorConfig);
