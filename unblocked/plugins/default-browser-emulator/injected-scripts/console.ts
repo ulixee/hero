@@ -32,6 +32,22 @@ const ALL_CONSOLE_METHODS: ConsoleKeys = [
   ...CONSOLE_METHODS,
 ] as const;
 
+// TODO move to utils in PR to cache everything
+const CACHED = {
+  Object,
+  Date,
+  Function,
+  Error,
+  RegExp,
+  String,
+  ArrayIsArray: Array.isArray,
+  NumberParseFloat: Number.parseFloat,
+  NumberParseInt: Number.parseInt,
+  NumberNaN: Number.NaN,
+  // eslint-disable-next-line no-restricted-properties
+  ObjectPrototypeToString: Object.prototype.toString
+};
+
 ALL_CONSOLE_METHODS.forEach(key => {
   if (typeof console[key] !== 'function') return;
   replaceFunction(console, key, (target, thisArg, argArray) => {
@@ -65,9 +81,9 @@ function formatter(args: any[]) {
     const specifier = state.str[state.offset + 1];
     if (['d', 'f', 'i'].includes(specifier)) {
       if (typeof current === 'symbol') {
-        current = Number.NaN;
+        current = CACHED.NumberNaN;
       } else {
-        const fn = specifier === 'f' ? Number.parseFloat : Number.parseInt;
+        const fn = specifier === 'f' ? CACHED.NumberParseFloat : CACHED.NumberParseInt;
         const fnArgs = [current, 10] as const;
         try {
           current = fn(...fnArgs);
@@ -77,7 +93,7 @@ function formatter(args: any[]) {
       }
     } else if (specifier === 's') {
       try {
-        current = String(current);
+        current = CACHED.String(current);
       } catch {
         return false;
       }
@@ -118,22 +134,22 @@ class V8ValueStringBuilder {
     if (typeof value === 'string') return this.appendString(value);
     if (typeof value === 'bigint') return this.appendBigInt(value);
     if (typeof value === 'symbol') return this.appendSymbol(value);
-    if (Array.isArray(value)) return this.appendArray(value);
+    if (CACHED.ArrayIsArray(value)) return this.appendArray(value);
     if (proxyToTarget.has(value)) {
       this.m_builder += '[object Proxy]';
       return true;
     }
 
     if (
-      value instanceof Object &&
-      !(value instanceof Date) &&
-      !(value instanceof Function) &&
-      !(value instanceof Error) &&
-      !(value instanceof RegExp)
+      value instanceof CACHED.Object &&
+      !(value instanceof CACHED.Date) &&
+      !(value instanceof CACHED.Function) &&
+      !(value instanceof CACHED.Error) &&
+      !(value instanceof CACHED.RegExp)
     ) {
       try {
         // eslint-disable-next-line no-restricted-properties
-        const string = Object.prototype.toString.call(value);
+        const string = CACHED.ObjectPrototypeToString.call(value);
         return this.appendString(string);
       } catch {
         this.m_tryCatch = true;
