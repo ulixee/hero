@@ -78,25 +78,3 @@ if (typedArgs.pdfViewerEnabled && 'pdfViewerEnabled' in self.navigator) {
 replaceGetter(self.navigator, 'platform', () => typedArgs.platform, {
   onlyForInstance: true,
 });
-
-
-
-if (typedArgs.headless === true && 'requestMediaKeySystemAccess' in self.navigator) {
-  replaceFunction(
-    self.navigator,
-    'requestMediaKeySystemAccess',
-    async (target, thisArg, argArray) => {
-      if (argArray.length < 2) {
-        return ReflectCached.apply(target, thisArg, argArray);
-      }
-      const [keySystem, configs] = argArray;
-      if (keySystem !== 'com.widevine.alpha' || [...configs].length < 1) {
-        return ReflectCached.apply(target, thisArg, argArray);
-      }
-
-      const result = await ReflectCached.apply(target, thisArg, ['org.w3.clearkey', configs]) as any;
-      replaceGetter(result, 'keySystem', () => keySystem);
-      return result;
-    },
-  );
-}
