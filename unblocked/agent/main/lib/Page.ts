@@ -279,7 +279,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
 
   evaluate<T>(
     expression: string,
-    options?: { timeoutMs?: number, isolatedFromWebPageEnvironment?: boolean },
+    options?: { timeoutMs?: number; isolatedFromWebPageEnvironment?: boolean },
   ): Promise<T> {
     return this.mainFrame.evaluate<T>(expression, options);
   }

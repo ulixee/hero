@@ -1,8 +1,13 @@
-// @ts-ignore
-const { audioCodecs, videoCodecs } = args;
+export type Args = {
+  audioCodecs: any;
+  videoCodecs: any;
+};
+const typedArgs = args as Args;
+
+const { audioCodecs, videoCodecs } = typedArgs;
 
 if ('RTCRtpSender' in self && RTCRtpSender.prototype) {
-  proxyFunction(RTCRtpSender, 'getCapabilities', function (target, thisArg, argArray) {
+  replaceFunction(RTCRtpSender, 'getCapabilities', function (target, thisArg, argArray) {
     const kind = argArray && argArray.length ? argArray[0] : null;
     const args = kind ? [kind] : undefined;
     const capabilities = target.apply(thisArg, args);

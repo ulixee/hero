@@ -1,26 +1,52 @@
+export type Args = never;
+
 if (typeof SharedWorker === 'undefined') {
   // @ts-ignore
   return;
 }
 
+const OriginalSharedWorker = SharedWorker;
+const originalSharedWorkerProperties = ObjectCached.getOwnPropertyDescriptors(SharedWorker);
+
 // shared workers created from blobs don't automatically pause in devtools, so we have to manipulate
-proxyConstructor(self, 'SharedWorker', (target, argArray) => {
-  if (!argArray?.length) return ReflectCached.construct(target, argArray);
+ObjectCached.defineProperty(self, 'SharedWorker', {
+  // eslint-disable-next-line object-shorthand
+  value: function SharedWorker(this, scriptURL, options) {
+    // eslint-disable-next-line strict
+    'use strict';
+    if (!new.target) {
+      return ReflectCached.apply(OriginalSharedWorker, this, [scriptURL, options]);
+    }
 
-  const [url] = argArray;
-  if (!url?.toString().startsWith('blob:')) {
-    return ReflectCached.construct(target, argArray);
-  }
+    let isBlob = false;
+    try {
+      isBlob = scriptURL?.toString().startsWith('blob:');
+    } catch {}
+    if (!isBlob) {
+      return ReflectCached.construct(OriginalSharedWorker, [scriptURL, options], new.target);
+    }
 
-  // read blob contents synchronously
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', url, false);
-  xhr.send();
-  const text = xhr.response;
+    // read blob contents synchronously
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', scriptURL, false);
+    xhr.send();
+    const text = xhr.response;
 
+    const script = createScript(text);
+
+    const newBlob = new Blob([script]);
+    return ReflectCached.construct(OriginalSharedWorker, [URL.createObjectURL(newBlob), options], new.target);
+  },
+});
+
+ObjectCached.defineProperties(SharedWorker, originalSharedWorkerProperties);
+SharedWorker.prototype.constructor = SharedWorker;
+toOriginalFn.set(SharedWorker, OriginalSharedWorker);
+
+function createScript(originalScript: string) {
   const script = `
     function original() {
-      ${text};
+      ${originalScript};
     }
 
     (async function runWhenReady() {
@@ -34,37 +60,33 @@ proxyConstructor(self, 'SharedWorker', (target, argArray) => {
         setTimeout(()=> {
           removeEventListener('connect', storeEvent);
           original();
-          events.forEach(ev => onconnect(ev));
+          events.forEach(ev => dispatchEvent(ev));
           delete events;
         }, 0);
       }
 
-      function isInjectedDone() {
+      // See proxyUtils
+      function getSharedStorage() {
         try {
-          // We can use this to check if injected logic is loaded
-          return Error['${sourceUrl}'];
+          return Function.prototype.toString('${sourceUrl}');
         } catch {
-          return false;
+          return undefined;
         }
       }
 
-
-      if (isInjectedDone()) {
+      if (getSharedStorage()?.ready) {
         originalAsSync();
         return;
       }
 
       // Keep checking until we are ready
       const interval = setInterval(() => {
-        if (!isInjectedDone()) {
-          return
+        if (getSharedStorage()?.ready) {
+          clearInterval(interval);
+          originalAsSync();
         }
-        clearInterval(interval);
-        originalAsSync();
       }, 20);
     })()
   `;
-
-  const newBlob = new Blob([script]);
-  return ReflectCached.construct(target, [URL.createObjectURL(newBlob)]);
-});
+  return script;
+}

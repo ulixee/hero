@@ -10,7 +10,7 @@ for (const symbol of ReflectCached.ownKeys(Symbol)) {
 function createError(message: string, type?: { new (msg: string): any }) {
   if (!type) {
     const match = nativeErrorRegex.exec(message);
-    if (match.length) {
+    if (match?.length) {
       message = message.replace(`${match[1]}: `, '');
       try {
         type = self[match[1]];
@@ -45,9 +45,10 @@ function newObjectConstructor(
       if (typeof invocation === 'function') return invocation(...arguments);
       return invocationReturnOrThrow(invocation, isAsync);
     }
-    const props = Object.entries(newProps);
+    const props = ObjectCached.entries(newProps);
     const obj = {};
-    Object.setPrototypeOf(
+    if (!newProps._$protos) throw new Error('newProps._$protos undefined');
+    ObjectCached.setPrototypeOf(
       obj,
       prototypesByPath[newProps._$protos[0]] ?? getObjectAtPath(newProps._$protos[0]),
     );
@@ -55,9 +56,9 @@ function newObjectConstructor(
       if (prop.startsWith('_$')) continue;
       let propName: string | symbol = prop;
       if (propName.startsWith('Symbol(')) {
-        propName = Symbol.for(propName.match(/Symbol\((.+)\)/)[1]);
+        propName = Symbol.for(propName.match(/Symbol\((.+)\)/)![1]);
       }
-      Object.defineProperty(obj, propName, buildDescriptor(value, `${path}.${prop}`));
+      ObjectCached.defineProperty(obj, propName, buildDescriptor(value, `${path}.${prop}`));
     }
     return obj;
   };
@@ -80,7 +81,8 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
         if (entry['_$$value()']) return entry['_$$value()']();
       },
     });
-    overriddenFns.set(attrs.get, entry._$get);
+    overriddenFns.set(attrs.get!, entry._$get);
+    toOriginalFn.set(attrs.get!, entry._$get);
   } else if (entry['_$$value()']) {
     attrs.value = entry['_$$value()']();
   } else if (entry._$value !== undefined) {
@@ -91,10 +93,11 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
     attrs.set = new Proxy(Function.prototype.call.bind({}), {
       apply() {},
     });
-    overriddenFns.set(attrs.set, entry._$set);
+    overriddenFns.set(attrs.set!, entry._$set);
+    toOriginalFn.set(attrs.set!, entry._$set);
   }
 
-  let prototypeDescriptor: PropertyDescriptor;
+  let prototypeDescriptor: PropertyDescriptor | undefined;
   if (entry.prototype) {
     prototypeDescriptor = buildDescriptor(entry.prototype, `${path}.prototype`);
 
@@ -103,6 +106,7 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
     }
     if (entry._$function) {
       overriddenFns.set(prototypeDescriptor.value.constructor, entry._$function);
+      toOriginalFn.set(attrs.set!, entry._$set);
     }
     prototypesByPath[`${path}.prototype`] = prototypeDescriptor.value;
   }
@@ -113,10 +117,10 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
     if (newProps) {
       attrs.value = newObjectConstructor(newProps, path, entry._$invocation, entry._$isAsync);
     } else {
-      Object.keys(entry)
+      ObjectCached.keys(entry)
         .filter((key): key is OtherInvocationKey => key.startsWith('_$otherInvocation'))
         // Not supported currently
-        .filter((key)=> !key.includes('new()'))
+        .filter(key => !key.includes('new()'))
         .forEach(key => OtherInvocationsTracker.addOtherInvocation(path, key, entry[key]));
 
       // use function call just to get a function that doesn't create prototypes on new
@@ -131,13 +135,13 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
       });
     }
     if (entry._$invocation !== undefined) {
-      Object.setPrototypeOf(attrs.value, Function.prototype);
+      ObjectCached.setPrototypeOf(attrs.value, Function.prototype);
       delete attrs.value.prototype;
       delete attrs.value.constructor;
     }
 
     if (prototypeDescriptor && newProps) {
-      Object.defineProperty(prototypeDescriptor.value, 'constructor', {
+      ObjectCached.defineProperty(prototypeDescriptor.value, 'constructor', {
         value: attrs.value,
         writable: true,
         enumerable: false,
@@ -145,16 +149,17 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
       });
     }
     overriddenFns.set(attrs.value, entry._$function);
+    toOriginalFn.set(attrs.value, entry._$function);
   }
 
   if (typeof entry === 'object') {
-    const props = Object.entries(entry).filter(([prop]) => !prop.startsWith('_$'));
+    const props = ObjectCached.entries(entry).filter(([prop]) => !prop.startsWith('_$'));
     if (!attrs.value && (props.length || entry._$protos)) {
       attrs.value = {};
     }
     if (entry._$protos) {
       const proto = prototypesByPath[entry._$protos[0]] ?? getObjectAtPath(entry._$protos[0]);
-      attrs.value = Object.setPrototypeOf(attrs.value, proto);
+      attrs.value = ObjectCached.setPrototypeOf(attrs.value, proto);
     }
 
     for (const [prop, value] of props) {
@@ -164,17 +169,17 @@ function buildDescriptor(entry: IDescriptor, path: string): PropertyDescriptor {
       if (propName.startsWith('Symbol(')) {
         propName = globalSymbols[propName];
         if (!propName) {
-          const symbolName = (propName as string).match(/Symbol\((.+)\)/)[1];
+          const symbolName = (propName as string).match(/Symbol\((.+)\)/)![1];
           propName = Symbol.for(symbolName);
         }
       }
       let descriptor: PropertyDescriptor;
       if (propName === 'prototype') {
-        descriptor = prototypeDescriptor;
+        descriptor = prototypeDescriptor!;
       } else {
         descriptor = buildDescriptor(value, `${path}.${prop}`);
       }
-      Object.defineProperty(attrs.value, propName, descriptor);
+      ObjectCached.defineProperty(attrs.value, propName, descriptor);
     }
   }
 
@@ -197,9 +202,10 @@ function breakdownPath(path: string, propsToLeave) {
   const parts = path.split(/\.Symbol\(([\w.]+)\)|\.(\w+)/).filter(Boolean);
   let obj: any = self;
   while (parts.length > propsToLeave) {
-    let next: string | symbol = parts.shift();
+    let next: string | symbol | undefined = parts.shift();
+    if (next === undefined) throw new Error('Reached end of parts without finding obj');
     if (next === 'window') continue;
-    if (next.startsWith('Symbol.')) next = Symbol.for(next);
+    if (next?.startsWith('Symbol.')) next = Symbol.for(next);
     obj = obj[next];
     if (!obj) {
       throw new Error(`Property not found -> ${path} at ${String(next)}`);
@@ -264,7 +270,9 @@ class PathToInstanceTracker {
   }
 
   private static getInstanceForPath(path: string) {
-    const { parent, property } = getParentAndProperty(path);
+    const result = getParentAndProperty(path);
+    if (!result) throw new Error('no parent and property found');
+    const { parent, property } = result;
     return parent[property];
   }
 }
@@ -283,11 +291,7 @@ class OtherInvocationsTracker {
     { invocation: any; isAsync: boolean }
   >();
 
-  static addOtherInvocation(
-    basePath: string,
-    otherKey: OtherInvocationKey,
-    otherInvocation: any,
-  ) {
+  static addOtherInvocation(basePath: string, otherKey: OtherInvocationKey, otherInvocation: any) {
     const [invocationKey, ...otherParts] = otherKey.split('.');
     // Remove key/property from path
     const otherPath = otherParts.slice(0, -1).join('.');
@@ -303,7 +307,7 @@ class OtherInvocationsTracker {
   static getOtherInvocation(
     basePath: string,
     otherThis: any,
-  ): { invocation: any; path: string; isAsync: boolean } {
+  ): { invocation: any; path: string; isAsync?: boolean } | undefined {
     const otherPath = PathToInstanceTracker.getPath(otherThis);
     if (!otherPath) {
       return;

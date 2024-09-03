@@ -1,8 +1,14 @@
-for (const itemToModify of args.itemsToModify || []) {
+export type Args = {
+  itemsToModify: any[];
+};
+const typedArgs = args as Args;
+
+for (const itemToModify of typedArgs.itemsToModify) {
   try {
     if (itemToModify.propertyName === '_$function') {
       const func = getObjectAtPath(itemToModify.path);
       overriddenFns.set(func, itemToModify.property);
+      toOriginalFn.set(func, itemToModify.property);
     }
     if (
       itemToModify.propertyName === '_$setToStringToString' ||
@@ -18,6 +24,7 @@ for (const itemToModify of args.itemsToModify || []) {
     }
 
     const parts = getParentAndProperty(itemToModify.path);
+    if (!parts) throw new Error('failed to find parent and property');
     const property = parts.property;
     const parent = parts.parent;
     const descriptorInHierarchy = getDescriptorInHierarchy(parent, property);
@@ -29,23 +36,37 @@ for (const itemToModify of args.itemsToModify || []) {
 
     if (itemToModify.propertyName === '_$value') {
       if (descriptor.get) {
-        descriptor.get = proxyGetter(parent, property, () => itemToModify.property);
+        descriptor.get = replaceGetter(parent, property, () => itemToModify.property).get;
       } else {
         descriptor.value = itemToModify.property;
-        Object.defineProperty(parent, property, descriptor);
+        ObjectCached.defineProperty(parent, property, descriptor);
       }
     } else if (itemToModify.propertyName === '_$get') {
-      overriddenFns.set(descriptor.get, itemToModify.property);
+      overriddenFns.set(descriptor.get!, itemToModify.property);
+      toOriginalFn.set(descriptor.get!, itemToModify.property);
     } else if (itemToModify.propertyName === '_$set') {
-      overriddenFns.set(descriptor.set, itemToModify.property);
+      overriddenFns.set(descriptor.set!, itemToModify.property);
+      toOriginalFn.set(descriptor.get!, itemToModify.property);
     } else if (itemToModify.propertyName.startsWith('_$otherInvocation')) {
+      replaceFunction(parent, property, (target, thisArg, argArray) => {
+        const otherInvocation = OtherInvocationsTrackerHere.getOtherInvocation(
+          itemToModify.path,
+          thisArg,
+        );
+
+        return otherInvocation !== undefined
+          ? invocationReturnOrThrowHere(otherInvocation.invocation, otherInvocation.isAsync)
+          : ReflectCachedHere.apply(target, thisArg, argArray);
+      });
+
+
       // TODO why is this needed, Im guessing since this is one big dump?
       const ReflectCachedHere = ReflectCached;
       const invocationReturnOrThrowHere = invocationReturnOrThrow;
       const OtherInvocationsTrackerHere = OtherInvocationsTracker;
       // Create single proxy on original prototype so 'this' rebinding is possible.
       if (!OtherInvocationsTracker.basePaths.has(itemToModify.path)) {
-        proxyFunction(parent, property, (target, thisArg, argArray) => {
+        replaceFunction(parent, property, (target, thisArg, argArray) => {
           const otherInvocation = OtherInvocationsTrackerHere.getOtherInvocation(
             itemToModify.path,
             thisArg,
@@ -65,9 +86,11 @@ for (const itemToModify of args.itemsToModify || []) {
       );
     }
   } catch (err) {
-    console.log(
-      `WARN: error changing prop ${itemToModify.path}.${itemToModify.propertyName}\n${err.stack}`,
-    );
+    let log = `ERROR changing prop ${itemToModify.path}.${itemToModify.propertyName}`;
+    if (err instanceof Error) {
+      log += `\n${err.stack}`;
+    }
+    console.error(log);
   }
 }
 

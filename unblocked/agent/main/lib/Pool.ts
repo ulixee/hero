@@ -16,7 +16,7 @@ import IDevtoolsSession from '@ulixee/unblocked-specification/agent/browser/IDev
 import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHooks';
 import {
   IUnblockedPluginClass,
-  UnblockedPluginConfig,
+  PluginConfigs,
 } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import IEmulationProfile from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
@@ -32,7 +32,7 @@ interface ICreatePoolOptions {
   certificateStore?: ICertificateStore;
   defaultBrowserEngine?: IBrowserEngine;
   plugins?: IUnblockedPluginClass[];
-  pluginConfigs?: UnblockedPluginConfig;
+  pluginConfigs?: PluginConfigs;
   dataDir?: string;
   logger?: IBoundLog;
 }
@@ -57,7 +57,7 @@ export default class Pool extends TypedEventEmitter<{
   public readonly agentsById = new Map<string, Agent>();
   public sharedMitmProxy: MitmProxy;
   public plugins: IUnblockedPluginClass[] = [];
-  public pluginConfigs: UnblockedPluginConfig = {};
+  public pluginConfigs: PluginConfigs = {};
 
   #activeAgentsCount = 0;
   #waitingForAvailability: {

@@ -1,20 +1,28 @@
-const maskLocalIp = args.localIp;
-const replacementIp = args.proxyIp;
+export type Args = {
+  localIp: string;
+  proxyIp: string;
+};
+
+const typedArgs = args as Args;
+
+const maskLocalIp = typedArgs.localIp;
+const replacementIp = typedArgs.proxyIp;
 
 if ('RTCIceCandidate' in self && RTCIceCandidate.prototype) {
-  proxyGetter(RTCIceCandidate.prototype, 'candidate', function () {
-    const result = ReflectCached.apply(...arguments);
+  // TODO argArray
+  replaceGetter(RTCIceCandidate.prototype, 'candidate', (target, thisArg) => {
+    const result = ReflectCached.apply(target, thisArg, []) as any;
     return result.replace(maskLocalIp, replacementIp);
   });
   if ('address' in RTCIceCandidate.prototype) {
     // @ts-ignore
-    proxyGetter(RTCIceCandidate.prototype, 'address', function () {
-      const result: string = ReflectCached.apply(...arguments);
+    replaceGetter(RTCIceCandidate.prototype, 'address', (target, thisArg, argArray) => {
+      const result: string = ReflectCached.apply(target, thisArg, argArray);
       return result.replace(maskLocalIp, replacementIp);
     });
   }
-  proxyFunction(RTCIceCandidate.prototype, 'toJSON', function () {
-    const json = ReflectCached.apply(...arguments);
+  replaceFunction(RTCIceCandidate.prototype, 'toJSON', (target, thisArg, argArray) => {
+    const json = ReflectCached.apply(target, thisArg, argArray) as any;
     if ('address' in json) json.address = json.address.replace(maskLocalIp, replacementIp);
     if ('candidate' in json) json.candidate = json.candidate.replace(maskLocalIp, replacementIp);
     return json;
@@ -22,15 +30,15 @@ if ('RTCIceCandidate' in self && RTCIceCandidate.prototype) {
 }
 
 if ('RTCSessionDescription' in self && RTCSessionDescription.prototype) {
-  proxyGetter(RTCSessionDescription.prototype, 'sdp', function () {
-    let result = ReflectCached.apply(...arguments);
+  replaceGetter(RTCSessionDescription.prototype, 'sdp', (target, thisArg, argArray) => {
+    let result = ReflectCached.apply(target, thisArg, argArray) as any;
     while (result.indexOf(maskLocalIp) !== -1) {
       result = result.replace(maskLocalIp, replacementIp);
     }
     return result;
   });
-  proxyFunction(RTCSessionDescription.prototype, 'toJSON', function () {
-    const json = ReflectCached.apply(...arguments);
+  replaceGetter(RTCSessionDescription.prototype, 'toJSON', (target, thisArg, argArray) => {
+    const json = ReflectCached.apply(target, thisArg, argArray) as any;
     if ('sdp' in json) json.sdp = json.sdp.replace(maskLocalIp, replacementIp);
     return json;
   });

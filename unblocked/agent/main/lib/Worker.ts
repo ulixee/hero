@@ -132,14 +132,20 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       return this.devtoolsSession.send('Runtime.runIfWaitingForDebugger');
     }
 
-    return Promise.all([
-      hooks.onNewWorker(this),
-      this.devtoolsSession.send('Debugger.enable'),
-      this.devtoolsSession.send('Debugger.setBreakpointByUrl', {
-        lineNumber: 0,
-        url: this.targetInfo.url,
-      }),
-    ])
+    const isBlobWorker = this.targetInfo.url.startsWith('blob:');
+    const promises = [hooks.onNewWorker(this)];
+
+    if (!isBlobWorker) {
+      promises.push(
+        this.devtoolsSession.send('Debugger.enable'),
+        this.devtoolsSession.send('Debugger.setBreakpointByUrl', {
+          lineNumber: 0,
+          url: this.targetInfo.url,
+        }),
+      );
+    }
+
+    return Promise.all(promises)
       .then(this.resumeAfterEmulation.bind(this))
       .catch(async error => {
         if (error instanceof CanceledPromiseError) return;
@@ -154,8 +160,8 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
 
   private resumeAfterEmulation(): Promise<any> {
     return Promise.all([
-      this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
       this.devtoolsSession.send('Debugger.disable'),
+      this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
   }
 

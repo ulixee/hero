@@ -1,29 +1,40 @@
-self.addEventListener('error', preventDefault);
-self.addEventListener('unhandledrejection', preventDefault);
+export type Args = {
+  preventDefaultUncaughtError: boolean;
+  preventDefaultUnhandledRejection: boolean;
+};
+
+const typedArgs = args as Args;
+
+if (typedArgs.preventDefaultUncaughtError) {
+  self.addEventListener('error', preventDefault);
+}
+if (typedArgs.preventDefaultUnhandledRejection) {
+  self.addEventListener('unhandledrejection', preventDefault);
+}
 
 function preventDefault(event: ErrorEvent | PromiseRejectionEvent) {
+  let prevented = event.defaultPrevented;
   event.preventDefault();
 
   // Hide this, but make sure if they hide it we mimic normal behaviour
-  let prevented = event.defaultPrevented;
-  proxyFunction(
+  replaceFunction(
     event,
     'preventDefault',
-    (originalFunction, thisArg, argArray) => {
+    (target, thisArg, argArray) => {
       // Will raise correct error if 'thisArg' is wrong
-      ReflectCached.apply(originalFunction, thisArg, argArray);
+      ReflectCached.apply(target, thisArg, argArray);
       prevented = true;
     },
-    true,
+    { onlyForInstance: true },
   );
-  proxyGetter(
+  replaceGetter(
     event,
     'defaultPrevented',
-    (target, thisArg) => {
-      ReflectCached.get(target, thisArg);
+    (target, thisArg, argArray) => {
+      ReflectCached.apply(target, thisArg, argArray);
       return prevented;
     },
-    true,
+    { onlyForInstance: true },
   );
 
   if (!('console' in self)) {

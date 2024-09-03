@@ -45,7 +45,7 @@ test('can use widevine', async () => {
     return x.createMediaKeys();
   }).then(x => {
     return x.constructor.name
-  })`,
+  }).catch((error) => 'error: ' + error.toString());`,
     )
     .catch((err) => err);
   expect(accessKey).toBe('MediaKeys');

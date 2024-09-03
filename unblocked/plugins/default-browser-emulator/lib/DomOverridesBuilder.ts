@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import INewDocumentInjectedScript from '../interfaces/INewDocumentInjectedScript';
-import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
+import IBrowserEmulatorConfig, { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
 const injectedSourceUrl = `<anonymous-${Math.random()}>`;
 const cache: { [name: string]: string } = {};
@@ -19,6 +19,8 @@ export default class DomOverridesBuilder {
   private readonly alwaysWorkerScripts = new Set<INewDocumentInjectedScript>();
 
   private workerOverrides = new Set<string>();
+
+  constructor(private readonly config?: IBrowserEmulatorConfig) {}
 
   public getWorkerOverrides(): string[] {
     return [...this.workerOverrides];
@@ -81,8 +83,8 @@ export default class DomOverridesBuilder {
   if (runMap.has(self)) return;
 
   const sourceUrl = '${injectedSourceUrl}';
-  ${utilsScript}
-
+  ${utilsScript};
+  
   (function newDocumentScript(selfOverride) {
     const originalSelf = self;
     if (selfOverride) self = selfOverride;
@@ -105,9 +107,9 @@ export default class DomOverridesBuilder {
       PathToInstanceTracker.updateAllReferences();
     } finally {
       self = originalSelf;
+      getSharedStorage().ready = true;
     }
   })();
-
 })();
 //# sourceURL=${injectedSourceUrl}`.replace(/\/\/# sourceMap.+/g, ''),
     };
@@ -167,6 +169,26 @@ export default class DomOverridesBuilder {
         fn: callbackFn,
       },
     });
+  }
+
+  public addOverrideAndUseConfig<T extends InjectedScript>(
+    injectedScript: T,
+    defaultConfig: IBrowserEmulatorConfig[T],
+    opts?: { registerWorkerOverride?: boolean },
+  ): void {
+    if (!this.config)
+      throw new Error(
+        'This method can only be used when creating domOverriderBuilder with a config',
+      );
+
+    const scriptConfig = this.config[injectedScript];
+    if (!scriptConfig) return;
+
+    this.add<IBrowserEmulatorConfig[T]>(
+      injectedScript,
+      scriptConfig === true ? defaultConfig : scriptConfig,
+      opts?.registerWorkerOverride ?? false,
+    );
   }
 
   public cleanup(): void {

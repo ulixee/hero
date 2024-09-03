@@ -7,7 +7,7 @@ import { defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { getOverrideScript, injectedSourceUrl } from '../lib/DomOverridesBuilder';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
-import { proxyFunction } from '../injected-scripts/_proxyUtils';
+import { replaceFunction } from '../injected-scripts/_proxyUtils';
 import BrowserEmulator from '../index';
 import DomExtractor = require('./DomExtractor');
 import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
@@ -48,7 +48,7 @@ test('should be able to override a function', async () => {
   if (debug) console.log(inspect(hierarchy, false, null, true));
   expect(win.holder.tester.doSomeWork('we')).toBe('we nope');
 
-  proxyFunction(win.TestClass.prototype, 'doSomeWork', (target, thisArg, args) => {
+  replaceFunction(win.TestClass.prototype, 'doSomeWork', (target, thisArg, args) => {
     return `${target.apply(thisArg, args)} yep`;
   });
 
@@ -97,4 +97,25 @@ test('should override a function and clean error stacks', async () => {
     }
   })();`);
   expect(perms).not.toContain(injectedSourceUrl);
+});
+
+test('should be able to combine multiple single instance overrides', async () => {
+  class TestClass {
+    public doSomeWork(param: string) {
+      return `${param} nope`;
+    }
+  }
+
+  const a = new TestClass();
+  const b = new TestClass();
+  const c = new TestClass();
+
+  replaceFunction(TestClass.prototype, 'doSomeWork', () => 'base');
+  replaceFunction(a, 'doSomeWork', t => 'a', { onlyForInstance: true });
+  replaceFunction(b, 'doSomeWork', () => 'b', { onlyForInstance: true });
+
+  expect(a.doSomeWork('')).toBe('a');
+  expect(b.doSomeWork('')).toBe('b');
+  expect(c.doSomeWork('')).toBe('base');
+  expect(a.doSomeWork === b.doSomeWork && b.doSomeWork === c.doSomeWork).toBeTruthy();
 });

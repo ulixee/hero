@@ -28,10 +28,9 @@ afterEach(Helpers.afterEach, 30e3);
 
 // Modify these values for easy testing
 const config = {
-  modifyWrongProxyAndObjectString: true,
   removeInjectedLines: true,
-  skipDuplicateSetPrototypeLines: true,
   applyStackTraceLimit: true,
+  fixConsoleStack: true,
 } satisfies ErrorArgs;
 const debug = false; // True will increase timeouts and open chrome with debugger attached
 
@@ -256,67 +255,62 @@ test('Errors should not leak proxy objects, second simple edition: looking at Er
   expect(output).toEqual(referenceOutput);
 });
 
-// TODO hide this test somewhere as it seems they don't know this yet??? But we did fix so doesn't really hurt?
-test.failing(
-  'Errors should not leak proxy objects, advanced edition: looking at Error.prepareStackTrace',
-  async () => {
-    function script() {
-      let errorSeen;
-      let stackTracesSeen;
+test('Errors should not leak proxy objects, advanced edition: looking at Error.prepareStackTrace', async () => {
+  function script() {
+    let errorSeen;
+    let stackTracesSeen;
 
-      function leak() {
-        try {
-          // @ts-expect-error
-          document.boddfsqy.innerHTML = 'dfjksqlm';
-        } catch (e) {
-          return e.stack;
-        }
-      }
-
-      Error.prepareStackTrace = (error, stackTraces) => {
-        // This should already be ok if simply tests succeed but also check
-        // everything here is as expected in case we missed something.
-        errorSeen = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
-        // Fixing error.stack is one thing, but holly hell this leaks even more, good thing we can hide this
-        stackTracesSeen = stackTraces.map(callsite => {
-          const callsiteInfo = {};
-          for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(callsite))) {
-            // This doesn't work with JSON.toString, but also doesn't contain anything interesting so just drop it.
-            if (key === 'getThis') continue;
-            try {
-              callsiteInfo[key] = callsite[key]();
-            } catch {
-              // dont care
-            }
-          }
-          return callsiteInfo;
-        });
-
-        return error.stack;
-      };
-
-      // @ts-expect-error
-      console.info.leak = leak;
+    function leak() {
       try {
         // @ts-expect-error
-        console.info.leak();
+        document.boddfsqy.innerHTML = 'dfjksqlm';
       } catch (e) {
-        // trigger stack
-        const _stack = e.stack;
+        return e.stack;
       }
-
-      return { errorSeen, stackTracesSeen };
     }
 
-    const { output, referenceOutput } = await runScriptWithReference(script);
-    expect(output).toEqual(referenceOutput);
-  },
-  9999999,
-);
+    Error.prepareStackTrace = (error, stackTraces) => {
+      // This should already be ok if simply tests succeed but also check
+      // everything here is as expected in case we missed something.
+      errorSeen = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+      // Fixing error.stack is one thing, but holly hell this leaks even more, good thing we can hide this
+      stackTracesSeen = stackTraces.map(callsite => {
+        const callsiteInfo = {};
+        for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(callsite))) {
+          // This doesn't work with JSON.toString, but also doesn't contain anything interesting so just drop it.
+          if (key === 'getThis') continue;
+          try {
+            callsiteInfo[key] = callsite[key]();
+          } catch {
+            // dont care
+          }
+        }
+        return callsiteInfo;
+      });
+
+      return error.stack;
+    };
+
+    // @ts-expect-error
+    console.info.leak = leak;
+    try {
+      // @ts-expect-error
+      console.info.leak();
+    } catch (e) {
+      // trigger stack
+      const _stack = e.stack;
+    }
+
+    return { errorSeen, stackTracesSeen };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
 
 test('Error should also not leak when using call with a proxy', async () => {
   function script() {
@@ -385,7 +379,22 @@ test('Error should also not leak when using bind with a proxy', async () => {
       }
     }
 
-    return leak.bind(console.info)();
+    const bound = leak.bind(console.info);
+    return bound();
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('Bind should work as expected', async () => {
+  function script() {
+    function bla() {
+      return this.data;
+    }
+    const t = { data: 'test' };
+
+    return bla.bind(t).bind(undefined)();
   }
 
   const { output, referenceOutput } = await runScriptWithReference(script);
@@ -485,6 +494,119 @@ test('stacktrace length should be the same', async () => {
   expect(output).toEqual(referenceOutput);
 });
 
+test('string expansion should trigger', async () => {
+  function script() {
+    let toStringTriggered = false;
+    const t = {
+      toString() {
+        toStringTriggered = true;
+        return 'test';
+      },
+    };
+    console.info('%s', t);
+    return { toStringTriggered };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('string expansion trigger should not reveal different .toString location', async () => {
+  function script() {
+    const error = new Error();
+    let wrongStack = false;
+    let seenStackInName = '';
+    let nameStack = '';
+
+    Object.defineProperty(error, 'stack', {
+      get() {
+        return 'proxied stack';
+      },
+    });
+    const expectedStack = Object.getOwnPropertyDescriptor(error, 'stack');
+
+    Object.defineProperty(error, 'name', {
+      get() {
+        if (Object.getOwnPropertyDescriptor(this, 'stack').get !== expectedStack.get) {
+          wrongStack = true;
+        }
+        seenStackInName = this.stack;
+        nameStack = new Error().stack;
+        return 'name';
+      },
+    });
+
+    console.info(error);
+    return { wrongStack, seenStackInName, nameStack };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('Should not leak we are modifying functions because this changes for primitives', async () => {
+  function script() {
+    const proxy = new Proxy(Function.prototype.toString, {
+      apply(target, thisArg, argArray) {
+        return typeof thisArg;
+      },
+    });
+
+    return proxy.call('stringThisArg');
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('should not leak we modified error constructor', async () => {
+  function script() {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'Error');
+    const propertyDescriptors = Object.getOwnPropertyDescriptors(Error);
+
+    const fnStack = Error('stack 1').stack;
+    const classStack = new Error('stack 2').stack;
+
+    class Test extends Error {}
+    const testStack = new Test('test').stack;
+
+    return { descriptor, propertyDescriptors, fnStack, classStack, testStack };
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
+test('should trigger user unhandledrejection', async () => {
+  async function script() {
+    const result = {
+      triggered: false,
+      defaultPrevented: null,
+      defaultPreventedAfterCall: null,
+    };
+    window.addEventListener('unhandledrejection', event => {
+      result.triggered = true;
+      result.defaultPrevented = event.defaultPrevented;
+
+      event.preventDefault();
+      result.defaultPreventedAfterCall = event.defaultPrevented;
+    });
+
+    async function thrower() {
+      throw new Error('async error');
+    }
+    void thrower();
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 200);
+    });
+    return result;
+  }
+
+  const { output, referenceOutput } = await runScriptWithReference(script);
+  expect(output).toEqual(referenceOutput);
+});
+
 // ** TEMPLATE for test **/
 
 test('template test', async () => {
@@ -518,7 +640,7 @@ async function runScript<T extends AnyFunction | string>(poolToUse: Pool, fn: T)
   const agent = poolToUse.createAgent({
     logger,
     options: { showChrome: debug && poolToUse === pool, showDevtools: debug },
-    customEmulatorConfig: {
+    pluginConfigs: {
       [BrowserEmulator.id]: {
         ...defaultConfig,
         [InjectedScript.ERROR]: config,
@@ -555,3 +677,57 @@ async function runScript<T extends AnyFunction | string>(poolToUse: Pool, fn: T)
 
   return output;
 }
+
+// Play with this test
+// eslint-disable-next-line jest/no-disabled-tests, jest/expect-expect
+test.skip('headful chrome for debugging', async () => {
+  const agent = pool.createAgent({
+    logger,
+    options: {
+      // useRemoteDebuggingPort: true,
+      showChrome: true,
+      // disableMitm: true,
+      // useRemoteDebuggingPort: true
+    },
+
+    pluginConfigs: {
+      [BrowserEmulator.id]: {
+        ...allDisabled,
+        'Document.prototype.cookie': true,
+        'JSON.stringify': false,
+        'MediaDevices.prototype.enumerateDevices': true,
+        'navigator.deviceMemory': true,
+        'navigator.hardwareConcurrency': true,
+        'polyfill.add': false,
+        'polyfill.modify': false,
+        'polyfill.remove': false,
+        'polyfill.reorder': false,
+        'RTCRtpSender.getCapabilities': true,
+        'SharedWorker.prototype': false,
+        'speechSynthesis.getVoices': true,
+        'WebGLRenderingContext.prototype.getParameter': false,
+        'window.screen': true,
+        console: true,
+        error: true,
+        navigator: true,
+        performance: true,
+        UnhandledErrorsAndRejections: true,
+        webrtc: true,
+
+        // ...defaultConfig,
+        // [InjectedScript.ERROR]: config,
+      } satisfies IBrowserEmulatorConfig,
+    },
+  });
+  Helpers.needsClosing.push(agent);
+  const page = await agent.newPage();
+  page.on('console', console.log);
+  const url = 'about:blank';
+  await page.goto(url).catch(() => undefined);
+  // eslint-disable-next-line promise/param-names
+  await new Promise(r => undefined);
+}, 999999999);
+
+const allDisabled = Object.values(InjectedScript).reduce((acc, value) => {
+  return { ...acc, [value]: false };
+}, {} as IBrowserEmulatorConfig);

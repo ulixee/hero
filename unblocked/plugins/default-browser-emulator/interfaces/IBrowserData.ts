@@ -25,10 +25,10 @@ export interface IDataWindowNavigator {
 }
 
 export interface IDataDomPolyfill {
-  add: any[];
-  remove: any[];
-  modify: any[];
-  reorder: any[];
+  add?: any[];
+  remove?: any[];
+  modify?: any[];
+  reorder?: any[];
 }
 
 export interface IDataWindowChrome {
