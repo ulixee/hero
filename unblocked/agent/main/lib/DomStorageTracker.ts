@@ -1,25 +1,24 @@
-import { bindFunctions } from '@ulixee/commons/lib/utils';
-import Protocol from 'devtools-protocol';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IDomStorage, {
   IDomStorageForOrigin,
 } from '@ulixee/unblocked-specification/agent/browser/IDomStorage';
-import { IIndexedDB } from '@ulixee/unblocked-specification/agent/browser/IIndexedDB';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
-import Page from './Page';
-import NetworkManager from './NetworkManager';
+import { IIndexedDB } from '@ulixee/unblocked-specification/agent/browser/IIndexedDB';
+import Protocol from 'devtools-protocol';
 import DevtoolsSession from './DevtoolsSession';
+import NetworkManager from './NetworkManager';
+import Page from './Page';
 import DomStorageItemAddedEvent = Protocol.DOMStorage.DomStorageItemAddedEvent;
 import DomStorageItemRemovedEvent = Protocol.DOMStorage.DomStorageItemRemovedEvent;
-import DomStorageItemUpdatedEvent = Protocol.DOMStorage.DomStorageItemUpdatedEvent;
 import DomStorageItemsClearedEvent = Protocol.DOMStorage.DomStorageItemsClearedEvent;
-import IndexedDBListUpdatedEvent = Protocol.Storage.IndexedDBListUpdatedEvent;
-import IndexedDBContentUpdatedEvent = Protocol.Storage.IndexedDBContentUpdatedEvent;
+import DomStorageItemUpdatedEvent = Protocol.DOMStorage.DomStorageItemUpdatedEvent;
 import KeyPath = Protocol.IndexedDB.KeyPath;
+import IndexedDBContentUpdatedEvent = Protocol.Storage.IndexedDBContentUpdatedEvent;
+import IndexedDBListUpdatedEvent = Protocol.Storage.IndexedDBListUpdatedEvent;
 
 export interface IDomStorageEvents {
   'dom-storage-updated': {

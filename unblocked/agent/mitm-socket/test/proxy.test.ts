@@ -54,7 +54,6 @@ test('should be able to send a request through a proxy', async () => {
   expect(httpResponse).toBe(htmlString);
   expect(connect).toHaveBeenCalledTimes(1);
   expect(connect.mock.calls[0][0].url).toBe(`localhost:${server.port}`);
-  console.log(connect.mock.calls[0][0].headers);
   expect(connect.mock.calls[0][0].headers['user-agent']).toBe('Chrome');
 });
 
