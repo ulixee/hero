@@ -66,6 +66,10 @@ page.interact([{ command: 'click', mousePosition: aElem, verification: 'exactEle
 
 Import KeyboardKey from IKeyboardLayoutUS for all valid KeyboardChar values (e.g. `KeyboardKey['\n']`, `KeyboardKey.Enter`).
 
+```ts
+import { KeyboardKey } from '@ulixee/unblocked-specification/agent/interact/IKeyboardLayoutUS';
+```
+
 ## Using Shortcuts
 
 If you have no need to change the position of the mouse between commands you can create Interactions using simple `Command` strings.
