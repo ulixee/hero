@@ -242,20 +242,20 @@ global.UlxSubscriptions ??= new Map();
 const loggerSessionIdNames = global.UlxLoggerSessionIdNames;
 
 class LogEvents {
-  private static subscriptions = global.UlxSubscriptions;
-
   public static unsubscribe(subscriptionId: number): void {
-    LogEvents.subscriptions.delete(subscriptionId);
+    global.UlxSubscriptions.delete(subscriptionId);
   }
 
   public static subscribe(onLogFn: (log: ILogEntry) => any): number {
-    const id = LogEvents.subscriptions.size + 1;
-    LogEvents.subscriptions[id] = onLogFn;
+    const id = global.UlxSubscriptions.size + 1;
+    global.UlxSubscriptions.set(id, onLogFn);
     return id;
   }
 
   public static broadcast(entry: ILogEntry): void {
-    LogEvents.subscriptions.forEach(x => x(entry));
+    for (const sub of global.UlxSubscriptions.values()) {
+      sub(entry);
+    }
   }
 }
 
