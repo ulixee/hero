@@ -1,22 +1,21 @@
+import { createPromise } from '@ulixee/commons/lib/utils';
+import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
+import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
+import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
 import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
-import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
-import * as Url from 'url';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { AddressInfo, Socket } from 'net';
-import { createPromise } from '@ulixee/commons/lib/utils';
-import IHttpResourceLoadDetails from '@ulixee/unblocked-specification/agent/net/IHttpResourceLoadDetails';
-import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
-import HttpProxyAgent = require('http-proxy-agent');
 import WebSocket = require('ws');
-import HttpRequestHandler from '../handlers/HttpRequestHandler';
-import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
-import MitmServer from '../lib/MitmProxy';
-import HeadersHandler from '../handlers/HeadersHandler';
-import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
-import { parseRawHeaders } from '../lib/Utils';
-import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
 import env from '../env';
+import HeadersHandler from '../handlers/HeadersHandler';
+import HttpRequestHandler from '../handlers/HttpRequestHandler';
+import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
+import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import { MitmProxy } from '../index';
+import IBrowserRequestMatcher from '../interfaces/IBrowserRequestMatcher';
+import MitmServer from '../lib/MitmProxy';
+import { parseRawHeaders } from '../lib/Utils';
 
 const mocks = {
   httpRequestHandler: {
@@ -312,11 +311,9 @@ describe('basic MitM tests', () => {
       });
     });
 
+    const proxyUrl = `http://${session.getProxyCredentials()}@localhost:${mitmServer.port}`;
     const wsClient = new WebSocket(`ws://localhost:${httpServer.port}`, {
-      agent: HttpProxyAgent({
-        ...Url.parse(`http://localhost:${mitmServer.port}`),
-        auth: session.getProxyCredentials(),
-      }),
+      agent: new HttpProxyAgent(proxyUrl),
     });
 
     Helpers.onClose(async () => wsClient.close());

@@ -1,16 +1,16 @@
+import { createPromise } from '@ulixee/commons/lib/utils';
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
-import * as Proxy from 'proxy';
-import * as http from 'http';
 import {
   getTlsConnection,
   httpGetWithSocket,
   readableToBuffer,
 } from '@ulixee/unblocked-agent-testing/helpers';
-import WebSocket = require('ws');
-import * as socks5 from 'simple-socks';
-import { createPromise } from '@ulixee/commons/lib/utils';
+import * as http from 'http';
 import * as http2 from 'http2';
-import exp = require('node:constants');
+import { AddressInfo } from 'node:net';
+import { createProxy } from 'proxy';
+import * as socks5 from 'simple-socks';
+import WebSocket = require('ws');
 import MitmSocket from '../index';
 import MitmSocketSession from '../lib/MitmSocketSession';
 
@@ -35,7 +35,7 @@ beforeAll(() => {
 test('should be able to send a request through a proxy', async () => {
   const htmlString = 'Proxy proxy echo echo';
   const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
+  const proxyPort = (proxy.address() as AddressInfo).port;
   const connect = jest.fn();
   proxy.once('connect', connect);
 
@@ -62,17 +62,10 @@ test('should be able to send a request through a secure proxy with auth', async 
   const password = `u:password`;
   const pass64 = Buffer.from(password).toString('base64');
   const proxyServer = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
-  const proxy = new Proxy(proxyServer.server);
-  proxy.authenticate = (
-    req: http.IncomingMessage,
-    cb: (req: http.IncomingMessage, success: boolean) => any,
-  ) => {
+  const proxy = createProxy(proxyServer.server);
+  proxy.authenticate = (req: http.IncomingMessage) => {
     const auth = req.headers['proxy-authorization'];
-    const isValid = auth === `Basic ${pass64}`;
-    if (!isValid) {
-      return cb(null, false);
-    }
-    cb(null, true);
+    return auth === `Basic ${pass64}`;
   };
   const connect = jest.fn();
   proxy.once('connect', connect);
@@ -92,17 +85,10 @@ test('should be able to send a request through a secure proxy with auth using sp
   const password = `u:abcDEF!123-_`;
   const pass64 = Buffer.from(password).toString('base64');
   const proxyServer = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
-  const proxy = new Proxy(proxyServer.server);
-  proxy.authenticate = (
-    req: http.IncomingMessage,
-    cb: (req: http.IncomingMessage, success: boolean) => any,
-  ) => {
+  const proxy = createProxy(proxyServer.server);
+  proxy.authenticate = (req: http.IncomingMessage) => {
     const auth = req.headers['proxy-authorization'];
-    const isValid = auth === `Basic ${pass64}`;
-    if (!isValid) {
-      return cb(null, false);
-    }
-    cb(null, true);
+    return auth === `Basic ${pass64}`;
   };
   const connect = jest.fn();
   proxy.once('connect', connect);
@@ -122,7 +108,7 @@ test('should be able to use a socks5 proxy', async () => {
   await new Promise(resolve => proxy.listen(0, resolve));
   Helpers.needsClosing.push(proxy);
 
-  const proxyPort = proxy.address().port;
+  const proxyPort = (proxy.address() as AddressInfo).port;
   const htmlString = 'Proxy proxy echo echo';
   const connect = jest.fn();
   proxy.once('proxyConnect', connect);
@@ -190,7 +176,6 @@ test('should be able to use a socks5 proxy with auth', async () => {
   expect(auth).toHaveBeenCalledTimes(1);
 });
 
-
 test('should be able to use a socks5 proxy with auth, using special characters', async () => {
   const proxy = socks5.createServer({
     authenticate(username, password, socket, callback) {
@@ -240,7 +225,7 @@ test('should be able to use a socks5 proxy with auth, using special characters',
 
 test('should handle websockets over proxies', async () => {
   const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
+  const proxyPort = (proxy.address() as AddressInfo).port;
   const connect = jest.fn();
   proxy.once('connect', connect);
 
@@ -274,7 +259,7 @@ test('should handle websockets over proxies', async () => {
 
 async function startProxy() {
   const proxyPromise = createPromise();
-  const proxy = new Proxy(http.createServer());
+  const proxy = createProxy(http.createServer());
   proxy.listen(0, () => {
     proxyPromise.resolve();
   });

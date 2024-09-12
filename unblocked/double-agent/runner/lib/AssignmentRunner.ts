@@ -55,7 +55,7 @@ export default class AssignmentRunner {
         try {
           assignment = await assignmentsClient.activate(assignmentId);
         } catch (error) {
-          console.log('ERROR activating assignment: ', error);
+          console.error('ERROR activating assignment: ', error);
           process.exit();
         }
 

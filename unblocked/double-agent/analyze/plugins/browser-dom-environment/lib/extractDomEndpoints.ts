@@ -57,11 +57,11 @@ export default function extractDomEndpoints(dom: IProfileData): { [path: string]
           endpoints.push({ path: path.join('.'), object: { _$type: 'object' } });
         }
         objectsToExtract.push({ path, object });
-      } else if (object._$type === 'array') {
+      } else if (objectMeta._$type === 'array') {
         endpoints.push({ path: path.join('.'), object: objectMeta });
         objectsToExtract.push({ path, object });
       } else {
-        endpoints.push({ path: path.join('.'), object });
+        endpoints.push({ path: path.join('.'), object: objectMeta });
       }
     }
   }
@@ -74,15 +74,18 @@ export default function extractDomEndpoints(dom: IProfileData): { [path: string]
   return endpointsByPath;
 }
 
-function extractObjectMeta(
-  path: string[],
-  object: IDomDescriptor,
-): IDomDescriptor {
+function extractObjectMeta(path: string[], object: IDomDescriptor): IDomDescriptor {
   if (object === null || object === undefined) return {};
 
   const objectMeta: IDomDescriptor = {};
   const objectMetaKeys: string[] = [];
   const currentKey = path[path.length - 1];
+  if (typeof object !== 'object') {
+    return {
+      _$type: 'raw',
+      _$value: object,
+    };
+  }
 
   const nonMetaKeys = Object.keys(object).filter(x => !x.startsWith('_$'));
   if (nonMetaKeys.length) {

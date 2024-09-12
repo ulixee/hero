@@ -6,5 +6,6 @@ import { getExternalDataPath } from '../paths';
 const assignmentsDataDir = getExternalDataPath(`/3-assignments`);
 const resultsDir = getExternalDataPath(`/4-assignment-results`);
 
-Fs.rmSync(resultsDir, { recursive: true });
+if (Fs.existsSync(resultsDir)) Fs.rmSync(resultsDir, { recursive: true });
+
 analyzeAssignmentResults(assignmentsDataDir, resultsDir).catch(console.log);

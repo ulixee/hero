@@ -1,6 +1,5 @@
 import cjsImport from './index.js';
 
-const { CoreProcess, BrowserEmulators, HumanEmulators } = cjsImport;
+const { Agent, Page, Pool, BrowserContext, Browser } = cjsImport;
 
-export { CoreProcess, BrowserEmulators, HumanEmulators };
-export default cjsImport.default;
+export { Agent, Page, Pool, BrowserContext, Browser };

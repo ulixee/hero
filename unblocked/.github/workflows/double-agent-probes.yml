@@ -40,6 +40,9 @@ jobs:
         run: yarn build:simple
 
       - name: Import Profiles
+        run: yarn workspace @ulixee/double-agent-stacks sync-config
+
+      - name: Import Profiles
         run: yarn workspace @ulixee/double-agent-stacks 0
 
       - name: Create Probes

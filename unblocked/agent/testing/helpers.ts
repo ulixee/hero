@@ -1,27 +1,28 @@
-import * as Fs from 'fs';
-import * as Path from 'path';
-import * as Url from 'url';
-import { URL } from 'url';
-import * as querystring from 'querystring';
-import * as http from 'http';
-import { IncomingMessage, RequestListener, Server } from 'http';
-import * as https from 'https';
-import { Agent } from 'https';
-import { createPromise } from '@ulixee/commons/lib/utils';
-import * as net from 'net';
-import * as tls from 'tls';
-import * as http2 from 'http2';
-import * as stream from 'stream';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { getSourcedir } from '@ulixee/commons/lib/dirUtils';
+import Logger from '@ulixee/commons/lib/Logger';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import MitmSocket from '@ulixee/unblocked-agent-mitm-socket';
 import MitmSocketSession from '@ulixee/unblocked-agent-mitm-socket/lib/MitmSocketSession';
 import MitmEnv from '@ulixee/unblocked-agent-mitm/env'; // eslint-disable-line import/no-extraneous-dependencies
-import Logger from '@ulixee/commons/lib/Logger';
-import HttpProxyAgent = require('http-proxy-agent');
-import HttpsProxyAgent = require('https-proxy-agent');
-import Koa = require('koa');
-import KoaRouter = require('@koa/router');
+import * as Fs from 'fs';
+import * as http from 'http';
+import { IncomingMessage, RequestListener, Server } from 'http';
+import * as http2 from 'http2';
+import * as https from 'https';
+import { Agent } from 'https';
+import * as net from 'net';
+import * as Path from 'path';
+import * as querystring from 'querystring';
+import * as stream from 'stream';
+import * as tls from 'tls';
+import * as Url from 'url';
+import { URL } from 'url';
 import KoaMulter = require('@koa/multer');
+import KoaRouter = require('@koa/router');
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import Koa = require('koa');
 import { Helpers, TestLogger } from './index';
 
 const { log } = Logger(module);
@@ -50,10 +51,12 @@ export interface ITestHttpServer<T> {
   server: T;
 }
 
+const sourcedir = getSourcedir(__dirname);
+
 export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
   const koa = new Koa();
   const router = new KoaRouter() as ITestKoaServer;
-  const exampleOrgPath = Path.join(__dirname, 'html', 'example.org.html');
+  const exampleOrgPath = Path.join(sourcedir, 'html', 'example.org.html');
   const exampleOrgHtml = Fs.readFileSync(exampleOrgPath, 'utf-8');
   const upload = KoaMulter(); // note you can pass `multer` options here
 
@@ -96,8 +99,8 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
 
 export function sslCerts() {
   return {
-    key: Fs.readFileSync(`${__dirname}/certs/key.pem`),
-    cert: Fs.readFileSync(`${__dirname}/certs/cert.pem`),
+    key: Fs.readFileSync(`${sourcedir}/certs/key.pem`),
+    cert: Fs.readFileSync(`${sourcedir}/certs/cert.pem`),
   };
 }
 
@@ -262,10 +265,12 @@ export function httpRequest(
 }
 
 export function getProxyAgent(url: URL, proxyHost: string, auth?: string): Agent {
-  const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
-  const opts = Url.parse(proxyHost);
-  opts.auth = auth;
-  return ProxyAgent(opts);
+  const proxyUrl = new URL(proxyHost);
+  if (auth) {
+    proxyUrl.username = auth.split(':')[0];
+    proxyUrl.password = auth.split(':')[1];
+  }
+  return url.protocol === 'https:' ? new HttpsProxyAgent(proxyUrl) : new HttpProxyAgent(proxyUrl);
 }
 
 export function httpGet(
@@ -415,7 +420,7 @@ export function getTlsConnection(
 }
 
 export function getLogo(): Buffer {
-  return Fs.readFileSync(`${__dirname}/html/img.png`);
+  return Fs.readFileSync(`${sourcedir}/html/img.png`);
 }
 
 export async function readableToBuffer(res: stream.Readable): Promise<Buffer> {

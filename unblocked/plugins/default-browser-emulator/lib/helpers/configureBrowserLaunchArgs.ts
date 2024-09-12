@@ -36,7 +36,6 @@ export function configureBrowserLaunchArgs(
     '--disable-sync', // Disable syncing to a Google account
 
     '--force-color-profile=srgb', // Force all monitors to be treated as though they have the specified color profile.
-    '--disable-skia-runtime-opts', // Do not use runtime-detected high-end CPU optimizations in Skia.
 
     '--use-fake-device-for-media-stream',
     '--disable-search-engine-choice-screen', // Disable the default search engine prompt

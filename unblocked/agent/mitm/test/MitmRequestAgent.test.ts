@@ -6,7 +6,7 @@ import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import { getProxyAgent, runHttpsServer } from '@ulixee/unblocked-agent-testing/helpers';
 import CertificateGenerator from '@ulixee/unblocked-agent-mitm-socket/lib/CertificateGenerator';
 import WebSocket = require('ws');
-import HttpProxyAgent = require('http-proxy-agent');
+import { HttpProxyAgent } from 'http-proxy-agent';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
@@ -211,12 +211,9 @@ test('it should not put upgrade connections in a pool', async () => {
     });
   });
 
+  const proxyUrl = `http://${session.getProxyCredentials()}@localhost:${mitmServer.port}`;
   const wsClient = new WebSocket(`ws://localhost:${httpServer.port}`, {
-    agent: HttpProxyAgent({
-      host: 'localhost',
-      port: mitmServer.port,
-      auth: session.getProxyCredentials(),
-    }),
+    agent: new HttpProxyAgent(proxyUrl),
   });
   Helpers.onClose(async () => wsClient.close());
 

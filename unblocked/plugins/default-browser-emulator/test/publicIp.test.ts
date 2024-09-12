@@ -1,5 +1,7 @@
 import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
 import RequestSession from '@ulixee/unblocked-agent-mitm/handlers/RequestSession';
+import { AddressInfo } from 'node:net';
+import { createProxy } from 'proxy';
 import * as Proxy from 'proxy';
 import MitmServer from '@ulixee/unblocked-agent-mitm/lib/MitmProxy';
 import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
@@ -41,7 +43,7 @@ test('can resolve an ip address with a mitm socket', async () => {
 test('should override webrtc ip', async () => {
   const publicIp = await ipLookupWithRetries();
   const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
+  const proxyPort = (proxy.address() as AddressInfo).port;
   const agent = await pool.createAgent({
     options: {
       upstreamProxyUrl: `http://localhost:${proxyPort}`,
@@ -70,7 +72,7 @@ test('should override webrtc ip', async () => {
 test('should override webrtc ip when mitm disabled', async () => {
   const publicIp = await ipLookupWithRetries();
   const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
+  const proxyPort = (proxy.address() as AddressInfo).port;
   const agent = await pool.createAgent({
     options: {
       disableMitm: true,
@@ -106,13 +108,18 @@ async function ipLookupWithRetries(agent?: IHttpSocketAgent): Promise<string> {
 
 async function startProxy() {
   const proxyPromise = createPromise();
-  const proxy = new Proxy(http.createServer());
+  const server = http.createServer();
+  const proxy = createProxy(server);
   proxy.listen(0, () => {
     proxyPromise.resolve();
   });
   proxy.unref();
 
-  Helpers.needsClosing.push(proxy);
+  Helpers.needsClosing.push({
+    close(): void {
+      server.close();
+    },
+  });
   await proxyPromise.promise;
   return proxy;
 }
