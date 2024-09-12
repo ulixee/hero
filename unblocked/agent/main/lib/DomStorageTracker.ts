@@ -279,8 +279,14 @@ export default class DomStorageTracker extends TypedEventEmitter<IDomStorageEven
     const originStorage = this.storageForOrigin(securityOrigin);
 
     const list = isLocalStorage ? originStorage.localStorage : originStorage.sessionStorage;
+    if (!list?.length) return;
 
-    for (const [key] of list) {
+    for (const entry of list) {
+      if (!entry || !entry[0]) {
+        console.warn('Invalid DomStorage entry', { entry, list });
+        continue;
+      }
+      const key = entry[0];
       this.emit('dom-storage-updated', {
         action: 'remove',
         type: isLocalStorage ? 'localStorage' : 'sessionStorage',
