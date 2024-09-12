@@ -18,7 +18,10 @@ export default class HttpTransportToClient
   public remoteId: string;
   public isConnected = true;
 
-  constructor(public request: IncomingMessage, private response: ServerResponse) {
+  constructor(
+    public request: IncomingMessage,
+    private response: ServerResponse,
+  ) {
     super();
     this.remoteId = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
   }

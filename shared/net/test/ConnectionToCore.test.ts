@@ -16,7 +16,7 @@ test('should be able to wait for a response to a message', async () => {
   const bridge = new TransportBridge();
   const connectionToCore = new ConnectionToCore(bridge.transportToCore);
   new ConnectionToClient(bridge.transportToClient, {
-    test () {
+    test() {
       return 'called';
     },
   });

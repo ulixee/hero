@@ -57,7 +57,10 @@ export default class ConnectionToCore<
   private isSendingConnect = false;
   private isSendingDisconnect = false;
 
-  constructor(public transport: ITransport, skipConnect = false) {
+  constructor(
+    public transport: ITransport,
+    skipConnect = false,
+  ) {
     super();
     bindFunctions(this);
 

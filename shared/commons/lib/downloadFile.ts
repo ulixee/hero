@@ -77,7 +77,7 @@ function getRequestOptionsWithProxy(url: string): RequestOptions {
         port: proxyURL.port,
       };
     }
-    options.agent = new HttpsProxyAgent(proxyURL.href);
+    options.agent = new HttpsProxyAgent(proxyURL);
     options.rejectUnauthorized = false;
   }
   return options;

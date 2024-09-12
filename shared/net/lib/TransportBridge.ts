@@ -7,7 +7,10 @@ export default class TransportBridge {
   public transportToClient = new EmittingTransportToClient();
   public transportToCore = new EmittingTransportToCore();
 
-  constructor(public shouldSerialize = false, private serializationMarker = 'DIRECT') {
+  constructor(
+    public shouldSerialize = false,
+    private serializationMarker = 'DIRECT',
+  ) {
     this.transportToClient.on('outbound', msg => this.sendToTransport(msg, this.transportToCore));
     this.transportToCore.on('outbound', msg => this.sendToTransport(msg, this.transportToClient));
   }

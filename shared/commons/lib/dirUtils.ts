@@ -1,12 +1,50 @@
 import * as Fs from 'fs';
 import * as os from 'os';
 import * as Path from 'path';
+import { fileURLToPath } from 'url';
 import { parseEnvPath } from './envUtils';
 import { existsAsync } from './fileUtils';
 
+export function getDirname(dirnameOrUrl: string): string {
+  if (typeof dirnameOrUrl === 'string') {
+    // handle file:// urls like import.meta.url
+    if (dirnameOrUrl.startsWith('file://')) {
+      const filename = fileURLToPath(dirnameOrUrl);
+      return Path.dirname(filename);
+    }
+    return dirnameOrUrl;
+  }
+  throw new Error('Invalid argument passed to getDirname');
+}
+
+export function getSourcedir(dirnameOrUrl: string, buildDir = 'build'): string | null {
+  const dirname = getDirname(dirnameOrUrl);
+  let rootBuildDir = dirname;
+  while (!rootBuildDir.endsWith(`${Path.sep}${buildDir}`)) {
+    rootBuildDir = Path.dirname(rootBuildDir);
+    if (!rootBuildDir || rootBuildDir === Path.sep) {
+      return null;
+    }
+  }
+  const relativePath = Path.relative(rootBuildDir, dirname);
+  return Path.join(buildDir, '..', relativePath);
+}
+
+export function getClosestPackageJson(path: string): any | undefined {
+  while (!Fs.existsSync(Path.join(path, 'package.json'))) {
+    const next = Path.dirname(path);
+    if (next === path || !next) {
+      return null;
+    }
+    path = next;
+  }
+  return JSON.parse(Fs.readFileSync(Path.join(path, 'package.json'), 'utf8'));
+}
+
 export function getDataDirectory(): string {
   if (process.env.ULX_DATA_DIR) {
-    return parseEnvPath(process.env.ULX_DATA_DIR);
+    const envPath = parseEnvPath(process.env.ULX_DATA_DIR);
+    if (envPath) return envPath;
   }
   if (process.platform === 'linux') {
     return process.env.XDG_DATA_HOME || Path.join(os.homedir(), '.local', 'share');

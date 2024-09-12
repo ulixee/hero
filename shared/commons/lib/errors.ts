@@ -3,7 +3,11 @@ import addGlobalInstance from './addGlobalInstance';
 import { registerSerializableErrorType } from './TypeSerializer';
 
 class UlixeeError extends Error {
-  constructor(override message, public code, public data?: object) {
+  constructor(
+    override message,
+    public code,
+    public data?: object,
+  ) {
     // Calling parent constructor of base Error class.
     super(message);
 
@@ -49,7 +53,11 @@ class AbortError extends Error {
 class CodeError<T extends Record<string, any> = Record<string, never>> extends Error {
   public readonly props: T;
 
-  constructor(message: string, public readonly code: string, props?: T) {
+  constructor(
+    message: string,
+    public readonly code: string,
+    props?: T,
+  ) {
     super(message);
 
     this.name = props?.name ?? 'CodeError';

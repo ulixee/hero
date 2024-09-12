@@ -31,7 +31,6 @@ export default class Callsite {
     }
     stack = stack.slice(startIndex);
 
-
     if (endFilename) {
       let lastIdx = -1;
       for (let i = stack.length - 1; i >= 0; i -= 1) {

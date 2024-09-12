@@ -187,7 +187,9 @@ export default class TypeSerializer {
         };
       }
       if (value instanceof ArrayBuffer) {
-        const binary = Array.from(new Uint8Array(value)).map(byte => String.fromCharCode(byte)).join('');
+        const binary = Array.from(new Uint8Array(value))
+          .map(byte => String.fromCharCode(byte))
+          .join('');
         return {
           __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),

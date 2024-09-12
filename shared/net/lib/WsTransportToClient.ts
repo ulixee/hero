@@ -15,7 +15,10 @@ export default class WsTransportToClient
   public remoteId: string;
   public isConnected = true;
   private events = new EventSubscriber();
-  constructor(private webSocket: WebSocket, private request: IncomingMessage) {
+  constructor(
+    private webSocket: WebSocket,
+    private request: IncomingMessage,
+  ) {
     super();
     bindFunctions(this);
     this.events.on(webSocket, 'message', this.onMessage);

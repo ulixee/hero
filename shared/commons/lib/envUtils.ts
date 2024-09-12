@@ -7,6 +7,7 @@ import { getDataDirectory } from './dirUtils';
  * Will load env files with this precedence (.env.defaults, .env.<NODE_ENV>, .env)
  */
 export function loadEnv(baseDir: string, overwriteSetValues = false): void {
+  if (baseDir.endsWith('dist')) baseDir = Path.resolve(baseDir, '..');
   const envName = process.env.NODE_ENV?.toLowerCase() ?? 'development';
   const env: Record<string, string> = {};
   for (const envFile of ['.env.defaults', `.env.${envName}`, '.env']) {
@@ -31,9 +32,10 @@ export function applyEnvironmentVariables(path: string, env: Record<string, stri
   const LineRegex =
     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/gm;
 
-  let match: RegExpExecArray;
+  let match: RegExpExecArray | null;
   // eslint-disable-next-line no-cond-assign
   while ((match = LineRegex.exec(lines))) {
+    if (!match) continue;
     // eslint-disable-next-line prefer-const
     let [, key, value] = match;
 
@@ -67,7 +69,7 @@ export function parseEnvInt(envvar: string): number | null {
   return parseInt(envvar, 10);
 }
 
-export function parseEnvPath(envvar: string, relativeTo?: string): string {
+export function parseEnvPath(envvar: string, relativeTo?: string): string | undefined {
   if (!envvar) return undefined;
   if (envvar?.startsWith('~')) envvar = Path.join(Os.homedir(), envvar.slice(1));
   if (envvar?.startsWith('<DATA>')) envvar = envvar.replace('<DATA>', getDataDirectory());

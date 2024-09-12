@@ -169,10 +169,11 @@ it('finds source maps with charset specified', () => {
   const file = `./.generated-${counter}.js`;
   fs.writeFileSync(
     path.join(__dirname, file),
-    `${'exports.test = function() {' +
+    `${
+      'exports.test = function() {' +
       'throw new Error("test");' +
-      '};//@ sourceMappingURL=data:application/json;charset=utf8;base64,'}${ 
-      Buffer.from(sourceMap.toString()).toString('base64')}`,
+      '};//@ sourceMappingURL=data:application/json;charset=utf8;base64,'
+    }${Buffer.from(sourceMap.toString()).toString('base64')}`,
   );
   try {
     // eslint-disable-next-line import/no-dynamic-require
@@ -196,11 +197,13 @@ it('allows code/comments after sourceMappingURL', () => {
   const file = `./.generated-${counter}.js`;
   fs.writeFileSync(
     path.join(__dirname, file),
-    `${'exports.test = function() {' +
+    `${
+      'exports.test = function() {' +
       'throw new Error("test");' +
-      '};//# sourceMappingURL=data:application/json;base64,'}${ 
-      Buffer.from(sourceMap.toString()).toString('base64') 
-      }\n// Some comment below the sourceMappingURL\nvar foo = 0;`,
+      '};//# sourceMappingURL=data:application/json;base64,'
+    }${Buffer.from(sourceMap.toString()).toString(
+      'base64',
+    )}\n// Some comment below the sourceMappingURL\nvar foo = 0;`,
   );
   try {
     // eslint-disable-next-line import/no-dynamic-require
@@ -238,7 +241,7 @@ function createMultiLineSourceMap(): SourceMapGenerator {
     sourceMap.addMapping({
       generated: { line: i, column: 0 },
       original: { line: 1000 + i, column: 99 + i },
-      source: `line${  i  }.js`,
+      source: `line${i}.js`,
     });
   }
   return sourceMap;
@@ -253,7 +256,7 @@ function createMultiLineSourceMapWithSourcesContent(): SourceMapGenerator {
       original: { line: 1000 + i, column: 4 },
       source: 'original.js',
     });
-    original += `    line ${  i  }\n`;
+    original += `    line ${i}\n`;
   }
   sourceMap.setSourceContent('original.js', original);
   return sourceMap;
@@ -267,9 +270,9 @@ function createStackTraces(
   fs.writeFileSync(`${__dirname}/.generated-${counter}.js.map`, sourceMap.toString());
   fs.writeFileSync(
     `${__dirname}/.generated-${counter}.js`,
-    `exports.test = function() {${ 
-      source.join('\n') 
-      }};//@ sourceMappingURL=.generated-${counter}.js.map`,
+    `exports.test = function() {${source.join(
+      '\n',
+    )}};//@ sourceMappingURL=.generated-${counter}.js.map`,
   );
   const response = { full: null, inline: null };
   try {
@@ -284,10 +287,11 @@ function createStackTraces(
   // Check again with an inline source map (in a data URL)
   fs.writeFileSync(
     `${__dirname}/.generated-${counter}-inline.js`,
-    `exports.test = function() {${ 
-      source.join('\n') 
-      }};//@ sourceMappingURL=data:application/json;base64,${ 
-      Buffer.from(sourceMap.toString()).toString('base64')}`,
+    `exports.test = function() {${source.join(
+      '\n',
+    )}};//@ sourceMappingURL=data:application/json;base64,${Buffer.from(
+      sourceMap.toString(),
+    ).toString('base64')}`,
   );
   try {
     // eslint-disable-next-line import/no-dynamic-require

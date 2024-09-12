@@ -9,7 +9,10 @@ export default class Timer {
   private timeoutMessage = 'Timeout waiting';
   private readonly expirePromise = new Resolvable<void>();
 
-  constructor(readonly timeoutMillis: number, readonly registry?: IRegistry[]) {
+  constructor(
+    readonly timeoutMillis: number,
+    readonly registry?: IRegistry[],
+  ) {
     // NOTE: A zero value will NOT timeout. This is to give users an ability to not timeout certain requests
     this.timeout =
       timeoutMillis > 0 ? setTimeout(this.expire.bind(this), timeoutMillis).unref() : null;

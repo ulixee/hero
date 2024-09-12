@@ -114,7 +114,7 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
   ): this {
     super.on(eventType, listenerFn);
     // if we're adding an error logger, we can remove the default logger
-    if (eventType === 'error' && listenerFn !== this.defaultErrorLogger as any) {
+    if (eventType === 'error' && listenerFn !== (this.defaultErrorLogger as any)) {
       super.off('error', this.defaultErrorLogger);
     }
     this.onEventListenerAdded?.(eventType);
@@ -126,7 +126,11 @@ export default class TypedEventEmitter<T> extends EventEmitter implements ITyped
     listenerFn: (this: this, event?: T[K]) => any,
   ): this {
     // if we're removing an error logger, we should add back the default logger
-    if (eventType === 'error' && listenerFn !== this.defaultErrorLogger as any && super.listenerCount(eventType) === 1) {
+    if (
+      eventType === 'error' &&
+      listenerFn !== (this.defaultErrorLogger as any) &&
+      super.listenerCount(eventType) === 1
+    ) {
       super.on('error', this.defaultErrorLogger);
     }
     return super.off(eventType, listenerFn);

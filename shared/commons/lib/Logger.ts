@@ -217,7 +217,6 @@ export function translateToPrintable(
 
 const logLevels = { stats: 0, info: 1, warn: 2, error: 3 };
 
-
 if (!global.UlixeeLogCreator) {
   global.UlixeeLogCreator = (module: NodeModule): { log: ILog } => {
     const log: ILog = new Log(module);

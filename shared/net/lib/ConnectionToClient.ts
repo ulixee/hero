@@ -22,7 +22,10 @@ export default class ConnectionToClient<
   public handlerMetadata?: IHandlerMetadata;
 
   private events = new EventSubscriber();
-  constructor(readonly transport: ITransport, readonly apiHandlers: IClientApiHandlers) {
+  constructor(
+    readonly transport: ITransport,
+    readonly apiHandlers: IClientApiHandlers,
+  ) {
     super();
 
     if (transport) {
