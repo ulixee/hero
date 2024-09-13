@@ -26,3 +26,14 @@ emulators/data/DOM-*.json
 /.eslintcache
 /.network.db
 connect
+
+.history/
+.vscode/
+
+build
+build-dist
+/.data-test
+browserstack.err
+
+agent/mitm-socket/dist
+/real-user-agents/local.log

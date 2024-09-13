@@ -1,4 +1,0 @@
-.eslint*
-.gitignore
-package.build.json
-tsconfig*

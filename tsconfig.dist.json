@@ -5,7 +5,11 @@
     "sourceMap": true,
     "inlineSourceMap": false
   },
-  "references": [],
+  "references": [
+    {
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
+    }
+  ],
   "include": ["./**/*.ts", "**/*.js", "**/*.json"],
   "exclude": [
     "*jest*",

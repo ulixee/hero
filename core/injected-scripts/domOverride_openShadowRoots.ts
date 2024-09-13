@@ -1,8 +1,3 @@
-declare let proxyGetter;
-declare let proxyFunction;
-declare let ProxyOverride;
-declare let args;
-
 const closedShadows = new WeakSet<ShadowRoot>();
 const closedShadowOwners = new WeakSet<Element>();
 
