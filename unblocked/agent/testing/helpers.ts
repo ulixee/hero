@@ -51,12 +51,10 @@ export interface ITestHttpServer<T> {
   server: T;
 }
 
-const sourcedir = getSourcedir(__dirname);
-
 export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
   const koa = new Koa();
   const router = new KoaRouter() as ITestKoaServer;
-  const exampleOrgPath = Path.join(sourcedir, 'html', 'example.org.html');
+  const exampleOrgPath = Path.join(__dirname, 'html', 'example.org.html');
   const exampleOrgHtml = Fs.readFileSync(exampleOrgPath, 'utf-8');
   const upload = KoaMulter(); // note you can pass `multer` options here
 
@@ -99,8 +97,8 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
 
 export function sslCerts() {
   return {
-    key: Fs.readFileSync(`${sourcedir}/certs/key.pem`),
-    cert: Fs.readFileSync(`${sourcedir}/certs/cert.pem`),
+    key: Fs.readFileSync(`${__dirname}/certs/key.pem`),
+    cert: Fs.readFileSync(`${__dirname}/certs/cert.pem`),
   };
 }
 
@@ -420,7 +418,7 @@ export function getTlsConnection(
 }
 
 export function getLogo(): Buffer {
-  return Fs.readFileSync(`${sourcedir}/html/img.png`);
+  return Fs.readFileSync(`${__dirname}/html/img.png`);
 }
 
 export async function readableToBuffer(res: stream.Readable): Promise<Buffer> {
