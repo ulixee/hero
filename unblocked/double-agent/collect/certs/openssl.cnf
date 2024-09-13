@@ -1,0 +1,23 @@
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[req_distinguished_name]
+countryName = US
+countryName_default = US
+organizationalUnitName = DoubleAgent
+organizationalUnitName_default = DoubleAgent
+commonName = double-agent.collect
+commonName_max = 64
+
+[ v3_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = double-agent.collect
+DNS.2 = sub.double-agent.collect
+DNS.3 = double-agent-external.collect
+DNS.4 = tls.double-agent.collect

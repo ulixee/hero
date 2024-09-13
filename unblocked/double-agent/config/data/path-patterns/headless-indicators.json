@@ -1,0 +1,22 @@
+{
+  "added": [
+    "window.HTMLLinkElement.prototype.import"
+  ],
+  "removed": [
+    "window.navigator.languages",
+    "window.navigator.plugins",
+    "window.navigator.mimeTypes"
+  ],
+  "changed": [
+    "window.navigator.languages",
+    "window.navigator.plugins",
+    "window.navigator.mimeTypes"
+  ],
+  "changedOrder": [
+    "window.navigator.languages",
+    "window.navigator.plugins",
+    "window.navigator.mimeTypes"
+  ],
+  "extraAdded": [],
+  "extraChanged": []
+}

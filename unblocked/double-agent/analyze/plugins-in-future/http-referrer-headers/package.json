@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/http-referrers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "checkCategories": [
+    "Referrers"
+  ],
+  "description": "Referrer headers indicate browser came from a legitimate source",
+  "scripts": {}
+}

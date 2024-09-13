@@ -1,0 +1,1 @@
+window.navigator.hardwareConcurrency can probably be used to determine lightweight cloud machines.

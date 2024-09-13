@@ -1,0 +1,15 @@
+- Detailed frames: Nodejs only lets you see a tiny bit into the http2 frames going back and forth. Need to switch to http2 lib (all javascript) or pull out pieces of it to have a slim version that can read the actual frames.
+
+- Stream reuse: Chrome will reuse the same stream/socket across domains and ports that resolve to the same address. This breaks safari <12.1 though, so I disabled it.
+
+Additional tracking we should do once we have a more capable http2 frame tracker:
+ - Initial window update
+ - Settings Ack
+ - True settings sent in SETTINGS updates (currently nodejs injects defaults)
+ - Frames per packet (ie, is headers/window_update in shared packet)
+ - Headers Frames
+ - Data Frames
+ - Continuation Frames
+ - Rst Frame and GoAway
+ - Padding in frames
+ - Test HPack of different headers - same indices/packing across browsers?

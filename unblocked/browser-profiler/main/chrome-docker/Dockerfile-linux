@@ -1,0 +1,42 @@
+FROM debian:stable-slim
+
+ARG chrome_url
+ARG chrome_folder
+
+ENV CHROME_URL=$chrome_url
+ENV CHROME_FOLDER=$chrome_folder
+
+RUN apt-get update \
+    && apt-get install -qy ca-certificates wget unzip fonts-freefont-ttf libxss1 socat --no-install-recommends \
+    && wget -O chrome.tar.gz "${CHROME_URL}" --progress=bar --no-check-certificate \
+    && tar -xf chrome.tar.gz \
+    && apt install -qqy "./${CHROME_FOLDER}/install-dependencies.deb" \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get autoremove -y
+
+RUN chown root "/${CHROME_FOLDER}/chrome-sandbox"
+RUN chmod 4755 "/${CHROME_FOLDER}/chrome-sandbox"
+RUN mkdir /browsers \
+    && ln -s "/${CHROME_FOLDER}/chrome" /browsers/chrome
+ENV PATH="/browsers:${PATH}"
+
+COPY Dockerstart.sh /Dockerstart.sh
+RUN chmod +x /Dockerstart.sh
+
+RUN useradd headless --shell /bin/bash --create-home \
+  && usermod -a -G sudo headless \
+  && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers \
+  && echo 'headless:nopassword' | chpasswd
+
+RUN echo "\n-------------------------------" \
+    && echo "INSTALLED BROWSERS:" \
+    && chrome --version \
+    && echo "-------------------------------\n"
+
+RUN mkdir /data && chown -R headless:headless /data
+
+USER headless
+
+ENTRYPOINT ["/Dockerstart.sh"]
+CMD ["", ""]

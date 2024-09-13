@@ -1,0 +1,31 @@
+builds:
+  - id: 'connect'
+    binary: connect
+    dir: ./go
+    goos:
+      - linux
+      - windows
+      - darwin
+    env:
+      - GO111MODULE=on
+      - CGO_ENABLED=0
+archives:
+  - name_template: >-
+      connect_{{ .Version }}_
+      {{- if eq .Os "darwin" }}mac_
+      {{- else if eq .Os "linux" }}linux_
+      {{- else if eq .Os "windows" }}win_{{end}}
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{end}}
+    format: gz
+    files:
+      - none*
+checksum:
+  name_template: 'connect.checksum'
+snapshot:
+  name_template: "{{ .Tag }}-snapshot"
+changelog:
+  skip: true
+release:
+  prerelease: auto

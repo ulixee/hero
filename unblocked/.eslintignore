@@ -1,0 +1,8 @@
+build
+.eslintrc.js
+*.config.js
+tsconfig*.json
+double-agent
+jest.*.js
+**/install.js
+**/updateSeccompProfile.js

@@ -1,0 +1,29 @@
+{
+  "extends": "./node_modules/@ulixee/repo-tools/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./build"
+  },
+  "references": [
+    {
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
+    }
+  ],
+  "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
+  "exclude": [
+    "**/tsconfig*.json",
+    "build",
+    "build-dist",
+    "node_modules",
+    "browser-emulator-builder/data",
+    "double-agent/probe-data",
+    "double-agent-stacks/data/local/3-assignments",
+    "double-agent-stacks/data/local/4-assignment-results",
+    "double-agent-stacks/data/external/0-foundational-profiles",
+    "double-agent-stacks/data/external/3-assignments",
+    "double-agent-stacks/data/external/4-assignment-results",
+    "plugins/default-browser-emulator/injected-scripts",
+    "docs",
+    "**/*.d.ts"
+  ]
+}

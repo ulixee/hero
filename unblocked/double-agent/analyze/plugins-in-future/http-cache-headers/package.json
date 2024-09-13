@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/http-cache",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "checkCategories": [
+    "Cache Headers"
+  ],
+  "description": "Http caching headers sent in different conditions vs default user agent behavior",
+  "scripts": {}
+}
