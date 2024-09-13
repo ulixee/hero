@@ -57,6 +57,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - uses: actions/setup-node@v4
         with:
@@ -81,6 +83,9 @@ jobs:
         uses: microsoft/setup-msbuild@v2
         if: ${{ matrix.os == 'windows-latest' }}
 
+      - name: Build modules
+        run: yarn build
+
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}
         working-directory: ./build
@@ -94,11 +99,6 @@ jobs:
       - name: Run Lint
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
-
-      - name: Build modules
-        run: yarn build --network-timeout 1000000
-        env:
-          ULX_MITM_REBUILD_SOCKET: 1
 
       - name: Run tests
         run: yarn jest --testTimeout=60000 --maxWorkers=2

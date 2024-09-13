@@ -23,10 +23,6 @@ jobs:
       - name: Build modules
         run: yarn && yarn build:dist --network-timeout 1000000
 
-      - name: Install pre-gyp in build-dist
-        working-directory: build-dist/core
-        run: yarn add --dev node-gyp@^10.2.0
-
       - name: Publish branch
         run: |
           cd build-dist

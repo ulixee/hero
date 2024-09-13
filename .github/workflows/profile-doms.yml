@@ -25,38 +25,28 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           submodules: 'true'
-          path: unblocked
-
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          repository: ulixee/shared
-          path: shared
+          path: hero
 
       - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'yarn'
-          cache-dependency-path: unblocked/yarn.lock
+          cache-dependency-path: hero/yarn.lock
 
-      - name: Install ulixee/shared
-        run: yarn build
-        working-directory: ./shared
-
-      - name: Install unblocked
+      - name: Install hero
         run: yarn build:simple
-        working-directory: ./unblocked
+        working-directory: ./hero
 
       - name: 'Collect new Browserstack Profiles'
-        run: yarn workspace @ulixee/unblocked-browser-profiler profile:dom-browserstack
-        working-directory: ./unblocked
+        run: yarn workspace @ulixee/hero-browser-profiler profile:dom-browserstack
+        working-directory: ./hero
         env:
           BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
       - name: 'Collect Local Doms'
-        run: yarn workspace @ulixee/unblocked-browser-profiler profile:dom-local
-        working-directory: ./unblocked
+        run: yarn workspace @ulixee/hero-browser-profiler profile:dom-local
+        working-directory: ./hero
         env:
           NODE_ENV: development
           RUN_DOCKERS: true

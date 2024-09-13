@@ -5,7 +5,6 @@
   "scripts": {
     "prepare": "husky",
     "build": "yarn --frozen-lockfile && yarn tsc && cd ./build && cross-env ULX_MITM_REBUILD_SOCKET=1 yarn && pwd && yarn workspace @double-agent/config sync",
-    "build:ci": "yarn tsc && cd build && yarn install",
     "build:docs": "ts-node ./docs/scripts/generateAwaitedDOM.ts",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && ulx-repo-after-build --dist",
     "build:simple": "yarn --frozen-lockfile && yarn tsc && cd ./build && yarn && pwd && yarn workspace @double-agent/config sync",

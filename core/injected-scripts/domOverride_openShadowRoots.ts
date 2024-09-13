@@ -9,14 +9,15 @@ if (self[shadowTriggerName]) {
   delete self[shadowTriggerName]; // eslint-disable-line no-restricted-globals
 }
 
-proxyGetter(Element.prototype, 'shadowRoot', (_, thisArg) => {
+proxyGetter(Element.prototype, 'shadowRoot', (target, thisArg, argArray) => {
   if (closedShadowOwners.has(thisArg)) return null;
-  return ProxyOverride.callOriginal;
+
+  return ReflectCached.apply(target, thisArg, argArray);
 });
 
-proxyGetter(ShadowRoot.prototype, 'mode', (_, thisArg) => {
+proxyGetter(ShadowRoot.prototype, 'mode', (target, thisArg, argArray) => {
   if (closedShadows.has(thisArg)) return 'closed';
-  return ProxyOverride.callOriginal;
+  return ReflectCached.apply(target, thisArg, argArray);
 });
 
 const ArrayIndexOfCache = Array.prototype.indexOf;
@@ -38,8 +39,8 @@ proxyFunction(Element.prototype, 'attachShadow', (func, thisArg, argArray) => {
     let element = thisArg as Element;
     // only traverse elements if connected
     if (element.isConnected) {
-      const path: { localName: string; id:string; index: number; hasShadowHost: boolean }[] = [];
-      let top: typeof path[0];
+      const path: { localName: string; id: string; index: number; hasShadowHost: boolean }[] = [];
+      let top: (typeof path)[0];
       while (element) {
         let parentElement: Element = element.parentElement;
 
@@ -47,7 +48,7 @@ proxyFunction(Element.prototype, 'attachShadow', (func, thisArg, argArray) => {
           localName: element.localName,
           id: element.id,
           index: parentElement ? ArrayIndexOfCache.call(parentElement.children, element) : 0,
-          hasShadowHost: false
+          hasShadowHost: false,
         };
 
         if (!parentElement) {

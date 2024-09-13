@@ -257,12 +257,6 @@ function runAndInjectProxyInStack(target: any, thisArg: any, argArray: any, prox
 
 /////// END TOSTRING  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO remove this, but make sure we clean this up in:
-// hero/core/injected-scripts/domOverride_openShadowRoots.ts
-enum ProxyOverride {
-  callOriginal = '_____invoke_original_____',
-}
-
 function proxyConstructor<T, K extends keyof T>(
   owner: T,
   key: K,
@@ -444,9 +438,7 @@ function proxyGetter<T, K extends keyof T>(
       apply: (target, thisArg, argArray) => {
         const shouldOverride = !opts?.overrideOnlyForInstance || thisArg === thisObject;
         if (shouldOverride) {
-          const result = overrideFn(target, thisArg, argArray);
-          // TODO remove
-          if (result !== ProxyOverride.callOriginal) return result;
+          return overrideFn(target, thisArg, argArray);
         }
         return ReflectCached.apply(target, thisArg, argArray);
       },

@@ -19,7 +19,7 @@ jobs:
           ref: main
           token: ${{ secrets.PAT }}
           submodules: 'recursive'
-          path: unblocked
+          path: hero
 
       - uses: actions/checkout@v4
         with:
@@ -28,41 +28,34 @@ jobs:
           repository: ulixee/browser-profile-data
           path: browser-profile-data
 
-      - name: Clone ulixee/shared
-        run: git clone https://github.com/ulixee/shared.git
-
       - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'yarn'
-          cache-dependency-path: unblocked/yarn.lock
-
-      - name: Install ulixee/shared
-        run: yarn build
-        working-directory: shared
+          cache-dependency-path: hero/yarn.lock
 
       - name: Yarn build
         run: yarn build:simple
-        working-directory: unblocked
+        working-directory: hero
 
       - name: Update Dom Bridges
-        run: yarn workspace @ulixee/unblocked-browser-profiler-dom-bridger generate
-        working-directory: unblocked
+        run: yarn workspace @ulixee/hero-browser-profiler-dom-bridger generate
+        working-directory: hero
 
       - name: Force Generate Profiles
-        run: yarn workspace @ulixee/unblocked-browser-emulator-builder generate force
-        working-directory: unblocked
+        run: yarn workspace @ulixee/hero-browser-emulator-builder generate force
+        working-directory: hero
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: main
           repository: browser-profile-data
-          commit_message: "chore(dom-bridges): automatic updates"
+          commit_message: 'chore(dom-bridges): automatic updates'
 
       - id: browser-data-checkin
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          repository: unblocked/browser-emulator-builder/data
+          repository: hero/browser-emulator-builder/data
           branch: main
           commit_message: 'chore(browser-emulator-builder): automatic emulator data update'
 
@@ -70,6 +63,6 @@ jobs:
         if: steps.browser-data-checkin.outputs.changes_detected == 'true'
         with:
           branch: main
-          repository: unblocked
+          repository: hero
           push_options: '--no-verify'
           commit_message: 'chore(browser-emulator-builder): automatic update emulator data ref'
