@@ -86,7 +86,7 @@ const Hero = require('@ulixee/hero-playground');
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - upstreamProxyUseSystemDns `boolean`. A variable to indicate DNS should be resolved on the host machine. By default, if a proxy is used, hosts will be resolved by the remote proxy.
   - upstreamProxyIpMask `object`. Optional settings to mask the Public IP Address of a host machine when using a proxy. This is used by the default BrowserEmulator to mask WebRTC IPs.
-    - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/hero/main/tree/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81).
+    - ipLookupService `string`. The URL of an http based IpLookupService. A list of common options can be found in the [Unblocked Plugin](https://github.com/ulixee/hero/blob/main/plugins/default-browser-emulator/lib/helpers/lookupPublicIp.ts#L81).
     - proxyIp `string`. The optional IP address of your proxy, if known ahead of time.
     - publicIp `string`. The optional IP address of your host machine, if known ahead of time.
   - sessionPersistence `boolean`. Do not save the [Session](../advanced-concepts/sessions.md) database if set to `false`. Defaults to `true` so you can troubleshoot errors, and load/extract data from previous sessions.
