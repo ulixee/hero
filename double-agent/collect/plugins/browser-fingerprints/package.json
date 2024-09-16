@@ -1,0 +1,20 @@
+{
+  "name": "@double-agent/collect-browser-fingerprints",
+  "version": "2.0.0-alpha.29",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "checkCategories": [
+    "Browser Fingerprint"
+  ],
+  "description": "Collects various browser attributes that can be used to fingerprint a given session",
+  "scripts": {
+    "start": "node index.js",
+    "prod": "GENERATE_PROFILES=1 PORT=3001 DOMAIN=a1.ulixee.org node index.js"
+  },
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.29",
+    "cookie": "^0.4.0",
+    "fingerprintjs2": "^2.1.0"
+  }
+}

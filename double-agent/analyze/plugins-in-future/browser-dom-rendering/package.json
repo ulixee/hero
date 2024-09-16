@@ -1,0 +1,12 @@
+{
+  "name": "@double-agent/browser-dom-rendering",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "checkCategories": [
+    "Browser Rendering"
+  ],
+  "description": "Detect nuances and capabilities for each browser rendering engine",
+  "scripts": {}
+}

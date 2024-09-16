@@ -1,0 +1,68 @@
+name: 'Emulator Data'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *'
+
+jobs:
+  profiler:
+    name: 'Update Emulator Profile Data'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT }}
+          submodules: 'recursive'
+          path: hero
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT }}
+          repository: ulixee/browser-profile-data
+          path: browser-profile-data
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: hero/yarn.lock
+
+      - name: Yarn build
+        run: yarn build:simple
+        working-directory: hero
+
+      - name: Update Dom Bridges
+        run: yarn workspace @ulixee/hero-browser-profiler-dom-bridger generate
+        working-directory: hero
+
+      - name: Force Generate Profiles
+        run: yarn workspace @ulixee/hero-browser-emulator-builder generate force
+        working-directory: hero
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: main
+          repository: browser-profile-data
+          commit_message: 'chore(dom-bridges): automatic updates'
+
+      - id: browser-data-checkin
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          repository: hero/browser-emulator-builder/data
+          branch: main
+          commit_message: 'chore(browser-emulator-builder): automatic emulator data update'
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: steps.browser-data-checkin.outputs.changes_detected == 'true'
+        with:
+          branch: main
+          repository: hero
+          push_options: '--no-verify'
+          commit_message: 'chore(browser-emulator-builder): automatic update emulator data ref'

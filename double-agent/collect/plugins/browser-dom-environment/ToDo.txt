@@ -1,0 +1,3 @@
+Promise.prototype is not being extracted due to an error when awaiting object.
+
+We are not calling inherited methods/properties of an object. Instead we just add the Object.prototype to an array.

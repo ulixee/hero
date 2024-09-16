@@ -1,0 +1,20 @@
+{
+  "name": "@double-agent/collect-http-xhr",
+  "version": "2.0.0-alpha.29",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "description": "Collects the headers used by browsers when facilitating XHR requests",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.29",
+    "@double-agent/config": "2.0.0-alpha.29",
+    "axios": "^1.6.7",
+    "diff": "^4.0.2",
+    "source-map-support": "^0.5.16",
+    "uuid": "^7.0.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/diff": "^4.0.2"
+  }
+}

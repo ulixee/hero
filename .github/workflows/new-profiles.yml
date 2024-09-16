@@ -1,0 +1,89 @@
+name: 'Profiles'
+
+on:
+  workflow_dispatch:
+    inputs:
+      clearPlugins:
+        description: 'Redo any plugin-ids (comma separated)'
+        required: false
+  schedule:
+    - cron: '0 7 * * *'
+
+jobs:
+  profiler:
+    name: 'Update Browser Profiles'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Install pcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT }}
+          repository: ulixee/browser-profile-data
+          path: browser-profile-data
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: 'recursive'
+          path: hero
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: hero/yarn.lock
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install hero
+        run: yarn build:simple
+        working-directory: ./hero
+
+      - name: Linux - Apt Install Chrome(s)
+        working-directory: ./hero/build
+        run: sudo $(npx install-browser-deps)
+
+      - name: 'Collect new Browserstack User Agents'
+        run: yarn workspace @ulixee/real-user-agents update:agents
+        working-directory: ./hero
+        env:
+          BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - name: 'Update Real UserAgent Stats'
+        run: yarn workspace @ulixee/real-user-agents update
+        working-directory: ./hero
+
+      - name: 'Clear plugin-ids from manual'
+        if: ${{ github.event.inputs.clearPlugins }}
+        run: yarn workspace @ulixee/hero-browser-profiler profile:clean ${{ github.event.inputs.clearPlugins }}
+        working-directory: ./hero
+
+      - name: 'Collect new Browserstack Profiles'
+        run: yarn workspace @ulixee/hero-browser-profiler profile:browserstack
+        working-directory: ./hero
+        env:
+          BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ always() }}
+        with:
+          branch: main
+          repository: ./browser-profile-data
+          commit_message: "chore(profiles): automatic updates"
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ always() }}
+        with:
+          branch: main
+          repository: ./hero
+          commit_options: '--no-verify'
+          push_options: '--no-verify'
+          commit_message: "chore(profiles): automatic updates"

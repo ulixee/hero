@@ -1,12 +1,10 @@
 import { IFrontendDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
-import type INodeTracker from './INodeTracker';
 
 declare global {
   interface Window {
     getNodeById(id: number): Node;
     DomActions: typeof DomActions;
   }
-  let NodeTracker: INodeTracker;
 }
 
 // copied since we can't import data types

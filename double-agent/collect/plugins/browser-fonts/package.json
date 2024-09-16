@@ -1,0 +1,17 @@
+{
+  "name": "@double-agent/collect-browser-fonts",
+  "version": "2.0.0-alpha.29",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "checkCategories": [
+    "Fonts Supported"
+  ],
+  "description": "Collects the fonts of the current browser/os.",
+  "scripts": {
+    "analyze": "node -e 'require(\"./lib/FontProfile\").analyze()'"
+  },
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.29"
+  }
+}

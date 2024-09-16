@@ -20,29 +20,8 @@ jobs:
           node-version: 18
           cache: yarn
 
-      - name: Clone ulixee/shared
-        run: git clone https://github.com/ulixee/shared.git
-        working-directory: ../..
-
-      - name: Install ulixee/shared
-        run: yarn build
-        working-directory: ../../shared
-
-      - name: Clone unblocked
-        run: git clone --recurse-submodules -j8 https://github.com/ulixee/unblocked.git
-        working-directory: ../..
-
-
-      - name: Install unblocked
-        run: yarn build:simple
-        working-directory: ../../unblocked
-
       - name: Build modules
         run: yarn && yarn build:dist --network-timeout 1000000
-
-      - name: Install pre-gyp in build-dist
-        working-directory: build-dist/core
-        run: yarn add --dev node-gyp@^10.2.0
 
       - name: Publish branch
         run: |

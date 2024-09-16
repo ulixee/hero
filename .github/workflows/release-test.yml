@@ -28,6 +28,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - uses: actions/setup-node@v4
         with:
@@ -35,7 +37,7 @@ jobs:
           cache: yarn
 
       - name: Build modules
-        run: yarn --network-timeout 1000000 --verbose && yarn build --network-timeout 1000000 --verbose
+        run: yarn build
 
       - name: Linux - Add Chrome Env
         if: ${{ matrix.browser }}

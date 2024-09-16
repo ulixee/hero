@@ -1,0 +1,17 @@
+{
+  "name": "@ulixee/commons",
+  "version": "2.0.0-alpha.29",
+  "private": true,
+  "description": "Common utilities for Ulixee",
+  "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.18",
+    "bech32": "^2.0.0",
+    "devtools-protocol": "^0.0.1137505",
+    "https-proxy-agent": "^7.0.5",
+    "semver": "^7.3.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "source-map-js": "^1.0.2"
+  }
+}

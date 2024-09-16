@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vue.js grid component example</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="vue.min.js"></script>
+  </head>
+  <body>
+    <script type="text/x-template" id="grid-template">
+      <table v-if="records">
+          <thead>
+          <tr>
+              <th v-for="key of columns">{{ key  }}</th>
+          </tr>
+          </thead>
+          <tbody>
+              <tr class="record" v-for="entry of records">
+                  <td v-for="key of columns">{{entry[key]}}</td>
+              </tr>
+          </tbody>
+      </table>
+    </script>
+
+    <div id="demo">
+      <demo-grid :columns="gridColumns"> </demo-grid>
+    </div>
+
+    <script type="text/javascript">
+      let counter = 0;
+      // register the grid component
+      Vue.component('demo-grid', {
+        template: '#grid-template',
+        replace: true,
+        props: {
+          columns: Array,
+        },
+        data() {
+          return {
+            records: null,
+          };
+        },
+        async mounted() {
+          const response = await fetch('data.json');
+          const { records } = await response.json();
+          this.records = records;
+        },
+      });
+
+      // bootstrap the demo
+      const demo = new Vue({
+        el: '#demo',
+        data: {
+          gridColumns: ['name', 'power'],
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -5,18 +5,28 @@
     "sourceMap": true,
     "inlineSourceMap": false
   },
-  "references": [],
-  "include": ["./**/*.ts", "**/*.js", "**/*.json"],
+  "references": [
+    {
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.dist.json"
+    }
+  ],
+  "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
-    "*jest*",
     "**/tsconfig*.json",
-    "**/test",
     "node_modules",
     "**/node_modules",
-    "**/dist",
     "**/build",
     "build",
     "build-dist",
-    "examples"
+    "examples/*.js",
+    "browser-emulator-builder/data",
+    "double-agent/probe-data",
+    "double-agent-stacks/data/local/3-assignments",
+    "double-agent-stacks/data/local/4-assignment-results",
+    "double-agent-stacks/data/external/0-foundational-profiles",
+    "double-agent-stacks/data/external/3-assignments",
+    "double-agent-stacks/data/external/4-assignment-results",
+    "plugins/default-browser-emulator/injected-scripts",
+    "docs"
   ]
 }

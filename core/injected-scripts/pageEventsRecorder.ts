@@ -24,16 +24,6 @@ declare global {
     listenToInteractionEvents(): void;
     trackElement(element: Element): void;
     doNotTrackElement(element: Element): void;
-    PaintEvents: {
-      onEventCallbackFn: (
-        paintEvent:
-          | 'DOMContentLoaded'
-          | 'AllContentLoaded'
-          | 'LargestContentfulPaint'
-          | 'FirstContentfulPaint',
-        timestamp: number,
-      ) => void;
-    };
   }
 }
 declare const runtimeFunction: string;
