@@ -12,9 +12,13 @@ Check out our [website for more details](https://ulixee.org).
 
 ## Installation
 
+You can get a playground started with Hero very quickly. A playground is a one-time use hero instance that will shut down once you've run a single script. This is great for quick scripts or testing.
+
 ```shell script
 npm i --save @ulixee/hero-playground
 ```
+
+Once you're ready to graduate to deploying, check out the docs here: [Deploying Hero](https://ulixee.org/docs/hero/advanced-concepts/deployment).
 
 ## Usage
 
@@ -65,7 +69,7 @@ This repository is home to several of the projects needed to create an "unblocke
 - [Browser Profile Data][profiles]. A data repository containing profiles of real browsers using BrowserStack, Dockers and Local Doms. Includes deep diffing various environments of Chrome (headed, headless, with devtools, browserstack, between runs, etc).
 - [Browser Profiler](./browser-profiler). Profiler to automatically collect [Browser Profile Data][profiles]. Automation to recreate files is driven from Profile Data project.
 - [Emulator Builder](./browser-emulator-builder). A library to use the collected data from Browser Profile Data to "patch" runtime headless Chrome to match headed Chrome on a home Operating System.
-- [Mission Impossible](./mission-impossible). Real world measurement of what DOM Apis are being analyzed on the top websites, and how many are detecting and blocking the Unblocked Agent + Community Plugins. _To be imported_
+- [Mission Impossible]. Real world measurement of what DOM Apis are being analyzed on the top websites, and how many are detecting and blocking the Unblocked Agent + Community Plugins. _To be imported_
 
 ## Questions
 

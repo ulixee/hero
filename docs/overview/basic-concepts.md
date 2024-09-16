@@ -82,4 +82,4 @@ see [here](../overview/configuration.md#blocked-urls) for more information.
 
 ## Mice and Keyboards Are Human Too
 
-Hero drives mice and keyboards with [Human Emulators](https://github.com/ulixee/unblocked/tree/main/plugins/default-human-emulator). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.
+Hero drives mice and keyboards with [Human Emulators](https://github.com/ulixee/hero/tree/main/plugins/default-human-emulator). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.

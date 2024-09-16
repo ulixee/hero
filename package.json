@@ -67,6 +67,7 @@
       "interfaces",
       "js-path",
       "net",
+      "playground",
       "plugin-utils",
       "plugins/*",
       "real-user-agents",

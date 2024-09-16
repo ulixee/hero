@@ -14,7 +14,7 @@ As the versions of browsers have gotten easier to differentiate, it is also beco
 npm i --save @ulixee/chrome-104-0 @ulixee/chrome-105-0 @ulixee/chrome-106-0
 ```
 
-When those browsers are installed, they will be automatically added to the round-robin of UserAgents. Whenever a new Hero instance is created, one of the installed Browsers is chosen at random, and a UserAgent string created by the [Unblocked RealUserAgents](https://github.com/ulixee/unblocked/tree/main/real-user-agents) project will be selected at random as well. Operating systems are rotated through Mac OS 10.10 to Mac OS 12, and Windows 7-11.
+When those browsers are installed, they will be automatically added to the round-robin of UserAgents. Whenever a new Hero instance is created, one of the installed Browsers is chosen at random, and a UserAgent string created by the [Unblocked RealUserAgents](https://github.com/ulixee/hero/tree/main/real-user-agents) project will be selected at random as well. Operating systems are rotated through Mac OS 10.10 to Mac OS 12, and Windows 7-11.
 
 This means anytime you use Hero, you're getting randomized UserAgent strings. The only exception to this is if you load a [UserProfile](../basic-client/hero.md#export-profile), Hero will consistently use the same UserAgent string and Operating system.
 

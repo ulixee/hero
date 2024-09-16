@@ -100,4 +100,4 @@ If you wish to generate probes for different data browsers (or a wider set), you
 5. Run `yarn 1` to create new probes.
 
 ## Testing your Scraper:
-To view examples of running the test suite with a custom browser, check-out the [DoubleAgent Stacks](https://github.com/ulixee/unblocked/double-agent-stacks) project in [Unblocked](https://github.com/ulixee/unblocked).
+To view examples of running the test suite with a custom browser, check-out the [DoubleAgent Stacks](https://github.com/ulixee/hero/double-agent-stacks) project in [Unblocked](https://github.com/ulixee/hero).

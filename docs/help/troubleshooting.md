@@ -6,7 +6,7 @@ Hero operates with a few different spawned processes:
 
 #### Browser Emulators
 
-When you install Hero, it also downloads a recent version of Chrome and emulator "data files" to mask automated and headless usage. Details of the underlying [Browser Emulators]](https://github.com/ulixee/unblocked/tree/main/plugins/default-browser-emulator) can be found in the [Unblocked](https://github.com/ulixee/unblocked) project.
+When you install Hero, it also downloads a recent version of Chrome and emulator "data files" to mask automated and headless usage. Details of the underlying [Browser Emulators]](https://github.com/ulixee/hero/tree/main/plugins/default-browser-emulator) can be found in the [Unblocked](https://github.com/ulixee/unblocked) project.
 
 Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Hero npm installations.
 
