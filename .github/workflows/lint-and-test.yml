@@ -101,7 +101,7 @@ jobs:
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests
-        run: yarn jest --testTimeout=60000 --maxWorkers=1
+        run: yarn jest --testTimeout=60000 --maxWorkers=1 --forceExit
         working-directory: ./build
         env:
           NODE_ENV: test
