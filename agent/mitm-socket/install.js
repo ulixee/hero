@@ -12,7 +12,7 @@ if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir);
 }
 const { version } = packageJson;
-const releasesAssetsUrl = `https://github.com/ulixee/unblocked/releases/download/v${version}`;
+const releasesAssetsUrl = `https://github.com/ulixee/hero/releases/download/v${version}`;
 
 const forceBuild = Boolean(JSON.parse(process.env.ULX_MITM_REBUILD_SOCKET || 'false'));
 

@@ -4,17 +4,19 @@
   "description": "The client interface for Hero",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./index.mjs",
-      "require": "./index.cjs",
-      "types": "./index.d.ts"
+      "require": "./index.cjs"
     },
     "./lib/*": {
+      "types": "./lib/*.d.ts",
       "default": "./lib/*.js",
-      "types": "./lib/*.d.ts"
+      "require": "./lib/*.js"
     },
     "./connections/*": {
+      "types": "./connections/*.d.ts",
       "default": "./connections/*.js",
-      "types": "./connections/*.d.ts"
+      "require": "./connections/*.js"
     }
   },
   "dependencies": {
