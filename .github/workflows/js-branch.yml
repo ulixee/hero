@@ -32,8 +32,14 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           version: v1.23.0
-          args: build --clean --skip-validate
-          workdir: ${{ github.workspace }}/build-dist/agent/mitm-socket
+          args: build --clean --skip=validate --snapshot
+          workdir: ${{ github.workspace }}/agent/mitm-socket
+
+      - name: Copy built files
+        run: |
+          mkdir -p build-dist/agent/mitm-socket/dist
+          cp -r agent/mitm-socket/dist/* build-dist/agent/mitm-socket/dist
+        shell: bash
 
       - name: Publish branch
         run: |
