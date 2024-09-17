@@ -23,12 +23,25 @@ jobs:
       - name: Build modules
         run: yarn && yarn build:dist --network-timeout 1000000
 
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build Sockets
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: v1.23.0
+          args: build --clean --skip-validate
+          workdir: ${{ github.workspace }}/build-dist/agent/mitm-socket
+
       - name: Publish branch
         run: |
           cd build-dist
           git config --global user.email "staff@ulixee.org"
           git config --global user.name "CI"
           git init -b main
+          git add agent/mitm-socket/dist/** -f
           git add -A
           git commit -m 'Auto-build Javascript files'
           git push -f https://ulixee:${{ env.GH_TOKEN }}@github.com/ulixee/hero.git main:${{ github.ref_name }}-built-js

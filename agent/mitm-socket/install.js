@@ -23,6 +23,24 @@ const forceBuild = Boolean(JSON.parse(process.env.ULX_MITM_REBUILD_SOCKET || 'fa
     programName += '.exe';
   }
 
+  if (fs.existsSync(`${__dirname}/dist/artifacts.json`)) {
+    const artifacts = JSON.parse(fs.readFileSync(`${__dirname}/dist/artifacts.json`, 'utf8'));
+    let platform = os.platform();
+    if (os.platform() === 'win32') {
+      platform = 'windows';
+    }
+    let arch = os.arch();
+    if (os.arch() === 'x86_64') {
+      arch = 'amd64';
+    }
+    const artifact = artifacts.find(x => x.goos === platform && x.goarch === arch);
+    if (artifact) {
+      fs.copyFileSync(artifact.path, `${__dirname}/dist/${artifact.name}`);
+      saveVersion();
+      console.log('Successfully copied Agent connect library');
+    }
+  }
+
   const installed = getInstalledVersion();
   if (!forceBuild && installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
     console.log('Latest Agent connect library already installed');
