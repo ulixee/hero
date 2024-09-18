@@ -8,6 +8,11 @@
   "removed": [],
   "changed": [],
   "changedOrder": [],
-  "extraAdded": ["window.cdc_adoQpoasnfa76pfcZLmcfl"],
-  "extraChanged": ["window.navigator.userActivation", "window.navigator.webdriver"]
+  "extraAdded": [
+    "window.cdc_adoQpoasnfa76pfcZLmcfl"
+  ],
+  "extraChanged": [
+    "window.navigator.userActivation",
+    "window.navigator.webdriver"
+  ]
 }
