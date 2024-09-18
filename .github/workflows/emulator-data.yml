@@ -39,11 +39,11 @@ jobs:
         working-directory: hero
 
       - name: Update Dom Bridges
-        run: yarn workspace @ulixee/hero-browser-profiler-dom-bridger generate
+        run: yarn workspace @ulixee/unblocked-browser-profiler-dom-bridger generate
         working-directory: hero
 
       - name: Force Generate Profiles
-        run: yarn workspace @ulixee/hero-browser-emulator-builder generate force
+        run: yarn workspace @ulixee/unblocked-browser-emulator-builder generate force
         working-directory: hero
 
       - uses: stefanzweifel/git-auto-commit-action@v5
