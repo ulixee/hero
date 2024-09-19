@@ -11,7 +11,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@ulixee/cloud": "2.0.0-alpha.29",
+    "@ulixee/net": "2.0.0-alpha.29",
     "@ulixee/commons": "2.0.0-alpha.29",
     "@ulixee/hero": "2.0.0-alpha.29",
     "@ulixee/hero-core": "2.0.0-alpha.29"

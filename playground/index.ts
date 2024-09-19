@@ -1,13 +1,24 @@
 import '@ulixee/commons/lib/SourceMapSupport';
+import DefaultHero, { ConnectionToHeroCore, IHeroCreateOptions } from '@ulixee/hero';
 import Core from '@ulixee/hero-core';
-import DefaultHero, { IHeroCreateOptions } from '@ulixee/hero';
-import { CloudNode } from '@ulixee/cloud';
-import UlixeeHostsConfig from '@ulixee/commons/config/hosts';
-
-const { version } = require('./package.json');
+import TransportBridge from '@ulixee/net/lib/TransportBridge';
 
 export * from '@ulixee/hero';
 export { Core };
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let _heroCore: Core;
+function initCore(): Core {
+  if (_heroCore) return _heroCore;
+  Core.events.once('browser-has-no-open-windows', ({ browser }) => browser.close());
+  Core.events.once('all-browsers-closed', () => {
+    // eslint-disable-next-line no-console
+    console.log('Automatically shutting down Hero Core (Browser Closed)');
+    return Core.shutdown();
+  });
+  _heroCore = new Core();
+  return _heroCore;
+}
 
 let counter = 0;
 export default class Hero extends DefaultHero {
@@ -21,32 +32,9 @@ If you're starting to run real production scenarios, you likely want to look int
 https://ulixee.org/docs/hero/advanced-concepts/client-vs-core
 `);
     }
-    createOptions.connectionToCore = { host: getCoreHost() };
+    const transportBridge = new TransportBridge();
+    createOptions.connectionToCore = new ConnectionToHeroCore(transportBridge.transportToCore);
+    initCore().addConnection(transportBridge.transportToClient);
     super(createOptions);
   }
-}
-
-async function getCoreHost(): Promise<string> {
-  let coreHost = UlixeeHostsConfig.global.getVersionHost(version);
-
-  if (coreHost?.startsWith('localhost')) {
-    coreHost = await UlixeeHostsConfig.global.checkLocalVersionHost(version, coreHost);
-  }
-
-  // start a cloud if none already started
-  if (!coreHost) {
-    const cloud = new CloudNode();
-    await cloud.listen();
-    coreHost = await cloud.address;
-    console.log('Started Ulixee Cloud at %s', coreHost);
-  } else {
-    console.log('Connecting to Ulixee Cloud at %s', coreHost);
-  }
-
-  Core.events.once('browser-has-no-open-windows', ({ browser }) => browser.close());
-  Core.events.once('all-browsers-closed', () => {
-    console.log('Automatically shutting down Hero Core (Browser Closed)');
-    return Core.shutdown();
-  });
-  return coreHost;
 }

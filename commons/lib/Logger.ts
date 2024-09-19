@@ -369,9 +369,6 @@ registerNamespaceMapping((ns, active, skip) => {
       /cloud\/.*/,
       /datastore[/-].*/,
       /broker\/.*/,
-      /mainchain[/-].*/,
-      /sidechain[/-].*/,
-      /ramps[/-].*/,
     );
     skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
   } else if (ns.includes('ulx:desktop')) {
