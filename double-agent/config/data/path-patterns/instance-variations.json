@@ -65,6 +65,7 @@
     "window.document.styleSheets",
     "window.document.scripts",
     "window.navigator.connection",
+    "window.ScrollTimeline",
     "window.BaseAudioContext.prototype.currentTime",
     "window.BaseAudioContext.prototype.state",
     "window.BaseAudioContext.prototype.onstatechange",
@@ -83,7 +84,6 @@
     "window.navigator.connection.onchange",
     "window.navigator.connection.effectiveType",
     "window.navigator.connection.saveData",
-    "window.ScrollTimeline",
     "window.BarcodeDetector.getSupportedFormats"
   ]
 }
