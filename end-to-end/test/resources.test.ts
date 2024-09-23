@@ -265,7 +265,7 @@ describe('basic resource tests', () => {
 </html>`;
     });
 
-    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
+    koaServer.get('/foo/bar/42.css', ctx => {
       ctx.statusCode = 500;
     });
     koaServer.get('/baz/bar.png', ctx => {
@@ -299,7 +299,7 @@ describe('basic resource tests', () => {
 </html>`;
     });
 
-    koaServer.get('/foo/bar/42.css?x=foo&y=%20baz', ctx => {
+    koaServer.get('/foo/bar/42.css', ctx => {
       ctx.statusCode = 500;
     });
     koaServer.get('/baz/bar.png', ctx => {

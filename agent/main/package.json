@@ -4,7 +4,7 @@
   "description": "Fully programmable Devtools Protocol based browser",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/chrome-124-0": "^6367.208.10",
+    "@ulixee/chrome-128-0": "^6613.138.11",
     "@ulixee/chrome-app": "^1.0.3",
     "@ulixee/commons": "2.0.0-alpha.29",
     "@ulixee/js-path": "2.0.0-alpha.29",

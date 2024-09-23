@@ -22,30 +22,12 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node-version: [18, 20]
         include:
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-123-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-122-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-121-0
+          - node-version: 20.x
+            os: ubuntu-latest
+            browser: chrome-125-0
           - node-version: 20.x
             os: ubuntu-latest
             browser: chrome-120-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-119-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-118-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-117-0
-          # - node-version: 20.x
-          #   os: ubuntu-latest
-          #   browser: chrome-116-0
           - node-version: 20.x
             os: ubuntu-latest
             browser: chrome-115-0

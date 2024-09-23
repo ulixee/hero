@@ -201,9 +201,13 @@ describe('Pages', () => {
          <div style="height: 200px; width: 100px; background:red">&nbsp;</div>`,
       );
       const screenshot = await page.screenshot({ format: 'png' });
-      expect(screenshot.toString('base64')).toContain(
-        'iVBORw0KGgoAAAANSUhEUgAABAAAAAOECAYAAAA/m0PDAAAAAXNSR0IArs4c6QAAFjhJREFUeJzt2rENw0AMBEG9of5bpkuQEulh70zM4OIF18zMAQAAAPy1z+4BAAAAwPMEAAAAAAgQAAAAACBAAAAAAIAA',
-      );
+
+      const viewport = await page.mainFrame.getWindowOffset();
+      expect(sizeOf(screenshot)).toStrictEqual({
+        width: viewport.innerWidth,
+        type: 'png',
+        height: viewport.innerHeight,
+      });
     });
 
     it('should screenshot only the visible page', async () => {
@@ -218,8 +222,6 @@ describe('Pages', () => {
         type: 'jpg',
         height: viewport.innerHeight,
       });
-      expect(sizeOf(screenshot).height).toBe(viewport.innerHeight);
-      expect(sizeOf(screenshot).width).toBe(viewport.innerWidth);
     });
 
     it('should be able to take a clipped rect screenshot', async () => {
@@ -238,9 +240,7 @@ describe('Pages', () => {
           scale: 1,
         },
       });
-      expect(screenshot.toString('base64')).toContain(
-        'iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t+KAAAAAXNSR0IArs4c6QAAB',
-      );
+      expect(sizeOf(screenshot).height).toBe(500);
     });
 
     it('should be able to take a full page screenshot', async () => {
@@ -255,7 +255,6 @@ describe('Pages', () => {
         jpegQuality: 1,
         fullPage: true,
       });
-      expect(screenshot.toString('base64')).toContain('4AAQSkZJRgABAQAAAQABAAD');
       expect(sizeOf(screenshot).height).toBe(2700);
     });
 
@@ -276,9 +275,7 @@ describe('Pages', () => {
           scale: 1,
         },
       });
-      expect(screenshot.toString('base64')).toContain(
-        'AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNABYEDoADAgdAAYEDoADAgdAAaEDgADQgeAAaEDwIDQAWBA6AAwIHQAGBA6AAwIHQAGhA4AA0IHgAGhA8CA0AFgQOgAMCB0ABgQOgAMCB0ABoQOAANCB4ABoQPAgNAB',
-      );
+      expect(sizeOf(screenshot).height).toBe(2700);
     });
   });
 

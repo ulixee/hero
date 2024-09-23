@@ -249,12 +249,13 @@ export default class MitmRequestAgent {
       }
     });
 
-    let callbackArgs: any[];
+    let responseCallbackArgs: any[];
+    let upgradeCallbackArgs: any[];
     request.once('response', (...args: any[]) => {
-      callbackArgs = args;
+      responseCallbackArgs = args;
     });
     request.once('upgrade', (...args: any[]) => {
-      callbackArgs = args;
+      upgradeCallbackArgs = args;
     });
 
     // we have to rebroadcast because this function is async, so the handlers can register late
@@ -262,9 +263,13 @@ export default class MitmRequestAgent {
       event: string,
       handler: (...args: any[]) => void,
     ): http.ClientRequest => {
-      if ((event === 'response' || event === 'upgrade') && callbackArgs) {
-        handler(...callbackArgs);
-        callbackArgs = null;
+      if (event === 'response' && responseCallbackArgs) {
+        handler(...responseCallbackArgs);
+        responseCallbackArgs = null;
+      }
+      if (event === 'upgrade' && upgradeCallbackArgs) {
+        handler(...upgradeCallbackArgs);
+        upgradeCallbackArgs = null;
       }
       // hand off to another fn
       if (event === 'error') this.events.off(flushListener);

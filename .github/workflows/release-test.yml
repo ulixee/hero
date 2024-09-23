@@ -20,7 +20,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node-version: [18, 20]
         include:
-          - node-version: 18.x
+          - node-version: 20.x
             os: ubuntu-latest
             browser: chrome-114-0
 

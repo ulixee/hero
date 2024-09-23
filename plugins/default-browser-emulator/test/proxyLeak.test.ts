@@ -536,7 +536,6 @@ test('string expansion trigger should not reveal different .toString location', 
       },
     });
 
-    console.info(error);
     return { wrongStack, seenStackInName, nameStack };
   }
 

@@ -1799,10 +1799,10 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.18"
 
-"@ulixee/chrome-124-0@^6367.208.10":
-  version "6367.208.10"
-  resolved "https://registry.yarnpkg.com/@ulixee/chrome-124-0/-/chrome-124-0-6367.208.10.tgz#32a874efdc837487d14899da721ced4b51b3a463"
-  integrity sha512-3rn8vdd5m+coAZXgBMkerqN+cC9RaYiK1HwXC36lKkK2csIsl6Ekc+PNCZyyl/i33p6Y1+sXVzRwR26Npr+0OA==
+"@ulixee/chrome-128-0@^6613.138.11":
+  version "6613.138.11"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-128-0/-/chrome-128-0-6613.138.11.tgz#9836f79a6f2ae4babe06f6fb34a706dfb632584c"
+  integrity sha512-efglwyxEq0UW/Qr6lvMi25aDwv8Ea4XwrLmd/MFPKAThZXI+vg6NoirT7lbtJ0RF02G6dvVX1OoEXnZH8rfQjg==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
