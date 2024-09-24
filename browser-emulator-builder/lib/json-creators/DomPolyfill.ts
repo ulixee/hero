@@ -95,6 +95,15 @@ export default class DomPolyfillJson {
     }
   }
 
+  public static clean(dataDir: string, userAgentIds: string[]): void {
+    for (const userAgentId of userAgentIds) {
+      const { operatingSystemId: emulateOsId } =
+        BrowserProfiler.extractMetaFromUserAgentId(userAgentId);
+      const dataOsDir = EmulatorData.getEmulatorDataOsDir(dataDir, emulateOsId);
+      if (Fs.existsSync(dataOsDir)) Fs.rmSync(dataOsDir, { recursive: true });
+    }
+  }
+
   public static hasAllDomPolyfills(
     browserId: string,
     dataDir: string,

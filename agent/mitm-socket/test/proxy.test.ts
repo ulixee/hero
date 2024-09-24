@@ -25,7 +25,7 @@ beforeEach(() => {
 let mitmSocketSession: MitmSocketSession;
 beforeAll(() => {
   mitmSocketSession = new MitmSocketSession(TestLogger.forTest(module), {
-    clientHelloId: 'chrome-114',
+    clientHelloId: 'chrome-115',
     rejectUnauthorized: false,
     userAgent: 'Chrome',
   });

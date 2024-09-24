@@ -26,6 +26,11 @@ export default class DomBridger {
     polyfill.add = polyfill.add.filter(x => !isDevtoolsIndicator(x.path, x.propertyName));
     polyfill.remove = polyfill.remove.filter(x => !isDevtoolsIndicator(x.path, x.propertyName));
     polyfill.modify = polyfill.modify.filter(x => !isDevtoolsIndicator(x.path, x.propertyName));
+    polyfill.reorder = polyfill.reorder.filter(
+      x =>
+        !isDevtoolsIndicator(x.path, x.propertyName) &&
+        !isDevtoolsIndicator(x.path, x.prevProperty),
+    );
 
     injectDevtoolsIndicatorPolyfills(polyfill);
   }
@@ -51,15 +56,9 @@ export default class DomBridger {
     polyfill: IDomPolyfill,
     callback: (path: string, propertyName: string, value: any) => boolean,
   ): void {
-    polyfill.modify = polyfill.modify.filter(
-      x => !callback(x.path, x.propertyName, x.property),
-    );
-    polyfill.remove = polyfill.remove.filter(
-      x => !callback(x.path, x.propertyName, null),
-    );
-    polyfill.add = polyfill.add.filter(
-      x => !callback(x.path, x.propertyName, x.property),
-    );
+    polyfill.modify = polyfill.modify.filter(x => !callback(x.path, x.propertyName, x.property));
+    polyfill.remove = polyfill.remove.filter(x => !callback(x.path, x.propertyName, null));
+    polyfill.add = polyfill.add.filter(x => !callback(x.path, x.propertyName, x.property));
   }
 }
 

@@ -17,7 +17,11 @@ export default class DevtoolsIndicatorExtractor extends BaseExtractor {
     'window.Element.prototype.createShadowRoot',
   ];
 
-  public static override extraChangePatterns = ['window.navigator.userActivation','window.navigator.webdriver'];
+  public static override extraChangePatterns = [
+    'window.document.$cdc_asdjflasutopfhvcZLmcfl_',
+    'window.navigator.userActivation',
+    'window.navigator.webdriver',
+  ];
 
   public static override ignoredExtraPatterns = [];
 
@@ -25,7 +29,7 @@ export default class DevtoolsIndicatorExtractor extends BaseExtractor {
     /window.navigator.userActivation.+/, // indicates user has done some activity
     /window.find/, // this seems to be returning true on webdriver, but not in a real browser
 
-    /window.document.\$cdc_asdjflasutopfhvcZLmcfl_/,
+    /cdc_asdjflasutopfhvcZLmcfl_/,
     /window.cdc_adoQpoasnfa76pfcZLmcfl_/,
     /.getDestinationInsertionPoints/,
 

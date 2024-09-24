@@ -29,20 +29,23 @@ for (const userAgentId of BrowserProfiler.userAgentIds) {
 const forceRedoDom = process.argv[2] === 'force';
 
 async function generate(): Promise<void> {
-  const chromeEngines = stableChromeVersions.filter(x => x.majorVersion >= 94);
+  const chromeEngines = stableChromeVersions.filter(x => x.majorVersion >= 115);
 
   for (const browserId of Object.keys(userAgentIdsByBrowserId).sort(
     (a, b) => Number(a.split('-').slice(1).join('.')) - Number(b.split('-').slice(1).join('.')),
   )) {
     if (!browserId.startsWith('chrome') && !browserId.startsWith('safari')) continue;
 
-    console.log('--------------------------------------------------');
-    console.log(`GENERATING ${browserId}`);
     const browserEngineId = EmulatorData.extractBrowserEngineId(browserId);
     const browserEngineOption = chromeEngines.find(x => x.id === browserEngineId);
-    const config = new ConfigJson(browserId, browserEngineId, browserEngineOption as any);
-    const userAgentIds = userAgentIdsByBrowserId[browserId];
     const browserDir = EmulatorData.getEmulatorDir(browserId);
+    const userAgentIds = userAgentIdsByBrowserId[browserId];
+    if (!browserEngineOption) {
+      DomPolyfillJson.clean(browserDir, userAgentIds);
+    }
+    console.log('--------------------------------------------------');
+    console.log(`GENERATING ${browserId}`);
+    const config = new ConfigJson(browserId, browserEngineId, browserEngineOption as any);
 
     console.log('- Clienthello');
     new ClienthelloJson(config, userAgentIds).save(browserDir);
@@ -57,23 +60,23 @@ async function generate(): Promise<void> {
     new UserAgentHintsJson(config, userAgentIds).save(browserDir);
 
     if (config.browserEngineOption) {
-      console.log('- Codecs');
-      new CodecsJson(config, userAgentIds).save(browserDir);
+        console.log('- Codecs');
+        new CodecsJson(config, userAgentIds).save(browserDir);
 
-      console.log('- Speech');
-      new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
+        console.log('- Speech');
+        new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
 
-      console.log('- Fonts');
-      new FontsJson(config, userAgentIds).save(browserDir);
+        console.log('- Fonts');
+        new FontsJson(config, userAgentIds).save(browserDir);
 
-      console.log('- WindowChrome');
-      new WindowChromeJson(config, userAgentIds).save(browserDir);
+        console.log('- WindowChrome');
+        new WindowChromeJson(config, userAgentIds).save(browserDir);
 
-      console.log('- WindowFraming');
-      new WindowFramingJson(config, userAgentIds).save(browserDir);
+        console.log('- WindowFraming');
+        new WindowFramingJson(config, userAgentIds).save(browserDir);
 
-      console.log('- WindowNavigator');
-      new WindowNavigatorJson(config, userAgentIds).save(browserDir);
+        console.log('- WindowNavigator');
+        new WindowNavigatorJson(config, userAgentIds).save(browserDir);
 
       const hasAllPolyfills = DomPolyfillJson.hasAllDomPolyfills(
         browserId,

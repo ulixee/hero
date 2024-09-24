@@ -48,6 +48,8 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.performance.toJSON',
     'window.performance.now',
     'window.document.documentElement.getInnerHTML',
+    'window.Element.prototype.getHTML',
+    'window.Navigator.prototype.createAuctionNonce',
     'window.webkitRTCPeerConnection.new().createOffer',
     'window.RTCPeerConnection.new().createOffer',
     'window.crypto.randomUUID',
@@ -56,12 +58,15 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.navigator.mediaDevices.enumerateDevices',
     'window.navigator.requestMIDIAccess',
     'window.navigator.clipboard.readText',
+    'window.Element.prototype.requestPointerLock',
+    'window.Animation.new().finished.startTime'
   ];
 
   public static override extraAddPatterns = [];
 
   public static override extraChangePatterns = [
     'window.Intl.DateTimeFormat.new().resolvedOptions',
+    'window.Intl.DateTimeFormat.new().format',
     'window.console.memory.usedJSHeapSize',
     'window.BaseAudioContext.prototype.state',
     'window.BaseAudioContext.prototype.onstatechange',
@@ -114,6 +119,7 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     /window.navigator.hardwareConcurrency/, // TODO: Add once we have better grasp of device ranges
     /window.Animation.new\(\).ready.timeline.currentTime/,
     /window.Animation.new\(\).timeline.currentTime/,
+    /window.Animation.new\(\).finished.startTime/,
     /window.DocumentTimeline.new\(\).currentTime/,
 
     /window.Math.random/,
