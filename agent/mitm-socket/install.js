@@ -6,10 +6,13 @@ const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
 const packageJson = require('./package.json');
 
-const outDir = `${__dirname}/dist`;
+const arch = process.env.npm_config_cpu || os.arch();
+const platform = process.env.npm_config_os || os.platform();
+
+const outDir = `${__dirname}/dist/${platform}-${arch}`;
 
 if (!fs.existsSync(outDir)) {
-  fs.mkdirSync(outDir);
+  fs.mkdirSync(outDir, { recursive: true });
 }
 const { version } = packageJson;
 const releasesAssetsUrl = `https://github.com/ulixee/hero/releases/download/v${version}`;
@@ -19,24 +22,24 @@ const forceBuild = Boolean(JSON.parse(process.env.ULX_MITM_REBUILD_SOCKET || 'fa
 (async function install() {
   let programName = 'connect';
   const filename = buildFilename();
-  if (os.platform() === 'win32') {
+  if (platform === 'win32') {
     programName += '.exe';
   }
 
   try {
     if (fs.existsSync(`${__dirname}/dist/artifacts.json`)) {
       const artifacts = JSON.parse(fs.readFileSync(`${__dirname}/dist/artifacts.json`, 'utf8'));
-      let platform = os.platform();
-      if (os.platform() === 'win32') {
-        platform = 'windows';
+      let artPlatform = platform;
+      if (platform === 'win32') {
+        artPlatform = 'windows';
       }
-      let arch = os.arch();
-      if (os.arch() === 'x86_64') {
-        arch = 'amd64';
+      let artArch = arch;
+      if (arch === 'x86_64') {
+        artArch = 'amd64';
       }
-      const artifact = artifacts.find(x => x.goos === platform && x.goarch === arch);
+      const artifact = artifacts.find(x => x.goos === artPlatform && x.goarch === artArch);
       if (artifact) {
-        fs.copyFileSync(artifact.path, `${__dirname}/dist/${artifact.name}`);
+        fs.copyFileSync(artifact.path, `${outDir}/${artifact.name}`);
         saveVersion();
         console.log('Successfully copied Agent connect library');
       }
@@ -129,19 +132,18 @@ function saveVersion() {
 }
 
 function buildFilename() {
-  let platform = String(os.platform());
-  let arch = os.arch();
-  if (arch === 'x64') arch = 'x86_64';
-  if (arch === 'ia32') arch = 'i386';
+  let arch_name = arch;
+  let platform_name = String(platform);
+  if (arch === 'x64') arch_name = 'x86_64';
 
   if (platform === 'win32') {
-    platform = 'win';
+    platform_name = 'win';
   }
   if (platform === 'darwin') {
-    platform = 'mac';
+    platform_name = 'mac';
   }
 
-  return `connect_${version}_${platform}_${arch}.gz`;
+  return `connect_${version}_${platform_name}_${arch_name}.gz`;
 }
 
 function download(filepath) {

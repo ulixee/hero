@@ -13,10 +13,11 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 
 const ext = os.platform() === 'win32' ? '.exe' : '';
-const libPath = Path.join(__dirname, '/../dist/', `connect${ext}`).replace(
-  'app.asar',
-  'app.asar.unpacked',
-);
+const libPath = Path.join(
+  __dirname,
+  `/../dist/${os.platform()}-${os.arch()}`,
+  `connect${ext}`,
+).replace('app.asar', 'app.asar.unpacked');
 
 const distExists = Fs.existsSync(libPath);
 
