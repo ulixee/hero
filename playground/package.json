@@ -4,9 +4,9 @@
   "description": "A Hero playground that creates a Client/Core connection out of the box",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./index.mjs",
-      "require": "./index.cjs",
-      "types": "./index.d.ts"
+      "require": "./index.cjs"
     },
     "./package.json": "./package.json"
   },

@@ -59,11 +59,6 @@ export function configureBrowserLaunchArgs(
   if (options.showChrome) {
     if (options.showDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
   } else {
-    if (process.platform === 'darwin') {
-      if (process.arch === 'arm64') {
-        engine.launchArguments.push('--use-gl=any');
-      }
-    }
     engine.launchArguments.push(
       '--hide-scrollbars',
       '--mute-audio',

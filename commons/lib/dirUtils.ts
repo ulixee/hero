@@ -42,7 +42,7 @@ export function getClosestPackageJson(path: string): any | undefined {
 }
 
 export function getDataDirectory(): string {
-  if (process.env.ULX_DATA_DIR) {
+  if (process.env.NODE_ENV === 'test' && process.env.ULX_DATA_DIR) {
     const envPath = parseEnvPath(process.env.ULX_DATA_DIR);
     if (envPath) return envPath;
   }

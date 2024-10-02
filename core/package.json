@@ -4,31 +4,31 @@
   "description": "The core browser API used to run Hero",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./index.mjs",
-      "require": "./index.cjs",
-      "types": "./index.d.ts"
+      "require": "./index.cjs"
     },
     "./package.json": "./package.json",
     "./lib/*": {
-      "default": "./lib/*.js",
-      "types": "./lib/*.d.ts"
+      "types": "./lib/*.d.ts",
+      "require": "./lib/*.js"
     },
     "./dbs": "./dbs",
     "./dbs/*": {
-      "default": "./dbs/*.js",
-      "types": "./dbs/*.d.ts"
+      "types": "./dbs/*.d.ts",
+      "require": "./dbs/*.js"
     },
     "./models/*": {
-      "default": "./models/*.js",
-      "types": "./models/*.d.ts"
+      "types": "./models/*.d.ts",
+      "require": "./models/*.js"
     },
     "./connections/*": {
-      "default": "./connections/*.js",
-      "types": "./connections/*.d.ts"
+      "types": "./connections/*.d.ts",
+      "require": "./connections/*.js"
     },
     "./apis/*": {
-      "default": "./apis/*.js",
-      "types": "./apis/*.d.ts"
+      "types": "./apis/*.d.ts",
+      "require": "./apis/*.js"
     }
   },
   "dependencies": {

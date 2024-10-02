@@ -9,7 +9,7 @@
     "@double-agent/config": "2.0.0-alpha.29",
     "@ulixee/commons": "2.0.0-alpha.29",
     "@ulixee/real-user-agents": "2.0.0-alpha.29",
-    "axios": "^1.6.7",
+    "axios": "^1.7.7",
     "cookie": "^0.4.0",
     "diff": "^4.0.2",
     "json5": "^2.1.2",

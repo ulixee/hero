@@ -22,7 +22,12 @@ export function toUrl(hostOrUrlFragment: string, defaultProtocol = 'ws:'): URL {
   return new URL(hostOrUrlFragment);
 }
 
-export function isPortInUse(port: number | string): Promise<boolean> {
+export async function isPortInUse(port: number | string): Promise<boolean> {
+  if (await isPortInUseOnHost(port, 'localhost')) return true;
+  return await isPortInUseOnHost(port, '::');
+}
+
+export function isPortInUseOnHost(port: number | string, host = 'localhost'): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
     const server = net.createServer();
 
@@ -46,7 +51,7 @@ export function isPortInUse(port: number | string): Promise<boolean> {
       server.close();
     };
 
-    server.listen(Number(port));
+    server.listen(Number(port), host);
   });
 }
 
