@@ -4170,5 +4170,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-129-0": {
+    "id": "edge-129-0",
+    "name": "Edge",
+    "marketshare": 1.7,
+    "version": {
+      "major": "129",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
