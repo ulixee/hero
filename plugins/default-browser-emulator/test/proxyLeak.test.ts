@@ -30,7 +30,8 @@ afterEach(Helpers.afterEach, 30e3);
 const config = {
   removeInjectedLines: true,
   applyStackTraceLimit: true,
-  fixConsoleStack: true,
+  // should only be enable when console plugin is used
+  fixConsoleStack: false,
 } satisfies ErrorArgs;
 const debug = false; // True will increase timeouts and open chrome with debugger attached
 
@@ -706,7 +707,7 @@ test.skip('headful chrome for debugging', async () => {
         'speechSynthesis.getVoices': true,
         'WebGLRenderingContext.prototype.getParameter': false,
         'window.screen': true,
-        console: true,
+        console: false,
         error: true,
         navigator: true,
         performance: true,

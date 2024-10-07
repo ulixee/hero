@@ -39,7 +39,6 @@ import Protocol from 'devtools-protocol';
 import * as Url from 'url';
 import IWaitForOptions from '../interfaces/IWaitForOptions';
 import BrowserContext from './BrowserContext';
-import ConsoleMessage from './ConsoleMessage';
 import DevtoolsSession from './DevtoolsSession';
 import DomStorageTracker, { IDomStorageEvents } from './DomStorageTracker';
 import Frame from './Frame';
@@ -53,8 +52,6 @@ import JavascriptDialogClosedEvent = Protocol.Page.JavascriptDialogClosedEvent;
 import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
 import Viewport = Protocol.Page.Viewport;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
-import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
-import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 
 export interface IPageCreateOptions {
@@ -154,6 +151,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     this.mouse = new Mouse(devtoolsSession, this.keyboard);
     this.networkManager = new NetworkManager(
       devtoolsSession,
+      this.browserContext.websocketSession,
       this.logger,
       this.browserContext.proxy,
     );
@@ -252,8 +250,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   addPageCallback(
     name: string,
     onCallback?: (payload: string, frame: IFrame) => any,
-    isolateFromWebPageEnvironment?: boolean,
-    devtoolsSession?: DevtoolsSession,
   ): Promise<IRegisteredEventListener> {
     return this.framesManager.addPageCallback(
       name,
@@ -266,8 +262,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
           frameId: frame.frameId,
         });
       },
-      isolateFromWebPageEnvironment,
-      devtoolsSession,
     );
   }
 
@@ -281,7 +275,10 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     expression: string,
     options?: { timeoutMs?: number; isolatedFromWebPageEnvironment?: boolean },
   ): Promise<T> {
-    return this.mainFrame.evaluate<T>(expression, options);
+    return this.mainFrame.evaluate<T>(expression, {
+      ...options,
+      usePageDefaultContextId: !options?.isolatedFromWebPageEnvironment,
+    });
   }
 
   async navigate(url: string, options: { referrer?: string } = {}): Promise<{ loaderId: string }> {
@@ -592,8 +589,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     this.events.group(
       id,
       this.events.on(session, 'Inspector.targetCrashed', this.onTargetCrashed.bind(this)),
-      this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this)),
-      this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)),
       this.events.on(session, 'Target.attachedToTarget', this.onAttachedToTarget.bind(this)),
       this.events.on(
         session,
@@ -714,24 +709,6 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
         )
         .catch(() => null);
     }
-  }
-
-  private onRuntimeException(msg: ExceptionThrownEvent): void {
-    const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
-    const frame = this.framesManager.getFrameForExecutionContext(
-      msg.exceptionDetails.executionContextId,
-    );
-    this.emit('page-error', { frameId: frame?.frameId, error });
-  }
-
-  private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
-    const message = ConsoleMessage.create(this.devtoolsSession, event);
-    const frame = this.framesManager.getFrameForExecutionContext(event.executionContextId);
-
-    this.emit('console', {
-      frameId: frame?.frameId,
-      ...message,
-    });
   }
 
   private onTargetCrashed(): void {

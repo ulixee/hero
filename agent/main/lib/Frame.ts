@@ -128,9 +128,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   private readonly parentFrame: Frame | null;
   private defaultLoaderId: string;
   private startedLoaderId: string;
-  private defaultContextId: number;
-  private isolatedContextId: number;
-  private activeContextIds: Set<number>;
   private internalFrame: PageFrame;
   private closedWithError: Error;
   private isClosing = false;
@@ -140,10 +137,29 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   private events = new EventSubscriber();
   private devtoolsNodeIdByNodePointerId: Record<number, string> = {};
 
+  private _defaultContextId?: Promise<number>;
+  private get defaultContextId(): Promise<number> {
+    this._defaultContextId ??= this.page.framesManager
+      .getDefaultContextIdForFrameId({ frameId: this.id, devtoolsSession: this.devtoolsSession })
+      .catch(error => {
+        this._defaultContextId = undefined;
+        throw error;
+      });
+    return this._defaultContextId;
+  }
+
+  private _isolatedContextId?: Promise<number>;
+  private get isolatedContextId(): Promise<number> {
+    this._isolatedContextId ??= this.createIsolatedWorld().catch(error => {
+      this._isolatedContextId = undefined;
+      throw error;
+    });
+    return this._isolatedContextId;
+  }
+
   constructor(
     framesManager: FramesManager,
     internalFrame: PageFrame,
-    activeContextIds: Set<number>,
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     checkIfAttached: () => boolean,
@@ -154,7 +170,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     idTracker.frameId += 1;
     this.frameId = idTracker.frameId;
     this.#framesManager = framesManager;
-    this.activeContextIds = activeContextIds;
     this.devtoolsSession = devtoolsSession;
     this.logger = logger.createChild(module, { frameId: this.frameId });
     this.navigations = new FrameNavigations(this, this.logger);
@@ -168,14 +183,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     this.onAttached(internalFrame);
   }
 
-  public async updateDevtoolsSession(
-    devtoolsSession: DevtoolsSession,
-    activeContextIds: Set<number>,
-  ): Promise<void> {
+  public async updateDevtoolsSession(devtoolsSession: DevtoolsSession): Promise<void> {
     if (this.devtoolsSession === devtoolsSession) return;
 
     this.devtoolsSession = devtoolsSession;
-    this.activeContextIds = activeContextIds;
     if (
       devtoolsSession === this.#framesManager.devtoolsSession ||
       devtoolsSession === this.parentFrame?.devtoolsSession
@@ -222,28 +233,17 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (newDocumentScripts.length) {
       const scripts = [...newDocumentScripts];
       this.#framesManager.pendingNewDocumentScripts.length = 0;
-      const [isolatedContextId, defaultContextId] = await Promise.all([
-        this.waitForActiveContextId(true),
-        this.waitForActiveContextId(false),
-      ]);
 
       if (this.closedWithError || !this.devtoolsSession.isConnected()) return;
 
       await Promise.all(
-        scripts.map(x => {
+        scripts.map(async script => {
           if (this.closedWithError || !this.devtoolsSession.isConnected()) return;
-          const contextId = x.isolated ? isolatedContextId : defaultContextId;
-
-          if (!contextId) {
-            this.logger.warn('No valid context found to run newDocumentScript', {
-              isolated: x.isolated,
-            });
-            return;
-          }
+          const contextId = await this.waitForContextId(script.isolated);
 
           return this.devtoolsSession
             .send('Runtime.evaluate', {
-              expression: x.script,
+              expression: script.script,
               contextId,
             })
             .catch(err => {
@@ -259,6 +259,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     expression: string,
     options?: {
       isolateFromWebPageEnvironment?: boolean;
+      usePageDefaultContextId?: boolean;
       shouldAwaitExpression?: boolean;
       retriesWaitingForLoad?: number;
       returnByValue?: boolean;
@@ -274,12 +275,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     if (!this.parentId) {
       await this.runPendingNewDocumentScripts();
     }
-    const startUrl = this.url;
-    const startOrigin = this.securityOrigin;
+
     const isolateFromWebPageEnvironment = options?.isolateFromWebPageEnvironment ?? false;
-    const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
+    const contextId = options?.usePageDefaultContextId
+      ? undefined
+      : await this.waitForContextId(isolateFromWebPageEnvironment);
+
     try {
-      if (!contextId) {
+      if (!contextId && !options?.usePageDefaultContextId) {
         const notFound: any = new Error('Could not find a valid context for this request');
         notFound.code = ContextNotFoundCode;
         throw notFound;
@@ -309,12 +312,11 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
         err.code === ContextNotFoundCode ||
         (err as ProtocolError).remoteError?.code === ContextNotFoundCode;
       if (isNotFoundError) {
-        const activeContextId = this.getActiveContextId(isolateFromWebPageEnvironment);
-        const didNavigate = !startOrigin || this.url !== startUrl;
+        this.resetContextIds();
+        const activeContextId = await this.waitForContextId(isolateFromWebPageEnvironment);
 
         let retries = options?.retriesWaitingForLoad ?? 0;
-        // if we had a context id from a blank page, try again
-        if (didNavigate && activeContextId && activeContextId !== contextId) {
+        if (activeContextId !== contextId) {
           retries += 1;
         }
         if (retries > 0) {
@@ -544,7 +546,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       'DOM.resolveNode',
       {
         backendNodeId,
-        executionContextId: this.getActiveContextId(resolveInIsolatedContext),
+        executionContextId: await this.waitForContextId(resolveInIsolatedContext),
       },
       this,
     );
@@ -690,10 +692,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
 
     const hasLoaderError = await this.navigationLoadersById[loaderId]?.navigationResolver;
     if (hasLoaderError instanceof Error) throw hasLoaderError;
-
-    if (!this.getActiveContextId(false)) {
-      await this.waitForDefaultContext();
-    }
   }
 
   public onLifecycleEvent(name: string, timestamp?: number, pageLoaderId?: string): void {
@@ -742,68 +740,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     }
   }
 
-  /////// CONTEXT ID  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  public hasContextId(executionContextId: number): boolean {
-    return (
-      this.defaultContextId === executionContextId || this.isolatedContextId === executionContextId
-    );
-  }
-
-  public removeContextId(executionContextId: number): void {
-    if (this.defaultContextId === executionContextId) {
-      this.defaultContextId = null;
-    }
-    if (this.isolatedContextId === executionContextId) this.isolatedContextId = null;
-  }
-
-  public clearContextIds(): void {
-    this.defaultContextId = null;
-    this.isolatedContextId = null;
-  }
-
-  public addContextId(executionContextId: number, isDefault: boolean, origin: string): void {
-    if (isDefault) {
-      this.defaultContextId = executionContextId;
-      this.defaultContextCreated?.resolve();
-    } else {
-      // if an existing context is isolated, and this context has the full security origin, take the unrestricted one
-      if (!!this.getActiveContextId(true) && origin !== '') return;
-      this.isolatedContextId = executionContextId;
-    }
-  }
-
-  public getActiveContextId(isolatedContext: boolean): number | undefined {
-    let id: number;
-    if (isolatedContext) {
-      id = this.isolatedContextId;
-    } else {
-      id = this.defaultContextId;
-    }
-    if (id && this.activeContextIds.has(id)) return id;
-  }
-
-  public async waitForActiveContextId(isolatedContext = true): Promise<number> {
-    if (!this.isAttached) throw new Error('Execution Context is not available in detached frame');
-
-    const existing = this.getActiveContextId(isolatedContext);
-    if (existing) return existing;
-
-    if (isolatedContext) {
-      const context = await this.createIsolatedWorld();
-      // give one task to set up
-      await new Promise(setImmediate);
-      return context;
-    }
-
-    await this.waitForDefaultContext();
-    return this.getActiveContextId(isolatedContext);
-  }
-
-  public canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean {
-    return this.getActiveContextId(isolatedFromWebPageEnvironment) !== undefined;
-  }
-
   public toJSON(): Pick<
     IFrame,
     'id' | 'parentId' | 'activeLoader' | 'name' | 'url' | 'navigationReason' | 'disposition'
@@ -817,6 +753,18 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       disposition: this.disposition,
       activeLoader: this.activeLoader,
     };
+  }
+
+  private async waitForContextId(isolatedFromWebPageEnvironment: boolean): Promise<number> {
+    if (isolatedFromWebPageEnvironment) {
+      return await this.isolatedContextId;
+    }
+    return await this.defaultContextId;
+  }
+
+  private resetContextIds(): void {
+    this._defaultContextId = undefined;
+    this._isolatedContextId = undefined;
   }
 
   private setLoader(loaderId: string, url?: string): void {
@@ -841,9 +789,11 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   private async createIsolatedWorld(): Promise<number> {
     try {
       if (!this.isAttached) return;
-      await new Promise(setImmediate);
-      if (this.isolatedContextId) return this.isolatedContextId;
 
+      // If an isolated world with the same worldName already exists chromium will reuse that world, 
+      // so calling this multiple times is safe, and can be used as creative way to get id of existing context.
+      // We need this because our isolated world is created with `Page.addScriptToEvaluateOnNewDocument`
+      // of which we don't know the contextId (since we are running with Runtime disabled to prevent detection).
       const isolatedWorld = await this.devtoolsSession.send(
         'Page.createIsolatedWorld',
         {
@@ -855,11 +805,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
         this,
       );
       const { executionContextId } = isolatedWorld;
-      if (!this.activeContextIds.has(executionContextId)) {
-        this.activeContextIds.add(executionContextId);
-        this.addContextId(executionContextId, false, '');
-        this.getFrameElementDevtoolsNodeId().catch(() => null);
-      }
+
+      this.getFrameElementDevtoolsNodeId().catch(() => null);
 
       return executionContextId;
     } catch (error) {
@@ -877,17 +824,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
         error,
       });
     }
-  }
-
-  private async waitForDefaultContext(): Promise<void> {
-    if (this.getActiveContextId(false)) return;
-
-    this.defaultContextCreated = new Resolvable<void>();
-    // don't time out this event, we'll just wait for the page to shut down
-    await this.defaultContextCreated.promise.catch(err => {
-      if (err instanceof CanceledPromiseError) return;
-      throw err;
-    });
   }
 
   private updateUrl(): void {

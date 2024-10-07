@@ -37,7 +37,7 @@ if ('RTCSessionDescription' in self && RTCSessionDescription.prototype) {
     }
     return result;
   });
-  replaceGetter(RTCSessionDescription.prototype, 'toJSON', (target, thisArg, argArray) => {
+  replaceFunction(RTCSessionDescription.prototype, 'toJSON', (target, thisArg, argArray) => {
     const json = ReflectCached.apply(target, thisArg, argArray) as any;
     if ('sdp' in json) json.sdp = json.sdp.replace(maskLocalIp, replacementIp);
     return json;

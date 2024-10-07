@@ -45,7 +45,6 @@ export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
 
   waitForLoad(options?: { timeoutMs?: number; loadStatus?: ILoadStatus }): Promise<INavigation>;
 
-  canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
   evaluate<T>(
     expression: string,
     options?: {

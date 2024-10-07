@@ -61,11 +61,13 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       workerTargetId: this.id,
       workerType: this.type,
     });
-    this.networkManager = new NetworkManager(devtoolsSession, this.logger, browserContext.proxy);
+    this.networkManager = new NetworkManager(
+      devtoolsSession,
+      this.browserContext.websocketSession,
+      this.logger,
+      browserContext.proxy,
+    );
     const session = this.devtoolsSession;
-    this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
-    this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this));
-    this.events.on(session, 'Runtime.executionContextCreated', this.onContextCreated.bind(this));
     this.events.on(session, 'Inspector.targetReloadedAfterCrash', () => {
       return this.initialize(parentNetworkManager);
     });
@@ -81,7 +83,6 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
         if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
         throw err;
       }),
-      this.devtoolsSession.send('Runtime.enable'),
       this.type === 'shared_worker'
         ? this.devtoolsSession.send('Network.setCacheDisabled', { cacheDisabled: true })
         : null,
@@ -163,27 +164,5 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       this.devtoolsSession.send('Debugger.disable'),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
-  }
-
-  private onContextCreated(event: ExecutionContextCreatedEvent): void {
-    this.executionContextId.resolve(event.context.id);
-  }
-
-  private onRuntimeException(msg: ExceptionThrownEvent): void {
-    const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
-
-    this.emit('page-error', {
-      error,
-    });
-  }
-
-  private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
-    const message = ConsoleMessage.create(this.devtoolsSession, event);
-    const frameId = `${this.type}:${this.url}`; // TBD
-
-    this.emit('console', {
-      frameId,
-      ...message,
-    });
   }
 }

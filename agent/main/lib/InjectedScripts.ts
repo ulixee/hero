@@ -12,7 +12,7 @@ const pageScripts = {
 };
 
 const pageEventsCallbackName = '__ulxPagePaintEventListenerCallback';
-export const injectedScript = `(function ulxInjectedScripts(runtimeFunction) {
+export const injectedScript = `(function ulxInjectedScripts(callbackName) {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};
 
@@ -44,8 +44,6 @@ export default class InjectedScripts {
       framesManager.addPageCallback(
         pageEventsCallbackName,
         (payload, frame) => onPaintEvent(frame.frameId, JSON.parse(payload)),
-        framesManager.page.installJsPathIntoIsolatedContext,
-        devtoolsSession,
       ),
       framesManager.addNewDocumentScript(
         injectedScript,

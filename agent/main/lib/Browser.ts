@@ -367,7 +367,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     if (options.proxyPort !== undefined && !launchArgs.some(x => x.startsWith('--proxy-server'))) {
       launchArgs.push(
         // Use proxy for localhost URLs
-        '--proxy-bypass-list=<-loopback>',
+        '--proxy-bypass-list=<-loopback>;websocket.localhost',
         `--proxy-server=localhost:${options.proxyPort}`,
       );
     }
@@ -460,6 +460,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
         });
       }
       const context = new BrowserContext(this, false);
+      void context.initialize();
       context.hooks = this.browserContextCreationHooks ?? {};
       context.id = targetInfo.browserContextId;
       context.targetsById.set(targetInfo.targetId, targetInfo);
@@ -571,6 +572,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
   private async onNewContext(context: BrowserContext): Promise<void> {
     const id = context.id;
     this.browserContextsById.set(id, context);
+    await context.initialize();
     context.once('close', () => this.browserContextsById.delete(id));
     this.emit('new-context', { context });
     await this.hooks?.onNewBrowserContext?.(context);

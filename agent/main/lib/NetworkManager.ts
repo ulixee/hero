@@ -14,6 +14,7 @@ import DevtoolsSession from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
+import WebSocketCreatedEvent = Protocol.Network.WebSocketCreatedEvent;
 import WebSocketFrameSentEvent = Protocol.Network.WebSocketFrameSentEvent;
 import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEvent;
 import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSendHandshakeRequestEvent;
@@ -24,6 +25,7 @@ import LoadingFailedEvent = Protocol.Network.LoadingFailedEvent;
 import RequestServedFromCacheEvent = Protocol.Network.RequestServedFromCacheEvent;
 import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtraInfoEvent;
 import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
+import { WebsocketSession } from './WebsocketSession';
 
 interface IResourcePublishing {
   hasRequestWillBeSentEvent: boolean;
@@ -35,6 +37,7 @@ interface IResourcePublishing {
 const mbBytes = 1028 * 1028;
 
 export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEvents> {
+  public readonly websocketSession: WebsocketSession;
   protected readonly logger: IBoundLog;
   private readonly devtools: DevtoolsSession;
   private readonly attemptedAuthentications = new Set<string>();
@@ -43,6 +46,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   private readonly requestPublishingById = new Map<string, IResourcePublishing>();
 
   private readonly navigationRequestIdsToLoaderId = new Map<string, string>();
+
+  private readonly requestIdsToIgnore = new Set<string>();
 
   private parentManager?: NetworkManager;
   private readonly events = new EventSubscriber();
@@ -57,11 +62,13 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
   constructor(
     devtoolsSession: DevtoolsSession,
+    websocketSession: WebsocketSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
   ) {
     super();
     this.devtools = devtoolsSession;
+    this.websocketSession = websocketSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
     bindFunctions(this);
@@ -69,6 +76,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     this.events.on(session, 'Fetch.requestPaused', this.onRequestPaused);
     this.events.on(session, 'Fetch.authRequired', this.onAuthRequired);
     this.events.on(session, 'Network.webSocketWillSendHandshakeRequest', this.onWebsocketHandshake);
+    this.events.on(session, 'Network.webSocketCreated', this.onWebSocketCreated.bind(this));
     this.events.on(
       session,
       'Network.webSocketFrameReceived',
@@ -297,6 +305,15 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent): void {
+    if (this.requestIdsToIgnore.has(networkRequest.requestId)) return;
+
+    const url = networkRequest.request.url;
+    if (this.websocketSession.isWebsocketUrl(url)) {
+      this.websocketSession.registerWebsocketFrameId(url, networkRequest.frameId);
+      this.addRequestIdToIgnore(networkRequest.requestId);
+      return;
+    }
+
     if (!this.monotonicOffsetTime)
       this.monotonicOffsetTime = networkRequest.wallTime - networkRequest.timestamp;
     const redirectedFromUrl = networkRequest.redirectResponse?.url;
@@ -372,6 +389,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     networkRequest: RequestWillBeSentExtraInfoEvent,
   ): void {
     const requestId = networkRequest.requestId;
+    if (this.requestIdsToIgnore.has(requestId)) return;
+
     let resource = this.requestsById.get(requestId);
     if (!resource) {
       resource = {} as any;
@@ -405,6 +424,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private emitResourceRequested(browserRequestId: string): void {
+    if (this.requestIdsToIgnore.has(browserRequestId)) return;
+
     const resource = this.requestsById.get(browserRequestId);
     if (!resource) return;
 
@@ -424,6 +445,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private doEmitResourceRequested(browserRequestId: string): boolean {
+    if (this.requestIdsToIgnore.has(browserRequestId)) return;
+
     const resource = this.requestsById.get(browserRequestId);
     if (!resource) return false;
     if (!resource.url) return false;
@@ -451,6 +474,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private onNetworkResponseReceived(event: ResponseReceivedEvent): void {
+    if (this.requestIdsToIgnore.has(event.requestId)) return;
+
     const { response, requestId, loaderId, frameId, type } = event;
 
     const resource = this.requestsById.get(requestId);
@@ -494,6 +519,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private onNetworkRequestServedFromCache(event: RequestServedFromCacheEvent): void {
+    if (this.requestIdsToIgnore.has(event.requestId)) return;
+
     const { requestId } = event;
     const resource = this.requestsById.get(requestId);
     if (resource) {
@@ -503,6 +530,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private onLoadingFailed(event: LoadingFailedEvent): void {
+    if (this.requestIdsToIgnore.has(event.requestId)) return;
+
     const { requestId, canceled, blockedReason, errorText, timestamp } = event;
 
     const resource = this.requestsById.get(requestId);
@@ -530,12 +559,16 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private onLoadingFinished(event: LoadingFinishedEvent): void {
+    if (this.requestIdsToIgnore.has(event.requestId)) return;
+
     const { requestId, timestamp } = event;
     const eventTime = this.monotonicTimeToUnix(timestamp);
     this.emitLoaded(requestId, eventTime);
   }
 
   private emitLoaded(id: string, timestamp: number): void {
+    if (this.requestIdsToIgnore.has(id)) return;
+
     const resource = this.requestsById.get(id);
     if (resource) {
       if (!this.requestPublishingById.get(id)?.isPublished) this.emitResourceRequested(id);
@@ -569,6 +602,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private async downloadRequestBody(requestId: string): Promise<Buffer> {
+    if (this.requestIdsToIgnore.has(requestId)) return;
+
     if (this.isChromeRetainingResources === false || !this.devtools.isConnected()) {
       return null;
     }
@@ -584,6 +619,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
 
   private getPublishingForRequestId(id: string, createIfNull = false): IResourcePublishing {
+    if (this.requestIdsToIgnore.has(id)) return;
+
     const publishing = this.requestPublishingById.get(id);
     if (publishing) return publishing;
     if (createIfNull) {
@@ -593,7 +630,15 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
+  private onWebSocketCreated(event: WebSocketCreatedEvent): void {
+    if (this.websocketSession.isWebsocketUrl(event.url)) {
+      this.addRequestIdToIgnore(event.requestId);
+    }
+  }
+
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent): void {
+    if (this.requestIdsToIgnore.has(handshake.requestId)) return;
+
     this.emit('websocket-handshake', {
       browserRequestId: handshake.requestId,
       headers: handshake.request.headers,
@@ -604,6 +649,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     isFromServer: boolean,
     event: WebSocketFrameSentEvent | WebSocketFrameReceivedEvent,
   ): void {
+    if (this.requestIdsToIgnore.has(event.requestId)) return;
+
     const browserRequestId = event.requestId;
     const { opcode, payloadData } = event.response;
     const message = opcode === 1 ? payloadData : Buffer.from(payloadData, 'base64');
@@ -613,5 +660,14 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
       isFromServer,
       timestamp: this.monotonicTimeToUnix(event.timestamp),
     });
+  }
+
+  /////// UTILS ///////////
+  private addRequestIdToIgnore(id: string): void {
+    this.requestIdsToIgnore.add(id);
+    while (this.requestIdsToIgnore.size > 1000) {
+      const value = this.requestIdsToIgnore.values().next().value;
+      this.requestIdsToIgnore.delete(value);
+    }
   }
 }

@@ -1,14 +1,15 @@
 import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IFrame, IFrameManagerEvents } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { IWebsocketEvents } from '@ulixee/unblocked-specification/agent/browser/IWebsocketSession';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import DevtoolsSession from './DevtoolsSession';
 import Frame from './Frame';
 import NetworkManager from './NetworkManager';
@@ -16,12 +17,11 @@ import DomStorageTracker from './DomStorageTracker';
 import InjectedScripts from './InjectedScripts';
 import Page from './Page';
 import Resources from './Resources';
+import { WebsocketSession } from './WebsocketSession';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
 import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
-import ExecutionContextDestroyedEvent = Protocol.Runtime.ExecutionContextDestroyedEvent;
-import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
 import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent;
 import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
@@ -48,6 +48,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   }
 
   public devtoolsSession: DevtoolsSession;
+  public websocketIdToFrameId = new Map<string, string>();
 
   protected readonly logger: IBoundLog;
 
@@ -62,11 +63,15 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     return this.page.browserContext.resources;
   }
 
+  private get websocketSession(): WebsocketSession {
+    return this.page.browserContext.websocketSession;
+  }
+
   private attachedFrameIds = new Set<string>();
-  private activeContextIdsBySessionId = new Map<string, Set<number>>();
   private readonly events = new EventSubscriber();
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
+  private pageCallbacks = new Map<string, Array<(payload: string, frame: IFrame) => any>>();
 
   private isReady: Promise<void>;
 
@@ -85,6 +90,11 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.events.on(page, 'resource-loaded', this.onResourceLoaded);
     this.events.on(page, 'resource-failed', this.onResourceFailed);
     this.events.on(page, 'navigation-response', this.onNavigationResourceResponse);
+    this.events.on(
+      this.websocketSession,
+      'message-received',
+      this.onWebsocketSessionMessageRecieved,
+    );
   }
 
   public initialize(devtoolsSession: DevtoolsSession): Promise<void> {
@@ -121,21 +131,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         'Page.lifecycleEvent',
         this.onLifecycleEvent.bind(this, devtoolsSession),
       ),
-      this.events.on(
-        devtoolsSession,
-        'Runtime.executionContextsCleared',
-        this.onExecutionContextsCleared.bind(this, devtoolsSession),
-      ),
-      this.events.on(
-        devtoolsSession,
-        'Runtime.executionContextDestroyed',
-        this.onExecutionContextDestroyed.bind(this, devtoolsSession),
-      ),
-      this.events.on(
-        devtoolsSession,
-        'Runtime.executionContextCreated',
-        this.onExecutionContextCreated.bind(this, devtoolsSession),
-      ),
     );
     const id = devtoolsSession.id;
     this.events.once(devtoolsSession, 'disconnected', () => this.events.endGroup(id));
@@ -157,7 +152,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
               };
             }),
           devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-          devtoolsSession.send('Runtime.enable'),
           InjectedScripts.install(this, devtoolsSession, this.onDomPaintEvent),
         ]);
         this.recurseFrameTree(devtoolsSession, framesResponse.frameTree);
@@ -210,25 +204,10 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   public async addPageCallback(
     name: string,
     onCallback: (payload: string, frame: IFrame) => any,
-    isolateFromWebPageEnvironment?: boolean,
-    devtoolsSession?: DevtoolsSession,
-  ): Promise<IRegisteredEventListener> {
-    const params: Protocol.Runtime.AddBindingRequest = {
-      name,
-    };
-    if (isolateFromWebPageEnvironment) {
-      params.executionContextName = ISOLATED_WORLD;
-    }
-    devtoolsSession ??= this.devtoolsSession;
-    // add binding to every new context automatically
-    await devtoolsSession.send('Runtime.addBinding', params);
-    return this.events.on(devtoolsSession, 'Runtime.bindingCalled', async event => {
-      if (event.name === name) {
-        await this.isReady;
-        const frame = this.getFrameForExecutionContext(event.executionContextId);
-        if (frame) onCallback(event.payload, frame);
-      }
-    });
+  ): Promise<any> {
+    const callbacks = this.pageCallbacks.get(name) ?? [];
+    if (callbacks.length === 0) this.pageCallbacks.set(name, callbacks);
+    callbacks.push(onCallback);
   }
 
   public async addNewDocumentScript(
@@ -237,6 +216,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
     devtoolsSession ??= this.devtoolsSession;
+    script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
     const installedScript = await devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
@@ -315,13 +295,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
 
     const frame = this.framesById.get(target.targetId);
     if (frame) {
-      if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
-        this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
-      }
-      await frame.updateDevtoolsSession(
-        devtoolsSession,
-        this.activeContextIdsBySessionId.get(devtoolsSession.id),
-      );
+      await frame.updateDevtoolsSession(devtoolsSession);
     }
   }
 
@@ -354,60 +328,39 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     await frame.waitForNavigationLoader(loaderId);
   }
 
-  public getFrameForExecutionContext(executionContextId: number): Frame | undefined {
-    for (const frame of this.framesById.values()) {
-      if (frame.hasContextId(executionContextId)) return frame;
-    }
-  }
+  public async getDefaultContextIdForFrameId(opts: {
+    frameId: string;
+    devtoolsSession?: DevtoolsSession;
+    refresh?: boolean;
+  }): Promise<number | undefined> {
+    const devtoolsSession = opts.devtoolsSession ?? this.devtoolsSession;
+    const contextId = new Resolvable<number>(3e3);
 
-  private async onExecutionContextDestroyed(
-    devtoolsSession: DevtoolsSession,
-    event: ExecutionContextDestroyedEvent,
-  ): Promise<void> {
-    await this.isReady;
-    this.activeContextIdsBySessionId.get(devtoolsSession.id)?.delete(event.executionContextId);
-    for (const frame of this.framesById.values()) {
-      if (frame.devtoolsSession === devtoolsSession)
-        frame.removeContextId(event.executionContextId);
-    }
-  }
+    const subcriber = this.events.on(devtoolsSession, 'Runtime.executionContextCreated', event => {
+      const { context } = event;
+      const frameId = context.auxData.frameId as string;
+      const type = context.auxData.type as string;
 
-  private async onExecutionContextsCleared(devtoolsSession: DevtoolsSession): Promise<void> {
-    await this.isReady;
-    this.activeContextIdsBySessionId.get(devtoolsSession.id)?.clear();
-    for (const frame of this.framesById.values()) {
-      if (frame.devtoolsSession === devtoolsSession) frame.clearContextIds();
-    }
-  }
+      if (
+        opts.frameId === frameId &&
+        context.name === '' &&
+        context.auxData.isDefault === true &&
+        type === 'default'
+      ) {
+        contextId.resolve(context.id);
+      }
+    });
 
-  private async onExecutionContextCreated(
-    devtoolsSession: DevtoolsSession,
-    event: ExecutionContextCreatedEvent,
-  ): Promise<void> {
-    await this.isReady;
-    const { context } = event;
-    const frameId = context.auxData.frameId as string;
-    const type = context.auxData.type as string;
+    // Enabling and disabling will trigger ExecutionContextCreatedEvent for all contexts
+    await Promise.all([
+      devtoolsSession.send('Runtime.enable'),
+      devtoolsSession.send('Runtime.disable'),
+    ]);
 
-    if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
-      this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
-    }
-    this.activeContextIdsBySessionId.get(devtoolsSession.id).add(context.id);
-
-    const frame = this.framesById.get(frameId);
-    if (!frame) {
-      this.logger.warn('No frame for active context!', {
-        frameId,
-        executionContextId: context.id,
-      });
-      return;
-    }
-
-    const isDefault =
-      context.name === '' && context.auxData.isDefault === true && type === 'default';
-    const isIsolatedWorld = context.name === ISOLATED_WORLD && type === 'isolated';
-    if (isDefault || isIsolatedWorld) {
-      frame?.addContextId(context.id, isDefault, context.origin);
+    try {
+      return await contextId.promise;
+    } finally {
+      this.events.off(subcriber);
     }
   }
 
@@ -493,10 +446,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
         // If an OOP iframes becomes a normal iframe again
         // it is first attached to the parent page before
         // the target is removed.
-        await frame.updateDevtoolsSession(
-          devtoolsSession,
-          this.activeContextIdsBySessionId.get(devtoolsSession.id),
-        );
+        await frame.updateDevtoolsSession(devtoolsSession);
       }
       return;
     }
@@ -557,15 +507,11 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       this.domStorageTracker.track(frame.securityOrigin);
       return frame;
     }
-    if (!this.activeContextIdsBySessionId.has(devtoolsSession.id)) {
-      this.activeContextIdsBySessionId.set(devtoolsSession.id, new Set());
-    }
 
     const parentFrame = parentId ? this.framesById.get(parentId) : null;
     const frame = new Frame(
       this,
       newFrame,
-      this.activeContextIdsBySessionId.get(devtoolsSession.id),
       devtoolsSession,
       this.logger,
       () => this.attachedFrameIds.has(id),
@@ -625,7 +571,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       : this.main;
 
     if (!frame) return;
-
     const navigations = frame.navigations;
 
     if (isDocumentNavigation && !navigations.top) {
@@ -745,5 +690,16 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       event.loaderId,
       event.timestamp,
     );
+  }
+
+  private async onWebsocketSessionMessageRecieved(
+    event: IWebsocketEvents['message-received'],
+  ): Promise<void> {
+    const callbacks = this.pageCallbacks.get(event.name);
+    const frame = this.framesById.get(event.id);
+    if (!callbacks || !frame) return;
+
+    await this.isReady;
+    callbacks.forEach(callback => callback(event.payload, frame));
   }
 }

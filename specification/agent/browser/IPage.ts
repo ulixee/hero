@@ -49,8 +49,6 @@ export interface IPage extends ITypedEventEmitter<IPageEvents> {
   addPageCallback(
     name: string,
     onCallback?: (payload: string, frame: IFrame) => any,
-    isolateFromWebPageEnvironment?: boolean,
-    devtoolsSession?: IDevtoolsSession,
   ): Promise<IRegisteredEventListener>;
 }
 

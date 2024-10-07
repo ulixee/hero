@@ -32,6 +32,7 @@ import { ISerializable } from '@ulixee/unblocked-agent/lib/JsPath';
 import Frame from '@ulixee/unblocked-agent/lib/Frame';
 import FrameNavigations from '@ulixee/unblocked-agent/lib/FrameNavigations';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Session from './Session';
 import Tab, { ITabEventParams } from './Tab';
 import CommandRecorder from './CommandRecorder';
@@ -108,6 +109,8 @@ export default class FrameEnvironment
   private lastDomChangeDocumentNavigationId: number;
   private lastDomChangeTimestamp = 0;
   private isTrackingMouse = false;
+
+  private flushPageEventsRecorderResolvers = new Map<string, Resolvable<void>>();
 
   private readonly installedDomAssertions = new Set<string>();
 
@@ -487,20 +490,17 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.session.resources.get(resourceId);
   }
 
-  public async flushPageEventsRecorder(): Promise<boolean> {
-    try {
-      // don't wait for env to be available
-      if (!this.frame.canEvaluate(true)) return false;
+  public async flushPageEventsRecorder(): Promise<void> {
+    const id = Math.random().toString();
+    const resolver = new Resolvable<void>();
+    this.flushPageEventsRecorderResolvers.set(id, resolver);
+    this.frame
+      .evaluate<PageRecorderResultSet>(`window.flushPageRecorder('${id}')`, {
+        isolateFromWebPageEnvironment: true,
+      })
+      .catch(() => undefined);
 
-      const results = await this.frame.evaluate<PageRecorderResultSet>(
-        `window.flushPageRecorder()`,
-        { isolateFromWebPageEnvironment: true },
-      );
-      return this.onPageRecorderEvents(results);
-    } catch (error) {
-      // no op if it fails
-    }
-    return false;
+    return resolver.promise;
   }
 
   public async onShadowDomPushed(payload: string): Promise<void> {
@@ -512,7 +512,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public onPageRecorderEvents(results: PageRecorderResultSet): boolean {
-    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
+    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents, id] = results;
+    if (id) {
+      this.flushPageEventsRecorderResolvers.get(id).resolve();
+      this.flushPageEventsRecorderResolvers.delete(id);
+    }
     const hasRecords = results.some(x => x.length > 0);
     if (!hasRecords) return false;
 

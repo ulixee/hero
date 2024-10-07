@@ -1,13 +1,7 @@
 const closedShadows = new WeakSet<ShadowRoot>();
 const closedShadowOwners = new WeakSet<Element>();
 
-const shadowTriggerName = args.callbackName;
-let shadowTrigger = (_: string) => {};
-// eslint-disable-next-line no-restricted-globals
-if (self[shadowTriggerName]) {
-  shadowTrigger = (self[shadowTriggerName] as unknown as Function).bind(self); // eslint-disable-line no-restricted-globals
-  delete self[shadowTriggerName]; // eslint-disable-line no-restricted-globals
-}
+const shadowTriggerCallback = callback.bind(null, args.callbackName);
 
 proxyGetter(Element.prototype, 'shadowRoot', (target, thisArg, argArray) => {
   if (closedShadowOwners.has(thisArg)) return null;
@@ -65,7 +59,7 @@ proxyFunction(Element.prototype, 'attachShadow', (func, thisArg, argArray) => {
 
         element = parentElement;
       }
-      shadowTrigger(JSON.stringify(path));
+      shadowTriggerCallback(JSON.stringify(path));
     }
   } catch (err) {
     // drown errors
