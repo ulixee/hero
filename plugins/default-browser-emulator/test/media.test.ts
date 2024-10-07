@@ -1,4 +1,4 @@
-import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing';
+import { Helpers, TestLogger, testIfNotOnGithubWindows } from '@ulixee/unblocked-agent-testing';
 import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
 import { Pool } from '@ulixee/unblocked-agent';
 import BrowserEmulator from '../index';
@@ -17,7 +17,7 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
-test('can use widevine', async () => {
+testIfNotOnGithubWindows('can use widevine', async () => {
   const agent = pool.createAgent({
     logger,
   });

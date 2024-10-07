@@ -50,7 +50,7 @@ class CustomPlugin implements INetworkHooks {
   }
 
   onDnsConfiguration(settings) {
-    settings.dnsOverTlsConnection = Quad9;
+    settings.dnsOverTlsConnection = CloudFlare;
   }
 }
 

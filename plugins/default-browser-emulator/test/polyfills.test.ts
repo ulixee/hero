@@ -27,7 +27,8 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
-const domExtractorTimeout = 180e3;
+const domExtractorEvalTimeout = 120e3;
+const domExtractorTestTimeout = 180e3;
 
 test(
   'it should be able to add polyfills',
@@ -117,6 +118,7 @@ test(
 
     const json = await page.mainFrame.evaluate(
       `new (${DomExtractor.toString()})('window').run(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
+      { timeoutMs: domExtractorEvalTimeout },
     );
     const result = JSON.parse(json as any);
 
@@ -136,7 +138,7 @@ test(
     expect(window.ObjectTest).toStrictEqual(objectTestProperties);
     expect(windowKeys.indexOf('ObjectTest')).toBe(windowKeys.indexOf('chromey') + 1);
   },
-  domExtractorTimeout,
+  domExtractorTestTimeout,
 );
 
 test('it should be able to remove properties', async () => {
