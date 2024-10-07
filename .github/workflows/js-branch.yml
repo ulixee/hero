@@ -48,6 +48,7 @@ jobs:
           git config --global user.name "CI"
           git init -b main
           git add agent/mitm-socket/dist/** -f
+          git add plugins/default-browser-emulator/data/** -f
           git add -A
           git commit -m 'Auto-build Javascript files'
           git push -f https://ulixee:${{ env.GH_TOKEN }}@github.com/ulixee/hero.git main:${{ github.ref_name }}-built-js
