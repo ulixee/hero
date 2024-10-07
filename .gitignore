@@ -38,6 +38,8 @@ browserstack.err
 agent/mitm-socket/dist
 /real-user-agents/local.log
 
+paths.local.json
+
 # Devenv
 .devenv*
 devenv.local.nix
