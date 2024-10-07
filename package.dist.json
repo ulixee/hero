@@ -4,13 +4,12 @@
     "dist": "lerna publish from-package"
   },
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "@lerna-lite/version": "^3.9.1",
+    "@lerna-lite/publish": "^3.9.1"
   },
   "workspaces": {
     "packages": [
       "agent/*",
-      "browser-emulator-builder",
-      "browser-profiler/*",
       "client",
       "commons",
       "core",

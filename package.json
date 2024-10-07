@@ -50,6 +50,7 @@
     "jest": "^29.7.0",
     "json2md": "^1.7.0",
     "@lerna-lite/version": "^3.9.1",
+    "@lerna-lite/publish": "^3.9.1",
     "lint-staged": "^13.2.2",
     "noderdom-detached": "https://github.com/ulixee/noderdom-detached.git#dist",
     "prettier": "^3.2.4",

@@ -299,12 +299,54 @@ function extractPathFromModule(module: NodeModule): string {
 
 /// LOG FILTERING //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function registerNamespaceMapping(
-  onNamespaceFn: (namespace: string, active: RegExp[], skip: RegExp[]) => void,
-): void {
-  loadNamespaces(process.env.DEBUG);
+export function registerNamespaceMapping(filter: string = process.env.DEBUG): void {
+  if (logFilters.envValue === filter) return;
+  logFilters.envValue = filter;
+
+  filter ??= '';
+  const { active, skip } = logFilters;
+  active.length = 0;
+  skip.length = 0;
+  logFilters.namespaces.active.clear();
+  logFilters.namespaces.inactive.clear();
+  logFilters.enabledNamesCache = {};
+  const split = filter.split(/[\s,]+/).map(x => x.trim());
+
+  for (const part of split) {
+    if (!part) continue;
+
+    if (part[0] === '-') {
+      logFilters.namespaces.inactive.add(part.slice(1));
+    } else {
+      logFilters.namespaces.active.add(part);
+      if (part === 'ulx*' || part === 'ulx:*') logFilters.namespaces.active.add('*');
+    }
+  }
   for (const ns of logFilters.namespaces.active) {
-    onNamespaceFn(ns, logFilters.active, logFilters.skip);
+    if (ns.includes('ulx:*') || ns.includes('ulx*') || ns === '*') {
+      active.push(/.*/);
+    } else if (ns === 'ulx') {
+      active.push(
+        /hero[/-].*/,
+        /agent\/.*/,
+        /plugins\/.*/,
+        /net\/.*/,
+        /cloud\/.*/,
+        /datastore[/-].*/,
+        /broker\/.*/,
+      );
+      skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
+    } else if (ns.includes('ulx:desktop')) {
+      active.push(/desktop[/-]?.*/);
+    } else if (ns.includes('ulx:mitm')) {
+      active.push(/agent[/-]mitm.*/);
+    } else if (ns.includes('ulx:devtools')) {
+      active.push(/DevtoolsSessionLogger/);
+    } else if (ns.includes('hero')) {
+      active.push(/^hero[/-].*/, /net\/.*/);
+    } else if (ns.includes('datastore')) {
+      active.push(/^datastore[/-].*/, /net\/.*/);
+    }
   }
 }
 
@@ -316,6 +358,7 @@ function isEnabled(modulePath: string): boolean {
   )
     return true;
 
+  registerNamespaceMapping(process.env.DEBUG);
   if (modulePath in logFilters.enabledNamesCache) return logFilters.enabledNamesCache[modulePath];
 
   if (logFilters.namespaces.active.has('*')) return true;
@@ -337,49 +380,3 @@ function isEnabled(modulePath: string): boolean {
   logFilters.enabledNamesCache[modulePath] = false;
   return false;
 }
-
-function loadNamespaces(namespaces: string): void {
-  if (logFilters.envValue === namespaces) return;
-
-  namespaces ??= '';
-  logFilters.envValue = namespaces;
-  const split = namespaces.split(/[\s,]+/).map(x => x.trim());
-
-  for (const part of split) {
-    if (!part) continue;
-
-    if (part[0] === '-') {
-      logFilters.namespaces.inactive.add(part.slice(1));
-    } else {
-      logFilters.namespaces.active.add(part);
-      if (part === 'ulx*' || part === 'ulx:*') logFilters.namespaces.active.add('*');
-    }
-  }
-}
-
-registerNamespaceMapping((ns, active, skip) => {
-  if (ns.includes('ulx:*') || ns.includes('ulx*') || ns === '*') {
-    active.push(/.*/);
-  } else if (ns === 'ulx') {
-    active.push(
-      /hero[/-].*/,
-      /agent\/.*/,
-      /plugins\/.*/,
-      /net\/.*/,
-      /cloud\/.*/,
-      /datastore[/-].*/,
-      /broker\/.*/,
-    );
-    skip.push(/desktop[/-]?.*/, /DevtoolsSessionLogger/);
-  } else if (ns.includes('ulx:desktop')) {
-    active.push(/desktop[/-]?.*/);
-  } else if (ns.includes('ulx:mitm')) {
-    active.push(/agent[/-]mitm.*/);
-  } else if (ns.includes('ulx:devtools')) {
-    active.push(/DevtoolsSessionLogger/);
-  } else if (ns.includes('hero')) {
-    active.push(/^hero[/-].*/, /net\/.*/);
-  } else if (ns.includes('datastore')) {
-    active.push(/^datastore[/-].*/, /net\/.*/);
-  }
-});
