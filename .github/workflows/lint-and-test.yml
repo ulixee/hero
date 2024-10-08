@@ -31,9 +31,6 @@ jobs:
           - node-version: 20.x
             os: ubuntu-latest
             browser: chrome-115-0
-          - node-version: 20.x
-            os: ubuntu-latest
-            browser: chrome-114-0
 
     runs-on: ${{ matrix.os }}
 
