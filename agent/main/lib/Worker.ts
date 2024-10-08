@@ -109,6 +109,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   }
 
   close(): void {
+    this.devtoolsSession.send('Target.closeTarget', { targetId: this.id }).catch(() => undefined);
     this.networkManager.close();
     this.cancelPendingEvents('Worker closing', ['close']);
     this.events.close();

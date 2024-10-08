@@ -5,10 +5,10 @@ function workerFunction() {
 }
 
 self.addEventListener('message', event => {
-  console.log(`got this data: ${  event.data}`);
+  console.log(`got this data: ${event.data}`);
 });
 
-(async function() {
+(async function () {
   while (true) {
     self.postMessage(workerFunction.toString());
     await new Promise(x => setTimeout(x, 100));
