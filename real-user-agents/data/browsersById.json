@@ -4184,5 +4184,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-131-0": {
+    "id": "firefox-131-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "131",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
