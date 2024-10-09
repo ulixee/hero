@@ -28,6 +28,7 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
 
   private server: Server;
   private wss: WebsocketServer;
+  private intervals = new Set<NodeJS.Timeout>();
 
   constructor() {
     super();
@@ -57,6 +58,7 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
   close(): void {
     this.wss.close();
     this.server.close();
+    this.intervals.forEach(interval => clearInterval(interval));
   }
 
   isWebsocketUrl(url: string): boolean {
@@ -165,6 +167,25 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
   private handleConnection(ws: Websocket, request: IncomingMessage, clientId: string): void {
     ws.on('error', error => log.error('WebsocketSession.ConnectionError', { error }));
     ws.on('message', this.handleMessage.bind(this, clientId));
+
+    let isAlive = true;
+    ws.on('pong', () => {
+      isAlive = true;
+    });
+
+    const interval = setInterval(() => {
+      if (isAlive) {
+        isAlive = false;
+        return ws.ping();
+      }
+
+        this.clientIdToTargetId.delete(clientId);
+        ws.terminate();
+        clearInterval(interval);
+      this.intervals.delete(interval);
+    }, 30e3).unref();
+
+    this.intervals.add(interval);
   }
 
   private async handleMessage(clientId: string, data: Buffer): Promise<void> {
