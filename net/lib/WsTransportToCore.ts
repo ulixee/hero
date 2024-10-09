@@ -37,7 +37,12 @@ export default class WsTransportToCore
   }
 
   public async send(payload: any): Promise<void> {
+    if (!isWsOpen(this.webSocket) && this.connectPromise) {
+      await this.disconnect();
+    }
+
     await this.connect();
+
 
     const message = TypeSerializer.stringify(payload);
     try {
@@ -57,6 +62,7 @@ export default class WsTransportToCore
   public disconnect(): Promise<void> {
     if (this.isDisconnecting) return;
     this.isDisconnecting = true;
+    this.connectPromise = null;
     this.emit('disconnected');
     this.isConnected = false;
     this.events.close('error');

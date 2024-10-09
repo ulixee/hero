@@ -41,7 +41,7 @@ export default class ConnectionFactory {
         // If Clouds are launched, but none compatible, propose installing @ulixee/cloud locally
         throw new Error(`Your script is using version ${version} of Hero. A compatible Hero Core was not found on localhost. You can fix this by installing and running a local Ulixee Cloud in your project:
 
-npm install --save-dev @ulixee/cloud @ulixee/desktop-core
+npm install --save-dev @ulixee/cloud
 
 npx @ulixee/cloud start
         `);

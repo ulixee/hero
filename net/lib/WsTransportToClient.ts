@@ -6,7 +6,7 @@ import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { IncomingMessage } from 'http';
 import WebSocket = require('ws');
 import ITransport, { ITransportEvents } from '../interfaces/ITransport';
-import { sendWsCloseUnexpectedError, wsSend } from './WsUtils';
+import { isWsOpen, sendWsCloseUnexpectedError, wsSend } from './WsUtils';
 
 export default class WsTransportToClient
   extends TypedEventEmitter<ITransportEvents>
@@ -29,6 +29,13 @@ export default class WsTransportToClient
 
   public async send(payload: any): Promise<void> {
     const message = TypeSerializer.stringify(payload);
+
+    if (!isWsOpen(this.webSocket)) {
+      const error = new CanceledPromiseError('Websocket was not open');
+      this.onError(error);
+      throw error;
+    }
+
     try {
       await wsSend(this.webSocket, message);
     } catch (error) {

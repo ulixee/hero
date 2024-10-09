@@ -18,7 +18,12 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
 
   public insert(log: ILogEntry): void {
     // ignore logging these to the db - they're in the Commands table
-    if (log.action === 'Command.run' || log.action === 'Command.done' || log.module.includes('DevtoolsSessionLogger')) return;
+    if (
+      log.action === 'Command.run' ||
+      log.action === 'Command.done' ||
+      log.module.includes('DevtoolsSessionLogger')
+    )
+      return;
     if (log.data instanceof Error) {
       log.data = {
         stack: log.data.stack,
@@ -35,6 +40,9 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
               toString: value.toString(),
               ...value,
             };
+          }
+          if (value instanceof BigInt || typeof value === 'bigint') {
+            return `${value.toString()}n`;
           }
           if (value instanceof RegExp) {
             return `/${value.source}/${value.flags}`;
