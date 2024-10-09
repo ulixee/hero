@@ -52,7 +52,9 @@ describe('Worker test', () => {
     expect(page.workers.length).toBe(0);
   });
 
-  it('should report console logs', async () => {
+  // TODO re-enabled when runtime enabled or we have new console logging logic
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('should report console logs', async () => {
     const [message] = await Promise.all<{ message: string }>([
       page.waitOn('console'),
       page.evaluate(`(() => {
@@ -75,7 +77,9 @@ describe('Worker test', () => {
     expect(await worker.evaluate('1+1')).toBe(2);
   });
 
-  it('should report errors', async () => {
+  // TODO re-enabled when runtime enabled or we have new console logging logic
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('should report errors', async () => {
     const errorPromise = new Promise<{ error: Error }>(resolve => page.on('page-error', resolve));
     await page.evaluate(
       `(() => {

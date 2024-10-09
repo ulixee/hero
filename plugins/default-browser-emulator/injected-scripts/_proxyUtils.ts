@@ -2,6 +2,7 @@
 declare let sourceUrl: string;
 declare let targetType: string | undefined;
 declare let args: any;
+declare const callback: (name: string, data: string) => void;
 
 /* eslint-disable no-restricted-properties */
 

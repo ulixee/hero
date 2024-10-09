@@ -1,18 +1,12 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable jest/no-standalone-expect */
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { ITestKoaServer } from '@ulixee/unblocked-agent-testing/helpers';
-import { Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
+import { Helpers, TestLogger, testIfNotOnGithubMac } from '@ulixee/unblocked-agent-testing/index';
 import Pool from '@ulixee/unblocked-agent/lib/Pool';
 import { LocationStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import * as fpscanner from 'fpscanner';
 import * as Fs from 'fs';
 import BrowserEmulator from '../index';
 import { injectedSourceUrl } from '../lib/DomOverridesBuilder';
-
-// Some tests are broken on github macos so we don't run them there
-const testIfNotOnGithubMac =
-  process.env.CI === 'true' && process.platform === 'darwin' ? test.skip : test;
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 const logger = TestLogger.forTest(module);

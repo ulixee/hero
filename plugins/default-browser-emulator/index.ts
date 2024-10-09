@@ -73,6 +73,7 @@ const allEnabled = Object.values(InjectedScript).reduce((acc, value) => {
 export const defaultConfig = {
   ...allEnabled,
   [InjectedScript.JSON_STRINGIFY]: false,
+  [InjectedScript.CONSOLE]: false,
 };
 
 @UnblockedPluginClassDecorator

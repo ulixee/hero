@@ -30,7 +30,8 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
-const domExtractorTimeout = 180e3;
+const domExtractorEvalTimeout = 120e3;
+const domExtractorTestTimeout = 180e3;
 
 test(
   'it should mimic a chrome object',
@@ -49,6 +50,7 @@ test(
     const structure = JSON.parse(
       (await page.mainFrame.evaluate(
         `new (${DomExtractor.toString()})('window').run(window, 'window', ['chrome'])`,
+        { timeoutMs: domExtractorEvalTimeout },
       )) as any,
     ).window;
     if (debug) console.log(inspect(structure.chrome, false, null, true));
@@ -77,7 +79,7 @@ test(
     // must delete csi's invocation since it's different on each run
     expect(structureJson).toBe(chromeJson);
   },
-  domExtractorTimeout,
+  domExtractorTestTimeout,
 );
 
 test('it should update loadtimes and csi values', async () => {

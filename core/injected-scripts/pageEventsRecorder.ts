@@ -17,7 +17,7 @@ declare global {
 
   interface Window {
     extractDomChanges(): PageRecorderResultSet;
-    flushPageRecorder(): PageRecorderResultSet;
+    flushPageRecorder(id: string): void;
     checkForShadowRoot(
       path: { localName: string; id: string; index: number; hasShadowHost: boolean }[],
     ): void;
@@ -26,7 +26,8 @@ declare global {
     doNotTrackElement(element: Element): void;
   }
 }
-declare const runtimeFunction: string;
+declare const callbackName: string;
+const eventsCallback = callback.bind(null, callbackName) as (data: string) => void;
 
 enum DomActionType {
   newDocument = 0,
@@ -51,11 +52,10 @@ export type PageRecorderResultSet = [
   IFocusEvent[],
   IScrollEvent[],
   ILoadEvent[],
+  string?,
 ];
 const SHADOW_NODE_TYPE = 40;
 
-// callback binding
-const eventsCallback = window[runtimeFunction] as unknown as (data: string) => void;
 const hiddenTags = new Set<string>([
   'STYLE',
   'SCRIPT',
@@ -76,7 +76,6 @@ function upload(records: PageRecorderResultSet) {
     }
 
     eventsCallback(JSON.stringify(records));
-
     lastUploadDate = Date.now();
     return true;
   } catch (err) {
@@ -173,11 +172,12 @@ class PageEventsRecorder {
     return this.pageResultset;
   }
 
-  public flushAndReturnLists(): PageRecorderResultSet {
+  public flushAndReturnLists(id: string): void {
     const changes = recorder.extractChanges();
 
     recorder.resetLists();
-    return changes;
+    changes.push(id);
+    upload(changes);
   }
 
   public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
@@ -734,7 +734,7 @@ const propertiesToCheck = ['value', 'selected', 'selectedIndex', 'checked'];
 const recorder = new PageEventsRecorder();
 window.extractDomChanges = () => recorder.extractChanges();
 window.trackElement = element => recorder.trackElement(element);
-window.flushPageRecorder = () => recorder.flushAndReturnLists();
+window.flushPageRecorder = (id: string) => recorder.flushAndReturnLists(id);
 window.checkForShadowRoot = host => recorder.checkForShadowRoot(host);
 window.listenToInteractionEvents = () => recorder.listenToInteractionEvents();
 window.doNotTrackElement = element => recorder.doNotTrackElement(element);

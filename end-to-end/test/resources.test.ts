@@ -291,7 +291,7 @@ describe('basic resource tests', () => {
     koaServer.get('/block-regexes', ctx => {
       ctx.body = `<html>
 <head>
-  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y=%20baz" />
+  <link rel="stylesheet" href="/foo/bar/42.css?x=foo&y= baz" />
 </head>
 <body>
   <img src="/baz/bar.png" alt="Image"/>

@@ -144,7 +144,7 @@ describe('emulator', () => {
   });
 
   it('should be able to add windows variables', async () => {
-    BrowserData.localOsMeta = { name: 'mac-os', version: '12' };
+    BrowserData.localOsMeta = { name: 'linux', version: '' };
     const agent = pool.createAgent({
       customEmulatorConfig: { userAgentSelector: '~ windows = 10' },
       logger,

@@ -1,5 +1,5 @@
 import { Hero, Helpers } from '@ulixee/hero-testing';
-import { Log } from '@ulixee/commons/lib/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
 import ChromeApp from '@ulixee/chrome-app/index';
@@ -7,7 +7,11 @@ import BrowserEngine from '@ulixee/default-browser-emulator/lib/BrowserEngine';
 import Core from '..';
 
 const validate = jest.spyOn(BrowserEngine.prototype, 'verifyLaunchable');
-const logError = jest.spyOn(Log.prototype, 'error');
+// TODO figure out why monorepo broke logging magic, and test if it doesnt
+// break external logic. (Probably due to the way we change proto dynamically
+// and import order now changed
+const { log } = Log(module);
+const logError = jest.spyOn(Object.getPrototypeOf(log), 'error');
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);

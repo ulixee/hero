@@ -10,9 +10,6 @@ import BrowserContext from './BrowserContext';
 import ConsoleMessage from './ConsoleMessage';
 import DevtoolsSession from './DevtoolsSession';
 import NetworkManager from './NetworkManager';
-import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
-import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
-import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 
 export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker {
@@ -32,7 +29,6 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   private readonly targetInfo: TargetInfo;
 
   private readonly events = new EventSubscriber();
-  private readonly executionContextId = createPromise<number>();
 
   public get id(): string {
     return this.targetInfo.targetId;
@@ -61,11 +57,13 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       workerTargetId: this.id,
       workerType: this.type,
     });
-    this.networkManager = new NetworkManager(devtoolsSession, this.logger, browserContext.proxy);
+    this.networkManager = new NetworkManager(
+      devtoolsSession,
+      this.browserContext.websocketSession,
+      this.logger,
+      browserContext.proxy,
+    );
     const session = this.devtoolsSession;
-    this.events.on(session, 'Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
-    this.events.on(session, 'Runtime.exceptionThrown', this.onRuntimeException.bind(this));
-    this.events.on(session, 'Runtime.executionContextCreated', this.onContextCreated.bind(this));
     this.events.on(session, 'Inspector.targetReloadedAfterCrash', () => {
       return this.initialize(parentNetworkManager);
     });
@@ -81,15 +79,10 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
         if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
         throw err;
       }),
-      this.devtoolsSession.send('Runtime.enable'),
       this.type === 'shared_worker'
         ? this.devtoolsSession.send('Network.setCacheDisabled', { cacheDisabled: true })
         : null,
       this.initializeEmulation(hooks as IBrowserContextHooks),
-      // service worker will lock up without this!
-      this.type === 'service_worker'
-        ? this.devtoolsSession.send('Runtime.runIfWaitingForDebugger')
-        : null,
     ]);
 
     setImmediate(() => this.initializationSent.resolve());
@@ -97,8 +90,11 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   }
 
   async evaluate<T>(expression: string, isInitializationScript = false): Promise<T> {
+    if (!isInitializationScript) await this.isReady;
     const result = await this.devtoolsSession.send('Runtime.evaluate', {
       expression,
+      // To be able to use awaitPromise the eventloop must be running, which is not the
+      // case during our initialization script since we pause debugger there.
       awaitPromise: !isInitializationScript,
       // contextId,
       returnByValue: true,
@@ -114,6 +110,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   }
 
   close(): void {
+    this.devtoolsSession.send('Target.closeTarget', { targetId: this.id }).catch(() => undefined);
     this.networkManager.close();
     this.cancelPendingEvents('Worker closing', ['close']);
     this.events.close();
@@ -127,35 +124,48 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
     };
   }
 
-  private initializeEmulation(hooks: IBrowserContextHooks): Promise<any> {
+  private async initializeEmulation(hooks: IBrowserContextHooks): Promise<void> {
     if (!hooks.onNewWorker) {
-      return this.devtoolsSession.send('Runtime.runIfWaitingForDebugger');
+      await this.devtoolsSession.send('Runtime.runIfWaitingForDebugger');
+      return;
     }
 
-    const isBlobWorker = this.targetInfo.url.startsWith('blob:');
-    const promises = [hooks.onNewWorker(this)];
+    try {
+      const emulationPromises = [hooks.onNewWorker(this)];
 
-    if (!isBlobWorker) {
-      promises.push(
-        this.devtoolsSession.send('Debugger.enable'),
-        this.devtoolsSession.send('Debugger.setBreakpointByUrl', {
-          lineNumber: 0,
-          url: this.targetInfo.url,
-        }),
-      );
-    }
+      // Not needed in blob worker since we already have a plugin that handles this.
+      // This is needed because cdp is often times too slow to pause debugger, it could
+      // be completely to late or pause debugger mid execution somewhere, all resulting
+      // in very bad results and/or crashes.
+      const isBlobWorker = this.targetInfo.url.startsWith('blob:');
+      if (!isBlobWorker) {
+        emulationPromises.push(
+          this.devtoolsSession.send('Debugger.enable'),
+          this.devtoolsSession.send('Debugger.setBreakpointByUrl', {
+            lineNumber: 0,
+            url: this.targetInfo.url,
+          }),
+        );
+      }
 
-    return Promise.all(promises)
-      .then(this.resumeAfterEmulation.bind(this))
-      .catch(async error => {
-        if (error instanceof CanceledPromiseError) return;
-        // eslint-disable-next-line promise/no-nesting
-        await this.resumeAfterEmulation().catch(() => null);
-        this.logger.warn('Emulator.onNewWorkerError', {
-          error,
-        });
-        throw error;
+      // Service worker will lock up without this! This happens because of deadlock in chromium
+      // where debugger is waiting for worker to be created but this only happens after runIfWaitingForDebugger.
+      // Good news is: if we queue up everything this doesn't affect us, it's just weird...
+      // https://issues.chromium.org/issues/40830027, https://issues.chromium.org/issues/40811832
+      if (this.type === 'service_worker') {
+        emulationPromises.push(this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'));
+      }
+
+      await Promise.all(emulationPromises);
+      await this.resumeAfterEmulation();
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) return;
+      await this.resumeAfterEmulation().catch(() => null);
+      this.logger.warn('Emulator.onNewWorkerError', {
+        error,
       });
+      throw error;
+    }
   }
 
   private resumeAfterEmulation(): Promise<any> {
@@ -163,27 +173,5 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       this.devtoolsSession.send('Debugger.disable'),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
-  }
-
-  private onContextCreated(event: ExecutionContextCreatedEvent): void {
-    this.executionContextId.resolve(event.context.id);
-  }
-
-  private onRuntimeException(msg: ExceptionThrownEvent): void {
-    const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
-
-    this.emit('page-error', {
-      error,
-    });
-  }
-
-  private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
-    const message = ConsoleMessage.create(this.devtoolsSession, event);
-    const frameId = `${this.type}:${this.url}`; // TBD
-
-    this.emit('console', {
-      frameId,
-      ...message,
-    });
   }
 }

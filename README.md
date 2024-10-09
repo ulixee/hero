@@ -47,6 +47,15 @@ You can work with the project by:
 1. Cloning the repository and installing git submodules (you can add --recursive to your initial clone request).
 2. Run `yarn build`. NOTE: you must run this command to build typescript files.
 
+### Using devenv for an isolated development sandbox (using nix)
+
+Using this setup everything will be automatically installed with the exact same versions for everyone. This avoids a lot of installation issues, and can help automate a lot of boring setup jobs.
+
+1. [Install nix ](https://determinate.systems/posts/determinate-nix-installer/)
+2. [Install devenv](https://devenv.sh/getting-started/#1-install-nix)
+3. [Install direnv ](https://direnv.net/docs/installation.html). Only needed if you want everything the auto load.
+4. [Make sure direnv works with zsh or other shell ](https://direnv.net/docs/hook.html)
+
 ### Browser Profiles
 
 If you want to work with profiles (ie, update Emulator Data, generate Double Agent probes, etc), you'll need to download the BrowserProfiles data: `$ yarn workspace @ulixee/unblocked-browser-profiler downloadData`. This will clone data into a folder called `browser-profile-data` adjacent to the `unblocked` folder.

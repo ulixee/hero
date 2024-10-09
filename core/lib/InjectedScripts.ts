@@ -37,7 +37,7 @@ window.HERO = {
 const injectedScript = `(function installInjectedScripts() {
 ${heroIncludes}
 
-(function installDomRecorder(runtimeFunction) {
+(function installDomRecorder(callbackName) {
    ${pageScripts.pageEventsRecorder}
 })('${pageEventsCallbackName}');
 
@@ -83,7 +83,7 @@ export default class InjectedScripts {
     page[installedSymbol] = true;
 
     return Promise.all([
-      page.addPageCallback(pageEventsCallbackName, null, true, devtoolsSession),
+      page.addPageCallback(pageEventsCallbackName, null),
       page.addNewDocumentScript(injectedScript, true, devtoolsSession),
       showInteractions
         ? page.addNewDocumentScript(showInteractionScript, true, devtoolsSession)

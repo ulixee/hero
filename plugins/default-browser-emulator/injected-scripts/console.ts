@@ -1,3 +1,5 @@
+// This plugin is only needed when runtime domain is enabled,
+// and maybe when console domain is enabled.
 export type Args = never;
 
 // Ported from chromium/src/v8/src/builtins/builtins-console.cc

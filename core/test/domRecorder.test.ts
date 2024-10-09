@@ -227,14 +227,18 @@ function sort() {
     await tab.page.frames[2].waitForLifecycleEvent('load');
     // await tab.page.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
-    await session.db.flush();
+    // triggers all flush actions
+    await tab.getDomChanges();
+
     const domChanges = session.db.domChanges.all();
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
     await tab.frameEnvironmentsByDevtoolsId.get(tab.page.frames[3].id).isReady;
 
-    await session.db.flush();
+    // triggers all flush actions
+    await tab.getDomChanges();
+
     const frames = session.db.frames.all();
     expect(frames).toHaveLength(4);
     const test1 = frames.find(x => x.name === 'test1');
@@ -492,8 +496,6 @@ describe('basic Form element tests', () => {
     const textValue2 = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await session.db.flush();
-
     const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
@@ -554,8 +556,6 @@ describe('basic Form element tests', () => {
     const textValue2 = await tab.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await session.db.flush();
-
     const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
@@ -611,8 +611,6 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(2);
 
-    await session.db.flush();
-
     const changesAfterType = await tab.getDomChanges();
 
     // should have a change for each keypress + one for test
@@ -665,8 +663,6 @@ describe('basic Form element tests', () => {
     ]);
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
-
-    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 
@@ -729,8 +725,6 @@ describe('basic Form element tests', () => {
     ]);
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
-
-    await session.db.flush();
 
     const changesAfterType = await tab.getDomChanges();
 

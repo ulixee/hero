@@ -25,12 +25,13 @@ export default function loadDomOverrides(
 
   const domPolyfill = data.domPolyfill;
 
+  const consolePluginUsed = !!config[InjectedScript.CONSOLE];
   domOverrides.addOverrideAndUseConfig(
     InjectedScript.ERROR,
     {
       removeInjectedLines: true,
       applyStackTraceLimit: true,
-      fixConsoleStack: true,
+      fixConsoleStack: consolePluginUsed,
     },
     { registerWorkerOverride: true },
   );

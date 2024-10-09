@@ -91,7 +91,7 @@ Shortcut to type a string of text.
 
 ### addNewDocumentScript(script, isolateFromWebpage): Promise<{ identifier:string }>
 
-Add a new script to run on all new Frames created from this Page, as well as before any new Navigations are completed on the main [Frame](./Frame.md). Returns an identifier that can be uninstalled by passing to `page.removeDocumentScript`.
+Add a new script to run on all new Frames created from this Page, as well as before any new Navigations are completed on the main [Frame](./Frame.md). Returns an identifier that can be uninstalled by passing to `page.removeDocumentScript`. These scripts also have a `callback(name: string, payload: string)` injected, which they can use to send data to nodejs, see `addPageCallback` for how to listen to this callback.
 
 #### **Arguments**:
 
@@ -104,15 +104,14 @@ Uninstall a newDocumentScript. NOTE: this will not un-do anything ran on the cur
 
 #### **Arguments**:
 
-### addPageCallback(name, onCallbackFn, isolateFromWebpage): Promise<RegisteredEventListener>
+### addPageCallback(name, onCallbackFn): Promise<RegisteredEventListener>
 
-Add a "function" that can be called from in-Page javascript back to Node.js. The function "name" will be available on the global `window` or `self` of each Frame.
+All scripts added by addNewDocumentScript have a callback function injected in them. This "function" can be called from in-Page javascript back to Node.js. By calling addPageCallback with the same name as used in the page script you can subscribe to these callbacks and run onCallbackFn.
 
 #### **Arguments**:
 
-- name `string`. The name of the callbackFn variable.
+- name `string`. The name used when running `callback(name, payload)` from within a page script.
 - onCallbackFn `(payload: string, frameId: string) => void` A callback to trigger when this Page Binding is triggered.
-- isolateFromWebpage `boolean`. Should this binding be visible in the same memory as the webpage memory? If `false`, ensure you remove this variable during a newDocumentScript so it can't be seen.
 
 ### setJavaScriptEnabled(enabled): Promise<void>
 
