@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "headerTableSize": 65536,
+    "initialWindowSize": 6291456,
+    "maxConcurrentStreams": 1000,
+    "maxHeaderListSize": 262144
+  },
+  "ping": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002",
+  "initialWindowSize": 65535,
+  "firstFrameWindowSize": 15728640
+}

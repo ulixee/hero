@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compileOnSave": true,
+  "compilerOptions": {
+    "strict": true,
+    "composite": true,
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "removeComments": true,
+    "strictBindCallApply": false,
+    "lib": ["dom", "es2022"],
+  },
+  "include": ["*.ts", "*.js", ".eslintrc.js"],
+  "exclude": [
+    "**/tsconfig*.json",
+    "**/node_modules",
+    "**/dist",
+    "**/build*",
+    "**/injected-scripts",
+  ],
+}
