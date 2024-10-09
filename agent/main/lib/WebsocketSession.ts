@@ -86,7 +86,7 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
   injectWebsocketCallbackIntoScript(script: string): string {
     // We could do this as a simple template script but this logic might get
     // complex over time and we want typescript to be able to check proxyScript();
-    const scriptBody = this.proxyScript
+    const scriptFn = injectedScript
       .toString()
       // eslint-disable-next-line no-template-curly-in-string
       .replaceAll('${this.host}', this.host)
@@ -97,58 +97,8 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
       // Use function otherwise replace will try todo some magic
       .replace('SCRIPT_PLACEHOLDER', () => script);
 
-    const wsScript = `(function ${scriptBody})();`;
+    const wsScript = `(${scriptFn})();`;
     return wsScript;
-  }
-
-  private proxyScript(): void {
-    const clientId = Math.random();
-    const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
-    // This will signal to network manager we are trying to make websocket connection
-    // This is needed later to map clientId to frameId
-    // eslint-disable-next-line no-console
-    fetch(`http://${url}`).catch(error => console.log(error));
-    let callback: WebsocketCallback;
-    try {
-      const socket = new WebSocket(`ws://${url}`);
-      let isReady = false;
-      const queuedCallbacks: { name: string; payload: string }[] = [];
-
-      const sendOverSocket = (name: string, payload: string): void => {
-        try {
-          socket.send(JSON.stringify({ name, payload }));
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.log(`failed to send over websocket: ${error}`);
-        }
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      callback = (name, payload): void => {
-        if (!isReady) {
-          queuedCallbacks.push({ name, payload });
-          return;
-        }
-        sendOverSocket(name, payload);
-      };
-
-      socket.addEventListener('open', _event => {
-        let queuedCallback = queuedCallbacks.shift();
-        while (queuedCallback) {
-          sendOverSocket(queuedCallback.name, queuedCallback.payload);
-          queuedCallback = queuedCallbacks.shift();
-        }
-        // Only ready when all older messages have been send so we
-        // keep original order of messages.
-        isReady = true;
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(`failed to use websocket: ${error}`);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    SCRIPT_PLACEHOLDER;
   }
 
   private handleUpgrade(request: IncomingMessage, socket: Socket, head: Buffer): void {
@@ -179,9 +129,9 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
         return ws.ping();
       }
 
-        this.clientIdToTargetId.delete(clientId);
-        ws.terminate();
-        clearInterval(interval);
+      this.clientIdToTargetId.delete(clientId);
+      ws.terminate();
+      clearInterval(interval);
       this.intervals.delete(interval);
     }, 30e3).unref();
 
@@ -201,4 +151,58 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
 
     this.emit('message-received', { id: frameId, name, payload });
   }
+}
+
+/** This function will be stringified and inserted as a wrapper script so all injected
+ * scripts have access to a callback function (over a websocket). This function takes
+ * care of setting up that websocket and all other logic it needs as glue to make it all work.
+ * */
+function injectedScript(): void {
+  const clientId = Math.random();
+  const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
+  // This will signal to network manager we are trying to make websocket connection
+  // This is needed later to map clientId to frameId
+  // eslint-disable-next-line no-console
+  fetch(`http://${url}`).catch(error => console.log(error));
+  let callback: WebsocketCallback;
+  try {
+    const socket = new WebSocket(`ws://${url}`);
+    let isReady = false;
+    const queuedCallbacks: { name: string; payload: string }[] = [];
+
+    const sendOverSocket = (name: string, payload: string): void => {
+      try {
+        socket.send(JSON.stringify({ name, payload }));
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(`failed to send over websocket: ${error}`);
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    callback = (name, payload): void => {
+      if (!isReady) {
+        queuedCallbacks.push({ name, payload });
+        return;
+      }
+      sendOverSocket(name, payload);
+    };
+
+    socket.addEventListener('open', _event => {
+      let queuedCallback = queuedCallbacks.shift();
+      while (queuedCallback) {
+        sendOverSocket(queuedCallback.name, queuedCallback.payload);
+        queuedCallback = queuedCallbacks.shift();
+      }
+      // Only ready when all older messages have been send so we
+      // keep original order of messages.
+      isReady = true;
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(`failed to use websocket: ${error}`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  SCRIPT_PLACEHOLDER;
 }
