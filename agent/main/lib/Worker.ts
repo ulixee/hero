@@ -90,6 +90,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
   }
 
   async evaluate<T>(expression: string, isInitializationScript = false): Promise<T> {
+    if (!isInitializationScript) await this.isReady;
     const result = await this.devtoolsSession.send('Runtime.evaluate', {
       expression,
       // To be able to use awaitPromise the eventloop must be running, which is not the
