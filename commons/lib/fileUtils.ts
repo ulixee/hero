@@ -1,6 +1,7 @@
 import { promises as Fs } from 'fs';
 import * as Os from 'os';
 import * as crypto from 'crypto';
+import TypeSerializer from './TypeSerializer';
 
 export async function existsAsync(path: string): Promise<boolean> {
   try {
@@ -23,7 +24,7 @@ export async function copyDir(fromDir: string, toDir: string): Promise<void> {
 export async function readFileAsJson<T>(path: string): Promise<T | null> {
   const buffer = await Fs.readFile(path, 'utf8').catch(() => null);
   if (!buffer) return null;
-  return JSON.parse(buffer) as T;
+  return TypeSerializer.parse(buffer) as T;
 }
 
 // Nodejs doesn't guarantee it will complete writing to the file if multiple processes are writing and/or the process shuts down.
