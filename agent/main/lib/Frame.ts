@@ -100,7 +100,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
   }
 
   public get page(): Page {
-    return this.#framesManager.page;
+    return this.#framesManager?.page;
   }
 
   public interactor: Interactor;
@@ -259,7 +259,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     expression: string,
     options?: {
       isolateFromWebPageEnvironment?: boolean;
-      usePageDefaultContextId?: boolean;
       shouldAwaitExpression?: boolean;
       retriesWaitingForLoad?: number;
       returnByValue?: boolean;
@@ -267,6 +266,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       timeoutMs?: number;
     },
   ): Promise<T> {
+    const cancelMessage = 'Cancel Pending Promise. Frame closed.';
+    if (this.isClosing) {
+      throw new CanceledPromiseError(cancelMessage);
+    };
     // can't run javascript if active dialog!
     if (this.page.activeDialog) {
       throw new Error('Cannot run frame.evaluate while an active dialog is present!!');
@@ -277,16 +280,19 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     }
 
     const isolateFromWebPageEnvironment = options?.isolateFromWebPageEnvironment ?? false;
-    const contextId = options?.usePageDefaultContextId
-      ? undefined
-      : await this.waitForContextId(isolateFromWebPageEnvironment);
+    let contextId: number | undefined;
 
     try {
-      if (!contextId && !options?.usePageDefaultContextId) {
-        const notFound: any = new Error('Could not find a valid context for this request');
-        notFound.code = ContextNotFoundCode;
-        throw notFound;
+      // We only need to find context id when running in isolated mode, or in a frame other than the main frame.
+      if (isolateFromWebPageEnvironment || this !== this.page?.mainFrame) {
+        contextId = await this.waitForContextId(isolateFromWebPageEnvironment);
+        if (!contextId) {
+          const notFound: any = new Error('Could not find a valid context for this request');
+          notFound.code = ContextNotFoundCode;
+          throw notFound;
+        }
       }
+
       const result: Protocol.Runtime.EvaluateResponse = await this.devtoolsSession.send(
         'Runtime.evaluate',
         {
@@ -308,6 +314,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       if (remote.objectId) this.devtoolsSession.disposeRemoteObject(remote);
       return remote.value as T;
     } catch (err) {
+      if (this.isClosing) {
+        throw new CanceledPromiseError(cancelMessage);;
+      };
+
       const isNotFoundError =
         err.code === ContextNotFoundCode ||
         (err as ProtocolError).remoteError?.code === ContextNotFoundCode;
@@ -790,7 +800,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     try {
       if (!this.isAttached) return;
 
-      // If an isolated world with the same worldName already exists chromium will reuse that world, 
+      // If an isolated world with the same worldName already exists chromium will reuse that world,
       // so calling this multiple times is safe, and can be used as creative way to get id of existing context.
       // We need this because our isolated world is created with `Page.addScriptToEvaluateOnNewDocument`
       // of which we don't know the contextId (since we are running with Runtime disabled to prevent detection).

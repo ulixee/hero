@@ -334,7 +334,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     refresh?: boolean;
   }): Promise<number | undefined> {
     const devtoolsSession = opts.devtoolsSession ?? this.devtoolsSession;
-    const contextId = new Resolvable<number>(3e3);
+    const contextId = new Resolvable<number>(10e3);
 
     const subcriber = this.events.on(devtoolsSession, 'Runtime.executionContextCreated', event => {
       const { context } = event;

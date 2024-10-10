@@ -5,6 +5,7 @@ import { Browser, BrowserContext, Page } from '../index';
 import Agent from '../lib/Agent';
 import { attachFrame, setContent, waitForExists } from './_pageTestUtils';
 import { TestServer } from './server';
+import Frame from '../lib/Frame';
 
 describe('Frames', () => {
   let server: TestServer;
@@ -48,6 +49,16 @@ describe('Frames', () => {
       await page.frames[1].evaluate(`(window.FOO = 'bar')`);
       expect(await page.frames[0].evaluate('window.FOO')).toBe('foo');
       expect(await page.frames[1].evaluate('window.FOO')).toBe('bar');
+    });
+
+    it('should not fetch context id for evaluate in mainframe', async () => {
+      await page.goto(server.emptyPage);
+      await page.waitForLoad('AllContentLoaded');
+      const mainFrame = page.mainFrame;
+    
+      const spy = jest.spyOn<any, any>(mainFrame, 'waitForContextId');
+      await mainFrame.evaluate('window.location.href');
+      expect(spy).toHaveBeenCalledTimes(0);
     });
 
     it('should have correct execution contexts', async () => {
@@ -94,7 +105,7 @@ describe('Frames', () => {
         await page.waitOn('frame-created', ev => ev.frame.id === 'frame1', 2000);
       }
       await expect(
-        page.frames[1].waitForLoad({ loadStatus: 'JavascriptReady', timeoutMs:1000 }),
+        page.frames[1].waitForLoad({ loadStatus: 'JavascriptReady', timeoutMs: 1000 }),
       ).resolves.toBeTruthy();
     });
 
