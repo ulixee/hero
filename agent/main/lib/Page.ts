@@ -102,11 +102,11 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   }
 
   public get mainFrame(): Frame {
-    return this.framesManager.main;
+    return this.framesManager?.main;
   }
 
   public get frames(): Frame[] {
-    return this.framesManager.activeFrames;
+    return this.framesManager?.activeFrames;
   }
 
   public get workers(): Worker[] {
@@ -275,10 +275,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     expression: string,
     options?: { timeoutMs?: number; isolatedFromWebPageEnvironment?: boolean },
   ): Promise<T> {
-    return this.mainFrame.evaluate<T>(expression, {
-      ...options,
-      usePageDefaultContextId: !options?.isolatedFromWebPageEnvironment,
-    });
+    return this.mainFrame.evaluate<T>(expression, options);
   }
 
   async navigate(url: string, options: { referrer?: string } = {}): Promise<{ loaderId: string }> {
