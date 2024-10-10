@@ -1,0 +1,25 @@
+{
+  "jsHighEntropyHints": {
+    "architecture": "x86",
+    "model": "",
+    "platformVersion": "10.0",
+    "uaFullVersion": "92.0.4515.107"
+  },
+  "documentHeaders": {
+    "sec-ch-ua": "\"Chromium\";v=\"92\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"92\"",
+    "Device-Memory": "8",
+    "rtt": "0",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-arch": "\"x86\"",
+    "Viewport-Width": "988",
+    "sec-ch-ua-full-version": "\"92.0.4515.107\"",
+    "sec-ch-ua-platform-version": "\"10.0\"",
+    "DPR": "1",
+    "downlink": "7.65",
+    "ect": "4g",
+    "sec-ch-ua-model": "",
+    "device-memory": "8",
+    "viewport-width": "988",
+    "dpr": "1"
+  }
+}
