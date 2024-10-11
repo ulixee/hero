@@ -3,8 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+# [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
+### Bug Fixes
+
+* **agent:** cleanup old websockets ([d005090](https://github.com/ulixee/hero/commit/d0050902419fb9042232aa9b61de2ce961be619e))
+* **agent:** use default context if mainframe ([f851728](https://github.com/ulixee/hero/commit/f851728bb98cce6353c13e293b15cbeb3d14799c))
+* **agent:** worker not closing in time ([0d374a5](https://github.com/ulixee/hero/commit/0d374a5547684e024efbb73eddfc109d4c0409e2))
+* **agent:** worker.evaluate wait until ready ([1d8c7a8](https://github.com/ulixee/hero/commit/1d8c7a82bf0c66a8067c0f0cb77ed4b3e5a54c57))
+* polyfills have extraneous data ([c714917](https://github.com/ulixee/hero/commit/c7149170a18c2c0145898e59b79a8486f4428033))
+
+### Features
+
+* migrate away from runtime to custom websockets ([1baf701](https://github.com/ulixee/hero/commit/1baf7018e3fba1a8f5cf3fd89f077812a1fbe97c))
+* upgrade base chrome to 128 ([67ee967](https://github.com/ulixee/hero/commit/67ee967c46d1632cd5e617a43cce29e4e3c1da0a))
+
+# [2.0.0-alpha.29](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
 
 ### Bug Fixes
 
@@ -13,19 +27,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **agent:** don’t call page callbacks w/o frame ([9036ce8](https://github.com/ulixee/unblocked/commit/9036ce84c42d211489358c6c747f32802789ed85)), closes [#86](https://github.com/ulixee/unblocked/issues/86)
 * **agent:** don’t show headless warning if headed ([559f3bc](https://github.com/ulixee/unblocked/commit/559f3bcc43d80f536e82b5bf6e1284260da84f70))
 
-
 ### Features
 
 * chrome remote debugger over websocket ([#88](https://github.com/ulixee/unblocked/issues/88)) ([964df92](https://github.com/ulixee/unblocked/commit/964df92e73557d95690f206fcf5fe77765fec07b))
 * make headless=new the default mode ([#95](https://github.com/ulixee/unblocked/issues/95)) ([c7297dd](https://github.com/ulixee/unblocked/commit/c7297dd0f90541fae430b28dc3c728df77591844))
 * **plugins:** ability to configure plugins ([5bc079b](https://github.com/ulixee/unblocked/commit/5bc079bba85f50a54457c41d5c6039041ceb1e9e))
 
-
-
-
-
 # [2.0.0-alpha.28](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
-
 
 ### Bug Fixes
 
@@ -33,21 +41,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **agent:** handle isOpen null during agent close ([e75c907](https://github.com/ulixee/unblocked/commit/e75c907379b9b87991b3e52d57e5d785d19d8320))
 * **agent:** still reject isOpen if fails ([e4114cd](https://github.com/ulixee/unblocked/commit/e4114cd18857f55141534d1f7ade18bab115e447))
 
-
-
-
-
 # [2.0.0-alpha.27](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
-
 
 ### Bug Fixes
 
 * **agent:** close agent if fails to open ([797731c](https://github.com/ulixee/unblocked/commit/797731c7b5c14438854addc272681d0302c369af))
 * **agent:** max agents per browser not working ([ac6e273](https://github.com/ulixee/unblocked/commit/ac6e273262da2d5d199026ac05f5b6347a2882f2))
-
-
-
-
 
 # [2.0.0-alpha.26](https://github.com/ulixee/unblocked/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-02-02)
 
