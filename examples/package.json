@@ -4,12 +4,12 @@
   "private": true,
   "dependencies": {
     "yargs-parser": "^20.2.9",
-    "@ulixee/hero": "2.0.0-alpha.29",
-    "@ulixee/hero-core": "2.0.0-alpha.29",
-    "@ulixee/hero-plugin-utils": "2.0.0-alpha.29",
-    "@ulixee/net": "2.0.0-alpha.29",
-    "@ulixee/commons": "2.0.0-alpha.29",
-    "@ulixee/hero-interfaces": "2.0.0-alpha.29",
-    "@ulixee/execute-js-plugin": "2.0.0-alpha.29"
+    "@ulixee/hero": "2.0.0-alpha.30",
+    "@ulixee/hero-core": "2.0.0-alpha.30",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.30",
+    "@ulixee/net": "2.0.0-alpha.30",
+    "@ulixee/commons": "2.0.0-alpha.30",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.30",
+    "@ulixee/execute-js-plugin": "2.0.0-alpha.30"
   }
 }
