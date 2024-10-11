@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/collect-tcp",
-  "version": "2.0.0-alpha.29",
+  "version": "2.0.0-alpha.30",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Collects tcp packet values such as window-size and time-to-live",
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.29",
-    "@double-agent/config": "2.0.0-alpha.29",
+    "@double-agent/collect": "2.0.0-alpha.30",
+    "@double-agent/config": "2.0.0-alpha.30",
     "source-map-support": "^0.5.16"
   },
   "optionalDependencies": {

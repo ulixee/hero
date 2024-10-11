@@ -3,116 +3,74 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
+
+### Features
+
+* migrate away from runtime to custom websockets ([1baf701](https://github.com/ulixee/hero/commit/1baf7018e3fba1a8f5cf3fd89f077812a1fbe97c))
+
 # [2.0.0-alpha.29](https://github.com/ulixee/platform/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.28](https://github.com/ulixee/platform/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
-
 
 ### Bug Fixes
 
 * **timetravel:** push dom changes one at a time ([b179075](https://github.com/ulixee/platform/commit/b1790754a93eaad33e1f71e42d8cc52f1e773159)), closes [#252](https://github.com/ulixee/platform/issues/252)
 
-
-
-
-
 # [2.0.0-alpha.27](https://github.com/ulixee/platform/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.26](https://github.com/ulixee/platform/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-02-02)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.25](https://github.com/ulixee/platform/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2023-09-28)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.24](https://github.com/ulixee/platform/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.23](https://github.com/ulixee/platform/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
-
 
 ### Bug Fixes
 
 * **core:** add db retention to session registry ([5af67e8](https://github.com/ulixee/platform/commit/5af67e82d5dc36e1d7b11cc11cee09520fec0fc7))
 
-
 ### Features
 
 * **core:** add productId to scriptInvocationMeta ([7cb291d](https://github.com/ulixee/platform/commit/7cb291dc612f1c7a9369df62c2eca16e684984f9))
 
-
-
-
-
 # [2.0.0-alpha.22](https://github.com/ulixee/platform/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
-
 
 ### Bug Fixes
 
 * **timetravel:** rollback update to defaultDbDir ([8daedec](https://github.com/ulixee/platform/commit/8daedec9d64e2ee8223d2018b1f517a5c41941fb))
-
 
 ### Features
 
 * **core:** allow configuring session directory ([9fda9b9](https://github.com/ulixee/platform/commit/9fda9b9d5560a3bfaf3b74c477746fbab9eded38))
 * **core:** session registry ([fd10317](https://github.com/ulixee/platform/commit/fd10317a1219b1aefffd5b8162021a43c8ca6dc5))
 
-
-
-
-
 # [2.0.0-alpha.21](https://github.com/ulixee/platform/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.20](https://github.com/ulixee/platform/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
-
 
 ### Bug Fixes
 
 * add a default replay tab ([d890704](https://github.com/ulixee/platform/commit/d89070470c80f57a5fcd4aab84629839e544a758))
 
-
 ### Features
 
 * **client:** allow injectable scriptinstance ([09aa700](https://github.com/ulixee/platform/commit/09aa700c04dc008b34822b9af446339f46f70c20))
 
-
-
-
-
 # [2.0.0-alpha.19](https://github.com/ulixee/platform/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
-
 
 ### Bug Fixes
 
@@ -120,174 +78,94 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **core:** cleanup memory variables leaking ([e3ae146](https://github.com/ulixee/platform/commit/e3ae146c0e38aa125bd9df6b1f9be564eae5aebe))
 * **timetravel:** simplify ticks to share state ([5b0a141](https://github.com/ulixee/platform/commit/5b0a141e2aead993345dbf3f7aa0982cdeae17f5))
 
-
 ### Features
 
 * **core:** allow loading session db from path ([b8fcb28](https://github.com/ulixee/platform/commit/b8fcb28e2f529f6fb06c6eafcb5a445e8dcf22e9))
 * **core:** refactor to accomodate ulixee/desktop ([be9ed0e](https://github.com/ulixee/platform/commit/be9ed0eb2ee905ea4683d814b9a5a694b94a3705))
 
-
-
-
-
 # [2.0.0-alpha.18](https://github.com/ulixee/platform/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.17](https://github.com/ulixee/platform/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.16](https://github.com/ulixee/platform/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
-
 
 ### Bug Fixes
 
 * disable auto-shutdown of idle connections ([9f3356b](https://github.com/ulixee/platform/commit/9f3356bf3fa60bd527ad3f381875a365146a4bad))
 
-
-
-
-
 # [2.0.0-alpha.15](https://github.com/ulixee/platform/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
-
 
 ### Features
 
 * convert unblocked to ulixee org ([6616ec9](https://github.com/ulixee/ulixee/commit/6616ec94186da360e70544c827294b95ecb9381f))
 
-
-
-
-
 # [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
-
 
 ### Bug Fixes
 
 * **client:** fix HeroReplay replaying a sessionid ([56da409](https://github.com/ulixee/ulixee/commit/56da409ad42dffd7b45333cd53811d6a8163e550))
 
-
-
-
-
 # [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
-
 
 ### Bug Fixes
 
 * update client hints spec for hero meta ([0455bf9](https://github.com/ulixee/ulixee/commit/0455bf943e3203a72e12cc43b240874b4e9bd1b8))
 
-
-
-
-
 # [2.0.0-alpha.11](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-08-31)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.10](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-16)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.9](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-07-26)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.8](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-13)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
-
 
 ### Bug Fixes
 
 * **core:** fix unblocked references ([edabadd](https://github.com/ulixee/ulixee/commit/edabadd08738875234afc9735e0ad81c31bc5c95))
 
-
 ### Features
 
 * **client:** $contentDocument AwaitedDOM extender ([d4bacbf](https://github.com/ulixee/ulixee/commit/d4bacbfa56086e60f72b80a9b5284a0d4bb678c8))
-
-
-
-
 
 # [2.0.0-alpha.6](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.5](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.4](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.3](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
-
-
-
-
 
 # [2.0.0-alpha.2](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-17)
 
 **Note:** Version bump only for package @ulixee/hero-timetravel
 
-
-
-
-
 # [2.0.0-alpha.1](https://github.com/ulixee/ulixee/compare/v1.5.4...v2.0.0-alpha.1) (2022-05-16)
-
 
 ### Bug Fixes
 
@@ -324,7 +202,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **timetravel:** timetravel creating dup contexts ([f64f201](https://github.com/ulixee/ulixee/commit/f64f201c402a231cb87815d3d8a83c5afc738ca8))
 * **timetravel:** unidentified frames break replay ([708e2dd](https://github.com/ulixee/ulixee/commit/708e2ddf75588a92366bfeb54cb7e2e6caa4b387))
 * **timetravel:** update dom change count ([acce5d6](https://github.com/ulixee/ulixee/commit/acce5d605ac5dd54573218a13280fff71e48877f))
-
 
 ### Features
 

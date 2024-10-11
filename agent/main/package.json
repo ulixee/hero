@@ -1,22 +1,22 @@
 {
   "name": "@ulixee/unblocked-agent",
-  "version": "2.0.0-alpha.29",
+  "version": "2.0.0-alpha.30",
   "description": "Fully programmable Devtools Protocol based browser",
   "main": "index.js",
   "dependencies": {
     "@ulixee/chrome-128-0": "^6613.138.11",
     "@ulixee/chrome-app": "^1.0.3",
-    "@ulixee/commons": "2.0.0-alpha.29",
-    "@ulixee/js-path": "2.0.0-alpha.29",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.29",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.29",
+    "@ulixee/commons": "2.0.0-alpha.30",
+    "@ulixee/js-path": "2.0.0-alpha.30",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.30",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.30",
     "devtools-protocol": "^0.0.1137505",
     "nanoid": "^3.3.6",
     "tough-cookie": "^4.1.3",
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.29",
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.30",
     "image-size": "^1.0.1",
     "vue": "^2.6.14"
   }

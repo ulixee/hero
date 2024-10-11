@@ -3,63 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.0.0-alpha.29](https://github.com/ulixee/platform/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
+# [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
+### Bug Fixes
+
+* attempt to resolve node-gyp in dev ([ff3f459](https://github.com/ulixee/hero/commit/ff3f45902dc5e4793104fe7c1cbb2b5aefaf6054))
+* **core:** improve max event listener warnings ([8b9422a](https://github.com/ulixee/hero/commit/8b9422ae59760576087546f827c4a3cf6459e863))
+* **net:** reconnect websockets if disconnected ([922af43](https://github.com/ulixee/hero/commit/922af4345ea64fec45e377f11c8b084a3d5bb218))
+
+### Features
+
+* migrate away from runtime to custom websockets ([1baf701](https://github.com/ulixee/hero/commit/1baf7018e3fba1a8f5cf3fd89f077812a1fbe97c))
+
+# [2.0.0-alpha.29](https://github.com/ulixee/platform/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-07-16)
 
 ### Bug Fixes
 
 * sync core ES exports with TS exports ([#258](https://github.com/ulixee/platform/issues/258)) ([b63f94a](https://github.com/ulixee/platform/commit/b63f94a53f00e8c1a34657b3322e77bc6cb4a808))
-
 
 ### Features
 
 * add ability to manually create a newTab ([c1f0017](https://github.com/ulixee/platform/commit/c1f0017549bbee215c3ca8c416e1ab4844e297b2)), closes [#268](https://github.com/ulixee/platform/issues/268)
 * **core:** enable dynamic configuration of plugins ([86bacbf](https://github.com/ulixee/platform/commit/86bacbf07fda0c1ece54d11a3a59020e88e49bd0))
 
-
-
-
-
 # [2.0.0-alpha.28](https://github.com/ulixee/platform/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-03-11)
 
 **Note:** Version bump only for package @ulixee/hero-core
-
-
-
-
 
 # [2.0.0-alpha.27](https://github.com/ulixee/platform/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-03-01)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.26](https://github.com/ulixee/platform/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-02-02)
-
 
 ### Bug Fixes
 
 * **core:** user profile tests hanging ([c72447f](https://github.com/ulixee/platform/commit/c72447f475c334f7347fb4575e7195b15bb256ae))
 
-
-
-
-
 # [2.0.0-alpha.25](https://github.com/ulixee/platform/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2023-09-28)
-
 
 ### Bug Fixes
 
 * **core:** don’t include source maps for injected ([0c2ee0d](https://github.com/ulixee/platform/commit/0c2ee0db548f3251c8182edd37fcfcd830e76ca3))
 
-
-
-
-
 # [2.0.0-alpha.24](https://github.com/ulixee/platform/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2023-08-09)
-
 
 ### Bug Fixes
 
@@ -67,34 +54,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **core:** fix user profile tests ([#235](https://github.com/ulixee/platform/issues/235)) ([df40699](https://github.com/ulixee/platform/commit/df406991502c0ff0df52e6a93a6c64178bfa50ca))
 * **core:** timing issue with headed profiles ([14ccc8c](https://github.com/ulixee/platform/commit/14ccc8cca7ca67cd85b35009ea84247af64d3f42))
 
-
 ### Features
 
 * **core:** user profile locale, tz, geo, viewport ([88e59c9](https://github.com/ulixee/platform/commit/88e59c907cd30236d8e9d4c595434c6f682133fb))
 
-
-
-
-
 # [2.0.0-alpha.23](https://github.com/ulixee/platform/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2023-07-07)
-
 
 ### Bug Fixes
 
 * **core:** add db retention to session registry ([5af67e8](https://github.com/ulixee/platform/commit/5af67e82d5dc36e1d7b11cc11cee09520fec0fc7))
 * **core:** re-add static addConnection ([428d4b0](https://github.com/ulixee/platform/commit/428d4b07d7c60a2cbb869800b6760a2db2903284))
 
-
 ### Features
 
 * **core:** add productId to scriptInvocationMeta ([7cb291d](https://github.com/ulixee/platform/commit/7cb291dc612f1c7a9369df62c2eca16e684984f9))
 
-
-
-
-
 # [2.0.0-alpha.22](https://github.com/ulixee/platform/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-06-12)
-
 
 ### Bug Fixes
 
@@ -105,31 +80,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **core:** only add wal mode if not readonly db ([f74ecc4](https://github.com/ulixee/platform/commit/f74ecc4ffc20d126ed5f379b2d221b9352fdf71b))
 * **core:** oopifs not injecting hero ([cc1e12b](https://github.com/ulixee/platform/commit/cc1e12b5ff975d1027f733ee655d8068d5b18385))
 
-
 ### Features
 
 * **core:** allow configuring session directory ([9fda9b9](https://github.com/ulixee/platform/commit/9fda9b9d5560a3bfaf3b74c477746fbab9eded38))
 * **core:** session registry ([fd10317](https://github.com/ulixee/platform/commit/fd10317a1219b1aefffd5b8162021a43c8ca6dc5))
 
-
-
-
-
 # [2.0.0-alpha.21](https://github.com/ulixee/platform/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-04-24)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.20](https://github.com/ulixee/platform/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-04-19)
-
 
 ### Bug Fixes
 
 * log devtools events ([e39575b](https://github.com/ulixee/platform/commit/e39575bb85a75469e7934c78720dcc951995595d))
-
 
 ### Features
 
@@ -138,12 +102,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **client:** global instanceof checks ([b704669](https://github.com/ulixee/platform/commit/b70466975c83a947803c28c98bbdf642c7b0b052))
 * **core:** out of process iframe support ([a95cfd5](https://github.com/ulixee/platform/commit/a95cfd5422115a5559c37fe00015f10760f333df))
 
-
-
-
-
 # [2.0.0-alpha.19](https://github.com/ulixee/platform/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-02-25)
-
 
 ### Bug Fixes
 
@@ -151,7 +110,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **core:** disable defaulting sqlite wal mode on ([44b6720](https://github.com/ulixee/platform/commit/44b67203048295bd1c305419e52ca5fc1d50f6a8))
 * **core:** remove wal experiment on by default ([ab33e70](https://github.com/ulixee/platform/commit/ab33e70192e0c03a51587c062ff247ecce720d2d))
 * **timetravel:** simplify ticks to share state ([5b0a141](https://github.com/ulixee/platform/commit/5b0a141e2aead993345dbf3f7aa0982cdeae17f5))
-
 
 ### Features
 
@@ -161,56 +119,34 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **hero:** add connected/session created event ([b638ef7](https://github.com/ulixee/platform/commit/b638ef7ec957f7e67ad66246bdb368214c7eff3c))
 * **session:** config to delete sessions ([d06fbc8](https://github.com/ulixee/platform/commit/d06fbc8bc2f00767436faf9a9d70d3ca325c2984))
 
-
-
-
-
 # [2.0.0-alpha.18](https://github.com/ulixee/platform/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-01-17)
-
 
 ### Bug Fixes
 
 * **core:** do not crash if events listener gone ([63b2206](https://github.com/ulixee/platform/commit/63b2206995b99f14c0cbb8f77b351e5b242dc4ea)), closes [#204](https://github.com/ulixee/platform/issues/204)
 
-
 ### Features
 
 * use WAL mode for databases ([0830238](https://github.com/ulixee/platform/commit/08302386c35e30f336b1651eb01170418a63bd23))
 
-
-
-
-
 # [2.0.0-alpha.17](https://github.com/ulixee/platform/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2022-12-15)
-
 
 ### Features
 
 * invert use of devtools flag ([7b39975](https://github.com/ulixee/platform/commit/7b39975c10fead577c517964f9586abb49eaee42))
 
-
-
-
-
 # [2.0.0-alpha.16](https://github.com/ulixee/platform/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2022-12-05)
-
 
 ### Bug Fixes
 
 * **core:** subdomain cookies not being removed ([fad14db](https://github.com/ulixee/platform/commit/fad14db468a3c7354e7e5f865fa3c62bf699eac0))
 * disable auto-shutdown of idle connections ([9f3356b](https://github.com/ulixee/platform/commit/9f3356bf3fa60bd527ad3f381875a365146a4bad))
 
-
 ### Features
 
 * **core:** allow user to specify auto-shutdown ([18371b1](https://github.com/ulixee/platform/commit/18371b1351a00237ffe852d2fd4ca18845112b4f))
 
-
-
-
-
 # [2.0.0-alpha.15](https://github.com/ulixee/platform/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2022-11-17)
-
 
 ### Bug Fixes
 
@@ -219,33 +155,21 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * improve message for no browser engine ([868ce7d](https://github.com/ulixee/platform/commit/868ce7d7e51e349a6a9da2b9d32a76441d3a2f44)), closes [#185](https://github.com/ulixee/platform/issues/185)
 * update awaited-dom to fix ts issue ([b98a567](https://github.com/ulixee/platform/commit/b98a5676df634947ec93e100556ecc4af6cd7890)), closes [#181](https://github.com/ulixee/platform/issues/181)
 
-
 ### Features
 
 * **blockedResourceUrls:** expose and document ([2db8b93](https://github.com/ulixee/platform/commit/2db8b936ee00467bad41e1ea4408006e099c5f87))
 
-
-
-
-
 # [2.0.0-alpha.14](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2022-11-02)
-
 
 ### Features
 
 * convert unblocked to ulixee org ([6616ec9](https://github.com/ulixee/ulixee/commit/6616ec94186da360e70544c827294b95ecb9381f))
 
-
-
-
-
 # [2.0.0-alpha.13](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2022-10-31)
-
 
 ### Bug Fixes
 
 * **client:** fix HeroReplay replaying a sessionid ([56da409](https://github.com/ulixee/ulixee/commit/56da409ad42dffd7b45333cd53811d6a8163e550))
-
 
 ### Features
 
@@ -255,12 +179,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * renamed HeroExtractor to HeroReplay as well as how $extract/$collect work and are named ([d97fb2d](https://github.com/ulixee/ulixee/commit/d97fb2dd1ce0b5329f6cf99af96dcd29422b55fb))
 * replaced CollectedSnippets with hero.getData/setData ([96a731f](https://github.com/ulixee/ulixee/commit/96a731fd295204b7c61d3eb4fbb81131289dc606))
 
-
-
-
-
 # [2.0.0-alpha.12](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2022-10-03)
-
 
 ### Bug Fixes
 
@@ -268,51 +187,28 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **core:** user profile not loading all frames ([d4f6ccc](https://github.com/ulixee/ulixee/commit/d4f6ccca2f2d56b430203eb341cd0647b8422f0c))
 * update client hints spec for hero meta ([0455bf9](https://github.com/ulixee/ulixee/commit/0455bf943e3203a72e12cc43b240874b4e9bd1b8))
 
-
-
-
-
 # [2.0.0-alpha.11](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2022-08-31)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.10](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2022-08-16)
-
 
 ### Bug Fixes
 
 * **core:** record websocket messages ([911f7d7](https://github.com/ulixee/ulixee/commit/911f7d7dd5136daf08fea2715034cd7118802de9))
 
-
-
-
-
 # [2.0.0-alpha.9](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2022-07-26)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.8](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2022-07-13)
-
 
 ### Bug Fixes
 
 * **core:** fix profile restore ([bd86f48](https://github.com/ulixee/ulixee/commit/bd86f48889448ba42b5331b0502af2f9ad9dc94f))
 * **core:** user profile failed w detached frame ([ada70f9](https://github.com/ulixee/ulixee/commit/ada70f9230d536b9e5cb785aeec3683bc7391fd6))
 
-
-
-
-
 # [2.0.0-alpha.7](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2022-06-28)
-
 
 ### Bug Fixes
 
@@ -323,65 +219,37 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * options passed into Session should parse strings into booleans ([3990f84](https://github.com/ulixee/ulixee/commit/3990f84faa88287eb0ba13153cbac1567528d8ca))
 * **timetravel:** allow more leeway to find doctype ([d537d28](https://github.com/ulixee/ulixee/commit/d537d2811dbdfe82c21202accbfd5b611675a1fb))
 
-
 ### Features
 
 * **client:** $contentDocument AwaitedDOM extender ([d4bacbf](https://github.com/ulixee/ulixee/commit/d4bacbfa56086e60f72b80a9b5284a0d4bb678c8))
 * **client:** add stdout/stderr piping on relaunch ([bcf5bb5](https://github.com/ulixee/ulixee/commit/bcf5bb57feccd506bfd8a5ce71f4994728a361d6))
 * **core:** shadow dom recorder ([5860b7c](https://github.com/ulixee/ulixee/commit/5860b7ccae96afb79f585e0bba76b4bb9590763b))
 
-
-
-
-
 # [2.0.0-alpha.6](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero-core
-
-
-
-
 
 # [2.0.0-alpha.5](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2022-06-10)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.4](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2022-06-09)
-
 
 ### Features
 
 * no automatic shutdown of hero for connection ([65ed29d](https://github.com/ulixee/ulixee/commit/65ed29d4f4ffa775df00821619f77006cb87bd32))
 
-
-
-
-
 # [2.0.0-alpha.3](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2022-05-19)
 
 **Note:** Version bump only for package @ulixee/hero-core
 
-
-
-
-
 # [2.0.0-alpha.2](https://github.com/ulixee/ulixee/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2022-05-17)
-
 
 ### Bug Fixes
 
 * **core:** server routing “Version” broken ([3853fd9](https://github.com/ulixee/ulixee/commit/3853fd9bd789eba5d737fcf8f86ab6e368781d74))
 
-
-
-
-
 # [2.0.0-alpha.1](https://github.com/ulixee/ulixee/compare/v1.5.4...v2.0.0-alpha.1) (2022-05-16)
-
 
 ### Bug Fixes
 
@@ -467,7 +335,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * **timetravel:** split recording out of timeline ([671e0e9](https://github.com/ulixee/ulixee/commit/671e0e91089691e483f28eb9141b21a4605f840f))
 * **timetravel:** timetravel creating dup contexts ([f64f201](https://github.com/ulixee/ulixee/commit/f64f201c402a231cb87815d3d8a83c5afc738ca8))
 * **user-profile:** handle empty database ([be78e3a](https://github.com/ulixee/ulixee/commit/be78e3a665ce86faeb454e092ac59db2b8f5e0d5))
-
 
 ### Features
 

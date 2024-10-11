@@ -1,9 +1,9 @@
 {
   "name": "@ulixee/unblocked-agent-examples",
   "private": true,
-  "version": "2.0.0-alpha.29",
+  "version": "2.0.0-alpha.30",
   "dependencies": {
-    "@ulixee/js-path": "2.0.0-alpha.29",
-    "@ulixee/unblocked-agent": "2.0.0-alpha.29"
+    "@ulixee/js-path": "2.0.0-alpha.30",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.30"
   }
 }
