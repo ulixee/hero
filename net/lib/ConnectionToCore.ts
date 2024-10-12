@@ -59,18 +59,12 @@ export default class ConnectionToCore<
 
   constructor(
     public transport: ITransport,
-    skipConnect = false,
   ) {
     super();
     bindFunctions(this);
 
     this.events.once(transport, 'disconnected', this.onConnectionTerminated.bind(this));
     this.events.on(transport, 'message', this.onMessage.bind(this));
-
-    if (transport.isConnected && skipConnect) {
-      this.connectPromise = new Resolvable<void>();
-      this.connectPromise.resolve();
-    }
   }
 
   public async connect(isAutoConnect = false, timeoutMs = 30e3): Promise<void> {
@@ -78,6 +72,11 @@ export default class ConnectionToCore<
       this.didAutoConnect = isAutoConnect;
       this.connectStartTime = Date.now();
       this.connectPromise = new Resolvable();
+      this.disconnectPromise = null;
+      this.isSendingDisconnect = false;
+      this.disconnectError = null;
+      this.disconnectStartTime = null;
+
       try {
         await this.transport.connect?.(timeoutMs);
 
@@ -89,6 +88,7 @@ export default class ConnectionToCore<
           );
         }
 
+        this.isConnectionTerminated = false;
         // can be resolved if canceled by a disconnect
         if (!this.connectPromise.isResolved && this.hooks.afterConnectFn) {
           this.isSendingConnect = true;

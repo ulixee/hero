@@ -77,7 +77,7 @@ If you wrote a Core Plugin, you'll notice that the API callbacks have changed sl
 
 ## Replay
 
-If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new Ulixee Desktop tooling. You can download the [Ulixee.app](https://github.com/ulixee/platform/releases/latest.md) install.
+If you were using Replay with SecretAgent (sorry Windows users...), it's now part of the new Ulixee Desktop tooling. You can download the [Ulixee.app](https://github.com/ulixee/desktop/releases/latest) install.
 
 
 [cloud]: https://ulixee.org/docs/cloud

@@ -104,6 +104,7 @@ export default class WsTransportToCore
     }
     await this.connectPromise;
     this.isConnected = true;
+    this.isDisconnecting = false;
     this.emit('connected');
   }
 
