@@ -168,7 +168,7 @@ function getSharedStorage(): SharedStorage | undefined {
 
 // Make sure we run our logic only once, see toString proxy for how this storage works.
 if (getSharedStorage()?.ready) {
-  // @ts-expect-error
+  // @ts-ignore
   return;
 }
 

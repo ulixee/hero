@@ -12,10 +12,9 @@ if (
 ) {
   replaceGetter(
     self.navigator,
-    // @ts-expect-error
-    'deviceMemory',
+    'deviceMemory' as keyof Navigator,
     () => typedArgs.memory,
-    { overrideOnlyForInstance: true },
+    { onlyForInstance: true },
   );
 }
 

@@ -29,8 +29,7 @@ if (typedArgs.userAgentData && 'userAgentData' in self.navigator) {
   function checkThisArg(thisArg, customMessage = '') {
     if (
       ObjectCached.getPrototypeOf(thisArg) !==
-      // @ts-expect-error
-      self.NavigatorUAData.prototype
+      (self as any).NavigatorUAData.prototype
     ) {
       throw new TypeError(`${customMessage}Illegal invocation`);
     }
