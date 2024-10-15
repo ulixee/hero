@@ -62,12 +62,16 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
   }
 
   isWebsocketUrl(url: string): boolean {
-    const parsed = new URL(url);
-    return (
-      parsed.hostname === this.host &&
-      parsed.port === this.port.toString() &&
-      parsed.searchParams.get('secret') === this.secret
-    );
+    try {
+      const parsed = new URL(url);
+      return (
+        parsed.hostname === this.host &&
+        parsed.port === this.port.toString() &&
+        parsed.searchParams.get('secret') === this.secret
+      );
+    } catch {
+      return false;
+    }
   }
 
   registerWebsocketFrameId(url: string, frameId: string): void {
