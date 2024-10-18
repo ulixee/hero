@@ -2,8 +2,6 @@
   "extends": "../../../tsconfig.json",
   "compileOnSave": true,
   "compilerOptions": {
-    "module": "ES2022",
-    "moduleResolution": "Bundler",
     "strict": true,
     "composite": true,
     "sourceMap": false,

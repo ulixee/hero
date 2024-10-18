@@ -182,7 +182,7 @@ function internalModifyDescriptor<T, K extends keyof T>(
   return newDescriptor;
 }
 
-function replaceFunction<T, K extends keyof T>(
+export function replaceFunction<T, K extends keyof T>(
   obj: T,
   key: K,
   newFunction: NewFunction,

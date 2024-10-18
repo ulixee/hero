@@ -7,7 +7,7 @@ import { defaultHooks } from '@ulixee/unblocked-agent-testing/browserUtils';
 import { getOverrideScript, injectedSourceUrl } from '../lib/DomOverridesBuilder';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
-import { replaceFunction } from '../injected-scripts/_proxyUtils';
+import { replaceFunction, main } from '../injected-scripts/_utils';
 import BrowserEmulator from '../index';
 import DomExtractor = require('./DomExtractor');
 import { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
@@ -41,6 +41,8 @@ test('should be able to override a function', async () => {
     TestClass,
     holder,
   };
+
+  main({ callback: () => {}, sourceUrl: 'test', targetType: 'node' });
 
   // @ts-ignore
   global.self = this;
