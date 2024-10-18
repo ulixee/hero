@@ -2,6 +2,7 @@
   "mac-os-15--chrome-129-0": {
     "id": "mac-os-15--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -10,8 +11,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -4069,6 +4069,7 @@
   "mac-os-14--chrome-129-0": {
     "id": "mac-os-14--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -4077,8 +4078,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -8868,6 +8868,7 @@
   "mac-os-13--chrome-129-0": {
     "id": "mac-os-13--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -8876,8 +8877,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -14142,6 +14142,7 @@
   "mac-os-12--chrome-129-0": {
     "id": "mac-os-12--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -14150,8 +14151,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -21369,6 +21369,7 @@
   "mac-os-11--chrome-129-0": {
     "id": "mac-os-11--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -21377,8 +21378,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -70536,6 +70536,7 @@
   "windows-11--chrome-129-0": {
     "id": "windows-11--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -70544,8 +70545,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
@@ -76578,6 +76578,7 @@
   "windows-10--chrome-129-0": {
     "id": "windows-10--chrome-129-0",
     "allPatchVersions": [
+      112,
       111,
       110,
       109,
@@ -76586,8 +76587,7 @@
       106,
       105,
       104,
-      103,
-      102
+      103
     ],
     "stablePatchVersions": [
       101,
