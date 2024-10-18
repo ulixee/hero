@@ -82,10 +82,17 @@ export default class DomOverridesBuilder {
 
   if (runMap.has(self)) return;
 
+  let callbackHere;
+  try {
+      callbackHere = callback;
+  } catch {
+      callbackHere = (...args) => {console.log('callback not defined, currently not supported in workers')};
+  }
+  
   const utilsInput = {
     sourceUrl: '${injectedSourceUrl}',
     targetType: '${type}',
-    callback,
+    callback: callbackHere,
   }
   const sourceUrl = '${injectedSourceUrl}';
   ${utilsScript.replaceAll('export function', 'function')};
