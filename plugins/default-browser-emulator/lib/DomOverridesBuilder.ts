@@ -7,8 +7,8 @@ const injectedSourceUrl = `<anonymous-${Math.random()}>`;
 const cache: { [name: string]: string } = {};
 const shouldCache = process.env.NODE_ENV === 'production';
 const utilsScript = [
-  fs.readFileSync(`${__dirname}/../injected-scripts/_proxyUtils.js`, 'utf8'),
-  fs.readFileSync(`${__dirname}/../injected-scripts/_descriptorBuilder.js`, 'utf8'),
+  fs.readFileSync(`${__dirname}/../injected-scripts/_utils.js`, 'utf8'),
+  // fs.readFileSync(`${__dirname}/../injected-scripts/_descriptorBuilder.js`, 'utf8'),
 ].join('\n');
 
 export { injectedSourceUrl };
@@ -82,8 +82,23 @@ export default class DomOverridesBuilder {
 
   if (runMap.has(self)) return;
 
+  let callbackHere;
+  try {
+      callbackHere = callback;
+  } catch {
+      callbackHere = (...args) => {console.log('callback not defined, currently not supported in workers')};
+  }
+  
+  const utilsInput = {
+    sourceUrl: '${injectedSourceUrl}',
+    targetType: '${type}',
+    callback: callbackHere,
+  }
   const sourceUrl = '${injectedSourceUrl}';
-  ${utilsScript};
+  ${utilsScript.replaceAll('export function', 'function')};
+  const utils = main(utilsInput);
+
+  const baseScriptInput = {...utilsInput, utils};
   
   (function newDocumentScript(selfOverride) {
     const originalSelf = self;
@@ -107,7 +122,7 @@ export default class DomOverridesBuilder {
       PathToInstanceTracker.updateAllReferences();
     } finally {
       self = originalSelf;
-      getSharedStorage().ready = true;
+      utils.getSharedStorage().ready = true;
     }
   })();
 })();
@@ -132,6 +147,12 @@ export default class DomOverridesBuilder {
       script = fs.readFileSync(`${__dirname}/../injected-scripts/${name}.js`, 'utf8');
     }
     if (shouldCache) cache[name] = script;
+
+    script = script
+      .replaceAll('export function', 'function')
+      .split('\n')
+      .filter(line => !line.includes('export {'))
+      .join('\n');
 
     let wrapper = this.wrapScript(name, script, args);
 
@@ -210,6 +231,7 @@ try{
 (function newDocumentScript_${name.replace(/\./g, '__')}(args) {
   try {
     ${script};
+    main({...baseScriptInput, args});
   } catch(err) {
     console.log('Failed to initialize "${name}"', err);
   }
