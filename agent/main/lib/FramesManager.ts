@@ -393,7 +393,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     await this.isReady;
     const { frameId } = event;
 
-    this.framesById.get(frameId).onStoppedLoading();
+    this.framesById.get(frameId)?.onStoppedLoading();
   }
 
   private async onFrameRequestedNavigation(
