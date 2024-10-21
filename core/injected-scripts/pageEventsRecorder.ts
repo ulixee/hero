@@ -26,6 +26,7 @@ declare global {
     doNotTrackElement(element: Element): void;
   }
 }
+declare const callback: (name: string, data: string) => void;
 declare const callbackName: string;
 const eventsCallback = callback.bind(null, callbackName) as (data: string) => void;
 

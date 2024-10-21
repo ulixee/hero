@@ -8,14 +8,8 @@
     "inlineSourceMap": false,
     "removeComments": true,
     "strictBindCallApply": false,
-    "lib": ["dom", "es2022"],
+    "lib": ["dom", "es2022"]
   },
   "include": ["*.ts", "*.js", ".eslintrc.js"],
-  "exclude": [
-    "**/tsconfig*.json",
-    "**/node_modules",
-    "**/dist",
-    "**/build*",
-    "**/injected-scripts",
-  ],
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist", "**/build*", "**/injected-scripts"]
 }
