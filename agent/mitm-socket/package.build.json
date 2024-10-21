@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "postinstall": "npm run build",
+    "build": "node install.js"
+  }
+}
