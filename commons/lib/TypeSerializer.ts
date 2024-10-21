@@ -7,6 +7,10 @@ const Types = {
   NaN: 'NaN',
   Infinity: 'Infinity',
   NegativeInfinity: '-Infinity',
+  Float32Array: 'Float32Array',
+  Float64Array: 'Float64Array',
+  Int32Array: 'Int32Array',
+  Uint32Array: 'Uint32Array',
   DateIso: 'DateIso',
   Buffer64: 'Buffer64',
   ArrayBuffer64: 'ArrayBuffer64',
@@ -152,6 +156,22 @@ export default class TypeSerializer {
       return { __type: Types.Set, value: [...value].map(x => this.replace(x, options)) };
     }
 
+    if (value instanceof Int32Array) {
+      return { __type: Types.Int32Array, value: value.toString() };
+    }
+
+    if (value instanceof Uint32Array) {
+      return { __type: Types.Uint32Array, value: value.toString() };
+    }
+
+    if (value instanceof Float32Array) {
+      return { __type: Types.Float32Array, value: value.toString() };
+    }
+
+    if (value instanceof Float64Array) {
+      return { __type: Types.Float64Array, value: value.toString() };
+    }
+
     if (this.isNodejs) {
       if (value instanceof Buffer || Buffer.isBuffer(value)) {
         return { __type: Types.Buffer64, value: value.toString('base64') };
@@ -215,6 +235,12 @@ export default class TypeSerializer {
     if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
     if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
     if (type === Types.DateIso) return new Date(value);
+  
+    if (type === Types.Int32Array) return Int32Array.from(value.split(','));
+    if (type === Types.Uint32Array) return Uint32Array.from(value.split(','));
+    if (type === Types.Float32Array) return Float32Array.from(value.split(','));
+    if (type === Types.Float64Array) return Float64Array.from(value.split(','));
+
     if (type === Types.Buffer64 || type === Types.ArrayBuffer64) {
       if (this.isNodejs) {
         return Buffer.from(value, 'base64');
