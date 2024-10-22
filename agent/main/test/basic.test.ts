@@ -1,5 +1,7 @@
 import { BrowserUtils, Helpers, TestLogger } from '@ulixee/unblocked-agent-testing/index';
 import TypeSerializer, { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
+import getTestObject from '@ulixee/commons/test/helpers/getTestObject';
+
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { Browser, BrowserContext } from '../index';
 
@@ -13,24 +15,7 @@ describe('basic tests', () => {
   });
 
   beforeAll(async () => {
-    testObject = {
-      name: 'original',
-      map: new Map<string, number>([
-        ['1', 1],
-        ['2', 2],
-      ]),
-      set: new Set([1, 2, 3, 4]),
-      regex: /test13234/gi,
-      date: new Date('2021-03-17T15:41:06.513Z'),
-      buffer: Buffer.from('This is a test buffer'),
-      error: new CanceledPromiseError('This is canceled'),
-    };
-
-    testObject.nestedObject = { ...testObject, name: 'nested' };
-    testObject.nestedArray = [
-      { ...testObject, name: 'item1' },
-      { ...testObject, name: 'item2' },
-    ];
+    testObject = getTestObject();
 
     browser = new Browser(BrowserUtils.browserEngineOptions);
     Helpers.onClose(() => browser.close(), true);
