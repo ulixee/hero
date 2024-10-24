@@ -1,3 +1,5 @@
+import type ITypeSerializer from '@ulixee/commons/interfaces/ITypeSerializer';
+
 export type UtilsInput = {
   sourceUrl: string;
   targetType: string;
@@ -7,6 +9,7 @@ export type UtilsInput = {
 
 export type ScriptInput<T extends Record<string, unknown> | never> = {
   utils: Exclude<ReturnType<typeof main>, undefined>;
+  TypeSerializer: ITypeSerializer,
   args: T;
 } & UtilsInput;
 
