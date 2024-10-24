@@ -1,3 +1,5 @@
+import ITypeSerializer from '../interfaces/ITypeSerializer';
+
 const Types = {
   number: 'number',
   string: 'string',
@@ -289,3 +291,6 @@ export function registerSerializableErrorType(errorConstructor: {
 export const stringifiedTypeSerializerClass = `const Types = ${JSON.stringify(
   Types,
 )};\n${TypeSerializer.toString()}`;
+
+// Here to check if we correctly implement interface
+const _internal: ITypeSerializer = TypeSerializer;

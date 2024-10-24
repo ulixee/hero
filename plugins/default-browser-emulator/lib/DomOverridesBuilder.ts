@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import TypeSerializer, { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
 import INewDocumentInjectedScript from '../interfaces/INewDocumentInjectedScript';
 import IBrowserEmulatorConfig, { InjectedScript } from '../interfaces/IBrowserEmulatorConfig';
 
@@ -8,7 +9,6 @@ const cache: { [name: string]: string } = {};
 const shouldCache = process.env.NODE_ENV === 'production';
 const utilsScript = [
   fs.readFileSync(`${__dirname}/../injected-scripts/_utils.js`, 'utf8'),
-  // fs.readFileSync(`${__dirname}/../injected-scripts/_descriptorBuilder.js`, 'utf8'),
 ].join('\n');
 
 export { injectedSourceUrl };
@@ -88,6 +88,8 @@ export default class DomOverridesBuilder {
   } catch {
       callbackHere = (...args) => {console.log('callback not defined, currently not supported in workers')};
   }
+
+  ${stringifiedTypeSerializerClass};
   
   const utilsInput = {
     sourceUrl: '${injectedSourceUrl}',
@@ -98,7 +100,7 @@ export default class DomOverridesBuilder {
   ${utilsScript.replaceAll('export function', 'function')};
   const utils = main(utilsInput);
 
-  const baseScriptInput = {...utilsInput, utils};
+  const baseScriptInput = {...utilsInput, utils, TypeSerializer};
   
   (function newDocumentScript(selfOverride) {
     const originalSelf = self;
@@ -225,17 +227,22 @@ export default class DomOverridesBuilder {
   }
 
   private wrapScript(name: string, script: string, args: any = {}): string {
-    const strArgs = JSON.stringify(args);
+    const serialized = TypeSerializer.stringify(args);
+    // JSON.stringify needed in script to make sure everything is escape correctly
+    // as sending this over CDP already reverses some logic
     return `
 try{
-(function newDocumentScript_${name.replace(/\./g, '__')}(args) {
-  try {
-    ${script};
-    main({...baseScriptInput, args});
-  } catch(err) {
-    console.log('Failed to initialize "${name}"', err);
-  }
-})(${strArgs});}catch (error){console.log(error)}`;
+  (function newDocumentScript_${name.replace(/\./g, '__')}(args) {
+    try {
+      ${script};
+      main({...baseScriptInput, args});
+    } catch(err) {
+      console.log('Failed to initialize "${name}"', err);
+    }
+  })(TypeSerializer.parse(JSON.stringify(${serialized})));
+  } catch (error){
+    console.log(error)
+  }`;
   }
 }
 

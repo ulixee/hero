@@ -5,12 +5,7 @@ import type { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
 import type { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
 import type { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
 import type { ILoadEvent } from '@ulixee/hero-interfaces/ILoadEvent';
-
-interface ITypeSerializer {
-  stringify(object: any): string;
-  parse(object: string): any;
-  replace(object: any): any;
-}
+import type ITypeSerializer from '@ulixee/commons/interfaces/ITypeSerializer';
 
 declare global {
   let TypeSerializer: ITypeSerializer;
