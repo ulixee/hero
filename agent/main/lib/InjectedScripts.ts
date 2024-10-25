@@ -11,7 +11,7 @@ const pageScripts = {
   PaintEvents: fs.readFileSync(`${__dirname}/../injected-scripts/PaintEvents.js`, 'utf8'),
 };
 
-const pageEventsCallbackName = '__ulxPagePaintEventListenerCallback';
+const pageEventsCallbackName = 'onPaintEvent';
 export const injectedScript = `(function ulxInjectedScripts(callbackName) {
 const exports = {}; // workaround for ts adding an exports variable
 ${stringifiedTypeSerializerClass};
@@ -41,13 +41,14 @@ export default class InjectedScripts {
     ) => void,
   ): Promise<any> {
     return Promise.all([
-      framesManager.addPageCallback(
-        pageEventsCallbackName,
-        (payload, frame) => onPaintEvent(frame.frameId, JSON.parse(payload)),
-      ),
       framesManager.addNewDocumentScript(
         injectedScript,
         framesManager.page.installJsPathIntoIsolatedContext,
+        {
+          [pageEventsCallbackName](payload: string, frame): void {
+            onPaintEvent(frame.frameId, JSON.parse(payload));
+          },
+        },
         devtoolsSession,
       ),
     ]);

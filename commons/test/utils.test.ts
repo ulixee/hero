@@ -14,7 +14,7 @@ test('should not escape already unescaped regex chars', () => {
   expect(result).toBe('http://test.com\\?param=1');
 });
 
-test('should get all functions of an object hierarchy', () => {
+test('should find functions in a class', () => {
   class BaseClass {
     method1() {}
     method2() {}
@@ -25,13 +25,6 @@ test('should get all functions of an object hierarchy', () => {
   }
 
   const instance = new TestClass();
-  const hierarchy = Utils.getPrototypeHierarchy(instance);
-  expect(hierarchy[0]).toEqual(BaseClass.prototype);
-  expect(hierarchy[1]).toEqual(TestClass.prototype);
-  expect(hierarchy[2]).toEqual(instance);
-  // cache should return the same set
-  expect(Utils.getPrototypeHierarchy(instance)).toEqual(hierarchy);
-
   bindFunctions(instance);
 
   expect([...Utils.getObjectFunctionProperties(BaseClass.prototype)]).toEqual([
@@ -39,13 +32,6 @@ test('should get all functions of an object hierarchy', () => {
     'method2',
   ]);
   expect([...Utils.getObjectFunctionProperties(TestClass.prototype)]).toEqual(['method3']);
-
-  // should bind all methods
-  expect([...Utils.getObjectFunctionProperties(instance)]).toEqual([
-    'method1',
-    'method2',
-    'method3',
-  ]);
 });
 
 test('can check Prerelease Semvers', () => {

@@ -16,7 +16,7 @@ const SCRIPT_PLACEHOLDER = '';
 const { log } = Log(module);
 
 export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
-  readonly isReady: Promise<void>;
+  isReady: Resolvable<void>;
 
   private readonly host = 'websocket.localhost';
   private port: number;
@@ -37,27 +37,28 @@ export class WebsocketSession extends TypedEventEmitter<IWebsocketEvents> {
   }
 
   async initialize(): Promise<void> {
-    const resolver = new Resolvable<void>(10e3);
+    if (this.isReady) return this.isReady.promise;
+    this.isReady = new Resolvable();
 
-    this.server.on('error', resolver.reject);
+    this.server.on('error', this.isReady.reject);
     this.server.listen(0, () => {
       const address = this.server.address();
       if (typeof address === 'string') {
         throw new Error('Unexpected server address format (string)');
       }
       this.port = address.port;
-      resolver.resolve();
+      this.isReady.resolve();
     });
 
     this.server.on('upgrade', this.handleUpgrade.bind(this));
     this.wss.on('connection', this.handleConnection.bind(this));
 
-    return resolver.promise;
+    return this.isReady.promise;
   }
 
   close(): void {
     this.wss.close();
-    this.server.close();
+    this.server.unref().close();
     this.intervals.forEach(interval => clearInterval(interval));
   }
 

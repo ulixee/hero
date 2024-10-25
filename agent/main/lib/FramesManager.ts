@@ -48,8 +48,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   }
 
   public devtoolsSession: DevtoolsSession;
-  public websocketIdToFrameId = new Map<string, string>();
-
   protected readonly logger: IBoundLog;
 
   private onFrameCreatedResourceEventsByFrameId: {
@@ -93,7 +91,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.events.on(
       this.websocketSession,
       'message-received',
-      this.onWebsocketSessionMessageRecieved,
+      this.onWebsocketSessionMessageReceived,
     );
   }
 
@@ -201,22 +199,22 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.framesByFrameId.clear();
   }
 
-  public async addPageCallback(
-    name: string,
-    onCallback: (payload: string, frame: IFrame) => any,
-  ): Promise<any> {
-    const callbacks = this.pageCallbacks.get(name) ?? [];
-    if (callbacks.length === 0) this.pageCallbacks.set(name, callbacks);
-    callbacks.push(onCallback);
-  }
-
   public async addNewDocumentScript(
     script: string,
     installInIsolatedScope = true,
+    callbacks?: { [name: string]: (payload: string, frame: IFrame) => any | null },
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
     devtoolsSession ??= this.devtoolsSession;
-    script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
+    if (callbacks) {
+      script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
+      for (const [name, onCallbackFn] of Object.entries(callbacks)) {
+        if (!onCallbackFn) continue;
+        const existing = this.pageCallbacks.get(name) ?? [];
+        if (existing.length === 0) this.pageCallbacks.set(name, existing);
+        existing.push(onCallbackFn);
+      }
+    }
     const installedScript = await devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
@@ -692,14 +690,23 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     );
   }
 
-  private async onWebsocketSessionMessageRecieved(
+  private async onWebsocketSessionMessageReceived(
     event: IWebsocketEvents['message-received'],
   ): Promise<void> {
     const callbacks = this.pageCallbacks.get(event.name);
-    const frame = this.framesById.get(event.id);
-    if (!callbacks || !frame) return;
+    let frame = this.framesById.get(event.id);
+    if (!frame) {
+      // try again after ready
+      await this.isReady;
+      frame = this.framesById.get(event.id);
+      if (!frame) return;
+    }
 
-    await this.isReady;
-    callbacks.forEach(callback => callback(event.payload, frame));
+    callbacks?.forEach(callback => callback(event.payload, frame));
+    this.page.emit('page-callback-triggered', {
+      name: event.name,
+      frameId: frame.frameId,
+      payload: event.payload,
+    });
   }
 }

@@ -327,7 +327,7 @@ export default class BrowserContext
     try {
       const logId = this.logger.info('BrowserContext.Closing');
       for (const waitingPage of this.waitForPageAttachedById.values()) {
-        await waitingPage.reject(new CanceledPromiseError('BrowserContext shutting down'), true);
+        waitingPage.reject(new CanceledPromiseError('BrowserContext shutting down'), true);
       }
       if (this.browser.devtoolsSession.isConnected()) {
         await Promise.all([...this.pagesById.values()].map(x => x.close()));

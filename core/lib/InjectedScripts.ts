@@ -20,7 +20,7 @@ const pageScripts = {
     'utf8',
   ),
 };
-const pageEventsCallbackName = '__heroPageListenerCallback';
+const pageEventsCallbackName = 'paintEvents';
 
 export const heroIncludes = `
 const exports = {}; // workaround for ts adding an exports variable
@@ -83,10 +83,14 @@ export default class InjectedScripts {
     page[installedSymbol] = true;
 
     return Promise.all([
-      page.addPageCallback(pageEventsCallbackName, null),
-      page.addNewDocumentScript(injectedScript, true, devtoolsSession),
+      page.addNewDocumentScript(
+        injectedScript,
+        true,
+        { [pageEventsCallbackName]: null },
+        devtoolsSession,
+      ),
       showInteractions
-        ? page.addNewDocumentScript(showInteractionScript, true, devtoolsSession)
+        ? page.addNewDocumentScript(showInteractionScript, true, null, devtoolsSession)
         : null,
     ]);
   }

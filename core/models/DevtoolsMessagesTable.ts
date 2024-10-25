@@ -2,6 +2,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import DevtoolsSessionLogger from '@ulixee/unblocked-agent/lib/DevtoolsSessionLogger';
+import InjectedScripts from '../lib/InjectedScripts';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private pageIds = new IdAssigner();
@@ -39,7 +40,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       if (
         key === 'payload' &&
         method === 'Runtime.bindingCalled' &&
-        params.name === '__heroPageListenerCallback' &&
+        params.name === InjectedScripts.PageEventsCallbackName &&
         value?.length > 250
       ) {
         return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;

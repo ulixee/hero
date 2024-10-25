@@ -16,7 +16,6 @@
  */
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import Timer from '@ulixee/commons/lib/Timer';
@@ -235,33 +234,21 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   addNewDocumentScript(
     script: string,
     isolatedEnvironment: boolean,
+    callbacks?: { [name: string]: (payload: string, frame: IFrame) => any | null },
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
-    return this.framesManager.addNewDocumentScript(script, isolatedEnvironment, devtoolsSession);
+    return this.framesManager.addNewDocumentScript(
+      script,
+      isolatedEnvironment,
+      callbacks,
+      devtoolsSession,
+    );
   }
 
   removeDocumentScript(identifier: string, devtoolsSession?: DevtoolsSession): Promise<void> {
     return (devtoolsSession ?? this.devtoolsSession).send(
       'Page.removeScriptToEvaluateOnNewDocument',
       { identifier },
-    );
-  }
-
-  addPageCallback(
-    name: string,
-    onCallback?: (payload: string, frame: IFrame) => any,
-  ): Promise<IRegisteredEventListener> {
-    return this.framesManager.addPageCallback(
-      name,
-      (payload, frame) => {
-        if (onCallback) onCallback(payload, frame);
-
-        this.emit('page-callback-triggered', {
-          name,
-          payload,
-          frameId: frame.frameId,
-        });
-      },
     );
   }
 

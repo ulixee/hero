@@ -89,23 +89,17 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
       callbackName: cookieCallbackName,
     });
     const scripts = domOverrides.build();
-    const callback = async ({ cookie, origin }): Promise<void> => {
-      try {
-        await this.cookieJar.setCookie(cookie, origin);
-      } catch (error) {
-        this.logger.warn('Error setting cookie from page', { error });
-      }
-    };
 
-    const promises: any[] = [
-      page.addPageCallback(cookieCallbackName, (payload) => {
-        return callback(JSON.parse(payload));
-      }),
-    ];
-
-    promises.push(page.addNewDocumentScript(scripts.script, false));
-
-    return Promise.all(promises);
+    return page.addNewDocumentScript(scripts.script, false, {
+      async onCookie(payload) {
+        try {
+          const { cookie, origin } = JSON.parse(payload);
+          await this.cookieJar.setCookie(cookie, origin);
+        } catch (error) {
+          this.logger.warn('Error setting cookie from page', { error });
+        }
+      },
+    });
   }
 
   public websiteHasFirstPartyInteraction(url: URL): void {
@@ -113,10 +107,10 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
   }
 
   private loadProfileCookies(cookies, storage): void {
-    const originUrls = (Object.keys(storage ?? {}) ?? []).map((x) => new URL(x));
+    const originUrls = (Object.keys(storage ?? {}) ?? []).map(x => new URL(x));
     for (const cookie of cookies) {
       let url = `http${cookie.secure ? 's' : ''}://${cookie.domain}${cookie.path}`;
-      const match = originUrls.find((x) => {
+      const match = originUrls.find(x => {
         return x.hostname.endsWith(cookie.domain);
       });
       if (match) url = match.href;
@@ -209,7 +203,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
     } as any);
 
     if (sameSiteContext === 'none') {
-      cookies = cookies.filter((x) => this.hasFirstPartyInteractionForDomain(x.domain));
+      cookies = cookies.filter(x => this.hasFirstPartyInteractionForDomain(x.domain));
     }
 
     cookies = this.handleNov2019ITPUpdates(sourceDocumentUrl, sameSiteContext, cookies);
@@ -226,7 +220,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
       cookies = [];
     }
 
-    return cookies.map((x) => x.cookieString()).join('; ');
+    return cookies.map(x => x.cookieString()).join('; ');
   }
 
   private async waitForDocumentCookiesLoaded(url: string): Promise<void> {
@@ -273,7 +267,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
      */
     if (this.isMinimumVersion(0, 4) && sameSiteContext !== 'strict') {
       const domain = canonicalDomain(sourceDocumentUrl);
-      if (!this.sitesWithUserInteraction.some((y) => domainMatch(y, domain))) {
+      if (!this.sitesWithUserInteraction.some(y => domainMatch(y, domain))) {
         return [];
       }
     }

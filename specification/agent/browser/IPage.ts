@@ -1,4 +1,3 @@
-import type IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import type ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { IJsPath } from '@ulixee/js-path';
 import { IFrame, IFrameManagerEvents } from './IFrame';
@@ -43,13 +42,10 @@ export interface IPage extends ITypedEventEmitter<IPageEvents> {
   addNewDocumentScript(
     script: string,
     isolateFromWebPageEnvironment: boolean,
+    callbackFns?: { [name: string]: (payload: string, frame: IFrame) => any | null },
     devtoolsSession?: IDevtoolsSession,
   ): Promise<{ identifier: string }>;
   removeDocumentScript(identifier: string, devtoolsSession?: IDevtoolsSession): Promise<void>;
-  addPageCallback(
-    name: string,
-    onCallback?: (payload: string, frame: IFrame) => any,
-  ): Promise<IRegisteredEventListener>;
 }
 
 export interface IPageEvents extends IFrameManagerEvents, IBrowserNetworkEvents {

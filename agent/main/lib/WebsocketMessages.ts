@@ -71,9 +71,6 @@ export default class WebsocketMessages extends TypedEventEmitter<{
     isMitmEnabled: boolean,
   ): IWebsocketMessage | undefined {
     if (!event.resourceId && isMitmEnabled) {
-      this.logger.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
-        event,
-      });
       return;
     }
 

@@ -89,29 +89,21 @@ Shortcut to type a string of text.
 
 - text `string`. Text characters to type.
 
-### addNewDocumentScript(script, isolateFromWebpage): Promise<{ identifier:string }>
+### addNewDocumentScript(script, isolateFromWebpage, callbacks): Promise<{ identifier:string }>
 
-Add a new script to run on all new Frames created from this Page, as well as before any new Navigations are completed on the main [Frame](./Frame.md). Returns an identifier that can be uninstalled by passing to `page.removeDocumentScript`. These scripts also have a `callback(name: string, payload: string)` injected, which they can use to send data to nodejs, see `addPageCallback` for how to listen to this callback.
+Add a new script to run on all new Frames created from this Page, as well as before any new Navigations are completed on the main [Frame](./Frame.md). Returns an identifier that can be uninstalled by passing to `page.removeDocumentScript`. These scripts optionally can have a `callbackFn` that can be provided. The first parameter will be the returned identifier.
 
 #### **Arguments**:
 
 - script `string`. The script to run
 - isolateFromWebpage `boolean`. Should this script run in the same Javascript memory as the main webpage, or should it be isolated. NOTE: to manipulate the default DOM objects and methods, you must set this flag to `false`. Defaults to `true`.
+- callbacks `object`. Optional callback function details
+  - \<key\> `string`. The name of the callback function
+  - \<value\> `(identifier: string, frameId: string) => void` Optional callback to trigger when this Page Binding is triggered. Will also emit the event `page-callback-triggered`.
 
 ### removeDocumentScript(scriptId): Promise<void>
 
 Uninstall a newDocumentScript. NOTE: this will not un-do anything ran on the current Page + Frames.
-
-#### **Arguments**:
-
-### addPageCallback(name, onCallbackFn): Promise<RegisteredEventListener>
-
-All scripts added by addNewDocumentScript have a callback function injected in them. This "function" can be called from in-Page javascript back to Node.js. By calling addPageCallback with the same name as used in the page script you can subscribe to these callbacks and run onCallbackFn.
-
-#### **Arguments**:
-
-- name `string`. The name used when running `callback(name, payload)` from within a page script.
-- onCallbackFn `(payload: string, frameId: string) => void` A callback to trigger when this Page Binding is triggered.
 
 ### setJavaScriptEnabled(enabled): Promise<void>
 
