@@ -57,6 +57,7 @@ export default class NetworkDb {
     if (this.db) {
       clearInterval(this.saveInterval);
       this.flush();
+      if (env.enableSqliteWal) this.db.pragma('wal_checkpoint(TRUNCATE)');
       this.db.close();
     }
     this.db = null;

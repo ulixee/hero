@@ -1,10 +1,11 @@
-import { Helpers, Hero } from '@ulixee/hero-testing';
+import HeroClient, { ConnectionToHeroCore } from '@ulixee/hero';
 import HeroCore, { Session } from '@ulixee/hero-core';
+import { Helpers, Hero } from '@ulixee/hero-testing';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 
 import TransportBridge from '@ulixee/net/lib/TransportBridge';
-import HeroClient, { ConnectionToHeroCore } from '@ulixee/hero';
 
-let koaServer;
+let koaServer: ITestKoaServer;
 let core: HeroCore;
 beforeAll(async () => {
   core = new HeroCore();
@@ -217,5 +218,37 @@ describe('basic Full Client tests', () => {
     await Promise.all(promises);
     process.stderr.write = stdout;
     expect(warningHandler).not.toHaveBeenCalled();
+  });
+
+  it('should run connections in parallel', async () => {
+    const bridge = new TransportBridge();
+    const connectionToCore = new ConnectionToHeroCore(bridge.transportToCore);
+
+    const heroCore = new HeroCore({
+      maxConcurrentClientCount: 10,
+      maxConcurrentClientsPerBrowser: 10,
+    });
+    Helpers.needsClosing.push(heroCore);
+    heroCore.addConnection(bridge.transportToClient);
+
+    koaServer.get('/random-delay', async ctx => {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
+      ctx.body = { test: true };
+    });
+
+    const resultOrder = [];
+    await Promise.all(
+      new Array(10).fill(0).map(async (_, i) => {
+        const hero = new Hero({
+          connectionToCore,
+        });
+        await hero.meta;
+        await hero.goto(`${koaServer.baseUrl}/random-delay`);
+        Helpers.needsClosing.push(hero);
+        resultOrder.push(i);
+      }),
+    );
+    expect(resultOrder).toHaveLength(10);
+    expect(resultOrder).not.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 });

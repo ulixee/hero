@@ -43,7 +43,7 @@ export default class SessionDb {
   }
 
   public get isOpen(): boolean {
-    return this.db?.open;
+    return this.db?.open ?? false;
   }
 
   public readonly path: string;
@@ -76,12 +76,10 @@ export default class SessionDb {
   public output: OutputTable;
   public readonly sessionId: string;
 
-  public keepAlive = false;
-
   private readonly batchInsert?: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
 
-  private db: SqliteDatabase;
+  private db: SqliteDatabase | null;
   private readonly tables: SqliteTable<any>[] = [];
 
   constructor(sessionId: string, path: string, dbOptions: IDbOptions = {}) {
@@ -142,18 +140,15 @@ export default class SessionDb {
 
   public close(): void {
     clearInterval(this.saveInterval);
+    if (!this.db) return;
 
-    if (this.db?.open) {
+    if (this.db.open) {
       this.flush();
     }
 
-    if (env.enableSqliteWal && !this.db.readonly) {
+    if (env.enableSqliteWal) {
+      // use delete to clean up wal files since we might move this around
       this.db.pragma('journal_mode = DELETE');
-    }
-
-    if (this.keepAlive) {
-      this.db.readonly = true;
-      return;
     }
 
     this.db.close();

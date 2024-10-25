@@ -23,7 +23,7 @@ import * as Path from 'path';
 import ConnectionToHeroClient from './connections/ConnectionToHeroClient';
 import DefaultSessionRegistry from './dbs/DefaultSessionRegistry';
 import NetworkDb from './dbs/NetworkDb';
-import * as Env from './env';
+import Env from './env';
 import ISessionRegistry from './interfaces/ISessionRegistry';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
@@ -93,6 +93,8 @@ export default class HeroCore extends TypedEventEmitter<THeroCoreEvents & { clos
     if (!Path.isAbsolute(options.dataDir)) {
       options.dataDir = Path.join(process.cwd(), options.dataDir);
     }
+
+    options.disableSessionPersistence ??= Env.disableSessionPersistence;
 
     try {
       Fs.mkdirSync(`${options.dataDir}`, { recursive: true });

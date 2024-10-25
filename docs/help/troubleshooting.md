@@ -18,10 +18,10 @@ Browsers will be saved to a shared location on each OS. Each browser version wil
 
 By default, Hero logs everything to a [Session](../advanced-concepts/sessions.md) database that is created per Hero instance. The SessionLogs table contains all debug logs.
 
-To output logs to the console during operation, you can set the environmental variable `DEBUG=true`.
+To output logs to the console during operation, you can set the environmental variable `DEBUG=ulx`. If you want to include all Devtools Protocol Messages as well, you can add `DEBUG=ulx,ulx:devtools`, or `DEBUG=ulx*`.
 
 ```js
-process.env.DEBUG = true;
+process.env.DEBUG = "ulx";
 import Hero from '@ulixee/hero';
 
 (async () => {

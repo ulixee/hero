@@ -11,6 +11,6 @@ export default {
   noChromeSandbox: parseEnvBool(env.ULX_NO_CHROME_SANDBOX) ?? AgentEnv.noChromeSandbox,
   disableGpu: parseEnvBool(env.ULX_DISABLE_GPU) ?? AgentEnv.disableGpu,
   enableSqliteWal: parseEnvBool(env.ULX_ENABLE_SQLITE_WAL) ?? false,
+  disableSessionPersistence: parseEnvBool(env.ULX_DISABLE_SESSION_PERSISTENCE),
+  dataDir: env.ULX_DATA_DIR,
 };
-
-export const dataDir = env.ULX_DATA_DIR;

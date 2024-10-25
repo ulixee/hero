@@ -31,6 +31,14 @@ Configures the storage location for files created by Core.
 
 Configurable via [`Core.start()`](#core-start.md) or the first [`ConnectionToCore`](../advanced-client/connection-to-core.md).
 
+### Disable Session Persistence <div class="specs"><i>Core</i><i>Hero</i></div>
+
+Configuration to disable session persistence. This will instruct Hero to clean up sessions AFTER they are closed.
+
+Configurable as a Hero Core option via [`Core.start({ disableSessionPersistence: true })`](#core-start.md) or [Hero](../basic-client/hero.md) instances via `sessionPersistence: false`.
+
+`Environmental variable`: `ULX_DISABLE_SESSION_PERSISTENCE=true`
+
 ### Blocked Resource Types <div class="specs"><i>Connection</i><i>Hero</i></div> {#blocked-resources}
 
 One of the best ways to optimize Hero's memory and CPU is setting `blockedResourceTypes` to block resources you don't need. The following are valid options.

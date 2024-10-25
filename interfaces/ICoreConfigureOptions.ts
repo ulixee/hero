@@ -8,4 +8,5 @@ export default interface ICoreConfigureOptions {
   defaultUnblockedPlugins?: IUnblockedPluginClass[];
   shouldShutdownOnSignals?: boolean;
   sessionRegistry?: ISessionRegistry;
+  disableSessionPersistence?: boolean;
 }

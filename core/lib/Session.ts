@@ -158,6 +158,7 @@ export default class Session
         }
       }
     }
+    options.sessionPersistence ??= core.options.disableSessionPersistence !== true;
 
     this.createdTime = Date.now();
     this.id = this.assignId(options.sessionId);
