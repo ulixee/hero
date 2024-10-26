@@ -127,11 +127,7 @@ describe('basic MitM tests', () => {
 
     const session = createSession(mitmServer, upstreamProxyHost);
 
-    await Helpers.httpGet(
-      'https://ulixee.org',
-      proxyHost,
-      session.getProxyCredentials(),
-    ).catch();
+    await Helpers.httpGet('https://ulixee.org', proxyHost, session.getProxyCredentials()).catch();
 
     expect(upstreamProxyConnected).toBeTruthy();
   });
@@ -378,7 +374,7 @@ describe('basic MitM tests', () => {
     expect(response.remoteAddress).toContain(`${httpServer.port}`);
     expect(wasCached).toBe(false);
     expect(onError).not.toHaveBeenCalled();
-    mocks.HeadersHandler.determineResourceType.mockImplementation(async () => ({} as any));
+    mocks.HeadersHandler.determineResourceType.mockImplementation(async () => ({}) as any);
 
     await httpServer.close();
     await mitmServer.close();

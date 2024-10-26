@@ -16,7 +16,10 @@ export default class WsTransportToCore
 {
   public host: string;
 
-  public isConnected = false;
+  public get isConnected(): boolean {
+    return this.connectPromise?.isResolved === true && isWsOpen(this.webSocket);
+  }
+
   public isDisconnecting = false;
 
   private connectPromise: IResolvablePromise<void>;
@@ -31,23 +34,23 @@ export default class WsTransportToCore
     }
     this.onMessage = this.onMessage.bind(this);
     this.disconnect = this.disconnect.bind(this);
-    this.onConnectError = this.onConnectError.bind(this);
     this.setHost = this.setHost.bind(this);
     this.hostPromise = Promise.resolve(host).then(this.setHost);
   }
 
   public async send(payload: any): Promise<void> {
-    if (!isWsOpen(this.webSocket) && this.connectPromise) {
-      await this.disconnect();
+    if (!isWsOpen(this.webSocket)) {
+      this.disconnect();
+      throw new DisconnectedError(this.host);
     }
-
-    await this.connect();
-
 
     const message = TypeSerializer.stringify(payload);
     try {
       await wsSend(this.webSocket, message);
     } catch (error) {
+      if (!isWsOpen(this.webSocket)) {
+        this.disconnect();
+      }
       const { code } = error as any;
       if (code === 'EPIPE' && this.isDisconnecting) {
         throw new DisconnectedError(this.host);
@@ -59,12 +62,11 @@ export default class WsTransportToCore
     }
   }
 
-  public disconnect(): Promise<void> {
+  public disconnect(): void {
     if (this.isDisconnecting) return;
     this.isDisconnecting = true;
     this.connectPromise = null;
     this.emit('disconnected');
-    this.isConnected = false;
     this.events.close('error');
     const webSocket = this.webSocket;
     this.webSocket = null;
@@ -75,48 +77,48 @@ export default class WsTransportToCore
         // ignore errors terminating
       }
     }
-    return Promise.resolve();
   }
 
   public async connect(timeoutMs?: number): Promise<void> {
     if (!this.connectPromise) {
-      this.connectPromise = new Resolvable();
-
       await this.hostPromise;
+      const connectPromise = new Resolvable<void>();
+      this.connectPromise = connectPromise;
       const webSocket = new WebSocket(this.host, {
         followRedirects: false,
         handshakeTimeout: timeoutMs,
       });
+
       this.events.group(
         'preConnect',
-        this.events.once(webSocket, 'close', this.onConnectError),
-        this.events.once(webSocket, 'error', this.onConnectError),
+        this.events.once(webSocket, 'close', (code: number, reason: string) => {
+          connectPromise.reject(
+            new Error(
+              `Error connecting to Websocket host -> Unexpected close code ${code} - ${reason}`,
+            ),
+            true,
+          );
+        }),
+        this.events.once(webSocket, 'error', err => connectPromise.reject(err, true)),
       );
       this.events.once(webSocket, 'open', () => {
+        this.isDisconnecting = false;
         this.events.once(webSocket, 'close', this.disconnect);
         this.events.on(webSocket, 'error', this.disconnect);
         this.events.endGroup('preConnect');
-        this.connectPromise.resolve();
+        connectPromise.resolve();
       });
 
       this.webSocket = webSocket;
       this.events.on(webSocket, 'message', this.onMessage);
     }
     await this.connectPromise;
-    this.isConnected = true;
-    this.isDisconnecting = false;
     this.emit('connected');
   }
 
   private onMessage(message: WebSocket.Data): void {
     const payload = TypeSerializer.parse(message.toString(), 'REMOTE CORE');
     this.emit('message', payload);
-  }
-
-  private onConnectError(error: Error): void {
-    if (error instanceof Error) this.connectPromise.reject(error);
-    else
-      this.connectPromise.reject(new Error(`Error connecting to Websocket host -> ${error}`), true);
   }
 
   private setHost(host: string): void {

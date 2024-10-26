@@ -5,7 +5,7 @@ export default interface ITransport extends ITypedEventEmitter<ITransportEvents>
   remoteId?: string;
   isConnected: boolean;
   connect?(timeoutMs?: number): Promise<void>;
-  disconnect?(fatalError?: Error): Promise<void> | void;
+  disconnect?(fatalError?: Error): void;
   send(message: any): Promise<void>;
 }
 

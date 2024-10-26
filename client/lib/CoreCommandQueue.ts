@@ -187,7 +187,7 @@ export default class CoreCommandQueue {
     clearTimeout(this.flushOnTimeout);
     this.flushOnTimeout = null;
 
-    if (this.connection.disconnectPromise) {
+    if (this.connection.disconnectAction) {
       throw new DisconnectedError(this.connection.transport.host);
     }
     for (const arg of args) {
@@ -310,7 +310,7 @@ export default class CoreCommandQueue {
   private async sendRequest<T>(
     payload: Omit<ICoreCommandRequestPayload, 'meta' | 'messageId' | 'sendTime'>,
   ): Promise<T> {
-    if (this.connection.disconnectPromise) {
+    if (this.connection.disconnectAction) {
       return Promise.resolve(null);
     }
 

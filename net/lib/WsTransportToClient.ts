@@ -15,6 +15,9 @@ export default class WsTransportToClient
   public remoteId: string;
   public isConnected = true;
   private events = new EventSubscriber();
+  private readonly keepAlive: NodeJS.Timeout;
+  private lastActivity: number | null;
+
   constructor(
     private webSocket: WebSocket,
     private request: IncomingMessage,
@@ -22,23 +25,24 @@ export default class WsTransportToClient
     super();
     bindFunctions(this);
     this.events.on(webSocket, 'message', this.onMessage);
-    this.events.on(webSocket, 'close', this.onClose);
-    this.events.on(webSocket, 'error', this.onError);
+    this.events.on(webSocket, 'close', this.onDisconnect.bind(this, null));
+    this.events.on(webSocket, 'error', this.onDisconnect);
+    this.events.on(webSocket, 'pong', this.onPong);
     this.remoteId = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
+    this.lastActivity = Date.now();
+    this.keepAlive = setInterval(this.checkAlive, 1000 * 10).unref();
   }
 
   public async send(payload: any): Promise<void> {
     const message = TypeSerializer.stringify(payload);
 
-    if (!isWsOpen(this.webSocket)) {
-      const error = new CanceledPromiseError('Websocket was not open');
-      this.onError(error);
-      throw error;
-    }
-
     try {
       await wsSend(this.webSocket, message);
+      this.lastActivity = Date.now();
     } catch (error) {
+      if (!isWsOpen(this.webSocket)) {
+        this.onDisconnect(error);
+      }
       if (!(error instanceof CanceledPromiseError)) {
         sendWsCloseUnexpectedError(this.webSocket, error.message);
       }
@@ -46,18 +50,34 @@ export default class WsTransportToClient
     }
   }
 
-  private onClose(): void {
-    this.isConnected = false;
-    this.emit('disconnected', null);
-    this.events.close();
+  public disconnect(fatalError?: Error): void {
+    if (isWsOpen(this.webSocket)) {
+      this.webSocket.close();
+    }
+    this.onDisconnect(fatalError);
   }
 
-  private onError(error: Error): void {
+  private checkAlive(): void {
+    if (Date.now() - this.lastActivity > 30_000) {
+      this.onDisconnect(new Error('No activity'));
+      return;
+    }
+    this.webSocket.ping();
+  }
+
+  private onPong(): void {
+    this.lastActivity = Date.now();
+  }
+
+  private onDisconnect(error: Error): void {
+    this.isConnected = false;
+    clearInterval(this.keepAlive);
     this.emit('disconnected', error);
     this.events.close();
   }
 
   private onMessage(message: WebSocket.Data): void {
+    this.lastActivity = Date.now();
     const payload = TypeSerializer.parse(message.toString(), 'CLIENT');
     this.emit('message', payload);
   }

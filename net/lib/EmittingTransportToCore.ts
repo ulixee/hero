@@ -24,4 +24,15 @@ export default class EmittingTransportToCore
     this.emit('outbound', message);
     return Promise.resolve();
   }
+
+  connect(): Promise<void> {
+    this.isConnected = true;
+    this.emit('connected');
+    return Promise.resolve();
+  }
+
+  disconnect(): void {
+    this.isConnected = false;
+    this.emit('disconnected');
+  }
 }

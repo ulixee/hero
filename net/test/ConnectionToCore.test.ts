@@ -64,13 +64,13 @@ test('should cancel connect messages if a connection closes before connecting', 
   };
   const connectPromise = connectionToCore.connect();
   await new Promise(setImmediate);
-  // @ts-expect-error
-  expect(connectionToCore.connectMessageId).toBeTruthy();
-  connectionToCore.transport.isConnected = false;
+
+  expect(connectionToCore.connectAction.hookMessageId).toBeTruthy();
+  const connectAction = connectionToCore.connectAction;
   connectionToCore.transport.emit('disconnected');
-  await expect(connectionToCore.connectPromise).rejects.toThrow('disconnected');
-  // @ts-expect-error
-  expect(connectionToCore.connectMessageId).toBeFalsy();
+  await expect(connectAction.resolvable).rejects.toThrow('disconnected');
+
+  expect(connectionToCore.connectAction?.hookMessageId).toBeFalsy();
   expect(connectResult?.toString()).toMatch('disconnected');
   await expect(connectPromise).rejects.toThrow();
 });
