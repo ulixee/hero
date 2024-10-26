@@ -123,7 +123,7 @@ export default class ConnectionToHeroCore extends ConnectionToCore<any, {}> {
         : new DisconnectedFromCoreError(this.transport.host),
     );
 
-    if (!connectAction?.resolvable.isResolved) {
+    if (connectAction && !connectAction?.resolvable.isResolved) {
       if (hasSessions && !connectAction.isAutomatic) {
         connectAction.resolvable.reject(new DisconnectedFromCoreError(this.transport.host));
       } else {
