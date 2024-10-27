@@ -10,6 +10,14 @@ export function loadEnv(baseDir: string, overwriteSetValues = false): void {
   if (baseDir.endsWith('dist')) baseDir = Path.resolve(baseDir, '..');
   const envName = process.env.NODE_ENV?.toLowerCase() ?? 'development';
   const env: Record<string, string> = {};
+  const argIndex = process.argv.findIndex(x => x.includes('--env'));
+  if (argIndex >= 0) {
+    const envFile = process.argv[argIndex].split('=')[1] ?? process.argv[argIndex + 1];
+    const path = Path.resolve(envFile);
+    if (Fs.existsSync(path)) {
+      applyEnvironmentVariables(path, env);
+    }
+  }
   for (const envFile of ['.env.defaults', `.env.${envName}`, '.env']) {
     const path = Path.join(baseDir, envFile);
     if (!Fs.existsSync(path)) continue;
