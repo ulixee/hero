@@ -35,6 +35,7 @@ beforeAll(async () => {
   pool = new Pool({ defaultBrowserEngine: BrowserUtils.defaultBrowserEngine });
   await pool.start();
   Helpers.onClose(() => pool.close(), true);
+  koaServer = await Helpers.runKoaServer();
 });
 
 afterAll(Helpers.afterAll);
@@ -747,7 +748,7 @@ describe.each([
       }
       if (filename === 'vue.min.js') {
         ctx.set('content-type', 'application/javascript');
-        ctx.body = Fs.createReadStream(require.resolve('vue/dist/vue.min.js'));
+        ctx.body = Fs.createReadStream(require.resolve('vue/dist/vue.global.prod.js'));
       }
       if (filename === 'index.html') {
         ctx.set('content-type', 'text/html');

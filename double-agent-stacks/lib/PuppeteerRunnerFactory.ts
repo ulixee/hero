@@ -13,12 +13,12 @@ export default class PuppeteerRunnerFactory implements IRunnerFactory {
   public async startFactory(): Promise<void> {
     this.browser = await launch({
       headless: true,
-      ignoreHTTPSErrors: true,
+      acceptInsecureCerts: true,
     });
   }
 
   public async spawnRunner(assignment: IAssignment): Promise<IRunner> {
-    const browserContext = await this.browser.createIncognitoBrowserContext();
+    const browserContext = await this.browser.createBrowserContext();
     const page = await browserContext.newPage();
     await page.setUserAgent(assignment.userAgentString);
     return new PuppeteerRunner(page);

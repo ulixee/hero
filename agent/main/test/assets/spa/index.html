@@ -29,9 +29,8 @@
     <script type="text/javascript">
       let counter = 0;
       // register the grid component
-      Vue.component('demo-grid', {
+      const DemoGrid = {
         template: '#grid-template',
-        replace: true,
         props: {
           columns: Array,
         },
@@ -45,15 +44,20 @@
           const { records } = await response.json();
           this.records = records;
         },
-      });
+      };
 
-      // bootstrap the demo
-      const demo = new Vue({
-        el: '#demo',
-        data: {
-          gridColumns: ['name', 'power'],
+      // Create and mount the Vue app
+      const app = Vue.createApp({
+        components: {
+          DemoGrid,
+        },
+        data() {
+          return {
+            gridColumns: ['name', 'power'],
+          };
         },
       });
+      app.mount('#demo');
     </script>
   </body>
 </html>

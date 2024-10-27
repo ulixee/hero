@@ -18,6 +18,6 @@
   "devDependencies": {
     "@ulixee/unblocked-agent-testing": "2.0.0-alpha.30",
     "image-size": "^1.0.1",
-    "vue": "^2.6.14"
+    "vue": "^3.4.30"
   }
 }
