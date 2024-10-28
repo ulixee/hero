@@ -202,7 +202,7 @@ export function main({
       return result;
     }
 
-    appendBigInt(bigint: BigInt): boolean {
+    appendBigInt(bigint: bigint): boolean {
       let string;
       try {
         string = bigint.toString();

@@ -124,7 +124,7 @@ async function startProxy() {
   return proxy;
 }
 
-let webrtcScript = `(() => {
+const webrtcScript = `(() => {
 const peerConnection = new RTCPeerConnection({
   iceServers: [{
     urls: 'stun:stun.l.google.com:19302',

@@ -9,7 +9,7 @@ export type UtilsInput = {
 
 export type ScriptInput<T extends Record<string, unknown> | never> = {
   utils: Exclude<ReturnType<typeof main>, undefined>;
-  TypeSerializer: ITypeSerializer,
+  TypeSerializer: ITypeSerializer;
   args: T;
 } & UtilsInput;
 
@@ -131,7 +131,7 @@ type NewFunction = (target: any, thisArg: any, argArray: any[]) => any;
 
 type ModifyDescriptorOpts = {
   descriptorKey: 'value' | 'get' | 'set';
-  onlyForInstance?: Boolean;
+  onlyForInstance?: boolean;
 };
 
 function internalModifyDescriptor<T, K extends keyof T>(
@@ -224,6 +224,7 @@ const proxyToTarget = new WeakMap();
 // From puppeteer-stealth: this is to prevent someone snooping at Reflect calls
 
 // Store External proxies as undefined so we can treat it as just missing
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
 const proxyThisTracker = new Map<string, WeakRef<Object | Symbol> | any>([['External', undefined]]);
 
 function getPrototypeSafe(obj: any): any {
