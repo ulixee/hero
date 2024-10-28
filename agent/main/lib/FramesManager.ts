@@ -7,8 +7,10 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IWebsocketEvents } from '@ulixee/unblocked-specification/agent/browser/IWebsocketSession';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
-import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
-import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
+import {
+  IPageEvents,
+  TNewDocumentCallbackFn,
+} from '@ulixee/unblocked-specification/agent/browser/IPage';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import DevtoolsSession from './DevtoolsSession';
 import Frame from './Frame';
@@ -48,8 +50,6 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   }
 
   public devtoolsSession: DevtoolsSession;
-  public websocketIdToFrameId = new Map<string, string>();
-
   protected readonly logger: IBoundLog;
 
   private onFrameCreatedResourceEventsByFrameId: {
@@ -71,7 +71,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   private readonly events = new EventSubscriber();
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
-  private pageCallbacks = new Map<string, Array<(payload: string, frame: IFrame) => any>>();
+  private pageCallbacks = new Map<string, TNewDocumentCallbackFn>();
 
   private isReady: Promise<void>;
 
@@ -93,7 +93,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.events.on(
       this.websocketSession,
       'message-received',
-      this.onWebsocketSessionMessageRecieved,
+      this.onWebsocketSessionMessageReceived,
     );
   }
 
@@ -201,22 +201,23 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.framesByFrameId.clear();
   }
 
-  public async addPageCallback(
-    name: string,
-    onCallback: (payload: string, frame: IFrame) => any,
-  ): Promise<any> {
-    const callbacks = this.pageCallbacks.get(name) ?? [];
-    if (callbacks.length === 0) this.pageCallbacks.set(name, callbacks);
-    callbacks.push(onCallback);
-  }
-
   public async addNewDocumentScript(
     script: string,
     installInIsolatedScope = true,
+    callbacks?: { [name: string]: TNewDocumentCallbackFn | null },
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
     devtoolsSession ??= this.devtoolsSession;
-    script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
+    if (callbacks) {
+      script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
+      for (const [name, onCallbackFn] of Object.entries(callbacks)) {
+        if (onCallbackFn) {
+          if (this.pageCallbacks.has(name) && this.pageCallbacks.get(name) !== onCallbackFn)
+            throw new Error(`Duplicate page callback registered ${name}`);
+          this.pageCallbacks.set(name, onCallbackFn);
+        }
+      }
+    }
     const installedScript = await devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
@@ -466,14 +467,12 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.domStorageTracker.track(frame.securityOrigin);
   }
 
-  private onDomPaintEvent(
-    frameId: number,
-    paintEvent: { event: IDomPaintEvent; timestamp: number; url: string },
-  ): void {
-    const { event, timestamp, url } = paintEvent;
+  private onDomPaintEvent(payload: string, frame: IFrame): void {
+    const { event, timestamp, url } = JSON.parse(payload);
+    const frameId = frame.frameId;
     void this.isReady.then(() => {
-      const frame = this.framesByFrameId.get(frameId);
-      frame.navigations.onDomPaintEvent(event, url, timestamp);
+      const coreFrame = this.framesByFrameId.get(frameId);
+      coreFrame.navigations.onDomPaintEvent(event, url, timestamp);
       return null;
     });
   }
@@ -692,14 +691,23 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     );
   }
 
-  private async onWebsocketSessionMessageRecieved(
+  private async onWebsocketSessionMessageReceived(
     event: IWebsocketEvents['message-received'],
   ): Promise<void> {
-    const callbacks = this.pageCallbacks.get(event.name);
-    const frame = this.framesById.get(event.id);
-    if (!callbacks || !frame) return;
+    const callback = this.pageCallbacks.get(event.name);
+    let frame = this.framesById.get(event.id);
+    if (!frame) {
+      // try again after ready
+      await this.isReady;
+      frame = this.framesById.get(event.id);
+      if (!frame) return;
+    }
 
-    await this.isReady;
-    callbacks.forEach(callback => callback(event.payload, frame));
+    if (callback) await callback(event.payload, frame);
+    this.page.emit('page-callback-triggered', {
+      name: event.name,
+      frameId: frame.frameId,
+      payload: event.payload,
+    });
   }
 }
