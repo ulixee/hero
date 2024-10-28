@@ -6321,7 +6321,7 @@ node-releases@^2.0.18:
 
 "noderdom-detached@https://github.com/ulixee/noderdom-detached.git#dist":
   version "0.3.2"
-  resolved "git+ssh://git@github.com/ulixee/noderdom-detached.git#25b6180898bec798a18b2821a4ce57896b688da9"
+  resolved "https://github.com/ulixee/noderdom-detached.git#25b6180898bec798a18b2821a4ce57896b688da9"
   dependencies:
     "@types/parse5" "^5.0.2"
     "@types/underscore" "^1.9.4"
@@ -8528,7 +8528,7 @@ vue@^3.4.30:
 
 "w3c-xmlserializer@https://github.com/ulixee/w3c-xmlserializer.git":
   version "2.0.0"
-  resolved "git+ssh://git@github.com/ulixee/w3c-xmlserializer.git#74efc6b7211319a6a14a2c12d86028ca60f4f559"
+  resolved "https://github.com/ulixee/w3c-xmlserializer.git#74efc6b7211319a6a14a2c12d86028ca60f4f559"
   dependencies:
     xml-name-validator "^3.0.0"
 
