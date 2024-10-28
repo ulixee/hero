@@ -11,7 +11,6 @@ import {
   IPageEvents,
   TNewDocumentCallbackFn,
 } from '@ulixee/unblocked-specification/agent/browser/IPage';
-import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import DevtoolsSession from './DevtoolsSession';
 import Frame from './Frame';
@@ -72,10 +71,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   private readonly events = new EventSubscriber();
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
-  private pageCallbacks = new Map<
-    string,
-    Array<(payload: string, frame: IFrame) => Promise<void> | void>
-  >();
+  private pageCallbacks = new Map<string, TNewDocumentCallbackFn>();
 
   private isReady: Promise<void>;
 
@@ -215,10 +211,11 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     if (callbacks) {
       script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
       for (const [name, onCallbackFn] of Object.entries(callbacks)) {
-        if (!onCallbackFn) continue;
-        const existing = this.pageCallbacks.get(name) ?? [];
-        if (existing.length === 0) this.pageCallbacks.set(name, existing);
-        existing.push(onCallbackFn);
+        if (onCallbackFn) {
+          if (this.pageCallbacks.has(name) && this.pageCallbacks.get(name) !== onCallbackFn)
+            throw new Error(`Duplicate page callback registered ${name}`);
+          this.pageCallbacks.set(name, onCallbackFn);
+        }
       }
     }
     const installedScript = await devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
@@ -470,14 +467,12 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     this.domStorageTracker.track(frame.securityOrigin);
   }
 
-  private onDomPaintEvent(
-    frameId: number,
-    paintEvent: { event: IDomPaintEvent; timestamp: number; url: string },
-  ): void {
-    const { event, timestamp, url } = paintEvent;
+  private onDomPaintEvent(payload: string, frame: IFrame): void {
+    const { event, timestamp, url } = JSON.parse(payload);
+    const frameId = frame.frameId;
     void this.isReady.then(() => {
-      const frame = this.framesByFrameId.get(frameId);
-      frame.navigations.onDomPaintEvent(event, url, timestamp);
+      const coreFrame = this.framesByFrameId.get(frameId);
+      coreFrame.navigations.onDomPaintEvent(event, url, timestamp);
       return null;
     });
   }
@@ -699,7 +694,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   private async onWebsocketSessionMessageReceived(
     event: IWebsocketEvents['message-received'],
   ): Promise<void> {
-    const callbacks = this.pageCallbacks.get(event.name);
+    const callback = this.pageCallbacks.get(event.name);
     let frame = this.framesById.get(event.id);
     if (!frame) {
       // try again after ready
@@ -708,7 +703,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       if (!frame) return;
     }
 
-    if (callbacks?.length) await Promise.allSettled(callbacks.map(cb => cb(event.payload, frame)));
+    if (callback) await callback(event.payload, frame);
     this.page.emit('page-callback-triggered', {
       name: event.name,
       frameId: frame.frameId,
