@@ -167,11 +167,8 @@ function injectedScript(): void {
   const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
-  fetch(`http://${url}`, {
-    mode: 'no-cors',
-  })
-    // eslint-disable-next-line no-console
-    .catch(error => console.log(error));
+  fetch(`http://${url}`).catch(() => {});
+
   let callback: WebsocketCallback;
   try {
     const socket = new WebSocket(`ws://${url}`);

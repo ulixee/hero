@@ -7,7 +7,10 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IWebsocketEvents } from '@ulixee/unblocked-specification/agent/browser/IWebsocketSession';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
-import { IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import {
+  IPageEvents,
+  TNewDocumentCallbackFn,
+} from '@ulixee/unblocked-specification/agent/browser/IPage';
 import { IDomPaintEvent } from '@ulixee/unblocked-specification/agent/browser/Location';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import DevtoolsSession from './DevtoolsSession';
@@ -69,7 +72,10 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   private readonly events = new EventSubscriber();
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
-  private pageCallbacks = new Map<string, Array<(payload: string, frame: IFrame) => any>>();
+  private pageCallbacks = new Map<
+    string,
+    Array<(payload: string, frame: IFrame) => Promise<void> | void>
+  >();
 
   private isReady: Promise<void>;
 
@@ -202,7 +208,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   public async addNewDocumentScript(
     script: string,
     installInIsolatedScope = true,
-    callbacks?: { [name: string]: (payload: string, frame: IFrame) => any | null },
+    callbacks?: { [name: string]: TNewDocumentCallbackFn | null },
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
     devtoolsSession ??= this.devtoolsSession;
@@ -702,7 +708,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
       if (!frame) return;
     }
 
-    callbacks?.forEach(callback => callback(event.payload, frame));
+    if (callbacks?.length) await Promise.allSettled(callbacks.map(cb => cb(event.payload, frame)));
     this.page.emit('page-callback-triggered', {
       name: event.name,
       frameId: frame.frameId,

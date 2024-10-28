@@ -1,6 +1,6 @@
-import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
+import { TNewDocumentCallbackFn } from '@ulixee/unblocked-specification/agent/browser/IPage';
 
 export default interface INewDocumentInjectedScript {
   script: string;
-  callback?: { name: string; fn: (data: string, frame: IFrame) => void };
+  callback?: { name: string; fn: TNewDocumentCallbackFn | null };
 }

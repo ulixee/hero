@@ -42,11 +42,15 @@ export interface IPage extends ITypedEventEmitter<IPageEvents> {
   addNewDocumentScript(
     script: string,
     isolateFromWebPageEnvironment: boolean,
-    callbackFns?: { [name: string]: (payload: string, frame: IFrame) => any | null },
+    callbackFns?: {
+      [name: string]: TNewDocumentCallbackFn | null;
+    },
     devtoolsSession?: IDevtoolsSession,
   ): Promise<{ identifier: string }>;
   removeDocumentScript(identifier: string, devtoolsSession?: IDevtoolsSession): Promise<void>;
 }
+
+export type TNewDocumentCallbackFn = (payload: string, frame: IFrame) => Promise<void> | void;
 
 export interface IPageEvents extends IFrameManagerEvents, IBrowserNetworkEvents {
   close: void;

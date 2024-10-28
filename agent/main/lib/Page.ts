@@ -25,7 +25,11 @@ import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
 import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
-import { IPage, IPageEvents } from '@ulixee/unblocked-specification/agent/browser/IPage';
+import {
+  IPage,
+  IPageEvents,
+  TNewDocumentCallbackFn,
+} from '@ulixee/unblocked-specification/agent/browser/IPage';
 import IScreenshotOptions from '@ulixee/unblocked-specification/agent/browser/IScreenshotOptions';
 import { ILoadStatus, LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
 import {
@@ -234,7 +238,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
   addNewDocumentScript(
     script: string,
     isolatedEnvironment: boolean,
-    callbacks?: { [name: string]: (payload: string, frame: IFrame) => any | null },
+    callbacks?: { [name: string]: TNewDocumentCallbackFn | null },
     devtoolsSession?: DevtoolsSession,
   ): Promise<{ identifier: string }> {
     return this.framesManager.addNewDocumentScript(
