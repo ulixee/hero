@@ -88,6 +88,7 @@ export default class WsTransportToCore
         followRedirects: false,
         handshakeTimeout: timeoutMs,
       });
+      this.isDisconnecting = false;
 
       this.events.group(
         'preConnect',
@@ -102,7 +103,6 @@ export default class WsTransportToCore
         this.events.once(webSocket, 'error', err => connectPromise.reject(err, true)),
       );
       this.events.once(webSocket, 'open', () => {
-        this.isDisconnecting = false;
         this.events.once(webSocket, 'close', this.disconnect);
         this.events.on(webSocket, 'error', this.disconnect);
         this.events.endGroup('preConnect');
