@@ -38,12 +38,12 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
     function paramsStringifyFilter(key: string, value: any): any {
       if (
-        key === 'payload' &&
-        method === 'Runtime.bindingCalled' &&
-        params.name === InjectedScripts.PageEventsCallbackName &&
+        key === 'payloadData' &&
+        method === 'Network.webSocketFrameSent' &&
+        params.response?.payloadData?.includes(InjectedScripts.PageEventsCallbackName) &&
         value?.length > 250
       ) {
-        return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;
+        return `${value.substr(0, 25)}... [truncated ${value.length - 25} chars]`;
       }
 
       if ((key === 'headers' || key === 'postData') && params.request) {

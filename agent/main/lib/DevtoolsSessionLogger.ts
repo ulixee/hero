@@ -31,6 +31,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
         { maxLength: 0, path: ['request', 'postDataEntries'] },
       ],
     ],
+    ['Network.webSocketFrameSent', [{ maxLength: 50, path: 'payloadData' }]],
   ]);
 
   public readonly truncateMessageResponses: Set<string>;
@@ -40,6 +41,7 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
   private events = new EventSubscriber();
   private fetchRequestIdToNetworkId = new Map<string, string>();
   private devtoolsSessions = new WeakSet<DevtoolsSession>();
+  private requestsToSkip = new Set<string>();
   private browserContextInitiatedMessageIds = new Set<number>();
   private sentMessagesById: {
     [id: number]: {
@@ -78,7 +80,12 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
       this.onEventReceive.bind(this, details),
       true,
     );
-    this.events.on(devtoolsSession.messageEvents, 'send', this.onEventSend.bind(this, details), true);
+    this.events.on(
+      devtoolsSession.messageEvents,
+      'send',
+      this.onEventSend.bind(this, details),
+      true,
+    );
   }
 
   private onEventSend(
@@ -143,6 +150,12 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
         params.networkId ??
         params.requestId;
       if (params.networkId) this.fetchRequestIdToNetworkId.set(params.requestId, params.networkId);
+      if (
+        event.method === 'Network.webSocketCreated' &&
+        this.browserContext.websocketSession?.isWebsocketUrl(params.url)
+      ) {
+        this.requestsToSkip.add(requestId);
+      }
 
       if (!pageId && params.targetInfo && params.targetInfo?.type === 'page') {
         pageId = params.targetInfo.targetId;
@@ -172,6 +185,8 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
 
     event.frameId = frameId;
     event.requestId = requestId;
+
+    if (requestId && this.requestsToSkip.has(requestId)) return;
 
     const method = event.method;
     const result = event.result;

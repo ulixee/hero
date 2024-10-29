@@ -514,7 +514,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   public onPageRecorderEvents(results: PageRecorderResultSet): boolean {
     const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents, id] = results;
     if (id) {
-      this.flushPageEventsRecorderResolvers.get(id).resolve();
+      this.flushPageEventsRecorderResolvers.get(id)?.resolve();
       this.flushPageEventsRecorderResolvers.delete(id);
     }
     const hasRecords = results.some(x => x.length > 0);
