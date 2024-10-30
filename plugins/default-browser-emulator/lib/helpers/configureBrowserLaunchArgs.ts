@@ -10,8 +10,6 @@ export function configureBrowserLaunchArgs(
   },
 ): void {
   engine.launchArguments.push(
-    '--disable-background-networking', // Disable various background network services, including extension updating,safe browsing service, upgrade detector, translate, UMA
-    '--enable-features=NetworkService,NetworkServiceInProcess',
     '--disable-background-timer-throttling', // Disable timers being throttled in background pages/tabs
     '--disable-backgrounding-occluded-windows',
     '--disable-breakpad', // Disable crashdump collection (reporting is already disabled in Chromium)
@@ -20,14 +18,15 @@ export function configureBrowserLaunchArgs(
     '--disable-default-apps', // Disable installation of default apps on first run
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
-    /**
-     * --disable-features
-     *  site-per-process = Disables OOPIF
-     *  OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
-     *  AvoidUnnecessaryBeforeUnloadCheckSync = allow about:blank nav
-     *  MediaRouter,DialMediaRouteProvider (don't lookup local area casting options)
-     */
-    '--disable-features=PaintHolding,LazyFrameLoading,DestroyProfileOnBrowserClose,AvoidUnnecessaryBeforeUnloadCheckSync,OutOfBlinkCors,GlobalMediaControls,MediaRouter,DialMediaRouteProvider,OptimizationHints',
+    '--disable-features=PaintHolding', // Don't defer paint commits (normally used to avoid flash of unstyled content)
+    '--disable-features=LazyFrameLoading',
+    '--disable-features=DestroyProfileOnBrowserClose', // Disable the feature of: Destroy profiles when their last browser window is closed, instead of when the browser exits.
+    '--disable-features=AvoidUnnecessaryBeforeUnloadCheckSync', // allow about:blank nav - If enabled, this feature results in the browser process only asking the renderer process to run beforeunload handlers if it knows such handlers are registered. With kAvoidUnnecessaryBeforeUnloadCheckSync, content does not report a beforeunload handler is present. A ramification of this is navigations that would normally check beforeunload handlers before continuing will not, and navigation will synchronously continue.
+    '--disable-features=GlobalMediaControls', // Hide toolbar button that opens dialog for controlling media sessions.
+    '--disable-features=MediaRouter', // don't lookup local area casting options - stops network permission prompt
+    '--disable-features=DialMediaRouteProvider', // don't lookup local area casting options)
+    '--disable-features=OptimizationHints', // Disable the Chrome Optimization Guide and networking with its service API
+    '--disable-features=AutofillServerCommunication', //  Disables autofill server communication
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
@@ -35,6 +34,7 @@ export function configureBrowserLaunchArgs(
     '--disable-renderer-backgrounding', // This disables non-foreground tabs from getting a lower process priority This doesn't (on its own) affect timers or painting behavior. karma-chrome-launcher#123
     '--disable-sync', // Disable syncing to a Google account
 
+    '--no-service-autorun', // Disables the service process from adding itself as an autorun process. This does not delete existing autorun registrations, it just prevents the service from registering a new one.
     '--force-color-profile=srgb', // Force all monitors to be treated as though they have the specified color profile.
 
     '--use-fake-device-for-media-stream',

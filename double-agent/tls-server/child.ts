@@ -2,6 +2,7 @@ import '@ulixee/commons/lib/SourceMapSupport';
 import * as https from 'https';
 import * as tls from 'tls';
 import { IncomingMessage, ServerResponse } from 'http';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 
 const minMillisBetweenConnects = 5e3;
 
@@ -54,13 +55,17 @@ function start(options: { port: number; key?: string; cert?: string }): void {
     });
     const childServer = https.createServer(options, onConnection);
 
-    childServer.on('error', (err) => {
+    childServer.on('error', err => {
       process.send({ error: err.message });
       console.log(err);
     });
 
     childServer.listen(port, () => {
       process.send({ started: true });
+    });
+
+    ShutdownHandler.register(() => {
+      if (childServer) childServer.unref().close();
     });
   } catch (err) {
     console.log(err);

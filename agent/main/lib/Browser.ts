@@ -358,6 +358,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
       ...this.engine.launchArguments,
       '--no-startup-window',
       '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs
+      '--disable-features=MediaRouter', // no prompt for network connections
     ];
 
     if (!options.disableMitm) {

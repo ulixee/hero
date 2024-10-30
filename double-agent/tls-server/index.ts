@@ -35,7 +35,7 @@ export default class TlsServer extends EventEmitter {
     this.child = fork(`${__dirname}/child`, [], { stdio: ['ignore', 'inherit', 'pipe', 'ipc'] });
     this.child.stderr.setEncoding('utf8');
 
-    this.child.on('error', (err) => {
+    this.child.on('error', err => {
       console.log('ERROR from tls child process', err);
       this.emit('error', err);
     });
@@ -49,7 +49,7 @@ export default class TlsServer extends EventEmitter {
   }
 
   public close(): void {
-    this.child.kill();
+    this.child.kill('SIGKILL');
   }
 
   private emitRequest(): void {

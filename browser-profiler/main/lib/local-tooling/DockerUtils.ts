@@ -44,7 +44,7 @@ export async function startDockerAndLoadUrl(
   chromeVersion: number,
 ): Promise<ChildProcess> {
   const { hostname } = new URL(url);
-  // TODO should we also run this with remote-debugging-pipe, as there migth be differences
+  // TODO should we also run this with remote-debugging-pipe, as there might be differences
   // between pipe and port debugging?
   const hasDevtools = automationType === 'devtools';
   const dockerArgs = [
@@ -61,6 +61,7 @@ export async function startDockerAndLoadUrl(
     '--allow-running-insecure-content',
     '--ignore-certificate-errors',
     '--incognito',
+    '--disable-features=HttpsFirstModeIncognito',
     '--use-mock-keychain',
     `--user-data-dir=/tmp/${Date.now()}-${(counter += 1)}`,
   ];
