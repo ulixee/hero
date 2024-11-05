@@ -16,9 +16,9 @@ let navigatorConfig: any;
 let browser: Browser;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 10.15');
+  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 11');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
-  const asOsDataDir = `${emulatorDataDir}/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}-${operatingSystemVersion.minor}`;
+  const asOsDataDir = `${emulatorDataDir}/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}`;
 
   const navigatorJsonPath = `${asOsDataDir}/window-navigator.json`;
   ({ navigator: navigatorConfig } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any);
@@ -93,9 +93,7 @@ test('it should handle overflows in plugins', async () => {
 
   // should handle Uint32 overflows
   await expect(
-    page.mainFrame.evaluate<boolean>(
-      `navigator.plugins.item(4294967296) === navigator.plugins[0]`,
-    ),
+    page.mainFrame.evaluate<boolean>(`navigator.plugins.item(4294967296) === navigator.plugins[0]`),
   ).resolves.toBe(true);
 
   // should correctly support instance references

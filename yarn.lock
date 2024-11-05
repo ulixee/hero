@@ -1938,10 +1938,10 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.18"
 
-"@ulixee/chrome-128-0@^6613.138.11":
-  version "6613.138.11"
-  resolved "https://registry.npmjs.org/@ulixee/chrome-128-0/-/chrome-128-0-6613.138.11.tgz"
-  integrity sha512-efglwyxEq0UW/Qr6lvMi25aDwv8Ea4XwrLmd/MFPKAThZXI+vg6NoirT7lbtJ0RF02G6dvVX1OoEXnZH8rfQjg==
+"@ulixee/chrome-130-0@^6723.92.11":
+  version "6723.92.11"
+  resolved "https://registry.yarnpkg.com/@ulixee/chrome-130-0/-/chrome-130-0-6723.92.11.tgz#d1c11090911817d1838deb65958abc05bc2cfb94"
+  integrity sha512-omNgBjC4DhFRQq90TmoT0t9CqoNsOEf9DTovdhYGdfp1PZw57zbfFh/sBFI5NVUKpp2JiXugR4m1sd2Gdyi2/Q==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
