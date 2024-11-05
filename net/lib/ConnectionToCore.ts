@@ -36,6 +36,7 @@ export default class ConnectionToCore<
   TCoreApiHandlers extends IApiHandlers,
   TEventSpec,
 > extends TypedEventEmitter<IConnectionToCoreEvents<TEventSpec>> {
+  public static readonly MinimumAutoReconnectMillis = 1000;
   public connectAction: IConnectAction;
   public disconnectAction: IConnectAction;
 
@@ -53,10 +54,12 @@ export default class ConnectionToCore<
 
   protected events = new EventSubscriber();
 
-  private isConnectionTerminated = false;
+  private didCallConnectionTerminated = false;
+  private lastDisconnectDate?: Date;
 
   constructor(public transport: ITransport) {
     super();
+
     bindFunctions(this);
 
     this.events.on(transport, 'disconnected', this.onConnectionTerminated);
@@ -87,6 +90,7 @@ export default class ConnectionToCore<
 
     try {
       await this.transport.connect?.(timeoutMs);
+      this.didCallConnectionTerminated = false;
       await this.afterConnectHook();
       connectAction.resolvable.resolve();
       this.emit('connected');
@@ -98,8 +102,8 @@ export default class ConnectionToCore<
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
-    if (this.disconnectAction) return this.disconnectAction.resolvable.promise;
     this.autoReconnect = false;
+    if (this.disconnectAction) return this.disconnectAction.resolvable.promise;
 
     const disconnectAction: IConnectAction = {
       isAutomatic: false,
@@ -120,6 +124,7 @@ export default class ConnectionToCore<
 
       this.transport.disconnect?.();
       await this.onConnectionTerminated();
+      this.connectAction = null;
       log.stats('ConnectionToCore.Disconnected', {
         parentLogId: logid,
         host: this.transport.host,
@@ -140,16 +145,20 @@ export default class ConnectionToCore<
     },
     timeoutMs?: number,
   ): Promise<ICoreResponsePayload<TCoreApiHandlers, T>['data']> {
-    const connect = this.connectAction;
-    const disconnect = this.disconnectAction;
+    const activeConnectHook = this.connectAction?.isCallingHook && this.connectAction;
+    const activeDisconnectHook = this.disconnectAction?.isCallingHook && this.disconnectAction;
 
-    if (!disconnect && !connect && this.autoReconnect) {
+    // if we are not connected, try to connect (except during a disconnect)
+    if (this.shouldAutoConnect()) {
       await this.connect({ timeoutMs, isAutoConnect: true });
     }
 
-    const { promise, id } = this.pendingMessages.create(timeoutMs, !!connect || !!disconnect);
-    if (connect) connect.hookMessageId = id;
-    if (disconnect) disconnect.hookMessageId = id;
+    const { promise, id } = this.pendingMessages.create(
+      timeoutMs,
+      !!activeConnectHook || !!activeDisconnectHook,
+    );
+    if (activeConnectHook) activeConnectHook.hookMessageId = id;
+    if (activeDisconnectHook) activeDisconnectHook.hookMessageId = id;
 
     try {
       const [result] = await Promise.all([
@@ -168,8 +177,8 @@ export default class ConnectionToCore<
       }
       throw error;
     } finally {
-      if (connect) connect.hookMessageId = null;
-      if (disconnect) disconnect.hookMessageId = null;
+      if (activeConnectHook) activeConnectHook.hookMessageId = null;
+      if (activeDisconnectHook) activeDisconnectHook.hookMessageId = null;
     }
   }
 
@@ -178,6 +187,17 @@ export default class ConnectionToCore<
    */
   public hasActiveSessions(): boolean {
     return false;
+  }
+
+  public shouldAutoConnect(): boolean {
+    if (!this.autoReconnect || !!this.connectAction) return false;
+    // if we're mid-disconnect, don't auto-reconnect
+    if (this.disconnectAction?.hookMessageId) return false;
+    if (!this.lastDisconnectDate) return true;
+    const reconnectMillis = (this.constructor as typeof ConnectionToCore)
+      .MinimumAutoReconnectMillis;
+    if (Number.isNaN(reconnectMillis)) return false;
+    return Date.now() - this.lastDisconnectDate.getTime() >= reconnectMillis;
   }
 
   protected onMessage(
@@ -214,8 +234,9 @@ export default class ConnectionToCore<
   }
 
   protected async onConnectionTerminated(): Promise<void> {
-    if (this.isConnectionTerminated) return;
-    this.isConnectionTerminated = true;
+    if (this.didCallConnectionTerminated) return;
+    this.lastDisconnectDate = new Date();
+    this.didCallConnectionTerminated = true;
     this.emit('disconnected');
 
     // clear all pending messages

@@ -9,7 +9,7 @@ import WsTransportToCore from '../lib/WsTransportToCore';
 
 const apiSpy = jest.fn();
 const apiSpec = {
-  api(test: boolean) {
+  api(test: any) {
     apiSpy();
     return { test };
   },
@@ -78,6 +78,7 @@ test('should cancel connect messages if a connection closes before connecting', 
 test('should be able to reconnect after a disconnect', async () => {
   const server = new Server();
   const wss = new WebsocketServer({ server });
+  apiSpy.mockClear();
   try {
     server.listen(0);
     wss.on('connection', (ws, req) => {
@@ -88,23 +89,51 @@ test('should be able to reconnect after a disconnect', async () => {
 
     const wsTransportToCore = new WsTransportToCore(`ws://localhost:${host.port}`);
 
+    const disconnectSpy = jest.spyOn(ConnectionToCore.prototype, 'disconnect');
+    const terminateSpy = jest.spyOn<any, any>(ConnectionToCore.prototype, 'onConnectionTerminated');
     const connectionToCore = new ConnectionToCore(wsTransportToCore);
     needsClosing.push(() => connectionToCore.disconnect());
-    await expect(connectionToCore.sendRequest({ command: 'api', args: [true] })).resolves.toEqual({
-      test: true,
+    await expect(connectionToCore.sendRequest({ command: 'api', args: [1] })).resolves.toEqual({
+      test: 1,
     });
     expect(apiSpy).toHaveBeenCalledTimes(1);
-    expect(wss.clients.size).toBe(1);
-    const didDisconnect = new Promise(resolve => wsTransportToCore.once('disconnected', resolve));
-    for (const client of wss.clients) {
-      client.close();
-    }
-    await didDisconnect;
-    expect(connectionToCore.transport.isConnected).toBe(false);
+    const disconnects = jest.fn();
+    connectionToCore.on('disconnected', disconnects);
+    for (let i = 0; i < 10; i++) {
+      disconnectSpy.mockClear();
+      terminateSpy.mockClear();
+      apiSpy.mockClear();
+      const didDisconnect = new Promise(resolve => wsTransportToCore.once('disconnected', resolve));
+      expect(wss.clients.size).toBe(1);
+      for (const client of wss.clients) {
+        client.close();
+      }
+      await didDisconnect;
 
-    await expect(connectionToCore.sendRequest({ command: 'api', args: [true] })).resolves.toEqual({
-      test: true,
-    });
+      expect(disconnects).toHaveBeenCalledTimes(i + 1);
+      expect(disconnectSpy).not.toHaveBeenCalled();
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+      expect(connectionToCore.transport.isConnected).toBe(false);
+      expect(connectionToCore.connectAction).toBeFalsy();
+      // @ts-expect-error
+      expect(connectionToCore.lastDisconnectDate).toBeTruthy();
+      expect(connectionToCore.shouldAutoConnect()).toBe(false);
+
+      // @ts-expect-error
+      connectionToCore.lastDisconnectDate = new Date(
+        // @ts-expect-error
+        connectionToCore.lastDisconnectDate.getTime() - 1000,
+      );
+      expect(connectionToCore.shouldAutoConnect()).toBe(true);
+
+      await expect(
+        connectionToCore.sendRequest({ command: 'api', args: [i + 2] }),
+      ).resolves.toEqual({
+        test: i + 2,
+      });
+      expect(apiSpy).toHaveBeenCalledTimes(1);
+      expect(connectionToCore.connectAction).toBeTruthy();
+    }
   } finally {
     wss.close();
     server.unref().close();
