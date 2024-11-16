@@ -36,10 +36,9 @@ export default class ConnectionToCore<
   TCoreApiHandlers extends IApiHandlers,
   TEventSpec,
 > extends TypedEventEmitter<IConnectionToCoreEvents<TEventSpec>> {
-  public static readonly MinimumAutoReconnectMillis = 1000;
+  public static MinimumAutoReconnectMillis = 1000;
   public connectAction: IConnectAction;
   public disconnectAction: IConnectAction;
-
   public autoReconnect = true;
 
   public hooks: {
@@ -54,8 +53,8 @@ export default class ConnectionToCore<
 
   protected events = new EventSubscriber();
 
-  private didCallConnectionTerminated = false;
-  private lastDisconnectDate?: Date;
+  protected didCallConnectionTerminated = false;
+  protected lastDisconnectDate?: Date;
 
   constructor(public transport: ITransport) {
     super();
@@ -85,16 +84,17 @@ export default class ConnectionToCore<
       startTime: Date.now(),
       resolvable: new Resolvable(),
     };
-    this.connectAction = connectAction;
     this.disconnectAction = null;
 
     try {
+      this.connectAction = connectAction;
       await this.transport.connect?.(timeoutMs);
       this.didCallConnectionTerminated = false;
       await this.afterConnectHook();
       connectAction.resolvable.resolve();
       this.emit('connected');
     } catch (err) {
+      delete this.connectAction;
       connectAction.resolvable.reject(err, true);
     }
 
@@ -147,7 +147,6 @@ export default class ConnectionToCore<
   ): Promise<ICoreResponsePayload<TCoreApiHandlers, T>['data']> {
     const activeConnectHook = this.connectAction?.isCallingHook && this.connectAction;
     const activeDisconnectHook = this.disconnectAction?.isCallingHook && this.disconnectAction;
-
     // if we are not connected, try to connect (except during a disconnect)
     if (this.shouldAutoConnect()) {
       await this.connect({ timeoutMs, isAutoConnect: true });

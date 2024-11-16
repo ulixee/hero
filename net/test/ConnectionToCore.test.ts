@@ -139,3 +139,36 @@ test('should be able to reconnect after a disconnect', async () => {
     server.unref().close();
   }
 });
+
+test('should be able to reconnect after a failed connect', async () => {
+  const server = new Server();
+  const wss = new WebsocketServer({ server });
+  apiSpy.mockClear();
+  try {
+    server.listen(0);
+    let counter = 0;
+    wss.on('connection', (ws, req) => {
+      if (counter++ < 1) {
+        req.destroy(new Error('test'));
+        return;
+      }
+      const transport = new WsTransportToClient(ws, req);
+      new ConnectionToClient(transport, apiSpec);
+    });
+    const host = server.address() as AddressInfo;
+
+    const wsTransportToCore = new WsTransportToCore(`ws://localhost:${host.port}`);
+
+    const connectionToCore = new ConnectionToCore(wsTransportToCore);
+    needsClosing.push(() => connectionToCore.disconnect());
+    await expect(connectionToCore.sendRequest({ command: 'api', args: [1] })).rejects.toThrow();
+    expect(apiSpy).toHaveBeenCalledTimes(0);
+
+    ConnectionToCore.MinimumAutoReconnectMillis = 0;
+    await expect(connectionToCore.sendRequest({ command: 'api', args: [1] })).resolves.toBeTruthy();
+    expect(apiSpy).toHaveBeenCalledTimes(1);
+  } finally {
+    wss.close();
+    server.unref().close();
+  }
+});
