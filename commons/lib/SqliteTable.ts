@@ -2,7 +2,7 @@
 import type { Database as SqliteDatabase, Statement } from 'better-sqlite3';
 
 type SqliteTypes = 'INTEGER' | 'TEXT' | 'BLOB' | 'DATETIME';
-type IRecord = (string | number | Buffer)[];
+type IRecord = (string | number | Buffer | bigint)[];
 
 export default abstract class SqliteTable<T> {
   protected readonly insertStatement: Statement;
