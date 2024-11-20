@@ -656,6 +656,7 @@ export default class Resources
     if (!Array.isArray(setCookie)) setCookie = [setCookie];
     const defaultDomain = responseEvent.url.host;
     for (const cookieHeader of setCookie) {
+      if (cookieHeader === '') continue;
       const cookie = Cookie.parse(cookieHeader, { loose: true });
       let domain = cookie.domain || defaultDomain;
       // restore stripped leading .
