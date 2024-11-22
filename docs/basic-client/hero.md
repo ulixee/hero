@@ -387,8 +387,6 @@ NOTE: this tab will not be focused until you call [hero.focusTab](./hero.md#focu
 
 #### **Returns**: `Promise<Tab>`
 
-Refer to the [Interactions page](./interactions.md) for details on how to construct an interaction.
-
 ### hero.setSnippet _(key, value)_ {#setSnippet}
 
 Stores a JSON-able value in the session database that can be retrieved later with [HeroReplay](./hero-replay.md).
