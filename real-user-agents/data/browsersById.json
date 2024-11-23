@@ -4250,5 +4250,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-131-0": {
+    "id": "edge-131-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "131",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
