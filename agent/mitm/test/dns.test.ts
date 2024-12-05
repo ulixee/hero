@@ -90,9 +90,9 @@ describe('DnsOverTlsSocket', () => {
 
   test('should be able to lookup dns records and reuse the socket', async () => {
     const response = await testDnsSocket.lookupARecords('ulixee.org');
-    expect(response.answers).toHaveLength(2);
+    expect(response.answers).toHaveLength(4);
     const response2 = await testDnsSocket.lookupARecords('ulixee.org');
-    expect(response2.answers).toHaveLength(2);
+    expect(response2.answers).toHaveLength(4);
   });
 
   test('should be able to lookup multiple records at once', async () => {
@@ -109,7 +109,7 @@ describe('DnsOverTlsSocket', () => {
     try {
       socket = new DnsOverTlsSocket({ dnsOverTlsConnection: Google }, requestSession);
       const response = await socket.lookupARecords('ulixee.org');
-      expect(response.answers).toHaveLength(2);
+      expect(response.answers).toHaveLength(4);
     } finally {
       socket.close();
     }
