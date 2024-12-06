@@ -12,7 +12,7 @@
     "@ulixee/unblocked-specification": "2.0.0-alpha.30",
     "devtools-protocol": "^0.0.1137505",
     "nanoid": "^3.3.6",
-    "tough-cookie": "^4.1.3",
+    "tough-cookie": "^5.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {

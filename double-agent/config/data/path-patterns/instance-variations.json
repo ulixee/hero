@@ -86,9 +86,6 @@
     "window.document.visibilityState",
     "window.document.webkitVisibilityState",
     "window.document.fonts.ready",
-    "window.navigator.connection.onchange",
-    "window.navigator.connection.effectiveType",
-    "window.navigator.connection.saveData",
     "window.BarcodeDetector.getSupportedFormats"
   ]
 }
