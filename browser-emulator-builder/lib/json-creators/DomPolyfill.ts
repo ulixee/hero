@@ -145,6 +145,11 @@ function filterNotSupportedByPolyfillPlugin(
     return true;
   }
 
+  const languages = ['window.navigator.languages', 'window.navigator.language'];
+  if (languages.includes(path)) {
+    return true;
+  }
+
   // Currently we don't support creating otherInvocations with new()
   if (propertyName.includes('_$otherInvocation') && propertyName.includes('new()')) {
     return true;
