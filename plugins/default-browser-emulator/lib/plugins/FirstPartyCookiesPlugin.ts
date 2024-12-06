@@ -145,7 +145,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
         ] ?? []) {
           await this.cookieJar.setCookie(cookie, sourceUrl, {
             sameSiteContext,
-          } as any);
+          });
         }
         delete this.cookiesPendingSiteInteraction[hostname];
       })()
@@ -179,7 +179,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
     }
     await this.cookieJar.setCookie(cookie, url.href, {
       sameSiteContext,
-    } as any);
+    });
   }
 
   private async getCookieHeader(resource: IHttpResourceLoadDetails): Promise<string> {
@@ -200,7 +200,7 @@ export default class FirstPartyCookiesPlugin implements IHooksProvider {
     await this.waitForDocumentCookiesLoaded(sourceDocumentUrl);
     let cookies = await this.cookieJar.getCookies(url.href, {
       sameSiteContext,
-    } as any);
+    });
 
     if (sameSiteContext === 'none') {
       cookies = cookies.filter(x => this.hasFirstPartyInteractionForDomain(x.domain));

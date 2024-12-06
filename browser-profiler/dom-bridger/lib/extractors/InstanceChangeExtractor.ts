@@ -59,39 +59,41 @@ export default class InstanceChangeExtractor extends BaseExtractor {
     'window.navigator.requestMIDIAccess',
     'window.navigator.clipboard.readText',
     'window.Element.prototype.requestPointerLock',
-    'window.Animation.new().finished.startTime'
+    'window.Animation.new().finished.startTime',
   ];
 
   public static override extraAddPatterns = [];
 
+  // NOTE: instance to instance changes won't always include the things you're looking for.
+  // For instance, if languages are different from browser stack to local, it won't show up here since those are instances of the same machine
   public static override extraChangePatterns = [
-    'window.Intl.DateTimeFormat.new().resolvedOptions',
-    'window.Intl.DateTimeFormat.new().format',
-    'window.console.memory.usedJSHeapSize',
-    'window.BaseAudioContext.prototype.state',
-    'window.BaseAudioContext.prototype.onstatechange',
     'window.AudioContext.new().destination.context.state',
     'window.AudioContext.new().destination.context.onstatechange',
+    'window.AudioContext.new().destination.context.baseLatency',
+    'window.AudioContext.new().destination.context.currentTime',
     'window.AudioContext.new().state',
     'window.AudioContext.new().onstatechange',
-    'window.document.readyState',
+    'window.AudioContext.new().baseLatency',
+    'window.AudioContext.new().currentTime',
+    'window.BarcodeDetector.getSupportedFormats',
+    'window.BaseAudioContext.prototype.state',
+    'window.BaseAudioContext.prototype.currentTime',
+    'window.BaseAudioContext.prototype.onstatechange',
+    'window.Intl.DateTimeFormat.new().resolvedOptions',
+    'window.Intl.DateTimeFormat.new().format',
+    'window.ScrollTimeline',
+    'window.console.memory.usedJSHeapSize',
+    'window.console.memory.jsHeapSizeLimit',
+    'window.navigator.connection',
     'window.navigator.connection.onchange',
     'window.navigator.connection.effectiveType',
     'window.navigator.connection.saveData',
+    'window.document.readyState',
     'window.document.styleSheets',
     'window.document.scripts',
-    'window.console.memory.jsHeapSizeLimit',
+    'window.document.fonts.ready',
     'window.document.visibilityState',
     'window.document.webkitVisibilityState',
-    'window.navigator.connection',
-    'window.BarcodeDetector.getSupportedFormats',
-    'window.BaseAudioContext.prototype.currentTime',
-    'window.AudioContext.new().baseLatency',
-    'window.AudioContext.new().destination.context.baseLatency',
-    'window.AudioContext.new().destination.context.currentTime',
-    'window.AudioContext.new().currentTime',
-    'window.document.fonts.ready',
-    'window.ScrollTimeline',
   ];
 
   public static override ignoredExtraPatterns = [];

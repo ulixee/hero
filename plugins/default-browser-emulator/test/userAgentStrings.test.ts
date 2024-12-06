@@ -18,7 +18,7 @@ test('it should run uninstalled userAgent strings on the closest installed brows
   );
 });
 
-test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async () => {
+test('it should run pick an OS match for the default chrome on mac', async () => {
   const userAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${defaultBrowserEngine.version.major}.0.3987.165 Safari/537.36`;
 
   const browserMeta = DefaultBrowserEmulator.selectBrowserMeta(userAgent);
@@ -33,5 +33,5 @@ test('it should run pick an OS version for Chrome 90+ on mac 10.15.17', async ()
   if (Number(osVersion.major) === 10) {
     expect(Number(osVersion.minor)).toBeGreaterThan(15);
   }
-  expect(browserMeta.userAgentOption.operatingSystemName).toBe('mac-os');
+  expect(browserMeta.userAgentOption.operatingSystemCleanName).toBe('mac-os');
 });

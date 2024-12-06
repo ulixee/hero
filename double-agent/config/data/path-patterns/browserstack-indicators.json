@@ -2,9 +2,10 @@
   "added": [],
   "removed": [
     "window.chrome.runtime",
-    "window.HTMLAnchorElement.prototype.hrefTranslate"
+    "window.HTMLAnchorElement.prototype.hrefTranslate",
+    "window.GPU.prototype.requestAdapter"
   ],
-  "changed": [],
+  "changed": ["window.GPU.prototype.requestAdapter"],
   "changedOrder": [],
   "extraAdded": [],
   "extraChanged": []

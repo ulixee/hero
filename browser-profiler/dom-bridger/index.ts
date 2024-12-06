@@ -20,6 +20,9 @@ const devtoolsIndicators = BrowserProfiler.loadDataFile<IBridgeDefinitions>(
 const headlessIndicators = BrowserProfiler.loadDataFile<IBridgeDefinitions>(
   'dom-bridges/path-patterns/headless-indicators.json',
 );
+const browserstackIndicators = BrowserProfiler.loadDataFile<IBridgeDefinitions>(
+  'dom-bridges/path-patterns/browserstack-indicators.json',
+);
 
 export default class DomBridger {
   public static removeDevtoolsFromPolyfill(polyfill: IDomPolyfill): void {
@@ -35,13 +38,23 @@ export default class DomBridger {
     injectDevtoolsIndicatorPolyfills(polyfill);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public static removeBrowserstackFromPolyfill(polyfill: IDomPolyfill): void {
-    // nothing to remove outside navigator, which is already being cut
+    polyfill.add = polyfill.add.filter(x => {
+      return (
+        !browserstackIndicators.added.some(pattern => pathIsPatternMatch(x.path, pattern)) &&
+        !browserstackIndicators.extraAdded.some(pattern => pathIsPatternMatch(x.path, pattern))
+      );
+    });
+    polyfill.modify = polyfill.modify.filter(x => {
+      return (
+        !browserstackIndicators.changed.some(pattern => pathIsPatternMatch(x.path, pattern)) &&
+        !browserstackIndicators.extraChanged.some(pattern => pathIsPatternMatch(x.path, pattern))
+      );
+    });
   }
 
   public static removeHeadlessFromPolyfill(polyfill: IDomPolyfill): void {
-    polyfill.add = polyfill.add.filter(x => !isHeadlessIndicator(x.path, x.propertyName));
+    polyfill.add = polyfill.add.filter(x => !isHeadlessAdded(x.path, x.propertyName));
 
     polyfill.remove = injectHeadlessIndicatorsToRemove(polyfill.remove);
   }
@@ -50,6 +63,9 @@ export default class DomBridger {
     polyfill.modify = polyfill.modify.filter(x => !isVariationChange(x.path, x.propertyName));
     polyfill.remove = polyfill.remove.filter(x => !isVariationChange(x.path, x.propertyName));
     polyfill.add = polyfill.add.filter(x => !isVariationChange(x.path, x.propertyName));
+    polyfill.reorder = polyfill.reorder.filter(
+      x => !isVariationChange(x.path, x.propertyName) && !isVariationChange(x.path, x.prevProperty),
+    );
   }
 
   public static removeCustomCallbackFromPolyfill(
@@ -75,6 +91,14 @@ function isVariationChange(path: string, propertyName: string): boolean {
     return true;
   if (windowVariations.changed.some(pattern => pathIsPatternMatch(path, pattern))) return true;
   if (windowVariations.extraChanged.some(pattern => pathIsPatternMatch(path, pattern))) return true;
+  if (devtoolsIndicators.changed.some(pattern => pathIsPatternMatch(path, pattern))) return true;
+  if (devtoolsIndicators.extraChanged.some(pattern => pathIsPatternMatch(path, pattern)))
+    return true;
+  if (browserstackIndicators.changed.some(pattern => pathIsPatternMatch(path, pattern)))
+    return true;
+  if (browserstackIndicators.extraChanged.some(pattern => pathIsPatternMatch(path, pattern)))
+    return true;
+
   return false;
 }
 
@@ -91,9 +115,10 @@ function isDevtoolsIndicator(path: string, propertyName: string): boolean {
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isHeadlessIndicator(path: string, propertyName: string): boolean {
+function isHeadlessAdded(path: string, _propertyName: string): boolean {
   if (headlessIndicators.added.some(pattern => pathIsPatternMatch(path, pattern))) return true;
+  if (headlessIndicators.extraAdded.some(pattern => pathIsPatternMatch(path, pattern))) return true;
+
   return false;
 }
 

@@ -141,7 +141,10 @@ export default class Session
     return this.core.sessionRegistry;
   }
 
-  protected constructor(readonly options: ISessionCreateOptions, public core: Core) {
+  protected constructor(
+    readonly options: ISessionCreateOptions,
+    public core: Core,
+  ) {
     super();
 
     for (const key of Object.keys(options)) {
@@ -817,7 +820,7 @@ export default class Session
 
     const {
       string: userAgentString,
-      operatingSystemName,
+      operatingSystemCleanName: operatingSystemName,
       operatingSystemVersion: osVersion,
       uaClientHintsPlatformVersion,
       browserVersion,

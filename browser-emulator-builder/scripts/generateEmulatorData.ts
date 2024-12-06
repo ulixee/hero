@@ -35,6 +35,7 @@ async function generate(): Promise<void> {
     (a, b) => Number(a.split('-').slice(1).join('.')) - Number(b.split('-').slice(1).join('.')),
   )) {
     if (!browserId.startsWith('chrome') && !browserId.startsWith('safari')) continue;
+    if (process.env.BROWSER_ID && !browserId.includes(process.env.BROWSER_ID)) continue;
 
     const browserEngineId = EmulatorData.extractBrowserEngineId(browserId);
     const browserEngineOption = chromeEngines.find(x => x.id === browserEngineId);
@@ -60,23 +61,23 @@ async function generate(): Promise<void> {
     new UserAgentHintsJson(config, userAgentIds).save(browserDir);
 
     if (config.browserEngineOption) {
-        console.log('- Codecs');
-        new CodecsJson(config, userAgentIds).save(browserDir);
+      console.log('- Codecs');
+      new CodecsJson(config, userAgentIds).save(browserDir);
 
-        console.log('- Speech');
-        new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
+      console.log('- Speech');
+      new SpeechSynthesisJson(config, userAgentIds).save(browserDir);
 
-        console.log('- Fonts');
-        new FontsJson(config, userAgentIds).save(browserDir);
+      console.log('- Fonts');
+      new FontsJson(config, userAgentIds).save(browserDir);
 
-        console.log('- WindowChrome');
-        new WindowChromeJson(config, userAgentIds).save(browserDir);
+      console.log('- WindowChrome');
+      new WindowChromeJson(config, userAgentIds).save(browserDir);
 
-        console.log('- WindowFraming');
-        new WindowFramingJson(config, userAgentIds).save(browserDir);
+      console.log('- WindowFraming');
+      new WindowFramingJson(config, userAgentIds).save(browserDir);
 
-        console.log('- WindowNavigator');
-        new WindowNavigatorJson(config, userAgentIds).save(browserDir);
+      console.log('- WindowNavigator');
+      new WindowNavigatorJson(config, userAgentIds).save(browserDir);
 
       const hasAllPolyfills = DomPolyfillJson.hasAllDomPolyfills(
         browserId,
