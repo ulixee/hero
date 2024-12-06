@@ -23,7 +23,6 @@ import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import { IJsPath } from '@ulixee/js-path';
 import IDialog from '@ulixee/unblocked-specification/agent/browser/IDialog';
 import IExecJsPathResult from '@ulixee/unblocked-specification/agent/browser/IExecJsPathResult';
-import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
 import {
   IPage,

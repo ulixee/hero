@@ -80,7 +80,7 @@ export default class UserAgentOptions {
     if (!filteredOptions.length) filteredOptions = this.defaultBrowserUserAgentOptions;
 
     const withOs = filteredOptions.filter(
-      x => x.operatingSystemName === userAgent.operatingSystemName,
+      x => cleanName(x.operatingSystemName) === userAgent.operatingSystemCleanName,
     );
 
     if (withOs.length) filteredOptions = withOs;
@@ -114,8 +114,12 @@ export default class UserAgentOptions {
 
     // eslint-disable-next-line prefer-const
     let [osVersionMajor, osVersionMinor, osVersionPatch] = uaOs.version.split('.');
-    const operatingSystemName = cleanName(uaOs.name || '');
-    if (operatingSystemName === 'mac-os' && osVersionMajor === '10' && osVersionMinor === '16') {
+    const operatingSystemCleanName = cleanName(uaOs.name || '');
+    if (
+      operatingSystemCleanName === 'mac-os' &&
+      osVersionMajor === '10' &&
+      osVersionMinor === '16'
+    ) {
       osVersionMajor = '11';
       osVersionMinor = undefined;
     }
@@ -128,7 +132,7 @@ export default class UserAgentOptions {
         patch: browserVersionPatch,
         build: browserVersionBuild,
       },
-      operatingSystemName,
+      operatingSystemCleanName,
       operatingSystemVersion: {
         major: osVersionMajor,
         minor: osVersionMinor,
@@ -172,7 +176,7 @@ export default class UserAgentOptions {
     const userAgent = {
       browserName: cleanName(agent.browserName),
       browserVersion: { major, minor, build, patch: String(patch) },
-      operatingSystemName: cleanName(agent.operatingSystemName),
+      operatingSystemCleanName: cleanName(agent.operatingSystemName),
       operatingSystemVersion: { ...agent.operatingSystemVersion },
       uaClientHintsPlatformVersion,
       string: UserAgent.parse(agent, patch, uaClientHintsPlatformVersion),
@@ -191,7 +195,7 @@ export default class UserAgentOptions {
   private static canTrustOsVersionForAgentString(agentOption: IUserAgentOption): boolean {
     // Chrome 90+ started pegging the OS versions to 10.15.7
     if (
-      agentOption.operatingSystemName === 'mac-os' &&
+      agentOption.operatingSystemCleanName === 'mac-os' &&
       Number(agentOption.browserVersion.major) > 90 &&
       agentOption.operatingSystemVersion.major === '10' &&
       agentOption.operatingSystemVersion.minor === '15' &&
@@ -202,7 +206,7 @@ export default class UserAgentOptions {
 
     // windows 11 never shows up in the os version (shows as 10)
     if (
-      agentOption.operatingSystemName === 'windows' &&
+      agentOption.operatingSystemCleanName === 'windows' &&
       agentOption.operatingSystemVersion.major === '10'
     ) {
       return false;
@@ -218,7 +222,7 @@ export default class UserAgentOptions {
     const realOperatingSystem = dataUserAgentOptions.find(
       x =>
         x.browserId === browserId &&
-        cleanName(x.operatingSystemName) === userAgent.operatingSystemName &&
+        cleanName(x.operatingSystemName) === userAgent.operatingSystemCleanName &&
         isLeftVersionGreater(x.operatingSystemVersion, userAgent.operatingSystemVersion),
     );
     if (realOperatingSystem) {

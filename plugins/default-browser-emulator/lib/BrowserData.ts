@@ -159,7 +159,7 @@ function getOperatingSystemParts(userAgentOption: IUserAgentOption): {
   name: string;
   version: string;
 } {
-  const { operatingSystemName: name, operatingSystemVersion: version } = userAgentOption;
+  const { operatingSystemCleanName: name, operatingSystemVersion: version } = userAgentOption;
   let { major, minor } = version;
 
   if (name.startsWith('mac')) {

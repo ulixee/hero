@@ -6,8 +6,8 @@ export default function configureSessionTcp(
   emulationProfile: IEmulationProfile,
   settings: ITcpSettings,
 ): void {
-  const { operatingSystemName, operatingSystemVersion } = emulationProfile.userAgentOption;
-  const tcpSettings = getTcpSettingsForOs(operatingSystemName, operatingSystemVersion);
+  const { operatingSystemCleanName, operatingSystemVersion } = emulationProfile.userAgentOption;
+  const tcpSettings = getTcpSettingsForOs(operatingSystemCleanName, operatingSystemVersion);
   if (tcpSettings) {
     settings.tcpTtl = tcpSettings.ttl;
     settings.tcpWindowSize = tcpSettings.windowSize;

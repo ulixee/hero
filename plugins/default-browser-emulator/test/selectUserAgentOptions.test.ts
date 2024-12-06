@@ -24,7 +24,7 @@ test('should support choosing a specific useragent', async () => {
 test('should support choosing a specific OS', async () => {
   const options = selectUserAgentOption('~ mac & chrome >= 88', userAgentOptions);
   expect(parseInt(options.browserVersion.major, 10)).toBeGreaterThanOrEqual(88);
-  expect(options.operatingSystemName).toBe('mac-os');
+  expect(options.operatingSystemCleanName).toBe('mac-os');
 });
 
 test('it should find correct browser meta', async () => {
