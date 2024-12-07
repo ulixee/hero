@@ -76,9 +76,14 @@
       "specification",
       "testing",
       "timetravel",
-      "double-agent/*",
-      "double-agent/collect/plugins/*",
+      "double-agent/analyze",
       "double-agent/analyze/plugins/*",
+      "double-agent/collect",
+      "double-agent/collect/plugins/*",
+      "double-agent/collect-controller",
+      "double-agent/config",
+      "double-agent/runner",
+      "double-agent/tls-server",
       "double-agent-stacks"
     ],
     "nohoist": [
