@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **commons:** parse argv env files ([b8aed1e](https://github.com/ulixee/hero/commit/b8aed1e6030fae9ab582018020cef6572cc2beb4))
+
+### Features
+
+* **commons:** extend typeserializer with array types ([6e23a45](https://github.com/ulixee/hero/commit/6e23a45e96468a155c077543c0c7ff9c7972711e))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 **Note:** Version bump only for package @ulixee/commons

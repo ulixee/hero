@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **core:** dont log devtools internal ws messages ([3c18030](https://github.com/ulixee/hero/commit/3c1803078b9ec8423b0250ef4b00fa9ab9e20d69))
+* **default-browser:** os lookup wrong ([b14bf27](https://github.com/ulixee/hero/commit/b14bf27080e88c50f7c76c53b1275c1b738093c2))
+
+### Features
+
+* **core:** start without session persistence ([4cf7520](https://github.com/ulixee/hero/commit/4cf7520b9f4de21e3c99637c355e49e88d336ba3))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 ### Bug Fixes

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **net:** clear connect when disconnected ([5a8a5fe](https://github.com/ulixee/hero/commit/5a8a5fe2f3187fa188a1efedffc0345a58dcf977))
+* **net:** set ws disconnecting earlier ([2c61ca3](https://github.com/ulixee/hero/commit/2c61ca3a59867ac5ab0c33749c0f8e9a43199994))
+* **net:** should reconnect if fails during connect ([6cbb55a](https://github.com/ulixee/hero/commit/6cbb55a9e5eca7ba5beb283b6f49f5239090c029))
+
+### Features
+
+* **net:** simplify network stack ([81d2c76](https://github.com/ulixee/hero/commit/81d2c7613a604bb5abd0d0343fa6dc413e7b6c8d))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 ### Bug Fixes

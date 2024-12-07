@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **agent:** make ws callbacks no-cors ([ecaf56e](https://github.com/ulixee/hero/commit/ecaf56e9a2a30a3823721b9599beea965b52b0ba))
+* **agent:** single new doc callback per name ([20e2c41](https://github.com/ulixee/hero/commit/20e2c4148fe92b3359b6de97ffbfbc95598f6182))
+* **agent:** support passing invalid URL to isWebsocketUrl ([665c108](https://github.com/ulixee/hero/commit/665c1080b31e9c7d6f4dfb8648524df0e5d64e40))
+* **client:** before disconnect bug ([fe8ac97](https://github.com/ulixee/hero/commit/fe8ac97ad848e58df4565939de681f0948153c37))
+* **commons:** parse argv env files ([b8aed1e](https://github.com/ulixee/hero/commit/b8aed1e6030fae9ab582018020cef6572cc2beb4))
+* **core:** dont log devtools internal ws messages ([3c18030](https://github.com/ulixee/hero/commit/3c1803078b9ec8423b0250ef4b00fa9ab9e20d69))
+* **default-browser-emulator:** fix typo that TS didnt catch, resulting in wrong deviceMemory proto ([4ef12e1](https://github.com/ulixee/hero/commit/4ef12e1e809b0c7cf6dbdc12ad39420197043bbb))
+* **default-browser:** os lookup wrong ([b14bf27](https://github.com/ulixee/hero/commit/b14bf27080e88c50f7c76c53b1275c1b738093c2))
+* **double-agent:** kill trailing tls process ([5942f27](https://github.com/ulixee/hero/commit/5942f27978a2e5673fadce09ab85e6d690a77423))
+* **double-agent:** probe data out of sync ([3eabd96](https://github.com/ulixee/hero/commit/3eabd96c5b7ddd0306e5203f7c9fb9d6f4120707))
+* **net:** clear connect when disconnected ([5a8a5fe](https://github.com/ulixee/hero/commit/5a8a5fe2f3187fa188a1efedffc0345a58dcf977))
+* **net:** set ws disconnecting earlier ([2c61ca3](https://github.com/ulixee/hero/commit/2c61ca3a59867ac5ab0c33749c0f8e9a43199994))
+* **net:** should reconnect if fails during connect ([6cbb55a](https://github.com/ulixee/hero/commit/6cbb55a9e5eca7ba5beb283b6f49f5239090c029))
+* polyfills adding incorrect data ([824da44](https://github.com/ulixee/hero/commit/824da4418303931a95a5bb2b2feedc5ee12a0ba8))
+
+### Features
+
+* **agent:** default to chrome 130 ([5830b3d](https://github.com/ulixee/hero/commit/5830b3de6a509614f1a40d20f5fe33f4778b3ac9))
+* **commons:** extend typeserializer with array types ([6e23a45](https://github.com/ulixee/hero/commit/6e23a45e96468a155c077543c0c7ff9c7972711e))
+* **core:** start without session persistence ([4cf7520](https://github.com/ulixee/hero/commit/4cf7520b9f4de21e3c99637c355e49e88d336ba3))
+* **default-browser-emulator:** use Typeserializer in injected scripts ([8a9a568](https://github.com/ulixee/hero/commit/8a9a56886a6707a1b8fd0ed8c0bd2fce45884c3c))
+* **net:** simplify network stack ([81d2c76](https://github.com/ulixee/hero/commit/81d2c7613a604bb5abd0d0343fa6dc413e7b6c8d))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 ### Bug Fixes
@@ -17,7 +44,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * attempt to resolve node-gyp in dev ([ff3f459](https://github.com/ulixee/hero/commit/ff3f45902dc5e4793104fe7c1cbb2b5aefaf6054))
 * **core:** improve max event listener warnings ([8b9422a](https://github.com/ulixee/hero/commit/8b9422ae59760576087546f827c4a3cf6459e863))
-
 
 ### Features
 

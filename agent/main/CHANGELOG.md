@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **agent:** make ws callbacks no-cors ([ecaf56e](https://github.com/ulixee/hero/commit/ecaf56e9a2a30a3823721b9599beea965b52b0ba))
+* **agent:** single new doc callback per name ([20e2c41](https://github.com/ulixee/hero/commit/20e2c4148fe92b3359b6de97ffbfbc95598f6182))
+* **agent:** support passing invalid URL to isWebsocketUrl ([665c108](https://github.com/ulixee/hero/commit/665c1080b31e9c7d6f4dfb8648524df0e5d64e40))
+* **core:** dont log devtools internal ws messages ([3c18030](https://github.com/ulixee/hero/commit/3c1803078b9ec8423b0250ef4b00fa9ab9e20d69))
+* **default-browser:** os lookup wrong ([b14bf27](https://github.com/ulixee/hero/commit/b14bf27080e88c50f7c76c53b1275c1b738093c2))
+* **double-agent:** kill trailing tls process ([5942f27](https://github.com/ulixee/hero/commit/5942f27978a2e5673fadce09ab85e6d690a77423))
+
+### Features
+
+* **agent:** default to chrome 130 ([5830b3d](https://github.com/ulixee/hero/commit/5830b3de6a509614f1a40d20f5fe33f4778b3ac9))
+* **commons:** extend typeserializer with array types ([6e23a45](https://github.com/ulixee/hero/commit/6e23a45e96468a155c077543c0c7ff9c7972711e))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 ### Bug Fixes

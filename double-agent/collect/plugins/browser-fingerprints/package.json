@@ -1,6 +1,6 @@
 {
   "name": "@double-agent/collect-browser-fingerprints",
-  "version": "2.0.0-alpha.30",
+  "version": "2.0.0-alpha.31",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -13,7 +13,7 @@
     "prod": "GENERATE_PROFILES=1 PORT=3001 DOMAIN=a1.ulixee.org node index.js"
   },
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.30",
+    "@double-agent/collect": "2.0.0-alpha.31",
     "cookie": "^0.4.0",
     "fingerprintjs2": "^2.1.0"
   }

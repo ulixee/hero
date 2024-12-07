@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
+
+### Bug Fixes
+
+* **default-browser-emulator:** fix typo that TS didnt catch, resulting in wrong deviceMemory proto ([4ef12e1](https://github.com/ulixee/hero/commit/4ef12e1e809b0c7cf6dbdc12ad39420197043bbb))
+* **default-browser:** os lookup wrong ([b14bf27](https://github.com/ulixee/hero/commit/b14bf27080e88c50f7c76c53b1275c1b738093c2))
+* **double-agent:** kill trailing tls process ([5942f27](https://github.com/ulixee/hero/commit/5942f27978a2e5673fadce09ab85e6d690a77423))
+
+### Features
+
+* **agent:** default to chrome 130 ([5830b3d](https://github.com/ulixee/hero/commit/5830b3de6a509614f1a40d20f5fe33f4778b3ac9))
+* **default-browser-emulator:** use Typeserializer in injected scripts ([8a9a568](https://github.com/ulixee/hero/commit/8a9a56886a6707a1b8fd0ed8c0bd2fce45884c3c))
+
 # [2.0.0-alpha.30](https://github.com/ulixee/hero/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-10-11)
 
 ### Features
