@@ -1,5 +1,7 @@
 {
-  "added": ["window.HTMLLinkElement.prototype.import"],
+  "added": [
+    "window.HTMLLinkElement.prototype.import"
+  ],
   "removed": [],
   "changed": [],
   "changedOrder": [],

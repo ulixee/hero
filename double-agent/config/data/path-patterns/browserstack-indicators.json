@@ -5,7 +5,9 @@
     "window.HTMLAnchorElement.prototype.hrefTranslate",
     "window.GPU.prototype.requestAdapter"
   ],
-  "changed": ["window.GPU.prototype.requestAdapter"],
+  "changed": [
+    "window.GPU.prototype.requestAdapter"
+  ],
   "changedOrder": [],
   "extraAdded": [],
   "extraChanged": []
