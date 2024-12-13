@@ -426,7 +426,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     for (const [key, value] of Object.entries(requestHeaders)) {
       const titleKey = `${key
         .split('-')
-        .map(x => x[0].toUpperCase() + x.slice(1))
+        .map(x => (x[0] ?? '').toUpperCase() + x.slice(1))
         .join('-')}`;
       if (resource.requestHeaders[titleKey] && titleKey !== key) {
         delete resource.requestHeaders[titleKey];
