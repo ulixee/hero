@@ -25,7 +25,6 @@ import LoadingFailedEvent = Protocol.Network.LoadingFailedEvent;
 import RequestServedFromCacheEvent = Protocol.Network.RequestServedFromCacheEvent;
 import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtraInfoEvent;
 import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
-import { WebsocketSession } from './WebsocketSession';
 
 interface IResourcePublishing {
   hasRequestWillBeSentEvent: boolean;
@@ -37,7 +36,6 @@ interface IResourcePublishing {
 const mbBytes = 1028 * 1028;
 
 export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEvents> {
-  public readonly websocketSession: WebsocketSession;
   protected readonly logger: IBoundLog;
   private readonly devtools: DevtoolsSession;
   private readonly attemptedAuthentications = new Set<string>();
@@ -62,13 +60,11 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
   constructor(
     devtoolsSession: DevtoolsSession,
-    websocketSession: WebsocketSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
   ) {
     super();
     this.devtools = devtoolsSession;
-    this.websocketSession = websocketSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
     bindFunctions(this);
@@ -308,8 +304,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     if (this.requestIdsToIgnore.has(networkRequest.requestId)) return;
 
     const url = networkRequest.request.url;
-    if (this.websocketSession.isWebsocketUrl(url)) {
-      this.websocketSession.registerWebsocketFrameId(url, networkRequest.frameId);
+    if (url.includes('agent.localhost')) {
+      this.emit('internal-request', { request: networkRequest });
       this.addRequestIdToIgnore(networkRequest.requestId);
       return;
     }
@@ -630,11 +626,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
-  private onWebSocketCreated(event: WebSocketCreatedEvent): void {
-    if (this.websocketSession.isWebsocketUrl(event.url)) {
-      this.addRequestIdToIgnore(event.requestId);
-    }
-  }
+  private onWebSocketCreated(_event: WebSocketCreatedEvent): void {}
 
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent): void {
     if (this.requestIdsToIgnore.has(handshake.requestId)) return;

@@ -150,12 +150,6 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
         params.networkId ??
         params.requestId;
       if (params.networkId) this.fetchRequestIdToNetworkId.set(params.requestId, params.networkId);
-      if (
-        event.method === 'Network.webSocketCreated' &&
-        this.browserContext.websocketSession?.isWebsocketUrl(params.url)
-      ) {
-        this.requestsToSkip.add(requestId);
-      }
 
       if (!pageId && params.targetInfo && params.targetInfo?.type === 'page') {
         pageId = params.targetInfo.targetId;

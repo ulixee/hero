@@ -1,4 +1,6 @@
 import IHttpResourceLoadDetails from '../net/IHttpResourceLoadDetails';
+import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
+import Protocol from 'devtools-protocol';
 
 export declare type IBrowserResourceRequest = Omit<
   IHttpResourceLoadDetails,
@@ -50,5 +52,9 @@ export interface IBrowserNetworkEvents {
   };
   'resource-failed': {
     resource: IBrowserResourceRequest;
+  };
+  // Special internal network request, used to communicate internal data
+  'internal-request': {
+    request: RequestWillBeSentEvent;
   };
 }

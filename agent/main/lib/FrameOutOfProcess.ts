@@ -23,7 +23,6 @@ export default class FrameOutOfProcess {
     this.frame = frame;
     this.networkManager = new NetworkManager(
       this.devtoolsSession,
-      this.browserContext.websocketSession,
       frame.logger,
       page.browserContext.proxy,
     );
