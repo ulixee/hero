@@ -67,8 +67,7 @@ export default class MirrorNetwork {
         responseCode: 200,
         responseHeaders: [
           { name: 'Content-Type', value: 'text/html; charset=utf-8' },
-          // TODO remove localhost stuff
-          { name: 'Content-Security-Policy', value: "script-src 'nonce-hero-timetravel'; connect-src 'self' ws://agent.localhost:* http://agent.localhost:*" },
+          { name: 'Content-Security-Policy', value: "script-src 'nonce-hero-timetravel'; connect-src 'self'" },
           { name: 'Access-Control-Allow-Origin', value: '*' },
         ],
         body: Buffer.from(`${doctype}<html><head></head><body></body></html>`).toString('base64'),
