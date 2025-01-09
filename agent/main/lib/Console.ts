@@ -10,15 +10,10 @@ import Protocol from 'devtools-protocol';
 import { IConsoleEvents } from '@ulixee/unblocked-specification/agent/browser/IConsole';
 
 const SCRIPT_PLACEHOLDER = '';
-const { log } = Log(module);
 
 export class Console extends TypedEventEmitter<IConsoleEvents> {
   isReady: Resolvable<void>;
 
-  private readonly host = 'agent.localhost';
-  private port = 9999;
-
-  private readonly secret = Math.random().toString();
   private readonly events = new EventSubscriber();
   // We store resolvable when we received websocket message before, receiving
   // targetId, this way we can await this, and still trigger to get proper ids.
@@ -27,7 +22,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   private server: Server;
   private intervals = new Set<NodeJS.Timeout>();
 
-  constructor(public devtoolsSession: DevtoolsSession) {
+  constructor(public devtoolsSession: DevtoolsSession, public secretKey?: string) {
     super();
   }
 
@@ -47,21 +42,11 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   }
 
   isConsoleRegisterUrl(url: string): boolean {
-    try {
-      const parsed = new URL(url);
-      return (
-        parsed.hostname === this.host
-        // parsed.port === this.port.toString() &&
-        // parsed.searchParams.get('secret') === this.secret
-      );
-    } catch {
-      return false;
-    }
+    return url.includes(`/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=`)
   }
 
   registerFrameId(url: string, frameId: string): void {
     const parsed = new URL(url);
-    if (parsed.searchParams.get('secret') !== this.secret) return;
     const clientId = parsed.searchParams.get('clientId');
     if (!clientId) return;
 
@@ -78,11 +63,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
     const scriptFn = injectedScript
       .toString()
       // eslint-disable-next-line no-template-curly-in-string
-      .replaceAll('${this.host}', this.host)
-      // eslint-disable-next-line no-template-curly-in-string
-      .replaceAll('${this.port}', this.port.toString())
-      // eslint-disable-next-line no-template-curly-in-string
-      .replaceAll('${this.secret}', this.secret)
+      .replaceAll('${this.secretKey}', this.secretKey)
       // Use function otherwise replace will try todo some magic
       .replace('SCRIPT_PLACEHOLDER', () => script);
 
@@ -100,7 +81,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
       const [secret, maybeClientId, serializedData] = msgAdded.message.text.split('-_-');
-      if (secret !== this.secret) return;
+      if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
       name = data.name;
@@ -129,16 +110,20 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
  * */
 function injectedScript(): void {
   const clientId = Math.random();
-  const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
+
+  // By using document.url.origin we avoid all content security problems
+  const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`
+
+  // const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
-  void fetch(`http://${url}`, { mode: 'no-cors' }).catch(() => undefined);
+  void fetch(url, { mode: 'no-cors' }).catch(() => undefined);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const callback = (name, payload): void => {
     const serializedData = JSON.stringify({ name, payload });
     // eslint-disable-next-line no-console
-    console.debug(`${this.secret}-_-${clientId}-_-${serializedData}`);
+    console.debug(`${this.secretKey}-_-${clientId}-_-${serializedData}`);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions

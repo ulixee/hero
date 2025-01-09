@@ -61,6 +61,7 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
       devtoolsSession,
       this.logger,
       browserContext.proxy,
+      browserContext.secretKey,
     );
     const session = this.devtoolsSession;
     this.events.on(session, 'Inspector.targetReloadedAfterCrash', () => {

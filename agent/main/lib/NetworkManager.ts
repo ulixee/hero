@@ -62,6 +62,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
+    public secretKey?: string,
   ) {
     super();
     this.devtools = devtoolsSession;
@@ -304,7 +305,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     if (this.requestIdsToIgnore.has(networkRequest.requestId)) return;
 
     const url = networkRequest.request.url;
-    if (url.includes('agent.localhost')) {
+    if (url.includes(`/heroInternalUrl?secretKey=${this.secretKey}`)) {
       this.emit('internal-request', { request: networkRequest });
       this.addRequestIdToIgnore(networkRequest.requestId);
       return;

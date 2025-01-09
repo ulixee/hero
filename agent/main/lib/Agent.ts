@@ -52,6 +52,10 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   private readonly closeBrowserOnClose: boolean = false;
   private isolatedMitm: MitmProxy;
 
+  // We use secretKey all through Agent components to make sure websites can't test if hero is present.
+  // Without this secretKey if would be pretty easy to detect hero.
+  private secretKey = Math.random().toString();
+
   private get proxyConnectionInfo(): IProxyConnectionOptions {
     if (!this.enableMitm) {
       if (this.emulationProfile.upstreamProxyUrl) {
@@ -91,6 +95,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       this.logger,
       this.plugins.profile.upstreamProxyUrl,
       this.plugins.profile.upstreamProxyUseLocalDns,
+      this.secretKey,
     );
     this.enableMitm = !env.disableMitm && !this.plugins.profile.options.disableMitm;
 
@@ -210,6 +215,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       hooks: this.plugins,
       isIncognito: this.isIncognito,
       commandMarker: this.options.commandMarker,
+      secretKey: this.secretKey,
     });
     this.events.once(this.browserContext, 'close', () => this.close());
 

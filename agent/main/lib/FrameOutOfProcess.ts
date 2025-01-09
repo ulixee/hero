@@ -25,6 +25,7 @@ export default class FrameOutOfProcess {
       this.devtoolsSession,
       frame.logger,
       page.browserContext.proxy,
+      page.browserContext.secretKey,
     );
     this.domStorageTracker = new DomStorageTracker(
       page,

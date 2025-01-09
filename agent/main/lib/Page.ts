@@ -155,6 +155,7 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
       devtoolsSession,
       this.logger,
       this.browserContext.proxy,
+      this.browserContext.secretKey,
     );
     this.domStorageTracker = new DomStorageTracker(
       this,

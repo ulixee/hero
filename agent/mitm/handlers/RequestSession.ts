@@ -73,6 +73,7 @@ export default class RequestSession
     logger: IBoundLog,
     public upstreamProxyUrl?: string,
     public upstreamProxyUseSystemDns?: boolean,
+    public secretKey?: string,
   ) {
     super();
     this.logger = logger.createChild(module);
@@ -195,6 +196,11 @@ export default class RequestSession
   }
 
   public shouldInterceptRequest(url: string, resourceType?: IResourceType): boolean {
+    // Requests including heroInternalUrl with secret key are considered intenal requests
+    // We use this to cordinate internal frameIds in a way that allows us to do everything
+    // with Runtime domain disabled.
+    if(url.includes(`/heroInternalUrl?secretKey=${this.secretKey}`)) return true;
+
     for (const handler of this.interceptorHandlers) {
       if (handler.types && resourceType) {
         if (handler.types.includes(resourceType)) return true;

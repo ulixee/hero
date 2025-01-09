@@ -368,7 +368,7 @@ export default class Browser extends TypedEventEmitter<IBrowserEvents> implement
     if (options.proxyPort !== undefined && !launchArgs.some(x => x.startsWith('--proxy-server'))) {
       launchArgs.push(
         // Use proxy for localhost URLs
-        '--proxy-bypass-list=<-loopback>;agent.localhost',
+        '--proxy-bypass-list=<-loopback>',
         `--proxy-server=localhost:${options.proxyPort}`,
       );
     }

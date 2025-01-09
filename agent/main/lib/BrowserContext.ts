@@ -40,6 +40,7 @@ export interface IBrowserContextCreateOptions {
   hooks?: IBrowserContextHooks & IInteractHooks;
   isIncognito?: boolean;
   commandMarker?: ICommandMarker;
+  secretKey?: string,
 }
 
 export default class BrowserContext
@@ -75,6 +76,7 @@ export default class BrowserContext
     frameId: 0,
   };
 
+  public secretKey?: string
   public commandMarker: ICommandMarker;
 
   private attachedTargetIds = new Set<string>();
@@ -94,6 +96,7 @@ export default class BrowserContext
     this.isIncognito = isIncognito;
     this.logger = options?.logger ?? log;
     this.hooks = options?.hooks ?? {};
+    this.secretKey = options?.secretKey;
     this.commandMarker = options?.commandMarker ?? new DefaultCommandMarker(this);
     this.resources = new Resources(this);
     this.websocketMessages = new WebsocketMessages(this.logger);
@@ -111,7 +114,7 @@ export default class BrowserContext
       disposeOnDetach: true,
     };
     if (this.proxy?.address) {
-      createContextOptions.proxyBypassList = '<-loopback>;agent.localhost';
+      createContextOptions.proxyBypassList = '<-loopback>';
       createContextOptions.proxyServer = this.proxy.address;
     }
 

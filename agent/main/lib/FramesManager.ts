@@ -5,7 +5,6 @@ import { IFrame, IFrameManagerEvents } from '@ulixee/unblocked-specification/age
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { IWebsocketEvents } from '@ulixee/unblocked-specification/agent/browser/IWebsocketSession';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import {
   IPageEvents,
@@ -85,7 +84,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
 
     bindFunctions(this);
 
-    this.console = new Console(devtoolsSession);
+    this.console = new Console(devtoolsSession, this.page.browserContext.secretKey);
 
     this.events.on(page, 'resource-will-be-requested', this.onResourceWillBeRequested);
     this.events.on(page, 'resource-was-requested', this.onResourceWasRequested);
