@@ -1,7 +1,6 @@
 // Currently this only used to support communication from chrome (injected scripts) to unblocked agent
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import TypedEventEmitter from '@ulixee/commons/lib/TypedEventEmitter';
-import { Server } from 'net';
 import DevtoolsSession from './DevtoolsSession';
 import EventSubscriber from '@ulixee/commons/lib/EventSubscriber';
 import Protocol from 'devtools-protocol';
@@ -16,11 +15,6 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   // We store resolvable when we received websocket message before, receiving
   // targetId, this way we can await this, and still trigger to get proper ids.
   private clientIdToTargetId = new Map<string, Resolvable<string> | string>();
-
-  private server: Server;
-  private intervals = new Set<NodeJS.Timeout>();
-
-  private separator = ' --- '
 
   constructor(
     public devtoolsSession: DevtoolsSession,
@@ -69,7 +63,6 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
       .toString()
       // eslint-disable-next-line no-template-curly-in-string
       .replaceAll('${this.secretKey}', this.secretKey)
-      .replaceAll('${this.separator}', this.separator)
       // Use function otherwise replace will try todo some magic
       .replace('SCRIPT_PLACEHOLDER', () => script);
 
@@ -86,8 +79,8 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
-      const [secret, maybeClientId, ...serializedDataMulti] = msgAdded.message.text.split(this.separator);
-      const serializedData = serializedDataMulti.join(this.separator);
+      const text = msgAdded.message.text;
+      const [secret, maybeClientId, serializedData] = [text.slice(0,36), text.slice(38,74), text.slice(76)];
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
@@ -116,7 +109,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
  * care of setting up that websocket and all other logic it needs as glue to make it all work.
  * */
 function injectedScript(): void {
-  const clientId = Math.random();
+  const clientId = crypto.randomUUID();
 
   // By using document.url.origin we avoid all content security problems
   const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
@@ -129,7 +122,7 @@ function injectedScript(): void {
   const callback = (name, payload): void => {
     const serializedData = JSON.stringify({ name, payload });
     // eslint-disable-next-line no-console
-    console.debug(`${this.secretKey}${this.separator}${clientId}${this.separator}${serializedData}`);
+    console.debug(`${this.secretKey}, ${clientId}, ${serializedData}`);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions

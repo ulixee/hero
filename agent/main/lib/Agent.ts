@@ -54,7 +54,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
 
   // We use secretKey all through Agent components to make sure websites can't test if hero is present.
   // Without this secretKey if would be pretty easy to detect hero.
-  private secretKey = Math.random().toString();
+  private secretKey = crypto.randomUUID();
 
   private get proxyConnectionInfo(): IProxyConnectionOptions {
     if (!this.enableMitm) {
