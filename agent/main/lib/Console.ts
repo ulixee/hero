@@ -80,7 +80,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
-      const [secret, maybeClientId, serializedData] = msgAdded.message.text.split('-_-');
+      const [secret, maybeClientId, serializedData] = msgAdded.message.text.split(' """ ');
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
@@ -122,7 +122,7 @@ function injectedScript(): void {
   const callback = (name, payload): void => {
     const serializedData = JSON.stringify({ name, payload });
     // eslint-disable-next-line no-console
-    console.debug(`${this.secretKey}-_-${clientId}-_-${serializedData}`);
+    console.debug(`${this.secretKey} """ ${clientId} """ ${serializedData}`);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
