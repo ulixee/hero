@@ -80,7 +80,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
       const text = msgAdded.message.text;
-      const [secret, maybeClientId, serializedData] = [text.slice(0,36), text.slice(38,74), text.slice(76)];
+      const [secret, maybeClientId, serializedData] = [text.slice(0,36), text.slice(38,48), text.slice(50)];
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
@@ -109,7 +109,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
  * care of setting up that websocket and all other logic it needs as glue to make it all work.
  * */
 function injectedScript(): void {
-  const clientId = crypto.randomUUID();
+  const clientId = Math.random().toString().slice(2, 12);
 
   // By using document.url.origin we avoid all content security problems
   const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
