@@ -20,6 +20,8 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   private server: Server;
   private intervals = new Set<NodeJS.Timeout>();
 
+  private separator = ' --- '
+
   constructor(
     public devtoolsSession: DevtoolsSession,
     public secretKey?: string,
@@ -67,6 +69,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
       .toString()
       // eslint-disable-next-line no-template-curly-in-string
       .replaceAll('${this.secretKey}', this.secretKey)
+      .replaceAll('${this.separator}', this.separator)
       // Use function otherwise replace will try todo some magic
       .replace('SCRIPT_PLACEHOLDER', () => script);
 
@@ -83,7 +86,8 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
-      const [secret, maybeClientId, serializedData] = msgAdded.message.text.split(' """ ');
+      const [secret, maybeClientId, ...serializedDataMulti] = msgAdded.message.text.split(this.separator);
+      const serializedData = serializedDataMulti.join(this.separator);
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
@@ -125,7 +129,7 @@ function injectedScript(): void {
   const callback = (name, payload): void => {
     const serializedData = JSON.stringify({ name, payload });
     // eslint-disable-next-line no-console
-    console.debug(`${this.secretKey} """ ${clientId} """ ${serializedData}`);
+    console.debug(`${this.secretKey}${this.separator}${clientId}${this.separator}${serializedData}`);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
