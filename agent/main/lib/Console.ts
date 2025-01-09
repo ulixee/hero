@@ -114,7 +114,6 @@ function injectedScript(): void {
   // By using document.url.origin we avoid all content security problems
   const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`
 
-  // const url = `${this.host}:${this.port}?secret=${this.secret}&clientId=${clientId}`;
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
   void fetch(url, { mode: 'no-cors' }).catch(() => undefined);
