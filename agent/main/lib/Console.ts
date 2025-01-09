@@ -1,6 +1,4 @@
 // Currently this only used to support communication from chrome (injected scripts) to unblocked agent
-
-import Log from '@ulixee/commons/lib/Logger';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import TypedEventEmitter from '@ulixee/commons/lib/TypedEventEmitter';
 import { Server } from 'net';
@@ -22,7 +20,10 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   private server: Server;
   private intervals = new Set<NodeJS.Timeout>();
 
-  constructor(public devtoolsSession: DevtoolsSession, public secretKey?: string) {
+  constructor(
+    public devtoolsSession: DevtoolsSession,
+    public secretKey?: string,
+  ) {
     super();
   }
 
@@ -42,7 +43,9 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
   }
 
   isConsoleRegisterUrl(url: string): boolean {
-    return url.includes(`/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=`)
+    return url.includes(
+      `/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=`,
+    );
   }
 
   registerFrameId(url: string, frameId: string): void {
@@ -112,7 +115,7 @@ function injectedScript(): void {
   const clientId = Math.random();
 
   // By using document.url.origin we avoid all content security problems
-  const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`
+  const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
 
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
