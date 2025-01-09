@@ -37,7 +37,8 @@ function createCallResultsWithoutNonApplicableCalls() {
   return mocks.MitmRequestContext.create.mock.results.filter(
     result =>
       // Favicon might or might not be called depending on OS, version and url
-      !result.value.url.href.includes('favicon') ||
+      !result.value.url.href.includes('favicon') &&
+      // Not interesting in internal traffic here
       !result.value.url.href.includes('heroInternalUrl'),
   );
 }
