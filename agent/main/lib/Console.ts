@@ -80,7 +80,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
       const text = msgAdded.message.text;
-      const [secret, maybeClientId, serializedData] = [text.slice(0,36), text.slice(38,48), text.slice(50)];
+      const [secret, maybeClientId, serializedData] = [text.slice(0,21), text.slice(23,33), text.slice(35)];
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
