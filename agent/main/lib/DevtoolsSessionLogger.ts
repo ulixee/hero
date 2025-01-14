@@ -141,6 +141,12 @@ export default class DevtoolsSessionLogger extends TypedEventEmitter<IDevtoolsLo
     let frameId = event.frameId;
     let requestId: string;
     let pageId = event.pageTargetId;
+
+    // Filter out internal communication to prevent lots of duplicate events and data
+    if (event.method === 'Console.messageAdded' && params.message.text.startsWith('hero:')) {
+      return
+    }
+
     if (params) {
       frameId = frameId ?? params.frame?.id ?? params.frameId ?? params.context?.auxData?.frameId;
 

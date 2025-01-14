@@ -55,6 +55,8 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   private readonly closeBrowserOnClose: boolean = false;
   private isolatedMitm: MitmProxy;
 
+  // We use secretKey all through Agent components to make sure websites can't test if hero is present.
+  // Without this secretKey if would be pretty easy to detect hero.
   private secretKey = nanoid();
 
   private get proxyConnectionInfo(): IProxyConnectionOptions {
