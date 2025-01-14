@@ -10,7 +10,10 @@ import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHoo
 import IEmulationProfile, {
   IEmulationOptions,
 } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
-import { IUnblockedPluginClass, PluginConfigs } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import {
+  IUnblockedPluginClass,
+  PluginConfigs,
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import { nanoid } from 'nanoid';
 import env from '../env';
 import ICommandMarker from '../interfaces/ICommandMarker';
@@ -52,16 +55,13 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   private readonly closeBrowserOnClose: boolean = false;
   private isolatedMitm: MitmProxy;
 
-  // We use secretKey all through Agent components to make sure websites can't test if hero is present.
-  // Without this secretKey if would be pretty easy to detect hero.
   private secretKey = nanoid();
 
   private get proxyConnectionInfo(): IProxyConnectionOptions {
     if (!this.enableMitm) {
-      if (this.emulationProfile.upstreamProxyUrl) {
-        return { address: this.emulationProfile.upstreamProxyUrl };
-      }
-      return null;
+      if (!this.emulationProfile.upstreamProxyUrl) return null;
+      const url = new URL(this.emulationProfile.upstreamProxyUrl);
+      return { address: url.origin, username: url.username, password: url.password };
     }
     if (this.isolatedMitm) {
       // don't use password for an isolated mitm proxy
@@ -95,7 +95,6 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       this.logger,
       this.plugins.profile.upstreamProxyUrl,
       this.plugins.profile.upstreamProxyUseLocalDns,
-      this.secretKey,
     );
     this.enableMitm = !env.disableMitm && !this.plugins.profile.options.disableMitm;
 

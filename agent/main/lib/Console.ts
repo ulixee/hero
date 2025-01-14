@@ -18,7 +18,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 
   constructor(
     public devtoolsSession: DevtoolsSession,
-    public secretKey?: string,
+    public secretKey: string,
   ) {
     super();
   }
@@ -40,7 +40,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 
   isConsoleRegisterUrl(url: string): boolean {
     return url.includes(
-      `/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=`,
+      `hero.localhost/?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=`,
     );
   }
 
@@ -80,7 +80,11 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
     try {
       // Doing this is much much cheaper than json parse on everything logged in console debug
       const text = msgAdded.message.text;
-      const [secret, maybeClientId, serializedData] = [text.slice(0,21), text.slice(23,33), text.slice(35)];
+      const [secret, maybeClientId, serializedData] = [
+        text.slice(0, 21),
+        text.slice(23, 33),
+        text.slice(35),
+      ];
       if (secret !== this.secretKey) return;
 
       const data = JSON.parse(serializedData);
@@ -111,8 +115,7 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 function injectedScript(): void {
   const clientId = Math.random().toString().slice(2, 12);
 
-  // By using document.url.origin we avoid all content security problems
-  const url = `${new URL(document.URL).origin}/heroInternalUrl?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
+  const url = `http://hero.localhost/?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
 
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
