@@ -54,10 +54,9 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
 
   private get proxyConnectionInfo(): IProxyConnectionOptions {
     if (!this.enableMitm) {
-      if (this.emulationProfile.upstreamProxyUrl) {
-        return { address: this.emulationProfile.upstreamProxyUrl };
-      }
-      return null;
+      if (!this.emulationProfile.upstreamProxyUrl) return null;
+      const url = new URL(this.emulationProfile.upstreamProxyUrl);
+      return { address: url.origin, username: url.username, password: url.password };
     }
     if (this.isolatedMitm) {
       // don't use password for an isolated mitm proxy
