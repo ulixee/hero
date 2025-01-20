@@ -5,7 +5,6 @@ import { IFrame, IFrameManagerEvents } from '@ulixee/unblocked-specification/age
 import { bindFunctions } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { IWebsocketEvents } from '@ulixee/unblocked-specification/agent/browser/IWebsocketSession';
 import IResourceMeta from '@ulixee/unblocked-specification/agent/net/IResourceMeta';
 import {
   IPageEvents,
@@ -19,7 +18,6 @@ import DomStorageTracker from './DomStorageTracker';
 import InjectedScripts from './InjectedScripts';
 import Page from './Page';
 import Resources from './Resources';
-import { WebsocketSession } from './WebsocketSession';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
@@ -29,6 +27,9 @@ import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
+import { Console } from './Console';
+import { IBrowserNetworkEvents } from '@ulixee/unblocked-specification/agent/browser/IBrowserNetworkEvents';
+import { IConsoleEvents } from '@ulixee/unblocked-specification/agent/browser/IConsole';
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__agent_world__';
@@ -63,15 +64,13 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     return this.page.browserContext.resources;
   }
 
-  private get websocketSession(): WebsocketSession {
-    return this.page.browserContext.websocketSession;
-  }
-
   private attachedFrameIds = new Set<string>();
   private readonly events = new EventSubscriber();
   private readonly networkManager: NetworkManager;
   private readonly domStorageTracker: DomStorageTracker;
   private pageCallbacks = new Map<string, TNewDocumentCallbackFn>();
+
+  private console: Console;
 
   private isReady: Promise<void>;
 
@@ -85,16 +84,21 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
 
     bindFunctions(this);
 
+    this.console = new Console(devtoolsSession, this.page.browserContext.secretKey);
+
     this.events.on(page, 'resource-will-be-requested', this.onResourceWillBeRequested);
     this.events.on(page, 'resource-was-requested', this.onResourceWasRequested);
     this.events.on(page, 'resource-loaded', this.onResourceLoaded);
     this.events.on(page, 'resource-failed', this.onResourceFailed);
     this.events.on(page, 'navigation-response', this.onNavigationResourceResponse);
-    this.events.on(
-      this.websocketSession,
-      'message-received',
-      this.onWebsocketSessionMessageReceived,
-    );
+    this.events.on(this.console, 'callback-received', this.onCallbackReceived);
+
+    this.events.on(this.networkManager, 'internal-request', (event: IBrowserNetworkEvents['internal-request']) => {
+      const url = event.request.request.url;
+      if (this.console.isConsoleRegisterUrl(url)) {
+        this.console.registerFrameId(url, event.request.frameId);
+      }
+    });
   }
 
   public initialize(devtoolsSession: DevtoolsSession): Promise<void> {
@@ -153,6 +157,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
             }),
           devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
           InjectedScripts.install(this, devtoolsSession, this.onDomPaintEvent),
+          this.console.initialize(),
         ]);
         this.recurseFrameTree(devtoolsSession, framesResponse.frameTree);
         resolve();
@@ -209,7 +214,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
   ): Promise<{ identifier: string }> {
     devtoolsSession ??= this.devtoolsSession;
     if (callbacks) {
-      script = this.websocketSession.injectWebsocketCallbackIntoScript(script);
+      script = this.console.injectCallbackIntoScript(script);
       for (const [name, onCallbackFn] of Object.entries(callbacks)) {
         if (onCallbackFn) {
           if (this.pageCallbacks.has(name) && this.pageCallbacks.get(name) !== onCallbackFn)
@@ -691,8 +696,8 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     );
   }
 
-  private async onWebsocketSessionMessageReceived(
-    event: IWebsocketEvents['message-received'],
+  private async onCallbackReceived(
+    event: IConsoleEvents['callback-received'],
   ): Promise<void> {
     const callback = this.pageCallbacks.get(event.name);
     let frame = this.framesById.get(event.id);

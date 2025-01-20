@@ -10,7 +10,10 @@ import { IHooksProvider } from '@ulixee/unblocked-specification/agent/hooks/IHoo
 import IEmulationProfile, {
   IEmulationOptions,
 } from '@ulixee/unblocked-specification/plugin/IEmulationProfile';
-import { IUnblockedPluginClass, PluginConfigs } from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
+import {
+  IUnblockedPluginClass,
+  PluginConfigs,
+} from '@ulixee/unblocked-specification/plugin/IUnblockedPlugin';
 import { nanoid } from 'nanoid';
 import env from '../env';
 import ICommandMarker from '../interfaces/ICommandMarker';
@@ -51,6 +54,10 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
   private readonly enableMitm: boolean = true;
   private readonly closeBrowserOnClose: boolean = false;
   private isolatedMitm: MitmProxy;
+
+  // We use secretKey all through Agent components to make sure websites can't test if hero is present.
+  // Without this secretKey if would be pretty easy to detect hero.
+  private secretKey = nanoid();
 
   private get proxyConnectionInfo(): IProxyConnectionOptions {
     if (!this.enableMitm) {
@@ -209,6 +216,7 @@ export default class Agent extends TypedEventEmitter<{ close: void }> {
       hooks: this.plugins,
       isIncognito: this.isIncognito,
       commandMarker: this.options.commandMarker,
+      secretKey: this.secretKey,
     });
     this.events.once(this.browserContext, 'close', () => this.close());
 

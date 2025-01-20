@@ -28,7 +28,6 @@ import WebsocketMessages from './WebsocketMessages';
 import { DefaultCommandMarker } from './DefaultCommandMarker';
 import DevtoolsSessionLogger from './DevtoolsSessionLogger';
 import FrameOutOfProcess from './FrameOutOfProcess';
-import { WebsocketSession } from './WebsocketSession';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
 import CreateBrowserContextRequest = Protocol.Target.CreateBrowserContextRequest;
@@ -41,6 +40,7 @@ export interface IBrowserContextCreateOptions {
   hooks?: IBrowserContextHooks & IInteractHooks;
   isIncognito?: boolean;
   commandMarker?: ICommandMarker;
+  secretKey?: string,
 }
 
 export default class BrowserContext
@@ -69,7 +69,6 @@ export default class BrowserContext
   }
 
   public isIncognito = true;
-  public readonly websocketSession: WebsocketSession;
 
   public readonly idTracker = {
     navigationId: 0,
@@ -77,6 +76,7 @@ export default class BrowserContext
     frameId: 0,
   };
 
+  public secretKey?: string
   public commandMarker: ICommandMarker;
 
   private attachedTargetIds = new Set<string>();
@@ -96,6 +96,7 @@ export default class BrowserContext
     this.isIncognito = isIncognito;
     this.logger = options?.logger ?? log;
     this.hooks = options?.hooks ?? {};
+    this.secretKey = options?.secretKey;
     this.commandMarker = options?.commandMarker ?? new DefaultCommandMarker(this);
     this.resources = new Resources(this);
     this.websocketMessages = new WebsocketMessages(this.logger);
@@ -104,11 +105,6 @@ export default class BrowserContext
     this.devtoolsSessionLogger.subscribeToDevtoolsMessages(this.browser.devtoolsSession, {
       sessionType: 'browser',
     });
-    this.websocketSession = new WebsocketSession();
-  }
-
-  public async initialize(): Promise<void> {
-    await this.websocketSession.initialize();
   }
 
   public async open(): Promise<void> {
@@ -118,7 +114,7 @@ export default class BrowserContext
       disposeOnDetach: true,
     };
     if (this.proxy?.address) {
-      createContextOptions.proxyBypassList = '<-loopback>;websocket.localhost';
+      createContextOptions.proxyBypassList = '<-loopback>';
       createContextOptions.proxyServer = this.proxy.address;
     }
 
@@ -351,7 +347,6 @@ export default class BrowserContext
       this.resources.cleanup();
       this.events.close();
       this.emit('close');
-      this.websocketSession.close();
       this.devtoolsSessionLogger.close();
       this.removeAllListeners();
       this.cleanup();
