@@ -1,26 +1,26 @@
 {
-  "fromMonthYear": "2024-12",
-  "toMonthYear": "2025-01",
-  "lastModified": "2025-01-01T07:15:10.143Z",
+  "fromMonthYear": "2025-01",
+  "toMonthYear": "2025-02",
+  "lastModified": "2025-02-01T07:14:04.113Z",
   "results": {
     "Windows": [
-      "68.43",
+      "66.11",
       "0"
     ],
     "OS X": [
-      "20.68",
-      "0"
-    ],
-    "Linux": [
-      "4.17",
+      "22.37",
       "0"
     ],
     "Chrome OS": [
-      "3.92",
+      "4.26",
+      "0"
+    ],
+    "Linux": [
+      "3.9",
       "0"
     ],
     "Unknown": [
-      "2.8",
+      "3.36",
       "0"
     ],
     "Other": [
