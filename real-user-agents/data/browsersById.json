@@ -4288,17 +4288,5 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
-  },
-  "firefox-134-0": {
-    "id": "firefox-134-0",
-    "name": "Firefox",
-    "marketshare": 0,
-    "version": {
-      "major": "134",
-      "minor": "0"
-    },
-    "deviceCategory": "desktop",
-    "releaseDate": "unknown",
-    "description": ""
   }
 }
