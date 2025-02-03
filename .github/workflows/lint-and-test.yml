@@ -19,17 +19,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, windows-latest, ubuntu-latest]
+        os: [macos-13, windows-latest, ubuntu-22.04]
         node-version: [18, 20, 22]
         include:
           - node-version: 20.x
-            os: ubuntu-latest
+            os: ubuntu-22.04
             browser: chrome-130-0
           - node-version: 20.x
-            os: ubuntu-latest
+            os: ubuntu-22.04
             browser: chrome-120-0
           - node-version: 20.x
-            os: ubuntu-latest
+            os: ubuntu-22.04
             browser: chrome-115-0
 
     runs-on: ${{ matrix.os }}
@@ -45,7 +45,7 @@ jobs:
           cache: yarn
 
       - name: Install pcap
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
         run: sudo apt-get install -y libpcap-dev
 
       - name: Chocolatey Install Action
@@ -71,12 +71,12 @@ jobs:
         run: yarn add -W @ulixee/${{ matrix.browser }}
 
       - name: Linux - Apt Install Chrome(s)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
         working-directory: ./build
         run: sudo $(npx install-browser-deps)
 
       - name: Run Lint
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
+        if: ${{ matrix.os == 'ubuntu-22.04' && matrix.node-version == 18 }}
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: Run tests
