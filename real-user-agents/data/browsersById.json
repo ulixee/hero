@@ -4300,19 +4300,5 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
-  },
-  "chrome-132-0": {
-    "id": "chrome-132-0",
-    "name": "Chrome",
-    "marketshare": 0,
-    "version": {
-      "major": "132",
-      "minor": "0",
-      "build": "0",
-      "patch": "0"
-    },
-    "deviceCategory": "desktop",
-    "releaseDate": "unknown",
-    "description": ""
   }
 }
