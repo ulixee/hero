@@ -25,7 +25,6 @@ import LoadingFailedEvent = Protocol.Network.LoadingFailedEvent;
 import RequestServedFromCacheEvent = Protocol.Network.RequestServedFromCacheEvent;
 import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtraInfoEvent;
 import IProxyConnectionOptions from '../interfaces/IProxyConnectionOptions';
-import { WebsocketSession } from './WebsocketSession';
 
 interface IResourcePublishing {
   hasRequestWillBeSentEvent: boolean;
@@ -37,7 +36,6 @@ interface IResourcePublishing {
 const mbBytes = 1028 * 1028;
 
 export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEvents> {
-  public readonly websocketSession: WebsocketSession;
   protected readonly logger: IBoundLog;
   private readonly devtools: DevtoolsSession;
   private readonly attemptedAuthentications = new Set<string>();
@@ -62,13 +60,12 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
   constructor(
     devtoolsSession: DevtoolsSession,
-    websocketSession: WebsocketSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
+    public secretKey?: string,
   ) {
     super();
     this.devtools = devtoolsSession;
-    this.websocketSession = websocketSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
     bindFunctions(this);
@@ -117,6 +114,14 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     const maxResourceBufferSize = this.proxyConnectionOptions?.address ? mbBytes : 5 * mbBytes; // 5mb max
     if (maxResourceBufferSize > 0) this.isChromeRetainingResources = true;
 
+    const patternsToIntercepts: Fetch.RequestPattern[] = [
+      { urlPattern: 'http://hero.localhost/*' },
+    ];
+    if (this.proxyConnectionOptions?.password) {
+      // Pattern needs to match website url (not proxy url), so wildcard is only option we really have here
+      patternsToIntercepts.push({ urlPattern: '*' });
+    }
+
     const errors = await Promise.all([
       this.devtools
         .send('Network.enable', {
@@ -125,13 +130,12 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
           maxTotalBufferSize: maxResourceBufferSize * 5,
         })
         .catch(err => err),
-      this.proxyConnectionOptions?.password
-        ? this.devtools
-            .send('Fetch.enable', {
-              handleAuthRequests: true,
-            })
-            .catch(err => err)
-        : Promise.resolve(),
+      this.devtools
+        .send('Fetch.enable', {
+          handleAuthRequests: !!this.proxyConnectionOptions?.password,
+          patterns: patternsToIntercepts,
+        })
+        .catch(err => err),
       // this.devtools.send('Security.setIgnoreCertificateErrors', { ignore: true }),
     ]);
     for (const error of errors) {
@@ -192,11 +196,11 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
     if (this.attemptedAuthentications.has(event.requestId)) {
       authChallengeResponse.response = AuthChallengeResponse.CancelAuth;
-    } else if (this.proxyConnectionOptions?.password) {
+    } else if (event.authChallenge.source === 'Proxy' && this.proxyConnectionOptions?.password) {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
-      authChallengeResponse.username = 'browser-chrome';
+      authChallengeResponse.username = this.proxyConnectionOptions.username ?? 'browser-chrome';
       authChallengeResponse.password = this.proxyConnectionOptions.password;
     }
     this.devtools
@@ -219,6 +223,13 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
       let continueDetails: Fetch.ContinueRequestRequest = {
         requestId: networkRequest.requestId,
       };
+      // Internal hero requests
+      if (networkRequest.request.url.includes(`hero.localhost/?secretKey=${this.secretKey}`)) {
+        return await this.devtools.send('Fetch.fulfillRequest', {
+          requestId: networkRequest.requestId,
+          responseCode: 200,
+        });
+      }
       if (this.mockNetworkRequests) {
         const response = await this.mockNetworkRequests(networkRequest);
         if (response) {
@@ -308,8 +319,8 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
     if (this.requestIdsToIgnore.has(networkRequest.requestId)) return;
 
     const url = networkRequest.request.url;
-    if (this.websocketSession.isWebsocketUrl(url)) {
-      this.websocketSession.registerWebsocketFrameId(url, networkRequest.frameId);
+    if (url.includes(`hero.localhost/?secretKey=${this.secretKey}`)) {
+      this.emit('internal-request', { request: networkRequest });
       this.addRequestIdToIgnore(networkRequest.requestId);
       return;
     }
@@ -630,11 +641,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
   }
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
-  private onWebSocketCreated(event: WebSocketCreatedEvent): void {
-    if (this.websocketSession.isWebsocketUrl(event.url)) {
-      this.addRequestIdToIgnore(event.requestId);
-    }
-  }
+  private onWebSocketCreated(_event: WebSocketCreatedEvent): void {}
 
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent): void {
     if (this.requestIdsToIgnore.has(handshake.requestId)) return;

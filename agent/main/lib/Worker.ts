@@ -59,9 +59,9 @@ export class Worker extends TypedEventEmitter<IWorkerEvents> implements IWorker 
     });
     this.networkManager = new NetworkManager(
       devtoolsSession,
-      this.browserContext.websocketSession,
       this.logger,
       browserContext.proxy,
+      browserContext.secretKey,
     );
     const session = this.devtoolsSession;
     this.events.on(session, 'Inspector.targetReloadedAfterCrash', () => {

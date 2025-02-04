@@ -153,9 +153,9 @@ export default class Page extends TypedEventEmitter<IPageLevelEvents> implements
     this.mouse = new Mouse(devtoolsSession, this.keyboard);
     this.networkManager = new NetworkManager(
       devtoolsSession,
-      this.browserContext.websocketSession,
       this.logger,
       this.browserContext.proxy,
+      this.browserContext.secretKey,
     );
     this.domStorageTracker = new DomStorageTracker(
       this,
