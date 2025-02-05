@@ -116,6 +116,7 @@ export default class NetworkManager extends TypedEventEmitter<IBrowserNetworkEve
 
     const patternsToIntercepts: Fetch.RequestPattern[] = [
       { urlPattern: 'http://hero.localhost/*' },
+      { urlPattern: 'data://hero.localhost/*' },
     ];
     if (this.proxyConnectionOptions?.password) {
       // Pattern needs to match website url (not proxy url), so wildcard is only option we really have here
