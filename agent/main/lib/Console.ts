@@ -115,10 +115,16 @@ export class Console extends TypedEventEmitter<IConsoleEvents> {
 function injectedScript(): void {
   const clientId = Math.random().toString().slice(2, 12);
 
-  const url = `http://hero.localhost/?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
-
   // This will signal to network manager we are trying to make websocket connection
   // This is needed later to map clientId to frameId
+
+  const scheme = location.href.startsWith('chrome://') ? 'data' : 'http'
+  const url = `${scheme}://hero.localhost/?secretKey=${this.secretKey}&action=registerConsoleClientId&clientId=${clientId}`;
+  if (scheme === 'data') {
+    // eslint-disable-next-line no-console
+    console.info('Using fetch with data:// scheme, http:// not supported inside chrome:// urls, ignore fetch errors including data:// scheme')
+  } 
+
   void fetch(url, { mode: 'no-cors' }).catch(() => undefined);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
