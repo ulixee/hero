@@ -651,7 +651,7 @@ export default class FramesManager extends TypedEventEmitter<IFrameManagerEvents
     if (
       !isKnownResource &&
       (resource.browserServedFromCache ||
-        resource.url?.protocol === 'blob:' ||
+        ['blob:', 'file:'].includes(resource.url?.protocol ?? '') ||
         !this.resources.hasRegisteredMitm)
     ) {
       this.resources
