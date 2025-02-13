@@ -46,3 +46,4 @@ devenv.local.nix
 
 # direnv
 .direnv
+/double-agent/collect/certs/server.key

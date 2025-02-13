@@ -368,10 +368,10 @@
     "@typescript-eslint/types" "8.10.0"
     eslint-visitor-keys "^3.4.3"
 
-"@ulixee/commons@2.0.0-alpha.30":
-  version "2.0.0-alpha.30"
-  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-2.0.0-alpha.30.tgz#fd1d4e21888d536d7208991f587eca84b832f3a1"
-  integrity sha512-6gvzPM7JWGPVfKFveEAZQZzKpjodb9yFrDZu8tNx8K32f3cCpFwvKvRJgX10zWMMtzoPAM3JAOMEtrPsrLpA2g==
+"@ulixee/commons@2.0.0-alpha.31":
+  version "2.0.0-alpha.31"
+  resolved "https://registry.npmjs.org/@ulixee/commons/-/commons-2.0.0-alpha.31.tgz#30fa72c1d17e39d636c84006821a73c3188cfd69"
+  integrity sha512-i78+ZxjYTKzvoV/qCywJYWiJwDJaqGop4jTqQ8Av7bjxLDSPlAF/VwmEvcH9X3sh65rPJJ58xK3UYP3fnsLBOA==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.18"
     bech32 "^2.0.0"
@@ -379,18 +379,18 @@
     https-proxy-agent "^7.0.5"
     semver "^7.3.7"
 
-"@ulixee/js-path@2.0.0-alpha.30":
-  version "2.0.0-alpha.30"
-  resolved "https://registry.yarnpkg.com/@ulixee/js-path/-/js-path-2.0.0-alpha.30.tgz#48bdb4185f8d3f254b84438885f3b12e6c2a730b"
-  integrity sha512-5OpDNS5tk1dB68fy8sTmhU4j4uca8l6Xkuq/WcXgbpaY9uydbQMLuOw6PWWaScG9r2GyirRU2l62IUYlOAKoNA==
+"@ulixee/js-path@2.0.0-alpha.31":
+  version "2.0.0-alpha.31"
+  resolved "https://registry.npmjs.org/@ulixee/js-path/-/js-path-2.0.0-alpha.31.tgz#23d566df42f00e73ac856825b86003db7659f32c"
+  integrity sha512-oKpI+bjjRKNKjCCjl3usiqyFSNN8PuyVGNXrH/QPJeriortKO8/0XAeh4qGuI005gP79IZqd75XDDVQdY95jLw==
 
-"@ulixee/real-user-agents@2.0.0-alpha.30":
-  version "2.0.0-alpha.30"
-  resolved "https://registry.yarnpkg.com/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.30.tgz#9619bae5d30cab0fb503de6144ae919ce4a90e70"
-  integrity sha512-dIlm9NqX5ge1TgNh+gPtZ+GrgrXzsnoKmOVKPNqM0uRIhSuR75f5Zsaiw4uZVvTUJ8wSbsHVid6+/e2ZF1t2nQ==
+"@ulixee/real-user-agents@2.0.0-alpha.31":
+  version "2.0.0-alpha.31"
+  resolved "https://registry.npmjs.org/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.31.tgz#a235d2d198101681ec5933d6e1a51976da1c9830"
+  integrity sha512-16DFtuCKLKB0vW1zrMU6b2/l6sbimnTMtt8su4J4BeBN5FpqB/RFYu2FzFtkbDN5efyAEaUKlFA/lMCqQ2VIXg==
   dependencies:
-    "@ulixee/commons" "2.0.0-alpha.30"
-    "@ulixee/unblocked-specification" "2.0.0-alpha.30"
+    "@ulixee/commons" "2.0.0-alpha.31"
+    "@ulixee/unblocked-specification" "2.0.0-alpha.31"
     compare-versions "^6.1.0"
     ua-parser-js "^1.0.37"
 
@@ -419,12 +419,12 @@
     pretty-quick "^4.0.0"
     typescript "^5.6.2"
 
-"@ulixee/unblocked-specification@2.0.0-alpha.30":
-  version "2.0.0-alpha.30"
-  resolved "https://registry.yarnpkg.com/@ulixee/unblocked-specification/-/unblocked-specification-2.0.0-alpha.30.tgz#5643a51e2a1a8d4b4b312f33e0e5772c537a1881"
-  integrity sha512-u02Q3RBm33m/KpA8fkwCJOhnJOhX3BOkMdDPsTbPDYTaJATw+H55UPkpo/r+yBF8b7QoYZIJpWL3AxiIspJeNQ==
+"@ulixee/unblocked-specification@2.0.0-alpha.31":
+  version "2.0.0-alpha.31"
+  resolved "https://registry.npmjs.org/@ulixee/unblocked-specification/-/unblocked-specification-2.0.0-alpha.31.tgz#6ca8f0cb3d15421da624809119cf2be3a91956be"
+  integrity sha512-Nx37nkeiuMqJPUkl88K97gxwOlOckJGI7wlTrwIj+uzGijXIjOcWLxIl+saw1w5r0U1FUGmTUggLamTHfQ56oA==
   dependencies:
-    "@ulixee/js-path" "2.0.0-alpha.30"
+    "@ulixee/js-path" "2.0.0-alpha.31"
     devtools-protocol "^0.0.1137505"
 
 "@ungap/structured-clone@^1.2.0":

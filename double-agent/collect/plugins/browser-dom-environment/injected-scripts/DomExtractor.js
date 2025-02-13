@@ -52,6 +52,8 @@ function DomExtractor(selfName, pageMeta = {}) {
     'self.CSSAnimation.prototype.timeline',
     'self.Animation.prototype.timeline',
     'self.CSSTransition.prototype.timeline',
+    `self.XRRigidTransform.new().matrix`,
+    `self.XRRigidTransform.new().inverse`,
   ].map(x => x.replace(/self\./g, `${selfName}.`));
   const excludedInheritedKeys = ['name', 'length', 'constructor'];
   const loadedObjectsRef = new Map([[self, selfName]]);
