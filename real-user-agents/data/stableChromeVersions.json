@@ -6,13 +6,16 @@
     "buildVersion": 6943,
     "stablePatchesByOs": {
       "mac": [
+        99,
         54
       ],
       "win": [
+        99,
         60,
         54
       ],
       "linux": [
+        98,
         53
       ]
     }
