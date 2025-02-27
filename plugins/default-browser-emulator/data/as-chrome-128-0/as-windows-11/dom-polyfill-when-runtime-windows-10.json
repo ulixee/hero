@@ -1,0 +1,47 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.IDBFactory.prototype.databases",
+      "propertyName": "_$otherInvocationAsync.window.indexedDB.databases",
+      "property": "[]"
+    },
+    {
+      "path": "window.StorageManager.prototype.getDirectory",
+      "propertyName": "_$otherInvocationAsync.window.navigator.storage.getDirectory",
+      "property": "{}"
+    },
+    {
+      "path": "window.Serial.prototype.getPorts",
+      "propertyName": "_$otherInvocationAsync.window.navigator.serial.getPorts",
+      "property": "[]"
+    }
+  ],
+  "reorder": []
+}

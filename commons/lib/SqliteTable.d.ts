@@ -1,0 +1,35 @@
+import type { Database as SqliteDatabase, Statement } from 'better-sqlite3';
+type SqliteTypes = 'INTEGER' | 'TEXT' | 'BLOB' | 'DATETIME';
+type IRecord = (string | number | Buffer | bigint)[];
+export default abstract class SqliteTable<T> {
+    readonly db: SqliteDatabase;
+    readonly tableName: string;
+    readonly columns: [keyof T, SqliteTypes, string?][];
+    private insertOrReplace;
+    protected readonly insertStatement: Statement;
+    protected readonly insertByKeyStatement: Statement;
+    protected defaultSortOrder?: string;
+    protected insertCallbackFn?: (records: T[]) => void;
+    protected pendingInserts: IRecord[];
+    private insertSubscriptionRecords;
+    private subscriptionThrottle;
+    private lastSubscriptionPublishTime;
+    protected constructor(db: SqliteDatabase, tableName: string, columns: [keyof T, SqliteTypes, string?][], insertOrReplace?: boolean);
+    findPendingInserts(cb: (record: IRecord) => boolean): IRecord[];
+    findPendingRecords(cb: (record: IRecord) => boolean): T[];
+    subscribe(callbackFn: (records: T[]) => void): void;
+    unsubscribe(): void;
+    runPendingInserts(): void;
+    insertNow(record: IRecord): void;
+    insertObject(record: T): void;
+    all(): T[];
+    protected queuePendingInsert(record: IRecord): void;
+    protected objectToInsert(object: T): IRecord;
+    protected buildInsertStatement(): string;
+    protected buildInsertByKeyStatement(): string;
+    private addRecordToPublish;
+    private publishPendingRecords;
+    private createTableStatement;
+    private insertToObject;
+}
+export {};
