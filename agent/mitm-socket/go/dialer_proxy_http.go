@@ -52,7 +52,12 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 		if allowInsecure {
 			proxyTlsConfig.InsecureSkipVerify = true
 		} else {
-			proxyTlsConfig.ServerName = proxyHost
+			sn, _, err := net.SplitHostPort(proxyHost)
+			if err != nil {
+				responseMessage := fmt.Sprintf("HTTP_PROXY_ERR invalid proxy host format: '%s' (%s)", proxyHost, err)
+				return nil, errors.New(responseMessage)
+			}
+			proxyTlsConfig.ServerName = sn
 		}
 
 		// NOTE: this is just the "wrapper" tls connection to the proxy. NOT to the destination
