@@ -1,0 +1,49 @@
+{
+  "name": "@ulixee/hero-monorepo",
+  "description": "The Web Browser Built for Scraping",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@lerna-lite/version": "^3.9.1",
+    "@lerna-lite/publish": "^3.9.1"
+  },
+  "private": true,
+  "scripts": {
+    "postinstall": "yarn workspace @ulixee/unblocked-agent-mitm-socket postinstall",
+    "dist": "lerna publish from-package"
+  },
+  "workspaces": {
+    "packages": [
+      "agent/*",
+      "client",
+      "commons",
+      "core",
+      "interfaces",
+      "js-path",
+      "net",
+      "playground",
+      "plugin-utils",
+      "plugins/*",
+      "real-user-agents",
+      "specification",
+      "timetravel"
+    ]
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  },
+  "packageManager": "yarn@1.22.21"
+}
