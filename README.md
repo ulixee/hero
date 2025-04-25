@@ -19,7 +19,7 @@ You can get a playground started with Hero very quickly. A playground is a one-t
 npm i --save @ulixee/hero-playground
 ```
 
-Once you're ready to graduate to deploying, check out the docs here: [Deploying Hero](https://ulixee.org/docs/hero/advanced-concepts/deployment).
+Once you're ready to graduate to deploying, check out the docs here: [Deploying Hero](./docs/advanced-concepts/deployment).
 
 ## Usage
 
@@ -96,3 +96,10 @@ We'd love your help in making Hero a better tool. Please don't hesitate to send 
 ## License
 
 [MIT](LICENSE.md)
+
+[agent]: ./agent
+[double-agent]: ./double-agent
+[spec]: ./specification
+[jspath]: ./js-path
+[profiles]: https://github.com/ulixee/browser-profile-data
+[real-user-agents]: ./real-user-agents

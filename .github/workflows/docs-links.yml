@@ -18,9 +18,9 @@ jobs:
       - name: Check README
         uses: becheran/mlc@v0.21.0
         with:
-          args: ./README.md
+          args: ./README.md -i "https://ulixee.org/*"
 
       - name: Check Docs
         uses: becheran/mlc@v0.21.0
         with:
-          args: ./docs
+          args: ./docs -i "https://ulixee.org/*"
