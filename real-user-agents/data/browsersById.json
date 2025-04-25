@@ -4314,5 +4314,139 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-132-0": {
+    "id": "edge-132-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "132",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-133-0": {
+    "id": "chrome-133-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "133",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-135-0": {
+    "id": "firefox-135-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "135",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-133-0": {
+    "id": "edge-133-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "133",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-134-0": {
+    "id": "chrome-134-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "134",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-136-0": {
+    "id": "firefox-136-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "136",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-134-0": {
+    "id": "edge-134-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "134",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-135-0": {
+    "id": "chrome-135-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "135",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-137-0": {
+    "id": "firefox-137-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "137",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-135-0": {
+    "id": "edge-135-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "135",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }

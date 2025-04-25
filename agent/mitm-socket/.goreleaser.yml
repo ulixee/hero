@@ -1,3 +1,4 @@
+version: 2
 builds:
   - id: 'connect'
     binary: connect
@@ -10,7 +11,6 @@ builds:
       - amd64
       - arm64
     env:
-      - GO111MODULE=on
       - CGO_ENABLED=0
 archives:
   - name_template: >-
@@ -21,14 +21,14 @@ archives:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "amd64_v1" }}x86_64
       {{- else }}{{ .Arch }}{{end}}
-    format: gz
+    formats: gz
     files:
       - none*
 checksum:
   name_template: 'connect.checksum'
 snapshot:
-  name_template: "{{ .Tag }}-snapshot"
+  version_template: "{{ .Tag }}-snapshot"
 changelog:
-  skip: true
+  disable: true
 release:
   prerelease: auto

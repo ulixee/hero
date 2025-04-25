@@ -43,8 +43,11 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_106_Shuffle)
 		} else if chromeVersion < 124 {
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120)
-		} else {
+		} else if chromeVersion < 131 {
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120_PQ)
+		} else {
+			// Chrome 131+ uses the latest available Chrome PQ spec
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_131)
 		}
 	} else {
 		// default to latest shuffle

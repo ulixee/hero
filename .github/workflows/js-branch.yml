@@ -28,12 +28,12 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: '1.24'
 
       - name: Build Sockets
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: v1.23.0
+          version: '~> v2'
           args: build --clean --skip=validate --snapshot
           workdir: ${{ github.workspace }}/agent/mitm-socket
 
