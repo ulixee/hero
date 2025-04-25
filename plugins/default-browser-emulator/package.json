@@ -7,7 +7,7 @@
     "update-unblocked-emulators": "./bin/downloadData.js"
   },
   "dependencies": {
-    "@ulixee/chrome-app": "^1.0.3",
+    "@ulixee/chrome-app": "^1.0.4",
     "@ulixee/commons": "2.0.0-alpha.31",
     "@ulixee/real-user-agents": "2.0.0-alpha.31",
     "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.31",

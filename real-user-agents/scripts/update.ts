@@ -15,7 +15,7 @@ import updateStatcounterData from './updateStatcounterData';
 import importOsVersions from './importOsVersions';
 
 export default async function update(): Promise<void> {
-  await Promise.all([
+  await Promise.allSettled([
     updateStatcounterData(),
     importChromiumData(),
     updateStableChromeVersions(),
