@@ -41,7 +41,7 @@ export default async function runBrowserstack(): Promise<void> {
 
     if (browser.name === 'Firefox' && Number(browser.version.major) < 100) continue;
     // TODO: The dom environment plugin hangs <= 94. Need to investigate for scraper report eventually
-    if (browser.name === 'Chrome' && Number(browser.version.major) < 95) continue;
+    if (browser.name === 'Chrome' && Number(browser.version.major) < 125) continue;
     if (browser.name === 'Edge' && Number(browser.version.major) < 95) continue;
     if (browser.name === 'Safari' && Number(browser.version.major) < 13) continue;
     // no support for Promises, lambdas... detections need refactor for support

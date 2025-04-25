@@ -9,6 +9,7 @@ const minMillisBetweenConnects = 5e3;
 let connectionCount = 0;
 let lastConnectionDate: Date;
 let activeConnection: { id: number; req: IncomingMessage; res: ServerResponse };
+const connections: (typeof activeConnection)[] = [];
 
 process.on('message', (message: any) => {
   if (message.start) {
@@ -66,6 +67,13 @@ function start(options: { port: number; key?: string; cert?: string }): void {
 
     ShutdownHandler.register(() => {
       if (childServer) childServer.unref().close();
+      while (connections.length) {
+        const connection = connections.pop();
+
+        console.log('Force closing active connection during shutdown.');
+        connection.res.end('Server shutting down');
+        connection.req.destroy();
+      }
     });
   } catch (err) {
     console.log(err);
@@ -89,6 +97,7 @@ async function onConnection(req, res): Promise<void> {
 
   const connectionId = (connectionCount += 1); // eslint-disable-line no-multi-assign
   activeConnection = { id: connectionId, req, res };
+  connections.push(activeConnection);
 
   try {
     const { remoteAddress, remotePort } = req.connection;
