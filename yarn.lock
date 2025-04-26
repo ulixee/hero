@@ -1933,10 +1933,10 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.18"
 
-"@ulixee/chrome-131-0@^6778.109.11":
-  version "6778.109.11"
-  resolved "https://registry.npmjs.org/@ulixee/chrome-131-0/-/chrome-131-0-6778.109.11.tgz#ca8dc474cd1c7f4e293bac54c0406a9e4a00b1b2"
-  integrity sha512-2aNYjkm06vaFHKonWg1HxFItbRr1LuTDLMXvHo2D26pWfbFv+meP8PJu5rTIoeBczl2iLou0Q2zABIM1SCoBsA==
+"@ulixee/chrome-136-0@^7103.114.11":
+  version "7103.114.11"
+  resolved "https://registry.npmjs.org/@ulixee/chrome-136-0/-/chrome-136-0-7103.114.11.tgz#e38099560aa66dcc740cd10a34547f36544181fb"
+  integrity sha512-y7Bq4iu8xizF+XWbmj+O3+on+s9qUNEudgFkII8xBZz35Hj55PIqm6mcz/hJiI10HFKr69VtgyYdCkfHjiKXUQ==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 
@@ -1949,7 +1949,7 @@
     progress "^2.0.3"
     tar "^6.1.11"
 
-"@ulixee/chrome-app@^1.0.3":
+"@ulixee/chrome-app@^1.0.3", "@ulixee/chrome-app@^1.0.4":
   version "1.0.4"
   resolved "https://registry.npmjs.org/@ulixee/chrome-app/-/chrome-app-1.0.4.tgz"
   integrity sha512-OqRxzQCd5AWKtPp/AT6fY8PLRgOD3fIq8p+VR0ZDlIhWktDjr+6aefoj1KwSMUmPoRty3Y+8/ck31d/UZOiZ6w==
@@ -6223,7 +6223,12 @@ nan@^2.14.0:
   resolved "https://registry.npmjs.org/nan/-/nan-2.22.0.tgz"
   integrity sha512-nbajikzWTMwsW+eSsNm3QwlOs7het9gGJU5dDZzRTQGk03vyBOauxgI4VakDzE0PtsGTmXPsXTbbjVhRwR5mpw==
 
-nanoid@^3.3.6, nanoid@^3.3.7:
+nanoid@^3.3.11:
+  version "3.3.11"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
+  integrity sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==
+
+nanoid@^3.3.7:
   version "3.3.7"
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.7.tgz"
   integrity sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==

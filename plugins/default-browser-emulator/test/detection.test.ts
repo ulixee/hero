@@ -904,7 +904,11 @@ describe('Proxy detections', () => {
     }
   }
 })();`);
-    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.name).toBe('TypeError');
   });
 
@@ -931,7 +935,11 @@ describe('Proxy detections', () => {
   }
 })();`);
     expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
-    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at debug.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.name).toBe('TypeError');
   });
 
@@ -958,7 +966,11 @@ describe('Proxy detections', () => {
   }
 })();`);
     expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
-    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at debug.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.name).toBe('TypeError');
   });
 
@@ -998,7 +1010,11 @@ describe('Proxy detections', () => {
 })();`);
     expect(error.stack.match(/at Proxy.setPrototypeOf/g)).toBeNull();
     expect(error.stack.match(/at Object.setPrototypeOf/g)).toBeNull();
-    expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at debug.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.name).toBe('TypeError');
   });
 
@@ -1103,7 +1119,11 @@ describe('Proxy detections', () => {
     }
   })();`);
 
-    expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.stack.match(/Object.apply/g)).toBe(null);
     expect(error.name).toBe('TypeError');
 
@@ -1122,7 +1142,11 @@ describe('Proxy detections', () => {
     }
   }
 })();`);
-    expect(error2.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.stack.match(/Object.apply/g)).toBe(null);
     expect(error2.name).toBe('TypeError');
   });
@@ -1156,7 +1180,11 @@ describe('Proxy detections', () => {
     }
   }
 })();`);
-    expect(error.stack.match(/Function.setPrototypeOf/g)).toHaveLength(1);
+    if (browserVersion >= 135) {
+      expect(error.stack.match(/at Object.setPrototypeOf/g)).toHaveLength(1);
+    } else {
+      expect(error.stack.match(/at Function.setPrototypeOf/g)).toHaveLength(1);
+    }
     expect(error.stack.match(/Object.apply/g)).toBe(null);
     expect(error.name).toBe('TypeError');
   });
