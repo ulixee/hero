@@ -1,0 +1,8 @@
+{
+    "scripts": {
+        "docs": "node docs/generator",
+        "start": "yarn workspace @double-agent/collect-controller start",
+        "prod": "yarn workspace @double-agent/collect-controller prod"
+    },
+    "devDependencies": {}
+}
