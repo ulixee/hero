@@ -4650,6 +4650,25 @@
     "browserId": "firefox-70-0",
     "marketshare": 0
   },
+  "mac-os-15--safari-18-4": {
+    "id": "mac-os-15--safari-18-4",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      18,
+      4,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "15"
+    },
+    "operatingSystemId": "mac-os-15",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15",
+    "browserId": "safari-18-4",
+    "marketshare": null
+  },
   "mac-os-15--safari-18-1": {
     "id": "mac-os-15--safari-18-1",
     "allPatchVersions": [],
