@@ -4460,5 +4460,31 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-136-0": {
+    "id": "chrome-136-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "136",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-138-0": {
+    "id": "firefox-138-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "138",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
