@@ -1,0 +1,1 @@
+{"version":3,"file":"SessionClosedOrMissingError.js","sourceRoot":"","sources":["../../../commons/lib/SessionClosedOrMissingError.ts"],"names":[],"mappings":";;AAAA,uEAAuE;AACvE,qDAAiE;AAEjE,MAAqB,2BAA4B,SAAQ,wCAAoB;IAC3E,YAAY,OAAe;QACzB,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,IAAI,GAAG,6BAA6B,CAAC;IAC5C,CAAC;CACF;AALD,8CAKC;AAED,IAAA,8CAA6B,EAAC,2BAA2B,CAAC,CAAC"}
