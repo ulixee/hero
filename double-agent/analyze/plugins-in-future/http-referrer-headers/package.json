@@ -1,0 +1,21 @@
+{
+  "name": "@double-agent/http-referrers",
+  "version": "1.0.0",
+  "description": "Referrer headers indicate browser came from a legitimate source",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "private": true,
+  "checkCategories": [
+    "Referrers"
+  ],
+  "scripts": {}
+}
