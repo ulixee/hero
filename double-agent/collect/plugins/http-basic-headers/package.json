@@ -1,0 +1,29 @@
+{
+  "name": "@double-agent/collect-http-basic-headers",
+  "version": "2.0.0-alpha.32",
+  "description": "Collects the headers sent by browser when requesting documents in various contexts",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.32",
+    "@double-agent/config": "2.0.0-alpha.32",
+    "diff": "^4.0.2",
+    "source-map-support": "^0.5.16",
+    "uuid": "^7.0.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/diff": "^4.0.2"
+  },
+  "private": true
+}

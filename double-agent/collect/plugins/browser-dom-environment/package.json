@@ -1,0 +1,21 @@
+{
+  "name": "@double-agent/collect-browser-dom-environment",
+  "version": "2.0.0-alpha.32",
+  "description": "Collects the browser's DOM environment such as object structure, class inheritance amd key order",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.32"
+  },
+  "private": true
+}

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test:build": "cross-env NODE_ENV=test ULX_DATA_DIR=.data-test jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "cross-env": "^7.0.3"
+  }
+}
