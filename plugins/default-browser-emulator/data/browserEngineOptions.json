@@ -1,0 +1,605 @@
+[
+  {
+    "id": "chrome-137-0",
+    "name": "chrome",
+    "majorVersion": 137,
+    "buildVersion": 7151,
+    "stablePatchesByOs": {
+      "mac": [
+        41
+      ],
+      "win": [
+        41
+      ],
+      "linux": []
+    }
+  },
+  {
+    "id": "chrome-136-0",
+    "name": "chrome",
+    "majorVersion": 136,
+    "buildVersion": 7103,
+    "stablePatchesByOs": {
+      "mac": [
+        114,
+        93,
+        49
+      ],
+      "win": [
+        114,
+        93,
+        49
+      ],
+      "linux": [
+        113,
+        92,
+        59
+      ]
+    }
+  },
+  {
+    "id": "chrome-135-0",
+    "name": "chrome",
+    "majorVersion": 135,
+    "buildVersion": 7049,
+    "stablePatchesByOs": {
+      "mac": [
+        115,
+        96,
+        85,
+        42
+      ],
+      "win": [
+        115,
+        96,
+        85,
+        42
+      ],
+      "linux": [
+        114,
+        95,
+        84,
+        52
+      ]
+    }
+  },
+  {
+    "id": "chrome-134-0",
+    "name": "chrome",
+    "majorVersion": 134,
+    "buildVersion": 6998,
+    "stablePatchesByOs": {
+      "mac": [
+        166,
+        118,
+        89,
+        45
+      ],
+      "win": [
+        178,
+        166,
+        118,
+        89,
+        36
+      ],
+      "linux": [
+        165,
+        117,
+        88,
+        35
+      ]
+    }
+  },
+  {
+    "id": "chrome-133-0",
+    "name": "chrome",
+    "majorVersion": 133,
+    "buildVersion": 6943,
+    "stablePatchesByOs": {
+      "mac": [
+        142,
+        127,
+        99,
+        54
+      ],
+      "win": [
+        142,
+        127,
+        99,
+        60,
+        54
+      ],
+      "linux": [
+        141,
+        126,
+        98,
+        53
+      ]
+    }
+  },
+  {
+    "id": "chrome-132-0",
+    "name": "chrome",
+    "majorVersion": 132,
+    "buildVersion": 6834,
+    "stablePatchesByOs": {
+      "mac": [
+        160,
+        111,
+        84
+      ],
+      "win": [
+        160,
+        111,
+        84
+      ],
+      "linux": [
+        159,
+        110,
+        83
+      ]
+    }
+  },
+  {
+    "id": "chrome-131-0",
+    "name": "chrome",
+    "majorVersion": 131,
+    "buildVersion": 6778,
+    "stablePatchesByOs": {
+      "mac": [
+        265,
+        205,
+        140,
+        109,
+        86,
+        70
+      ],
+      "win": [
+        265,
+        205,
+        140,
+        109,
+        86,
+        70
+      ],
+      "linux": [
+        264,
+        204,
+        139,
+        108,
+        85,
+        69
+      ]
+    }
+  },
+  {
+    "id": "chrome-130-0",
+    "name": "chrome",
+    "majorVersion": 130,
+    "buildVersion": 6723,
+    "stablePatchesByOs": {
+      "mac": [
+        117,
+        92,
+        70,
+        59
+      ],
+      "win": [
+        117,
+        92,
+        70,
+        59
+      ],
+      "linux": [
+        116,
+        91,
+        69,
+        58
+      ]
+    }
+  },
+  {
+    "id": "chrome-129-0",
+    "name": "chrome",
+    "majorVersion": 129,
+    "buildVersion": 6668,
+    "stablePatchesByOs": {
+      "mac": [
+        101,
+        90,
+        71,
+        59
+      ],
+      "win": [
+        101,
+        90,
+        71,
+        59
+      ],
+      "linux": [
+        100,
+        89,
+        70,
+        58
+      ]
+    }
+  },
+  {
+    "id": "chrome-128-0",
+    "name": "chrome",
+    "majorVersion": 128,
+    "buildVersion": 6613,
+    "stablePatchesByOs": {
+      "mac": [
+        138,
+        120,
+        114,
+        85
+      ],
+      "win": [
+        138,
+        120,
+        114,
+        85
+      ],
+      "linux": [
+        137,
+        119,
+        113,
+        84
+      ]
+    }
+  },
+  {
+    "id": "chrome-127-0",
+    "name": "chrome",
+    "majorVersion": 127,
+    "buildVersion": 6533,
+    "stablePatchesByOs": {
+      "mac": [
+        120,
+        100,
+        89,
+        73
+      ],
+      "win": [
+        120,
+        100,
+        89,
+        73
+      ],
+      "linux": [
+        119,
+        99,
+        88,
+        72
+      ]
+    }
+  },
+  {
+    "id": "chrome-126-0",
+    "name": "chrome",
+    "majorVersion": 126,
+    "buildVersion": 6478,
+    "stablePatchesByOs": {
+      "mac": [
+        183,
+        127,
+        115,
+        62,
+        57
+      ],
+      "win": [
+        183,
+        127,
+        115,
+        62,
+        57
+      ],
+      "linux": [
+        182,
+        126,
+        114,
+        61,
+        55
+      ]
+    }
+  },
+  {
+    "id": "chrome-125-0",
+    "name": "chrome",
+    "majorVersion": 125,
+    "buildVersion": 6422,
+    "stablePatchesByOs": {
+      "mac": [
+        142,
+        113,
+        77,
+        61
+      ],
+      "win": [
+        142,
+        113,
+        77,
+        61
+      ],
+      "linux": [
+        141,
+        112,
+        76,
+        60
+      ]
+    }
+  },
+  {
+    "id": "chrome-124-0",
+    "name": "chrome",
+    "majorVersion": 124,
+    "buildVersion": 6367,
+    "stablePatchesByOs": {
+      "mac": [
+        208,
+        202,
+        156,
+        119,
+        93,
+        80,
+        62
+      ],
+      "win": [
+        208,
+        202,
+        156,
+        119,
+        92,
+        79,
+        61
+      ],
+      "linux": [
+        78,
+        60
+      ]
+    }
+  },
+  {
+    "id": "chrome-123-0",
+    "name": "chrome",
+    "majorVersion": 123,
+    "buildVersion": 6312,
+    "stablePatchesByOs": {
+      "mac": [
+        124,
+        107,
+        87,
+        59
+      ],
+      "win": [
+        123,
+        106,
+        86,
+        59
+      ],
+      "linux": [
+        86
+      ]
+    }
+  },
+  {
+    "id": "chrome-122-0",
+    "name": "chrome",
+    "majorVersion": 122,
+    "buildVersion": 6261,
+    "stablePatchesByOs": {
+      "mac": [
+        129,
+        112,
+        94,
+        69,
+        57
+      ],
+      "win": [
+        129,
+        112,
+        95,
+        70,
+        58
+      ],
+      "linux": [
+        94,
+        69,
+        57
+      ]
+    }
+  },
+  {
+    "id": "chrome-121-0",
+    "name": "chrome",
+    "majorVersion": 121,
+    "buildVersion": 6167,
+    "stablePatchesByOs": {
+      "mac": [
+        184,
+        160,
+        139,
+        85
+      ],
+      "win": [
+        185,
+        161,
+        140,
+        86
+      ],
+      "linux": [
+        184,
+        160,
+        139,
+        85
+      ]
+    }
+  },
+  {
+    "id": "chrome-120-0",
+    "name": "chrome",
+    "majorVersion": 120,
+    "buildVersion": 6099,
+    "stablePatchesByOs": {
+      "mac": [
+        234,
+        216,
+        199,
+        129,
+        109,
+        62
+      ],
+      "win": [
+        225,
+        217,
+        200,
+        130,
+        110,
+        71,
+        63
+      ],
+      "linux": [
+        216,
+        199,
+        129,
+        109,
+        62
+      ]
+    }
+  },
+  {
+    "id": "chrome-119-0",
+    "name": "chrome",
+    "majorVersion": 119,
+    "buildVersion": 6045,
+    "stablePatchesByOs": {
+      "mac": [
+        199,
+        159,
+        123,
+        105
+      ],
+      "win": [
+        200,
+        160,
+        124,
+        106
+      ],
+      "linux": [
+        199,
+        159,
+        123,
+        105
+      ]
+    }
+  },
+  {
+    "id": "chrome-118-0",
+    "name": "chrome",
+    "majorVersion": 118,
+    "buildVersion": 5993,
+    "stablePatchesByOs": {
+      "mac": [
+        117,
+        96,
+        88,
+        70
+      ],
+      "win": [
+        118,
+        89,
+        71
+      ],
+      "linux": [
+        117,
+        88,
+        70
+      ]
+    }
+  },
+  {
+    "id": "chrome-117-0",
+    "name": "chrome",
+    "majorVersion": 117,
+    "buildVersion": 5938,
+    "stablePatchesByOs": {
+      "mac": [
+        149,
+        132,
+        92,
+        88,
+        62
+      ],
+      "win": [
+        150,
+        132,
+        92,
+        89,
+        63
+      ],
+      "linux": [
+        149,
+        132,
+        92,
+        88,
+        62
+      ]
+    }
+  },
+  {
+    "id": "chrome-116-0",
+    "name": "chrome",
+    "majorVersion": 116,
+    "buildVersion": 5845,
+    "stablePatchesByOs": {
+      "mac": [
+        187,
+        179,
+        140,
+        110,
+        96
+      ],
+      "win": [
+        188,
+        180,
+        141,
+        111,
+        97
+      ],
+      "linux": [
+        187,
+        179,
+        140,
+        110,
+        96
+      ]
+    }
+  },
+  {
+    "id": "chrome-115-0",
+    "name": "chrome",
+    "majorVersion": 115,
+    "buildVersion": 5790,
+    "stablePatchesByOs": {
+      "mac": [
+        170,
+        114,
+        102,
+        98
+      ],
+      "win": [
+        171,
+        110,
+        102,
+        99
+      ],
+      "linux": [
+        170,
+        102,
+        98
+      ]
+    }
+  }
+]

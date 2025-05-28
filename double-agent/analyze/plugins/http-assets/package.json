@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/analyze-http-assets",
+  "version": "2.0.0-alpha.32",
+  "description": "Analyzes http header order, capitalization and default values for common document assets (images, fonts, media, scripts, stylesheet, etc)",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.32",
+    "@double-agent/collect-http-assets": "2.0.0-alpha.32",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true
+}

@@ -1,0 +1,261 @@
+{
+  "windows-5-2": {
+    "id": "windows-5-2",
+    "name": "Windows",
+    "marketshare": 0.1,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "XP",
+      "major": "5",
+      "minor": "2"
+    },
+    "releaseDate": "2001-10-25",
+    "description": "Windows XP is an operating system produced by Microsoft as part of the Windows NT family of operating systems. It was the successor to both Windows 2000 for professional users and Windows Me for home users. It was released to manufacturing on August 24, 2001, and broadly released for retail sale on October 25, 2001"
+  },
+  "windows-7": {
+    "id": "windows-7",
+    "name": "Windows",
+    "marketshare": 0.2,
+    "deviceCategory": "desktop",
+    "version": {
+      "major": "7"
+    },
+    "releaseDate": "2009-10-22",
+    "description": "Microsoft Windows, commonly referred to as Windows, is a group of several proprietary graphical operating system families, all of which are developed and marketed by Microsoft. Each family caters to a certain sector of the computing industry."
+  },
+  "windows-8": {
+    "id": "windows-8",
+    "name": "Windows",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "major": "8"
+    },
+    "releaseDate": "2012-10-26",
+    "description": "Microsoft Windows, commonly referred to as Windows, is a group of several proprietary graphical operating system families, all of which are developed and marketed by Microsoft. Each family caters to a certain sector of the computing industry."
+  },
+  "windows-8-1": {
+    "id": "windows-8-1",
+    "name": "Windows",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "major": "8",
+      "minor": "1"
+    },
+    "releaseDate": "2013-10-17",
+    "description": "Microsoft Windows, commonly referred to as Windows, is a group of several proprietary graphical operating system families, all of which are developed and marketed by Microsoft. Each family caters to a certain sector of the computing industry."
+  },
+  "windows-10": {
+    "id": "windows-10",
+    "name": "Windows",
+    "marketshare": 6.7,
+    "deviceCategory": "desktop",
+    "version": {
+      "major": "10"
+    },
+    "releaseDate": "2015-07-15",
+    "description": "Microsoft Windows, commonly referred to as Windows, is a group of several proprietary graphical operating system families, all of which are developed and marketed by Microsoft. Each family caters to a certain sector of the computing industry."
+  },
+  "mac-os-10-6": {
+    "id": "mac-os-10-6",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Snow Leopard",
+      "major": "10",
+      "minor": "6"
+    },
+    "releaseDate": "2009-06-08",
+    "description": "Mac OS X Snow Leopard is the seventh major release of Mac OS X, Apple's desktop and server operating system for Macintosh computers. Snow Leopard was publicly unveiled on June 8, 2009 at Apple’s Worldwide Developers Conference."
+  },
+  "mac-os-10-7": {
+    "id": "mac-os-10-7",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Lion",
+      "major": "10",
+      "minor": "7"
+    },
+    "releaseDate": "2011-07-20",
+    "description": "Mac OS X Lion is the eighth major release of Mac OS X, Apple's desktop and server operating system for Macintosh computers. A preview of Mac OS X 10.7 Lion was publicly shown at the \"Back to the Mac\" Apple Special Event on October 20, 2010. "
+  },
+  "mac-os-10-8": {
+    "id": "mac-os-10-8",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Mountain Lion",
+      "major": "10",
+      "minor": "8"
+    },
+    "releaseDate": "2012-06-25",
+    "description": "OS X Mountain Lion is the ninth major release of OS X, Apple Inc.'s desktop and server operating system for Macintosh computers."
+  },
+  "mac-os-10-9": {
+    "id": "mac-os-10-9",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Mavericks",
+      "major": "10",
+      "minor": "9"
+    },
+    "releaseDate": "2013-10-22",
+    "description": "OS X Mavericks is the tenth major release of OS X, Apple Inc.'s desktop and server operating system for Macintosh computers. OS X Mavericks was announced on June 10, 2013, at WWDC 2013, and was released on October 22, 2013 worldwide."
+  },
+  "mac-os-10-10": {
+    "id": "mac-os-10-10",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Yosemite",
+      "major": "10",
+      "minor": "10"
+    },
+    "releaseDate": "2014-10-16",
+    "description": "OS X Yosemite is the eleventh major release of OS X, Apple Inc.'s desktop and server operating system for Macintosh computers. OS X Yosemite was announced and released to developers on June 2, 2014, at WWDC 2014 and released to public beta testers on July 24, 2014."
+  },
+  "mac-os-10-11": {
+    "id": "mac-os-10-11",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "El Capitan",
+      "major": "10",
+      "minor": "11"
+    },
+    "releaseDate": "2015-09-30",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  },
+  "mac-os-10-12": {
+    "id": "mac-os-10-12",
+    "name": "Mac OS",
+    "marketshare": 0.1,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Sierra",
+      "major": "10",
+      "minor": "12"
+    },
+    "releaseDate": "2016-09-20",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  },
+  "mac-os-10-13": {
+    "id": "mac-os-10-13",
+    "name": "Mac OS",
+    "marketshare": 0.1,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "High Sierra",
+      "major": "10",
+      "minor": "13"
+    },
+    "releaseDate": "2017-09-25",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  },
+  "mac-os-10-14": {
+    "id": "mac-os-10-14",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Mojave",
+      "major": "10",
+      "minor": "14"
+    },
+    "releaseDate": "2018-09-24",
+    "description": "Mojave is the fifteenth major release of macOS, Apple Inc.'s desktop operating system for Macintosh computers. Mojave was announced at Apple's Worldwide Developers Conference on June 4, 2018, and was released to the public on September 24, 2018."
+  },
+  "mac-os-10-15": {
+    "id": "mac-os-10-15",
+    "name": "Mac OS",
+    "marketshare": 3.2,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Catalina",
+      "major": "10",
+      "minor": "15"
+    },
+    "releaseDate": "2019-10-07",
+    "description": "Catalina is the sixteenth and, as of July 2020, current major release of macOS, Apple Inc.'s desktop operating system for Macintosh computers. It is the successor to macOS Mojave."
+  },
+  "mac-os-11": {
+    "id": "mac-os-11",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Big Sur",
+      "major": "11"
+    },
+    "releaseDate": "2020-11-12",
+    "description": "Big Sur is the 17th and current major release of macOS, Apple's operating system for Macintosh computers, and is the successor to macOS Catalina. It was announced at Apple's Worldwide Developers Conference on June 22, 2020, and was released to the public on November 12, 2020."
+  },
+  "windows-11": {
+    "id": "windows-11",
+    "name": "Windows",
+    "marketshare": 9.3,
+    "deviceCategory": "desktop",
+    "version": {
+      "major": "11"
+    },
+    "releaseDate": "2021-10-05",
+    "description": "Microsoft Windows, commonly referred to as Windows, is a group of several proprietary graphical operating system families, all of which are developed and marketed by Microsoft. Each family caters to a certain sector of the computing industry."
+  },
+  "mac-os-12": {
+    "id": "mac-os-12",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Monterey",
+      "major": "12"
+    },
+    "releaseDate": "2021-10-18",
+    "description": "macOS Monterey (version 12) is the 18th and current major release of macOS, Apple's desktop operating system for Macintosh computers. The successor to macOS Big Sur, it was announced at WWDC 2021 on June 7, 2021, and released on October 25, 2021"
+  },
+  "mac-os-13": {
+    "id": "mac-os-13",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Ventura",
+      "major": "13"
+    },
+    "releaseDate": "2022-09-24",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  },
+  "mac-os-14": {
+    "id": "mac-os-14",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Sonoma",
+      "major": "14"
+    },
+    "releaseDate": "2023-09-26",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  },
+  "mac-os-15": {
+    "id": "mac-os-15",
+    "name": "Mac OS",
+    "marketshare": 0,
+    "deviceCategory": "desktop",
+    "version": {
+      "name": "Sequoia",
+      "major": "15"
+    },
+    "releaseDate": "2024-09-16",
+    "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
+  }
+}

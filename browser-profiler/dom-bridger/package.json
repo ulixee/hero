@@ -1,0 +1,28 @@
+{
+  "name": "@ulixee/unblocked-browser-profiler-dom-bridger",
+  "version": "2.0.0-alpha.32",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/commons": "2.0.0-alpha.32",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.32",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.32",
+    "lodash": "^4.17.20"
+  },
+  "private": true,
+  "scripts": {
+    "generateRawMappings": "node --inspect ../../build/browser-profiler/dom-bridger/scripts/generateRawMappings.js",
+    "generatePathPatterns": "node --inspect ../../build/browser-profiler/dom-bridger/scripts/generatePathPatterns.js",
+    "generate": "yarn generateRawMappings && yarn generatePathPatterns"
+  }
+}

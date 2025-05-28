@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "headerTableSize": 65536,
+    "enablePush": false,
+    "initialWindowSize": 6291456,
+    "maxConcurrentStreams": 1000,
+    "maxHeaderListSize": 262144
+  },
+  "initialWindowSize": 65535,
+  "firstFrameWindowSize": 15728640
+}

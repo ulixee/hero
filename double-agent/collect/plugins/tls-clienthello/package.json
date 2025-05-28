@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/collect-tls-clienthello",
+  "version": "2.0.0-alpha.32",
+  "description": "Collects the TLS clienthello handshake when initiating a secure connection",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.32",
+    "@double-agent/config": "2.0.0-alpha.32",
+    "@double-agent/tls-server": "2.0.0-alpha.32"
+  },
+  "private": true
+}

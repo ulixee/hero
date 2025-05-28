@@ -1,0 +1,25 @@
+{
+  "name": "@ulixee/commons",
+  "version": "2.0.0-alpha.32",
+  "description": "Common utilities for Ulixee",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.18",
+    "bech32": "^2.0.0",
+    "devtools-protocol": "^0.0.1137505",
+    "https-proxy-agent": "^7.0.5",
+    "semver": "^7.3.7"
+  }
+}
