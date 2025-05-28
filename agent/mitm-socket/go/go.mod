@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/refraction-networking/utls v1.7.1
+	github.com/refraction-networking/utls v1.7.3
 	golang.org/x/net v0.38.0
 )
 
