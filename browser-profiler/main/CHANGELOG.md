@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.32](https://github.com/ulixee/hero/compare/v2.0.0-alpha.31...v2.0.0-alpha.32) (2025-05-28)
+
+### Bug Fixes
+
+* **double-agent:** try to clean tls servers ([31c9291](https://github.com/ulixee/hero/commit/31c929147879f978ceae173aadfa27b8834ab28d))
+
 # [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
 
 ### Bug Fixes

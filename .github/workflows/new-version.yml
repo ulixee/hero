@@ -22,7 +22,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
-          args: release --rm-dist --debug --skip-validate
+          args: release --clean --skip=validate --verbose
           workdir: ${{ github.workspace }}/agent/mitm-socket
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

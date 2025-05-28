@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.32](https://github.com/ulixee/hero/compare/v2.0.0-alpha.31...v2.0.0-alpha.32) (2025-05-28)
+
+### Bug Fixes
+
+* **agent:** headers starting with - broken ([47f63af](https://github.com/ulixee/hero/commit/47f63af3813e72d181751a500abdbc3d31f2a7cd)), closes [#345](https://github.com/ulixee/hero/issues/345)
+* **agent:** resource loading for file urls ([36988a0](https://github.com/ulixee/hero/commit/36988a008b2bc89ae16b40ba67ded3c4785bd32b))
+* **agent:** support callbacks in chrome internal urls ([5b0c41e](https://github.com/ulixee/hero/commit/5b0c41e6c34967f952db9ccb12e8e2fe20288f60))
+* doc links ([d5ce248](https://github.com/ulixee/hero/commit/d5ce2487bdee8df6a6560610ef99d4985cc54a8b))
+* **double-agent:** try to clean tls servers ([31c9291](https://github.com/ulixee/hero/commit/31c929147879f978ceae173aadfa27b8834ab28d))
+* **profiler:** chrome 133 infinite loop ([526c27d](https://github.com/ulixee/hero/commit/526c27d47e4632b4191516a835c34a241db6f167))
+* **real-user-agents:** update script broken ([c1d5251](https://github.com/ulixee/hero/commit/c1d5251f99315f390b17fac51cb6243128a30dd2))
+
+### Features
+
+* **agent:** chrome 135 emulation ([fdcd31b](https://github.com/ulixee/hero/commit/fdcd31b6f4dc04e8ad716a0ba78cb571e4ed1584))
+* **agent:** migrate from websockets to deprecated console domain for communication ([3a2ceca](https://github.com/ulixee/hero/commit/3a2cecaae2968d002c0d4ef9a48d94a6f2335cdc))
+* **agent:** support authenticated proxies when mitm is disabled ([9946794](https://github.com/ulixee/hero/commit/99467940232f004d6cc1a22a3755489083c627be))
+* upgrade utls for post quantum chrome ([bb60ad5](https://github.com/ulixee/hero/commit/bb60ad5972febba30989fb4fb73eae8d1ed20180))
+
 # [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
 
 ### Bug Fixes

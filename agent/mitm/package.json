@@ -1,19 +1,19 @@
 {
   "name": "@ulixee/unblocked-agent-mitm",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.31",
-    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.31",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.31",
+    "@ulixee/commons": "2.0.0-alpha.32",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.32",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.32",
     "dns-packet": "^5.2.4",
     "moment": "^2.29.4"
   },
   "devDependencies": {
     "@types/node": "^18.19.10",
     "@types/ws": "^7.4.7",
-    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.31",
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.32",
     "http-proxy-agent": "^7.0.2",
     "proxy": "^2.2.0",
     "ws": "^8.18.0"

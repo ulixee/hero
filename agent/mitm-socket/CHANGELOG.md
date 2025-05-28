@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.32](https://github.com/ulixee/hero/compare/v2.0.0-alpha.31...v2.0.0-alpha.32) (2025-05-28)
+
+### Features
+
+* **agent:** chrome 135 emulation ([fdcd31b](https://github.com/ulixee/hero/commit/fdcd31b6f4dc04e8ad716a0ba78cb571e4ed1584))
+* upgrade utls for post quantum chrome ([bb60ad5](https://github.com/ulixee/hero/commit/bb60ad5972febba30989fb4fb73eae8d1ed20180))
+
 # [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
 
 **Note:** Version bump only for package @ulixee/unblocked-agent-mitm-socket
