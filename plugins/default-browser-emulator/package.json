@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/default-browser-emulator",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "bin": {
@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "@ulixee/chrome-app": "^1.0.4",
-    "@ulixee/commons": "2.0.0-alpha.31",
-    "@ulixee/real-user-agents": "2.0.0-alpha.31",
-    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.31",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.31",
+    "@ulixee/commons": "2.0.0-alpha.32",
+    "@ulixee/real-user-agents": "2.0.0-alpha.32",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.32",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.32",
     "compare-versions": "^6.1.0",
     "nanoid": "^3.3.11",
     "tar": "^7.4.3",
@@ -19,9 +19,9 @@
     "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {
-    "@ulixee/unblocked-agent": "2.0.0-alpha.31",
-    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.31",
-    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.31",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.32",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.32",
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.32",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "proxy": "^2.2.0",

@@ -1,13 +1,13 @@
 {
   "name": "@double-agent/collect-browser-speech",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Collects browser speech synthesis voices",
   "dependencies": {
-    "@double-agent/collect": "2.0.0-alpha.31",
-    "@double-agent/config": "2.0.0-alpha.31"
+    "@double-agent/collect": "2.0.0-alpha.32",
+    "@double-agent/config": "2.0.0-alpha.32"
   },
   "devDependencies": {
     "@types/diff": "^4.0.2"

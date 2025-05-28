@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.32](https://github.com/ulixee/hero/compare/v2.0.0-alpha.31...v2.0.0-alpha.32) (2025-05-28)
+
+### Bug Fixes
+
+* **real-user-agents:** update script broken ([c1d5251](https://github.com/ulixee/hero/commit/c1d5251f99315f390b17fac51cb6243128a30dd2))
+
 # [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
 
 **Note:** Version bump only for package @ulixee/real-user-agents

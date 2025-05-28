@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.32](https://github.com/ulixee/hero/compare/v2.0.0-alpha.31...v2.0.0-alpha.32) (2025-05-28)
+
+### Bug Fixes
+
+* **profiler:** chrome 133 infinite loop ([526c27d](https://github.com/ulixee/hero/commit/526c27d47e4632b4191516a835c34a241db6f167))
+* **real-user-agents:** update script broken ([c1d5251](https://github.com/ulixee/hero/commit/c1d5251f99315f390b17fac51cb6243128a30dd2))
+
+### Features
+
+* **agent:** chrome 135 emulation ([fdcd31b](https://github.com/ulixee/hero/commit/fdcd31b6f4dc04e8ad716a0ba78cb571e4ed1584))
+
 # [2.0.0-alpha.31](https://github.com/ulixee/hero/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-12-07)
 
 ### Bug Fixes
