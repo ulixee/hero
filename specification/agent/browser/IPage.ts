@@ -38,7 +38,7 @@ export interface IPage extends ITypedEventEmitter<IPageEvents> {
 
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
 
-  evaluate<T>(expression: string): Promise<T>;
+  evaluate<T>(expression: string, options?: { timeoutMs?: number; isolatedFromWebPageEnvironment?: boolean }): Promise<T>;
   addNewDocumentScript(
     script: string,
     isolateFromWebPageEnvironment: boolean,

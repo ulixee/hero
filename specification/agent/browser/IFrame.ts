@@ -53,6 +53,7 @@ export interface IFrame extends ITypedEventEmitter<IFrameEvents> {
       retriesWaitingForLoad?: number;
       returnByValue?: boolean;
       includeCommandLineAPI?: boolean;
+      timeoutMs?: number;
     },
   ): Promise<T>;
 
