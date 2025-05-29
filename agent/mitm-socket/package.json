@@ -1,6 +1,6 @@
 {
   "name": "@ulixee/unblocked-agent-mitm-socket",
-  "version": "2.0.0-alpha.32",
+  "version": "2.0.0-alpha.33",
   "description": "Man-in-the-middle socket library to emulate TLS and TCP settings",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
     "build-install": "npm run build"
   },
   "dependencies": {
-    "@ulixee/commons": "2.0.0-alpha.32",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.32",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
     "nanoid": "^3.3.11"
   },
   "devDependencies": {
     "@types/ws": "^7.2.4",
-    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.32",
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.33",
     "proxy": "^2.2.0",
     "simple-socks": "^2.1.0",
     "ws": "^8.18.0"

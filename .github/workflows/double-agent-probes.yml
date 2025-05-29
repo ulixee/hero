@@ -52,3 +52,4 @@ jobs:
         with:
           branch: main
           commit_message: "chore(probes): point at new double agent"
+          push_options: '--no-verify'

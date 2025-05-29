@@ -1,12 +1,12 @@
 {
   "name": "@ulixee/hero-interfaces",
-  "version": "2.0.0-alpha.32",
+  "version": "2.0.0-alpha.33",
   "description": "Core interfaces used by Hero",
   "dependencies": {
     "@ulixee/awaited-dom": "1.4.2",
-    "@ulixee/commons": "2.0.0-alpha.32",
-    "@ulixee/js-path": "2.0.0-alpha.32",
-    "@ulixee/unblocked-specification": "2.0.0-alpha.32",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/js-path": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
     "devtools-protocol": "^0.0.1137505"
   }
 }
