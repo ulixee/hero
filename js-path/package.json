@@ -1,0 +1,20 @@
+{
+  "name": "@ulixee/js-path",
+  "version": "2.0.0-alpha.33",
+  "description": "The Serialization format to reference Paths to elements/nodes and properties in the DOM",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts"
+}

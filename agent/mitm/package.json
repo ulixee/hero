@@ -1,0 +1,27 @@
+{
+  "name": "@ulixee/unblocked-agent-mitm",
+  "version": "2.0.0-alpha.33",
+  "description": "Man-in-the-middle proxy to fix chrome request/response",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "dns-packet": "^5.2.4",
+    "moment": "^2.29.4"
+  }
+}
