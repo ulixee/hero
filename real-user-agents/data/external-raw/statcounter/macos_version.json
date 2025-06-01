@@ -1,74 +1,90 @@
 {
-  "fromMonthYear": "2025-04",
-  "toMonthYear": "2025-05",
-  "lastModified": "2025-05-01T07:11:30.509Z",
+  "fromMonthYear": "2025-05",
+  "toMonthYear": "2025-06",
+  "lastModified": "2025-06-01T07:10:51.517Z",
   "results": {
     "macOS Catalina": [
-      "87.82",
+      "88.33",
       "0"
     ],
     "macOS Cheetah": [
-      "3.83",
+      "3.93",
       "0"
     ],
     "macOS 11": [
-      "2.04",
+      "1.75",
       "0"
     ],
     "macOS High Sierra": [
-      "1.66",
+      "1.62",
       "0"
     ],
     "macOS Sierra": [
-      "1.65",
+      "1.61",
       "0"
     ],
     "macOS Mojave": [
-      "1.36",
-      "0"
-    ],
-    "OS X El Capitan": [
-      "0.4",
+      "1.29",
       "0"
     ],
     "OS X 10.10": [
-      "0.4",
+      "0.34",
       "0"
     ],
-    "macOS Big Sur 11.0": [
+    "OS X El Capitan": [
       "0.33",
       "0"
     ],
-    "OS X Mavericks": [
-      "0.19",
+    "macOS Big Sur 11.0": [
+      "0.22",
       "0"
     ],
-    "mac OS X Leopard": [
-      "0.07",
+    "OS X Mavericks": [
+      "0.2",
       "0"
     ],
     "mac OS X Snow Leopard": [
-      "0.07",
+      "0.08",
+      "0"
+    ],
+    "OS X Mountain Lion": [
+      "0.06",
+      "0"
+    ],
+    "mac OS X Leopard": [
+      "0.04",
       "0"
     ],
     "macOS Big Sur 10.16": [
       "0.04",
       "0"
     ],
-    "OS X Mountain Lion": [
-      "0.04",
-      "0"
-    ],
     "mac OS X Lion": [
-      "0.02",
+      "0.03",
       "0"
     ],
     "mac OS X Tiger": [
+      "0.03",
+      "0"
+    ],
+    "mac OS X Panther": [
+      "0.03",
+      "0"
+    ],
+    "mac OS X Jaguar": [
+      "0.02",
+      "0"
+    ],
+    "macOS Big Sur 11.2": [
+      "0.02",
+      "0"
+    ],
+    "macOS Big Sur 11.1": [
       "0.01",
       "0"
     ],
     "Other": [
-      "0.04",
+      "0.03",
       "0"
     ]
   }
