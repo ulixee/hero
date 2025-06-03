@@ -4500,5 +4500,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-139-0": {
+    "id": "firefox-139-0",
+    "name": "Firefox",
+    "marketshare": 0.1,
+    "version": {
+      "major": "139",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
