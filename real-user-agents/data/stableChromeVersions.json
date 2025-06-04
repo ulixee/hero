@@ -6,14 +6,17 @@
     "buildVersion": 7151,
     "stablePatchesByOs": {
       "mac": [
+        69,
         56,
         41
       ],
       "win": [
+        69,
         56,
         41
       ],
       "linux": [
+        68,
         55
       ]
     }
