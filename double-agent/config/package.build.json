@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "sync": "node -e 'require(\"./scripts/updatePathPatterns.js\").default()'"
+  }
+}
