@@ -1,0 +1,35 @@
+{
+  "name": "@ulixee/hero-end-to-end",
+  "version": "2.0.0-alpha.33",
+  "description": "End to end Hero tests",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/execute-js-plugin": "2.0.0-alpha.33",
+    "@ulixee/hero": "2.0.0-alpha.33",
+    "@ulixee/hero-core": "2.0.0-alpha.33",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.33",
+    "@ulixee/net": "2.0.0-alpha.33"
+  },
+  "devDependencies": {
+    "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.33",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.33",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.33",
+    "@ulixee/hero-testing": "2.0.0-alpha.33",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "ws": "^8.18.0"
+  },
+  "private": true
+}
