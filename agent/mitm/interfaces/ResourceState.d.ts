@@ -1,0 +1,25 @@
+declare enum ResourceState {
+    ClientToProxyRequest = "ClientToProxyRequest",
+    InterceptHandler = "InterceptHandler",
+    DetermineResourceType = "DetermineResourceType",
+    EmulationWillSendResponse = "EmulationWillSendResponse",
+    CheckCacheOnRequest = "CheckCacheOnRequest",
+    GetSocket = "GetSocket",
+    BeforeSendRequest = "BeforeSendRequest",
+    CreateH2Session = "CreateH2Session",
+    CreateProxyToServerRequest = "CreateProxyToServerRequest",
+    ServerToProxyPush = "ServerToProxyPush",
+    ProxyToClientPush = "ProxyToClientPush",
+    WriteProxyToServerRequestBody = "WriteProxyToServerRequestBody",
+    ServerToProxyOnResponse = "ServerToProxyOnResponse",
+    ProxyToClientPushResponse = "ProxyToClientPushResponse",
+    ServerToProxyPushResponse = "ServerToProxyPushResponse",
+    CheckCacheOnResponseEnd = "CheckCacheOnResponseEnd",
+    WriteProxyToClientResponseBody = "WriteProxyToClientResponseBody",
+    End = "End",
+    SessionClosed = "SessionClosed",
+    PrematurelyClosed = "PrematurelyClosed",
+    Intercepted = "Intercepted",
+    Error = "Error"
+}
+export default ResourceState;
