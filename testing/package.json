@@ -1,0 +1,37 @@
+{
+  "name": "@ulixee/hero-testing",
+  "version": "2.0.0-alpha.33",
+  "description": "Helpers and stubs for testing",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@koa/multer": "^3.0.2",
+    "@koa/router": "^13.0.0",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/hero": "2.0.0-alpha.33",
+    "@ulixee/hero-core": "2.0.0-alpha.33",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.33",
+    "@ulixee/js-path": "2.0.0-alpha.33",
+    "@ulixee/net": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent-mitm-socket": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "koa": "^2.15.3",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0",
+    "@types/koa__multer": "^2.0.7",
+    "@types/koa__router": "^12.0.4"
+  },
+  "private": true
+}

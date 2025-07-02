@@ -1,0 +1,24 @@
+{
+  "name": "@ulixee/default-human-emulator",
+  "version": "2.0.0-alpha.33",
+  "description": "Default human emulator based on Xetera/ghost-cursor",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33"
+  }
+}
