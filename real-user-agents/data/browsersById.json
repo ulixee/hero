@@ -4566,5 +4566,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-138-0": {
+    "id": "edge-138-0",
+    "name": "Edge",
+    "marketshare": 0.3,
+    "version": {
+      "major": "138",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
