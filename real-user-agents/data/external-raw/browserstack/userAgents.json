@@ -20422,301 +20422,301 @@
   {
     "id": "Chrome-123.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-126.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-122.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-125.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-124.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-131.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-129.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-130.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-127.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-128.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-133.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-135.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-134.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-132.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-136.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-138.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Chrome-137.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-80.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36 Edg/80.0.361.57",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-116.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.54",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-123.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-122.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-124.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-125.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-126.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-128.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-127.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-129.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-130.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-131.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-133.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-132.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-134.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-137.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-135.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-136.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Edge-138.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Safari-19.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-83.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:83.0) Gecko/20100101 Firefox/83.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-82.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:82.0) Gecko/20100101 Firefox/82.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-84.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:84.0) Gecko/20100101 Firefox/84.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-100.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-115.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-120.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-124.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-125.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-126.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-127.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-128.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-129.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-130.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-131.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:131.0) Gecko/20100101 Firefox/131.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-132.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-133.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-135.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:135.0) Gecko/20100101 Firefox/135.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-136.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-134.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-137.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-138.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-139.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:139.0) Gecko/20100101 Firefox/139.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   },
   {
     "id": "Firefox-140.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:140.0) Gecko/20100101 Firefox/140.0",
-    "osId": "mac-os-Tahoe"
+    "osId": "mac-os-26"
   }
 ]

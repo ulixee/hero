@@ -258,15 +258,15 @@
     "releaseDate": "2024-09-16",
     "description": "MacOS is a series of proprietary graphical operating systems developed and marketed by Apple Inc. since 2001. It is the primary operating system for Apple's Mac computers. Within the market of desktop, laptop and home computers, and by web usage, it is the second most widely used desktop OS, after Microsoft Windows."
   },
-  "mac-os-Tahoe": {
-    "id": "mac-os-Tahoe",
+  "mac-os-26": {
+    "id": "mac-os-26",
     "name": "Mac OS",
     "marketshare": 0,
     "deviceCategory": "desktop",
     "version": {
-      "major": "Tahoe"
+      "major": "26"
     },
-    "releaseDate": "unknown",
+    "releaseDate": "2025-06-09",
     "description": ""
   }
 }
