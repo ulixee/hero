@@ -3,6 +3,7 @@
     "id": "mac-os-15--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       93,
       50
     ],
@@ -4929,6 +4930,7 @@
     "id": "mac-os-14--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       93,
       50
     ],
@@ -10668,6 +10670,7 @@
     "id": "mac-os-13--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       93,
       50
     ],
@@ -16963,6 +16966,7 @@
     "id": "mac-os-12--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       93,
       50
     ],
@@ -25100,6 +25104,7 @@
     "id": "mac-os-11--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       93,
       50
     ],
@@ -75385,10 +75390,1417 @@
     "browserId": "opera-12-15",
     "marketshare": 0
   },
+  "mac-os-Tahoe--chrome-123-0": {
+    "id": "mac-os-Tahoe--chrome-123-0",
+    "allPatchVersions": [
+      134,
+      133,
+      132,
+      131,
+      130,
+      129,
+      128,
+      127,
+      126,
+      125
+    ],
+    "stablePatchVersions": [
+      124,
+      107,
+      87,
+      59
+    ],
+    "browserBaseVersion": [
+      123,
+      0,
+      6312,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "browserId": "chrome-123-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-126-0": {
+    "id": "mac-os-Tahoe--chrome-126-0",
+    "allPatchVersions": [
+      270,
+      269,
+      268,
+      267,
+      266,
+      265,
+      264,
+      263,
+      262,
+      261
+    ],
+    "stablePatchVersions": [
+      183,
+      127,
+      115,
+      62,
+      57
+    ],
+    "browserBaseVersion": [
+      126,
+      0,
+      6478,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "browserId": "chrome-126-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-122-0": {
+    "id": "mac-os-Tahoe--chrome-122-0",
+    "allPatchVersions": [
+      171,
+      170,
+      169,
+      168,
+      167,
+      166,
+      165,
+      164,
+      163,
+      162
+    ],
+    "stablePatchVersions": [
+      129,
+      112,
+      94,
+      69,
+      57
+    ],
+    "browserBaseVersion": [
+      122,
+      0,
+      6261,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "browserId": "chrome-122-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-125-0": {
+    "id": "mac-os-Tahoe--chrome-125-0",
+    "allPatchVersions": [
+      237,
+      236,
+      235,
+      234,
+      233,
+      232,
+      231,
+      230,
+      229,
+      228
+    ],
+    "stablePatchVersions": [
+      142,
+      113,
+      77,
+      61
+    ],
+    "browserBaseVersion": [
+      125,
+      0,
+      6422,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "browserId": "chrome-125-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-124-0": {
+    "id": "mac-os-Tahoe--chrome-124-0",
+    "allPatchVersions": [
+      257,
+      256,
+      255,
+      254,
+      253,
+      252,
+      251,
+      250,
+      249,
+      248
+    ],
+    "stablePatchVersions": [
+      208,
+      202,
+      156,
+      119,
+      93,
+      80,
+      62
+    ],
+    "browserBaseVersion": [
+      124,
+      0,
+      6367,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "browserId": "chrome-124-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-131-0": {
+    "id": "mac-os-Tahoe--chrome-131-0",
+    "allPatchVersions": [
+      268,
+      267,
+      266,
+      265,
+      264,
+      263,
+      262,
+      261,
+      260,
+      259
+    ],
+    "stablePatchVersions": [
+      265,
+      205,
+      140,
+      109,
+      86,
+      70
+    ],
+    "browserBaseVersion": [
+      131,
+      0,
+      6778,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "browserId": "chrome-131-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-129-0": {
+    "id": "mac-os-Tahoe--chrome-129-0",
+    "allPatchVersions": [
+      112,
+      111,
+      110,
+      109,
+      108,
+      107,
+      106,
+      105,
+      104,
+      103
+    ],
+    "stablePatchVersions": [
+      101,
+      90,
+      71,
+      59
+    ],
+    "browserBaseVersion": [
+      129,
+      0,
+      6668,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+    "browserId": "chrome-129-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-130-0": {
+    "id": "mac-os-Tahoe--chrome-130-0",
+    "allPatchVersions": [
+      192,
+      191,
+      190,
+      189,
+      188,
+      187,
+      186,
+      185,
+      184,
+      183
+    ],
+    "stablePatchVersions": [
+      117,
+      92,
+      70,
+      59
+    ],
+    "browserBaseVersion": [
+      130,
+      0,
+      6723,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    "browserId": "chrome-130-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-127-0": {
+    "id": "mac-os-Tahoe--chrome-127-0",
+    "allPatchVersions": [
+      144,
+      143,
+      142,
+      141,
+      140,
+      139,
+      138,
+      137,
+      136,
+      135
+    ],
+    "stablePatchVersions": [
+      120,
+      100,
+      89,
+      73
+    ],
+    "browserBaseVersion": [
+      127,
+      0,
+      6533,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    "browserId": "chrome-127-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-128-0": {
+    "id": "mac-os-Tahoe--chrome-128-0",
+    "allPatchVersions": [
+      194,
+      193,
+      192,
+      191,
+      190,
+      189,
+      188,
+      187,
+      186,
+      185
+    ],
+    "stablePatchVersions": [
+      138,
+      120,
+      114,
+      85
+    ],
+    "browserBaseVersion": [
+      128,
+      0,
+      6613,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+    "browserId": "chrome-128-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-133-0": {
+    "id": "mac-os-Tahoe--chrome-133-0",
+    "allPatchVersions": [
+      184,
+      183,
+      153,
+      152,
+      151,
+      150,
+      149,
+      148,
+      147,
+      146
+    ],
+    "stablePatchVersions": [
+      142,
+      127,
+      99,
+      54
+    ],
+    "browserBaseVersion": [
+      133,
+      0,
+      6943,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    "browserId": "chrome-133-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-135-0": {
+    "id": "mac-os-Tahoe--chrome-135-0",
+    "allPatchVersions": [
+      122,
+      121,
+      120,
+      119,
+      118,
+      117,
+      116,
+      115,
+      114,
+      113
+    ],
+    "stablePatchVersions": [
+      115,
+      96,
+      85,
+      42
+    ],
+    "browserBaseVersion": [
+      135,
+      0,
+      7049,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+    "browserId": "chrome-135-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-134-0": {
+    "id": "mac-os-Tahoe--chrome-134-0",
+    "allPatchVersions": [
+      216,
+      215,
+      214,
+      213,
+      212,
+      211,
+      210,
+      209,
+      208,
+      207
+    ],
+    "stablePatchVersions": [
+      166,
+      118,
+      89,
+      45
+    ],
+    "browserBaseVersion": [
+      134,
+      0,
+      6998,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+    "browserId": "chrome-134-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-132-0": {
+    "id": "mac-os-Tahoe--chrome-132-0",
+    "allPatchVersions": [
+      222,
+      221,
+      220,
+      219,
+      218,
+      217,
+      216,
+      215,
+      214,
+      213
+    ],
+    "stablePatchVersions": [
+      160,
+      111,
+      84
+    ],
+    "browserBaseVersion": [
+      132,
+      0,
+      6834,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "browserId": "chrome-132-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-136-0": {
+    "id": "mac-os-Tahoe--chrome-136-0",
+    "allPatchVersions": [
+      56,
+      55,
+      54,
+      53,
+      52,
+      51,
+      50,
+      49,
+      48,
+      47
+    ],
+    "stablePatchVersions": [
+      114,
+      93,
+      49
+    ],
+    "browserBaseVersion": [
+      136,
+      0,
+      7103,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "browserId": "chrome-136-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-138-0": {
+    "id": "mac-os-Tahoe--chrome-138-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [
+      101,
+      93,
+      50
+    ],
+    "browserBaseVersion": [
+      138,
+      0,
+      7204,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+    "browserId": "chrome-138-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--chrome-137-0": {
+    "id": "mac-os-Tahoe--chrome-137-0",
+    "allPatchVersions": [
+      1,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2,
+      1,
+      0
+    ],
+    "stablePatchVersions": [
+      120,
+      104,
+      69,
+      56,
+      41
+    ],
+    "browserBaseVersion": [
+      137,
+      0,
+      7151,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "browserId": "chrome-137-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-80-0": {
+    "id": "mac-os-Tahoe--edge-80-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      80,
+      0,
+      361,
+      57
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36 Edg/80.0.361.57",
+    "browserId": "edge-80-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-116-0": {
+    "id": "mac-os-Tahoe--edge-116-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      116,
+      0,
+      1938,
+      54
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.54",
+    "browserId": "edge-116-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-123-0": {
+    "id": "mac-os-Tahoe--edge-123-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      123,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
+    "browserId": "edge-123-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-122-0": {
+    "id": "mac-os-Tahoe--edge-122-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      122,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
+    "browserId": "edge-122-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-124-0": {
+    "id": "mac-os-Tahoe--edge-124-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      124,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+    "browserId": "edge-124-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-125-0": {
+    "id": "mac-os-Tahoe--edge-125-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      125,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
+    "browserId": "edge-125-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-126-0": {
+    "id": "mac-os-Tahoe--edge-126-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      126,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
+    "browserId": "edge-126-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-128-0": {
+    "id": "mac-os-Tahoe--edge-128-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      128,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0",
+    "browserId": "edge-128-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-127-0": {
+    "id": "mac-os-Tahoe--edge-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+    "browserId": "edge-127-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-129-0": {
+    "id": "mac-os-Tahoe--edge-129-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      129,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0",
+    "browserId": "edge-129-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-130-0": {
+    "id": "mac-os-Tahoe--edge-130-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      130,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
+    "browserId": "edge-130-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-131-0": {
+    "id": "mac-os-Tahoe--edge-131-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      131,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+    "browserId": "edge-131-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-133-0": {
+    "id": "mac-os-Tahoe--edge-133-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      133,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
+    "browserId": "edge-133-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-132-0": {
+    "id": "mac-os-Tahoe--edge-132-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      132,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
+    "browserId": "edge-132-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-134-0": {
+    "id": "mac-os-Tahoe--edge-134-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      134,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
+    "browserId": "edge-134-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-137-0": {
+    "id": "mac-os-Tahoe--edge-137-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      137,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0",
+    "browserId": "edge-137-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-135-0": {
+    "id": "mac-os-Tahoe--edge-135-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      135,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0",
+    "browserId": "edge-135-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-136-0": {
+    "id": "mac-os-Tahoe--edge-136-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      136,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0",
+    "browserId": "edge-136-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--edge-138-0": {
+    "id": "mac-os-Tahoe--edge-138-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      138,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0",
+    "browserId": "edge-138-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--safari-26-0": {
+    "id": "mac-os-Tahoe--safari-26-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      26,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+    "browserId": "safari-26-0",
+    "marketshare": null
+  },
+  "mac-os-Tahoe--firefox-83-0": {
+    "id": "mac-os-Tahoe--firefox-83-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      83,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:83.0) Gecko/20100101 Firefox/83.0",
+    "browserId": "firefox-83-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-82-0": {
+    "id": "mac-os-Tahoe--firefox-82-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      82,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:82.0) Gecko/20100101 Firefox/82.0",
+    "browserId": "firefox-82-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-84-0": {
+    "id": "mac-os-Tahoe--firefox-84-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      84,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 16.0; rv:84.0) Gecko/20100101 Firefox/84.0",
+    "browserId": "firefox-84-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-100-0": {
+    "id": "mac-os-Tahoe--firefox-100-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      100,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
+    "browserId": "firefox-100-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-115-0": {
+    "id": "mac-os-Tahoe--firefox-115-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      115,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "browserId": "firefox-115-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-120-0": {
+    "id": "mac-os-Tahoe--firefox-120-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      120,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0",
+    "browserId": "firefox-120-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-124-0": {
+    "id": "mac-os-Tahoe--firefox-124-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      124,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0",
+    "browserId": "firefox-124-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-125-0": {
+    "id": "mac-os-Tahoe--firefox-125-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      125,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0",
+    "browserId": "firefox-125-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-126-0": {
+    "id": "mac-os-Tahoe--firefox-126-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      126,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
+    "browserId": "firefox-126-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-127-0": {
+    "id": "mac-os-Tahoe--firefox-127-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      127,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0",
+    "browserId": "firefox-127-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-128-0": {
+    "id": "mac-os-Tahoe--firefox-128-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      128,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0",
+    "browserId": "firefox-128-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-129-0": {
+    "id": "mac-os-Tahoe--firefox-129-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      129,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:129.0) Gecko/20100101 Firefox/129.0",
+    "browserId": "firefox-129-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-130-0": {
+    "id": "mac-os-Tahoe--firefox-130-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      130,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0",
+    "browserId": "firefox-130-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-131-0": {
+    "id": "mac-os-Tahoe--firefox-131-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      131,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:131.0) Gecko/20100101 Firefox/131.0",
+    "browserId": "firefox-131-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-132-0": {
+    "id": "mac-os-Tahoe--firefox-132-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      132,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0",
+    "browserId": "firefox-132-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-133-0": {
+    "id": "mac-os-Tahoe--firefox-133-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      133,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0",
+    "browserId": "firefox-133-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-135-0": {
+    "id": "mac-os-Tahoe--firefox-135-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      135,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:135.0) Gecko/20100101 Firefox/135.0",
+    "browserId": "firefox-135-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-136-0": {
+    "id": "mac-os-Tahoe--firefox-136-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      136,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0",
+    "browserId": "firefox-136-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-134-0": {
+    "id": "mac-os-Tahoe--firefox-134-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      134,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0",
+    "browserId": "firefox-134-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-137-0": {
+    "id": "mac-os-Tahoe--firefox-137-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      137,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+    "browserId": "firefox-137-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-138-0": {
+    "id": "mac-os-Tahoe--firefox-138-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      138,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
+    "browserId": "firefox-138-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-139-0": {
+    "id": "mac-os-Tahoe--firefox-139-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      139,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:139.0) Gecko/20100101 Firefox/139.0",
+    "browserId": "firefox-139-0",
+    "marketshare": 0
+  },
+  "mac-os-Tahoe--firefox-140-0": {
+    "id": "mac-os-Tahoe--firefox-140-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      140,
+      0,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "Tahoe"
+    },
+    "operatingSystemId": "mac-os-Tahoe",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:140.0) Gecko/20100101 Firefox/140.0",
+    "browserId": "firefox-140-0",
+    "marketshare": 0
+  },
   "windows-11--chrome-138-0": {
     "id": "windows-11--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       97,
       50
     ],
@@ -82105,6 +83517,7 @@
     "id": "windows-10--chrome-138-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      101,
       97,
       50
     ],
