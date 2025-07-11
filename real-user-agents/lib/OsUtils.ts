@@ -66,7 +66,7 @@ export function createOsVersion(
   if (majorVersion.match(/^([a-z\s]+)/i)) {
     // majorVersion is name instead of number
     namedVersion = majorVersion;
-    if (osName.startsWith('Mac')) {
+    if (osName.startsWith('Mac') || osName.startsWith('OS X')) {
       const versionString = macOsNameToVersionMap[majorVersion];
       if (versionString) {
         [majorVersion, minorVersion] = versionString.split('.');
