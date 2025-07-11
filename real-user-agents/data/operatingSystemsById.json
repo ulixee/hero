@@ -266,18 +266,7 @@
     "version": {
       "major": "26"
     },
-    "releaseDate": "unknown",
-    "description": ""
-  },
-  "mac-os-Tahoe": {
-    "id": "mac-os-Tahoe",
-    "name": "Mac OS",
-    "marketshare": 0,
-    "deviceCategory": "desktop",
-    "version": {
-      "major": "Tahoe"
-    },
-    "releaseDate": "unknown",
+    "releaseDate": "2025-06-09",
     "description": ""
   }
 }
