@@ -21123,5 +21123,40 @@
     "id": "Safari-26.0--OS X-Tahoe",
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
     "osId": "mac-os-26"
+  },
+  {
+    "id": "Chrome-139.0--OS X-Sonoma",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "mac-os-14"
+  },
+  {
+    "id": "Chrome-139.0--OS X-Ventura",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "mac-os-13"
+  },
+  {
+    "id": "Chrome-139.0--OS X-Monterey",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "mac-os-12"
+  },
+  {
+    "id": "Chrome-139.0--Windows-10",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "windows-10"
+  },
+  {
+    "id": "Chrome-139.0--Windows-11",
+    "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "windows-11"
+  },
+  {
+    "id": "Chrome-139.0--OS X-Tahoe",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "mac-os-26"
+  },
+  {
+    "id": "Chrome-139.0--OS X-Sequoia",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "osId": "mac-os-15"
   }
 ]
