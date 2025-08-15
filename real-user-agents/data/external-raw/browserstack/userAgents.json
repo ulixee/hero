@@ -21188,5 +21188,10 @@
     "id": "Edge-139.0--Windows-11",
     "string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0",
     "osId": "windows-11"
+  },
+  {
+    "id": "Edge-139.0--OS X-Sequoia",
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0",
+    "osId": "mac-os-15"
   }
 ]

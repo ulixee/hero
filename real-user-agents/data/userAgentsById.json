@@ -5404,6 +5404,25 @@
     "browserId": "chrome-61-0",
     "marketshare": 0
   },
+  "mac-os-15--edge-139-0": {
+    "id": "mac-os-15--edge-139-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      139,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "15"
+    },
+    "operatingSystemId": "mac-os-15",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0",
+    "browserId": "edge-139-0",
+    "marketshare": 0
+  },
   "mac-os-15--edge-138-0": {
     "id": "mac-os-15--edge-138-0",
     "allPatchVersions": [],
