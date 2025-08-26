@@ -4632,5 +4632,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-142-0": {
+    "id": "firefox-142-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "142",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
