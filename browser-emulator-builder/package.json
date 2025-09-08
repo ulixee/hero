@@ -1,0 +1,40 @@
+{
+  "name": "@ulixee/unblocked-browser-emulator-builder",
+  "version": "2.0.0-alpha.33",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.33",
+    "@double-agent/analyze-http-basic-headers": "2.0.0-alpha.33",
+    "@double-agent/collect": "2.0.0-alpha.33",
+    "@double-agent/collect-browser-codecs": "2.0.0-alpha.33",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.33",
+    "@double-agent/collect-browser-fonts": "2.0.0-alpha.33",
+    "@double-agent/collect-browser-speech": "2.0.0-alpha.33",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.33",
+    "@double-agent/collect-http-ua-hints": "2.0.0-alpha.33",
+    "@double-agent/collect-http2-session": "2.0.0-alpha.33",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.33",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/real-user-agents": "2.0.0-alpha.33",
+    "@ulixee/unblocked-browser-profiler": "2.0.0-alpha.33",
+    "@ulixee/unblocked-browser-profiler-dom-bridger": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "@ulixee/unblocked-agent-testing": "2.0.0-alpha.33"
+  },
+  "private": true,
+  "scripts": {
+    "generate": "node --inspect ../build/browser-emulator-builder/scripts/generateEmulatorData"
+  }
+}

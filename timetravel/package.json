@@ -1,0 +1,28 @@
+{
+  "name": "@ulixee/hero-timetravel",
+  "version": "2.0.0-alpha.33",
+  "description": "The interface to playback and examine previous Hero sessions",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/hero-core": "2.0.0-alpha.33",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "nanoid": "^3.3.11"
+  }
+}

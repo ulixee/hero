@@ -1,0 +1,25 @@
+{
+  "name": "@ulixee/hero-interfaces",
+  "version": "2.0.0-alpha.33",
+  "description": "Core interfaces used by Hero",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/js-path": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "devtools-protocol": "^0.0.1137505"
+  }
+}

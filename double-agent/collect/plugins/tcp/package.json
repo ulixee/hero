@@ -1,0 +1,26 @@
+{
+  "name": "@double-agent/collect-tcp",
+  "version": "2.0.0-alpha.33",
+  "description": "Collects tcp packet values such as window-size and time-to-live",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.33",
+    "@double-agent/config": "2.0.0-alpha.33",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true,
+  "optionalDependencies": {
+    "pcap": "^3.1.0"
+  }
+}

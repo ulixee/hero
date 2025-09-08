@@ -1,0 +1,340 @@
+{
+  "voices": [
+    {
+      "default": true,
+      "lang": "en-US",
+      "localService": true,
+      "name": "Alex",
+      "voiceURI": "Alex"
+    },
+    {
+      "default": false,
+      "lang": "it-IT",
+      "localService": true,
+      "name": "Alice",
+      "voiceURI": "Alice"
+    },
+    {
+      "default": false,
+      "lang": "sv-SE",
+      "localService": true,
+      "name": "Alva",
+      "voiceURI": "Alva"
+    },
+    {
+      "default": false,
+      "lang": "fr-CA",
+      "localService": true,
+      "name": "Amelie",
+      "voiceURI": "Amelie"
+    },
+    {
+      "default": false,
+      "lang": "de-DE",
+      "localService": true,
+      "name": "Anna",
+      "voiceURI": "Anna"
+    },
+    {
+      "default": false,
+      "lang": "he-IL",
+      "localService": true,
+      "name": "Carmit",
+      "voiceURI": "Carmit"
+    },
+    {
+      "default": false,
+      "lang": "id-ID",
+      "localService": true,
+      "name": "Damayanti",
+      "voiceURI": "Damayanti"
+    },
+    {
+      "default": false,
+      "lang": "en-GB",
+      "localService": true,
+      "name": "Daniel",
+      "voiceURI": "Daniel"
+    },
+    {
+      "default": false,
+      "lang": "es-AR",
+      "localService": true,
+      "name": "Diego",
+      "voiceURI": "Diego"
+    },
+    {
+      "default": false,
+      "lang": "nl-BE",
+      "localService": true,
+      "name": "Ellen",
+      "voiceURI": "Ellen"
+    },
+    {
+      "default": false,
+      "lang": "en-SCOTLAND",
+      "localService": true,
+      "name": "Fiona",
+      "voiceURI": "Fiona"
+    },
+    {
+      "default": false,
+      "lang": "en-US",
+      "localService": true,
+      "name": "Fred",
+      "voiceURI": "Fred"
+    },
+    {
+      "default": false,
+      "lang": "ro-RO",
+      "localService": true,
+      "name": "Ioana",
+      "voiceURI": "Ioana"
+    },
+    {
+      "default": false,
+      "lang": "pt-PT",
+      "localService": true,
+      "name": "Joana",
+      "voiceURI": "Joana"
+    },
+    {
+      "default": false,
+      "lang": "es-ES",
+      "localService": true,
+      "name": "Jorge",
+      "voiceURI": "Jorge"
+    },
+    {
+      "default": false,
+      "lang": "es-MX",
+      "localService": true,
+      "name": "Juan",
+      "voiceURI": "Juan"
+    },
+    {
+      "default": false,
+      "lang": "th-TH",
+      "localService": true,
+      "name": "Kanya",
+      "voiceURI": "Kanya"
+    },
+    {
+      "default": false,
+      "lang": "en-AU",
+      "localService": true,
+      "name": "Karen",
+      "voiceURI": "Karen"
+    },
+    {
+      "default": false,
+      "lang": "ja-JP",
+      "localService": true,
+      "name": "Kyoko",
+      "voiceURI": "Kyoko"
+    },
+    {
+      "default": false,
+      "lang": "sk-SK",
+      "localService": true,
+      "name": "Laura",
+      "voiceURI": "Laura"
+    },
+    {
+      "default": false,
+      "lang": "hi-IN",
+      "localService": true,
+      "name": "Lekha",
+      "voiceURI": "Lekha"
+    },
+    {
+      "default": false,
+      "lang": "it-IT",
+      "localService": true,
+      "name": "Luca",
+      "voiceURI": "Luca"
+    },
+    {
+      "default": false,
+      "lang": "pt-BR",
+      "localService": true,
+      "name": "Luciana",
+      "voiceURI": "Luciana"
+    },
+    {
+      "default": false,
+      "lang": "ar-SA",
+      "localService": true,
+      "name": "Maged",
+      "voiceURI": "Maged"
+    },
+    {
+      "default": false,
+      "lang": "hu-HU",
+      "localService": true,
+      "name": "Mariska",
+      "voiceURI": "Mariska"
+    },
+    {
+      "default": false,
+      "lang": "zh-TW",
+      "localService": true,
+      "name": "Mei-Jia",
+      "voiceURI": "Mei-Jia"
+    },
+    {
+      "default": false,
+      "lang": "el-GR",
+      "localService": true,
+      "name": "Melina",
+      "voiceURI": "Melina"
+    },
+    {
+      "default": false,
+      "lang": "ru-RU",
+      "localService": true,
+      "name": "Milena",
+      "voiceURI": "Milena"
+    },
+    {
+      "default": false,
+      "lang": "en-IE",
+      "localService": true,
+      "name": "Moira",
+      "voiceURI": "Moira"
+    },
+    {
+      "default": false,
+      "lang": "es-ES",
+      "localService": true,
+      "name": "Monica",
+      "voiceURI": "Monica"
+    },
+    {
+      "default": false,
+      "lang": "nb-NO",
+      "localService": true,
+      "name": "Nora",
+      "voiceURI": "Nora"
+    },
+    {
+      "default": false,
+      "lang": "es-MX",
+      "localService": true,
+      "name": "Paulina",
+      "voiceURI": "Paulina"
+    },
+    {
+      "default": false,
+      "lang": "en-IN",
+      "localService": true,
+      "name": "Rishi",
+      "voiceURI": "Rishi"
+    },
+    {
+      "default": false,
+      "lang": "en-US",
+      "localService": true,
+      "name": "Samantha",
+      "voiceURI": "Samantha"
+    },
+    {
+      "default": false,
+      "lang": "da-DK",
+      "localService": true,
+      "name": "Sara",
+      "voiceURI": "Sara"
+    },
+    {
+      "default": false,
+      "lang": "fi-FI",
+      "localService": true,
+      "name": "Satu",
+      "voiceURI": "Satu"
+    },
+    {
+      "default": false,
+      "lang": "zh-HK",
+      "localService": true,
+      "name": "Sin-ji",
+      "voiceURI": "Sin-ji"
+    },
+    {
+      "default": false,
+      "lang": "en-ZA",
+      "localService": true,
+      "name": "Tessa",
+      "voiceURI": "Tessa"
+    },
+    {
+      "default": false,
+      "lang": "fr-FR",
+      "localService": true,
+      "name": "Thomas",
+      "voiceURI": "Thomas"
+    },
+    {
+      "default": false,
+      "lang": "zh-CN",
+      "localService": true,
+      "name": "Ting-Ting",
+      "voiceURI": "Ting-Ting"
+    },
+    {
+      "default": false,
+      "lang": "en-IN",
+      "localService": true,
+      "name": "Veena",
+      "voiceURI": "Veena"
+    },
+    {
+      "default": false,
+      "lang": "en-US",
+      "localService": true,
+      "name": "Victoria",
+      "voiceURI": "Victoria"
+    },
+    {
+      "default": false,
+      "lang": "nl-NL",
+      "localService": true,
+      "name": "Xander",
+      "voiceURI": "Xander"
+    },
+    {
+      "default": false,
+      "lang": "tr-TR",
+      "localService": true,
+      "name": "Yelda",
+      "voiceURI": "Yelda"
+    },
+    {
+      "default": false,
+      "lang": "ko-KR",
+      "localService": true,
+      "name": "Yuna",
+      "voiceURI": "Yuna"
+    },
+    {
+      "default": false,
+      "lang": "ru-RU",
+      "localService": true,
+      "name": "Yuri",
+      "voiceURI": "Yuri"
+    },
+    {
+      "default": false,
+      "lang": "pl-PL",
+      "localService": true,
+      "name": "Zosia",
+      "voiceURI": "Zosia"
+    },
+    {
+      "default": false,
+      "lang": "cs-CZ",
+      "localService": true,
+      "name": "Zuzana",
+      "voiceURI": "Zuzana"
+    }
+  ]
+}

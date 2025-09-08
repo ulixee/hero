@@ -1,0 +1,26 @@
+{
+  "name": "@double-agent/analyze-browser-dom-environment",
+  "version": "2.0.0-alpha.33",
+  "description": "Analyzes the DOM environment, such as functionality and object structure, match the given user-agent",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.33",
+    "@double-agent/collect": "2.0.0-alpha.33",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.33",
+    "@double-agent/config": "2.0.0-alpha.33",
+    "csv-parse": "^4.8.5",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/config",
+  "version": "2.0.0-alpha.33",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.33",
+    "@double-agent/collect": "2.0.0-alpha.33",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/real-user-agents": "2.0.0-alpha.33"
+  },
+  "private": true
+}

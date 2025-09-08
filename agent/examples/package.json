@@ -1,0 +1,19 @@
+{
+  "name": "@ulixee/unblocked-agent-examples",
+  "version": "2.0.0-alpha.33",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@ulixee/js-path": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.33"
+  },
+  "private": true
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@ulixee/hero-core",
+  "version": "2.0.0-alpha.33",
+  "description": "The core browser API used to run Hero",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    },
+    "./package.json": "./package.json",
+    "./lib/*": {
+      "types": "./lib/*.d.ts",
+      "require": "./lib/*.js"
+    },
+    "./dbs": "./dbs",
+    "./dbs/*": {
+      "types": "./dbs/*.d.ts",
+      "require": "./dbs/*.js"
+    },
+    "./models/*": {
+      "types": "./models/*.d.ts",
+      "require": "./models/*.js"
+    },
+    "./connections/*": {
+      "types": "./connections/*.d.ts",
+      "require": "./connections/*.js"
+    },
+    "./apis/*": {
+      "types": "./apis/*.d.ts",
+      "require": "./apis/*.js"
+    }
+  },
+  "dependencies": {
+    "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/commons": "2.0.0-alpha.33",
+    "@ulixee/default-browser-emulator": "2.0.0-alpha.33",
+    "@ulixee/default-human-emulator": "2.0.0-alpha.33",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.33",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.33",
+    "@ulixee/hero-timetravel": "2.0.0-alpha.33",
+    "@ulixee/js-path": "2.0.0-alpha.33",
+    "@ulixee/net": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent": "2.0.0-alpha.33",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.33",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.33",
+    "better-sqlite3": "^11.1.2",
+    "moment": "^2.29.4",
+    "nanoid": "^3.3.11",
+    "ws": "^8.18.0"
+  }
+}

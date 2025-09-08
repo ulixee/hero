@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/collect-http2-session",
+  "version": "2.0.0-alpha.33",
+  "description": "Collects the settings, pings and frames sent across by a browser http2 client",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.33",
+    "@double-agent/config": "2.0.0-alpha.33"
+  },
+  "disabled": false,
+  "private": true
+}
