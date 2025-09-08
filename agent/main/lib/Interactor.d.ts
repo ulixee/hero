@@ -1,0 +1,53 @@
+import { IInteractionGroups, IInteractionStep, IMousePosition } from '@ulixee/unblocked-specification/agent/interact/IInteractions';
+import IInteractionsHelper, { IRectLookup, IViewportSize } from '@ulixee/unblocked-specification/agent/interact/IInteractionsHelper';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { INodePointer, IJsPath, INodeVisibility } from '@ulixee/js-path';
+import IPoint from '@ulixee/unblocked-specification/agent/browser/IPoint';
+import IMouseResult from '@ulixee/unblocked-specification/agent/interact/IMouseResult';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import IRect from '@ulixee/unblocked-specification/agent/browser/IRect';
+import Frame from './Frame';
+import * as rectUtils from './rectUtils';
+export default class Interactor implements IInteractionsHelper {
+    get mousePosition(): IPoint;
+    get scrollOffset(): Promise<IRect>;
+    get doesBrowserAnimateScrolling(): boolean;
+    beforeEachInteractionStep: (interactionStep: IInteractionStep, isMouseCommand: boolean) => Promise<void>;
+    afterEachInteractionStep: (interactionStep: IInteractionStep, startTime: number) => Promise<void>;
+    afterInteractionGroups: () => Promise<void>;
+    logger: IBoundLog;
+    viewportSize: IViewportSize;
+    isPointWithinRect: typeof rectUtils.isPointWithinRect;
+    createPointInRect: typeof rectUtils.createPointInRect;
+    createScrollPointForRect: typeof rectUtils.createScrollPointForRect;
+    isRectInViewport: typeof rectUtils.isRectInViewport;
+    private preInteractionPaintStableStatus;
+    private isReady;
+    private readonly frame;
+    private get hooks();
+    private get browserContext();
+    private get jsPath();
+    private get mouse();
+    private get keyboard();
+    private playAllInteractions;
+    constructor(frame: Frame);
+    initialize(): Promise<void>;
+    play(interactions: IInteractionGroups, resolvablePromise: IResolvablePromise<any>): void;
+    reloadJsPath(jsPath: IJsPath): Promise<INodePointer>;
+    lookupBoundingRect(mousePosition: IMousePosition, options?: {
+        relativeToScrollOffset?: IPoint;
+        includeNodeVisibility?: boolean;
+        useLastKnownPosition?: boolean;
+    }): Promise<IRectLookup>;
+    createMousedownTrigger(nodeId: number): Promise<{
+        nodeVisibility: INodeVisibility;
+        didTrigger: () => Promise<IMouseResult>;
+    }>;
+    private playInteraction;
+    private getWindowOffset;
+    private initializeViewport;
+    private getInteractionRect;
+    private getMousePositionXY;
+    private injectScrollToPositions;
+    static defaultPlayInteractions(interactionGroups: IInteractionGroups, runFn: (interactionStep: IInteractionStep) => Promise<void>): Promise<void>;
+}
