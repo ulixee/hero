@@ -1,15 +1,15 @@
 {
   "name": "@double-agent/analyze-browser-dom-environment",
-  "version": "2.0.0-alpha.33",
+  "version": "2.0.0-alpha.34",
   "main": "index.js",
   "private": true,
   "license": "MIT",
   "description": "Analyzes the DOM environment, such as functionality and object structure, match the given user-agent",
   "dependencies": {
-    "@double-agent/analyze": "2.0.0-alpha.33",
-    "@double-agent/collect": "2.0.0-alpha.33",
-    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.33",
-    "@double-agent/config": "2.0.0-alpha.33",
+    "@double-agent/analyze": "2.0.0-alpha.34",
+    "@double-agent/collect": "2.0.0-alpha.34",
+    "@double-agent/collect-browser-dom-environment": "2.0.0-alpha.34",
+    "@double-agent/config": "2.0.0-alpha.34",
     "csv-parse": "^4.8.5",
     "source-map-support": "^0.5.16"
   }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.34](https://github.com/ulixee/hero/compare/v2.0.0-alpha.33...v2.0.0-alpha.34) (2025-09-08)
+
+### Bug Fixes
+
+* **real-user-agents:** fix tahoe release ([b479f97](https://github.com/ulixee/hero/commit/b479f975f8e42439b21f668a5403953c5901fba3))
+* tahoe id still showing up ([d6c807b](https://github.com/ulixee/hero/commit/d6c807bb5f02b7b3e8c18ff537426f57c9f39f01))
+
+### Reverts
+
+* Revert "chore(profiles): automatic updates" ([4b69cc1](https://github.com/ulixee/hero/commit/4b69cc19f1ee164895d4338d4ff29bf8eb1276a4))
+
 # [2.0.0-alpha.33](https://github.com/ulixee/hero/compare/v2.0.0-alpha.32...v2.0.0-alpha.33) (2025-05-29)
 
 **Note:** Version bump only for package @ulixee/real-user-agents

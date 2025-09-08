@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.34](https://github.com/ulixee/hero/compare/v2.0.0-alpha.33...v2.0.0-alpha.34) (2025-09-08)
+
+### Features
+
+* update to chrome 139 ([9e8a69b](https://github.com/ulixee/hero/commit/9e8a69bf5f4dbb1255b81a7e7bc56839c08dcef7))
+
 # [2.0.0-alpha.33](https://github.com/ulixee/hero/compare/v2.0.0-alpha.32...v2.0.0-alpha.33) (2025-05-29)
 
 **Note:** Version bump only for package @ulixee/default-browser-emulator
