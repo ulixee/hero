@@ -295,5 +295,9 @@ function generatePort(): number {
   if (releasedPorts.length) {
     return releasedPorts.shift();
   }
+  if (portCounter > Config.collect.pluginMaxPort) {
+    portCounter = Config.collect.pluginStartingPort;
+    return portCounter++;
+  }
   return (portCounter += 1);
 }

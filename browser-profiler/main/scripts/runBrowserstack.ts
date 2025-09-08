@@ -40,6 +40,7 @@ export default async function runBrowserstack(): Promise<void> {
     if (browser.name === 'Safari' && Number(browser.version.major) < 13) continue;
     // no support for Promises, lambdas... detections need refactor for support
     if (browser.name === 'IE') continue;
+    if (process.env.BROWSER_ID && !browser.id.includes(process.env.BROWSER_ID)) continue;
 
     const rerunPluginIds = BrowserProfiler.findMissingPlugins(userAgentId, plugins);
     if (!rerunPluginIds.length) continue;

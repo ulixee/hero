@@ -45,9 +45,12 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120)
 		} else if chromeVersion < 131 {
 			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_120_PQ)
-		} else {
-			// Chrome 131+ uses the latest available Chrome PQ spec
-			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_131)
+		} else if chromeVersion < 133 {
+            // Chrome 131+ uses the latest available Chrome PQ spec
+            spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_131)
+        } else {
+			// chrome 133 uses new alps extension
+			spec, _ = tls.UTLSIdToSpec(tls.HelloChrome_133)
 		}
 	} else {
 		// default to latest shuffle

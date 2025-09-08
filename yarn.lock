@@ -1933,10 +1933,10 @@
   dependencies:
     "@ulixee/js-path" "^2.0.0-alpha.18"
 
-"@ulixee/chrome-136-0@^7103.114.11":
-  version "7103.114.11"
-  resolved "https://registry.npmjs.org/@ulixee/chrome-136-0/-/chrome-136-0-7103.114.11.tgz#e38099560aa66dcc740cd10a34547f36544181fb"
-  integrity sha512-y7Bq4iu8xizF+XWbmj+O3+on+s9qUNEudgFkII8xBZz35Hj55PIqm6mcz/hJiI10HFKr69VtgyYdCkfHjiKXUQ==
+"@ulixee/chrome-139-0@^7258.155.11":
+  version "7258.155.11"
+  resolved "https://registry.npmjs.org/@ulixee/chrome-139-0/-/chrome-139-0-7258.155.11.tgz#b725e3ce8c83fcd408610c90ff6a31bb4fd97fbb"
+  integrity sha512-z3nzSzXa+OHRwxTguShz7dF3JfUQfYTpRomUss2j7koR3YbHQtH9u2W5zq6YfS23ouI3t3w5NeuM0EXnNIpG5g==
   dependencies:
     "@ulixee/chrome-app" "^1.0.3"
 

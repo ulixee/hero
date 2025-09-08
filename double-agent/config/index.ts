@@ -54,6 +54,7 @@ export default class Config {
     },
     shouldGenerateProfiles: parseEnvBool(env.GENERATE_PROFILES),
     pluginStartingPort: parseEnvInt(env.PLUGIN_STARTING_PORT),
+    pluginMaxPort: parseEnvInt(env.PLUGIN_MAX_PORT) || 20000,
 
     // collect plugins
     tcpNetworkDevice: env.TCP_NETWORK_DEVICE,

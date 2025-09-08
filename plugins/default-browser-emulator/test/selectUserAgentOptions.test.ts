@@ -29,11 +29,11 @@ test('should support choosing a specific OS', async () => {
 
 test('it should find correct browser meta', async () => {
   const browserMeta = DefaultBrowserEmulator.selectBrowserMeta(
-    `Mozilla/5.0 (Macintosh; Intel Mac OS X 11_4_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${defaultBrowserEngine.version.major}.0.4324.182 Safari/537.36`,
+    `Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${defaultBrowserEngine.version.major}.0.4324.182 Safari/537.36`,
   );
   const data = dataLoader.as(browserMeta.userAgentOption) as any;
   const asOsId = data.osDataDir.split('/').pop();
-  expect(asOsId).toEqual('as-mac-os-11');
+  expect(asOsId).toEqual('as-mac-os-12');
 });
 
 test('should throw an error for a non-installed pattern', async () => {

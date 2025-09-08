@@ -16,7 +16,7 @@ let navigatorConfig: any;
 let browser: Browser;
 beforeEach(Helpers.beforeEach);
 beforeAll(async () => {
-  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac = 11');
+  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta('~ mac');
   const { browserVersion, operatingSystemVersion } = selectBrowserMeta.userAgentOption;
   const asOsDataDir = `${emulatorDataDir}/as-chrome-${browserVersion.major}-0/as-mac-os-${operatingSystemVersion.major}`;
 
