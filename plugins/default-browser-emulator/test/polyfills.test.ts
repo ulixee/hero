@@ -87,6 +87,10 @@ test(
       _$value: 'function ObjectTest() { [native code] }',
       _$invocation: "TypeError: Cannot read property '0' of undefined",
     };
+    if (browser.majorVersion >= 139) {
+      delete objectTestProperties.arguments;
+      delete objectTestProperties.caller;
+    }
     const chromeProperty = {
       _$flags: 'ce',
       _$type: 'string',
