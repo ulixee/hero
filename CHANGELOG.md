@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-alpha.34](https://github.com/ulixee/hero/compare/v2.0.0-alpha.33...v2.0.0-alpha.34) (2025-09-08)
+
+### Bug Fixes
+
+* **agent:** fix proxyConnectionInfo for socks5 URLs ([d66daed](https://github.com/ulixee/hero/commit/d66daedda1b9a332c279969da03a7ee1428f6d51))
+* **real-user-agents:** fix tahoe release ([b479f97](https://github.com/ulixee/hero/commit/b479f975f8e42439b21f668a5403953c5901fba3))
+* tahoe id still showing up ([d6c807b](https://github.com/ulixee/hero/commit/d6c807bb5f02b7b3e8c18ff537426f57c9f39f01))
+
+### Features
+
+* update to chrome 139 ([9e8a69b](https://github.com/ulixee/hero/commit/9e8a69bf5f4dbb1255b81a7e7bc56839c08dcef7))
+
+### Reverts
+
+* Revert "chore(profiles): automatic updates" ([4b69cc1](https://github.com/ulixee/hero/commit/4b69cc19f1ee164895d4338d4ff29bf8eb1276a4))
+
 # [2.0.0-alpha.33](https://github.com/ulixee/hero/compare/v2.0.0-alpha.32...v2.0.0-alpha.33) (2025-05-29)
 
 **Note:** Version bump only for package @ulixee/hero-monorepo
