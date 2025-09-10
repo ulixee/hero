@@ -4644,5 +4644,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-140-0": {
+    "id": "chrome-140-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "140",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
