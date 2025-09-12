@@ -82795,6 +82795,25 @@
     "browserId": "chrome-37-0",
     "marketshare": 0
   },
+  "windows-11--edge-140-0": {
+    "id": "windows-11--edge-140-0",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      140,
+      0,
+      0,
+      0
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "11"
+    },
+    "operatingSystemId": "windows-11",
+    "pattern": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
+    "browserId": "edge-140-0",
+    "marketshare": 0
+  },
   "windows-11--edge-139-0": {
     "id": "windows-11--edge-139-0",
     "allPatchVersions": [],
