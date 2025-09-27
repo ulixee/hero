@@ -1,0 +1,5 @@
+{
+  "0x0000": "uncompressed",
+  "0x0001": "ansiX962_compressed_prime",
+  "0x0002": "ansiX962_compressed_char2"
+}
