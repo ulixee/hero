@@ -1,0 +1,4688 @@
+{
+  "opera-12-15": {
+    "id": "opera-12-15",
+    "name": "Opera",
+    "marketshare": 0,
+    "version": {
+      "major": "12",
+      "minor": "15"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-04-04",
+    "description": "Opera is a freeware web browser for Microsoft Windows, Android, iOS, macOS, and Linux operating systems developed by Opera Software. Opera is a Chromium-based browser using the Blink layout engine. It differentiates itself because of a distinct user interface and other features."
+  },
+  "opera-12-16": {
+    "id": "opera-12-16",
+    "name": "Opera",
+    "marketshare": 0,
+    "version": {
+      "major": "12",
+      "minor": "16"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-07-04",
+    "description": "Opera is a freeware web browser for Microsoft Windows, Android, iOS, macOS, and Linux operating systems developed by Opera Software. Opera is a Chromium-based browser using the Blink layout engine. It differentiates itself because of a distinct user interface and other features."
+  },
+  "chrome-14-0": {
+    "id": "chrome-14-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "14",
+      "minor": "0",
+      "build": "835",
+      "patch": "202"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-09-16",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-19-0": {
+    "id": "chrome-19-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "19",
+      "minor": "0",
+      "build": "1084",
+      "patch": "56"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-05-15",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-17-0": {
+    "id": "chrome-17-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "17",
+      "minor": "0",
+      "build": "963",
+      "patch": "26"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-02-08",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-18-0": {
+    "id": "chrome-18-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "18",
+      "minor": "0",
+      "build": "1025",
+      "patch": "151"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-03-28",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-15-0": {
+    "id": "chrome-15-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "15",
+      "minor": "0",
+      "build": "874",
+      "patch": "121"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-10-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-16-0": {
+    "id": "chrome-16-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "16",
+      "minor": "0",
+      "build": "912",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-12-13",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-20-0": {
+    "id": "chrome-20-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "20",
+      "minor": "0",
+      "build": "1132",
+      "patch": "47"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-06-26",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-24-0": {
+    "id": "chrome-24-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "24",
+      "minor": "0",
+      "build": "1312",
+      "patch": "52"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-01-10",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-23-0": {
+    "id": "chrome-23-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "23",
+      "minor": "0",
+      "build": "1271",
+      "patch": "101"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-11-06",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-27-0": {
+    "id": "chrome-27-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "27",
+      "minor": "0",
+      "build": "1453",
+      "patch": "116"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-05-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-21-0": {
+    "id": "chrome-21-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "21",
+      "minor": "0",
+      "build": "1180",
+      "patch": "57"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-07-31",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-28-0": {
+    "id": "chrome-28-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "28",
+      "minor": "0",
+      "build": "1500",
+      "patch": "71"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-07-09",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-25-0": {
+    "id": "chrome-25-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "25",
+      "minor": "0",
+      "build": "1364",
+      "patch": "172"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-02-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-26-0": {
+    "id": "chrome-26-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "26",
+      "minor": "0",
+      "build": "1410",
+      "patch": "65"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-03-26",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-29-0": {
+    "id": "chrome-29-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "29",
+      "minor": "0",
+      "build": "1547",
+      "patch": "62"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-08-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-32-0": {
+    "id": "chrome-32-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "32",
+      "minor": "0",
+      "build": "1700",
+      "patch": "102"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-01-14",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-22-0": {
+    "id": "chrome-22-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "22",
+      "minor": "0",
+      "build": "1229",
+      "patch": "92"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-09-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-31-0": {
+    "id": "chrome-31-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "31",
+      "minor": "0",
+      "build": "1650",
+      "patch": "57"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-11-12",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-30-0": {
+    "id": "chrome-30-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "30",
+      "minor": "0",
+      "build": "1599",
+      "patch": "101"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-10-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-33-0": {
+    "id": "chrome-33-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "33",
+      "minor": "0",
+      "build": "1750",
+      "patch": "117"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-02-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-37-0": {
+    "id": "chrome-37-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "37",
+      "minor": "0",
+      "build": "2062",
+      "patch": "102"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-08-26",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-36-0": {
+    "id": "chrome-36-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "36",
+      "minor": "0",
+      "build": "1985",
+      "patch": "125"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-07-16",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-39-0": {
+    "id": "chrome-39-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "39",
+      "minor": "0",
+      "build": "2171",
+      "patch": "65"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-11-18",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-35-0": {
+    "id": "chrome-35-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "35",
+      "minor": "0",
+      "build": "1916",
+      "patch": "114"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-05-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-41-0": {
+    "id": "chrome-41-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "41",
+      "minor": "0",
+      "build": "2272",
+      "patch": "76"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-03-03",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-40-0": {
+    "id": "chrome-40-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "40",
+      "minor": "0",
+      "build": "2214",
+      "patch": "93"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-01-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-34-0": {
+    "id": "chrome-34-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "34",
+      "minor": "0",
+      "build": "1847",
+      "patch": "116"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-04-08",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-42-0": {
+    "id": "chrome-42-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "42",
+      "minor": "0",
+      "build": "2311",
+      "patch": "135"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-04-14",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-45-0": {
+    "id": "chrome-45-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "45",
+      "minor": "0",
+      "build": "2454",
+      "patch": "85"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-09-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-43-0": {
+    "id": "chrome-43-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "43",
+      "minor": "0",
+      "build": "2357",
+      "patch": "65"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-05-19",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-44-0": {
+    "id": "chrome-44-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "44",
+      "minor": "0",
+      "build": "2403",
+      "patch": "89"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-07-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-48-0": {
+    "id": "chrome-48-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "48",
+      "minor": "0",
+      "build": "2564",
+      "patch": "97"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-01-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-46-0": {
+    "id": "chrome-46-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "46",
+      "minor": "0",
+      "build": "2490",
+      "patch": "71"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-10-13",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-47-0": {
+    "id": "chrome-47-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "47",
+      "minor": "0",
+      "build": "2526",
+      "patch": "73"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-12-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-49-0": {
+    "id": "chrome-49-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "49",
+      "minor": "0",
+      "build": "2623",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-03-02",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-38-0": {
+    "id": "chrome-38-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "38",
+      "minor": "0",
+      "build": "2125",
+      "patch": "101"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-10-07",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-6-0": {
+    "id": "firefox-6-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "6",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-08-16",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-7-0": {
+    "id": "firefox-7-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "7",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-09-27",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-8-0": {
+    "id": "firefox-8-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "8",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-11-08",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-10-0": {
+    "id": "firefox-10-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "10",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-01-31",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-11-0": {
+    "id": "firefox-11-0",
+    "name": "Firefox",
+    "marketshare": 0.2,
+    "version": {
+      "major": "11",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-03-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-9-0": {
+    "id": "firefox-9-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "9",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-12-20",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-12-0": {
+    "id": "firefox-12-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "12",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-04-24 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-13-0": {
+    "id": "firefox-13-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "13",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-06-05 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-14-0": {
+    "id": "firefox-14-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "14",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-07-17",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-15-0": {
+    "id": "firefox-15-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "15",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-08-28 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-16-0": {
+    "id": "firefox-16-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "16",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-10-09 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-18-0": {
+    "id": "firefox-18-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "18",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-01-08* ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-19-0": {
+    "id": "firefox-19-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "19",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-02-19 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-17-0": {
+    "id": "firefox-17-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "17",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-11-20 ",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-20-0": {
+    "id": "firefox-20-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "20",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-04-02",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-21-0": {
+    "id": "firefox-21-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "21",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-05-14",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-22-0": {
+    "id": "firefox-22-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "22",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-06-25",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-24-0": {
+    "id": "firefox-24-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "24",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-09-17",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-23-0": {
+    "id": "firefox-23-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "23",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-08-06",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-26-0": {
+    "id": "firefox-26-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "26",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-12-10",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-27-0": {
+    "id": "firefox-27-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "27",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-02-04",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-25-0": {
+    "id": "firefox-25-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "25",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-10-29",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-28-0": {
+    "id": "firefox-28-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "28",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-03-18",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-29-0": {
+    "id": "firefox-29-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "29",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-04-29",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-30-0": {
+    "id": "firefox-30-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "30",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-06-10",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-31-0": {
+    "id": "firefox-31-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "31",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-07-22",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-32-0": {
+    "id": "firefox-32-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "32",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-09-02",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-33-0": {
+    "id": "firefox-33-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "33",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-10-14",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-35-0": {
+    "id": "firefox-35-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "35",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-01-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-36-0": {
+    "id": "firefox-36-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "36",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-02-24",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-34-0": {
+    "id": "firefox-34-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "34",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-12-01",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-37-0": {
+    "id": "firefox-37-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "37",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-03-31",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-38-0": {
+    "id": "firefox-38-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "38",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-05-12",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-40-0": {
+    "id": "firefox-40-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "40",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-08-11",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-42-0": {
+    "id": "firefox-42-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "42",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-11-03",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-43-0": {
+    "id": "firefox-43-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "43",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-12-15",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-44-0": {
+    "id": "firefox-44-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "44",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-01-26",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-51-0": {
+    "id": "chrome-51-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "51",
+      "minor": "0",
+      "build": "2704",
+      "patch": "79"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-05-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-52-0": {
+    "id": "chrome-52-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "52",
+      "minor": "0",
+      "build": "2743",
+      "patch": "82"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-07-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-50-0": {
+    "id": "chrome-50-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "50",
+      "minor": "0",
+      "build": "2661",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-04-13",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-53-0": {
+    "id": "chrome-53-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "53",
+      "minor": "0",
+      "build": "2785",
+      "patch": "89"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-08-31",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-54-0": {
+    "id": "chrome-54-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "54",
+      "minor": "0",
+      "build": "2840",
+      "patch": "59"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-10-12",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-55-0": {
+    "id": "chrome-55-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "55",
+      "minor": "0",
+      "build": "2883",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-12-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-57-0": {
+    "id": "chrome-57-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "57",
+      "minor": "0",
+      "build": "2987",
+      "patch": "98"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-03-09",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-56-0": {
+    "id": "chrome-56-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "56",
+      "minor": "0",
+      "build": "2924",
+      "patch": "76"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-01-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-59-0": {
+    "id": "chrome-59-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "59",
+      "minor": "0",
+      "build": "3071",
+      "patch": "86"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-06-05",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-60-0": {
+    "id": "chrome-60-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "60",
+      "minor": "0",
+      "build": "3112",
+      "patch": "78"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-06-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-58-0": {
+    "id": "chrome-58-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "58",
+      "minor": "0",
+      "build": "3029",
+      "patch": "81"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-04-19",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-61-0": {
+    "id": "chrome-61-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "61",
+      "minor": "0",
+      "build": "3163",
+      "patch": "79"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-09-05",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-62-0": {
+    "id": "chrome-62-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "62",
+      "minor": "0",
+      "build": "3202",
+      "patch": "62"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-10-17",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-63-0": {
+    "id": "chrome-63-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "63",
+      "minor": "0",
+      "build": "3239",
+      "patch": "84"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-12-05",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-65-0": {
+    "id": "chrome-65-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "65",
+      "minor": "0",
+      "build": "3325",
+      "patch": "146"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-03-06",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-64-0": {
+    "id": "chrome-64-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "64",
+      "minor": "0",
+      "build": "3282",
+      "patch": "119"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-01-23",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-66-0": {
+    "id": "chrome-66-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "66",
+      "minor": "0",
+      "build": "3359",
+      "patch": "117"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-09-05",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-69-0": {
+    "id": "chrome-69-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "69",
+      "minor": "0",
+      "build": "3497",
+      "patch": "81"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-09-04",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-67-0": {
+    "id": "chrome-67-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "67",
+      "minor": "0",
+      "build": "3396",
+      "patch": "62"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-03-29",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-68-0": {
+    "id": "chrome-68-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "68",
+      "minor": "0",
+      "build": "3440",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-07-24",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-70-0": {
+    "id": "chrome-70-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "70",
+      "minor": "0",
+      "build": "3538",
+      "patch": "67"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-10-16",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-72-0": {
+    "id": "chrome-72-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "72",
+      "minor": "0",
+      "build": "3626",
+      "patch": "121"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-01-29",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-71-0": {
+    "id": "chrome-71-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "71",
+      "minor": "0",
+      "build": "3578",
+      "patch": "80"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-12-04",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-73-0": {
+    "id": "chrome-73-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "73",
+      "minor": "0",
+      "build": "3683",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-03-12",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-75-0": {
+    "id": "chrome-75-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "75",
+      "minor": "0",
+      "build": "3770",
+      "patch": "80"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-06-04",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-74-0": {
+    "id": "chrome-74-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "74",
+      "minor": "0",
+      "build": "3729",
+      "patch": "131"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-04-23",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-76-0": {
+    "id": "chrome-76-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "76",
+      "minor": "0",
+      "build": "3809",
+      "patch": "87"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-07-30",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-78-0": {
+    "id": "chrome-78-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "78",
+      "minor": "0",
+      "build": "3904",
+      "patch": "70"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-10-22",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-79-0": {
+    "id": "chrome-79-0",
+    "name": "Chrome",
+    "marketshare": 0.2,
+    "version": {
+      "major": "79",
+      "minor": "0",
+      "build": "3945",
+      "patch": "79"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-12-10",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-77-0": {
+    "id": "chrome-77-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "77",
+      "minor": "0",
+      "build": "3865",
+      "patch": "75"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-09-10",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-80-0": {
+    "id": "chrome-80-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "80",
+      "minor": "0",
+      "build": "3987",
+      "patch": "132"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-02-04",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-81-0": {
+    "id": "chrome-81-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "81",
+      "minor": "0",
+      "build": "4044",
+      "patch": "129"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-04-07",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-84-0": {
+    "id": "chrome-84-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "84",
+      "minor": "0",
+      "build": "4147",
+      "patch": "89"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-07-14",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-83-0": {
+    "id": "chrome-83-0",
+    "name": "Chrome",
+    "marketshare": 0.2,
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "build": "4103",
+      "patch": "61"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-05-19",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-85-0": {
+    "id": "chrome-85-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "85",
+      "minor": "0",
+      "build": "4183",
+      "patch": "83"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-08-25",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-86-0": {
+    "id": "chrome-86-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "86",
+      "minor": "0",
+      "build": "4240",
+      "patch": "183"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-10-06",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "ie-10-0": {
+    "id": "ie-10-0",
+    "name": "IE",
+    "marketshare": 0,
+    "version": {
+      "major": "10",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2012-10-26",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "ie-11-0": {
+    "id": "ie-11-0",
+    "name": "IE",
+    "marketshare": 0.1,
+    "version": {
+      "major": "11",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2013-10-17",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "firefox-41-0": {
+    "id": "firefox-41-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "41",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-09-22",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-39-0": {
+    "id": "firefox-39-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "39",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2015-06-30",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-53-0": {
+    "id": "firefox-53-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "53",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-04-19",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-54-0": {
+    "id": "firefox-54-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "54",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-06-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-55-0": {
+    "id": "firefox-55-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "55",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-08-08",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-56-0": {
+    "id": "firefox-56-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "56",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-09-28",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-57-0": {
+    "id": "firefox-57-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "57",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-11-14",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-58-0": {
+    "id": "firefox-58-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "58",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-01-23",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-60-0": {
+    "id": "firefox-60-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "60",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-05-09",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-59-0": {
+    "id": "firefox-59-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "59",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-03-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-61-0": {
+    "id": "firefox-61-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "61",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-06-26",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-62-0": {
+    "id": "firefox-62-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "62",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-09-05",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-65-0": {
+    "id": "firefox-65-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "65",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-01-29",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-63-0": {
+    "id": "firefox-63-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "63",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-10-23",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-64-0": {
+    "id": "firefox-64-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "64",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-12-11",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-67-0": {
+    "id": "firefox-67-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "67",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-05-21",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-69-0": {
+    "id": "firefox-69-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "69",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-09-03",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-70-0": {
+    "id": "firefox-70-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "70",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-10-22",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-68-0": {
+    "id": "firefox-68-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "68",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-07-09",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-66-0": {
+    "id": "firefox-66-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "66",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-03-19",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-73-0": {
+    "id": "firefox-73-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "73",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-02-11",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-72-0": {
+    "id": "firefox-72-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "72",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-01-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-71-0": {
+    "id": "firefox-71-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "71",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-12-03",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-75-0": {
+    "id": "firefox-75-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "75",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-04-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-74-0": {
+    "id": "firefox-74-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "74",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-03-10",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-76-0": {
+    "id": "firefox-76-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "76",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-05-05",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-77-0": {
+    "id": "firefox-77-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "77",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-05-02",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-79-0": {
+    "id": "firefox-79-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "79",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-06-30",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-80-0": {
+    "id": "firefox-80-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "80",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-07-28",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-81-0": {
+    "id": "firefox-81-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "81",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-08-25",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-80-0": {
+    "id": "edge-80-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "80",
+      "minor": "0",
+      "build": "361",
+      "patch": "57"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-02-07",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-78-0": {
+    "id": "firefox-78-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "78",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-05-30",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-83-0": {
+    "id": "edge-83-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "build": "478",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-05-21",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-81-0": {
+    "id": "edge-81-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "81",
+      "minor": "0",
+      "build": "416",
+      "patch": "53"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-04-13",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-84-0": {
+    "id": "edge-84-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "84",
+      "minor": "0",
+      "build": "522",
+      "patch": "40"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-07-16",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-85-0": {
+    "id": "edge-85-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "85",
+      "minor": "0",
+      "build": "564",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-08-27",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-86-0": {
+    "id": "edge-86-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "86",
+      "minor": "0",
+      "build": "622",
+      "patch": "38"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-10-09",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-15-0": {
+    "id": "edge-15-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "15",
+      "minor": "15063"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-04-11",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-16-0": {
+    "id": "edge-16-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "16",
+      "minor": "16299"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-10-08",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-17-0": {
+    "id": "edge-17-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "17",
+      "minor": "17134"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-04-30",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-18-0": {
+    "id": "edge-18-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "18",
+      "minor": "18262"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-10-02",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "ie-6-0": {
+    "id": "ie-6-0",
+    "name": "IE",
+    "marketshare": 0,
+    "version": {
+      "major": "6",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2001-08-28",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "ie-7-0": {
+    "id": "ie-7-0",
+    "name": "IE",
+    "marketshare": 0,
+    "version": {
+      "major": "7",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2006-10-18",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "ie-9-0": {
+    "id": "ie-9-0",
+    "name": "IE",
+    "marketshare": 0,
+    "version": {
+      "major": "9",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2011-03-14",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "ie-8-0": {
+    "id": "ie-8-0",
+    "name": "IE",
+    "marketshare": 0,
+    "version": {
+      "major": "8",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2009-03-19",
+    "description": "Internet Explorer is a series of graphical web browsers developed by Microsoft and included in the Microsoft Windows line of operating systems, starting in 1995. It was first released as part of the add-on package Plus! for Windows 95 that year."
+  },
+  "firefox-45-0": {
+    "id": "firefox-45-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "45",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-03-08",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-46-0": {
+    "id": "firefox-46-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "46",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-04-26",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-48-0": {
+    "id": "firefox-48-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "48",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-08-02",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-49-0": {
+    "id": "firefox-49-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "49",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-09-20",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-47-0": {
+    "id": "firefox-47-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "47",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-06-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-50-0": {
+    "id": "firefox-50-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "50",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-11-15",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-51-0": {
+    "id": "firefox-51-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "51",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-01-24",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-3-6": {
+    "id": "firefox-3-6",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "3",
+      "minor": "6",
+      "build": "28"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2010-01-21",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "safari-7-1": {
+    "id": "safari-7-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "7",
+      "minor": "1",
+      "build": "8"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-09-18",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-8-0": {
+    "id": "safari-8-0",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "8",
+      "minor": "0",
+      "build": "8"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2014-10-16",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-9-1": {
+    "id": "safari-9-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "9",
+      "minor": "1",
+      "build": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2016-03-21",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-10-1": {
+    "id": "safari-10-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "10",
+      "minor": "1",
+      "build": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-03-27",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-11-1": {
+    "id": "safari-11-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "11",
+      "minor": "1",
+      "build": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2018-07-09",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-12-1": {
+    "id": "safari-12-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "12",
+      "minor": "1",
+      "build": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2019-03-25",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-13-1": {
+    "id": "safari-13-1",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "13",
+      "minor": "1",
+      "build": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-03-24",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "chrome-87-0": {
+    "id": "chrome-87-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "87",
+      "minor": "0",
+      "build": "4280",
+      "patch": "66"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-11-12",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-82-0": {
+    "id": "firefox-82-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "82",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-09-22",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-83-0": {
+    "id": "firefox-83-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "83",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-11-17",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-87-0": {
+    "id": "edge-87-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "87",
+      "minor": "0",
+      "build": "664",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-11-19",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-52-0": {
+    "id": "firefox-52-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "52",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2017-03-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-88-0": {
+    "id": "chrome-88-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "88",
+      "minor": "0",
+      "build": "4324",
+      "patch": "150"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-01-19",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-84-0": {
+    "id": "firefox-84-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "84",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-12-15",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "safari-14-0": {
+    "id": "safari-14-0",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "14",
+      "minor": "0",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-09-16",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "chrome-89-0": {
+    "id": "chrome-89-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "89",
+      "minor": "0",
+      "build": "4389",
+      "patch": "90"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-03-09",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "edge-88-0": {
+    "id": "edge-88-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "88",
+      "minor": "0",
+      "build": "705",
+      "patch": "50"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2020-12-09",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-85-0": {
+    "id": "firefox-85-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "85",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-01-26",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-89-0": {
+    "id": "edge-89-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "89",
+      "minor": "0",
+      "build": "774",
+      "patch": "45"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-02-03",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-86-0": {
+    "id": "firefox-86-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "86",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-02-23",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-87-0": {
+    "id": "firefox-87-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "87",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-03-22",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-88-0": {
+    "id": "firefox-88-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "88",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-04-19",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-90-0": {
+    "id": "chrome-90-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "90",
+      "minor": "0",
+      "build": "4430",
+      "patch": "72"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-04-14",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "edge-90-0": {
+    "id": "edge-90-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "90",
+      "minor": "0",
+      "build": "818",
+      "patch": "39"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-04-15",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "chrome-91-0": {
+    "id": "chrome-91-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "91",
+      "minor": "0",
+      "build": "4472",
+      "patch": "106"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-05-26",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-89-0": {
+    "id": "firefox-89-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "89",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-06-01",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-91-0": {
+    "id": "edge-91-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "91",
+      "minor": "0",
+      "build": "864",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-05-27",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "chrome-92-0": {
+    "id": "chrome-92-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "92",
+      "minor": "0",
+      "build": "4515",
+      "patch": "107"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-07-20",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-97-0": {
+    "id": "chrome-97-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "97",
+      "minor": "0",
+      "build": "4692",
+      "patch": "71"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-01-04",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-93-0": {
+    "id": "chrome-93-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "93",
+      "minor": "0",
+      "build": "4577",
+      "patch": "63"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-08-31",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-98-0": {
+    "id": "chrome-98-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "98",
+      "minor": "0",
+      "build": "4758",
+      "patch": "80"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-02-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-94-0": {
+    "id": "chrome-94-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "94",
+      "minor": "0",
+      "build": "4606",
+      "patch": "71"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-09-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-90-0": {
+    "id": "firefox-90-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "90",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-07-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-95-0": {
+    "id": "chrome-95-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "95",
+      "minor": "0",
+      "build": "4638",
+      "patch": "54"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-10-19",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-91-0": {
+    "id": "firefox-91-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "91",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-08-10",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-96-0": {
+    "id": "chrome-96-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "96",
+      "minor": "0",
+      "build": "4664",
+      "patch": "110"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-11-15",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-93-0": {
+    "id": "firefox-93-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "93",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-10-15",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-94-0": {
+    "id": "firefox-94-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "94",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-11-02",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-95-0": {
+    "id": "firefox-95-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "95",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-12-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-92-0": {
+    "id": "edge-92-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "92",
+      "minor": "0",
+      "build": "902",
+      "patch": "55"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-07-22",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-96-0": {
+    "id": "firefox-96-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "96",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-01-11",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-97-0": {
+    "id": "firefox-97-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "97",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-02-08",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-93-0": {
+    "id": "edge-93-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "93",
+      "minor": "0",
+      "build": "961",
+      "patch": "38"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-09-02",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-94-0": {
+    "id": "edge-94-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "94",
+      "minor": "0",
+      "build": "992",
+      "patch": "31"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-09-24",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-95-0": {
+    "id": "edge-95-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "95",
+      "minor": "0",
+      "build": "1020",
+      "patch": "30"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-10-21",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-96-0": {
+    "id": "edge-96-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "96",
+      "minor": "0",
+      "build": "1054",
+      "patch": "34"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-01-06",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-97-0": {
+    "id": "edge-97-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "97",
+      "minor": "0",
+      "build": "1072",
+      "patch": "55"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-01-20",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-98-0": {
+    "id": "edge-98-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "98",
+      "minor": "0",
+      "build": "1108",
+      "patch": "43"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-02-23",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-92-0": {
+    "id": "firefox-92-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "92",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-09-07",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "safari-14-1": {
+    "id": "safari-14-1",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "14",
+      "minor": "1",
+      "build": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-04-26",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "safari-15-1": {
+    "id": "safari-15-1",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "15",
+      "minor": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2021-10-25",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "chrome-100-0": {
+    "id": "chrome-100-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "100",
+      "minor": "0",
+      "build": "4896",
+      "patch": "127"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-03-29",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-101-0": {
+    "id": "chrome-101-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "101",
+      "minor": "0",
+      "build": "4951",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-04-26",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-99-0": {
+    "id": "chrome-99-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "99",
+      "minor": "0",
+      "build": "4844",
+      "patch": "51"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-03-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-102-0": {
+    "id": "chrome-102-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "102",
+      "minor": "0",
+      "build": "5005",
+      "patch": "61"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-05-24",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "chrome-104-0": {
+    "id": "chrome-104-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "104",
+      "minor": "0",
+      "build": "5112",
+      "patch": "79"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-08-02",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-98-0": {
+    "id": "firefox-98-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "98",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-03-08",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-99-0": {
+    "id": "firefox-99-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "99",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-04-05",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-105-0": {
+    "id": "chrome-105-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "105",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-08-30",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-101-0": {
+    "id": "firefox-101-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "101",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-05-31",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-103-0": {
+    "id": "chrome-103-0",
+    "name": "Chrome",
+    "marketshare": 0.2,
+    "version": {
+      "major": "103",
+      "minor": "0",
+      "build": "5060",
+      "patch": "114"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-06-21",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "firefox-100-0": {
+    "id": "firefox-100-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "100",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-05-03",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-103-0": {
+    "id": "firefox-103-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "103",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-07-26",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "firefox-102-0": {
+    "id": "firefox-102-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "102",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-06-28",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-99-0": {
+    "id": "edge-99-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "99",
+      "minor": "0",
+      "build": "1150",
+      "patch": "36"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-03-03",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-104-0": {
+    "id": "firefox-104-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "104",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-08-23",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "edge-101-0": {
+    "id": "edge-101-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "101",
+      "minor": "0",
+      "build": "1210",
+      "patch": "32"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-04-28",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-102-0": {
+    "id": "edge-102-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "102",
+      "minor": "0",
+      "build": "1245",
+      "patch": "33"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-05-31",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-100-0": {
+    "id": "edge-100-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "100",
+      "minor": "0",
+      "build": "1185",
+      "patch": "29"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-04-01",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-103-0": {
+    "id": "edge-103-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "103",
+      "minor": "0",
+      "build": "1264",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-06-23",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-104-0": {
+    "id": "edge-104-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "104",
+      "minor": "0",
+      "build": "1293",
+      "patch": "47"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-08-05",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "edge-105-0": {
+    "id": "edge-105-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "105",
+      "minor": "0",
+      "build": "1343",
+      "patch": "25"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-01",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "safari-15-3": {
+    "id": "safari-15-3",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "15",
+      "minor": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-01-26",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "firefox-105-0": {
+    "id": "firefox-105-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "105",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-20",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-106-0": {
+    "id": "chrome-106-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "106",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-01",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "edge-106-0": {
+    "id": "edge-106-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "106",
+      "minor": "0",
+      "build": "1370",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-28",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "safari-15-6": {
+    "id": "safari-15-6",
+    "name": "Safari",
+    "marketshare": 0.2,
+    "version": {
+      "major": "15",
+      "minor": "6",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-07-20",
+    "description": "Safari is a graphical web browser developed by Apple, based on the WebKit engine. First released on desktop in 2003 with Mac OS X Panther, a mobile version has been bundled with iOS devices since the iPhone's introduction in 2007."
+  },
+  "firefox-106-0": {
+    "id": "firefox-106-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "106",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-10-18",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-107-0": {
+    "id": "chrome-107-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "107",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-09-08",
+    "description": "Google Chrome is a cross-platform web browser developed by Google. It was first released in 2008 for Microsoft Windows, and was later ported to Linux, macOS, iOS, and Android."
+  },
+  "edge-107-0": {
+    "id": "edge-107-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "107",
+      "minor": "0",
+      "build": "1418",
+      "patch": "24"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-10-27",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-107-0": {
+    "id": "firefox-107-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "107",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-11-15",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "safari-16-1": {
+    "id": "safari-16-1",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "16",
+      "minor": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-108-0": {
+    "id": "chrome-108-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "108",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-108-0": {
+    "id": "edge-108-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "108",
+      "minor": "0",
+      "build": "1462",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-12-01",
+    "description": "Microsoft Edge is a web browser developed by Microsoft. It was first released for Windows 10 and Xbox One in 2015, then for Android, iOS and macOS in 2019. Edge includes integration with Cortana and has extensions hosted on the Microsoft Store."
+  },
+  "firefox-108-0": {
+    "id": "firefox-108-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "108",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "2022-12-13",
+    "description": "Firefox is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web standards."
+  },
+  "chrome-109-0": {
+    "id": "chrome-109-0",
+    "name": "Chrome",
+    "marketshare": 0.4,
+    "version": {
+      "major": "109",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-109-0": {
+    "id": "edge-109-0",
+    "name": "Edge",
+    "marketshare": 0.1,
+    "version": {
+      "major": "109",
+      "minor": "0",
+      "build": "1518",
+      "patch": "49"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-109-0": {
+    "id": "firefox-109-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "109",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-110-0": {
+    "id": "chrome-110-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-110-0": {
+    "id": "edge-110-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0",
+      "build": "1587",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-110-0": {
+    "id": "firefox-110-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "110",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-111-0": {
+    "id": "chrome-111-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "111",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-16-3": {
+    "id": "safari-16-3",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "16",
+      "minor": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-111-0": {
+    "id": "firefox-111-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "111",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-111-0": {
+    "id": "edge-111-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "111",
+      "minor": "0",
+      "build": "1661",
+      "patch": "41"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-112-0": {
+    "id": "chrome-112-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "112",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-112-0": {
+    "id": "edge-112-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "112",
+      "minor": "0",
+      "build": "1722",
+      "patch": "34"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-112-0": {
+    "id": "firefox-112-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "112",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-113-0": {
+    "id": "chrome-113-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "113",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-113-0": {
+    "id": "firefox-113-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "113",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-113-0": {
+    "id": "edge-113-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "113",
+      "minor": "0",
+      "build": "1774",
+      "patch": "35"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-114-0": {
+    "id": "chrome-114-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "114",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-114-0": {
+    "id": "edge-114-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "114",
+      "minor": "0",
+      "build": "1823",
+      "patch": "37"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-114-0": {
+    "id": "firefox-114-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "114",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-115-0": {
+    "id": "firefox-115-0",
+    "name": "Firefox",
+    "marketshare": 0.2,
+    "version": {
+      "major": "115",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-115-0": {
+    "id": "chrome-115-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "115",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-16-5": {
+    "id": "safari-16-5",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "16",
+      "minor": "5",
+      "build": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-115-0": {
+    "id": "edge-115-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "115",
+      "minor": "0",
+      "build": "1901",
+      "patch": "183"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-116-0": {
+    "id": "firefox-116-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "116",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-116-0": {
+    "id": "chrome-116-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "116",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-17-0": {
+    "id": "safari-17-0",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "17",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-116-0": {
+    "id": "edge-116-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "116",
+      "minor": "0",
+      "build": "1938",
+      "patch": "54"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-117-0": {
+    "id": "firefox-117-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "117",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-117-0": {
+    "id": "chrome-117-0",
+    "name": "Chrome",
+    "marketshare": 0.5,
+    "version": {
+      "major": "117",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-117-0": {
+    "id": "edge-117-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "117",
+      "minor": "0",
+      "build": "2045",
+      "patch": "31"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-118-0": {
+    "id": "firefox-118-0",
+    "name": "Firefox",
+    "marketshare": 0.7,
+    "version": {
+      "major": "118",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-118-0": {
+    "id": "chrome-118-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "118",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-118-0": {
+    "id": "edge-118-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "118",
+      "minor": "0",
+      "build": "2088",
+      "patch": "46"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-119-0": {
+    "id": "firefox-119-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "119",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-119-0": {
+    "id": "chrome-119-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "119",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-119-0": {
+    "id": "edge-119-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "119",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-120-0": {
+    "id": "firefox-120-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "120",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-120-0": {
+    "id": "chrome-120-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "120",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-120-0": {
+    "id": "edge-120-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "120",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-121-0": {
+    "id": "firefox-121-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "121",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-121-0": {
+    "id": "edge-121-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "121",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-121-0": {
+    "id": "chrome-121-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "121",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-122-0": {
+    "id": "firefox-122-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "122",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-17-3": {
+    "id": "safari-17-3",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "17",
+      "minor": "3"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-122-0": {
+    "id": "chrome-122-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "122",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-123-0": {
+    "id": "firefox-123-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "123",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-122-0": {
+    "id": "edge-122-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "122",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-123-0": {
+    "id": "chrome-123-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "123",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-124-0": {
+    "id": "firefox-124-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "124",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-123-0": {
+    "id": "edge-123-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "123",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-124-0": {
+    "id": "chrome-124-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "124",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-125-0": {
+    "id": "firefox-125-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "125",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-124-0": {
+    "id": "edge-124-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "124",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-125-0": {
+    "id": "chrome-125-0",
+    "name": "Chrome",
+    "marketshare": 0.3,
+    "version": {
+      "major": "125",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-126-0": {
+    "id": "firefox-126-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "126",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-125-0": {
+    "id": "edge-125-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "125",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-126-0": {
+    "id": "chrome-126-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "126",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-127-0": {
+    "id": "firefox-127-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "127",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-126-0": {
+    "id": "edge-126-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "126",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-128-0": {
+    "id": "firefox-128-0",
+    "name": "Firefox",
+    "marketshare": 0.1,
+    "version": {
+      "major": "128",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-127-0": {
+    "id": "chrome-127-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "127",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-127-0": {
+    "id": "edge-127-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "127",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-129-0": {
+    "id": "firefox-129-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "129",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-18-0": {
+    "id": "safari-18-0",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "18",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-128-0": {
+    "id": "chrome-128-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "128",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-128-0": {
+    "id": "edge-128-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "128",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-130-0": {
+    "id": "firefox-130-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "130",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-129-0": {
+    "id": "chrome-129-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "129",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-129-0": {
+    "id": "edge-129-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "129",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-131-0": {
+    "id": "firefox-131-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "131",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-130-0": {
+    "id": "chrome-130-0",
+    "name": "Chrome",
+    "marketshare": 0.2,
+    "version": {
+      "major": "130",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-130-0": {
+    "id": "edge-130-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "130",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-132-0": {
+    "id": "firefox-132-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "132",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-131-0": {
+    "id": "chrome-131-0",
+    "name": "Chrome",
+    "marketshare": 0.4,
+    "version": {
+      "major": "131",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-131-0": {
+    "id": "edge-131-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "131",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-133-0": {
+    "id": "firefox-133-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "133",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-18-1": {
+    "id": "safari-18-1",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "18",
+      "minor": "1"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-134-0": {
+    "id": "firefox-134-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "134",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-132-0": {
+    "id": "chrome-132-0",
+    "name": "Chrome",
+    "marketshare": 0.3,
+    "version": {
+      "major": "132",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-132-0": {
+    "id": "edge-132-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "132",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-133-0": {
+    "id": "chrome-133-0",
+    "name": "Chrome",
+    "marketshare": 0.1,
+    "version": {
+      "major": "133",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-135-0": {
+    "id": "firefox-135-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "135",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-133-0": {
+    "id": "edge-133-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "133",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-134-0": {
+    "id": "chrome-134-0",
+    "name": "Chrome",
+    "marketshare": 0.4,
+    "version": {
+      "major": "134",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-136-0": {
+    "id": "firefox-136-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "136",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-134-0": {
+    "id": "edge-134-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "134",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-135-0": {
+    "id": "chrome-135-0",
+    "name": "Chrome",
+    "marketshare": 0.3,
+    "version": {
+      "major": "135",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-137-0": {
+    "id": "firefox-137-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "137",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-135-0": {
+    "id": "edge-135-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "135",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-18-4": {
+    "id": "safari-18-4",
+    "name": "Safari",
+    "marketshare": 0.1,
+    "version": {
+      "major": "18",
+      "minor": "4"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-136-0": {
+    "id": "chrome-136-0",
+    "name": "Chrome",
+    "marketshare": 0.4,
+    "version": {
+      "major": "136",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-138-0": {
+    "id": "firefox-138-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "138",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-136-0": {
+    "id": "edge-136-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "136",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-139-0": {
+    "id": "firefox-139-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "139",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-137-0": {
+    "id": "edge-137-0",
+    "name": "Edge",
+    "marketshare": 0.1,
+    "version": {
+      "major": "137",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-137-0": {
+    "id": "chrome-137-0",
+    "name": "Chrome",
+    "marketshare": 1.3,
+    "version": {
+      "major": "137",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-140-0": {
+    "id": "firefox-140-0",
+    "name": "Firefox",
+    "marketshare": 0.1,
+    "version": {
+      "major": "140",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-138-0": {
+    "id": "chrome-138-0",
+    "name": "Chrome",
+    "marketshare": 12.9,
+    "version": {
+      "major": "138",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-138-0": {
+    "id": "edge-138-0",
+    "name": "Edge",
+    "marketshare": 2.2,
+    "version": {
+      "major": "138",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "safari-26-0": {
+    "id": "safari-26-0",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "26",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-141-0": {
+    "id": "firefox-141-0",
+    "name": "Firefox",
+    "marketshare": 1.4,
+    "version": {
+      "major": "141",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-139-0": {
+    "id": "chrome-139-0",
+    "name": "Chrome",
+    "marketshare": 8.8,
+    "version": {
+      "major": "139",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-139-0": {
+    "id": "edge-139-0",
+    "name": "Edge",
+    "marketshare": 4.1,
+    "version": {
+      "major": "139",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-142-0": {
+    "id": "firefox-142-0",
+    "name": "Firefox",
+    "marketshare": 0.6,
+    "version": {
+      "major": "142",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "chrome-140-0": {
+    "id": "chrome-140-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "140",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "edge-140-0": {
+    "id": "edge-140-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "140",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  },
+  "firefox-143-0": {
+    "id": "firefox-143-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "143",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
+  }
+}

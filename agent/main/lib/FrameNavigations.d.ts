@@ -1,0 +1,50 @@
+import INavigation from '@ulixee/unblocked-specification/agent/browser/INavigation';
+import { NavigationReason } from '@ulixee/unblocked-specification/agent/browser/NavigationReason';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import { IDomPaintEvent, ILoadStatus, LoadStatus } from '@ulixee/unblocked-specification/agent/browser/Location';
+import { IFrameNavigationEvents, IFrameNavigations } from '@ulixee/unblocked-specification/agent/browser/IFrameNavigations';
+import Frame from './Frame';
+export default class FrameNavigations extends TypedEventEmitter<IFrameNavigationEvents> implements IFrameNavigations {
+    readonly frame: Frame;
+    get top(): INavigation;
+    lastHttpNavigationRequest: INavigation;
+    get currentUrl(): string;
+    history: INavigation[];
+    initiatedUserAction: {
+        startCommandId: number;
+        reason: NavigationReason;
+    };
+    logger: IBoundLog;
+    private readonly historyByLoaderId;
+    private readonly historyById;
+    private nextNavigationReason;
+    constructor(frame: Frame, logger: IBoundLog);
+    reset(): void;
+    get(id: number): INavigation;
+    didGotoUrl(url: string): boolean;
+    hasLoadStatus(status: ILoadStatus): boolean;
+    getPaintStableStatus(): {
+        isStable: boolean;
+        timeUntilReadyMs?: number;
+    };
+    onNavigationRequested(reason: NavigationReason, url: string, commandId: number, loaderId: string, browserRequestId?: string): INavigation;
+    onHttpRequested(url: string, lastCommandId: number, redirectedFromUrl: string, browserRequestId: string, loaderId: string): void;
+    onDomPaintEvent(event: IDomPaintEvent, url: string, timestamp: number, didRetry?: boolean): void;
+    adjustInPageLocationChangeTime(navigation: INavigation, timestamp: number): void;
+    setPageReady(navigation: INavigation, timestamp: number): void;
+    onHttpResponded(browserRequestId: string, url: string, loaderId: string, responseTime: number): void;
+    pendingResourceId(browserRequestId: string, requestedUrl: string, finalUrl: string, loaderId?: string): INavigation;
+    onResourceLoaded(navigation: INavigation, resourceId: number, statusCode: number, error?: Error): void;
+    onLoadStatusChanged(incomingStatus: LoadStatus.DomContentLoaded | LoadStatus.AllContentLoaded | LoadStatus.PaintingStable, url: string, loaderId: string, statusChangeDate?: number): void;
+    updateNavigationReason(url: string, reason: NavigationReason): void;
+    assignLoaderId(navigation: INavigation, loaderId: string): void;
+    getLastLoadedNavigation(): INavigation;
+    findMostRecentHistory(callback: (history: INavigation) => boolean): INavigation;
+    private checkStoredNavigationReason;
+    private findMatchingNavigation;
+    private recordRedirect;
+    private changeNavigationStatus;
+    private resolveResourceId;
+    private recordStatusChange;
+}

@@ -1,0 +1,40 @@
+{
+  "jsHighEntropyHints": {
+    "architecture": "x86",
+    "bitness": "64",
+    "brands": [
+      {
+        "brand": "Chromium",
+        "version": "94"
+      },
+      {
+        "brand": "Google Chrome",
+        "version": "94"
+      },
+      {
+        "brand": ";Not A Brand",
+        "version": "99"
+      }
+    ],
+    "mobile": false,
+    "model": "",
+    "platformVersion": "6.1.0",
+    "uaFullVersion": "94.0.4606.71"
+  },
+  "documentHeaders": {
+    "sec-ch-ua": "\"Chromium\";v=\"94\", \"Google Chrome\";v=\"94\", \";Not A Brand\";v=\"99\"",
+    "sec-ch-ua-arch": "\"x86\"",
+    "sec-ch-ua-platform-version": "\"6.1.0\"",
+    "DPR": "1",
+    "downlink": "10",
+    "sec-ch-ua-bitness": "\"64\"",
+    "sec-ch-ua-model": "",
+    "Device-Memory": "8",
+    "rtt": "100",
+    "sec-ch-ua-mobile": "?0",
+    "Viewport-Width": "996",
+    "sec-ch-ua-full-version": "\"94.0.4606.71\"",
+    "ect": "4g",
+    "sec-ch-prefers-color-scheme": "light"
+  }
+}

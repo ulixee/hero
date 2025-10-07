@@ -1,0 +1,4 @@
+build
+**/*.ts
+**/node_modules
+**socket/connect

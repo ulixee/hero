@@ -1,0 +1,30 @@
+{
+  "name": "@double-agent/collect-browser-fingerprints",
+  "version": "2.0.0-alpha.34",
+  "description": "Collects various browser attributes that can be used to fingerprint a given session",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.34",
+    "cookie": "^0.4.0",
+    "fingerprintjs2": "^2.1.0"
+  },
+  "private": true,
+  "checkCategories": [
+    "Browser Fingerprint"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "prod": "GENERATE_PROFILES=1 PORT=3001 DOMAIN=a1.ulixee.org node index.js"
+  }
+}
