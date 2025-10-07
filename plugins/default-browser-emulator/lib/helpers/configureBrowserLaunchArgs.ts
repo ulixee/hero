@@ -18,6 +18,7 @@ export function configureBrowserLaunchArgs(
     '--disable-default-apps', // Disable installation of default apps on first run
     '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
     '--disable-extensions', // Disable all chrome extensions.
+    '--disable-features=AimEnabled', // disable AIM Server Eligibility (this does extra network requests)
     '--disable-features=PaintHolding', // Don't defer paint commits (normally used to avoid flash of unstyled content)
     '--disable-features=LazyFrameLoading',
     '--disable-features=DestroyProfileOnBrowserClose', // Disable the feature of: Destroy profiles when their last browser window is closed, instead of when the browser exits.
