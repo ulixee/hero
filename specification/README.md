@@ -295,12 +295,22 @@ Browsers and versions send specific HTTP2 settings that remain true across all o
   - localWindowSize `number`. The HTTP2 initial window size to use.
   - settings `http2.Settings`. A node.js http2 module Settings object. It can be manipulated to change the settings sent to create an HTTP connection.
 
-#### shouldBlockRequest(url, resourceTypeIfKnown?)
+#### shouldInterceptRequest(url, resourceTypeIfKnown?)
 
-Callback before each an HTTP request is initiated. Any plugin returning `true` will halt processing for the given request.
+Callback before each an HTTP request is initiated. Any plugin returning `true` will halt processing for the given request. When combined with [`handleInterceptedRequest`] you can also return custom responses.
 
-- url: `string`. The url being requested.
+- url: `URL`. The url being requested.
 - resourceTypeIfKnown: [`IResourceType`](./agent/net/IResourceType.ts). The type of resource being requested if it can be determined by the browser.
+
+### handleInterceptedRequest(url, resourceTypeIfKnown?, request, response)
+
+Callback that will be triggered for each intercepted resource. This callback can be used to customize what response will be returned. In most cases
+a plugin should only use this hook if the same plugin also used [`shouldInterceptRequest] to intercept this resource.
+
+- url: `URL`. The url being requested.
+- resourceTypeIfKnown: [`IResourceType`](./agent/net/IResourceType.ts). The type of resource being requested if it can be determined by the browser.
+- request: request that would have been send but was intercepted instead.
+- response: response object which will be used by the browser. Its important that this is a valid response, otherwise chrome might have issues with it.
   
 #### beforeHttpRequest(request)
 

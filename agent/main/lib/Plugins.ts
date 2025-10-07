@@ -28,8 +28,8 @@ import { IFrame } from '@ulixee/unblocked-specification/agent/browser/IFrame';
 import IResourceType from '@ulixee/unblocked-specification/agent/net/IResourceType';
 import ChromeEngine from './ChromeEngine';
 import Interactor from './Interactor';
-
-type ICallbackFn = (...args: any[]) => Promise<void> | void;
+import { IncomingMessage, ServerResponse } from 'http';
+import { Http2ServerRequest, Http2ServerResponse } from 'http2';
 
 export default class Plugins implements IUnblockedPlugins {
   public profile: IEmulationProfile = {};
@@ -42,7 +42,7 @@ export default class Plugins implements IUnblockedPlugins {
 
   public readonly instances: IUnblockedPlugin[] = [];
 
-  private hooksByName: Record<keyof IUnblockedPlugin, ICallbackFn[]> = {
+  private hooksByName: {[K in keyof IUnblockedPlugin]-?: IUnblockedPlugin[K][]} = {
     configure: [],
     onClose: [],
     addDomOverride: [],
@@ -60,7 +60,8 @@ export default class Plugins implements IUnblockedPlugins {
     onTlsConfiguration: [],
     onHttpAgentInitialized: [],
     onHttp2SessionConnect: [],
-    shouldBlockRequest: [],
+    shouldInterceptRequest: [],
+    handleInterceptedRequest: [],
     beforeHttpRequest: [],
     beforeHttpRequestBody: [],
     beforeHttpResponse: [],
@@ -232,9 +233,18 @@ export default class Plugins implements IUnblockedPlugins {
     await Promise.all(this.hooksByName.onHttp2SessionConnect.map(fn => fn(resource, settings)));
   }
 
-  public shouldBlockRequest(url: string, resourceTypeIfKnown?: IResourceType): boolean {
-    for (const hook of this.hooksByName.shouldBlockRequest) {
-      if (hook(url, resourceTypeIfKnown)) return true;
+  public async shouldInterceptRequest(url: URL, resourceTypeIfKnown?: IResourceType): Promise<boolean> {
+    for (const hook of this.hooksByName.shouldInterceptRequest) {
+      if (await hook(url, resourceTypeIfKnown)) return true;
+    }
+    return false;
+  }
+
+  public async handleInterceptedRequest(url: URL, type: IResourceType, request: IncomingMessage | Http2ServerRequest, response: ServerResponse | Http2ServerResponse): Promise<boolean> {
+    for (const fn of this.hooksByName.handleInterceptedRequest) {
+      if (await fn(url, type, request, response)) {
+        return true
+      }
     }
     return false;
   }

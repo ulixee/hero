@@ -36,12 +36,7 @@ export default class RequestSession
   public interceptorHandlers: {
     types?: IResourceType[];
     urls?: (string | RegExp)[];
-    handlerFn?: (
-      url: URL,
-      type: IResourceType,
-      request: http.IncomingMessage | http2.Http2ServerRequest,
-      response: http.ServerResponse | http2.Http2ServerResponse,
-    ) => boolean | Promise<boolean>;
+    handlerFn?: INetworkHooks['handleInterceptedRequest'];
     hasParsed?: boolean;
   }[] = [];
 
@@ -194,7 +189,13 @@ export default class RequestSession
     });
   }
 
-  public shouldInterceptRequest(url: string, resourceType?: IResourceType): boolean {
+  public async willInterceptRequest(url: URL, resourceType?: IResourceType): Promise<boolean> {
+    for (const hook of this.hooks) {
+      if (await hook.shouldInterceptRequest?.(url, resourceType)){
+         return true;
+      };
+    }
+
     for (const handler of this.interceptorHandlers) {
       if (handler.types && resourceType) {
         if (handler.types.includes(resourceType)) return true;
@@ -208,13 +209,10 @@ export default class RequestSession
         handler.hasParsed = true;
       }
       for (const blockedUrlFragment of handler.urls) {
-        if (url.match(blockedUrlFragment)) {
+        if (url.href.match(blockedUrlFragment)) {
           return true;
         }
       }
-    }
-    for (const hook of this.hooks) {
-      if (hook.shouldBlockRequest?.(url, resourceType)) return true;
     }
     return false;
   }
@@ -225,6 +223,12 @@ export default class RequestSession
     response: http.ServerResponse | http2.Http2ServerResponse,
   ): Promise<boolean> {
     const url = ctx.url.href;
+    for (const hook of this.hooks) {
+      if (await hook.handleInterceptedRequest?.(ctx.url, ctx.resourceType, request, response)) {
+        return true;
+      }
+    }
+
     for (const handler of this.interceptorHandlers) {
       const isMatch =
         handler.types?.includes(ctx.resourceType) || handler.urls?.some(x => url.match(x));

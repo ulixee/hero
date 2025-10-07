@@ -382,8 +382,8 @@ export default class MitmProxy {
       const requestSession = this.sessionById[sessionId];
       if (
         requestSession.bypassAllWithEmptyResponse ||
-        requestSession.shouldInterceptRequest(`https://${hostname}:${port}`) ||
-        requestSession.shouldInterceptRequest(`https://${hostname}`)
+        await requestSession.willInterceptRequest(new URL(`https://${hostname}:${port}`)) ||
+        await requestSession.willInterceptRequest(new URL(`https://${hostname}`))
       ) {
         return false;
       }

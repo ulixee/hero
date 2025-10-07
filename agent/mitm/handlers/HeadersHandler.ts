@@ -62,7 +62,7 @@ export default class HeadersHandler {
     }
 
     // if we're going to block this, don't wait for a resource type
-    if (!ctx.resourceType && session.shouldInterceptRequest(ctx.url.href)) {
+    if (!ctx.resourceType && await session.willInterceptRequest(ctx.url)) {
       session.browserRequestMatcher.resolveBrowserRequest(ctx);
       return;
     }
