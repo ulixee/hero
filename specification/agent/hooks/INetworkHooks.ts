@@ -1,4 +1,6 @@
 import { URL } from 'url';
+import * as http from 'http';
+import * as http2 from 'http2';
 import IDnsSettings from '../net/IDnsSettings';
 import ITcpSettings from '../net/ITcpSettings';
 import IHttpSocketAgent from '../net/IHttpSocketAgent';
@@ -21,7 +23,18 @@ export default interface INetworkHooks {
     settings: IHttp2ConnectSettings,
   ): Promise<any> | void;
 
-  shouldBlockRequest?(url: string, resourceTypeIfKnown?: IResourceType): boolean;
+  shouldInterceptRequest?(
+    url: URL,
+    resourceTypeIfKnown?: IResourceType,
+  ): Promise<boolean> | boolean;
+
+  handleInterceptedRequest?(
+    url: URL,
+    type: IResourceType,
+    request: http.IncomingMessage | http2.Http2ServerRequest,
+    response: http.ServerResponse | http2.Http2ServerResponse,
+  ): Promise<boolean> | boolean;
+
   beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any> | void;
   beforeHttpRequestBody?(request: IHttpResourceLoadDetails): Promise<any> | void;
   beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;

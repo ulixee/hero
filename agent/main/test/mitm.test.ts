@@ -411,3 +411,83 @@ test('should be able to intercept http requests and responses', async () => {
     'Intercepted',
   );
 });
+
+test('should be able to intercept and serve local responses', async () => {
+  const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
+  agent.hook({
+    async shouldInterceptRequest(url, resourceTypeIfKnown) {
+      return true;
+    },
+    async handleInterceptedRequest(url, type, request, response) {
+      response.end('<html><head></head><body>locally served</body></html>');
+      return true;
+    },
+  });
+  const page = await agent.newPage();
+
+  let socketConnects = 0;
+  agent.mitmRequestSession.on('socket-connect', () => {
+    socketConnects += 1;
+  });
+
+  await page.goto(koa.baseUrl);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+
+  expect(socketConnects).toEqual(0);
+
+  const content = await page.mainFrame.outerHTML();
+  expect(content).toContain('locally served');
+});
+
+test('should be able to implement a cache using plugin hooks', async () => {
+  const agent = pool.createAgent({ logger: TestLogger.forTest(module) });
+  const cache = new Map<string, Buffer>();
+
+  agent.hook({
+    async shouldInterceptRequest(url, resourceTypeIfKnown) {
+      // Block all requests that are not related to this test to avoid noise
+      if (!url.href.includes(koa.baseUrl)) {
+        return true;
+      }
+      // Also block favicon as chrome doesn't always load this consistently
+      if (url.href.includes('favicon')) {
+        return true;
+      }
+
+      return cache.has(url.href);
+    },
+    async handleInterceptedRequest(url, type, request, response) {
+      const buffer = cache.get(url.href);
+      if (buffer) {
+        response.end(buffer);
+        return true;
+      }
+
+      return false;
+    },
+    async beforeHttpResponseBody(response: IHttpResourceLoadDetails): Promise<any> {
+      if (response.method === 'GET') {
+        const chunks = [];
+        for await (const chunk of response.responseBodyStream) {
+          chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+        cache.set(response.url.href, buffer);
+        response.responseBodyStream = Readable.from(buffer);
+      }
+    },
+  });
+  const page = await agent.newPage();
+
+  let socketConnects = 0;
+  agent.mitmRequestSession.on('socket-connect', _event => {
+    socketConnects += 1;
+  });
+
+  await page.goto(koa.baseUrl);
+  await page.waitForLoad(LocationStatus.AllContentLoaded);
+  expect(socketConnects).toEqual(1);
+
+  await page.goto(koa.baseUrl);
+  expect(socketConnects).toEqual(1);
+});
