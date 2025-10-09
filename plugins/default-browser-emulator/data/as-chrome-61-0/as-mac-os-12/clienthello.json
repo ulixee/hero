@@ -1,0 +1,103 @@
+{
+  "version": "0x303 (TLS 1.2)",
+  "ciphers": [
+    "{0xC0, 0x23} TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    "{0xC0, 0x27} TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+    "{0x00, 0x3C} TLS_RSA_WITH_AES_128_CBC_SHA256",
+    "{0xC0, 0x25} TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+    "{0xC0, 0x29} TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
+    "{0x00, 0x67} TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+    "{0x00, 0x40} TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+    "{0xC0, 0x09} TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+    "{0xC0, 0x13} TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    "{0x00, 0x2F} TLS_RSA_WITH_AES_128_CBC_SHA",
+    "{0xC0, 0x04} TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+    "{0xC0, 0x0E} TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+    "{0x00, 0x33} TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+    "{0x00, 0x32} TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+    "{0xC0, 0x2B} TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x2F} TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    "{0x00, 0x9C} TLS_RSA_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x2D} TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x31} TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256",
+    "{0x00, 0x9E} TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+    "{0x00, 0xA2} TLS_DHE_DSS_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x08} TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA",
+    "{0xC0, 0x12} TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
+    "{0x00, 0x0A} TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    "{0xC0, 0x03} TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA",
+    "{0xC0, 0x0D} TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA",
+    "{0x00, 0x16} TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+    "{0x00, 0x13} TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA",
+    "{0x00, 0xFF} TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+  ],
+  "compressionMethods": [
+    "No Compression (0x00)"
+  ],
+  "extensions": [
+    {
+      "type": "supported_groups",
+      "decimal": 10,
+      "values": [
+        "secp256r1 (P-256) (23)",
+        "sect163k1 (K-163) (1)",
+        "sect163r2 (B-163) (3)",
+        "secp192r1 (P-192) (19)",
+        "secp224r1 (P-224) (21)",
+        "sect233k1 (K-233) (6)",
+        "sect233r1 (B-233) (7)",
+        "sect283k1 (K-283) (9)",
+        "sect283r1 (B-283) (10)",
+        "secp384r1 (P-384) (24)",
+        "sect409k1 (K-409) (11)",
+        "sect409r1 (B-409) (12)",
+        "secp521r1 (P-521) (25)",
+        "sect571k1 (K-571) (13)",
+        "sect571r1 (B-571) (14)",
+        "secp160k1 (15)",
+        "secp160r1 (16)",
+        "secp160r2 (17)",
+        "sect163r1 (2)",
+        "secp192k1 (18)",
+        "sect193r1 (4)",
+        "sect193r2 (5)",
+        "secp224k1 (20)",
+        "sect239k1 (8)",
+        "secp256k1 (22)"
+      ]
+    },
+    {
+      "type": "ec_point_formats",
+      "decimal": 11,
+      "values": [
+        "uncompressed (0)"
+      ]
+    },
+    {
+      "type": "signature_algorithms",
+      "decimal": 13,
+      "values": [
+        "ecdsa_secp521r1_sha512 (0x0603)",
+        "rsa_pkcs1_sha512 (0x0601)",
+        "ecdsa_secp384r1_sha384 (0x0503)",
+        "rsa_pkcs1_sha384 (0x0501)",
+        "ecdsa_secp256r1_sha256 (0x0403)",
+        "rsa_pkcs1_sha256 (0x0401)",
+        "ecdsa_sha224 (0x0303)",
+        "rsa_pkcs1_sha224 (0x0301)",
+        "ecdsa_sha1 (0x0203)",
+        "rsa_pkcs1_sha1 (0x0201)",
+        "dsa_sha1 (0x0202)",
+        "UNKNOWN (0x0101)"
+      ]
+    },
+    {
+      "type": "server_name",
+      "decimal": 0,
+      "values": [
+        "0000 - 00 1c 00 00 19 74 6c 73-2e 64 61 2d 63 6f 6c   .....tls.da-col",
+        "000f - 6c 65 63 74 2e 75 6c 69-78 65 65 2e 6f 72 67   lect.ulixee.org"
+      ]
+    }
+  ]
+}

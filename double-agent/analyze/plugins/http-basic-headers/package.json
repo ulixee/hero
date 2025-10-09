@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/analyze-http-basic-headers",
+  "version": "2.0.0-alpha.34",
+  "description": "Analyzes header order, capitalization and default values",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.34",
+    "@double-agent/collect-http-basic-headers": "2.0.0-alpha.34",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true
+}
