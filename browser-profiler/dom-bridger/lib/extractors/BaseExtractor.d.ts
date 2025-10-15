@@ -1,0 +1,32 @@
+import IBridgeDefinitions from '../../interfaces/IBridgeDefinitions';
+export default abstract class BaseExtractor {
+    static definitePatterns: string[];
+    static extraAddPatterns: string[];
+    static extraChangePatterns: string[];
+    static ignoredExtraPatterns: string[];
+    static regexps: RegExp[];
+    patternsHandledElsewhere: string[];
+    definitePathsFound: Set<string>;
+    extraPathsFound: Set<string>;
+    private definitePathsMap;
+    private regexpsUsedForMatch;
+    constructor(rawMappings: any);
+    evaluate(paths: string[]): void;
+    get handledPatterns(): string[];
+    get definitePathsMatched(): string[];
+    get definitePathsNotMatched(): string[];
+    get definitePathsHandledElsewhere(): string[];
+    get definitePatternsNotUsed(): string[];
+    get extraPathsMatched(): string[];
+    get extraPathsNotMatched(): string[];
+    get extraPathsHandledElsewhere(): string[];
+    get regexpsUsed(): RegExp[];
+    setAsHandled(...groupsOfPaths: string[][]): void;
+    toJSON(): IBridgeDefinitions;
+    getRegexps(path: string): RegExp[];
+    private addDefinitePath;
+    static isDefinitePath(path: string): boolean;
+    static fitsAnyPattern(path: string): boolean;
+    static isIgnoredExtraPath(path: string): boolean;
+    static getRegexps(path: string): RegExp[];
+}

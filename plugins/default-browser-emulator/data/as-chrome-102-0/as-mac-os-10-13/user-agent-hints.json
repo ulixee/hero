@@ -1,0 +1,61 @@
+{
+  "jsHighEntropyHints": {
+    "architecture": "x86",
+    "bitness": "64",
+    "brands": [
+      {
+        "brand": " Not A;Brand",
+        "version": "99"
+      },
+      {
+        "brand": "Chromium",
+        "version": "102"
+      },
+      {
+        "brand": "Google Chrome",
+        "version": "102"
+      }
+    ],
+    "fullVersionList": [
+      {
+        "brand": " Not A;Brand",
+        "version": "99.0.0.0"
+      },
+      {
+        "brand": "Chromium",
+        "version": "102.0.5005.61"
+      },
+      {
+        "brand": "Google Chrome",
+        "version": "102.0.5005.61"
+      }
+    ],
+    "mobile": false,
+    "model": "",
+    "platform": "macOS",
+    "platformVersion": "10.13.6",
+    "uaFullVersion": "102.0.5005.61",
+    "wow64": false
+  },
+  "documentHeaders": {
+    "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"102\", \"Google Chrome\";v=\"102\"",
+    "sec-ch-ua-arch": "\"x86\"",
+    "sec-ch-device-memory": "8",
+    "sec-ch-ua-platform-version": "\"10.13.6\"",
+    "dpr": "1",
+    "downlink": "10",
+    "sec-ch-ua-full-version-list": "\" Not A;Brand\";v=\"99.0.0.0\", \"Chromium\";v=\"102.0.5005.61\", \"Google Chrome\";v=\"102.0.5005.61\"",
+    "sec-ch-ua-wow64": "?0",
+    "sec-ch-ua-model": "",
+    "device-memory": "8",
+    "sec-ch-ua-bitness": "\"64\"",
+    "sec-ch-viewport-width": "980",
+    "rtt": "50",
+    "sec-ch-ua-mobile": "?0",
+    "viewport-width": "980",
+    "sec-ch-ua-full-version": "\"102.0.5005.61\"",
+    "ect": "4g",
+    "sec-ch-dpr": "1",
+    "sec-ch-prefers-color-scheme": "light"
+  }
+}

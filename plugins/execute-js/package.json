@@ -1,0 +1,24 @@
+{
+  "name": "@ulixee/execute-js-plugin",
+  "version": "2.0.0-alpha.34",
+  "description": "Plugin that allows executing javascript in the remote browser context",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/hero-interfaces": "2.0.0-alpha.34",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.34"
+  }
+}

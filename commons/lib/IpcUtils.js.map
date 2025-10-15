@@ -1,0 +1,1 @@
+{"version":3,"file":"IpcUtils.js","sourceRoot":"","sources":["../../../commons/lib/IpcUtils.ts"],"names":[],"mappings":";;AAEA,kDAKC;AAPD,yBAAyB;AAEzB,SAAgB,mBAAmB,CAAC,IAAY;IAC9C,IAAI,EAAE,CAAC,QAAQ,EAAE,KAAK,OAAO,EAAE,CAAC;QAC9B,OAAO,gBAAgB,IAAI,EAAE,CAAC;IAChC,CAAC;IACD,OAAO,GAAG,EAAE,CAAC,MAAM,EAAE,IAAI,IAAI,OAAO,CAAC;AACvC,CAAC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"shared-worker.js","sourceRoot":"","sources":["../../../../../../agent/main/test/assets/worker/shared-worker.js"],"names":[],"mappings":"AAAA,SAAS,GAAG,KAAK,CAAC,EAAE;IAClB,MAAM,IAAI,GAAG,KAAK,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC;IAC5B,IAAI,CAAC,SAAS,GAAG,CAAC,CAAC,EAAE,CAAC,IAAI,CAAC,WAAW,CAAC,OAAO,GAAG,CAAC,CAAC,IAAI,CAAC,CAAC;AAC3D,CAAC,CAAC"}
