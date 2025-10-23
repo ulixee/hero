@@ -1,0 +1,182 @@
+{
+  "version": "0x303 (TLS 1.2)",
+  "ciphers": [
+    "{0xCA, 0xCA} GREASE",
+    "{0x13, 0x01} TLS_AES_128_GCM_SHA256",
+    "{0x13, 0x02} TLS_AES_256_GCM_SHA384",
+    "{0x13, 0x03} TLS_CHACHA20_POLY1305_SHA256",
+    "{0xC0, 0x2B} TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x2F} TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    "{0xC0, 0x2C} TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    "{0xC0, 0x30} TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    "{0xCC, 0xA9} TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+    "{0xCC, 0xA8} TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+    "{0xC0, 0x13} TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    "{0xC0, 0x14} TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+    "{0x00, 0x9C} TLS_RSA_WITH_AES_128_GCM_SHA256",
+    "{0x00, 0x9D} TLS_RSA_WITH_AES_256_GCM_SHA384",
+    "{0x00, 0x2F} TLS_RSA_WITH_AES_128_CBC_SHA",
+    "{0x00, 0x35} TLS_RSA_WITH_AES_256_CBC_SHA"
+  ],
+  "compressionMethods": [
+    "No Compression (0x00)"
+  ],
+  "extensions": [
+    {
+      "type": "GREASE",
+      "decimal": 14906,
+      "values": []
+    },
+    {
+      "type": "session_ticket",
+      "decimal": 35,
+      "values": []
+    },
+    {
+      "type": "compress_certificate",
+      "decimal": 27,
+      "values": [
+        "0000 - 02 00 02                                       ..."
+      ]
+    },
+    {
+      "type": "UNKNOWN",
+      "decimal": 65037,
+      "values": [
+        "0000 - 00 00 01 00 01 6f 00 20-33 80 89 66 82 cf 0f   .....o. 3..f...",
+        "000f - d6 c4 d6 2b 50 8e 68 a3-9f 61 40 b8 5e 4e 23   ...+P.h..a@.^N#",
+        "001e - 00 24 ed 8e 72 b7 be 13-40 64 00 f0 48 6a fe   .$..r...@d..Hj.",
+        "002d - 52 de 6a e3 c7 6c 6d a8-73 75 d0 cd 00 95 dd   R.j..lm.su.....",
+        "003c - b0 f7 f6 29 13 62 db 2a-27 7e 17 8a b6 8e 4c   ...).b.*'~....L",
+        "004b - 48 66 ef 80 de cd b5 b5-71 1a 02 c4 dc d9 21   Hf......q.....!",
+        "005a - 39 13 93 dc 58 d2 3c 52-ca f5 9c d1 4c 6b b0   9...X.<R....Lk.",
+        "0069 - ae df ee d2 ec 33 7d 6d-34 2d 94 e3 bf 3d af   .....3}m4-...=.",
+        "0078 - a1 82 cd bd 10 61 29 18-d3 ee 98 68 b0 4c 87   .....a)....h.L.",
+        "0087 - 4a ed aa b3 5c 98 97 ed-ef 1e 3c 39 df 76 c8   J...\\.....<9.v.",
+        "0096 - b3 35 03 eb d6 a0 66 6b-83 3c 44 b7 d0 85 f9   .5....fk.<D....",
+        "00a5 - a7 14 1c 80 e7 41 f8 c4-c9 0b 64 fa b7 59 cf   .....A....d..Y.",
+        "00b4 - c1 08 ac bd cd cb de 3d-5d f9 cc e8 91 f6 e8   .......=]......",
+        "00c3 - f0 a7 cf 8a 4b e4 37 0e-38 64 4b fe 7f 6d 55   ....K.7.8dK..mU",
+        "00d2 - 1f 1d 09 45 5c ec c2 61-5c be 58 89 ea 58 af   ...E\\..a\\.X..X.",
+        "00e1 - 1b 2b e0 b7 67 75 f6 53-ce ab b4 83 9c 66 69   .+..gu.S.....fi",
+        "00f0 - f0 34 ad fa 37 5b 7b a2-bc 8a 51 29 bb f1 09   .4..7[{...Q)...",
+        "00ff - 90 cf 0a dc c5 9d dd 3a-91 6b 26 5b e5 c8 c5   .......:.k&[...",
+        "010e - c3 88 11 43 15 e3 0a 17-75 d8 f8 f1            ...C....u..."
+      ]
+    },
+    {
+      "type": "key_share",
+      "decimal": 51,
+      "values": [
+        "NamedGroup: GREASE (43690)",
+        "key_exchange:  (len=1): 00",
+        "NamedGroup: UNKNOWN (4588)",
+        "key_exchange:  (len=1216): E34107EF5202DAB77A4AA4359D9A583709166D964E8402608127B2A33320FEFA8B472C260A87799FBC0F490351BDE6812A4ACC9F50CDCE634FA3F1B764127346EA31D116A64BE014AFC9A746BB94F771073A3902C44A57F76C9AC3B1238220CD5FEACF314298F5466200441C5418C14BE97FD1F19DAF7CB482A1189CA6000718BB8EB51CF8253FC7539EE913595E9B6E9E34AE2E256D8494657ACAA083840BB3CB6B04013FC6D3BAEE20BC4EA830646556AC4B2B74E70560F2A239D7CF02E82584065B1C71ACB554CE0F99AFD9167CAD7CBF34543697B9AC13767F2F563BBFA345E79C181254985AE4CE18EC0C0C76B856B59BE1A3BD656544CDD3226E258D04D272957689DB200717857295D370EEC277109C59A1C547CE480889C153FD4CC1F9BB6494EACE6BDB14AA5C6E5063CD7AE09B4E81401215B849FB9435A0BCDBB0C1BF51B6F49B5830FBB704CA06D1C727C98643FF23C1EFA715A77A1B357B361991C8873770242378DD816A5365574CACC40CDB38E36A2E7329BBEE60B042F7B88BB1306C343B0D3A3718E6C65E4167B559CA42281DB54B7E0BCCA2BBD20594205E89E923F41236FA37AB0F27AC3A05662131BB22B225EA255D852C0DD487B82712587C30BF35AC1685C3AB0E9BB14F2439F0E32FB480BECA1996B8A51F0303C4EDF571ADEC160F6CBA89B5221466BA4CC8757F1BC5B9A718ED4C2AF0577C4352532CF2529A352375B06F1DD4A483406E25A99CAEA0BDED534137779DA6429735F77B5C0884A6AA379E82A45E322C16E24D6C3719E40C3E348444C7ACA9922ABD1FF27EF681A3C7B007294CB3FBAC84A9E5054AB6A277A7B000DD33A25998CE107EB6714E6B4B71DCEA6B7CD45A40E8BC3A2CA45233AEC0B91537F79615F98D0B0B843994AB7A97BD6265A07BD346D0EAA60CA9827D8CC1952723443061303399B23A53AF149C2767BD37A2528FE28EDC752A07ACB2EEDB1D957639C29670C403BAC7906D9DF0A235034FE8020BFFE8453B571F332073422B472F02795906523FEC439B8B63BA75057C91728AE9BA53464818CAA8CEBB8D70F1916636AC52A44E3D9ABB84ABCAD28C8215596000179927B9CFD11A2F22115678D93D7709A5B8E9253C5AB6F20659CBEABB68C123726C253AA12C15F788C92C119F0509C3A159BFC3B7D18BC4CD7A447FA92BBF240D95D30AC1A52E81D2A1EE3C782AA17902BC2749279CF46A3A76656373895B83A48F0C8C01B0D9BA719BA4B35B288E6B4C7C346924960EC51B41C5A1B37CA13BD4E68A77CBA12B631E8F42B6FCCB2918E3ABEEE333D496A7A9E27ADDEAA9408ABFB10B1CD6FB83231B56B32613D2EB7404F5A4B74B916CBC075020949F922C15991FC4933F59264641D5059C42925C271885541B0D375B0377CC8285B25800A87956469D262D7EA55992C55BCD2198CA716CFE43014356C7CDD41314FC24D0874EB3E4AA2E3B2BCD6C58FE24AEFF002F61A2ADAD18185F56995EF2B3DD0850D3C7C2C0D8027F80CD950119443B971BE03057825B5C785F8D5A059D186336E19548465D879CA0014B76230A3E88143F60462ECDA5AF494A123AE7B868128789D722FC2BA06509C501E6B8DED61C55AB6DFA109A2295114FF9D77F046A149BC164889548E138BCB2BA1DF4EAEE53757A6144C5B03241C94F8D45D3B10613ED84B8BB78A874E66A28C8A9418EB1F44B080071882E",
+        "NamedGroup: ecdh_x25519 (29)",
+        "key_exchange:  (len=32): AD98F9DBDA0D267CBE4881C1321CBD11B1FF25D9B1C59A3A97AAC90441DDDC11"
+      ]
+    },
+    {
+      "type": "UNKNOWN",
+      "decimal": 17513,
+      "values": [
+        "0000 - 00 03 02 68 32                                 ...h2"
+      ]
+    },
+    {
+      "type": "signed_certificate_timestamps",
+      "decimal": 18,
+      "values": []
+    },
+    {
+      "type": "signature_algorithms",
+      "decimal": 13,
+      "values": [
+        "ecdsa_secp256r1_sha256 (0x0403)",
+        "rsa_pss_rsae_sha256 (0x0804)",
+        "rsa_pkcs1_sha256 (0x0401)",
+        "ecdsa_secp384r1_sha384 (0x0503)",
+        "rsa_pss_rsae_sha384 (0x0805)",
+        "rsa_pkcs1_sha384 (0x0501)",
+        "rsa_pss_rsae_sha512 (0x0806)",
+        "rsa_pkcs1_sha512 (0x0601)"
+      ]
+    },
+    {
+      "type": "status_request",
+      "decimal": 5,
+      "values": [
+        "0000 - 01 00 00 00 00                                 ....."
+      ]
+    },
+    {
+      "type": "extended_master_secret",
+      "decimal": 23,
+      "values": []
+    },
+    {
+      "type": "supported_groups",
+      "decimal": 10,
+      "values": [
+        "GREASE (43690)",
+        "UNKNOWN (4588)",
+        "ecdh_x25519 (29)",
+        "secp256r1 (P-256) (23)",
+        "secp384r1 (P-384) (24)"
+      ]
+    },
+    {
+      "type": "server_name",
+      "decimal": 0,
+      "values": [
+        "0000 - 00 1c 00 00 19 74 6c 73-2e 64 61 2d 63 6f 6c   .....tls.da-col",
+        "000f - 6c 65 63 74 2e 75 6c 69-78 65 65 2e 6f 72 67   lect.ulixee.org"
+      ]
+    },
+    {
+      "type": "application_layer_protocol_negotiation",
+      "decimal": 16,
+      "values": [
+        "h2",
+        "http/1.1"
+      ]
+    },
+    {
+      "type": "ec_point_formats",
+      "decimal": 11,
+      "values": [
+        "uncompressed (0)"
+      ]
+    },
+    {
+      "type": "renegotiate",
+      "decimal": 65281,
+      "values": [
+        "<EMPTY>"
+      ]
+    },
+    {
+      "type": "supported_versions",
+      "decimal": 43,
+      "values": [
+        "GREASE (27242)",
+        "TLS 1.3 (772)",
+        "TLS 1.2 (771)"
+      ]
+    },
+    {
+      "type": "psk_key_exchange_modes",
+      "decimal": 45,
+      "values": [
+        "psk_dhe_ke (1)"
+      ]
+    },
+    {
+      "type": "GREASE",
+      "decimal": 6682,
+      "values": [
+        "0000 - 00                                             ."
+      ]
+    }
+  ]
+}

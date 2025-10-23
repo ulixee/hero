@@ -1,0 +1,25 @@
+{
+  "name": "@double-agent/collect-http-ua-hints",
+  "version": "2.0.0-alpha.34",
+  "description": "Collects User Agent hints for a browser",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.34",
+    "@double-agent/config": "2.0.0-alpha.34"
+  },
+  "devDependencies": {
+    "@types/diff": "^4.0.2"
+  },
+  "private": true
+}
