@@ -1,4 +1,5 @@
 import { CanceledPromiseError } from '../../interfaces/IPendingWaitEvent';
+import { URL } from 'url';
 
 export default function getTestObject() {
   const testObject: any = {
@@ -16,6 +17,7 @@ export default function getTestObject() {
     intArray: Int32Array.from([4, 7]),
     floatArray: Float32Array.from([4.1]),
     float64Array: Float64Array.from([4.1, 5.3]),
+    url: new URL("https://example.com"),
   };
 
   testObject.nestedObject = { ...testObject, name: 'nested' };
