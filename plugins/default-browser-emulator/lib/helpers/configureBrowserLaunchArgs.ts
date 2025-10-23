@@ -27,6 +27,8 @@ export function configureBrowserLaunchArgs(
     '--disable-features=DialMediaRouteProvider', // don't lookup local area casting options)
     '--disable-features=OptimizationHints', // Disable the Chrome Optimization Guide and networking with its service API
     '--disable-features=AutofillServerCommunication', //  Disables autofill server communication
+    '--disable-features=AimEnabled',  // Disable ai search assist eligibility (this causes unexpected internal network traffic otherwise: "https://www.google.com/async/folae?async=_fmt:pb")
+
     '--disable-blink-features=AutomationControlled',
     '--disable-hang-monitor',
     '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
