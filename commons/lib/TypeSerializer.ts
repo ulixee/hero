@@ -16,6 +16,7 @@ const Types = {
   Map: 'Map',
   Set: 'Set',
   Error: 'Error',
+  URL: 'URL',
 };
 
 declare let Buffer;
@@ -121,6 +122,10 @@ export default class TypeSerializer {
     if (type === Types.boolean || type === Types.string || type === Types.number) return value;
     if (type === Types.bigint || value instanceof BigInt) {
       return { __type: Types.bigint, value: value.toString() };
+    }
+
+    if (value instanceof URL) {
+      return { __type: Types.URL, value: value.toString() };
     }
 
     if (value instanceof Date) {
@@ -232,6 +237,7 @@ export default class TypeSerializer {
 
     if (type === Types.number || type === Types.string || type === Types.boolean) return value;
     if (type === Types.bigint) return BigInt(value);
+    if (type === Types.URL) return new URL(value);
     if (type === Types.NaN) return Number.NaN;
     if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
     if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
