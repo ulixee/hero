@@ -71,7 +71,39 @@ export default class BrowserProcess extends TypedEventEmitter<{ close: void }> {
       launchArguments.unshift(executablePath);
     }
 
-    const child = childProcess.spawn(spawnFile, launchArguments, {
+    // Combine all features
+    const disabledFeatures = new Set<string>();
+    const enabledFeatures = new Set<string>();
+    const otherArgs = [];
+
+    const disablePrefix = '--disable-features=';
+    const enablePrefix = '--enable-features=';
+
+    for (const arg of launchArguments) {
+      if (arg.startsWith(disablePrefix)) {
+        const features = arg.substring(disablePrefix.length).split(',');
+        features.forEach(feature => feature.trim() && disabledFeatures.add(feature.trim()));
+      } else if (arg.startsWith(enablePrefix)) {
+        const features = arg.substring(enablePrefix.length).split(',');
+        features.forEach(feature => feature.trim() && enabledFeatures.add(feature.trim()));
+      } else {
+        otherArgs.push(arg);
+      }
+    }
+
+    const result = [...otherArgs];
+
+    if (disabledFeatures.size > 0) {
+      const combinedDisabled = Array.from(disabledFeatures).join(',');
+      result.push(`${disablePrefix}${combinedDisabled}`);
+    }
+
+    if (enabledFeatures.size > 0) {
+      const combinedEnabled = Array.from(enabledFeatures).join(',');
+      result.push(`${enablePrefix}${combinedEnabled}`);
+    }
+
+    const child = childProcess.spawn(spawnFile, result, {
       // On non-windows platforms, `detached: true` makes child process a
       // leader of a new process group, making it possible to kill child
       // process tree with `.kill(-pid)` command. @see
