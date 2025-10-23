@@ -1,0 +1,23 @@
+{
+  "name": "@double-agent/collect-browser-codecs",
+  "version": "2.0.0-alpha.34",
+  "description": "Collects the audio, video and WebRTC codecs of the browser",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect": "2.0.0-alpha.34",
+    "csv-parse": "^4.8.5",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true
+}
