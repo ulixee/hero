@@ -4712,5 +4712,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-144-0": {
+    "id": "firefox-144-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "144",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
