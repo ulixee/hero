@@ -1078,7 +1078,7 @@
   "chrome-56-0": {
     "id": "chrome-56-0",
     "name": "Chrome",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "56",
       "minor": "0",
@@ -1496,7 +1496,7 @@
   "ie-11-0": {
     "id": "ie-11-0",
     "name": "IE",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "11",
       "minor": "0"
@@ -2235,7 +2235,7 @@
   "safari-13-1": {
     "id": "safari-13-1",
     "name": "Safari",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "13",
       "minor": "1",
@@ -2248,7 +2248,7 @@
   "chrome-87-0": {
     "id": "chrome-87-0",
     "name": "Chrome",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "87",
       "minor": "0",
@@ -2801,7 +2801,7 @@
   "safari-14-1": {
     "id": "safari-14-1",
     "name": "Safari",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "14",
       "minor": "1",
@@ -2814,7 +2814,7 @@
   "safari-15-1": {
     "id": "safari-15-1",
     "name": "Safari",
-    "marketshare": 0.2,
+    "marketshare": 0,
     "version": {
       "major": "15",
       "minor": "1"
@@ -2946,7 +2946,7 @@
   "chrome-103-0": {
     "id": "chrome-103-0",
     "name": "Chrome",
-    "marketshare": 0.2,
+    "marketshare": 0.1,
     "version": {
       "major": "103",
       "minor": "0",
@@ -3158,7 +3158,7 @@
   "safari-15-6": {
     "id": "safari-15-6",
     "name": "Safari",
-    "marketshare": 0.2,
+    "marketshare": 0.1,
     "version": {
       "major": "15",
       "minor": "6",
@@ -3289,7 +3289,7 @@
   "edge-109-0": {
     "id": "edge-109-0",
     "name": "Edge",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "109",
       "minor": "0",
@@ -3527,7 +3527,7 @@
   "firefox-115-0": {
     "id": "firefox-115-0",
     "name": "Firefox",
-    "marketshare": 0.2,
+    "marketshare": 0.1,
     "version": {
       "major": "115",
       "minor": "0"
@@ -3644,7 +3644,7 @@
   "chrome-117-0": {
     "id": "chrome-117-0",
     "name": "Chrome",
-    "marketshare": 0.5,
+    "marketshare": 0.4,
     "version": {
       "major": "117",
       "minor": "0",
@@ -3672,7 +3672,7 @@
   "firefox-118-0": {
     "id": "firefox-118-0",
     "name": "Firefox",
-    "marketshare": 0.6,
+    "marketshare": 0.5,
     "version": {
       "major": "118",
       "minor": "0"
@@ -3764,7 +3764,7 @@
   "chrome-120-0": {
     "id": "chrome-120-0",
     "name": "Chrome",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "120",
       "minor": "0",
@@ -3976,7 +3976,7 @@
   "chrome-125-0": {
     "id": "chrome-125-0",
     "name": "Chrome",
-    "marketshare": 0.2,
+    "marketshare": 6.6,
     "version": {
       "major": "125",
       "minor": "0",
@@ -4016,7 +4016,7 @@
   "chrome-126-0": {
     "id": "chrome-126-0",
     "name": "Chrome",
-    "marketshare": 0.3,
+    "marketshare": 0.4,
     "version": {
       "major": "126",
       "minor": "0",
@@ -4056,7 +4056,7 @@
   "firefox-128-0": {
     "id": "firefox-128-0",
     "name": "Firefox",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "128",
       "minor": "0"
@@ -4160,7 +4160,7 @@
   "chrome-129-0": {
     "id": "chrome-129-0",
     "name": "Chrome",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "129",
       "minor": "0",
@@ -4200,7 +4200,7 @@
   "chrome-130-0": {
     "id": "chrome-130-0",
     "name": "Chrome",
-    "marketshare": 0.2,
+    "marketshare": 5.6,
     "version": {
       "major": "130",
       "minor": "0",
@@ -4280,7 +4280,7 @@
   "safari-18-1": {
     "id": "safari-18-1",
     "name": "Safari",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "18",
       "minor": "1"
@@ -4304,7 +4304,7 @@
   "chrome-132-0": {
     "id": "chrome-132-0",
     "name": "Chrome",
-    "marketshare": 0.3,
+    "marketshare": 0.2,
     "version": {
       "major": "132",
       "minor": "0",
@@ -4372,7 +4372,7 @@
   "chrome-134-0": {
     "id": "chrome-134-0",
     "name": "Chrome",
-    "marketshare": 0.3,
+    "marketshare": 0.1,
     "version": {
       "major": "134",
       "minor": "0",
@@ -4412,7 +4412,7 @@
   "chrome-135-0": {
     "id": "chrome-135-0",
     "name": "Chrome",
-    "marketshare": 0.2,
+    "marketshare": 0.1,
     "version": {
       "major": "135",
       "minor": "0",
@@ -4464,7 +4464,7 @@
   "chrome-136-0": {
     "id": "chrome-136-0",
     "name": "Chrome",
-    "marketshare": 0.3,
+    "marketshare": 0.1,
     "version": {
       "major": "136",
       "minor": "0",
@@ -4530,7 +4530,7 @@
   "chrome-137-0": {
     "id": "chrome-137-0",
     "name": "Chrome",
-    "marketshare": 0.5,
+    "marketshare": 0.4,
     "version": {
       "major": "137",
       "minor": "0",
@@ -4556,7 +4556,7 @@
   "chrome-138-0": {
     "id": "chrome-138-0",
     "name": "Chrome",
-    "marketshare": 7.2,
+    "marketshare": 1.1,
     "version": {
       "major": "138",
       "minor": "0",
@@ -4570,7 +4570,7 @@
   "edge-138-0": {
     "id": "edge-138-0",
     "name": "Edge",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "138",
       "minor": "0",
@@ -4584,7 +4584,7 @@
   "safari-26-0": {
     "id": "safari-26-0",
     "name": "Safari",
-    "marketshare": 0.2,
+    "marketshare": 0.5,
     "version": {
       "major": "26",
       "minor": "0"
@@ -4596,7 +4596,7 @@
   "firefox-141-0": {
     "id": "firefox-141-0",
     "name": "Firefox",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "version": {
       "major": "141",
       "minor": "0"
@@ -4608,7 +4608,7 @@
   "chrome-139-0": {
     "id": "chrome-139-0",
     "name": "Chrome",
-    "marketshare": 6.8,
+    "marketshare": 1.6,
     "version": {
       "major": "139",
       "minor": "0",
@@ -4622,7 +4622,7 @@
   "edge-139-0": {
     "id": "edge-139-0",
     "name": "Edge",
-    "marketshare": 1.7,
+    "marketshare": 0.1,
     "version": {
       "major": "139",
       "minor": "0",
@@ -4636,7 +4636,7 @@
   "firefox-142-0": {
     "id": "firefox-142-0",
     "name": "Firefox",
-    "marketshare": 1.2,
+    "marketshare": 0.1,
     "version": {
       "major": "142",
       "minor": "0"
@@ -4648,7 +4648,7 @@
   "chrome-140-0": {
     "id": "chrome-140-0",
     "name": "Chrome",
-    "marketshare": 9.6,
+    "marketshare": 5.3,
     "version": {
       "major": "140",
       "minor": "0",
@@ -4662,7 +4662,7 @@
   "edge-140-0": {
     "id": "edge-140-0",
     "name": "Edge",
-    "marketshare": 4.3,
+    "marketshare": 1,
     "version": {
       "major": "140",
       "minor": "0",
@@ -4676,7 +4676,7 @@
   "firefox-143-0": {
     "id": "firefox-143-0",
     "name": "Firefox",
-    "marketshare": 0.6,
+    "marketshare": 0.8,
     "version": {
       "major": "143",
       "minor": "0"
@@ -4688,7 +4688,7 @@
   "chrome-141-0": {
     "id": "chrome-141-0",
     "name": "Chrome",
-    "marketshare": 0,
+    "marketshare": 9.4,
     "version": {
       "major": "141",
       "minor": "0",
@@ -4702,7 +4702,7 @@
   "edge-141-0": {
     "id": "edge-141-0",
     "name": "Edge",
-    "marketshare": 0,
+    "marketshare": 3.9,
     "version": {
       "major": "141",
       "minor": "0",
@@ -4716,7 +4716,7 @@
   "firefox-144-0": {
     "id": "firefox-144-0",
     "name": "Firefox",
-    "marketshare": 0,
+    "marketshare": 0.7,
     "version": {
       "major": "144",
       "minor": "0"
