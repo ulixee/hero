@@ -2,7 +2,7 @@
   "windows-5-2": {
     "id": "windows-5-2",
     "name": "Windows",
-    "marketshare": 0.1,
+    "marketshare": 0.2,
     "deviceCategory": "desktop",
     "version": {
       "name": "XP",
@@ -49,7 +49,7 @@
   "windows-10": {
     "id": "windows-10",
     "name": "Windows",
-    "marketshare": 4.6,
+    "marketshare": 5.4,
     "deviceCategory": "desktop",
     "version": {
       "major": "10"
@@ -151,7 +151,7 @@
   "mac-os-10-13": {
     "id": "mac-os-10-13",
     "name": "Mac OS",
-    "marketshare": 0.1,
+    "marketshare": 0,
     "deviceCategory": "desktop",
     "version": {
       "name": "High Sierra",
@@ -177,7 +177,7 @@
   "mac-os-10-15": {
     "id": "mac-os-10-15",
     "name": "Mac OS",
-    "marketshare": 4.6,
+    "marketshare": 2.1,
     "deviceCategory": "desktop",
     "version": {
       "name": "Catalina",
@@ -202,7 +202,7 @@
   "windows-11": {
     "id": "windows-11",
     "name": "Windows",
-    "marketshare": 9.4,
+    "marketshare": 9.7,
     "deviceCategory": "desktop",
     "version": {
       "major": "11"
