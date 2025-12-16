@@ -4792,5 +4792,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-146-0": {
+    "id": "firefox-146-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "146",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
