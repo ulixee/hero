@@ -1,0 +1,42 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.DOMRectReadOnly.prototype.toJSON",
+      "propertyName": "_$otherInvocation.window.viewport.segments.0.toJSON",
+      "property": "{x: 0,y: 0,width: 988,height: 613,top: 0,right: 988,bottom: 613,left: 0}"
+    },
+    {
+      "path": "window.Summarizer.create",
+      "propertyName": "_$invocation",
+      "property": "NotAllowedError: The device is not eligible for running on-device model."
+    }
+  ],
+  "reorder": []
+}

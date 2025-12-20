@@ -1,0 +1,32 @@
+{
+  "name": "@ulixee/unblocked-agent",
+  "version": "2.0.0-alpha.34",
+  "description": "Fully programmable Devtools Protocol based browser",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ulixee/chrome-139-0": "^7258.155.11",
+    "@ulixee/chrome-app": "^1.0.3",
+    "@ulixee/commons": "2.0.0-alpha.34",
+    "@ulixee/js-path": "2.0.0-alpha.34",
+    "@ulixee/unblocked-agent-mitm": "2.0.0-alpha.34",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.34",
+    "devtools-protocol": "^0.0.1137505",
+    "nanoid": "^3.3.11",
+    "tough-cookie": "^5.0.0",
+    "ws": "^8.18.0"
+  }
+}

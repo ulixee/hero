@@ -1,0 +1,47 @@
+{
+  "name": "@ulixee/hero",
+  "version": "2.0.0-alpha.34",
+  "description": "The client interface for Hero",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    },
+    "./lib/*": {
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js",
+      "require": "./lib/*.js"
+    },
+    "./connections/*": {
+      "types": "./connections/*.d.ts",
+      "default": "./connections/*.js",
+      "require": "./connections/*.js"
+    }
+  },
+  "dependencies": {
+    "@ulixee/awaited-dom": "1.4.2",
+    "@ulixee/commons": "2.0.0-alpha.34",
+    "@ulixee/hero-interfaces": "2.0.0-alpha.34",
+    "@ulixee/hero-plugin-utils": "2.0.0-alpha.34",
+    "@ulixee/js-path": "2.0.0-alpha.34",
+    "@ulixee/net": "2.0.0-alpha.34",
+    "@ulixee/unblocked-specification": "2.0.0-alpha.34",
+    "linkedom": "^0.14.11"
+  }
+}
