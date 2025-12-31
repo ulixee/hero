@@ -4804,5 +4804,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "safari-26-2": {
+    "id": "safari-26-2",
+    "name": "Safari",
+    "marketshare": 0,
+    "version": {
+      "major": "26",
+      "minor": "2"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }

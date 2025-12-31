@@ -3102,6 +3102,25 @@
     "browserId": "firefox-81-0",
     "marketshare": 0
   },
+  "mac-os-26--safari-26-2": {
+    "id": "mac-os-26--safari-26-2",
+    "allPatchVersions": [],
+    "stablePatchVersions": [],
+    "browserBaseVersion": [
+      26,
+      2,
+      null,
+      null
+    ],
+    "uaClientHintsPlatformVersions": [],
+    "operatingSystemVersion": {
+      "major": "26"
+    },
+    "operatingSystemId": "mac-os-26",
+    "pattern": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",
+    "browserId": "safari-26-2",
+    "marketshare": 0
+  },
   "mac-os-26--safari-26-0": {
     "id": "mac-os-26--safari-26-0",
     "allPatchVersions": [],
