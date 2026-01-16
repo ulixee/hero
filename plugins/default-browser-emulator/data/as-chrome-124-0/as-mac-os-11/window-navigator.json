@@ -1,0 +1,1182 @@
+{
+  "navigator": {
+    "_$protos": [
+      "Navigator.prototype",
+      "Object.prototype"
+    ],
+    "vendorSub": {
+      "_$type": "string",
+      "_$value": ""
+    },
+    "productSub": {
+      "_$type": "string",
+      "_$value": "20030107"
+    },
+    "vendor": {
+      "_$type": "string",
+      "_$value": "Google Inc."
+    },
+    "maxTouchPoints": {
+      "_$type": "number",
+      "_$value": 0
+    },
+    "scheduling": {
+      "_$protos": [
+        "Scheduling.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "userActivation": {
+      "_$protos": [
+        "UserActivation.prototype",
+        "Object.prototype"
+      ],
+      "hasBeenActive": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "isActive": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "_$type": "object"
+    },
+    "doNotTrack": {
+      "_$type": "object",
+      "_$value": null
+    },
+    "geolocation": {
+      "_$protos": [
+        "Geolocation.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "connection": {
+      "_$protos": [
+        "NetworkInformation.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "effectiveType": {
+        "_$type": "string",
+        "_$value": "4g"
+      },
+      "rtt": {
+        "_$type": "number",
+        "_$value": 100
+      },
+      "downlink": {
+        "_$type": "number",
+        "_$value": 1.6
+      },
+      "saveData": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "_$type": "object"
+    },
+    "plugins": {
+      "0": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "text/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "PDF Viewer"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "1": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "text/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Chrome PDF Viewer"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "2": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "text/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Chromium PDF Viewer"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "3": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "text/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Microsoft Edge PDF Viewer"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "4": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "text/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "_$protos": [
+        "PluginArray.prototype",
+        "Object.prototype"
+      ],
+      "PDF Viewer": "REF: window.navigator.plugins.0",
+      "Chrome PDF Viewer": "REF: window.navigator.plugins.1",
+      "Chromium PDF Viewer": "REF: window.navigator.plugins.2",
+      "Microsoft Edge PDF Viewer": "REF: window.navigator.plugins.3",
+      "WebKit built-in PDF": "REF: window.navigator.plugins.4",
+      "length": {
+        "_$type": "number",
+        "_$value": 5
+      },
+      "_$type": "object"
+    },
+    "mimeTypes": {
+      "0": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "1": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "text/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "_$protos": [
+        "MimeTypeArray.prototype",
+        "Object.prototype"
+      ],
+      "application/pdf": "REF: window.navigator.mimeTypes.0",
+      "text/pdf": "REF: window.navigator.mimeTypes.1",
+      "length": {
+        "_$type": "number",
+        "_$value": 2
+      },
+      "_$type": "object"
+    },
+    "pdfViewerEnabled": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "webkitTemporaryStorage": {
+      "_$protos": [
+        "DeprecatedStorageQuota.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "windowControlsOverlay": {
+      "_$protos": [
+        "WindowControlsOverlay.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "visible": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "ongeometrychange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "hardwareConcurrency": {
+      "_$type": "number",
+      "_$value": 2
+    },
+    "cookieEnabled": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "appCodeName": {
+      "_$type": "string",
+      "_$value": "Mozilla"
+    },
+    "appName": {
+      "_$type": "string",
+      "_$value": "Netscape"
+    },
+    "appVersion": {
+      "_$type": "string",
+      "_$value": "5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    },
+    "platform": {
+      "_$type": "string",
+      "_$value": "MacIntel"
+    },
+    "product": {
+      "_$type": "string",
+      "_$value": "Gecko"
+    },
+    "userAgent": {
+      "_$type": "string",
+      "_$value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    },
+    "language": {
+      "_$type": "string",
+      "_$value": "en-US"
+    },
+    "languages": {
+      "0": {
+        "_$type": "string",
+        "_$flags": "e",
+        "_$value": "en-US"
+      },
+      "1": {
+        "_$type": "string",
+        "_$flags": "e",
+        "_$value": "en"
+      },
+      "_$protos": [
+        "Array.prototype",
+        "Object.prototype"
+      ],
+      "_$isFrozen": true,
+      "_$isSealed": true,
+      "length": {
+        "_$type": "number",
+        "_$flags": "",
+        "_$value": 2
+      },
+      "_$type": "array"
+    },
+    "onLine": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "webdriver": {
+      "_$type": "boolean",
+      "_$value": false
+    },
+    "bluetooth": {
+      "_$protos": [
+        "Bluetooth.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "storageBuckets": {
+      "_$protos": [
+        "StorageBucketManager.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "clipboard": {
+      "_$protos": [
+        "Clipboard.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "credentials": {
+      "_$protos": [
+        "CredentialsContainer.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "keyboard": {
+      "_$protos": [
+        "Keyboard.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "managed": {
+      "_$protos": [
+        "NavigatorManagedData.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onmanagedconfigurationchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "mediaDevices": {
+      "_$protos": [
+        "MediaDevices.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "ondevicechange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "storage": {
+      "_$protos": [
+        "StorageManager.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "serviceWorker": {
+      "_$protos": [
+        "ServiceWorkerContainer.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "controller": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ready": {
+        "_$value": "Promise",
+        "_$type": "object"
+      },
+      "oncontrollerchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "onmessage": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "onmessageerror": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "virtualKeyboard": {
+      "_$protos": [
+        "VirtualKeyboard.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "boundingRect": {
+        "_$protos": [
+          "DOMRect.prototype",
+          "DOMRectReadOnly.prototype",
+          "Object.prototype"
+        ],
+        "x": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "y": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "width": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "height": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "top": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "right": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "bottom": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "left": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "_$type": "object"
+      },
+      "overlaysContent": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "ongeometrychange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "wakeLock": {
+      "_$protos": [
+        "WakeLock.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "deviceMemory": {
+      "_$type": "number",
+      "_$value": 8
+    },
+    "userAgentData": {
+      "_$protos": [
+        "NavigatorUAData.prototype",
+        "Object.prototype"
+      ],
+      "brands": {
+        "0": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "brand": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "Chromium"
+          },
+          "version": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "124"
+          },
+          "_$type": "object",
+          "_$flags": "e"
+        },
+        "1": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "brand": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "Google Chrome"
+          },
+          "version": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "124"
+          },
+          "_$type": "object",
+          "_$flags": "e"
+        },
+        "2": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "brand": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "Not-A.Brand"
+          },
+          "version": {
+            "_$type": "string",
+            "_$flags": "cew",
+            "_$value": "99"
+          },
+          "_$type": "object",
+          "_$flags": "e"
+        },
+        "_$protos": [
+          "Array.prototype",
+          "Object.prototype"
+        ],
+        "_$isFrozen": true,
+        "_$isSealed": true,
+        "length": {
+          "_$type": "number",
+          "_$flags": "",
+          "_$value": 3
+        },
+        "_$type": "array",
+        "_$value": "[{brand: Chromium,version: 124},{brand: Google Chrome,version: 124},{brand: Not-A.Brand,version: 99}]"
+      },
+      "mobile": {
+        "_$type": "boolean",
+        "_$value": false
+      },
+      "platform": {
+        "_$type": "string",
+        "_$value": "macOS"
+      },
+      "_$type": "object",
+      "_$value": "{}"
+    },
+    "login": {
+      "_$protos": [
+        "NavigatorLogin.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "ink": {
+      "_$protos": [
+        "Ink.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "mediaCapabilities": {
+      "_$protos": [
+        "MediaCapabilities.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "hid": {
+      "_$protos": [
+        "HID.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ondisconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "locks": {
+      "_$protos": [
+        "LockManager.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "gpu": {
+      "_$protos": [
+        "GPU.prototype",
+        "Object.prototype"
+      ],
+      "wgslLanguageFeatures": {
+        "_$protos": [
+          "WGSLLanguageFeatures.prototype",
+          "Object.prototype"
+        ],
+        "size": {
+          "_$type": "number",
+          "_$value": 4
+        },
+        "_$type": "object"
+      },
+      "_$type": "object"
+    },
+    "mediaSession": {
+      "_$protos": [
+        "MediaSession.prototype",
+        "Object.prototype"
+      ],
+      "metadata": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "playbackState": {
+        "_$type": "string",
+        "_$value": "none"
+      },
+      "_$type": "object"
+    },
+    "permissions": {
+      "_$protos": [
+        "Permissions.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "presentation": {
+      "_$protos": [
+        "Presentation.prototype",
+        "Object.prototype"
+      ],
+      "defaultRequest": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "receiver": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "usb": {
+      "_$protos": [
+        "USB.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ondisconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "xr": {
+      "_$protos": [
+        "XRSystem.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "ondevicechange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "serial": {
+      "_$protos": [
+        "Serial.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ondisconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "_$type": "object",
+    "_$flags": "ce",
+    "_$get": "function get navigator() { [native code] }",
+    "_$getToStringToString": "function toString() { [native code] }"
+  }
+}
