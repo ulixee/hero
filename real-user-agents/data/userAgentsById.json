@@ -3,6 +3,7 @@
     "id": "mac-os-26--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -3185,6 +3186,7 @@
     "id": "mac-os-15--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -8544,6 +8546,7 @@
     "id": "mac-os-14--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -14782,6 +14785,7 @@
     "id": "mac-os-13--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -21630,6 +21634,7 @@
     "id": "mac-os-12--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -80903,6 +80908,7 @@
     "id": "windows-11--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
@@ -88045,6 +88051,7 @@
     "id": "windows-10--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      97,
       60
     ],
     "browserBaseVersion": [
