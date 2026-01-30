@@ -4842,5 +4842,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-144-0": {
+    "id": "edge-144-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "144",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
