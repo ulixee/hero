@@ -15,7 +15,7 @@
   "windows-7": {
     "id": "windows-7",
     "name": "Windows",
-    "marketshare": 0.3,
+    "marketshare": 0.1,
     "deviceCategory": "desktop",
     "version": {
       "major": "7"
@@ -49,7 +49,7 @@
   "windows-10": {
     "id": "windows-10",
     "name": "Windows",
-    "marketshare": 5.2,
+    "marketshare": 4.3,
     "deviceCategory": "desktop",
     "version": {
       "major": "10"
@@ -177,7 +177,7 @@
   "mac-os-10-15": {
     "id": "mac-os-10-15",
     "name": "Mac OS",
-    "marketshare": 2.2,
+    "marketshare": 2.1,
     "deviceCategory": "desktop",
     "version": {
       "name": "Catalina",
@@ -202,7 +202,7 @@
   "windows-11": {
     "id": "windows-11",
     "name": "Windows",
-    "marketshare": 9.1,
+    "marketshare": 10.6,
     "deviceCategory": "desktop",
     "version": {
       "major": "11"
