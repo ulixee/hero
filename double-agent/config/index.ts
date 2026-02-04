@@ -55,6 +55,7 @@ export default class Config {
     shouldGenerateProfiles: parseEnvBool(env.GENERATE_PROFILES),
     pluginStartingPort: parseEnvInt(env.PLUGIN_STARTING_PORT),
     pluginMaxPort: parseEnvInt(env.PLUGIN_MAX_PORT) || 20000,
+    sessionTtlMs: parseEnvInt(env.COLLECT_SESSION_TTL_MS) ?? 60 * 60 * 1000,
 
     // collect plugins
     tcpNetworkDevice: env.TCP_NETWORK_DEVICE,

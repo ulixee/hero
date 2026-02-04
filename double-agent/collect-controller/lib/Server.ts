@@ -255,12 +255,13 @@ export default class Server {
 
     await this.saveMetaFiles(activeScraper, assignment);
     const profilesDir = extractAssignmentProfilesDir(activeScraper, assignment);
-    await pipeDirToStream(profilesDir, res);
-
     const session = this.collect.getSession(assignment.sessionId);
-    await this.collect.deleteSession(session);
-
-    delete this.activeUsersById[userId];
+    try {
+      await pipeDirToStream(profilesDir, res);
+    } finally {
+      await this.collect.deleteSession(session);
+      delete this.activeUsersById[userId];
+    }
   }
 
   private async downloadAll(

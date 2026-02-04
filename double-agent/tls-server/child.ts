@@ -10,6 +10,13 @@ let connectionCount = 0;
 let lastConnectionDate: Date;
 let activeConnection: { id: number; req: IncomingMessage; res: ServerResponse };
 const connections: (typeof activeConnection)[] = [];
+let childServer: https.Server;
+let isShuttingDown = false;
+
+process.on('disconnect', () => {
+  shutdown('parent disconnect');
+  process.exit(0);
+});
 
 process.on('message', (message: any) => {
   if (message.start) {
@@ -54,7 +61,7 @@ function start(options: { port: number; key?: string; cert?: string }): void {
       enableTrace: true,
       sessionTimeout: 10,
     });
-    const childServer = https.createServer(options, onConnection);
+    childServer = https.createServer(options, onConnection);
 
     childServer.on('error', err => {
       process.send({ error: err.message });
@@ -65,18 +72,22 @@ function start(options: { port: number; key?: string; cert?: string }): void {
       process.send({ started: true });
     });
 
-    ShutdownHandler.register(() => {
-      if (childServer) childServer.unref().close();
-      while (connections.length) {
-        const connection = connections.pop();
-
-        console.log('Force closing active connection during shutdown.');
-        connection.res.end('Server shutting down');
-        connection.req.destroy();
-      }
-    });
+    ShutdownHandler.register(() => shutdown('shutdown handler'));
   } catch (err) {
     console.log(err);
+  }
+}
+
+function shutdown(reason?: string): void {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  if (reason) console.log(`TLS child shutdown: ${reason}`);
+  if (childServer) childServer.unref().close();
+  while (connections.length) {
+    const connection = connections.pop();
+    console.log('Force closing active connection during shutdown.');
+    connection.res.end('Server shutting down');
+    connection.req.destroy();
   }
 }
 

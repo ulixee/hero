@@ -24,6 +24,7 @@ export default function createTlsRequestHandler(
     }
 
     const session = sessionTracker.getSessionFromServerRequest(server, req);
+    sessionTracker.touchSession(session.id);
     const { requestDetails } = await extractRequestDetails(server, req, session);
     const ctx = new RequestContext(server, req, res, requestUrl, requestDetails, session);
     const handler = server.getHandlerFn(requestUrl.pathname);

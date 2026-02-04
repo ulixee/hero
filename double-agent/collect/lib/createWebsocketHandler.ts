@@ -20,6 +20,7 @@ export default function createWebsocketHandler(
   ): Promise<void> {
     const { sessionTracker } = detectionContext;
     const session = sessionTracker.getSessionFromServerRequest(server, req);
+    sessionTracker.touchSession(session.id);
     const { requestDetails, requestUrl } = await extractRequestDetails(
       server,
       req,

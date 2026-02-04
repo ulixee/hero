@@ -55,6 +55,7 @@ export default function createHttpRequestHandler(
       if (!session) {
         throw new Error(`Missing session: ${sessionId}`);
       }
+      sessionTracker.touchSession(sessionId);
       const { requestDetails } = await extractRequestDetails(server, req, session);
       const ctx = new RequestContext(server, req, res, requestUrl, requestDetails, session);
       const userAgentId = session.userAgentId;
