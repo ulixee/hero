@@ -10,4 +10,6 @@ export interface IDomExtractorPageMeta {
   pageUrl: string;
   pageHost: string;
   pageName: keyof typeof PageNames | string;
+  debugToConsole?: boolean;
+  stallLogUrl?: string;
 }

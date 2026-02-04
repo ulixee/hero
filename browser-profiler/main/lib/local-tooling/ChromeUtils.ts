@@ -106,10 +106,35 @@ export async function navigateDevtoolsToUrl(
   try {
     client = await connect(developerToolsPort);
     console.log('Connected to chrome devtools (%s)', developerToolsPort);
-    const { Network, Page } = client;
+    const { Network, Page, Runtime, Log } = client;
     await Network.enable();
+    const shouldLogConsole =
+      process.env.DOM_CONSOLE === '1' || process.env.DOM_EXTRACTOR_DEBUG === '1';
+    if (shouldLogConsole) {
+      await Runtime.enable();
+      await Log.enable();
+      Runtime.consoleAPICalled(event => {
+        const args = (event.args || [])
+          .map(x => x.value ?? x.description ?? x.type)
+          .join(' ');
+        console.log(`[chrome-console] ${event.type}: ${args}`);
+      });
+      Runtime.exceptionThrown(event => {
+        const details = event.exceptionDetails;
+        const desc = details.exception?.description ?? details.text;
+        console.log(`[chrome-exception] ${desc}`);
+      });
+      Log.entryAdded(event => {
+        console.log(`[chrome-log] ${event.entry.level}: ${event.entry.text}`);
+      });
+    }
     await Page.enable();
     await Page.navigate({ url });
+    // Close the client after page load (or timeout) to avoid leaking connections.
+    await Promise.race([
+      Page.loadEventFired(),
+      new Promise<void>(resolve => setTimeout(resolve, 5_000)),
+    ]);
   } catch (err) {
     console.error('DEVTOOLS ERROR: ', err);
   } finally {

@@ -18,6 +18,7 @@ export default class BrowserDomPlugin extends Plugin {
   public initialize() {
     this.registerRoute('allHttp1', '/', this.loadScript);
     this.registerRoute('allHttp1', '/save', this.save);
+    this.registerRoute('allHttp1', '/dom-extractor-stall', this.handleStallLog);
     this.registerRoute('allHttp1', '/load-dedicated-worker', this.loadDedicatedWorker);
     this.registerRoute('allHttp1', '/dedicated-worker.js', dedicatedWorkerScript);
     this.registerRoute('allHttp1', '/load-service-worker', this.loadServiceWorker);
@@ -77,6 +78,8 @@ export default class BrowserDomPlugin extends Plugin {
       pageUrl: ctx.url.href,
       pageHost: ctx.url.host,
       pageName: PageNames.BrowserDom,
+      debugToConsole: process.env.DOM_CONSOLE === '1',
+      stallLogUrl: ctx.buildUrl('/dom-extractor-stall'),
     };
     document.injectBodyTag(`
       <script type="text/javascript">
@@ -165,6 +168,19 @@ export default class BrowserDomPlugin extends Plugin {
     const profileData = ctx.requestDetails.bodyJson as IProfileData;
     ctx.session.savePluginProfileData<IProfileData>(this, profileData, { filenameSuffix });
     this.pendingByKey[pendingKey]?.resolve();
+    ctx.res.end();
+  }
+
+  private async handleStallLog(ctx: IRequestContext) {
+    const pageName = ctx.req.headers['page-name'] || PageNames.BrowserDom;
+    const pendingKey = this.getPendingKey(ctx, pageName as string);
+    const body = ctx.requestDetails.bodyJson as { path?: string; pageName?: string };
+    const path = body?.path ? String(body.path) : '';
+    if (path) {
+      console.warn('[dom-extractor-stall]', pendingKey, ctx.url.href, path);
+    } else {
+      console.warn('[dom-extractor-stall]', pendingKey, ctx.url.href);
+    }
     ctx.res.end();
   }
 

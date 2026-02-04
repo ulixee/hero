@@ -1,5 +1,5 @@
 function DomExtractor(selfName, pageMeta = {}) {
-  const { saveToUrl, pageUrl, pageHost, pageName } = pageMeta;
+  const { saveToUrl, pageUrl, pageHost, pageName, debugToConsole, stallLogUrl } = pageMeta;
   const skipProps = [
     'Fingerprint2',
     'pageQueue',
@@ -7,8 +7,10 @@ function DomExtractor(selfName, pageMeta = {}) {
     'pageLoaded',
     'axios',
     'justAFunction',
+    'append',
+    'setHTMLUnsafe',
   ];
-  const skipValues = ['innerHTML', 'outerHTML', 'innerText', 'outerText'];
+  const skipValues = ['innerHTML', 'outerHTML', 'innerText', 'outerText', 'epochNanoseconds'];
   const doNotInvoke = [
     'replaceChildren',
     'print',
@@ -31,6 +33,9 @@ function DomExtractor(selfName, pageMeta = {}) {
     'writeln',
     'replaceWith',
     'remove',
+    'SVGAnimatedInteger',
+    'createOffer',
+    'createAnswer',
     'self.history.back',
     'self.history.forward',
     'self.history.go',
@@ -43,6 +48,7 @@ function DomExtractor(selfName, pageMeta = {}) {
     'self.navigation.replaceState',
     'getUserMedia',
     'requestFullscreen',
+    'requestPointerLock',
     'webkitRequestFullScreen',
     'webkitRequestFullscreen',
     'getDisplayMedia',
@@ -56,6 +62,43 @@ function DomExtractor(selfName, pageMeta = {}) {
     `self.XRRigidTransform.new().inverse`,
   ].map(x => x.replace(/self\./g, `${selfName}.`));
   const excludedInheritedKeys = ['name', 'length', 'constructor'];
+  let lastDebugPath;
+  let lastConsoleAt = 0;
+  let stallTimer;
+  let stallPostedForPath;
+  const stallTimeoutMs = 5 * 60 * 1000;
+  let debugCount = 0;
+  function debugPath(path) {
+    if (debugToConsole) {
+      debugCount += 1;
+      const now = Date.now();
+      if (debugCount % 500 === 0 || now - lastConsoleAt > 1000) {
+        lastConsoleAt = now;
+        try {
+          console.log('[dom-extractor]', path);
+        } catch (err) {}
+      }
+    }
+    if (path === lastDebugPath) return;
+    lastDebugPath = path;
+    stallPostedForPath = undefined;
+    if (!stallLogUrl) return;
+    if (stallTimer) clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => {
+      if (!lastDebugPath || stallPostedForPath === lastDebugPath) return;
+      stallPostedForPath = lastDebugPath;
+      try {
+        fetch(stallLogUrl, {
+          method: 'POST',
+          body: JSON.stringify({ path: lastDebugPath, pageName }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Page-Name': pageName,
+          },
+        }).catch(() => null);
+      } catch (err) {}
+    }, stallTimeoutMs);
+  }
   const loadedObjectsRef = new Map([[self, selfName]]);
   const loadedObjectsProp = new Map();
   const hierarchyNav = new Map();
@@ -99,7 +142,11 @@ function DomExtractor(selfName, pageMeta = {}) {
       return newObj;
     }
     const isNewObject = parentPath.includes('.new()');
-    if (isNewObject && newObj._$protos[0] === 'HTMLDocument.prototype') {
+    if (
+      isNewObject &&
+      (newObj._$protos[0] === 'HTMLDocument.prototype' ||
+        newObj._$protos[0] === 'Document.prototype')
+    ) {
       newObj._$skipped = 'SKIPPED DOCUMENT';
       newObj._$type = 'HTMLDocument.prototype';
       return newObj;
@@ -234,6 +281,7 @@ function DomExtractor(selfName, pageMeta = {}) {
     if (obj === null || obj === undefined || !key) {
       return undefined;
     }
+    debugPath(path);
     let accessException;
     const value = await new Promise(async (resolve, reject) => {
       let didResolve = false;
@@ -361,7 +409,15 @@ function DomExtractor(selfName, pageMeta = {}) {
         func = err.toString();
       }
       try {
-        if (!doNotInvoke.includes(key) && !doNotInvoke.includes(path) && !value.prototype) {
+        const isSvgPrototypeMethod =
+          path.startsWith(`${selfName}.SVG`) && path.includes('.prototype.');
+        if (
+          !isSvgPrototypeMethod &&
+          !doNotInvoke.includes(key) &&
+          !doNotInvoke.includes(path) &&
+          !value.prototype
+        ) {
+          debugPath(`${path}()`);
           invocation = await new Promise(async (resolve, reject) => {
             const c = setTimeout(() => reject('Promise-like'), 650);
             let didReply = false;
