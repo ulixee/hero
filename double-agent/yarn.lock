@@ -368,10 +368,10 @@
     "@typescript-eslint/types" "8.10.0"
     eslint-visitor-keys "^3.4.3"
 
-"@ulixee/commons@2.0.0-alpha.31":
-  version "2.0.0-alpha.31"
-  resolved "https://registry.npmjs.org/@ulixee/commons/-/commons-2.0.0-alpha.31.tgz#30fa72c1d17e39d636c84006821a73c3188cfd69"
-  integrity sha512-i78+ZxjYTKzvoV/qCywJYWiJwDJaqGop4jTqQ8Av7bjxLDSPlAF/VwmEvcH9X3sh65rPJJ58xK3UYP3fnsLBOA==
+"@ulixee/commons@2.0.0-alpha.34":
+  version "2.0.0-alpha.34"
+  resolved "https://registry.npmjs.org/@ulixee/commons/-/commons-2.0.0-alpha.34.tgz#45dd26e91a15317eebc2355afe41cce4550d01f1"
+  integrity sha512-bLx6Yx7ncA2GqkPdBk4DU1iRP+wUkkhAgp6DHn5D6Ae9SAxiJWWvoXWvH+uukgcL43haC4SpkGXCwqsxnaZ59w==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.18"
     bech32 "^2.0.0"
@@ -379,18 +379,18 @@
     https-proxy-agent "^7.0.5"
     semver "^7.3.7"
 
-"@ulixee/js-path@2.0.0-alpha.31":
-  version "2.0.0-alpha.31"
-  resolved "https://registry.npmjs.org/@ulixee/js-path/-/js-path-2.0.0-alpha.31.tgz#23d566df42f00e73ac856825b86003db7659f32c"
-  integrity sha512-oKpI+bjjRKNKjCCjl3usiqyFSNN8PuyVGNXrH/QPJeriortKO8/0XAeh4qGuI005gP79IZqd75XDDVQdY95jLw==
+"@ulixee/js-path@2.0.0-alpha.34":
+  version "2.0.0-alpha.34"
+  resolved "https://registry.npmjs.org/@ulixee/js-path/-/js-path-2.0.0-alpha.34.tgz#6c0ab5d0eb5e9d312b525fbc124bb01a9cb943b2"
+  integrity sha512-Q/JHg9LW2uSV7J1eoEta8XUlyntv26ZOE6fBkyhQ2GO+IR1rzRv10qmy8k02q8eKRgtNdvPGPEm8iO2A/nz08g==
 
-"@ulixee/real-user-agents@2.0.0-alpha.31":
-  version "2.0.0-alpha.31"
-  resolved "https://registry.npmjs.org/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.31.tgz#a235d2d198101681ec5933d6e1a51976da1c9830"
-  integrity sha512-16DFtuCKLKB0vW1zrMU6b2/l6sbimnTMtt8su4J4BeBN5FpqB/RFYu2FzFtkbDN5efyAEaUKlFA/lMCqQ2VIXg==
+"@ulixee/real-user-agents@2.0.0-alpha.34":
+  version "2.0.0-alpha.34"
+  resolved "https://registry.npmjs.org/@ulixee/real-user-agents/-/real-user-agents-2.0.0-alpha.34.tgz#9da9e04461897d65ce746ac62d221087a39004f4"
+  integrity sha512-lOjrEsOhVFmikoBFdocdLT0kX8ME4VNJql0Njvd2DmFucID2OVv8OcmjSufmP/PFTsjS1P7GmaVcoZFjWJ/WBw==
   dependencies:
-    "@ulixee/commons" "2.0.0-alpha.31"
-    "@ulixee/unblocked-specification" "2.0.0-alpha.31"
+    "@ulixee/commons" "2.0.0-alpha.34"
+    "@ulixee/unblocked-specification" "2.0.0-alpha.34"
     compare-versions "^6.1.0"
     ua-parser-js "^1.0.37"
 
@@ -419,12 +419,12 @@
     pretty-quick "^4.0.0"
     typescript "^5.6.2"
 
-"@ulixee/unblocked-specification@2.0.0-alpha.31":
-  version "2.0.0-alpha.31"
-  resolved "https://registry.npmjs.org/@ulixee/unblocked-specification/-/unblocked-specification-2.0.0-alpha.31.tgz#6ca8f0cb3d15421da624809119cf2be3a91956be"
-  integrity sha512-Nx37nkeiuMqJPUkl88K97gxwOlOckJGI7wlTrwIj+uzGijXIjOcWLxIl+saw1w5r0U1FUGmTUggLamTHfQ56oA==
+"@ulixee/unblocked-specification@2.0.0-alpha.34":
+  version "2.0.0-alpha.34"
+  resolved "https://registry.npmjs.org/@ulixee/unblocked-specification/-/unblocked-specification-2.0.0-alpha.34.tgz#0aafe7e53d1259fc11c7c6c2f0985874c042e91e"
+  integrity sha512-7Pt6Kk2GPSAoec3YsGYi2HwlxldpF8/2IWe7T0hXw59Tv8hoZKpwQ8l5y+AqtneiodmhieAlKz5v4W1CFzmpng==
   dependencies:
-    "@ulixee/js-path" "2.0.0-alpha.31"
+    "@ulixee/js-path" "2.0.0-alpha.34"
     devtools-protocol "^0.0.1137505"
 
 "@ungap/structured-clone@^1.2.0":
