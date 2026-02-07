@@ -3,6 +3,7 @@
     "id": "mac-os-26--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      133,
       132,
       112,
       97,
@@ -3207,6 +3208,7 @@
     "id": "mac-os-15--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      133,
       132,
       112,
       97,
@@ -8588,6 +8590,7 @@
     "id": "mac-os-14--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      133,
       132,
       112,
       97,
@@ -14848,6 +14851,7 @@
     "id": "mac-os-13--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      133,
       132,
       112,
       97,
@@ -21718,6 +21722,7 @@
     "id": "mac-os-12--chrome-144-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      133,
       132,
       112,
       97,
