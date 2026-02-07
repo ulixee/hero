@@ -1,0 +1,47 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.PublicKeyCredential.getClientCapabilities",
+      "propertyName": "_$invocation",
+      "property": "{conditionalCreate: true,conditionalGet: true,extension:appid: true,extension:appidExclude: true,extension:credBlob: true,extension:credProps: true,extension:credentialProtectionPolicy: true,extension:enforceCredentialProtectionPolicy: true,extension:getCredBlob: true,extension:hmacCreateSecret: true,extension:largeBlob: true,extension:minPinLength: true,extension:payment: true,extension:prf: true,hybridTransport: true,passkeyPlatformAuthenticator: true,relatedOrigins: true,signalAllAcceptedCredentials: true,signalCurrentUserDetails: true,signalUnknownCredential: true,userVerifyingPlatformAuthenticator: false}"
+    },
+    {
+      "path": "window.Summarizer.availability",
+      "propertyName": "_$invocation",
+      "property": "unavailable"
+    },
+    {
+      "path": "window.Summarizer.create",
+      "propertyName": "_$invocation",
+      "property": "NotAllowedError: The device is not eligible for running on-device model."
+    }
+  ],
+  "reorder": []
+}

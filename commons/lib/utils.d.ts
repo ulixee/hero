@@ -1,0 +1,10 @@
+import IResolvablePromise from '../interfaces/IResolvablePromise';
+export declare function assert(value: unknown, message?: string, reject?: any): void;
+export declare function toUrl(hostOrUrlFragment: string, defaultProtocol?: string): URL;
+export declare function isPortInUse(port: number | string): Promise<boolean>;
+export declare function isPortInUseOnHost(port: number | string, host?: string): Promise<boolean>;
+export declare function escapeUnescapedChar(str: string, char: string): string;
+export declare function pickRandom<T>(array: T[]): T;
+export declare function getObjectFunctionProperties(object: any): Set<PropertyKey>;
+export declare function bindFunctions(self: any): void;
+export declare function createPromise<T = any>(timeoutMillis?: number, timeoutMessage?: string): IResolvablePromise<T>;
