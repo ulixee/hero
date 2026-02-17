@@ -4856,5 +4856,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-145-0": {
+    "id": "chrome-145-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "145",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
