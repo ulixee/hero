@@ -4870,5 +4870,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-145-0": {
+    "id": "edge-145-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "145",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
