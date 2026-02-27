@@ -1,0 +1,1033 @@
+{
+  "add": [
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "bluetooth",
+      "prevProperty": "protectedAudience",
+      "property": {
+        "_$flags": "ce",
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get bluetooth() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      }
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "canShare",
+      "prevProperty": "canLoadAdAuctionFencedFrame",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "canShare"
+        },
+        "_$type": "function",
+        "_$function": "function canShare() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": "cew",
+        "_$value": "function canShare() { [native code] }",
+        "_$otherInvocation.window.navigator.canShare": false
+      }
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "share",
+      "prevProperty": "canShare",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "share"
+        },
+        "_$type": "function",
+        "_$function": "function share() { [native code] }",
+        "_$invocation": "TypeError: Failed to execute 'share' on 'Navigator': Illegal invocation",
+        "_$isAsync": true,
+        "_$flags": "cew",
+        "_$value": "function share() { [native code] }",
+        "_$otherInvocationAsync.window.navigator.share": "NotAllowedError: Failed to execute 'share' on 'Navigator': Must be handling a user gesture to perform a share request."
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "Bluetooth",
+      "prevProperty": "PublicKeyCredential",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "Bluetooth"
+        },
+        "prototype": {
+          "_$protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "getAvailability": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getAvailability"
+            },
+            "_$type": "function",
+            "_$function": "function getAvailability() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getAvailability' on 'Bluetooth': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getAvailability() { [native code] }",
+            "_$otherInvocationAsync.window.navigator.bluetooth.getAvailability": "Promise-like"
+          },
+          "requestDevice": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "requestDevice"
+            },
+            "_$type": "function",
+            "_$function": "function requestDevice() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'requestDevice' on 'Bluetooth': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function requestDevice() { [native code] }",
+            "_$otherInvocationAsync.window.navigator.bluetooth.requestDevice": "SecurityError: Failed to execute 'requestDevice' on 'Bluetooth': Must be handling a user gesture to show a permission request."
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "Bluetooth"
+          }
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'Bluetooth': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function Bluetooth() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function Bluetooth() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothCharacteristicProperties",
+      "prevProperty": "Bluetooth",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothCharacteristicProperties"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "broadcast": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get broadcast() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "read": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get read() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "writeWithoutResponse": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get writeWithoutResponse() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "write": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get write() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "notify": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get notify() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "indicate": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get indicate() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "authenticatedSignedWrites": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get authenticatedSignedWrites() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "reliableWrite": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get reliableWrite() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "writableAuxiliaries": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get writableAuxiliaries() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothCharacteristicProperties"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothCharacteristicProperties': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothCharacteristicProperties() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothCharacteristicProperties() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothDevice",
+      "prevProperty": "BluetoothCharacteristicProperties",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothDevice"
+        },
+        "prototype": {
+          "_$protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "id": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get id() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "name": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get name() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "gatt": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get gatt() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "ongattserverdisconnected": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get ongattserverdisconnected() { [native code] }",
+            "_$set": "function set ongattserverdisconnected() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }",
+            "_$setToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothDevice"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothDevice': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothDevice() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothDevice() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTCharacteristic",
+      "prevProperty": "BluetoothDevice",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothRemoteGATTCharacteristic"
+        },
+        "prototype": {
+          "_$protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "service": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get service() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "uuid": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get uuid() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "properties": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get properties() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "value": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get value() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "oncharacteristicvaluechanged": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get oncharacteristicvaluechanged() { [native code] }",
+            "_$set": "function set oncharacteristicvaluechanged() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }",
+            "_$setToStringToString": "function toString() { [native code] }"
+          },
+          "getDescriptor": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getDescriptor"
+            },
+            "_$type": "function",
+            "_$function": "function getDescriptor() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getDescriptor' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getDescriptor() { [native code] }"
+          },
+          "getDescriptors": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getDescriptors"
+            },
+            "_$type": "function",
+            "_$function": "function getDescriptors() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getDescriptors' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getDescriptors() { [native code] }"
+          },
+          "readValue": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "readValue"
+            },
+            "_$type": "function",
+            "_$function": "function readValue() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'readValue' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function readValue() { [native code] }"
+          },
+          "startNotifications": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "startNotifications"
+            },
+            "_$type": "function",
+            "_$function": "function startNotifications() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'startNotifications' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function startNotifications() { [native code] }"
+          },
+          "stopNotifications": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "stopNotifications"
+            },
+            "_$type": "function",
+            "_$function": "function stopNotifications() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'stopNotifications' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function stopNotifications() { [native code] }"
+          },
+          "writeValue": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "writeValue"
+            },
+            "_$type": "function",
+            "_$function": "function writeValue() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'writeValue' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function writeValue() { [native code] }"
+          },
+          "writeValueWithResponse": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "writeValueWithResponse"
+            },
+            "_$type": "function",
+            "_$function": "function writeValueWithResponse() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'writeValueWithResponse' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function writeValueWithResponse() { [native code] }"
+          },
+          "writeValueWithoutResponse": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "writeValueWithoutResponse"
+            },
+            "_$type": "function",
+            "_$function": "function writeValueWithoutResponse() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'writeValueWithoutResponse' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function writeValueWithoutResponse() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothRemoteGATTCharacteristic"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothRemoteGATTCharacteristic': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothRemoteGATTCharacteristic() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothRemoteGATTCharacteristic() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTDescriptor",
+      "prevProperty": "BluetoothRemoteGATTCharacteristic",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothRemoteGATTDescriptor"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "characteristic": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get characteristic() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "uuid": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get uuid() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "value": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get value() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "readValue": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "readValue"
+            },
+            "_$type": "function",
+            "_$function": "function readValue() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'readValue' on 'BluetoothRemoteGATTDescriptor': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function readValue() { [native code] }"
+          },
+          "writeValue": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "writeValue"
+            },
+            "_$type": "function",
+            "_$function": "function writeValue() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'writeValue' on 'BluetoothRemoteGATTDescriptor': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function writeValue() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothRemoteGATTDescriptor"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothRemoteGATTDescriptor': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothRemoteGATTDescriptor() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothRemoteGATTDescriptor() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTServer",
+      "prevProperty": "BluetoothRemoteGATTDescriptor",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothRemoteGATTServer"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "device": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get device() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "connected": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get connected() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "connect": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "connect"
+            },
+            "_$type": "function",
+            "_$function": "function connect() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'connect' on 'BluetoothRemoteGATTServer': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function connect() { [native code] }"
+          },
+          "disconnect": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "disconnect"
+            },
+            "_$type": "function",
+            "_$function": "function disconnect() { [native code] }",
+            "_$invocation": "TypeError: Illegal invocation",
+            "_$flags": "cew",
+            "_$value": "function disconnect() { [native code] }"
+          },
+          "getPrimaryService": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getPrimaryService"
+            },
+            "_$type": "function",
+            "_$function": "function getPrimaryService() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getPrimaryService' on 'BluetoothRemoteGATTServer': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getPrimaryService() { [native code] }"
+          },
+          "getPrimaryServices": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getPrimaryServices"
+            },
+            "_$type": "function",
+            "_$function": "function getPrimaryServices() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getPrimaryServices' on 'BluetoothRemoteGATTServer': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getPrimaryServices() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothRemoteGATTServer"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothRemoteGATTServer': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothRemoteGATTServer() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothRemoteGATTServer() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTService",
+      "prevProperty": "BluetoothRemoteGATTServer",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothRemoteGATTService"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "device": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get device() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "uuid": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get uuid() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "isPrimary": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get isPrimary() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "getCharacteristic": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getCharacteristic"
+            },
+            "_$type": "function",
+            "_$function": "function getCharacteristic() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getCharacteristic' on 'BluetoothRemoteGATTService': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getCharacteristic() { [native code] }"
+          },
+          "getCharacteristics": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 0
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "getCharacteristics"
+            },
+            "_$type": "function",
+            "_$function": "function getCharacteristics() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'getCharacteristics' on 'BluetoothRemoteGATTService': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function getCharacteristics() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothRemoteGATTService"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothRemoteGATTService': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothRemoteGATTService() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothRemoteGATTService() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothUUID",
+      "prevProperty": "BackgroundFetchRegistration",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BluetoothUUID"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BluetoothUUID"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "canonicalUUID": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 1
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "canonicalUUID"
+          },
+          "_$type": "function",
+          "_$function": "function canonicalUUID() { [native code] }",
+          "_$invocation": "TypeError: Failed to execute 'canonicalUUID' on 'BluetoothUUID': 1 argument required, but only 0 present.",
+          "_$flags": "cew",
+          "_$value": "function canonicalUUID() { [native code] }"
+        },
+        "getCharacteristic": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 1
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "getCharacteristic"
+          },
+          "_$type": "function",
+          "_$function": "function getCharacteristic() { [native code] }",
+          "_$invocation": "TypeError: Failed to execute 'getCharacteristic' on 'BluetoothUUID': 1 argument required, but only 0 present.",
+          "_$flags": "cew",
+          "_$value": "function getCharacteristic() { [native code] }"
+        },
+        "getDescriptor": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 1
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "getDescriptor"
+          },
+          "_$type": "function",
+          "_$function": "function getDescriptor() { [native code] }",
+          "_$invocation": "TypeError: Failed to execute 'getDescriptor' on 'BluetoothUUID': 1 argument required, but only 0 present.",
+          "_$flags": "cew",
+          "_$value": "function getDescriptor() { [native code] }"
+        },
+        "getService": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 1
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "getService"
+          },
+          "_$type": "function",
+          "_$function": "function getService() { [native code] }",
+          "_$invocation": "TypeError: Failed to execute 'getService' on 'BluetoothUUID': 1 argument required, but only 0 present.",
+          "_$flags": "cew",
+          "_$value": "function getService() { [native code] }"
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Failed to construct 'BluetoothUUID': Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BluetoothUUID() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function BluetoothUUID() { [native code] }"
+      }
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "bluetooth",
+      "prevProperty": "protectedAudience",
+      "property": {
+        "_$protos": [
+          "Bluetooth.prototype",
+          "EventTarget.prototype",
+          "Object.prototype"
+        ],
+        "_$type": "object"
+      }
+    }
+  ],
+  "remove": [
+    {
+      "path": "window.HTMLAnchorElement.prototype",
+      "propertyName": "hrefTranslate"
+    },
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.FeaturePolicy.prototype.allowedFeatures",
+      "propertyName": "_$otherInvocation.window.document.featurePolicy.allowedFeatures",
+      "property": "[geolocation,ch-ua-full-version-list,cross-origin-isolated,screen-wake-lock,on-device-speech-recognition,translator,publickey-credentials-get,shared-storage-select-url,ch-ua-arch,bluetooth,compute-pressure,ch-prefers-reduced-transparency,deferred-fetch,usb,ch-save-data,publickey-credentials-create,shared-storage,deferred-fetch-minimal,run-ad-auction,ch-downlink,ch-ua-form-factors,otp-credentials,payment,ch-ua,ch-ua-model,ch-ect,autoplay,camera,language-detector,private-state-token-issuance,digital-credentials-get,accelerometer,ch-ua-platform-version,idle-detection,private-aggregation,interest-cohort,ch-viewport-height,captured-surface-control,local-fonts,ch-ua-platform,midi,ch-ua-full-version,xr-spatial-tracking,clipboard-read,gamepad,display-capture,keyboard-map,join-ad-interest-group,aria-notify,ch-width,ch-prefers-reduced-motion,browsing-topics,encrypted-media,local-network-access,gyroscope,serial,ch-rtt,ch-ua-mobile,window-management,unload,ch-dpr,ch-prefers-color-scheme,ch-ua-wow64,attribution-reporting,fullscreen,identity-credentials-get,private-state-token-redemption,hid,summarizer,ch-ua-bitness,storage-access,sync-xhr,ch-device-memory,ch-viewport-width,picture-in-picture,magnetometer,clipboard-write,microphone]"
+    },
+    {
+      "path": "window.FeaturePolicy.prototype.features",
+      "propertyName": "_$otherInvocation.window.document.featurePolicy.features",
+      "property": "[geolocation,ch-ua-full-version-list,cross-origin-isolated,screen-wake-lock,on-device-speech-recognition,translator,publickey-credentials-get,shared-storage-select-url,ch-ua-arch,bluetooth,compute-pressure,ch-prefers-reduced-transparency,deferred-fetch,usb,ch-save-data,publickey-credentials-create,shared-storage,deferred-fetch-minimal,run-ad-auction,ch-downlink,ch-ua-form-factors,otp-credentials,payment,ch-ua,ch-ua-model,ch-ect,autoplay,camera,language-detector,private-state-token-issuance,digital-credentials-get,accelerometer,ch-ua-platform-version,idle-detection,private-aggregation,interest-cohort,ch-viewport-height,captured-surface-control,local-fonts,ch-ua-platform,midi,ch-ua-full-version,xr-spatial-tracking,clipboard-read,gamepad,display-capture,keyboard-map,join-ad-interest-group,aria-notify,ch-width,ch-prefers-reduced-motion,browsing-topics,encrypted-media,local-network-access,gyroscope,serial,ch-rtt,ch-ua-mobile,window-management,unload,ch-dpr,ch-prefers-color-scheme,ch-ua-wow64,attribution-reporting,fullscreen,identity-credentials-get,private-state-token-redemption,hid,summarizer,ch-ua-bitness,storage-access,sync-xhr,ch-device-memory,ch-viewport-width,picture-in-picture,magnetometer,clipboard-write,microphone]"
+    },
+    {
+      "path": "window.DOMRectReadOnly.prototype.toJSON",
+      "propertyName": "_$otherInvocation.window.viewport.segments.0.toJSON",
+      "property": "{x: 0,y: 0,width: 988,height: 613,top: 0,right: 988,bottom: 613,left: 0}"
+    },
+    {
+      "path": "window.PublicKeyCredential.getClientCapabilities",
+      "propertyName": "_$invocation",
+      "property": "{conditionalCreate: true,conditionalGet: true,extension:appid: true,extension:appidExclude: true,extension:credBlob: true,extension:credProps: true,extension:credentialProtectionPolicy: true,extension:enforceCredentialProtectionPolicy: true,extension:getCredBlob: true,extension:hmacCreateSecret: true,extension:largeBlob: true,extension:minPinLength: true,extension:payment: true,extension:prf: true,hybridTransport: false,passkeyPlatformAuthenticator: false,relatedOrigins: true,signalAllAcceptedCredentials: true,signalCurrentUserDetails: true,signalUnknownCredential: true,userVerifyingPlatformAuthenticator: false}"
+    },
+    {
+      "path": "window.PaymentRequest.securePaymentConfirmationAvailability",
+      "propertyName": "_$invocation",
+      "property": "unavailable-no-user-verifying-platform-authenticator"
+    },
+    {
+      "path": "window.Summarizer.create",
+      "propertyName": "_$invocation",
+      "property": "NotAllowedError: The device is not eligible for running on-device model."
+    }
+  ],
+  "reorder": [
+    {
+      "path": "window",
+      "propertyName": "CaptureController",
+      "throughProperty": "BackgroundFetchRegistration",
+      "prevProperty": "BluetoothRemoteGATTService"
+    },
+    {
+      "path": "window",
+      "propertyName": "CSSFontFeatureValuesRule",
+      "throughProperty": "webkitResolveLocalFileSystemURL",
+      "prevProperty": "BluetoothUUID"
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "clipboard",
+      "throughProperty": "storageBuckets",
+      "prevProperty": "bluetooth"
+    },
+    {
+      "path": "window.navigator.languages",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": "1"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "clipboard",
+      "throughProperty": "canLoadAdAuctionFencedFrame",
+      "prevProperty": "bluetooth"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "clearAppBadge",
+      "throughProperty": "unregisterProtocolHandler",
+      "prevProperty": "share"
+    }
+  ]
+}

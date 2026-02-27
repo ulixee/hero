@@ -1,0 +1,38 @@
+{
+  "name": "@double-agent/collect",
+  "version": "2.0.0-alpha.34",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/collect-controller": "2.0.0-alpha.34",
+    "@double-agent/config": "2.0.0-alpha.34",
+    "@double-agent/tls-server": "2.0.0-alpha.34",
+    "@ulixee/commons": "2.0.0-alpha.34",
+    "axios": "^1.7.7",
+    "cookie": "^0.4.0",
+    "diff": "^4.0.2",
+    "json5": "^2.1.2",
+    "moment": "^2.29.4",
+    "p-queue": "^6.2.1",
+    "path-to-regexp": "^6.1.0",
+    "source-map-support": "^0.5.16",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.3.3",
+    "@types/diff": "^4.0.2",
+    "@types/uuid": "^7.0.2",
+    "@types/ws": "^7.2.2"
+  },
+  "private": true
+}

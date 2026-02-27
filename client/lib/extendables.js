@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WebsocketResource = exports.ResourceResponse = exports.ResourceRequest = exports.Resource = exports.HeroReplay = exports.Hero = exports.FrameEnvironment = exports.Tab = void 0;
+const Tab_1 = require("./Tab");
+exports.Tab = Tab_1.default;
+const FrameEnvironment_1 = require("./FrameEnvironment");
+exports.FrameEnvironment = FrameEnvironment_1.default;
+const Hero_1 = require("./Hero");
+exports.Hero = Hero_1.default;
+const HeroReplay_1 = require("./HeroReplay");
+exports.HeroReplay = HeroReplay_1.default;
+const Resource_1 = require("./Resource");
+exports.Resource = Resource_1.default;
+const ResourceRequest_1 = require("./ResourceRequest");
+exports.ResourceRequest = ResourceRequest_1.default;
+const ResourceResponse_1 = require("./ResourceResponse");
+exports.ResourceResponse = ResourceResponse_1.default;
+const WebsocketResource_1 = require("./WebsocketResource");
+exports.WebsocketResource = WebsocketResource_1.default;
+//# sourceMappingURL=extendables.js.map

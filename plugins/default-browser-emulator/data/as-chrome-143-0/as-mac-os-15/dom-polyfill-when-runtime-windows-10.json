@@ -1,0 +1,165 @@
+{
+  "add": [
+    {
+      "path": "window",
+      "propertyName": "BarcodeDetector",
+      "prevProperty": "PublicKeyCredential",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "BarcodeDetector"
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "detect": {
+            "length": {
+              "_$type": "number",
+              "_$flags": "c",
+              "_$value": 1
+            },
+            "name": {
+              "_$type": "string",
+              "_$flags": "c",
+              "_$value": "detect"
+            },
+            "_$type": "function",
+            "_$function": "function detect() { [native code] }",
+            "_$invocation": "TypeError: Failed to execute 'detect' on 'BarcodeDetector': Illegal invocation",
+            "_$isAsync": true,
+            "_$flags": "cew",
+            "_$value": "function detect() { [native code] }",
+            "_$otherInvocationAsync.window.BarcodeDetector.new().detect": "TypeError: Failed to execute 'detect' on 'BarcodeDetector': 1 argument required, but only 0 present."
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "BarcodeDetector"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "getSupportedFormats": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "getSupportedFormats"
+          },
+          "_$type": "function",
+          "_$function": "function getSupportedFormats() { [native code] }",
+          "_$invocation": "[aztec,code_128,code_39,code_93,data_matrix,ean_13,ean_8,itf,pdf417,qr_code,upc_e]",
+          "_$isAsync": true,
+          "_$flags": "cew",
+          "_$value": "function getSupportedFormats() { [native code] }"
+        },
+        "new()": {
+          "_$protos": [
+            "BarcodeDetector.prototype",
+            "Object.prototype"
+          ],
+          "_$type": "constructor"
+        },
+        "_$type": "function",
+        "_$function": "function BarcodeDetector() { [native code] }",
+        "_$invocation": "TypeError: Failed to construct 'BarcodeDetector': Please use the 'new' operator, this DOM object constructor cannot be called as a function.",
+        "_$flags": "cw",
+        "_$value": "function BarcodeDetector() { [native code] }"
+      }
+    }
+  ],
+  "remove": [
+    {
+      "path": "window.CredentialsContainer.prototype.preventSilentAccess",
+      "propertyName": "_$otherInvocationAsync.window.navigator.credentials.preventSilentAccess"
+    },
+    {
+      "path": "window.Keyboard.prototype.lock",
+      "propertyName": "_$otherInvocationAsync.window.navigator.keyboard.lock"
+    },
+    {
+      "path": "window.Notification.prototype",
+      "propertyName": "image"
+    },
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.DOMRectReadOnly.prototype.toJSON",
+      "propertyName": "_$otherInvocation.window.viewport.segments.0.toJSON",
+      "property": "{x: 0,y: 0,width: 980,height: 612,top: 0,right: 980,bottom: 612,left: 0}"
+    },
+    {
+      "path": "window.CredentialsContainer.prototype.get",
+      "propertyName": "_$otherInvocationAsync.window.navigator.credentials.get",
+      "property": null
+    },
+    {
+      "path": "window.Keyboard.prototype.getLayoutMap",
+      "propertyName": "_$otherInvocationAsync.window.navigator.keyboard.getLayoutMap",
+      "property": "{}"
+    },
+    {
+      "path": "window.PublicKeyCredential.getClientCapabilities",
+      "propertyName": "_$invocation",
+      "property": "{conditionalCreate: true,conditionalGet: true,extension:appid: true,extension:appidExclude: true,extension:credBlob: true,extension:credProps: true,extension:credentialProtectionPolicy: true,extension:enforceCredentialProtectionPolicy: true,extension:getCredBlob: true,extension:hmacCreateSecret: true,extension:largeBlob: true,extension:minPinLength: true,extension:payment: true,extension:prf: true,hybridTransport: true,passkeyPlatformAuthenticator: true,relatedOrigins: true,signalAllAcceptedCredentials: true,signalCurrentUserDetails: true,signalUnknownCredential: true,userVerifyingPlatformAuthenticator: true}"
+    },
+    {
+      "path": "window.Bluetooth.prototype.getAvailability",
+      "propertyName": "_$otherInvocationAsync.window.navigator.bluetooth.getAvailability",
+      "property": true
+    },
+    {
+      "path": "window.PaymentRequest.securePaymentConfirmationAvailability",
+      "propertyName": "_$invocation",
+      "property": "available"
+    },
+    {
+      "path": "window.Summarizer.create",
+      "propertyName": "_$invocation",
+      "property": "NotAllowedError: Requires a user gesture when availability is \"downloading\" or \"downloadable\"."
+    }
+  ],
+  "reorder": [
+    {
+      "path": "window",
+      "propertyName": "Bluetooth",
+      "throughProperty": "PERSISTENT",
+      "prevProperty": "BarcodeDetector"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"DetachedElement.js","sourceRoot":"","sources":["../../../client/lib/DetachedElement.ts"],"names":[],"mappings":";;;;;;;;AAAA,uCAAqC;AAErC,MAAqB,eAAe;IAG3B,MAAM,CAAC,IAAI,CAAC,SAAiB;QAClC,OAAO,uBAAA,IAAI,sCAAW,CAAC,eAAe,CAAC,SAAS,EAAE,WAAW,CAAC,CAAC,UAAU,CAAC;IAC5E,CAAC;;;AAJM,sCAAa,IAAI,oBAAS,EAAE,EAAlB,CAAmB;kBADjB,eAAe"}

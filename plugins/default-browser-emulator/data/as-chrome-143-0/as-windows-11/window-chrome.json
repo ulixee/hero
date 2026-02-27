@@ -1,0 +1,284 @@
+{
+  "chrome": {
+    "_$protos": [
+      "Object.prototype"
+    ],
+    "loadTimes": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "prototype": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "requestTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128873.849
+        },
+        "startLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128873.849
+        },
+        "commitLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128873.882
+        },
+        "finishDocumentLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128874.47
+        },
+        "finishLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128874.47
+        },
+        "firstPaintTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128874.471
+        },
+        "firstPaintAfterLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "navigationType": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "Other"
+        },
+        "wasFetchedViaSpdy": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "wasNpnNegotiated": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": true
+        },
+        "npnNegotiatedProtocol": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "wasAlternateProtocolAvailable": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "connectionInfo": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{requestTime: 1766128873.849,startLoadTime: 1766128873.849,commitLoadTime: 1766128873.882,finishDocumentLoadTime: 1766128874.47,finishLoadTime: 1766128874.47,firstPaintTime: 1766128874.471,firstPaintAfterLoadTime: 0,navigationType: Other,wasFetchedViaSpdy: false,wasNpnNegotiated: true,npnNegotiatedProtocol: http/1.1,wasAlternateProtocolAvailable: false,connectionInfo: http/1.1}",
+      "_$isAsync": false,
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "csi": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "prototype": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "startE": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128873849
+        },
+        "onloadT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1766128874470
+        },
+        "pageT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 9784.575
+        },
+        "tran": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 15
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{startE: 1766128873849,onloadT: 1766128874470,pageT: 9784.75,tran: 15}",
+      "_$isAsync": false,
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "app": {
+      "_$protos": [
+        "Object.prototype"
+      ],
+      "isInstalled": {
+        "_$type": "boolean",
+        "_$flags": "cew",
+        "_$value": false
+      },
+      "getDetails": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getDetails"
+        },
+        "_$type": "function",
+        "_$function": "function getDetails() { [native code] }",
+        "_$invocation": null,
+        "_$isAsync": false,
+        "_$flags": "cew",
+        "_$value": "function getDetails() { [native code] }"
+      },
+      "getIsInstalled": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getIsInstalled"
+        },
+        "_$type": "function",
+        "_$function": "function getIsInstalled() { [native code] }",
+        "_$invocation": false,
+        "_$isAsync": false,
+        "_$flags": "cew",
+        "_$value": "function getIsInstalled() { [native code] }"
+      },
+      "installState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "installState"
+        },
+        "_$type": "function",
+        "_$function": "function installState() { [native code] }",
+        "_$isAsync": false,
+        "_$flags": "cew",
+        "_$value": "function installState() { [native code] }"
+      },
+      "runningState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "runningState"
+        },
+        "_$type": "function",
+        "_$function": "function runningState() { [native code] }",
+        "_$invocation": "cannot_run",
+        "_$isAsync": false,
+        "_$flags": "cew",
+        "_$value": "function runningState() { [native code] }"
+      },
+      "InstallState": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "DISABLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "disabled"
+        },
+        "INSTALLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "installed"
+        },
+        "NOT_INSTALLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "not_installed"
+        },
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "RunningState": {
+        "_$protos": [
+          "Object.prototype"
+        ],
+        "CANNOT_RUN": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "cannot_run"
+        },
+        "READY_TO_RUN": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "ready_to_run"
+        },
+        "RUNNING": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "running"
+        },
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "_$type": "object",
+      "_$flags": "cew"
+    },
+    "_$type": "object",
+    "_$flags": "ew"
+  },
+  "prevProperty": "Float16Array"
+}
