@@ -4884,5 +4884,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-148-0": {
+    "id": "firefox-148-0",
+    "name": "Firefox",
+    "marketshare": 0.1,
+    "version": {
+      "major": "148",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
