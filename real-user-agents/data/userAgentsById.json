@@ -81440,6 +81440,7 @@
     "id": "windows-11--chrome-145-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      160,
       117,
       110,
       76,
@@ -88669,6 +88670,7 @@
     "id": "windows-10--chrome-145-0",
     "allPatchVersions": [],
     "stablePatchVersions": [
+      160,
       117,
       110,
       76,
