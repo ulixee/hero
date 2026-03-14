@@ -1,0 +1,16 @@
+node_modules
+*yarn-error.log
+package-lock.json
+npm-debug.log
+.DS_Store
+tsconfig.tsbuildinfo
+
+.idea/
+
+**/.env
+
+**/build/
+/build-dist/
+
+**/dist
+/.eslintcache
