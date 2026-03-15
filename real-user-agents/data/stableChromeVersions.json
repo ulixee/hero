@@ -7,10 +7,12 @@
     "stablePatchesByOs": {
       "mac": [],
       "win": [
+        80,
         76,
         72
       ],
       "linux": [
+        80,
         75,
         71
       ]
