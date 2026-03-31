@@ -4924,5 +4924,17 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "firefox-149-0": {
+    "id": "firefox-149-0",
+    "name": "Firefox",
+    "marketshare": 0,
+    "version": {
+      "major": "149",
+      "minor": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
