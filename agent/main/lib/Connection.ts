@@ -65,7 +65,17 @@ export class Connection extends TypedEventEmitter<{
 
   private onMessage(message: string): void {
     const timestamp = new Date();
-    const object = JSON.parse(message);
+    let object;
+    try {
+      object = JSON.parse(message);
+    } catch (error) {
+      log.warn('Connection.InvalidMessage', {
+        sessionId: null,
+        message: message.slice(0, 500),
+        error,
+      });
+      return;
+    }
     object.timestamp = timestamp;
     const devtoolsSessionId = object.params?.sessionId;
 
