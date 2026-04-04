@@ -933,7 +933,19 @@ export default class Tab
         return;
       }
 
-      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(JSON.parse(payload));
+      let parsedPayload;
+      try {
+        parsedPayload = JSON.parse(payload);
+      } catch (error) {
+        log.warn('Tab.onPageCallback:InvalidPayload', {
+          sessionId: this.sessionId,
+          frameId,
+          payload,
+          error,
+        });
+        return;
+      }
+      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(parsedPayload);
     }
   }
 
