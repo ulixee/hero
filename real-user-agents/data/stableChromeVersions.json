@@ -21,6 +21,7 @@
     "buildVersion": 7680,
     "stablePatchesByOs": {
       "mac": [
+        180,
         178,
         167,
         165,
