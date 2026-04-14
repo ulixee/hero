@@ -4936,5 +4936,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "chrome-147-0": {
+    "id": "chrome-147-0",
+    "name": "Chrome",
+    "marketshare": 0,
+    "version": {
+      "major": "147",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
