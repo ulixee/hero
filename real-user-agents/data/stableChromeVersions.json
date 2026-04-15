@@ -5,7 +5,9 @@
     "majorVersion": 147,
     "buildVersion": 7727,
     "stablePatchesByOs": {
-      "mac": [],
+      "mac": [
+        56
+      ],
       "win": [
         56
       ],

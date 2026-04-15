@@ -2,7 +2,9 @@
   "mac-os-26--chrome-147-0": {
     "id": "mac-os-26--chrome-147-0",
     "allPatchVersions": [],
-    "stablePatchVersions": [],
+    "stablePatchVersions": [
+      56
+    ],
     "browserBaseVersion": [
       147,
       0,
@@ -3358,7 +3360,9 @@
   "mac-os-15--chrome-147-0": {
     "id": "mac-os-15--chrome-147-0",
     "allPatchVersions": [],
-    "stablePatchVersions": [],
+    "stablePatchVersions": [
+      56
+    ],
     "browserBaseVersion": [
       147,
       0,
@@ -8903,7 +8907,9 @@
   "mac-os-14--chrome-147-0": {
     "id": "mac-os-14--chrome-147-0",
     "allPatchVersions": [],
-    "stablePatchVersions": [],
+    "stablePatchVersions": [
+      56
+    ],
     "browserBaseVersion": [
       147,
       0,
@@ -15360,7 +15366,9 @@
   "mac-os-13--chrome-147-0": {
     "id": "mac-os-13--chrome-147-0",
     "allPatchVersions": [],
-    "stablePatchVersions": [],
+    "stablePatchVersions": [
+      56
+    ],
     "browserBaseVersion": [
       147,
       0,
@@ -22454,7 +22462,9 @@
   "mac-os-12--chrome-147-0": {
     "id": "mac-os-12--chrome-147-0",
     "allPatchVersions": [],
-    "stablePatchVersions": [],
+    "stablePatchVersions": [
+      56
+    ],
     "browserBaseVersion": [
       147,
       0,
