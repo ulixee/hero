@@ -4962,5 +4962,19 @@
     "deviceCategory": "desktop",
     "releaseDate": "unknown",
     "description": ""
+  },
+  "edge-147-0": {
+    "id": "edge-147-0",
+    "name": "Edge",
+    "marketshare": 0,
+    "version": {
+      "major": "147",
+      "minor": "0",
+      "build": "0",
+      "patch": "0"
+    },
+    "deviceCategory": "desktop",
+    "releaseDate": "unknown",
+    "description": ""
   }
 }
