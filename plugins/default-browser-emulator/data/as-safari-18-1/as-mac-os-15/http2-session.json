@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "enablePush": false,
+    "initialWindowSize": 2097152,
+    "maxConcurrentStreams": 100,
+    "maxHeaderListSize": 4294967295,
+    "enableConnectProtocol": true
+  },
+  "initialWindowSize": 65535,
+  "firstFrameWindowSize": 10485760
+}

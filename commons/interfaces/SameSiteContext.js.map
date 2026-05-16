@@ -1,0 +1,1 @@
+{"version":3,"file":"SameSiteContext.js","sourceRoot":"","sources":["../../../commons/interfaces/SameSiteContext.ts"],"names":[],"mappings":";;AAIA,8CAEC;AAND,MAAM,eAAe,GAAG,CAAC,MAAM,EAAE,QAAQ,EAAE,KAAK,CAAU,CAAC;AAI3D,SAAgB,iBAAiB,CAAC,IAAY;IAC5C,OAAO,eAAe,CAAC,QAAQ,CAAC,IAAW,CAAC,CAAC;AAC/C,CAAC"}

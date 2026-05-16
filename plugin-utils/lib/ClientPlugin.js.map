@@ -1,0 +1,1 @@
+{"version":3,"file":"ClientPlugin.js","sourceRoot":"","sources":["../../../plugin-utils/lib/ClientPlugin.ts"],"names":[],"mappings":";;;;;;;;AAAA,yEAG+C;AAC/C,uEAAmE;AAGpD,IAAM,YAAY,GAAlB,MAAM,YAAY;IAM/B;QACE,IAAI,CAAC,EAAE,GAAI,IAAI,CAAC,WAAkC,CAAC,EAAE,CAAC;IACxD,CAAC;;AANsB,iBAAI,GAAG,0BAAW,CAAC,YAAY,AAA3B,CAA4B;AAFpC,YAAY;IADhC,0CAA0B;GACN,YAAY,CAShC;kBAToB,YAAY"}

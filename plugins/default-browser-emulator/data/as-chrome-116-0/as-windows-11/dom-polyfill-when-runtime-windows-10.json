@@ -1,0 +1,42 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.PublicKeyCredential.isConditionalMediationAvailable",
+      "propertyName": "_$invocation",
+      "property": true
+    },
+    {
+      "path": "window.Bluetooth.prototype.getAvailability",
+      "propertyName": "_$otherInvocationAsync.window.navigator.bluetooth.getAvailability",
+      "property": false
+    }
+  ],
+  "reorder": []
+}

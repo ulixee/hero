@@ -1,0 +1,1 @@
+{"version":3,"file":"setActiveAndFocused.js","sourceRoot":"","sources":["../../../../../plugins/default-browser-emulator/lib/helpers/setActiveAndFocused.ts"],"names":[],"mappings":";;AAGA,sCAKC;AALc,KAAK,UAAU,mBAAmB,CAC/C,gBAAmC,EACnC,QAA0B;IAE1B,MAAM,QAAQ,CAAC,IAAI,CAAC,oCAAoC,EAAE,EAAE,OAAO,EAAE,IAAI,EAAE,CAAC,CAAC,KAAK,CAAC,GAAG,CAAC,EAAE,CAAC,GAAG,CAAC,CAAC;AACjG,CAAC"}

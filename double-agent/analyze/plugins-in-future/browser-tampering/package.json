@@ -1,0 +1,21 @@
+{
+  "name": "@double-agent/browser-tampering",
+  "version": "1.0.0",
+  "description": "Detect when features have been tampered with to simulate a real browser",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "private": true,
+  "checkCategories": [
+    "Dom Features Tampered With"
+  ],
+  "scripts": {}
+}

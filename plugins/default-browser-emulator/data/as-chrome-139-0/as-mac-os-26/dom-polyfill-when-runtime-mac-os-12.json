@@ -1,0 +1,57 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.DOMRectReadOnly.prototype.toJSON",
+      "propertyName": "_$otherInvocation.window.viewport.segments.0.toJSON",
+      "property": "{x: 0,y: 0,width: 980,height: 606,top: 0,right: 980,bottom: 606,left: 0}"
+    },
+    {
+      "path": "window.PublicKeyCredential.getClientCapabilities",
+      "propertyName": "_$invocation",
+      "property": "{conditionalCreate: true,conditionalGet: true,extension:appid: true,extension:appidExclude: true,extension:credBlob: true,extension:credProps: true,extension:credentialProtectionPolicy: true,extension:enforceCredentialProtectionPolicy: true,extension:getCredBlob: true,extension:hmacCreateSecret: true,extension:largeBlob: true,extension:minPinLength: true,extension:payment: true,extension:prf: true,hybridTransport: true,passkeyPlatformAuthenticator: true,relatedOrigins: true,signalAllAcceptedCredentials: true,signalCurrentUserDetails: true,signalUnknownCredential: true,userVerifyingPlatformAuthenticator: true}"
+    },
+    {
+      "path": "window.PaymentRequest.securePaymentConfirmationAvailability",
+      "propertyName": "_$invocation",
+      "property": "available"
+    },
+    {
+      "path": "window.Summarizer.availability",
+      "propertyName": "_$invocation",
+      "property": "downloadable"
+    },
+    {
+      "path": "window.Summarizer.create",
+      "propertyName": "_$invocation",
+      "property": "NotAllowedError: Requires a user gesture when availability is \"downloading\" or \"downloadable\"."
+    }
+  ],
+  "reorder": []
+}

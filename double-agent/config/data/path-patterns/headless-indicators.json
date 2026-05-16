@@ -1,0 +1,10 @@
+{
+    "added": [
+        "window.HTMLLinkElement.prototype.import"
+    ],
+    "removed": [],
+    "changed": [],
+    "changedOrder": [],
+    "extraAdded": [],
+    "extraChanged": []
+}

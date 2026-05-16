@@ -1,0 +1,31 @@
+import { EventEmitter } from 'events';
+import ITypedEventEmitter from '../interfaces/ITypedEventEmitter';
+import { IBoundLog } from '../interfaces/ILog';
+import IRegisteredEventListener from '../interfaces/IRegisteredEventListener';
+export default class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
+    #private;
+    storeEventsWithoutListeners: boolean;
+    EventTypes: T;
+    onEventListenerAdded?: <K extends keyof T & (string | symbol)>(event: K) => void;
+    private pendingIdCounter;
+    private pendingWaitEventsById;
+    private eventsToLog;
+    private storedEventsByType;
+    private reemitterCountByEventType;
+    constructor();
+    cancelPendingEvents(message?: string, excludeEvents?: (keyof T & string)[]): void;
+    setEventsToLog<K extends keyof T & (string | symbol)>(logger: IBoundLog, events: K[]): void;
+    waitOn<K extends keyof T & (string | symbol)>(eventType: K, listenerFn?: (this: this, event?: T[K]) => boolean, timeoutMillis?: number): Promise<T[K]>;
+    addEventEmitter<Y, K extends keyof T & keyof Y & (string | symbol)>(emitter: TypedEventEmitter<Y>, eventTypes: K[]): IRegisteredEventListener[];
+    on<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => any, includeUnhandledEvents?: boolean): this;
+    off<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => any): this;
+    once<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => any, includeUnhandledEvents?: boolean): this;
+    emit<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K], sendInitiator?: object): boolean;
+    addListener<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => any, includeUnhandledEvents?: boolean): this;
+    removeListener<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => any): this;
+    prependListener<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => void, includeUnhandledEvents?: boolean): this;
+    prependOnceListener<K extends keyof T & (string | symbol)>(eventType: K, listenerFn: (this: this, event?: T[K]) => void, includeUnhandledEvents?: boolean): this;
+    protected defaultErrorLogger(this: this, error: Error): void;
+    private replayOrClearMissedEvents;
+    private logEvent;
+}

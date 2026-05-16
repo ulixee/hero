@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/test.ttf');
+}
+body {
+  background-color: white;
+  background-image: url('/css-background.png');
+  font-family: 'Roboto';
+}

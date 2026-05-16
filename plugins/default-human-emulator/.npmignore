@@ -1,0 +1,5 @@
+.env
+.eslint*
+.gitignore
+package.*.json
+tsconfig*

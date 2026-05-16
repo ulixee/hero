@@ -1,0 +1,24 @@
+{
+  "name": "@double-agent/analyze-tls-clienthello",
+  "version": "2.0.0-alpha.34",
+  "description": "Analyzes clienthello handshake signatures, including ciphers, extensions and version",
+  "homepage": "https://ulixee.org",
+  "repository": "git@github.com:ulixee/hero.git",
+  "bugs": {
+    "url": "https://github.com/ulixee/hero/issues"
+  },
+  "license": "MIT",
+  "author": "Data Liberation Foundation",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@double-agent/analyze": "2.0.0-alpha.34",
+    "@double-agent/collect-tls-clienthello": "2.0.0-alpha.34",
+    "@double-agent/tls-server": "2.0.0-alpha.34",
+    "source-map-support": "^0.5.16"
+  },
+  "private": true
+}
