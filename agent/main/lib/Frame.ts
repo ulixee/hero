@@ -552,15 +552,20 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
     backendNodeId: number,
     resolveInIsolatedContext = true,
   ): Promise<string> {
-    const result = await this.devtoolsSession.send(
-      'DOM.resolveNode',
-      {
-        backendNodeId,
-        executionContextId: await this.waitForContextId(resolveInIsolatedContext),
-      },
-      this,
-    );
-    return result.object.objectId;
+    try {
+      return await this.sendResolveNode(backendNodeId, resolveInIsolatedContext);
+    } catch (error) {
+      // After a cross-document navigation the cached execution context can be stale (Hero runs
+      // with Runtime disabled, so it never receives executionContextDestroyed). DOM.resolveNode
+      // then rejects with "Node ... does not belong to the document", which is NOT a
+      // ContextNotFound error, so the normal reset/retry path in evaluate() never fires. Reset the
+      // cached context ids and retry once against a fresh context.
+      if (String(error).includes('does not belong to the document')) {
+        this.resetContextIds();
+        return await this.sendResolveNode(backendNodeId, resolveInIsolatedContext);
+      }
+      throw error;
+    }
   }
 
   public async trackBackendNodeAsNodePointer(backendNodeId: number): Promise<number> {
@@ -763,6 +768,21 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IF
       disposition: this.disposition,
       activeLoader: this.activeLoader,
     };
+  }
+
+  private async sendResolveNode(
+    backendNodeId: number,
+    resolveInIsolatedContext: boolean,
+  ): Promise<string> {
+    const result = await this.devtoolsSession.send(
+      'DOM.resolveNode',
+      {
+        backendNodeId,
+        executionContextId: await this.waitForContextId(resolveInIsolatedContext),
+      },
+      this,
+    );
+    return result.object.objectId;
   }
 
   private async waitForContextId(isolatedFromWebPageEnvironment: boolean): Promise<number> {
